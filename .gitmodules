@@ -1,0 +1,21 @@
+[submodule "Engine/ThirdParty/imgui"]
+	path = Engine/ThirdParty/imgui
+	url = https://github.com/vitei/imgui.git
+[submodule "Engine/ThirdParty/EASTL"]
+	path = Engine/ThirdParty/EASTL
+	url = https://github.com/vitei/EASTL.git
+	branch = vitei-master
+[submodule "Engine/ThirdParty/yaml-cpp"]
+	path = Engine/ThirdParty/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Engine/ThirdParty/msdfgen"]
+	path = Engine/ThirdParty/msdfgen
+	url = https://github.com/vitei/msdfgen.git
+	branch = vitei-master
+[submodule "Engine/ThirdParty/nanopb"]
+	path = Engine/ThirdParty/nanopb
+	url = https://github.com/vitei/nanopb.git
+	branch = vitei-settings
+[submodule "Engine/ThirdParty/gli"]
+	path = Engine/ThirdParty/gli
+	url = https://github.com/vitei/gli.git

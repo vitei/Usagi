@@ -1,0 +1,23 @@
+*.bcfnt filter=lfs diff=lfs merge=lfs
+*.bmp filter=lfs diff=lfs merge=lfs
+*.cmdl filter=lfs diff=lfs merge=lfs
+*.cskla filter=lfs diff=lfs merge=lfs
+*.dll filter=lfs diff=lfs merge=lfs
+*.exe filter=lfs diff=lfs merge=lfs
+*.lib filter=lfs diff=lfs merge=lfs
+*.a filter=lfs diff=lfs merge=lfs
+*.tga filter=lfs diff=lfs merge=lfs
+*.wav filter=lfs diff=lfs merge=lfs
+# force normalization of line endings
+* text=auto eol=lf
+*.bat text eol=crlf
+*.vcproj text eol=crlf
+*.vcproj.filters text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.sln text eol=crlf
+*.rsf text eol=crlf
+*.glsl text eol=crlf
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.dds filter=lfs diff=lfs merge=lfs -text
+*.gem filter=lfs diff=lfs merge=lfs -text
