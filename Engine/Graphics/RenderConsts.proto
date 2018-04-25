@@ -1,0 +1,43 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+
+enum VertexElementType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	VE_BYTE = 0;
+	VE_UBYTE = 1;
+	VE_SHORT = 2;
+	VE_USHORT = 3;
+	VE_FLOAT = 4;
+	VE_INT = 5;
+	VE_INVALID = 6;
+};
+
+enum TextureDimensions
+{
+	option (nanopb_enumopt).long_names = false;
+
+	TD_TEXTURE1D = 0;
+	TD_TEXTURE2D = 1;
+	TD_TEXTURE3D = 2;
+	TD_TEXTURECUBE = 3;
+	
+	TD_FORCE_SIZE = 0x7FFFFFFF; // Force enum size to sizeof(int32_t)
+};
+
+
+enum GPULocation
+{
+	option (nanopb_enumopt).long_names = false;
+
+	GPU_LOCATION_STANDARD = 0;
+	GPU_LOCATION_FASTMEM = 1;
+
+	GPU_LOCATION_FORCE_SIZE = 0x7FFFFFFF;  // Force enum size to sizeof(int32_t)
+};

@@ -1,0 +1,34 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.particles;
+
+
+message EmitterShapeBase
+{
+	required usg.Vector3f	  vScale = 1;
+	required usg.Vector3f	  vRotation = 2;
+	required usg.Vector3f	  vPosition = 3;
+	required float			  fHollowness = 4;	// Only applies to volumes
+	required usg.Vector3f	  vVelocity = 5;
+	required float			  fSpeedRand = 6;
+	required usg.Vector3f	  vGravity = 7;
+	required float	    	  fShapeExpandVel = 8;
+}
+
+message EmitterArc {
+	required float		  fArcWidthDeg = 1;
+	required float		  fArcStartDeg = 2;
+	required bool		  bRandomizeStartAngle = 3;
+}
+
+
+message EmitterShapeDetails
+{
+	required EmitterShapeBase	baseShape = 1;
+	required EmitterArc			arc = 2;
+	required usg.Vector3f		vShapeExtents = 3;
+}

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{<%= project_guid %>}</ProjectGuid>
+    <RootNamespace>$(ProjectName)</RootNamespace>
+    <ApplicationEnvironment>title</ApplicationEnvironment>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NXEmu_Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(USAGI_DIR)\Engine\CommonProps.props" />
+    <Import Project="$(USAGI_DIR)\Engine\ConditionalProps.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+
+<% if project_root.include?('ThirdParty') %>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile />
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CPPExceptions Condition="'$(Platform)'=='NX64'">true</CPPExceptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+<% end %>
+
+  <PropertyGroup>
+    <SourceDir>$(USAGI_DIR)\<%= project_dir %></SourceDir>
+    <PBProjectDir>$(USAGI_DIR)\_build\proto\<%= project_dir %></PBProjectDir>
+  </PropertyGroup>
+
+<% unless project_root.include?('ThirdParty') %>
+  <ItemGroup Condition="'$(Platform)'!='NX64'">
+    <ClCompile Include="..\..\..\..\Engine\$(ProjectName)\_exclude\stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Platform)'=='NX64'">
+    <ClCompile Include="..\..\..\..\Engine\$(ProjectName)\_exclude\stdafx.cpp">
+    <PrecompiledHeader>Create</PrecompiledHeader>
+    <PrecompiledHeaderFile>../../../Engine/Common/Common.h</PrecompiledHeaderFile>
+  </ClCompile>
+  </ItemGroup>
+<% end %>
+
+  <ItemGroup>
+<% for @src in proto_sources %>
+    <ClCompile Include="$(PBProjectDir)<%= @src %>" />
+<% end %>
+
+<% for @src in boilerplate_sources %>
+    <ClCompile Include="$(IntDir)..\<%= @src %>" />
+<% end %>
+
+<% for @src in sources %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @h in proto_headers %>
+    <ClInclude Include="$(PBProjectDir)<%= @h %>" />
+<% end %>
+
+<% for @h in headers %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @p in proto %>
+    <None Include="..\..\..\..\<%= @p %>" />
+<% end %>
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

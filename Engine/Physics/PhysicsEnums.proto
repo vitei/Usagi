@@ -1,0 +1,23 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2016
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg;
+
+enum ForceMode
+{
+	FORCE = 0;
+	IMPULSE = 1;
+	VELOCITY_CHANGE = 2;
+	ACCELERATION = 3;
+}
+
+enum CombineMode
+{
+	AVERAGE = 0;
+	MIN = 1;
+	MULTIPLY = 2;
+	MAX = 3;
+}

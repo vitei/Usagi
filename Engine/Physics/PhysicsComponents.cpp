@@ -1,0 +1,936 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+#include "Engine/Common/Common.h"
+#include "Engine/Resource/ResourceMgr.h"
+#include "PhysicsComponents.h"
+#include "Engine/Physics/PhysX.h"
+#include "Engine/Framework/FrameworkComponents.pb.h"
+#include "Engine/Framework/ComponentLoadHandles.h"
+#include "Engine/Resource/CollisionModelResource.h"
+#include "Engine/Physics/PhysXMeshCache.h"
+#include "Engine/Physics/VehicleCollider.h"
+#include "Engine/Physics/PhysicsSceneData.h"
+#include "Engine/Framework/TransformTool.h"
+#include <EASTL/string.h>
+
+namespace usg
+{
+	static_assert(sizeof(CollisionModelResource::IndexType)==sizeof(uint32),"PhysX and Usagi CollisionModelResource are using different index type.");
+
+	// Helper functions
+
+	namespace physics
+	{
+		namespace details
+		{
+			uint32 GetMaterialHash(const PhysicMaterial& m)
+			{
+				return utl::CRC32(&m, sizeof(PhysicMaterial));
+			}
+		}
+	}
+
+	template<typename ShapeType>
+	static void OnActivateShape(Component<ShapeType>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.shapeAggregateEntity = nullptr;
+		rtd.entity = nullptr;
+		rtd.pShape = nullptr;
+		rtd.pMaterial = nullptr;
+	}
+
+	template<typename ShapeType>
+	static void OnDeactivateShape(Component<ShapeType>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.release();
+
+		auto scene = physics::GetScene(c);
+		auto& sceneRtd = scene.GetRuntimeData().GetData();
+		if (sceneRtd.dirtyShapeList.count(&rtd))
+		{
+			sceneRtd.dirtyShapeList.erase(&rtd);
+		}
+
+		rtd.shapeAggregateEntity = nullptr;
+		rtd.entity = nullptr;
+		rtd.pShape = nullptr;
+	}
+	
+	void PhysXShapeRuntimeData::release()
+	{
+		ASSERT(pMaterial != nullptr);
+		pMaterial->release();
+		pMaterial = nullptr;
+	}
+
+	TransformComponent GetTransform(Entity e)
+	{
+		Optional<TransformComponent> trans;
+		GetComponent(e, trans);
+		if (trans.Exists())
+		{
+			return *trans.Force();
+		}
+		TransformComponent r;
+		TransformComponent_init(&r);
+		return r;
+	}
+
+	// Get an entity's transform relative to some not necessarily direct parent (pass nullptr as parent to get global pose)
+	static physx::PxTransform GetRelativeTransform(Entity parent, Entity child)
+	{
+		if (parent == nullptr)
+		{
+			// Use the matrix component to initialize static bodies with no transformcomponent
+			Optional<TransformComponent, FromSelfOrParents> transFromSelfOrParents;
+			GetComponent(child, transFromSelfOrParents);
+			if (!transFromSelfOrParents.Exists())
+			{
+				Optional<MatrixComponent, FromSelfOrParents> mtxFromSelfOrParents;
+				GetComponent(child, mtxFromSelfOrParents);
+				if (mtxFromSelfOrParents.Exists())
+				{
+					const Quaternionf qRot = mtxFromSelfOrParents.Force()->matrix;
+					const Vector3f vPos = mtxFromSelfOrParents.Force()->matrix.vPos().v3();
+					physx::PxTransform t;
+					t.p = ToPhysXVec3(vPos);
+					t.q = ToPhysXQuaternion(qRot);
+					return t;
+				}
+			}
+		}
+
+		const TransformComponent usgTrans = GetTransform(child);
+		if (!usgTrans.bInheritFromParent)
+		{
+			return ToPhysXTransform(usgTrans);
+		}
+		physx::PxTransform trans = ToPhysXTransform(usgTrans);
+		Entity e = child;
+		while (e->GetParentEntity() != parent)
+		{
+			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity()));
+			trans = trans.transform(parentTrans);
+			e = e->GetParentEntity();
+		}
+		return trans;
+	}
+
+	void ApplyMaterial(physx::PxMaterial* pMaterial, const PhysicMaterial& m)
+	{
+		pMaterial->setDynamicFriction(m.fDynamicFriction);
+		pMaterial->setStaticFriction(m.fStaticFriction);
+		pMaterial->setRestitution(m.fBounciness);
+		pMaterial->setFrictionCombineMode((physx::PxCombineMode::Enum)m.eFrictionCombineMode);
+		pMaterial->setRestitutionCombineMode((physx::PxCombineMode::Enum)m.eRestitutionCombineMode);
+		pMaterial->userData = (void*)&m;
+	}
+
+	// The Scene
+
+	template<>
+	void OnActivate<PhysicsScene>(Component<PhysicsScene>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pSceneData = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<PhysicsScene>(Component<PhysicsScene>& c, ComponentLoadHandles& handles)
+	{
+		DeinitPhysicsScene(c);
+	}
+
+	template <>
+	void OnLoaded<PhysicsScene>(Component<PhysicsScene>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+		InitPhysicsScene(c);
+	}
+
+	// Rigid Body
+
+	static void OnRigidBodyLoaded(Required<RigidBody>& c, ComponentLoadHandles& handles)
+	{
+		auto& rtd = c.GetRuntimeData();
+
+		if (rtd.pRigidActor != nullptr)
+		{
+			return;
+		}
+
+		auto& sceneRuntimeData = *handles.pPhysicsScene;
+
+		ASSERT(!c->bDynamic || GameComponents<TransformComponent>::GetComponentData(c.GetEntity()) != nullptr && "Entities with dynamic rigid bodies must have TransformComponent");
+		const physx::PxTransform initialTransform = GetRelativeTransform(nullptr, c.GetEntity());
+		
+		if (c->bDynamic)
+		{
+			physx::PxRigidDynamic* pRigidBody = sceneRuntimeData.pPhysics->createRigidDynamic(initialTransform);
+			ASSERT(pRigidBody != nullptr);
+			pRigidBody->setMass(c->fMass);
+			pRigidBody->setMassSpaceInertiaTensor(ToPhysXVec3(c->vInertiaTensor));
+			pRigidBody->setAngularDamping(c->fAngularDamping);
+			pRigidBody->setLinearDamping(c->fLinearDamping);
+			pRigidBody->setSolverIterationCounts(c->uSolverMinPositionsIters, c->uSolverMinVelocityIters);
+			rtd.pRigidActor = pRigidBody;
+			GameComponents<DynamicBodyTag>::Create(c.GetEntity());
+			if (c->bDisableSleep)
+			{
+				pRigidBody->setSleepThreshold(0);
+			}
+			else
+			{
+				pRigidBody->setSleepThreshold(c->fSleepThreshold);
+				pRigidBody->setActorFlag(physx::PxActorFlag::eSEND_SLEEP_NOTIFIES, true);
+			}
+			if (c->bKinematic)
+			{
+				pRigidBody->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+				GameComponents<KinematicBodyTag>::Create(c.GetEntity());
+			}
+			if (c->bEnableCCD)
+			{
+				ASSERT(!c->bKinematic && "CCD not supported on kinematic bodies.");
+				pRigidBody->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+			}
+			if (c->bDisableGravity)
+			{
+				pRigidBody->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+			}
+		}
+		else
+		{
+			ASSERT(!c->bKinematic && "Kinematic bodies must be dynamic.");
+			ASSERT(!c->bEnableCCD && "CCD is applied to dynamic bodies.");
+			ASSERT(!c->bDisableGravity && "Gravity is applied to dynamic bodies.");
+			rtd.pRigidActor = sceneRuntimeData.pPhysics->createRigidStatic(initialTransform);
+		}
+		ASSERT(rtd.pRigidActor != nullptr);
+		rtd.pRigidActor->userData = GameComponents<RigidBody>::GetComponent(c.GetEntity());
+		rtd.pActor = rtd.pRigidActor;
+
+		Optional<Identifier> id;
+		GetComponent(c.GetEntity(), id);
+		if (id.Exists())
+		{
+			rtd.pActor->setName(id.Force()->name);
+		}
+
+		Optional<PhysicsAggregate, FromSelfOrParents> aggregate;
+		GetComponent(c.GetEntity(), aggregate);
+		if (aggregate.Exists() && !c->bDoNotAttachToParentAggregate)
+		{
+			auto& aggregateComponent = *GameComponents<PhysicsAggregate>::GetComponent(aggregate.Force().GetEntity());
+			ComponentLoadHandles handles;
+			if (aggregateComponent.GetRuntimeData().pAggregate == nullptr)
+			{
+				OnLoaded(aggregateComponent, handles, false);
+			}
+			physx::PxAggregate* pAggregate = aggregateComponent.GetRuntimeData().pAggregate;
+			ASSERT(pAggregate != nullptr);
+			pAggregate->addActor(*rtd.pActor);
+			ASSERT(rtd.pActor->getAggregate() == pAggregate);
+		}
+		
+		sceneRuntimeData.addActorList.insert(&rtd);
+		sceneRuntimeData.dirtyActorList.insert(&rtd);
+	}
+
+	template <>
+	void OnLoaded<RigidBody>(Component<RigidBody>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		Required<RigidBody, FromSelf> rb;
+		GetComponent(c.GetEntity(), rb);
+		OnRigidBodyLoaded(rb, handles);
+	}
+
+	template<>
+	void OnActivate<RigidBody>(Component<RigidBody>& c)
+	{
+		c.Modify().vInertiaTensor = Vector3f(1, 1, 1);
+
+		auto& rtd = c.GetRuntimeData();
+		rtd.pRigidActor = nullptr;
+		rtd.pActor = nullptr;
+		rtd.pActor = nullptr;
+		rtd.uBitmask = 0;
+	}
+
+	template<>
+	void OnDeactivate<RigidBody>(Component<RigidBody>& c, ComponentLoadHandles& handles)
+	{
+		auto& rtd = c.GetRuntimeData();
+		if (rtd.pRigidActor != nullptr)
+		{
+			ASSERT(rtd.pActor != nullptr);
+
+			if (handles.pPhysicsScene->addActorList.count(&rtd))
+			{
+				handles.pPhysicsScene->addActorList.erase(&rtd);
+			}
+			else
+			{
+				handles.pPhysicsScene->removeActorList.insert(rtd.pRigidActor);
+			}
+
+			handles.pPhysicsScene->dirtyActorList.erase(&rtd);
+
+			rtd.pRigidActor = nullptr;
+			rtd.pActor = nullptr;
+		}
+		rtd.uBitmask = 0;
+	}
+
+	// Generic Shape Functions
+	template<typename T>
+	static void AddShape(Required<RigidBody, T> rigidBody, physx::PxShape* pShape)
+	{
+		physx::PxRigidActor* pActor = rigidBody.GetRuntimeData().pRigidActor;
+		ASSERT(pActor != nullptr && "PhysX actor pointer uninitialized. Are you attempting to add a shape to a rigid body for which OnLoaded has not yet been called?");
+		pActor->attachShape(*pShape);
+
+		Optional<VehicleCollider> vehicle;
+		GetComponent(rigidBody.GetEntity(), vehicle);
+		if (vehicle.Exists())
+		{
+			return;
+		}
+		
+		if (rigidBody->bDynamic && pActor->is<physx::PxRigidBody>())
+		{
+			physx::PxRigidBody* pRigidBody = static_cast<physx::PxRigidBody*>(rigidBody.GetRuntimeData().pRigidActor);
+			if (rigidBody->fDensity > Math::EPSILON)
+			{
+				physx::PxRigidBodyExt::updateMassAndInertia(*pRigidBody, rigidBody->fDensity, 0, false);
+				rigidBody.Modify().fMass = pRigidBody->getMass();
+			}
+			else
+			{
+				physx::PxRigidBodyExt::updateMassAndInertia(*pRigidBody, 1.0f, 0, false);
+				pRigidBody->setMass(rigidBody->fMass);
+			}
+			const physx::PxVec3 vTensor = pRigidBody->getMassSpaceInertiaTensor().multiply(ToPhysXVec3(rigidBody->vInertiaTensor));
+			pRigidBody->setMassSpaceInertiaTensor(vTensor);
+		}
+	}
+
+	template<typename SearchMask>
+	static void EnsureRigidBodyLoaded(Optional<RigidBody, SearchMask> rigidBody, ComponentLoadHandles& handles)
+	{
+		if (rigidBody.Exists() && rigidBody.Force().GetRuntimeData().pRigidActor == nullptr)
+		{
+			Required<RigidBody, FromSelf> rigidBodyFromSelf;
+			GetComponent(rigidBody.Force().GetEntity(), rigidBodyFromSelf);
+			ASSERT(rigidBodyFromSelf.IsValid());
+			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
+		}
+	}
+
+	template<typename SearchMask>
+	static void EnsureRigidBodyLoaded(Required<RigidBody, SearchMask> rigidBody, ComponentLoadHandles& handles)
+	{
+		if (rigidBody.GetRuntimeData().pRigidActor == nullptr)
+		{
+			Required<RigidBody, FromSelf> rigidBodyFromSelf;
+			GetComponent(rigidBody.GetEntity(), rigidBodyFromSelf);
+			ASSERT(rigidBodyFromSelf.IsValid());
+			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
+		}
+	}
+
+	template<typename ShapeType>
+	static void OnShapeLoaded(Component<ShapeType>&c, const physx::PxGeometry& geometry, ComponentLoadHandles& handles)
+	{
+		PhysXShapeRuntimeData& rtd = c.GetRuntimeData();
+
+		rtd.pMaterial = handles.pPhysicsScene->pPhysics->createMaterial(PhysicMaterial_fStaticFriction_default, PhysicMaterial_fDynamicFriction_default, PhysicMaterial_fBounciness_default);
+		rtd.pMaterial->userData = (void*)(uint64)0xdeadc0de;
+
+		ApplyMaterial(rtd.pMaterial, c->material);
+
+		physx::PxShape* pShape = handles.pPhysicsScene->pPhysics->createShape(geometry, *rtd.pMaterial, true);
+		rtd.pShape = pShape;
+
+		Entity shapeAggregateEntity = nullptr;
+		Entity actorEntity = nullptr;
+		Optional<RigidBody, FromSelfOrParents> rigidBody;
+		GetComponent(c.GetEntity(), rigidBody);
+		ASSERT((rigidBody.Exists() || c->bIsTrigger) && "A shape must be attached to a rigid body or be a trigger.");
+		if (rigidBody.Exists())
+		{
+			Optional<PhysicsAggregate, FromSelfOrParents> aggregate;
+			GetComponent(c.GetEntity(), aggregate);
+			if (aggregate.Exists() && !rigidBody.Force()->bDoNotAttachToParentAggregate)
+			{
+				shapeAggregateEntity = aggregate.Force().GetEntity();
+			}
+			else
+			{
+				shapeAggregateEntity = rigidBody.Force().GetEntity();
+			}
+			actorEntity = rigidBody.Force().GetEntity();
+		}
+		else if (c->bIsTrigger)
+		{
+			shapeAggregateEntity = c.GetEntity();
+			actorEntity = shapeAggregateEntity;
+		}
+		ASSERT(shapeAggregateEntity != nullptr);
+		rtd.shapeAggregateEntity = shapeAggregateEntity;
+		rtd.entity = c.GetEntity();
+
+		EnsureRigidBodyLoaded(rigidBody, handles);
+		
+		physics::details::SetUserData(pShape, &c.GetRuntimeData());
+
+		if (c.GetEntity() != actorEntity)
+		{
+			const physx::PxTransform transformRelativeToActor = GetRelativeTransform(actorEntity,c.GetEntity());
+			pShape->setLocalPose(physx::PxTransform(ToPhysXVec3(c->vCenter)).transform(transformRelativeToActor));
+		}
+		else
+		{
+			pShape->setLocalPose(physx::PxTransform(ToPhysXVec3(c->vCenter)));
+		}
+
+		Required<RigidBody> rigidBodyFromSelf;
+		if (rigidBody.Exists())
+		{
+			GetComponent(actorEntity, rigidBodyFromSelf);
+		}
+		else
+		{
+			// No rigid body found. In this case, the shape must be a trigger.
+			ASSERT(c->bIsTrigger);
+			auto pRigidBody = GameComponents<RigidBody>::Create(shapeAggregateEntity);
+			RigidBody_init(pRigidBody);
+			pRigidBody->bDynamic = false;
+
+			GetComponent(shapeAggregateEntity, rigidBodyFromSelf);
+			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
+		}
+		if (c->bIsTrigger)
+		{
+			pShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
+			pShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);
+		}
+		
+
+		Optional<Identifier> id;
+		GetComponent(c.GetEntity(), id);
+		if (id.Exists())
+		{
+			pShape->setName(id.Force()->name);
+		}
+		AddShape(rigidBodyFromSelf, pShape);
+		handles.pPhysicsScene->dirtyActorList.insert(&rigidBodyFromSelf.GetRuntimeData());
+		handles.pPhysicsScene->dirtyShapeList.insert(&rtd);
+	}
+
+	// Sphere Collider
+
+	template <>
+	void OnLoaded<SphereCollider>(Component<SphereCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		OnShapeLoaded(c, physx::PxSphereGeometry(c->fRadius), handles);
+	}
+
+	template<>
+	void OnActivate<SphereCollider>(Component<SphereCollider>& c)
+	{
+		OnActivateShape(c);
+	}
+
+	template<>
+	void OnDeactivate<SphereCollider>(Component<SphereCollider>& c, ComponentLoadHandles& handles)
+	{
+		OnDeactivateShape(c);
+	}
+
+	// Box Collider
+
+	template <>
+	void OnLoaded<BoxCollider>(Component<BoxCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		OnShapeLoaded(c, physx::PxBoxGeometry(ToPhysXVec3(c->vExtents)), handles);
+	}
+
+	template<>
+	void OnActivate<BoxCollider>(Component<BoxCollider>& c)
+	{
+		OnActivateShape(c);
+	}
+
+	template<>
+	void OnDeactivate<BoxCollider>(Component<BoxCollider>& c, ComponentLoadHandles& handles)
+	{
+		OnDeactivateShape(c);
+	}
+
+	// Cone Collider
+
+	template <>
+	void OnLoaded<ConeCollider>(Component<ConeCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		auto scene = physics::GetScene(c);
+
+		Vector3f vToCircle;
+		Vector3f vOtherVec = V3F_Z_AXIS;
+		if (DotProduct(c->vDirection, V3F_Z_AXIS) > 0.99f)
+		{
+			vOtherVec = V3F_X_AXIS;
+		}
+		vToCircle = CrossProduct(c->vDirection, vOtherVec).GetNormalised()*c->fRadius;
+
+		vector<physx::PxVec3> vertices;
+		const size_t uCircleVertexCount = 1 + (size_t)(c->fRadius * 3);
+		vertices.reserve(1 + uCircleVertexCount);
+		physx::PxConvexMeshDesc convexDesc;
+		convexDesc.flags = physx::PxConvexFlag::eCOMPUTE_CONVEX;
+		convexDesc.points.stride = sizeof(physx::PxVec3);
+
+		vertices.push_back(ToPhysXVec3(c->vCenter));
+		for (size_t uVertexIndex = 0; uVertexIndex < uCircleVertexCount; uVertexIndex++)
+		{
+			const float fAngle = (float)uVertexIndex / (float)uCircleVertexCount*Math::two_pi;
+			const Vector3f vOffset = vToCircle*Quaternionf(c->vDirection, fAngle);
+			const Vector3f vVertex = c->vCenter + c->vDirection*c->fLength + vOffset;
+			vertices.push_back(ToPhysXVec3(vVertex));
+		}
+
+		convexDesc.points.count = static_cast<uint32>(vertices.size());
+		convexDesc.points.data = &vertices[0];
+
+		physx::PxDefaultMemoryOutputStream buf;
+		physx::PxConvexMeshCookingResult::Enum result;
+		auto& sceneRtd = scene.GetRuntimeData().GetData();
+		if (!sceneRtd.pCooking->cookConvexMesh(convexDesc, buf, &result))
+		{
+			ASSERT(false && "Failed to generate convex mesh from cone geometry.");
+			return;
+		}
+		physx::PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+		physx::PxConvexMesh* pConvexMesh = sceneRtd.pPhysics->createConvexMesh(input);
+		OnShapeLoaded(c, physx::PxConvexMeshGeometry(pConvexMesh), handles);
+		pConvexMesh->release();
+	}
+
+	template<>
+	void OnActivate<ConeCollider>(Component<ConeCollider>& c)
+	{
+		OnActivateShape(c);
+	}
+
+	template<>
+	void OnDeactivate<ConeCollider>(Component<ConeCollider>& c, ComponentLoadHandles& handles)
+	{
+		OnDeactivateShape(c);
+	}
+
+	// Cylinder Collider
+
+	template <>
+	void OnLoaded<CylinderCollider>(Component<CylinderCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		auto scene = physics::GetScene(c);
+		const memsize uCircleVertexCount = c->has_uCircleVertices ? c->uCircleVertices : Math::Min((memsize)16, 1 + (memsize)(c->fRadius * 5));
+		physx::PxConvexMesh* pConvexMesh = scene.GetRuntimeData().GetData().pMeshCache->GetCylinderMesh(c->vCenter, c->vDirection, c->fRadius, c->fHeight, (uint32)uCircleVertexCount);
+		ASSERT(pConvexMesh != nullptr);
+		if (pConvexMesh != nullptr)
+		{
+			c.GetRuntimeData().pConvexMesh = pConvexMesh;
+			OnShapeLoaded(c, physx::PxConvexMeshGeometry(pConvexMesh), handles);
+		}
+	}
+
+	template<>
+	void OnActivate<CylinderCollider>(Component<CylinderCollider>& c)
+	{
+		OnActivateShape(c);
+		c.GetRuntimeData().pConvexMesh = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<CylinderCollider>(Component<CylinderCollider>& c, ComponentLoadHandles& handles)
+	{
+		OnDeactivateShape(c);
+		c.GetRuntimeData().pConvexMesh = nullptr;
+	}
+
+	// Joint Shared functions
+
+	template<typename JointType, typename PhysXJointType>
+	void OnJointLoaded(PhysXJointType* pJoint, Component<JointType>& c)
+	{
+		if (c->has_breakForce)
+		{
+			const auto& joinBreakForce = c->breakForce;
+			pJoint->setBreakForce(joinBreakForce.fLinear, joinBreakForce.fAngular);
+		}
+
+		if (c->bEnableProjection)
+		{
+			pJoint->setProjectionLinearTolerance(c->fProjectionLinearTolerance);
+			pJoint->setProjectionAngularTolerance(c->fProjectionAngularTolerance);
+			pJoint->setConstraintFlag(physx::PxConstraintFlag::ePROJECTION, true);
+		}
+		pJoint->userData = c.GetEntity();
+	}
+
+	// Revolute Joint
+
+	template<>
+	void OnActivate<RevoluteJoint>(Component<RevoluteJoint>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pJoint = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<RevoluteJoint>(Component<RevoluteJoint>& c, ComponentLoadHandles& handles)
+	{
+
+	}
+
+	template <>
+	void OnLoaded<RevoluteJoint>(Component<RevoluteJoint>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		// Note: currently only parent-child joints supported. Consider adding support for joints between sibling rigid bodies.
+
+		Required<usg::RigidBody, FromSelf> myRigidBody;
+		Required<usg::RigidBody, FromParents> myParentsRigidBody;
+		GetComponent(c.GetEntity(), myRigidBody);
+		GetComponent(c.GetEntity(), myParentsRigidBody);
+		EnsureRigidBodyLoaded(myRigidBody, handles);
+		EnsureRigidBodyLoaded(myParentsRigidBody, handles);
+		
+		physx::PxRigidActor* pActor1 = myParentsRigidBody.GetRuntimeData().pRigidActor;
+		physx::PxRigidActor* pActor2 = myRigidBody.GetRuntimeData().pRigidActor;
+		ASSERT(pActor1 != nullptr && pActor2 != nullptr);
+
+		physx::PxTransform t1(physx::PxIdentity);
+		Quaternionf q1;
+		q1.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		t1.q = ToPhysXQuaternion(q1);
+		t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity()).position);
+
+		Required<TransformComponent> myTrans;
+		GetComponent(c.GetEntity(), myTrans);
+		// myTrans.Modify().bInheritFromParent = false;
+		physx::PxTransform t2(physx::PxIdentity);
+		Quaternionf q2;
+		q2.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		t2.q = ToPhysXQuaternion(q2);
+		
+		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
+		auto pJoint = physx::PxRevoluteJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		c.GetRuntimeData().pJoint = pJoint;
+
+		pJoint->setRevoluteJointFlag(physx::PxRevoluteJointFlag::eDRIVE_ENABLED, c->bEnableMotor);
+
+		OnJointLoaded(pJoint, c);
+	}
+
+	// Fixed Joint
+
+	template<>
+	void OnActivate<FixedJoint>(Component<FixedJoint>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pJoint = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<FixedJoint>(Component<FixedJoint>& c, ComponentLoadHandles& handles)
+	{
+
+	}
+
+	template <>
+	void OnLoaded<FixedJoint>(Component<FixedJoint>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		// Note: currently only parent-child joints supported. Consider adding support for joints between sibling rigid bodies.
+
+		Required<usg::RigidBody, FromSelf> myRigidBody;
+		Optional<usg::RigidBody, FromParents> myParentsRigidBody;
+		GetComponent(c.GetEntity(), myRigidBody);
+		GetComponent(c.GetEntity(), myParentsRigidBody);
+		EnsureRigidBodyLoaded(myRigidBody, handles);
+		if (myParentsRigidBody.Exists())
+		{
+			EnsureRigidBodyLoaded(myParentsRigidBody, handles);
+		}
+
+		physx::PxRigidActor* pActor1 = myParentsRigidBody.Exists() ? myParentsRigidBody.Force().GetRuntimeData().pRigidActor : nullptr;
+		physx::PxRigidActor* pActor2 = myRigidBody.GetRuntimeData().pRigidActor;
+		ASSERT(pActor2 != nullptr);
+
+		physx::PxTransform t1(physx::PxIdentity);
+		if (myParentsRigidBody.Exists())
+		{
+			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.Force().GetEntity(), myRigidBody.GetEntity()).position);
+		}
+		else
+		{
+			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(nullptr, myRigidBody.GetEntity()).position);
+		}
+
+		Required<TransformComponent> myTrans;
+		GetComponent(c.GetEntity(), myTrans);
+		physx::PxTransform t2(physx::PxIdentity);
+
+		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
+		auto pJoint = physx::PxFixedJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		c.GetRuntimeData().pJoint = pJoint;
+
+		OnJointLoaded(pJoint, c);
+	}
+
+	// Prismatic Joint
+
+	template<>
+	void OnActivate<PrismaticJoint>(Component<PrismaticJoint>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pJoint = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<PrismaticJoint>(Component<PrismaticJoint>& c, ComponentLoadHandles& handles)
+	{
+
+	}
+
+	template <>
+	void OnLoaded<PrismaticJoint>(Component<PrismaticJoint>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		// Note: currently only parent-child joints supported. Consider adding support for joints between sibling rigid bodies.
+
+		Required<usg::RigidBody, FromSelf> myRigidBody;
+		Optional<usg::RigidBody, FromParents> myParentsRigidBody;
+		GetComponent(c.GetEntity(), myRigidBody);
+		GetComponent(c.GetEntity(), myParentsRigidBody);
+		EnsureRigidBodyLoaded(myRigidBody, handles);
+		if (myParentsRigidBody.Exists())
+		{
+			EnsureRigidBodyLoaded(myParentsRigidBody, handles);
+		}
+
+		physx::PxRigidActor* pActor1 = myParentsRigidBody.Exists() ? myParentsRigidBody.Force().GetRuntimeData().pRigidActor : nullptr;
+		physx::PxRigidActor* pActor2 = myRigidBody.GetRuntimeData().pRigidActor;
+		ASSERT(pActor2 != nullptr);
+
+		const TransformComponent myTransformRelativeToConnectedParent = TransformTool::GetRelativeTransform(myParentsRigidBody.Exists() ? myParentsRigidBody.Force().GetEntity() : nullptr, myRigidBody.GetEntity());
+		physx::PxTransform t1(physx::PxIdentity);
+		t1.p = ToPhysXVec3(myTransformRelativeToConnectedParent.position);
+		Quaternionf q1;
+		q1.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		t1.q = ToPhysXQuaternion(q1);
+
+		physx::PxTransform t2(physx::PxIdentity);
+		t2.q = ToPhysXQuaternion(q1);
+
+		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
+		auto pJoint = physx::PxPrismaticJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		c.GetRuntimeData().pJoint = pJoint;
+
+		OnJointLoaded(pJoint, c);
+	}
+
+	// Aggregate
+
+	template<>
+	void OnActivate<PhysicsAggregate>(Component<PhysicsAggregate>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pAggregate = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<PhysicsAggregate>(Component<PhysicsAggregate>& c, ComponentLoadHandles& handles)
+	{
+		auto& scene = physics::GetScene(c).GetRuntimeData().GetData();
+		auto pAggregate = c.GetRuntimeData().pAggregate;
+		if (scene.addAggregateList.count(pAggregate))
+		{
+			scene.addAggregateList.erase(pAggregate);
+		}
+		else
+		{
+			scene.removeAggregateList.insert(pAggregate);
+		}
+	}
+
+	template <>
+	void OnLoaded<PhysicsAggregate>(Component<PhysicsAggregate>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		auto& scene = physics::GetScene(c).GetRuntimeData().GetData();
+		
+		c.GetRuntimeData().pAggregate = scene.pPhysics->createAggregate(c->uMaxNumBodies, c->bEnableSelfCollisions);
+		scene.addAggregateList.insert(c.GetRuntimeData().pAggregate);
+	}
+
+	// Mesh Collider
+
+	template <>
+	void OnLoaded<MeshCollider>(Component<MeshCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+		
+		auto& rtd = c.GetRuntimeData();
+		auto scene = physics::GetScene(c);
+
+		ASSERT(scene.IsValid());
+		physx::PxCooking* pCooking = scene.GetRuntimeData().GetData().pCooking;
+		ASSERT(pCooking != nullptr);
+		physx::PxPhysics* pPhysics = scene.GetRuntimeData().GetData().pPhysics;
+		ASSERT(pPhysics != nullptr);
+
+		Required<RigidBody, FromSelfOrParents> rigidBody;
+		GetComponent(c.GetEntity(), rigidBody);
+		if (rigidBody->bDynamic && !c->bConvex)
+		{
+			// Triangle Mesh collider can only be attached to static actors (this is a limitation of PhysX). Split the mesh into convex submeshes if you REALLY need such a complex
+			// collision model in a dynamic entity.
+			ASSERT(false);
+			c.Modify().bConvex = true;
+		}
+
+		PhysXMeshCache* pMeshCache = scene.GetRuntimeData().GetData().pMeshCache;
+		if (c->bConvex)
+		{
+			physx::PxConvexMesh* pConvexMesh = pMeshCache->GetConvexMesh(c->szCollisionModel, c->szMeshName);
+			rtd.pConvexMesh = pConvexMesh;
+			OnShapeLoaded(c, physx::PxConvexMeshGeometry(pConvexMesh, physx::PxMeshScale(c->fMeshScale)), handles);
+			rtd.pShape->setName(c->szCollisionModel);
+		}
+		else
+		{
+			ASSERT(c->szMeshName[0]==0 && "Non-convex collision models with bones not supported as of now");
+			if (c->szCollisionModel[0])
+			{
+				ASSERT(rtd.pTriangleMesh == nullptr);
+				rtd.pTriangleMesh = pMeshCache->GetTriangleMesh(c->szCollisionModel, c->bFlipNormals);
+			}
+			else
+			{
+				ASSERT(rtd.pTriangleMesh != nullptr && "If you do not specify collision mesh filename, you must programmatically create the PxTriangleMesh between OnActivate and OnLoaded.");
+			}
+			OnShapeLoaded(c, physx::PxTriangleMeshGeometry(rtd.pTriangleMesh, physx::PxMeshScale(c->fMeshScale)), handles);
+			if (c->szCollisionModel[0])
+			{
+				rtd.pShape->setName(c->szCollisionModel);
+			}
+		}
+	}
+
+	template<>
+	void OnActivate<MeshCollider>(Component<MeshCollider>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pConvexMesh = nullptr;
+		rtd.pTriangleMesh = nullptr;
+		OnActivateShape(c);
+	}
+
+	template<>
+	void OnDeactivate<MeshCollider>(Component<MeshCollider>& c, ComponentLoadHandles& handles)
+	{
+		auto& rtd = c.GetRuntimeData();
+		OnDeactivateShape(c);
+		rtd.pConvexMesh = nullptr;
+		rtd.pTriangleMesh = nullptr;
+	}
+
+	// Vehicle Collider
+
+	template <>
+	void OnLoaded<VehicleCollider>(Component<VehicleCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+		OnVehicleColliderLoaded(c);
+		auto& sceneRtd = physics::GetScene(c).GetRuntimeData().GetData();
+		const memsize uWheelCount = c->uNumWheels;
+		for (memsize i = 0; i < uWheelCount; i++)
+		{
+			auto& wheel = c.GetRuntimeData().wheelsData.wheel[i];
+			sceneRtd.dirtyShapeList.insert((PhysXShapeRuntimeData*)&wheel.rtd);
+		}
+	}
+
+	template<>
+	void OnActivate<VehicleCollider>(Component<VehicleCollider>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		OnActivateShape(c);
+		OnVehicleColliderActivated(c);
+	}
+
+	template<>
+	void OnDeactivate<VehicleCollider>(Component<VehicleCollider>& c, ComponentLoadHandles& handles)
+	{
+		auto& rtd = c.GetRuntimeData();
+		OnDeactivateShape(c);
+		OnVehicleColliderDeactivated(c);
+	}
+
+}
+

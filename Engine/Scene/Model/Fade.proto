@@ -1,0 +1,15 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+
+enum FaderState
+{
+	option (nanopb_enumopt).long_names = false;
+
+	FADER_BEGIN = 0;
+	FADER_END = 1;
+}

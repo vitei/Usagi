@@ -1,0 +1,11 @@
+import 'nanopb.proto';
+import 'Engine/Network/Network.proto';
+
+package usg.Components;
+
+message HostManagedEntity
+{
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required bool bLocalSimCPUPlayerValue = 1 [default = true];
+}

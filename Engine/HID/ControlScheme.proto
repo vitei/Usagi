@@ -1,0 +1,80 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/HID/InputEnums.proto';
+
+package usg;
+
+message ButtonMapping
+{
+	// gameId
+	// game-specific command
+	required uint32 gameId = 1;
+
+	// buttonId
+	// gamepad button to trigger said command
+	required GamepadButton buttonId = 2;
+};
+
+message PhysicalAxis
+{
+	required GamepadAxis id = 1 [default = GAMEPAD_AXIS_NONE];
+	optional AxisType type = 2 [default = AXIS_TYPE_ABSOLUTE];
+};
+
+message VirtualAxis
+{
+	required GamepadButton up = 1;
+	required GamepadButton down = 2;
+};
+
+message VirtualAxis2D
+{
+	required GamepadButton up = 1;
+	required GamepadButton down = 2;
+	required GamepadButton left = 3; 
+	required GamepadButton right = 4;
+};
+
+message AxisMapping
+{
+	// gameId
+	// game-specific axis
+	required uint32 gameId = 1;
+
+	optional float stickyRate = 2 [default = 0.0];
+
+	// physical
+	// gamepad axis to map to this axis
+	optional PhysicalAxis physicalAxis = 3;
+
+	// virtual
+	// button pair to map to this axis
+	optional VirtualAxis virtualAxis = 4;
+};
+
+message ModeControlSchemeMappings
+{
+	repeated AxisMapping axes = 1 [(nanopb).max_count = 8];
+	repeated ButtonMapping buttons = 2 [(nanopb).max_count = 16];
+};
+
+message ModeControlScheme
+{
+	required uint32 controlMode = 1 [default = 0];
+	required ModeControlSchemeMappings mappings = 2;
+};
+
+message ControlScheme
+{
+	repeated ModeControlScheme modes = 1 [(nanopb).max_count = 4];
+};
+
+message ControlSchemeDefinition
+{
+	required string name = 1 [(nanopb).max_size = 32];
+	required ControlScheme scheme = 2;
+};
+
+

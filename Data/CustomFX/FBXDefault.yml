@@ -1,0 +1,45 @@
+Shader:
+  name: "ModelFBXDefault"
+  deferred: "ModelFBXDefaultDeferred"
+  shadow: "ModelFBXDefaultDepth"
+  omniShadow: "ModelFBXDefaultOmniDepth"
+
+Attributes:
+  - { index: 0, hint: "position" }
+  - { index: 1, hint: "normal" }
+  - { index: 2, hint: "tangent" }
+  - { index: 10, hint: "binormal" }
+  - { index: 3, hint: "blendindex" }
+  - { index: 4, hint: "blendweight" }
+  - { index: 5, hint: "color" }
+  - { index: 6, hint: "uv0" }
+  - { index: 7, hint: "uv1" }
+  - { index: 8, hint: "uv2" }
+  - { index: 9, hint: "uv3" }
+
+Samplers:
+  - { index: 0, hint: "DiffuseColor" }
+  - { index: 1, hint: "NormalMap" }
+  - { index: 2, hint: "EmissiveFactor" }
+  - { index: 3, hint: "SpecularColor" }
+  - { index: 4, hint: "Reflection" }
+
+ConstantDefs:
+  - name: Material
+    Variables:
+      - { type: mat3x4, name: mTexMatrix,     count: 4 }
+      - { type: int,    name: iBoneCount,     default: 0 }              
+      - { type: bool,   name: bBumpMap,       default: false }
+  - name: Material1
+    Variables:
+      - { type: vec4,   name: emission,       count: 1 }  # 0
+      - { type: vec4,   name: diffuse,        count: 1 }  # 16
+      - { type: vec4,   name: specular,       count: 1 }  # 32
+      - { type: float,  name: reflectionfactor, count: 1 } # 48
+      - { type: float,  name: specularpow,    count: 1, default: 10.0 } # 52
+      - { type: float,  name: alpha,          count: 1, default: 1.0 } # 56
+      - { type: bool,   name: bDiffuseMap,    default: false } # 60
+      - { type: bool,   name: bBumpMap,       default: false } # 64
+      - { type: bool,   name: bSpecMap,       default: false } # 68
+      - { type: bool,   name: bEmissiveMap,   default: false } # 72            
+      - { type: bool,   name: bReflectionMap, default: false } # 76

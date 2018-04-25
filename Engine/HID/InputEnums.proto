@@ -1,0 +1,146 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+enum AxisType
+{
+    option (nanopb_enumopt).long_names = false;
+
+    AXIS_TYPE_ABSOLUTE = 0;
+    AXIS_TYPE_POSITIVE = 1;
+    AXIS_TYPE_NEGATIVE = 2;
+    AXIS_TYPE_NONE = 3;
+};
+
+enum OutputType
+{
+    option (nanopb_enumopt).long_names = false;
+
+    OUTPUT_TYPE_FLOAT = 0;
+    OUTPUT_TYPE_BOOL = 1;
+    OUTPUT_TYPE_NONE = 2;
+};
+
+enum GamepadAxis
+{
+    option (nanopb_enumopt).long_names = false;
+
+    GAMEPAD_AXIS_LEFT_X = 0;
+    GAMEPAD_AXIS_LEFT_Y = 1;
+    GAMEPAD_AXIS_RIGHT_X = 2;
+    GAMEPAD_AXIS_RIGHT_Y = 3;
+    GAMEPAD_AXIS_POINTER_X = 4;
+    GAMEPAD_AXIS_POINTER_Y = 5;
+
+    GAMEPAD_AXIS_GYRO_VEL_X = 6;
+    GAMEPAD_AXIS_GYRO_VEL_Y = 7;
+    GAMEPAD_AXIS_GYRO_VEL_Z = 8;
+
+    GAMEPAD_AXIS_GYRO_ANG_DX = 9;
+    GAMEPAD_AXIS_GYRO_ANG_DY = 10;
+    GAMEPAD_AXIS_GYRO_ANG_DZ = 11;
+
+	GAMEPAD_AXIS_GYRO_VEL_X_R = 12;
+    GAMEPAD_AXIS_GYRO_VEL_Y_R = 13;
+    GAMEPAD_AXIS_GYRO_VEL_Z_R = 14;
+
+    GAMEPAD_AXIS_GYRO_ANG_DX_R = 15;
+    GAMEPAD_AXIS_GYRO_ANG_DY_R = 16;
+    GAMEPAD_AXIS_GYRO_ANG_DZ_R = 17;
+
+    GAMEPAD_AXIS_SCROLL_X = 18;
+    GAMEPAD_AXIS_SCROLL_Y = 19;
+    GAMEPAD_AXIS_NONE = 20;
+};
+
+
+enum MouseButton
+{
+    option (nanopb_enumopt).long_names = false;
+
+    MOUSE_BUTTON_LEFT = 0;
+    MOUSE_BUTTON_RIGHT = 1;
+    MOUSE_BUTTON_MIDDLE = 2;
+};
+
+enum MouseAxis
+{
+    option (nanopb_enumopt).long_names = false;
+
+    MOUSE_POS_X = 0;
+    MOUSE_POS_Y = 1;
+    MOUSE_DELTA_X = 2;
+    MOUSE_DELTA_Y = 3;
+    MOUSE_DELTA_WHEEL = 4;
+};
+
+
+enum InputType
+{
+    option (nanopb_enumopt).long_names = false;
+
+    INPUT_TYPE_AXIS = 0;
+    INPUT_TYPE_BUTTON = 1;
+    INPUT_TYPE_SCREEN_TOUCH = 2;
+    INPUT_TYPE_NONE = 3;
+};
+
+enum ButtonState
+{
+    option (nanopb_enumopt).long_names = false;
+
+    BUTTON_STATE_PRESSED = 0;
+    BUTTON_STATE_RELEASED = 1;
+    BUTTON_STATE_HELD = 2;
+    BUTTON_STATE_CONTACT = 3;
+    BUTTON_STATE_NONE = 4;
+};
+
+enum GamepadButton
+{
+    option (nanopb_enumopt).long_names = false;
+
+    GAMEPAD_BUTTON_NONE     = 0;
+
+    GAMEPAD_BUTTON_A        = 1;
+    GAMEPAD_BUTTON_B        = 2;
+    GAMEPAD_BUTTON_X        = 3;
+    GAMEPAD_BUTTON_Y        = 4;
+
+    GAMEPAD_BUTTON_L        = 5;
+    GAMEPAD_BUTTON_R        = 6;
+    GAMEPAD_BUTTON_ZL       = 7;
+    GAMEPAD_BUTTON_ZR       = 8;
+
+    GAMEPAD_BUTTON_THUMB_L  = 9;
+    GAMEPAD_BUTTON_THUMB_R  = 10;
+
+    GAMEPAD_BUTTON_HOME     = 11;
+
+    GAMEPAD_BUTTON_UP       = 12;
+    GAMEPAD_BUTTON_DOWN     = 13;
+    GAMEPAD_BUTTON_LEFT     = 14;
+    GAMEPAD_BUTTON_RIGHT    = 15;
+
+    GAMEPAD_BUTTON_SELECT   = 16;
+    GAMEPAD_BUTTON_START    = 17;
+
+    // Screen touch
+    GAMEPAD_BUTTON_TOUCH = 18;
+};
+
+enum TouchType
+{
+    option (nanopb_enumopt).long_names = false;
+
+    TOUCH_NONE = 0;
+    TOUCH_LEFT_INDEX_POINTING = 1;
+    TOUCH_RIGHT_INDEX_POINTING = 2;
+    TOUCH_LEFT_THUMB_UP = 3;
+    TOUCH_RIGHT_THUMB_UP = 4;
+    TOUCH_LEFT_THUMB_ON_REST = 5;
+    TOUCH_RIGHT_THUMB_ON_REST = 6;
+};

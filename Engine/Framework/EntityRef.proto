@@ -1,0 +1,13 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+message EntityRef
+{
+	option (nanopb_msgopt).from_header = "Engine/Framework/EntityRef.h";
+	option (nanopb_msgopt).lua_generate = true;
+	required fixed64 entityID = 1 [default = 0];
+}

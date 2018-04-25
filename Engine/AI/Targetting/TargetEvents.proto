@@ -1,0 +1,26 @@
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Framework/EntityRef.proto';
+
+package usg.ai.Events;
+
+message TargetEvent
+{
+	required usg.Vector3f position = 1;
+	required usg.EntityRef selfID = 2;
+	required float health = 3;
+	required uint32 type = 4;
+	required uint32 team = 5;
+	required bool bVisible = 6 [default = true];
+	required usg.Vector3f vForward = 7;
+	required usg.Vector3f vRight = 8;
+	required usg.Vector3f vVelocity = 9;
+	required double fTimeStamp = 10;
+	required sint64 iNUID = 11;
+}
+
+message TargetLineOfSightEvent
+{
+	required bool bHasLineOfSight = 1;
+	required usg.EntityRef entityId = 2;
+}

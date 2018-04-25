@@ -1,0 +1,7 @@
+source "https://rubygems.org"
+
+ruby '2.3.1'
+
+gem 'nokogiri',              '1.6.8'
+gem 'ruby-protocol-buffers', '1.6.1', :source => 'http://gems.vitei.com'
+gem 'rake',                  '<= 10.4.2'

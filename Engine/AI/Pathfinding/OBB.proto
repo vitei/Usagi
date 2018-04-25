@@ -1,0 +1,25 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.ai.pb;
+
+// *******************
+// Data for 2D oriented bounding box used in pathfinding to block areas.
+// ********************
+
+message OBB
+{
+	required float x = 1;
+	required float y = 2;
+	required float width = 3;
+	required float height = 4;
+	required float angle = 5;
+	required bool addWaypoints = 6;
+};
+
+message OBBList
+{
+	repeated OBB boxes = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 64>"];
+};

@@ -1,0 +1,15 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+
+import 'nanopb.proto';
+
+option (nanopb_fileopt).include = 'Engine/Framework/Script/LuaEventTriggers.h';
+
+package usg.Events;
+
+message LuaEvent
+{
+	required uint32 eventType  = 1;
+	required uint32 eventIndex = 2;
+}

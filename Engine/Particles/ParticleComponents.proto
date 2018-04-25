@@ -1,0 +1,18 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+package usg;
+
+option (nanopb_fileopt).include = "Engine/Particles/ParticleComponents.h";
+
+message ParticleComponent
+{
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).is_gamecomponent = true;
+
+	required string name = 1 [(nanopb).max_size = 64];
+	required float fScale = 2 [default=1.0];
+	required bool bSpawn = 3 [default=false];
+	required bool bIsScripted = 4 [default=false];
+}

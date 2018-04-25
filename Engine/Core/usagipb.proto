@@ -1,0 +1,35 @@
+// Custom options for defining Usagi-specific field metadata
+
+syntax = "proto2";
+import "nanopb.proto";
+import "google/protobuf/descriptor.proto";
+
+message UsagiPBOptions {
+	optional string doc_en = 1 [default = ""];
+	optional string doc_jp = 2 [default = ""];
+}
+
+message UsagiPBEnumOptions {
+	optional bool is_bitmask = 1 [default = false];
+}
+
+extend google.protobuf.FileOptions {
+	optional UsagiPBOptions usagi_file = 1020;
+}
+
+extend google.protobuf.MessageOptions {
+	optional UsagiPBOptions usagi_msg = 1020;
+}
+
+extend google.protobuf.EnumOptions {
+	optional UsagiPBOptions usagi_enum = 1020;
+	optional UsagiPBEnumOptions usagipb_enumopt = 1011;
+}
+
+extend google.protobuf.FieldOptions {
+	optional UsagiPBOptions usagi = 1020;
+}
+
+extend google.protobuf.EnumValueOptions {
+	optional UsagiPBOptions usagi_value = 1020;
+}

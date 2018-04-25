@@ -1,0 +1,53 @@
+import 'nanopb.proto';
+import 'Engine/Core/usagipb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.Events;
+
+message DecreaseHealthEvent
+{
+	option (nanopb_msgopt).lua_send = true;
+	option (usagi_msg).doc_jp = "ヘルスを減らす";
+
+	required float amount = 1;
+}
+
+
+message IncreaseHealthEvent
+{
+	option (nanopb_msgopt).lua_send = true;
+	option (usagi_msg).doc_jp = "ヘルスを増やす";
+
+	required float amount = 1;
+}
+
+
+message SetHealthEvent
+{
+	required float amount = 1;
+}
+
+message HealthChangedEvent
+{
+	option (nanopb_msgopt).lua_receive = true;
+	option (usagi_msg).doc_jp = "ヘルスが変わった";
+
+	required float fPrev = 1 [(usagi).doc_jp = "変更前の値"];
+	required float fNew = 2 [(usagi).doc_jp = "変更後の値"];
+}
+
+message SetMagnetNorthPole
+{
+	required usg.Vector3f vNorthPole = 1;
+}
+
+
+message KillEntityEvent
+{
+}
+
+message SetGameState
+{
+	required bool bParticipating = 1;
+	required bool bActive = 2;
+}

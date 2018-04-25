@@ -1,0 +1,54 @@
+<%
+# This file is the source file for system registration files.
+# You can embed Ruby code by using the markup <%= ... your code ... %>
+# There are three global constants available to you:
+#    HEADERS - An array of strings; filenames of all required headers
+#    SYSTEMS - An array of strings; the names of all the systems
+#    COMPONENTS - An array of strings; the names of all the components
+#    EVENTS - An array of strings; the names of all the events
+# There is also one helper function available to you
+#    component_id(c) - Returns the component ID of a component as an int
+%>
+
+<%
+# We assume that the output file is at the root of the directory we're interested in
+ROOT_DIR = Pathname.new(File.dirname($out).sub(/_build\/[^\/]+\/[^\/]+\//, ""))
+PROJECT_NAME = ROOT_DIR.sub(/^Engine\//, "")
+IS_ENGINE = ROOT_DIR.to_s =~ /^Engine/
+
+SYSTEMS_TO_REGISTER =
+	SYSTEMS.select{ |s|
+		path_relative_to_root = Pathname.new(s["sourceFile"]).relative_path_from(ROOT_DIR)
+		path_relative_to_root.to_s !~ /^\.\./
+	}.map{ |s|
+		s.merge({ "sourceFile" => Pathname.new(s["sourceFile"]).relative_path_from(Pathname.new(".")).to_s })
+	}.uniq
+%>
+
+#include "Engine/Common/Common.h"
+#include "Engine/Framework/SystemCoordinator.h"
+
+<%=
+SYSTEMS_TO_REGISTER.map{ |s|
+	if !s["isTemplated"]
+		recordType = s["isClass"] ? "class" : "struct"
+		*namespaces, system_name = s["name"].split("::").reject{|s| s.empty? }
+		namespaces.map{ |ns| "namespace #{ns} { " }.join("") +
+		"#{recordType} #{system_name}; " +
+		namespaces.map{ |_| "}" }.join("")
+	else
+		"#include \"#{s["sourceFile"]}\""
+	end
+}.uniq.sort.join("\n")
+%>
+
+<%= IS_ENGINE ? "namespace usg {" : "" %>
+
+void Register<%=PROJECT_NAME%>Systems(usg::SystemCoordinator& systemCoordinator)
+{
+<%= SYSTEMS_TO_REGISTER.map { |s|
+	"\t::usg::RegisterSystem< #{s["name"]} >(systemCoordinator);"
+}.join("\n") %>
+}
+
+<%= IS_ENGINE ? "}" : "" %>

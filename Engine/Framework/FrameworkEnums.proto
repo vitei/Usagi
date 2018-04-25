@@ -1,0 +1,32 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+enum STATUS
+{
+	UNKNOWN = 0;
+	ACTIVE = 1;
+	DEAD = 2;
+};
+
+// FIXME: Game specifics, doesnt really belong here
+enum UID
+{
+	PLAYER = 1;
+	CAMERA = 2;
+	HUD    = 3;
+	COCKPIT = 4;
+	WORLD  = 5;
+	TEAM1_BASE = 6;
+	TEAM2_BASE = 7;
+	GROUND = 8;
+	TEAM1_TURRET0 = 9;
+	TEAM1_TURRET1 = 10;
+	TEAM1_TURRET2 = 11;
+	TEAM2_TURRET0 = 12;
+	TEAM2_TURRET1 = 13;
+	TEAM2_TURRET2 = 14;
+}

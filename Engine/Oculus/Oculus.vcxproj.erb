@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{<%= project_guid %>}</ProjectGuid>
+    <RootNamespace>$(ProjectName)</RootNamespace>
+    <ApplicationEnvironment>title</ApplicationEnvironment>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+ <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(USAGI_DIR)\Engine\CommonProps.props" />
+    <Import Project="$(USAGI_DIR)\Engine\ConditionalProps.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OCULUS_SDK_DIR)\LibOVR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OCULUS_SDK_DIR)\LibOVR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OCULUS_SDK_DIR)\LibOVR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;DLL_MEM_MANAGEMENT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Debug\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OCULUS_SDK_DIR)\LibOVR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;DLL_MEM_MANAGEMENT;NDEBUG;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+<% if project_root.include?('ThirdParty') %>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile />
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <ExceptionHandling>Sync</ExceptionHandling>
+    </ClCompile>
+  </ItemDefinitionGroup>
+<% end %>
+
+  <PropertyGroup>
+    <SourceDir>$(USAGI_DIR)\<%= project_dir %></SourceDir>
+    <PBProjectDir>$(USAGI_DIR)\_build\proto\<%= project_dir %></PBProjectDir>
+  </PropertyGroup>
+
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\_romfiles\win\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\_romfiles\win\</OutDir>
+  </PropertyGroup>
+
+<ItemGroup>
+  <ClCompile Include="..\..\..\..\Engine\$(ProjectName)\_exclude\stdafx.cpp">
+    <PrecompiledHeader>Create</PrecompiledHeader>
+    <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>
+  </ClCompile>
+</ItemGroup>
+
+  <ItemGroup>
+<% for @src in proto_sources %>
+    <ClCompile Include="$(PBProjectDir)<%= @src %>" />
+<% end %>
+
+<% for @src in boilerplate_sources %>
+    <ClCompile Include="$(IntDir)..\<%= @src %>" />
+<% end %>
+
+<% for @src in sources %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @h in proto_headers %>
+    <ClInclude Include="$(PBProjectDir)<%= @h %>" />
+<% end %>
+
+<% for @h in headers %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @p in proto %>
+    <None Include="..\..\..\..\<%= @p %>" />
+<% end %>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Maths\Maths.vcxproj">
+      <Project>{258c9d89-38fb-4b1e-81e1-6d32ac81ff17}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Core\Core.vcxproj">
+      <Project>{4f44a822-08d7-424a-8d40-72677d8346a4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Debug\Debug.vcxproj">
+      <Project>{505a7767-c568-4303-8979-116ff110c8ff}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Memory\Memory.vcxproj">
+      <Project>{1c319d5b-0060-4653-9000-2ed6c92acaef}</Project>
+    </ProjectReference>
+
+  </ItemGroup>
+
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

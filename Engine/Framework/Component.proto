@@ -1,0 +1,31 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2017
+****************************************************************************/
+package usg;
+
+message ComponentHeader
+{
+	required fixed32 id = 1;
+	required uint32 byteLength = 2;
+}
+
+message HierarchyHeader
+{
+	// This is a top-level header that gives the number of entities
+	// defined at the root level of the file.
+	required uint32 entityCount = 1;
+}
+
+message EntityHeader
+{
+	required uint32 componentCount = 1;
+	required uint32 childEntityCount = 2;
+	required uint32 initializerEventCount = 3;
+}
+
+message InitializerEventHeader
+{
+	required fixed32 id = 1;
+	required uint32 byteLength = 2;
+	required uint32 check = 3;
+}

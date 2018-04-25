@@ -1,0 +1,27 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.Components;
+
+enum NUID
+{
+	INVALID = -1;
+}
+
+message NetworkUID
+{
+	option (nanopb_msgopt).lua_generate = true;
+	required sint64 gameUID = 1;
+}
+
+message NetworkOwner
+{
+	required sint64 ownerUID = 1;
+}
+
+message NetworkClient
+{
+	required sint64 clientUID = 1;
+}

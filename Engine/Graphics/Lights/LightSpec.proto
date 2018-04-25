@@ -1,0 +1,69 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Color.proto";
+
+package usg;
+
+enum LightKind {
+	DIRECTIONAL = 0;
+	POINT       = 1;
+	SPOT        = 2;
+	PROJECTION  = 3;
+}
+
+message AmbientLightSpec {
+	required string name   = 1 [(nanopb).max_size = 32];
+	required Color ambient = 2;
+};
+
+message HemisphericalLightSpec {
+	required string   name        = 1 [(nanopb).max_size = 32];
+	required Vector3f direction   = 2;
+	required float    lerpFactor  = 3;
+	required Color    groundColor = 4;
+	required Color    skyColor    = 5;
+};
+
+message LightSpecBase
+{
+	required LightKind kind     = 1;
+	required Color ambient      = 2;
+	required Color diffuse      = 3;
+	required Color specular     = 4;
+	required bool  bShadow 		= 5;	
+};
+
+message LightSpecAttenuation
+{
+	required bool bEnabled = 1;
+	required float fNear = 2;
+	required float fFar = 3;
+};
+
+message SpotLightSpec
+{
+	required float fInnerAngle = 4 [default = 5.0];
+	required float fOuterAngle = 5 [default = 45.0];
+};
+
+message ProjectionLightSpec
+{
+	required string	texName = 1 [(nanopb).max_size = 64];
+	required float fFov = 2 [default = 20];
+	required float fAspect = 3 [default = 1];
+};
+
+message LightSpec
+{
+	required LightSpecBase base = 1;
+	required LightSpecAttenuation atten = 2;
+	required SpotLightSpec spot = 3;
+	required ProjectionLightSpec proj = 4;
+
+	// Spot and direction only
+	required Vector3f direction = 5;
+};

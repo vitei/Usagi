@@ -1,0 +1,54 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+message Vector2f {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Vector2f.h";
+
+	required float x = 1 [default = 0];
+	required float y = 2 [default = 0];
+};
+
+message Vector3f {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Vector3f.h";
+	option (nanopb_msgopt).lua_generate = true;
+
+	required float x = 1 [default = 0];
+	required float y = 2 [default = 0];
+	required float z = 3 [default = 0];
+};
+
+message Vector4f {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Vector4f.h";
+
+	required float x = 1 [default = 0];
+	required float y = 2 [default = 0];
+	required float z = 3 [default = 0];
+	required float w = 4 [default = 0];
+};
+
+message Matrix4x3 {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Matrix4x3.h";
+	repeated float m = 1  [(nanopb).max_count = 12, (nanopb).has_max_count = true];
+};
+
+message Matrix4x4 {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Matrix4x4.h";
+	repeated float m = 1  [(nanopb).max_count = 16, (nanopb).has_max_count = true];
+};
+
+message Matrix3x3 {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Matrix3x3.h";
+	repeated float m = 1  [(nanopb).max_count = 12, (nanopb).has_max_count = true];
+};
+
+message Quaternionf {
+	option (nanopb_msgopt).from_header = "Engine/Maths/Quaternionf.h";
+	required float x = 1 [default = 0];
+	required float y = 2 [default = 0];
+	required float z = 3 [default = 0];
+	required float w = 4 [default = 1];
+};

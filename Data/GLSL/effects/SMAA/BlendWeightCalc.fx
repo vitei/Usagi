@@ -1,0 +1,2 @@
+VS SMAA/SMAABlendWeightCalc_vs
+PS SMAA/SMAABlendWeightCalc_ps

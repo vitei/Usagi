@@ -1,0 +1,24 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Physics/PhysicsEnums.proto";
+
+package usg;
+
+message PhysicMaterial
+{
+	required float fDynamicFriction = 1 [default = 0.5];
+	required float fStaticFriction = 2 [default = 0.5];
+	required float fBounciness = 3 [default = 0.5];
+	required uint32 uFlags = 4 [default = 0];
+	required CombineMode eFrictionCombineMode = 5 [default = AVERAGE];
+	required CombineMode eRestitutionCombineMode = 6 [default = AVERAGE];
+}
+
+message JointBreakForce
+{
+	required float fLinear = 1 [default = 1000000.0];
+	required float fAngular = 2 [default = 1000000.0];
+}

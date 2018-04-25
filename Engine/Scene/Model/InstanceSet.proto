@@ -1,0 +1,25 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Physics/CollisionData.proto";
+
+package usg.model;
+
+message Instance {
+	required Vector3f center = 1;
+	required Vector3f rotation = 2;
+	required Vector3f scale = 3;
+	optional string name = 4 [(nanopb).max_size = 64];
+};
+
+message InstanceSet {
+	required string modelName = 1 [(nanopb).max_size = 64];
+	required Components.Sphere boundingSphere = 2;
+	repeated Instance instances = 3 [(nanopb).decoder = "PBChunkedArray<ALLOC_GEOMETRY_DATA, 32>"];
+};
+
+message InstanceHeader {
+	required int32 instanceSets = 1;
+}

@@ -1,0 +1,36 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+import "Engine/Maths/Maths.proto";
+
+package usg.exchange;
+
+message Sphere {
+	required Vector3f center = 1;
+	required float    radius = 2 [default = 0.0];
+}
+
+message ModelHeader {
+	required uint32 version = 1 [default = 0];
+	required uint32 alignment = 2 [default = 0];
+
+	required string name = 3 [(nanopb).max_size = 64];
+
+	required Sphere boundingSphere = 4;
+
+	required uint32 shapeNum    = 5 [default = 0];
+	required uint32 materialNum = 6 [default = 0];
+	required uint32 meshNum     = 7 [default = 0];
+
+	required uint32 shapeOffset    = 8 [default = 0];
+	required uint32 materialOffset = 9 [default = 0];
+	required uint32 meshOffset     = 10 [default = 0];
+	required uint32 skeletonOffset = 11 [default = 0];
+
+	required uint32 rigidBoneCount = 12 [default = 0];
+	required uint32 skinnedBoneCount = 13 [default = 0];
+	repeated uint32 rigidBoneIndices = 14  [(nanopb).max_count = 255];
+	repeated uint32 skinnedBoneIndices = 15  [(nanopb).max_count = 255];
+}

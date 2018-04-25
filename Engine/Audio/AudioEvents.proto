@@ -1,0 +1,51 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Core/usagipb.proto';
+package Events;
+
+message MusicTime
+{
+	required float fFade = 1 [default = 0.3];
+}
+
+message PlayMusic
+{
+	option (nanopb_msgopt).lua_send = true;
+
+	option (usagi_msg).doc_en = "Request to start a particular audio track";
+	option (usagi_msg).doc_jp = "音楽開始リクエスト";
+
+	required uint32 uAudioID = 1 [default = 0, (usagi).doc_jp = "再生される音楽のオーディオID"];
+}
+
+message PauseMusic
+{
+}
+
+message RestartMusic
+{
+}
+
+message StopMusic
+{
+	option (usagi_msg).doc_en = "Request to stop currently playing music";
+	option (usagi_msg).doc_jp = "音楽中止リクエスト";
+}
+
+
+message PlaySound
+{
+	option (usagi_msg).doc_en = "Request a sound effect to play";
+	option (usagi_msg).doc_jp = "音開始リクエスト";	
+
+	required uint32 uAudioID = 1 [default = 0, (usagi).doc_jp = "再生される音のオーディオID"];
+	required bool bPositional = 2 [default=false];
+}
+
+message StopSound
+{
+	option (usagi_msg).doc_en = "Request a sound effect to stop";
+	option (usagi_msg).doc_jp = "音停止リクエスト";	
+}

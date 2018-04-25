@@ -1,0 +1,46 @@
+import 'nanopb.proto';
+import 'Engine/Audio/AudioBank.proto';
+
+package usg.Components;
+
+option (nanopb_fileopt).include = "Engine/Audio/AudioComponents.h";
+
+message SoundComponent
+{
+	option (nanopb_msgopt).has_ondeactivate = true;
+}
+
+
+message SoundActorComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+}
+
+message AudioListenerComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+}
+
+
+message PitchModulator
+{
+	required float	fVariationTime = 1 [default=2.0];
+	required float	fVariationRand = 2 [default=0.2];
+	required float  fCountdown = 3 [default=0.0];
+	required float  fPrevPitch = 4 [default=1.0];
+	required float  fTargetPitch = 5 [default=1.0];
+	required float	fLerpTime = 6 [default=1.0];
+}
+
+message AudioTypeComponent
+{
+	required AudioType eType = 1;
+}
+
+message MusicComponent
+{
+	
+}
+

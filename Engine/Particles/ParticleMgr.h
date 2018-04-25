@@ -1,0 +1,104 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+#ifndef _USG_PARTICLE_SYSTEM_H_
+#define _USG_PARTICLE_SYSTEM_H_
+#include "Engine/Common/Common.h"
+#include "Engine/Memory/MemHeap.h"
+#include "Engine/Particles/Scripted/EffectGroup.pb.h"
+#include "Scripted/ScriptEmitter.h"
+#include "RibbonTrail.h"
+#include "ParticleEffect.h"
+#include "ParticleEffectHndl.h"
+#include "ParticleSet.h"
+
+namespace usg{
+
+class ParticleMgr
+{
+public:
+    ParticleMgr(uint32 uMaxEffects = 60);
+    ~ParticleMgr();
+
+	void Init(GFXDevice* pDevice, Scene* pScene, ParticleSet* pSet);
+	void CleanUp(GFXDevice* pDevice, Scene* pScene);
+	bool Update(float fElapsed);
+	void UpdateBuffers(usg::GFXDevice* pDevice);
+	void CreateInstances(GFXDevice* pDevice, uint32 uInstances=8);
+
+	ParticleEffectHndl CreateEffect(const Matrix4x4& mMat, const Vector3f& vVelocity, const char* szName, bool bCustom = true, float fScale = 1.0f);
+	void SetEnvironmentColor(const Color& color) { m_envColor = color;  }
+	const Color& GetEnvironmentColor() { return m_envColor;  }
+
+	// Do not call directly
+	void FreeScriptedEffect(ScriptEmitter* pEmitter);
+	void FreeRibbon(RibbonTrail* pRibbon);
+	Scene* GetScene() { return m_pScene; }
+
+protected:
+	ParticleSet*			m_pParticleSet;
+	Scene*					m_pScene;
+	GFXDevice*				m_pDevice;
+	Color					m_envColor;
+
+	// For storing all of the allocated instances of an effect
+	class EmitterInstances
+	{
+	public:
+		EmitterInstances();
+		~EmitterInstances();
+
+		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
+		void CleanUp(GFXDevice* pDevice);
+		void UpdatePreloadCount(ParticleMgr& mgr, uint32 uCount);
+		void ClearPreloadCount();
+		const U8String& GetName() { return m_name; }
+		ScriptEmitter* GetInstance(GFXDevice* pDevice, ParticleMgr& mgr);
+		void FreeInstance(ScriptEmitter* pInstance);
+		void PreloadInstances(GFXDevice* pDevice, ParticleMgr& mgr);
+	private:
+		ParticleEmitterResHndl		m_resHndl;
+		U8String					m_name;
+		List<ScriptEmitter>			m_activeEmitters;
+		List<ScriptEmitter>			m_freeEmitters;
+		uint32						m_uPreloadCount;
+	};
+
+	class EffectResources
+	{
+	public:
+		EffectResources();
+		~EffectResources();
+
+		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
+		void UpdatePreloadCount(ParticleMgr& mgr);
+		const U8String& GetName() const { return m_name;  }
+		void AddEmitters(GFXDevice* pDevice, ParticleMgr& mgr, ParticleEffect& effect);
+		ParticleEffectResHndl& GetResHndl() { return m_resHndl; }
+	private:
+		U8String				m_name;
+		uint32					m_uPreloadCount;
+		ParticleEffectResHndl	m_resHndl;
+		EmitterInstances*		m_pInstanceGroups[particles::EffectGroup::emitters_max_count];
+	};
+
+	struct EffectData
+	{
+		ParticleEffectHndl	hndl;
+		ParticleEffect 		effect;
+	};
+
+	EmitterInstances* GetEmitterInstance(GFXDevice* pDevice, const char* szName);
+	EffectResources* GetEffectResource(GFXDevice* pDevice, const char* szName);
+
+	FastPool<EmitterInstances>	m_emitters;
+	FastPool<EffectResources>	m_effectResources;
+	FastPool<EffectData>		m_effects;
+
+	List<RibbonTrail>			m_activeRibbons;
+	List<RibbonTrail>			m_freeRibbons;
+};
+
+}
+
+#endif // _USG_PARTICLE_SYSTEM_H_

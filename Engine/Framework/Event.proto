@@ -1,0 +1,25 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Network/Network.proto';
+
+message EventTargetEntity
+{
+	required sint64 nuid    = 1;
+	required uint32 targets = 2;
+}
+
+message EventHeader
+{
+	required double            time   = 1;
+	optional EventTargetEntity target = 2;
+}
+
+// We wrap network events into these packets to decrease template code bloat.
+message WrappedEvent
+{
+	required uint32 uMessageId = 1;
+	required uint32 uDataSize = 2;
+	repeated uint32 uData = 3 [(nanopb).max_count = 128];
+}

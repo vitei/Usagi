@@ -1,0 +1,28 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Scene/Model/Fade.proto";
+
+option (nanopb_fileopt).include='Engine/Scene/Model/ModelEffectComponents.h';
+
+package usg.Components;
+
+message FadeComponent
+{
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onactivate = true;
+
+	required float fCurrentAlpha = 2 [default=1.0];	
+	required bool bFadeNearCamera = 7 [default=false];
+	required float fCurrentAlphaCameraMultip = 8 [default=1.0];
+	required float fCameraFadeRadius = 9 [default=0.0]; // if <= 0, use radius of the collision model
+	repeated uint32 uIgnoreMessages = 10 [(nanopb).max_count = 4];
+}
+
+
+message TriggerFadeOut
+{
+	required float fFadeOutTime = 1 [default=1.0];
+	required bool bTriggered = 2 [default=false];
+}

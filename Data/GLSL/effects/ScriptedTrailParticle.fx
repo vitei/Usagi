@@ -1,0 +1,3 @@
+VS Particles/scripted_trail_vs
+GS Particles/scripted_trail_gs
+PS Particles/scripted_trail_ps

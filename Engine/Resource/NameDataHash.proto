@@ -1,0 +1,15 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+message NameDataHashHeader {
+	required uint32 hashNum = 1 [default = 0];
+};
+
+message NameDataHash {
+	required uint32 nameCRC = 1 [default = 0];
+	required uint32 dataHash = 2 [default = 0];
+};

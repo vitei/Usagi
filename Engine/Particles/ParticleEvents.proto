@@ -1,0 +1,18 @@
+import "Engine/Maths/Maths.proto";
+
+package usg.Events;
+
+message ParticleEffectStart
+{
+	required float fScale = 1 [default = 1.0];
+}
+
+message ParticleEffectStop
+{
+	required bool bForce = 1 [default = false];
+}
+
+message ParticleEnableEmission
+{
+	required bool bEnable = 1 [default = false];
+}

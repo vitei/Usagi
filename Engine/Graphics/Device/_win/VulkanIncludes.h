@@ -1,0 +1,10 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+#ifndef USAGI_ENGINE_GRAPHICS_WIN_VULKAN_INCLUDES
+#define USAGI_ENGINE_GRAPHICS_WIN_VULKAN_INCLUDES
+
+#include <vulkan/vulkan.h>
+#include <vulkan/vk_sdk_platform.h>
+
+#endif

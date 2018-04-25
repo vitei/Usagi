@@ -1,0 +1,20 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg;
+
+enum CollisionQuadTreeConstants{
+	MATERIAL_NAME_LENGTH = 40;
+}
+
+message CollisionQuadTreeHeader {
+	required Vector3f vMin = 1;
+	required Vector3f vMax = 2;
+
+	required uint32 uTriangles = 3 [default = 0];
+	required uint32 uVertices = 4 [default = 0];
+	required uint32 uMaterials = 5 [default = 0];
+}

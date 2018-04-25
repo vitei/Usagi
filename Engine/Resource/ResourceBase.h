@@ -1,0 +1,46 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+#ifndef ResourceBase_h__
+#define ResourceBase_h__
+
+#include "Engine/Resource/ResourceDictionary.h"
+
+namespace usg
+{
+
+	class GFXDevice;
+
+	class ResourceBase
+	{
+	public:
+		ResourceBase()
+		{
+			m_nameHash = 0;
+			m_dataHash = 0;
+			m_bReady = false;
+		}
+		virtual ~ResourceBase() {}
+		NameHash GetNameHash() const { return m_nameHash; }
+		DataHash GetDataHash() const { return m_dataHash; }
+
+		// Support for asynchronous loading, coded to match level editor for now
+		virtual void CleanUp(GFXDevice* pDevice) {}
+		bool IsReady() const { return m_bReady; }
+		void SetReady(bool bReady) { m_bReady = bReady; }
+
+
+	protected:
+		void SetupHash( const char* name )
+		{
+			m_nameHash = ResourceDictionary::calcNameHash( name );
+			m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
+		}
+		NameHash	m_nameHash;
+		DataHash	m_dataHash;
+
+		bool		m_bReady;
+	};
+	
+}
+#endif // ResourceBase_h__

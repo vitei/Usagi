@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="main\PC">
+      <UniqueIdentifier>{23a353a7-72f1-4647-a37c-a51211d7a6df}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\PlayerController.cpp" />
+    <ClCompile Include="..\TestBed.cpp" />
+    <ClCompile Include="..\Ship.cpp" />
+    <ClCompile Include="..\main\PC\WinMain.cpp">
+      <Filter>main\PC</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\PlayerController.h" />
+    <ClInclude Include="..\Ship.h" />
+    <ClInclude Include="..\TestBed.h" />
+  </ItemGroup>
+</Project>

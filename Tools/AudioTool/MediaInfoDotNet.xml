@@ -1,0 +1,713 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MediaInfoDotNet</name>
+    </assembly>
+    <members>
+        <member name="T:MediaInfoDotNet.Models.Media">
+            <summary>Implements features common to all media types.</summary>
+        </member>
+        <member name="F:MediaInfoDotNet.Models.Media.kind">
+            <summary>MediaInfo stream kind.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miOption(System.String)">
+            <summary>Returns information about MediaInfo.</summary>
+            <param name="parameter">Option such as Info_Parameters</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetString(System.String)">
+            <summary>Returns a MediaInfo value, "" if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetLong(System.String)">
+            <summary>Returns a MediaInfo value as a long, 0 if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetInt(System.String)">
+            <summary>Returns a MediaInfo value as an int, 0 if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetFloat(System.String)">
+            <summary>Returns a MediaInfo value as a float, 0.0 if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetDouble(System.String)">
+            <summary>Returns a MediaInfo value as a float, 0.0 if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.miGetDateTime(System.String,System.String)">
+            <summary>Returns a MediaInfo date, Minval if error.</summary>
+            <param name="parameter">The MediaInfo parameter.</param>
+            <param name="format">The DateTime format for TryParseExact()</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.isMediaInfoDllCompatible">
+            <summary>Returns true if MediaInfo.dll is compatible.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.Dispose">
+            <summary>Ensures resource disposal.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.Finalize">
+            <summary>Destructor. Disposes of resources.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>Used to create a stream-specific object, such as an audio
+            stream, for use by an existing MediaFile object.</summary>
+            <param name="mediaInfo">A pre-initialized MediaInfo object.</param>
+            <param name="id">The MediaInfo ID for this stream.</param>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.Media.#ctor(System.String)">
+            <summary>Initializes the initial MediaInfo object.</summary>
+            <param name="filePath">Complete path and name of a file.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.Media.filePath">
+            <summary>Complete path to the current media file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.Media.mediaInfo">
+            <summary>MediaInfo object</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.Media.id">
+            <summary>MediaInfo ID for this stream kind.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.ChapterStream">
+            <summary>Represents a single chapter stream.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.ChapterStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>ChapterStream constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object.</param>
+            <param name="id">The MediaInfo ID for this chapter stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ChapterStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ChapterStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ChapterStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.TextStream">
+            <summary>Represents a single text stream.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.TextStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>TextStream constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object.</param>
+            <param name="id">The MediaInfo ID for this text stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.encodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.encodedLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.internetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.encoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.encoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitRate">
+            <summary>The bit rate of this stream, in bits per second</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitRateMaximum">
+            <summary>The maximum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitRateMinimum">
+            <summary>The minimum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitRateNominal">
+            <summary>The maximum allowed bitrate, in BPS, with the encoder
+             settings used. Some encoders report the average BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitRateMode">
+            <summary>Mode (CBR, VBR) used for bit allocation.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.muxingMode">
+            <summary>How the stream is muxed into the container.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.frameCount">
+            <summary>The total number of frames (e.g. video frames).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.frameRate">
+            <summary>Frame rate of the stream in frames per second.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.compressionMode">
+            <summary>Compression mode (lossy or lossless).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.compressionRatio">
+            <summary>Ratio of current size to uncompressed size.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.bitDepth">
+            <example>Stream bit depth (16, 24, 32...)</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.frameRateMode">
+            <summary>Frame rate mode (CFR, VFR) of stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.height">
+            <summary>Height in pixels.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.TextStream.width">
+            <summary>Width in pixels.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.AudioStream">
+            <summary>Represents a single audio stream.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.AudioStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>AudioStream constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object.</param>
+            <param name="id">The MediaInfo ID for this audio stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.encodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.encodedLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.internetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.encoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.encoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitRate">
+            <summary>The bit rate of this stream, in bits per second</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitRateMaximum">
+            <summary>The maximum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitRateMinimum">
+            <summary>The minimum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitRateNominal">
+            <summary>The maximum allowed bitrate, in BPS, with the encoder
+             settings used. Some encoders report the average BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitRateMode">
+            <summary>Mode (CBR, VBR) used for bit allocation.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.muxingMode">
+            <summary>How the stream is muxed into the container.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.frameCount">
+            <summary>The total number of frames (e.g. video frames).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.frameRate">
+            <summary>Frame rate of the stream in frames per second.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.compressionMode">
+            <summary>Compression mode (lossy or lossless).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.compressionRatio">
+            <summary>Ratio of current size to uncompressed size.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.bitDepth">
+            <example>Stream bit depth (16, 24, 32...)</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.channels">
+            <summary>Number of audio channels, e.g. 6 for 5.1 audio.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.AudioStream.sampleRate">
+            <summary>Audio sample rate, e.g. 44100 for CD audio.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.MenuStream">
+            <summary>Represents a single menu stream.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.MenuStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>MenuStream constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object which has already opened a media file.</param>
+            <param name="id">The MediaInfo ID for this menu stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MenuStream.language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.MultiStreamCommon">
+            <summary>Functionality common to more than one stream type.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.MultiStreamCommon.#ctor(MediaInfoLib.MediaInfo,MediaInfoLib.StreamKind,System.Int32)">
+             <summary>MultiStreamCommon constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object.</param>
+             <param name="kind">A MediaInfo StreamKind.</param>
+            <param name="id">The MediaInfo ID for this audio stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.encodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.encoderLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.internetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.encoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.encoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitRate">
+            <summary>The bit rate of this stream, in bits per second</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitRateMaximum">
+            <summary>The maximum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitRateMinimum">
+            <summary>The minimum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitRateNominal">
+            <summary>The maximum allowed bitrate, in BPS, with the encoder
+             settings used. Some encoders report the average BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitRateMode">
+            <summary>Mode (CBR, VBR) used for bit allocation.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.muxingMode">
+            <summary>How the stream is muxed into the container.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.frameCount">
+            <summary>The total number of frames (e.g. video frames).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.frameRate">
+            <summary>Frame rate of the stream in frames per second.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.compressionMode">
+            <summary>Compression mode (lossy or lossless).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.compressionRatio">
+            <summary>Ratio of current size to uncompressed size.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.bitDepth">
+            <example>Stream bit depth (16, 24, 32...)</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.pixelAspectRatio">
+            <summary>Ratio of pixel width to pixel height.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.frameRateMode">
+            <summary>Frame rate mode (CFR, VFR) of stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.height">
+            <summary>Height in pixels.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.MultiStreamCommon.width">
+            <summary>Width in pixels.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.GeneralStream">
+            <summary>For inheritance by classes representing media files.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.GeneralStream.#ctor(System.String)">
+            <summary>GeneralStream constructor.</summary>
+            <param name="filePath">Complete path and name of a file.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.encodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.encodedLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.internetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.encoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.encoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.encodedBy">
+            <summary>Name of the person/group who encoded this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.album">
+            <summary>Album name, if the file represents an album.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.iTunesGrouping">
+            <summary>The grouping used by iTunes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.iTunesCompilation">
+            <summary>The compilation used by iTunes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.bitRate">
+            <summary>Overall bitrate of all streams.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.bitRateMaximum">
+            <summary>Maximum overall bitrate of all streams.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.bitRateMinimum">
+            <summary>Minimum overall bitrate of all streams.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.bitRateNominal">
+            <summary>Maximum allowed overall bitrate of all streams.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.videoCount">
+            <summary>Number of video streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.audioCount">
+            <summary>Number of audio streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.textCount">
+            <summary>Number of subtitles or other texts in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.imageCount">
+            <summary>Number of images in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.chapterCount">
+            <summary>Number of chapters in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.GeneralStream.menuCount">
+            <summary>Number of menu streams in this file.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.VideoStream">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.VideoStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="mediaInfo"></param>
+            <param name="id"></param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Format">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Title">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.UniqueId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.EncodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.EncodedLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.InternetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.EncoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.EncoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.CodecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.CodecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Delay">
+            <summary>Stream delay (e.g. to sync audio/video) in ms.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Duration">
+            <summary>Duration of the stream in milliseconds.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitRate">
+            <summary>The bit rate of this stream, in bits per second</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitRateMaximum">
+            <summary>The maximum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitRateMinimum">
+            <summary>The minimum bitrate of this stream in BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitRateNominal">
+            <summary>The maximum allowed bitrate, in BPS, with the encoder
+             settings used. Some encoders report the average BPS.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitRateMode">
+            <summary>Mode (CBR, VBR) used for bit allocation.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.MuxingMode">
+            <summary>How the stream is muxed into the container.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.FrameCount">
+            <summary>The total number of frames (e.g. video frames).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.FrameRate">
+            <summary>Frame rate of the stream in frames per second.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.CompressionMode">
+            <summary>Compression mode (lossy or lossless).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.CompressionRatio">
+            <summary>Ratio of current size to uncompressed size.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.BitDepth">
+            <example>Stream bit depth (16, 24, 32...)</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.PixelAspectRatio">
+            <summary>Ratio of pixel width to pixel height.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.FrameRateMode">
+            <summary>Frame rate mode (CFR, VFR) of stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Height">
+            <summary>Height in pixels.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.VideoStream.Width">
+            <summary>Width in pixels.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.MediaFile">
+            <summary>Represents a media file.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.MediaFile.#ctor(System.String)">
+            <summary>MediaFile constructor.</summary>
+            <param name="filePath">Complete path and name of a file.</param>
+            <example>"c:\pics\me.jpg", "/home/charles/me.mkv"</example>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Video">
+            <summary>Video streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Audio">
+            <summary>Audio streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Text">
+            <summary>Text streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Image">
+            <summary>Image streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Chapter">
+            <summary>Chapter streams in this file.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.MediaFile.Menu">
+            <summary>Menu streams in this file.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.Models.ImageStream">
+            <summary>Represents a single image stream.</summary>
+        </member>
+        <member name="M:MediaInfoDotNet.Models.ImageStream.#ctor(MediaInfoLib.MediaInfo,System.Int32)">
+            <summary>ImageStream constructor.</summary>
+            <param name="mediaInfo">A MediaInfo object.</param>
+            <param name="id">The MediaInfo ID for this image stream.</param>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.format">
+            <summary>The format or container of this file or stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.title">
+            <summary>The title of this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.uniqueId">
+            <summary>This stream's globally unique ID (GUID).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.encodedDate">
+            <summary>Date and time stream encoding completed.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.encodedLibrary">
+            <summary>Software used to encode this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.internetMediaType">
+            <summary>Media type of stream, formerly called MIME type.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.size">
+            <summary>Size in bytes.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.encoderSettingsRaw">
+            <summary>Encoder settings used for encoding this stream.
+            String format: name=value / name=value / ...</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.encoderSettings">
+            <summary>Encoder settings used for encoding this stream.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.codecId">
+            <summary>Codec ID available from some codecs.</summary>
+            <example>AAC audio:A_AAC, h.264 video:V_MPEG4/ISO/AVC</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.codecCommonName">
+            <summary>Common name of the codec.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.compressionMode">
+            <summary>Compression mode (lossy or lossless).</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.compressionRatio">
+            <summary>Ratio of current size to uncompressed size.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.bitDepth">
+            <example>Stream bit depth (16, 24, 32...)</example>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.language">
+            <summary>2-letter (if available) or 3-letter ISO code.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.pixelAspectRatio">
+            <summary>Ratio of pixel width to pixel height.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.height">
+            <summary>Height in pixels.</summary>
+        </member>
+        <member name="P:MediaInfoDotNet.Models.ImageStream.width">
+            <summary>Width in pixels.</summary>
+        </member>
+        <member name="T:MediaInfoDotNet.VideoDurationDeterminer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:MediaInfoDotNet.VideoDurationDeterminer.#ctor(System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="filename"></param>
+            <param name="streamId"> </param>
+        </member>
+        <member name="M:MediaInfoDotNet.VideoDurationDeterminer.GetDuration">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,450 @@
+﻿<?xml version="1.0"?>
+<doc>
+  <assembly>
+    <name>Nito.KitchenSink.CRC</name>
+  </assembly>
+  <members>
+    <member name="T:Nito.KitchenSink.CRC.CRC16">
+      <summary>
+            A generalized CRC-16 algorithm.
+            </summary>
+      <invariant>this.definition != null</invariant>
+      <invariant>this.lookupTable != null</invariant>
+      <invariant>this.lookupTable.Length == 256</invariant>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC16.NormalLookupTables">
+      <summary>
+            The lookup tables for non-reversed polynomials.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC16.ReversedLookupTables">
+      <summary>
+            The lookup tables for reversed polynomials.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC16.lookupTable">
+      <summary>
+            A reference to the lookup table.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC16.definition">
+      <summary>
+            The CRC-32 algorithm definition.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC16.remainder">
+      <summary>
+            The current value of the remainder.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.#ctor(Nito.KitchenSink.CRC.CRC16.Definition,System.UInt16[])">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC16" /> class with the specified definition and lookup table.
+            </summary>
+      <param name="definition">The CRC-16 algorithm definition. May not be <c>null</c>.</param>
+      <param name="lookupTable">The lookup table. May not be <c>null</c>.</param>
+      <requires>definition != null</requires>
+      <requires>lookupTable != null</requires>
+      <requires>lookupTable.Length == 256</requires>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.#ctor(Nito.KitchenSink.CRC.CRC16.Definition)">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC16" /> class with the specified definition.
+            </summary>
+      <param name="definition">The CRC-16 algorithm definition.</param>
+      <requires>definition != null</requires>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.#ctor">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC16" /> class with the default definition.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.FindOrGenerateLookupTable(Nito.KitchenSink.CRC.CRC16.Definition)">
+      <summary>
+            Searches the known lookup tables for one matching the given CRC-16 definition; if none is found, a new lookup table is generated and added to the known lookup tables.
+            </summary>
+      <param name="definition">The CRC-16 definition. May not be <c>null</c>.</param>
+      <returns>The lookup table for the given CRC-16 definition.</returns>
+      <requires>definition != null</requires>
+      <ensures>Contract.Result&lt;ushort[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;ushort[]&gt;().Length == 256</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.GenerateLookupTable(Nito.KitchenSink.CRC.CRC16.Definition)">
+      <summary>
+            Generates a lookup table for a CRC-16 algorithm definition. Both <see cref="P:Nito.KitchenSink.CRC.CRC16.Definition.TruncatedPolynomial" /> and <see cref="P:Nito.KitchenSink.CRC.CRC16.Definition.ReverseDataBytes" /> are used in the calculations.
+            </summary>
+      <param name="definition">The CRC-16 algorithm definition. May not be <c>null</c>.</param>
+      <returns>The lookup table.</returns>
+      <requires>definition != null</requires>
+      <ensures>Contract.Result&lt;ushort[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;ushort[]&gt;().Length == 256</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.Initialize">
+      <summary>
+            Initializes the CRC-16 calculations.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.ToString">
+      <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+      <returns>A <see cref="T:System.String" /> that represents this instance.</returns>
+      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object">Contract.Result&lt;string&gt;() != null</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.HashCore(System.Byte[],System.Int32,System.Int32)">
+      <summary>
+            Routes data written to the object into the hash algorithm for computing the hash.
+            </summary>
+      <param name="array">The input to compute the hash code for.</param>
+      <param name="offset">The offset into the byte array from which to begin using data.</param>
+      <param name="count">The number of bytes in the byte array to use as data.</param>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.HashFinal">
+      <summary>
+            Finalizes the hash computation after the last data is processed by the cryptographic stream object.
+            </summary>
+      <returns>The computed hash code.</returns>
+      <ensures>Contract.Result&lt;byte[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;byte[]&gt;().Length == 2</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.ReflectedIndex(System.UInt16,System.Byte)">
+      <summary>
+            Gets the index into the lookup array for a given remainder and data byte. Data byte reversal is taken into account.
+            </summary>
+      <param name="remainder">The current remainder.</param>
+      <param name="data">The data byte.</param>
+      <returns>The index into the lookup array.</returns>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.ReflectedShift(System.UInt16)">
+      <summary>
+            Shifts a byte out of the remainder. This is the high byte or low byte, depending on whether the data bytes are reversed.
+            </summary>
+      <param name="remainder">The remainder value.</param>
+      <returns>The shifted remainder value.</returns>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Result">
+      <summary>
+            Gets the result of the CRC-16 algorithm.
+            </summary>
+    </member>
+    <member name="T:Nito.KitchenSink.CRC.CRC16.Definition">
+      <summary>
+            Holds parameters for a CRC-16 algorithm.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC16.Definition.Create">
+      <summary>
+            Creates a new <see cref="T:Nito.KitchenSink.CRC.CRC16" /> instance using this definition.
+            </summary>
+      <returns>A new <see cref="T:Nito.KitchenSink.CRC.CRC16" /> instance using this definition.</returns>
+      <ensures>Contract.Result&lt;CRC16&gt;() != null</ensures>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.Default">
+      <summary>
+            Gets a common CRC-16, used by ARC and LHA.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.CcittFalse">
+      <summary>
+            Gets a CRC-16 used by floppy disk formats, commonly misidentified as CCITT.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.Ccitt">
+      <summary>
+            Gets a CRC-16 known as CCITT, used by Kermit. Appears in "Numerical Recipes in C".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.XModem">
+      <summary>
+            Gets a CRC-16 used by XMODEM and ZMODEM. Appears in "Numerical Recipes in C".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.X25">
+      <summary>
+            Gets a CRC-16 used by X.25, V.42, T.30, RFC 1171. Appears in "Numerical Recipes in C".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.TruncatedPolynomial">
+      <summary>
+            Gets or sets the normal (non-reversed, non-reciprocal) polynomial to use for the CRC calculations.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.Initializer">
+      <summary>
+            Gets or sets the value to which the remainder is initialized at the beginning of the CRC calculation.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.FinalXorValue">
+      <summary>
+            Gets or sets the value by which the remainder is XOR'ed at the end of the CRC calculation.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.ReverseDataBytes">
+      <summary>
+            Gets or sets a value indicating whether incoming data bytes are reversed/reflected.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC16.Definition.ReverseResultBeforeFinalXor">
+      <summary>
+            Gets or sets a value indicating whether the final remainder is reversed/reflected at the end of the CRC calculation before it is XOR'ed with <see cref="P:Nito.KitchenSink.CRC.CRC16.Definition.FinalXorValue" />.
+            </summary>
+    </member>
+    <member name="T:Nito.KitchenSink.CRC.CRC32">
+      <summary>
+            A generalized CRC-32 algorithm.
+            </summary>
+      <invariant>this.definition != null</invariant>
+      <invariant>this.lookupTable != null</invariant>
+      <invariant>this.lookupTable.Length == 256</invariant>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC32.NormalLookupTables">
+      <summary>
+            The lookup tables for non-reversed polynomials.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC32.ReversedLookupTables">
+      <summary>
+            The lookup tables for reversed polynomials.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC32.lookupTable">
+      <summary>
+            A reference to the lookup table.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC32.definition">
+      <summary>
+            The CRC-32 algorithm definition.
+            </summary>
+    </member>
+    <member name="F:Nito.KitchenSink.CRC.CRC32.remainder">
+      <summary>
+            The current value of the remainder.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.#ctor(Nito.KitchenSink.CRC.CRC32.Definition,System.UInt32[])">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC32" /> class with the specified definition and lookup table.
+            </summary>
+      <param name="definition">The CRC-32 algorithm definition. May not be <c>null</c>.</param>
+      <param name="lookupTable">The lookup table. May not be <c>null</c>.</param>
+      <requires>definition != null</requires>
+      <requires>lookupTable != null</requires>
+      <requires>lookupTable.Length == 256</requires>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.#ctor(Nito.KitchenSink.CRC.CRC32.Definition)">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC32" /> class with the specified definition.
+            </summary>
+      <param name="definition">The CRC-32 algorithm definition. May not be <c>null</c>.</param>
+      <requires>definition != null</requires>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.#ctor">
+      <summary>
+            Initializes a new instance of the <see cref="T:Nito.KitchenSink.CRC.CRC32" /> class with the default definition. Note that the "default" CRC-32 definition is an older IEEE recommendation and there are better polynomials for new protocols.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.FindOrGenerateLookupTable(Nito.KitchenSink.CRC.CRC32.Definition)">
+      <summary>
+            Searches the known lookup tables for one matching the given CRC-32 definition; if none is found, a new lookup table is generated and added to the known lookup tables.
+            </summary>
+      <param name="definition">The CRC-32 definition.</param>
+      <returns>The lookup table for the given CRC-32 definition.</returns>
+      <requires>definition != null</requires>
+      <ensures>Contract.Result&lt;uint[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;uint[]&gt;().Length == 256</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.GenerateLookupTable(Nito.KitchenSink.CRC.CRC32.Definition)">
+      <summary>
+            Generates a lookup table for a CRC-32 algorithm definition. Both <see cref="P:Nito.KitchenSink.CRC.CRC32.Definition.TruncatedPolynomial" /> and <see cref="P:Nito.KitchenSink.CRC.CRC32.Definition.ReverseDataBytes" /> are used in the calculations.
+            </summary>
+      <param name="definition">The CRC-32 algorithm definition.</param>
+      <returns>The lookup table.</returns>
+      <requires>definition != null</requires>
+      <ensures>Contract.Result&lt;uint[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;uint[]&gt;().Length == 256</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.Initialize">
+      <summary>
+            Initializes the CRC-32 calculations.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.ToString">
+      <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+      <returns>A <see cref="T:System.String" /> that represents this instance.</returns>
+      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object">Contract.Result&lt;string&gt;() != null</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.HashCore(System.Byte[],System.Int32,System.Int32)">
+      <summary>
+            Routes data written to the object into the hash algorithm for computing the hash.
+            </summary>
+      <param name="array">The input to compute the hash code for.</param>
+      <param name="offset">The offset into the byte array from which to begin using data.</param>
+      <param name="count">The number of bytes in the byte array to use as data.</param>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.HashFinal">
+      <summary>
+            Finalizes the hash computation after the last data is processed by the cryptographic stream object.
+            </summary>
+      <returns>The computed hash code.</returns>
+      <ensures>Contract.Result&lt;byte[]&gt;() != null</ensures>
+      <ensures>Contract.Result&lt;byte[]&gt;().Length == 4</ensures>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.ReflectedIndex(System.UInt32,System.Byte)">
+      <summary>
+            Gets the index into the lookup array for a given remainder and data byte. Data byte reversal is taken into account.
+            </summary>
+      <param name="remainder">The current remainder.</param>
+      <param name="data">The data byte.</param>
+      <returns>The index into the lookup array.</returns>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.ReflectedShift(System.UInt32)">
+      <summary>
+            Shifts a byte out of the remainder. This is the high byte or low byte, depending on whether the data bytes are reversed.
+            </summary>
+      <param name="remainder">The remainder value.</param>
+      <returns>The shifted remainder value.</returns>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Result">
+      <summary>
+            Gets the result of the CRC-32 algorithm.
+            </summary>
+    </member>
+    <member name="T:Nito.KitchenSink.CRC.CRC32.Definition">
+      <summary>
+            Holds parameters for a CRC-32 algorithm.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.CRC32.Definition.Create">
+      <summary>
+            Creates a new <see cref="T:Nito.KitchenSink.CRC.CRC32" /> instance using this definition.
+            </summary>
+      <returns>A new <see cref="T:Nito.KitchenSink.CRC.CRC32" /> instance using this definition.</returns>
+      <ensures>Contract.Result&lt;CRC32&gt;() != null</ensures>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Default">
+      <summary>
+            Gets a CRC-32 defined by the old IEEE standard; used by Ethernet, zip, PNG, etc. Note that this "default" CRC-32 definition is an older IEEE recommendation and there are better polynomials for new protocols. Known as "CRC-32", "CRC-32/ADCCP", and "PKZIP".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.BZip2">
+      <summary>
+            Gets a CRC-32 used by BZIP2. Known as "CRC-32/BZIP2" and "B-CRC-32".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Castagnoli">
+      <summary>
+            Gets a modern CRC-32 defined in RFC 3720. Known as "CRC-32C", "CRC-32/ISCSI", and "CRC-32/CASTAGNOLI".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Mpeg2">
+      <summary>
+            Gets a CRC-32 used by the MPEG-2 standard. Known as "CRC-32/MPEG-2".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Posix">
+      <summary>
+            Gets a CRC-32 used by the POSIX "chksum" command; note that the chksum command-line program appends the file length to the contents unless it is empty. Known as "CRC-32/POSIX" and "CKSUM".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Aixm">
+      <summary>
+            Gets a CRC-32 used in the Aeronautical Information eXchange Model. Known as "CRC-32Q".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Xfer">
+      <summary>
+            Gets a very old CRC-32, appearing in "Numerical Recipes in C". Known as "XFER".
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Definition&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.TruncatedPolynomial">
+      <summary>
+            Gets or sets the normal (non-reversed, non-reciprocal) polynomial to use for the CRC calculations.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.Initializer">
+      <summary>
+            Gets or sets the value to which the remainder is initialized at the beginning of the CRC calculation.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.FinalXorValue">
+      <summary>
+            Gets or sets the value by which the remainder is XOR'ed at the end of the CRC calculation.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.ReverseDataBytes">
+      <summary>
+            Gets or sets a value indicating whether incoming data bytes are reversed/reflected.
+            </summary>
+    </member>
+    <member name="P:Nito.KitchenSink.CRC.CRC32.Definition.ReverseResultBeforeFinalXor">
+      <summary>
+            Gets or sets a value indicating whether the final remainder is reversed/reflected at the end of the CRC calculation before it is XOR'ed with <see cref="P:Nito.KitchenSink.CRC.CRC32.Definition.FinalXorValue" />.
+            </summary>
+    </member>
+    <member name="T:Nito.KitchenSink.CRC.HackersDelight">
+      <summary>
+            Helpful methods from the book <a href="http://www.amazon.com/gp/product/0201914654?ie=UTF8&amp;tag=stepheclearys-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=0201914654">Hacker's Delight</a>.
+            </summary>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.HackersDelight.Reverse(System.UInt32)">
+      <summary>
+            Reverses the bits in an unsigned integer of data.
+            </summary>
+      <param name="data">The unsigned integer whose bits are to be reversed.</param>
+      <returns>The reversed data.</returns>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.HackersDelight.Reverse(System.UInt16)">
+      <summary>
+            Reverses the bits in an unsigned short of data.
+            </summary>
+      <param name="data">The unsigned short whose bits are to be reversed.</param>
+      <returns>The reversed data.</returns>
+    </member>
+    <member name="M:Nito.KitchenSink.CRC.HackersDelight.Reverse(System.Byte)">
+      <summary>
+            Reverses the bits in a byte of data.
+            </summary>
+      <param name="data">The byte whose bits are to be reversed.</param>
+      <returns>The reversed data.</returns>
+    </member>
+  </members>
+</doc>

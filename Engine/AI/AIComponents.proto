@@ -1,0 +1,13 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.ai.Components;
+
+message AgentNavigationComponent
+{
+	option (nanopb_msgopt).from_header = "Engine/AI/AgentNavigation.h";
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+}

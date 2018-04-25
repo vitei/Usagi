@@ -1,0 +1,32 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg;
+
+message NetMessageHeader
+{
+	required uint32 typeIdentifier       = 1;
+	required uint32 messageLength        = 2;
+	required int32  messageReliableIndex = 3;
+}
+
+message NetSimplePlayerData
+{
+	required sint64 uid    = 1;
+	required uint32 ip     = 2;
+	required uint32 port   = 3;
+	required uint32 color  = 4;
+	required uint32 active = 5;
+	required uint32 uType  = 6;
+
+	required string name   = 7 [(nanopb).max_size = 32, (nanopb).has_max_size=true];
+}
+
+message HostListPair
+{
+	required double bestPing = 1;
+	required sint64 clientID = 2;
+}
+

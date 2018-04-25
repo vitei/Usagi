@@ -1,0 +1,3 @@
+Kepler
+Engine
+**/*.pyc

@@ -1,0 +1,19 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	This file contains definitions for events which are used by the
+//	physics system internally. User code should not generate these events.
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.physics.details.Events;
+
+message MarkShapeDirty
+{
+	required uint64 pShape = 1;
+}
+
+message MarkActorDirty
+{
+	required uint64 pActor = 1;
+}

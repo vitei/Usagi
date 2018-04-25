@@ -1,0 +1,248 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Physics/PhysicsEnums.proto";
+import "Engine/Physics/PhysicsStructs.proto";
+
+package usg.Components;
+
+option (nanopb_fileopt).include = "Engine/Physics/PhysicsComponents.h";
+
+message PhysicsScene
+{
+	option (nanopb_msgopt).fastpool_chunksize = 1;
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f vGravity = 1;
+
+	// Vehicle colliders need to allocate somewhat large buffers for raycast data.
+	required uint32 uMaxNumberOfVehicles = 2 [default = 8];
+}
+
+message SphereCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required float fRadius = 1 [default = 1.0];
+	required Vector3f vCenter = 2;
+	required PhysicMaterial material = 3;
+	required bool bIsTrigger = 4 [default = false];
+}
+
+message BoxCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f vExtents = 1;
+	required Vector3f vCenter = 2;
+	required PhysicMaterial material = 3;
+	required bool bIsTrigger = 4 [default = false];
+}
+
+message MeshCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string szCollisionModel = 1 [(nanopb).max_size = 64];
+	required string szMeshName = 2 [(nanopb).max_size = 32];
+	required bool bConvex = 3 [default = false];
+	required Vector3f vCenter = 4;
+	required PhysicMaterial material = 5;
+	required bool bFlipNormals = 6 [default = false];
+	required bool bIsTrigger = 7 [default = false];
+	required float fMeshScale = 8 [default = 1];
+}
+
+message ConeCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f vCenter = 1;
+	required Vector3f vDirection = 2;
+	required float fLength = 3;
+	required float fRadius = 4;
+	required PhysicMaterial material = 5;
+	required bool bIsTrigger = 6 [default = false];
+}
+
+message CylinderCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f vCenter = 1;
+	required Vector3f vDirection = 2;
+	required float fHeight = 3;
+	required float fRadius = 4;
+	required PhysicMaterial material = 5;
+	required bool bIsTrigger = 6 [default = false];
+	optional uint32 uCircleVertices = 7; // If non-present, automatically computed based on radius.
+}
+
+message VehicleCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	// Chassis
+
+	required Vector3f vChassisExtents = 1;
+	required Vector3f vChassisMOI = 2;
+	required Vector3f vChassisCMOffset = 3;
+
+	required PhysicMaterial chassisMaterial = 4;
+
+	// Wheels
+
+	required float fWheelMass = 5;
+	required float fWheelWidth = 6;
+	required float fWheelRadius = 7;
+	required float fWheelMOI = 8;
+	required PhysicMaterial wheelMaterial = 9;
+
+	// Number of wheels. Can be left zero, in which case we analyze the bone hierarchy to figure out the number of wheels
+	required uint32 uNumWheels = 10 [default = 4];
+
+	// If false, the wheel bone's rotation is set to match the data from PhysX. If true, you are responsible for updating the rotation every frame (see VehicleCollider's RuntimeData)
+	required bool bFakeWheelRotation = 21 [default = false];
+
+	// Springs
+
+	required float fSpringStrength = 11 [default = 50000.0];
+	required float fSpringMaxCompression = 12 [default = 0.30];
+	required float fSpringMaxDroop = 13 [default = 0.10];
+	required float fSpringDamperRate = 14 [default = 1500];
+
+	// Collision Model (if used, the model will override variables such as number of wheels, radius, width, etc)
+
+	// Name of the .coll file to use
+	required string szCollisionModel = 20 [(nanopb).max_size = 64];
+}
+
+message RigidBody
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required bool bDynamic = 1 [default = true];
+	required bool bKinematic = 2 [default = false];
+	required bool bDisableSleep = 3 [default = false];
+	required bool bDisableImpulses = 4 [default = false];
+	required bool bEnableCCD = 5 [default = false]; // Continuous Collision Detection prevents objects from tunneling through each other. Has performance cost so enable only if needed.
+	required bool bDisableGravity = 6 [default = false];
+
+	// Normally child rigid bodies are attached to a PhysicsAggregate component from a parent, which means that the parent entity is used in collision reports. If you need the child entity
+	// to be an independent collidable entity, set this to true.
+	required bool bDoNotAttachToParentAggregate = 7 [default = false];		
+	
+	required float fMass = 11 [default = 1];
+	required float fDensity = 12 [default = 0]; // If non-zero, fMass is ignored and mass is automatically computed, based on shapes attached to the rigid body.
+	required Vector3f vInertiaTensor = 13;
+	required float fAngularDamping = 14 [default = 0.05];
+	required float fLinearDamping = 15 [default = 0.00];
+	required float fSleepThreshold = 16 [default = 0.0005]; // Sets the mass-normalized kinetic energy threshold below which an actor may go to sleep. Actors whose kinetic energy divided by their mass is below this threshold will be candidates for sleeping.
+	required float fMaxImpulse = 17 [default = 0];
+
+	// When the motion of a rigid body is constrained either by contacts or joints, the constraint solver comes into play.
+	// The solver satisfies the constraints on the bodies by iterating over all the constraints restricting the motion of the body a certain number of times.
+	// The more iterations, the more accurate the results become.
+	required uint32 uSolverMinPositionsIters = 18 [default = 4];
+	required uint32 uSolverMinVelocityIters = 19 [default = 1];
+}
+
+message KinematicBodyTag
+{
+
+}
+
+message DynamicBodyTag
+{
+
+}
+
+message SleepTag
+{
+	
+}
+
+message PhysicsAggregate
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+	
+	required uint32 uMaxNumBodies = 1 [default = 4];
+	required bool bEnableSelfCollisions = 2 [default = false];
+}
+
+message RevoluteJoint
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+	
+	required Vector3f vAxis = 1;
+	required bool bEnableMotor = 2 [default = false];
+
+	// Under stressful conditions, PhysX dynamics solver may not be able to accurately enforce the constraints specified by the joint.
+	// PhysX provides kinematic projection which tries to bring violated constraints back into alignment even when the solver fails.
+	// Projection is not a physical process and does not preserve momentum or respect collision geometry. It is best avoided if practical,
+	// but can be useful in improving simulation quality where joint separation results in unacceptable artifacts.
+	required bool bEnableProjection = 3 [default = false];
+	required float fProjectionLinearTolerance = 4 [default = 0.01];
+	required float fProjectionAngularTolerance = 5 [default = 0.05];
+
+	optional float fMinAngleDegrees = 6;
+	optional float fMaxAngleDegrees = 7;
+
+	optional JointBreakForce breakForce = 20;
+}
+
+message FixedJoint
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+	
+	required bool bEnableProjection = 3 [default = false];
+	required float fProjectionLinearTolerance = 4 [default = 0.01];
+	required float fProjectionAngularTolerance = 5 [default = 0.05];
+
+	optional JointBreakForce breakForce = 20;
+}
+
+message PrismaticJoint
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f vAxis = 1;
+	
+	required bool bEnableProjection = 3 [default = false];
+	required float fProjectionLinearTolerance = 4 [default = 0.01];
+	required float fProjectionAngularTolerance = 5 [default = 0.05];
+
+	optional JointBreakForce breakForce = 20;
+}
+
+message VehicleWheel
+{
+	required uint32 uIndex = 1;
+	required bool bIsHub = 2;
+}

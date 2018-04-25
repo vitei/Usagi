@@ -1,0 +1,159 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Core/usagipb.proto";
+import "Engine/Framework/FrameworkEnums.proto";
+
+package usg.Components;
+
+option (nanopb_fileopt).include = "Engine/Framework/FrameworkComponents.h";
+
+
+message ActiveDevice
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+}
+
+message TransformComponent
+{
+	required Vector3f position = 1;
+	required Quaternionf rotation = 2;
+	required bool bInheritFromParent = 3 [default = true, (usagi).doc_en = "Position and rotation are in local space if true, world space if false"];
+}
+
+message ScaleComponent
+{
+	required Vector3f scale = 1;
+}
+
+message MatrixComponent
+{
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Matrix4x4 matrix = 1;
+}
+
+message LocalMatrixComponent
+{
+	required Matrix4x4 matrix = 1;
+}
+
+
+message TurnableComponent
+{
+	required float fDirection = 1 [default = 0.0];
+	required float fAngle = 2 [default = 0.0];
+	required float fMaxAngle = 3  [default = 720.0];
+	required float fMinAngle = 4 [default = -720.0];
+	required float fPrevAngle = 5  [default = 0.0];
+	required usg.Vector4f vAxis = 6;
+}
+
+message TeamComponent
+{
+	required uint32 uTeam = 1 [default = 0];
+	required uint32 uSpawnTeam = 2 [default = 0];
+}
+
+message StateComponent
+{
+	required STATUS current = 1  [default = ACTIVE];
+}
+
+message HealthComponent
+{
+	required float  fLife = 1  [default = 1.0];
+	required uint32 uKillerTeam = 4 [default = 0];
+	required sint64 iKillerNUID = 5 [default = 0];
+}
+
+message DistanceTravelled
+{
+	required float fDistance = 1 [default = 0.0];
+}
+
+message ControllerID
+{
+	required uint32 id = 1;
+}
+
+message Identifier
+{
+	option (nanopb_msgopt).has_onloaded = true;
+	required string name = 1 [(nanopb).max_size = 64];
+}
+
+message InputScale
+{
+	required float fValue = 1;
+}
+
+message VisibilityComponent
+{
+	required bool bVisible = 1 [default = true];
+}
+
+message Lifetime
+{
+	required float fLifetime = 1 [default = 0.0];
+}
+
+// For automated killing of entities
+message MaxLifetime
+{
+	required float fMaxLifetime = 1 [default = 5.0];
+	required float fFadeTime = 2 [default = 0.0];
+	required bool bSetHealthToZero = 3 [default = false];
+}
+
+message LineFollowsVelocity {}
+
+message SpringComponent
+{
+	required float fPotentialEnergy = 1 [default = 0.0];
+	required float fKineticEnergy = 2 [default = 0.0];
+	required bool bOscillating = 3 [default = false];
+	required float fAngle = 4 [default = 0.0];
+	required float fTransferRate = 5 [default = 0.0];
+	required float fTransfer = 6 [default = 0.0];
+	required float fDampening = 7 [default = 0.0];
+	required float fOutput = 8 [default = 0.0];
+}
+
+message LocalSim
+{
+	required bool bCPUPlayer = 1 [default = false];
+}
+
+// The presence of this component on a scene entity denotes that downstream
+// components should run. To pause the game, remove the component.
+message SimulationActive
+{
+	required bool bActive = 1 [default = true];
+}
+
+// The presence of this component on a scene entity means that the local
+// player should be able to control her own vehicle. Removing this component
+// should effectively act as a control cut-out - i.e. the show goes on,
+// without the local player's active participation, which is what we want
+// to happen in multiplayer.
+message SimulationParticipating
+{
+	required bool bParticipating = 2 [default = true];
+}
+
+// This component being present on a context entity means that the simulation
+// should run when this context is active (and not run when it is inactive).
+message SimulationContext
+{
+	required bool bPauseEnabled = 1 [default=false];
+	required bool bCanPause = 2 [default=true];
+}
+
+message TimeComponent
+{
+	required uint32 uFrameTime = 1 [default=0];
+}

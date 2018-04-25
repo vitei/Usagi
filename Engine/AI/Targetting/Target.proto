@@ -1,0 +1,53 @@
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Framework/EntityRef.proto';
+import 'Engine/AI/BehaviorTree/BehaviorCommon.proto';
+
+package usg.ai;
+
+message Target
+{
+	required usg.Vector3f position = 1;
+	required usg.Vector3f forward = 2;
+	required usg.Vector3f right = 3;
+	required usg.Vector3f normalizedDirToTarget = 4;
+	required usg.EntityRef entityRef = 5;
+	required float health = 6;
+	required uint32 team = 7;
+	required uint32 type = 8;
+	required bool visible = 9 [default = true];
+	required bool active = 10 [default = false];
+	required uint32 uLineOfSight = 15 [default = 0]; // If zero, no line of sight.
+	required usg.Vector3f vVelocity = 16;
+	required double fTimeStamp = 17 [default = 0.0];
+	required sint64 iNUID = 18 [default = 0];
+}
+
+message TargetData
+{
+	required usg.EntityRef target = 1;
+	required uint32 index = 2;
+}
+
+message TargetParams
+{
+	required usg.Vector3f position = 1;
+	required usg.Vector3f forward = 2;
+	required uint32 type = 3;
+	required uint32 team = 4;	//	the team this entity belongs to
+	required usg.ai.Team teamType = 5;	//	the target team we are looking for (friendly or enemy or any)
+	required usg.ai.PickTarget pickTarget = 6;
+	required float health = 7;
+	required float minDistance = 8;
+	required float minAngle = 9;
+	required bool ignoreDistance = 10;
+	required bool ignoreAngle = 11;
+	required bool requireDetected = 12 [default = false];
+}
+
+message TargetListData
+{
+	required Target target = 1;
+	required uint32 ticks = 2;
+	required uint32 targetTicks = 3;
+}

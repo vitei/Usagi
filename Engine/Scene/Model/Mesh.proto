@@ -1,0 +1,19 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.exchange;
+
+message Mesh {
+	required string name = 1 [(nanopb).max_size = 40];
+
+	required uint32 shapeRefIndex = 2 [default = 0xffffffff];
+	required uint32 shapeShadowRefIndex = 3 [default = 0xffffffff];
+
+	required string materialRefName = 4 [(nanopb).max_size = 40];
+	required uint32 materialRefIndex = 5 [default = 0xffffffff];
+
+	required uint32 renderPriority = 6 [default = 0];
+	required uint32 isVisible = 7 [default = 1];
+}

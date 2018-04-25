@@ -1,0 +1,4 @@
+*.vcxproj.erb
+Engine/CommonProps.props
+Engine/Core/BuildID.h
+ThirdParty

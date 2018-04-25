@@ -1,0 +1,29 @@
+import 'nanopb.proto';
+
+package usg;
+
+enum Region
+{
+	JAPAN = 0;
+	AMERICA = 1;
+	EUROPE = 2;
+}
+
+enum Language
+{
+	JAPANESE = 0;
+	ENGLISH = 1;
+	FRENCH = 2;
+	SPANISH = 3;
+	GERMAN = 4;
+	ITALIAN = 5;
+	DUTCH = 6;
+}
+
+// This message can be used to override the locale for
+// debugging purposes.
+message LocaleOverride
+{
+	optional Region region = 1;
+	optional Language language = 2;
+}

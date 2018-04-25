@@ -1,0 +1,2 @@
+VS SMAA/SMAANeighbourhoodBlend_vs
+PS SMAA/SMAANeighbourhoodBlend_ps

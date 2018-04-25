@@ -1,0 +1,40 @@
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Color.proto";
+
+package usg.Events;
+
+message RotateUV
+{
+	required float fRotation = 1;
+	required uint32 uTexIndex = 2;
+	required uint32 uMeshIndex = 3;
+	required uint32 uUVCount = 4;
+}
+
+message TranslateUV
+{
+	required usg.Vector2f vTranslation = 1;
+	required uint32 uTexIndex = 2;
+	required uint32 uMeshIndex = 3;
+	required uint32 uUVCount = 4;	
+}
+
+message ScaleModel
+{
+	required float fScale = 1;
+}
+
+message OverrideColorEvent
+{
+	// TODO: Replace material name with hash
+	required string strMat = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required uint32 uColStage = 2 [default=0];
+	required Color color = 3;
+}
+
+message ModifyAnimationConditionEvent
+{
+	required uint32 nameHash = 1;
+	required bool value = 2;
+}

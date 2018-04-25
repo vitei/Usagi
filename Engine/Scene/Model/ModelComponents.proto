@@ -1,0 +1,90 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Scene/Model/Skeleton.proto';
+
+package usg.Components;
+
+option (nanopb_fileopt).include = "Engine/Scene/Model/ModelComponents.h";
+
+message ModelComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string name = 1 [(nanopb).max_size = 64];
+	required bool bDynamic = 2 [default = true];
+	required bool bPerBoneCulling = 3 [default = true];
+	required uint32 uPreloadCount = 4 [default = 1];
+	required bool bShadowCast = 5 [default = true];
+}
+
+message BoneComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required Vector3f m_scale = 1;
+	required Vector3f m_rotate = 2;
+	required Vector3f m_translate = 3;
+	required uint32 uIndex = 4;
+}
+
+// This is a placeholder component which helps us set up billboarded
+// bones. Essentially, we create a new entity with this component and
+// insert it into the hierarchy between the billboarded bone entity
+// and its parent.
+message IntermediateBone
+{
+	option (nanopb_msgopt).has_onloaded = true;
+}
+
+message Billboard
+{
+	required usg.exchange.Bone_BillboardMode mode = 1;
+}
+
+
+ message UVIdentifier 
+ {
+     // TODO: lookup by mesh name too
+     required string materialName = 1 [(nanopb).max_size = 64];
+     required uint32 uTexIndex = 2;
+     required uint32 uMeshIndex = 3 [default = 0xFFFFFFFF];
+     required uint32    uUVCount = 4 [default = 1];
+ }
+ 
+ 
+ message UVTranslation
+ {
+     option (nanopb_msgopt).has_onloaded = true;
+ 
+     required UVIdentifier    identifier = 1;
+     required Vector2f        vTranslation = 2;
+     required Vector2f        vMultiplier = 3;
+ };
+  
+ message UVRotation
+ {
+      option (nanopb_msgopt).has_onloaded = true;
+  
+      required UVIdentifier    identifier = 1;
+      required float            fRotation = 2;
+      required float            fMultiplier = 3;
+  
+}
+
+message ModelAnimComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string name = 1 [(nanopb).max_size = 64];
+	required bool applyBindPose = 2 [default = true];
+}
+

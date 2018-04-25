@@ -1,0 +1,19 @@
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.Events;
+
+message SetViewContextMask
+{
+	required uint32 uContext = 1 [default=0];
+	required uint32 uEnableBits =2 [default=0];
+	required uint32 uDisableBits = 3[default=0];
+};
+
+message CreateDecalEvent
+{
+	required usg.Vector3f  vStartPos = 1;
+	required usg.Vector3f  vEndPos = 2;
+	required float		   fSize = 3 [default=3.0];
+	required uint32 	   uType = 4 [default=0];	// Anything over 0 is a special decal
+};

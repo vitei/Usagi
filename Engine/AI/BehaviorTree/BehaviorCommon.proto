@@ -1,0 +1,327 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.ai;
+
+// *******************
+// Common Behaviors, data, enums etc for creating a behavior tree
+// ********************
+
+enum NodeType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	NodeType_Invalid = 0;
+	NodeType_Action = 1;
+	NodeType_Decorator = 2;
+	NodeType_Composite = 3;
+}
+
+enum BehaviorType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	BehaviorType_ClearDestination = 1;
+	BehaviorType_HasNoTarget = 2;
+	BehaviorType_HasTarget = 3;
+	BehaviorType_IsTargetAlive = 4;
+	BehaviorType_IsTargetWithinDistance = 5;
+	BehaviorType_MoveTowardsPosition = 6;
+	BehaviorType_RandomPosition = 7;
+	BehaviorType_SetDestinationToTarget = 8;
+	BehaviorType_TargetMaxDistance = 9;
+	BehaviorType_TargetMinDistance = 10;
+	BehaviorType_ApproachTarget = 12;
+	BehaviorType_RemoveTarget = 14;
+	BehaviorType_IsHealthAbove = 15;
+	BehaviorType_IsHealthBelow = 16;
+	BehaviorType_MoveAwayFromTarget = 17;
+	BehaviorType_CircleAroundTarget = 18;
+	BehaviorType_Wait = 19;
+	BehaviorType_FuzzyWait = 20;
+	BehaviorType_FaceTarget = 21;
+	BehaviorType_FuzzyApproachTarget = 22;
+	BehaviorType_ObjectAvoidance = 23;
+	BehaviorType_SetReverse = 26;
+	BehaviorType_CanSeeTarget = 27;
+	BehaviorType_CanNotSeeTarget = 28;
+	BehaviorType_IsTargetSameTeam = 29;
+	BehaviorType_IsTargetNotSameTeam = 30;
+	BehaviorType_SetDestination = 31;
+	BehaviorType_IsTargetNotAlive = 32;
+	BehaviorType_IsAnimationConditionTrue = 34;
+	BehaviorType_SetDestinationToWaypoint = 35;
+	BehaviorType_DestinationMinDistance = 36;
+	BehaviorType_DestinationMaxDistance = 37;
+	BehaviorType_SetVariable = 38;
+	BehaviorType_GetVariable = 39;
+}
+
+enum DecoratorType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	DecoratorType_Control = 1;
+	DecoratorType_HasDestination = 2;
+	DecoratorType_HasNoDestination = 3;
+	DecoratorType_HasTarget = 4;
+	DecoratorType_HasNoTarget = 5;
+	DecoratorType_TargetMaxDistance = 6;
+	DecoratorType_TargetMinDistance = 7;
+	DecoratorType_IsHealthAbove = 8;
+	DecoratorType_IsHealthBelow = 9;
+	DecoratorType_CanSeeTarget = 10;
+	DecoratorType_CanNotSeeTarget = 11;
+	DecoratorType_ExecuteUntilTime = 12;
+	DecoratorType_FuzzyExecuteUntilTime = 13;
+	DecoratorType_IsMoving = 14;
+	DecoratorType_IsNotMoving = 15;
+	DecoratorType_IsTargetSameTeam = 16;
+	DecoratorType_IsTargetNotSameTeam = 17;
+	DecoratorType_IsTargetAlive = 18;
+	DecoratorType_IsTargetNotAlive = 19;
+	DecoratorType_SetAnimationCondition = 20;
+	DecoratorType_DestinationMinDistance = 21;
+	DecoratorType_DestinationMaxDistance = 22;
+	DecoratorType_GetVariable = 23;
+}
+
+enum CompositeType
+{
+	Sequence = 1;
+	Selector = 2;
+	Parallel = 3;
+	Decorator = 4;
+	Behavior = 5;
+	RandomSelector = 6;
+}
+
+enum TargetSize
+{
+	count = 16;
+}
+
+enum AIProperty
+{
+	option (nanopb_enumopt).long_names = false;
+
+	AIProperty_viewDistance = 55;
+	AIProperty_viewDistanceLong = 65;
+	AIProperty_minViewDistance = 20;	// the distance that look direction doesnt matter for knowing the prescence of a target 
+	AIProperty_avoidanceSeeAhead = 5;
+	AIProperty_avoidanceSeeAheadFar = 10;
+	AIProperty_avoidanceForce = 2;
+}
+
+enum PickTarget
+{
+	option (nanopb_enumopt).long_names = false;
+	PickTarget_Nearest = 1;
+	PickTarget_Furthest = 2;
+	PickTarget_Weakest = 3;
+	PickTarget_Strongest = 4;
+}
+
+enum Team
+{
+	option (nanopb_enumopt).long_names = false;
+
+	Team_Any		= 1;
+	Team_Friendly	= 2;
+	Team_Enemy		= 3;
+}
+
+message CompositeHeader
+{
+	required CompositeType compositeType = 1;
+}
+
+message SequenceHeader
+{
+	required int32 numChildren = 2;
+}
+
+message SelectorHeader
+{
+	required int32 numChildren = 3;
+}
+
+message ParallelHeader
+{
+	required int32 numChildren = 4;
+	required int32 numSuccess = 5;
+}
+
+message BehaviorHeader
+{
+	required uint32 behaviorType = 6;
+}
+
+message DecoratorHeader
+{
+	required uint32 decoratorHeader = 7;
+}
+
+message IsTargetWithinDistance
+{
+	required float min = 8;
+	required float max = 9;
+}
+
+message RandomPosition
+{
+	required float minX = 10;
+	required float minZ = 11;
+	required float maxX = 12;
+	required float maxZ = 13;
+	required bool usePathfinding = 14;
+}
+
+message TargetMaxDistance
+{
+	required float maxDistance = 15;
+}
+
+message TargetMinDistance
+{
+	required float minDistance = 16;
+}
+
+message ApproachTarget
+{
+	required float minDistance = 19;
+	required float maxDistance = 20;
+	optional bool usePathFinding = 21 [default = false];
+	optional float fOffsetX = 22 [default = 0];
+	optional float fOffsetY = 23 [default = 0];
+	optional float fOffsetZ = 24 [default = 0];
+}
+
+message IsHealthAbove
+{
+	required float health = 30;
+}
+
+message IsHealthBelow
+{
+	required float health = 40;
+}
+
+message MoveAwayFromTarget
+{
+	required float minDistance = 51;
+	required float maxDistance = 52;
+}
+
+message CircleAroundTarget
+{
+	required float minDistance = 60;
+	required float maxDistance = 61;
+}
+
+message Wait
+{
+	required float targetTime = 70;
+}
+
+message FuzzyWait
+{
+	required float minTime = 80;
+	required float maxTime = 81;
+}
+
+message SetDestinationToTarget
+{
+	required bool usePathfinding = 90;
+}
+
+message FaceTarget
+{
+	required float minAngle = 100;
+}
+
+message RandomSelectorHeader
+{
+	required int32 numChildren = 110;
+}
+
+message DestinationMinDistance
+{
+	required float fMinDistance = 111;
+}
+
+message DestinationMaxDistance
+{
+	required float fMaxDistance = 1;
+}
+
+message FuzzyApproachTarget
+{
+	required float minMinDistance = 120;
+	required float minMaxDistance = 121;
+	required float maxMinDistance = 122;
+	required float maxMaxDistance = 123;
+	optional bool usePathFinding = 124 [default = false];
+	optional float fOffsetX = 125 [default = 0];
+	optional float fOffsetY = 126 [default = 0];
+	optional float fOffsetZ = 127 [default = 0];
+}
+
+message ObjectAvoidance
+{
+	required float radius = 130;
+	required float ahead = 131;
+	required float aheadFar = 132;
+	required float avoidanceForce = 133;
+	required int32 numObjects = 134;
+}
+
+message ExecuteUntilTime
+{
+	required float targetTime = 160;
+}
+
+message FuzzyExecuteUntilTime
+{
+	required float min = 170;
+	required float max = 171;
+}
+
+message SetDestination
+{
+	required float x = 180;
+	required float z = 181;
+}
+
+message IsAnimationConditionTrue
+{
+	required string conditionName = 190 [(nanopb).max_size = 16];
+	required string childEntityName = 191 [(nanopb).max_size = 32];
+}
+
+message SetAnimationCondition
+{
+	required string conditionName = 192 [(nanopb).max_size = 16];
+	required string childEntityName = 193 [(nanopb).max_size = 32];
+	required bool onAllChildrenRecursively = 194;
+}
+
+message SetDestinationToWaypoint
+{
+	required string waypointName = 200 [(nanopb).max_size = 64];
+}
+
+message GetVariable
+{
+	required string szVariableName = 1 [(nanopb).max_size = 64];
+	required bool bRequiredValue = 2 [default = true];
+	required bool bDefaultValue = 3 [default = false];
+}
+
+message SetVariable
+{
+	required string szVariableName = 1 [(nanopb).max_size = 64];
+	required bool bValue = 2;
+}

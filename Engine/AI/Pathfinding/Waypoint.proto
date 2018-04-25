@@ -1,0 +1,21 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.ai.pb;
+
+// *******************
+// Data for waypoint class used in pathfinding
+// ********************
+
+message Waypoint
+{
+	required float x = 1;
+	required float y = 2;
+};
+
+message WaypointList
+{
+	repeated Waypoint waypoints = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 128>"];
+};

@@ -1,0 +1,28 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+
+package usg.exchange;
+
+message UserDataString {
+	required string key = 1 [(nanopb).max_size = 40];
+	repeated string values = 2 [(nanopb).max_size = 40, (nanopb).max_count = 4];
+}
+
+message UserDataFloat {
+	required string key = 1 [(nanopb).max_size = 40];
+	repeated float values = 2 [(nanopb).max_count = 4];
+}
+
+message UserDataInteger {
+	required string key = 1 [(nanopb).max_size = 40];
+	repeated int32 values = 2 [(nanopb).max_count = 4];
+}
+
+message UserData {
+	required UserDataString  dataString = 1;
+	required UserDataFloat   dataFloat  = 2;
+	required UserDataInteger dataInteger= 3;
+}

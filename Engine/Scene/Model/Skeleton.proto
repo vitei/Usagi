@@ -1,0 +1,47 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Scene/Model/Model.proto';
+
+package usg.exchange;
+
+message Skeleton {
+	required uint32 bonesNum = 1 [default = 0];
+	required string rootBoneName = 2 [(nanopb).max_size = 40];
+	required uint32 rootBoneIndex = 3 [default = 0xffffffff];
+	required uint32 isTransAnimEnabled = 4 [default = 0];
+}
+
+enum Bone_BillboardMode {
+	OFF = 0;				// ビルボード処理は行ないません。
+	WORLD = 1;				// Z軸が視点軸と平行となるように回転します。
+	WORLDVIEWPOINT = 2;		// Z軸が視点方向になるように回転します。
+	SCREEN = 3;				// Z軸が視点軸に平行で、Y軸が画面上方向になるように回転します。
+	SCREENVIEWPOINT = 4;	// Z軸が視点方向を向き、Y軸が画面上方向になるように回転します。
+	YAXIAL = 5;				// Z軸が視点軸に平行になるように、Y軸だけ回転します。
+	YAXIALVIEWPOINT = 6;	// Z軸が視点方向を向くように、Y軸だけ回転します。
+};
+
+message Bone {
+	required string name = 1 [(nanopb).max_size = 40];
+	required string parentName = 2 [(nanopb).max_size = 40];
+	required uint32 parentIndex = 3 [default = 0xffffffff];
+	required uint32 isSegmentScaleCompensate = 4 [default = 0];
+	required uint32 isCompressible = 5 [default = 0];
+	required uint32 isNeededRendering = 6 [default = 0];
+	required uint32 hasSkinningMatrix = 7 [default = 0];
+	required uint32 billboardMode = 8 [default = 0];
+
+	required Vector3f scale = 9;
+	required Vector3f rotate = 10;
+	required Vector3f translate = 11;
+	required Matrix4x4 transform = 12;
+
+	required Sphere boundingSphere = 13;
+
+	required Matrix4x4 bindPoseTrans = 14;
+	required Matrix4x4 invBindPoseTrans = 15;
+}

@@ -1,0 +1,16 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2016
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg;
+
+message Collision
+{
+	required float fDepth = 11;
+	required usg.Vector3f vIntersectionPoint = 12;
+	required usg.Vector3f vNormal = 13;
+	required bool bFirstContact = 15;
+	required uint32 uMaterialFlags = 16;
+}

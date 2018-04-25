@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+<% for @path, @uuid in filters %>
+    <Filter Include="<%= @path %>">
+      <UniqueIdentifier>{<%= @uuid %>}</UniqueIdentifier>
+    </Filter>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @h in headers %>
+<% if locations.has_key?(@h) %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>">
+      <Filter><%= locations[@h] %></Filter>
+    </ClInclude>
+<% else %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>" />
+<% end %>
+<% end %>
+
+<% for @h in proto_headers %>
+<% if locations.has_key?(@h) %>
+    <ClInclude Include="$(PBProjectDir)<%= @h %>">
+      <Filter><%= locations[@h] %></Filter>
+    </ClInclude>
+<% else %>
+    <ClInclude Include="$(PBProjectDir)<%= @h %>" />
+<% end %>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @src in sources %>
+<% if locations.has_key?(@src) %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>">
+      <Filter><%= locations[@src] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
+<% end %>
+<% end %>
+
+<% for @src in proto_sources %>
+<% if locations.has_key?(@src) %>
+    <ClCompile Include="$(PBProjectDir)<%= @src %>">
+      <Filter><%= locations[@src] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="$(PBProjectDir)<%= @src %>" />
+<% end %>
+<% end %>
+
+<% for @src in boilerplate_sources %>
+<% if locations.has_key?(@src) %>
+    <ClCompile Include="$(IntDir)..\<%= @src %>">
+      <Filter><%= locations[@src] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="$(IntDir)..\<%= @src %>" />
+<% end %>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @p in proto_relative %>
+<% if locations.has_key?(@p) %>
+    <None Include="..\..\..\..\<%= project_dir + @p %>">
+      <Filter><%= locations[@p] %></Filter>
+    </None>
+<% else %>
+    <None Include="..\..\..\..\<%= @p %>" />
+<% end %>
+<% end %>
+  </ItemGroup>
+</Project>

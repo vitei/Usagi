@@ -1,0 +1,32 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.Components;
+
+message CollisionMasks
+{
+	required uint32 uGroup = 4 [default = 0];
+	required uint32 uFilter = 5 [default = 0xffffffff];
+}
+
+message Sphere
+{
+	required Vector3f centre = 1;
+	required float radius = 2;
+}
+
+message Box
+{
+	required Vector3f vCenter  = 1;
+	required Matrix3x3 mAxes  = 2;
+	required Vector3f vExtents = 3;
+}
+
+message QuadTreeHandle
+{
+	option (nanopb_msgopt).from_header = "Engine/Physics/CollisionQuadTreeHandle.h";
+	required fixed64 quadtreeID = 1;
+}

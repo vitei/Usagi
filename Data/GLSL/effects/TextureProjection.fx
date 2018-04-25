@@ -1,0 +1,2 @@
+VS texture_projection_light_pos_vs
+PS texture_projection_light_ps

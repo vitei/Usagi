@@ -1,0 +1,61 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Lights/LightSpec.proto";
+
+package usg.Components;
+
+option (nanopb_fileopt).include = "Engine/Scene/Common/SceneComponents.h";
+
+message SceneComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+}
+
+message LightComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required LightSpec spec = 1;
+	required bool bFullIntensity = 2 [default = true];
+}
+
+message LightIntensityComponent
+{
+	required float fIntensity = 1 [default=1.0];
+}
+
+message LightFadeComponent
+{
+	required float fFadeInTime = 1 [default=0.0];
+	required float fFadeOutTime = 2 [default=0.0];
+}
+
+
+message ShadowDecalComponent
+{
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string name = 1 [(nanopb).max_size = 64];
+	required usg.Vector2f vScale = 2;
+	required float fTestRadius = 3 [default = 1.0];
+	required float fUpdateDistance = 4 [default = 2.0];
+	required float fMaxHeight = 5 [default = 5.0];
+	required bool bRotateWithObject = 6 [default=true];
+}
+
+message ModelMgrComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required float fDummy = 1 [default=1.0];
+}

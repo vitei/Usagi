@@ -1,0 +1,37 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.exchange;
+
+message SkeletalAnimationHeader
+{
+	required string name = 1 [(nanopb).max_size = 40];
+	required uint32 frameCount = 2;
+	required float frameRate = 3;
+	required bool isLoop = 4 [default = false];
+	required bool isAdditive = 5 [default = false];
+
+	required uint32 referencedBones = 6;
+	// Header for each bone comes next
+	// Followed by the per-frame data
+}
+
+
+message BoneAnimationDescription
+{
+	required string targetName = 1 [(nanopb).max_size = 40];
+	required bool controlsRot = 2 [default = true];
+	required bool controlsPos = 3 [default = true];
+	required bool controlsScale = 4 [default = false];
+}
+
+
+message BoneAnimationFrame
+{
+	required usg.Quaternionf	qRot = 1;
+	required usg.Vector3f		vPos = 2;
+	required usg.Vector3f		vScale = 3;
+}

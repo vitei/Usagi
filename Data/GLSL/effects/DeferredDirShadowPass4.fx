@@ -1,0 +1,2 @@
+VS deferred/directional_vs
+PS deferred/directionalshadowpass4_ps

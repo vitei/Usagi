@@ -1,0 +1,143 @@
+require 'tempfile'
+require 'fileutils'
+
+DEFAULT_PLATFORM = RUBY_PLATFORM =~ /darwin/ ? "osx" : "win"
+NINJA_PREFIX = RUBY_PLATFORM =~ /darwin/ ? "" : "Tools/bin/"
+
+BUILDS          = (ENV["build"]    || "debug").split(",")
+TARGET_PLATFORM = ENV["platform"]  || DEFAULT_PLATFORM
+REGION          = ENV["region"]    || "JP"
+VERBOSITY       = ENV["verbosity"] || "normal"
+PROJECT         = ENV["project"]   || "Kepler"
+EMBED_DLP       = ENV["embed_dlp"] || "false"
+CURRENT_DIR     = File.dirname(__FILE__)
+
+RUBY = "ruby"
+
+raise "USAGI_DIR environment variable not defined!" if ENV['USAGI_DIR'].nil?
+
+if VERBOSITY == "verbose"
+  verbose(true)
+  VERBOSITY_FLAG="-v"
+else
+  verbose(false)
+  VERBOSITY_FLAG=""
+end
+
+def build_dir(build_name)
+  File.join("_build", TARGET_PLATFORM, build_name)
+end
+
+def ninja_file(build_name)
+  File.join(build_dir(build_name), "build.ninja")
+end
+
+def protobuf_depfile
+  depfile = "_build/proto/deps.txt"
+  dir = File.dirname depfile
+  FileUtils.mkdir_p dir if ! File.directory? dir
+
+  depfile
+end
+
+def ninja(build_name, failed_job_limit=10)
+  "#{NINJA_PREFIX}ninja #{VERBOSITY_FLAG} -f #{ninja_file(build_name)} -k #{failed_job_limit}"
+end
+
+BUILDS.each{ |b| directory build_dir(b) }
+
+task :default => :build
+task :build => :ninja do |t|
+	BUILDS.each{ |b| sh ninja(b) }
+end
+
+task :cia => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} cia" }
+end
+
+task :dlp => :ninja do
+end
+
+task :data => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} data" }
+end
+
+task :libs => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} libs" }
+end
+
+task :id => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} id" }
+end
+
+task :includes => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} includes" }
+end
+
+task :pb => :ninja do
+	BUILDS.each{ |b| sh "#{ninja b} pb" }
+end
+
+task :projects => :ninja do
+	# the second parameter to the ninja function should be
+	# greater than the total number of project files we generate
+	BUILDS.each{ |b| sh "#{ninja(b, 30)} projects" }
+end
+
+task :ninja => BUILDS.map{|b|build_dir b} do |t|
+	BUILDS.each do |b|
+		sh "#{RUBY} Tools/build/deflist.rb Engine > #{protobuf_depfile}"
+		sh "#{RUBY} Tools/build/generator.rb #{b} #{TARGET_PLATFORM} #{REGION} #{PROJECT} #{CURRENT_DIR} #{ninja_file b} #{EMBED_DLP}"
+	end
+end
+
+task :clean do |t|
+	BUILDS.each{ |b| sh "#{ninja b} -t clean" }
+end
+
+task :clean_bp do |t|
+  BUILDS.map{|b| build_dir b}.each do |dir|
+    bp_files = FileList["#{dir}/**/*.bp.cpp"]
+
+    if TARGET_PLATFORM == 'win'
+      bp_files.include "#{dir.to_s.sub(Regexp.quote('/win/'), '/Win32/')}/**/*.bp.cpp"
+    end
+
+   FileUtils.rm bp_files
+  end
+end
+
+task :clean_code do |t|
+  BUILDS.map{|b| build_dir b}.each do |dir|
+    code_files = FileList["#{dir}/**/*.o"]
+    code_files.exclude("#{dir}/Data/**/*", "#{dir}/Effects/**/*")
+
+    FileUtils.rm code_files
+  end
+end
+
+task :clean_data do |t|
+  FileUtils.rm_rf FileList["_romfiles/#{TARGET_PLATFORM}/**"]
+end
+
+task :clean_includes do |t|
+  FileUtils.rm_rf FileList["_includes/**"]
+end
+
+task :clean_projects do
+  FileUtils.rm_rf FileList["_build/projects/**"]
+end
+
+task :run => :build do
+	case TARGET_PLATFORM
+	when "osx"
+		sh "_rom/#{TARGET_PLATFORM}/#{BUILDS[0]}/#{PROJECT}_#{REGION}.app/Contents/MacOS/#{PROJECT}_#{REGION}"
+	end
+end
+
+task :debug => :build do
+	case TARGET_PLATFORM
+	when "osx"
+		sh "lldb _rom/#{TARGET_PLATFORM}/#{BUILDS[0]}/#{PROJECT}_#{REGION}.app"
+	end
+end

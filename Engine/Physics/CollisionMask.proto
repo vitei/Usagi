@@ -1,0 +1,20 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Core/usagipb.proto';
+
+package usg;
+
+enum CollisionMask {
+	option (nanopb_enumopt).long_names = false;
+	option (usagipb_enumopt).is_bitmask = true;
+
+	COLLM_NONE				= 0x00000000;
+	COLLM_WHEEL				= 0x00000001;
+	COLLM_DRIVABLE_SURFACE	= 0x00000002;
+	COLLM_VEHICLE			= 0x00000004;
+	COLLM_PLAYER			= 0x00000005;
+	COLLM_PROJECTILE		= 0x00000006;
+	COLLM_ANY				= 0x7fffffff;
+}

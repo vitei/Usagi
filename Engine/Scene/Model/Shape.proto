@@ -1,0 +1,93 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Scene/Model/Model.proto';
+import 'Engine/Graphics/RenderConsts.proto';
+
+package usg.exchange;
+
+enum VertexAttribute
+{
+	option allow_alias = true;
+
+	NONE = 0;
+	POSITION = 1;
+	NORMAL = 2;
+	UV = 3;
+	TANGENT = 4;
+	COLOR = 5;
+	BONE_INDEX = 6;
+	BONE_WEIGHT = 7;
+	BINORMAL = 8;
+}
+
+enum SkinningType
+{
+	option allow_alias = true;	
+
+	NO_SKINNING = 0;
+	SMOOTH_SKINNING = 1;
+	RIGID_SKINNING = 2;
+}
+
+message VertexStreamInfo
+{
+	required uint32 refIndex = 1 [default = 0];
+	required uint32 columns = 2 [default = 0];
+	// Had to set these to uint32s as ayataka is dumping binaries and enum sizes don't match across platforms
+	required uint32 attribute = 3 [default = 0]; // VertexAttribute [default=NONE]
+	required uint32 elementType = 4; // VertexElementType
+	required float scaling = 5 [default = 1.0];
+	required string usageHint = 6 [(nanopb).max_size = 40];
+
+}
+
+message IndexStream
+{
+	required uint32 formatSize = 1 [default = 0];
+	required uint32 sizeAligned = 2 [default = 0];
+	required uint32 indexNum = 3 [default = 0];
+}
+
+message AdjacencyStream
+{
+	required uint32 sizeAligned = 1 [default = 0];
+}
+
+message Primitive
+{
+	required IndexStream indexStream = 1;
+	required AdjacencyStream adjacencyStream = 2;
+	required uint32 rootBone = 3;
+	required uint32 lodLevel = 4 [default = 0];
+}
+
+message SingleAttribute
+{
+	required VertexAttribute attribute = 1 [default = NONE];
+	required Vector4f value = 2;
+	required uint32 columns = 3;
+	required string usageHint = 4 [(nanopb).max_size = 40];
+}
+
+message Shape
+{
+	required uint32 streamOffset = 1 [default = 0];
+
+	required Primitive primitive = 2;
+
+	repeated VertexStreamInfo streamInfo = 3 [(nanopb).max_count = 9];
+	required uint32 vertexStreamSizeAligned = 4 [default = 0];
+	required uint32 vertexNum = 5 [default = 0];
+	required float vertexAlphaScale = 6 [default = 0.0];
+
+	required Sphere boundingSphere = 7;
+
+	repeated SingleAttribute singleAttributes = 8 [(nanopb).max_count = 4];
+
+	required uint32 attributeMask = 9 [default=0];
+
+	required uint32 skinningType = 10 [default=0];
+}

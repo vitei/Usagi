@@ -1,0 +1,59 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/AI/Targetting/Target.proto';
+import "Engine/Maths/Maths.proto";
+import 'Engine/Framework/EntityRef.proto';
+
+option (nanopb_fileopt).include='Engine/AI/Targetting/TargetComponents.h';
+
+package usg.ai.Components;
+
+message TargetComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+
+	required usg.ai.Target target = 1;
+	required usg.ai.TargetData targetData = 2;
+	required bool active = 3 [default = false];
+}
+
+message TargetNotifyComponent
+{
+	required uint32 ticks = 1 [default = 0];
+	required uint32 targetTicks = 2 [default = 10];
+	required uint32 type = 3;
+	required usg.Vector3f vPositionOffset = 4;
+}
+
+message TargetVisibilityComponent
+{
+	required usg.Vector3f vPositionOffset = 1;
+	required usg.EntityRef pLastEntityChecked = 2;
+	required float fTimer = 3 [default = 0.0];
+	required float fFrequency = 4 [default = 0.3];
+	required uint32 uFailCounter = 5 [default = 0];
+}
+
+enum AIMaxTargets
+{
+	MaxTargets = 32;
+}
+
+message TargetListComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	//repeated usg.ai.TargetListData targets = 1 [(nanopb).max_count = 32, (nanopb).has_max_count = true];
+	//required uint32 numTargets = 2 [default = 0];
+}
+
+message TargetListRaycastComponent
+{
+	required usg.EntityRef pLastRaycastEntity = 1;
+	required uint32 uLastRaycastIndex = 2;
+	required float fTimer = 3;
+	required uint32 uTick = 4;
+	repeated uint32 pRaycastHash = 5 [(nanopb).max_count = 32, (nanopb).has_max_count = true];
+	required uint32 uVisibilityBlockingCollisionMask = 6 [default = 0x7ffffff];
+}

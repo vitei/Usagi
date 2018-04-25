@@ -1,0 +1,46 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+enum AudioType
+{
+	option (nanopb_enumopt).long_names = false;
+	
+	AUDIO_TYPE_MUSIC = 0;
+	AUDIO_TYPE_SFX = 1;
+	AUDIO_TYPE_UI = 2;
+}
+
+enum AudioFalloff
+{
+	option (nanopb_enumopt).long_names = false;
+
+	AUDIO_FALLOFF_LINEAR = 0;
+	AUDIO_FALLOFF_LOGARITHMIC = 1;
+}
+
+message SoundFileDef
+{
+	required string enumName = 1  [(nanopb).max_size = 32];
+	required string filename = 2 [(nanopb).max_size = 32];
+	required bool stream = 3 [default = false];
+	required bool loop = 4  [default = false];
+	required float volume = 5 [default = 1.0];
+	required float minDistance = 6 [default = 1.0];
+	required float maxDistance = 7 [default = 1000.0];
+	required AudioType eType = 8 [default = AUDIO_TYPE_SFX];
+	optional AudioFalloff eFalloff = 9 [default = AUDIO_FALLOFF_LINEAR];
+	optional float pitchRandomisation = 10 [default = 0.0];
+	optional float dopplerFactor = 11 [default = 0.0];
+	optional float basePitch = 12 [default = 1.0];
+	optional uint32 priority = 13 [default = 128];
+	optional string crossfade = 14 [(nanopb).max_size = 32];
+	required bool localized = 15 [default = false];
+	required uint32 crc = 16 [default = 0];
+}
+
+message AudioBank
+{
+	repeated SoundFileDef soundFiles = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+}

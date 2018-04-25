@@ -1,0 +1,227 @@
+<%
+# This file is the source file for system boilerplate files.
+# You can embed Ruby code by using the markup <%= ... your code ... %>
+# There are four global constants available to you:
+#    HEADERS - An array of strings; filenames of all required headers
+#    SYSTEMS - An array of strings; the names of all the systems
+#    COMPONENTS - An array of strings; the names of all the components
+#    EVENTS - An array of strings; the names of all the events
+# There is also one helper function available to you
+#    component_id(c) - Returns the component ID of a component as an int
+%>
+<%
+SIGNAL_HEADER_MAPPING = {
+	"GPUUpdateSignal" => "Engine/Graphics/GPUUpdate.h"	
+}
+SYSTEM_SOURCE = $out.sub(/^_build\/[^\/]+\/[^\/]+\//, "").sub(/\.bp\.cpp$/, "").gsub("\\", "/")
+%>
+#include "Engine/Common/Common.h"
+#include "Engine/Framework/SystemCoordinator.h"
+#include "Engine/Framework/EventManager.h"
+#include "Engine/Framework/System.h"
+#include "Engine/Framework/Event.h"
+
+<%=
+SYSTEM_SOURCE =~ /\.h$/ ? "#include \"#{SYSTEM_SOURCE}\"" : ""
+%>
+
+<%
+chosenSystems = SYSTEMS.select{ |s| File.identical?(s["sourceFile"], SYSTEM_SOURCE) }
+signals = Hash.new
+chosenSystems.each { |s|
+	s["signals"].each { |sig| signals[sig] = true }
+}
+%>
+
+<%=
+# Include required signal headers
+signals.keys.select { |sig| SIGNAL_HEADER_MAPPING.has_key? sig }.map{ |sig| '#include "' + SIGNAL_HEADER_MAPPING[sig] + '"' }.join("\n")
+%>
+
+<%=
+
+chosenSystems.map { |s|
+	def getters(s, collections)
+		collections.reject{ |coll| s[coll].empty? }
+				   .flat_map { |coll| s[coll].map{|c|
+			        	"\t\tGetComponent(#{coll}.#{c["name"]})"
+				  	}}
+	end
+
+	def input_output_getters(s, collections, status_mask)
+		collections.reject{ |coll| s[coll].empty? }
+				   .flat_map { |coll| s[coll].reject { |c| c["status"] & status_mask == 0 }.map{|c|
+				   		owner = c["ownerBitfield"]
+				   		if owner >= 1 and owner <= 3 then
+				        	"usg::GetComponent(GetComponent.GetEntity(), usg::Component<::#{c["type"]}>::GetTypeID(), #{owner},  #{coll}.#{c["name"]})"
+				        else
+				        	"GetComponent(#{coll}.#{c["name"]})"
+				        end
+				  	}}
+	end
+
+	def component_wrapper_types(s, inputoutput, collections)
+		collections.reject{ |coll| s[coll].empty? }
+				   .flat_map { |coll| s[coll].map{|c| "decltype(#{s["name"]}::#{inputoutput}::#{c["name"]})"} }
+	end
+
+	prefix = s["isTemplated"] == true ? "template <>\n" : ""
+	inputOutputGetters = getters s, ["inputs", "outputs"]
+
+	requiredInputOutputGetters = input_output_getters s, ["inputs", "outputs"], 1
+	optionalInputOutputGetters = input_output_getters s, ["inputs", "outputs"], 2
+
+	colliderInputGetters = getters s, ["colliderInputs"]
+	raycastHitInputGetters = getters s, ["raycastHitInputs"]
+	triggererInputGetters = getters s, ["triggererInputs"]
+
+	componentWrapperTypes = (component_wrapper_types s, "Inputs", ["inputs"]) + (component_wrapper_types s, "Outputs", ["outputs"])
+	extern_template_declarations = componentWrapperTypes.map{|t| "extern template bool usg::ComponentGetter::operator()<" + t + ">(" + t + "&);" }.join("\n")
+
+<<END_SYSTEM_OUTPUT
+#{s["autogenCheckExclusions"] ? '#include "Engine/Framework/ExclusionCheck.h"' : ''}
+
+#{!s["autogenGetInputOutputs"] ? "" : <<END_GET_INPUTOUTPUTS
+#{prefix}
+const char* #{s["name"]}::Name()
+{
+	static const char* const name = "#{s["name"].split("::").last}";
+	return name;
+}
+
+#{prefix}
+bool #{s["name"]}::GetInputOutputs(usg::ComponentGetter GetComponent, #{s["name"]}::Inputs& inputs, #{s["name"]}::Outputs& outputs)
+{
+	const bool bFulfillsRequirements = #{requiredInputOutputGetters.empty? ? "true" : (s["autogenCheckExclusions"] ? "usg::CheckExclusions(GetComponent,ExclusionComponents()) &&" : "") + (requiredInputOutputGetters.empty? ? "true" : requiredInputOutputGetters.join(" &&\n\t\t")) };
+	if (!bFulfillsRequirements)
+	{
+		return false;
+	}
+	#{ requiredInputOutputGetters.empty? ? "return true;" : (optionalInputOutputGetters.join(",\n\t") + ";\n\treturn true;") }	
+}
+END_GET_INPUTOUTPUTS
+}
+
+#{!s["autogenGetColliderInputs"] ? "" : <<END_GET_COLLIDERINPUTS
+#include "Engine/Physics/Signals/OnCollision.h"
+#{prefix}
+bool #{s["name"]}::GetColliderInputs(usg::ComponentGetter GetComponent, const uint32 uColliderGroup, #{s["name"]}::ColliderInputs& colliderInputs)
+{
+	return ((uColliderGroup & OnCollisionMask) != 0) && #{colliderInputGetters.empty? ? "true" : "\n" + colliderInputGetters.join(" &&\n")};
+}
+END_GET_COLLIDERINPUTS
+}
+
+#{!s["autogenGetTriggererInputs"] ? "" : <<END_GET_TRIGGERERINPUTS
+#include "Engine/Physics/Signals/OnTrigger.h"
+#{prefix}
+bool #{s["name"]}::GetTriggererInputs(usg::ComponentGetter GetComponent, #{s["name"]}::TriggererInputs& triggererInputs)
+{
+	return #{triggererInputGetters.empty? ? "true" : "\n" + triggererInputGetters.join(" &&\n")};
+}
+END_GET_TRIGGERERINPUTS
+}
+
+#{!s["autogenGetRaycastHitInputs"] ? "" : <<END_GET_RCHINPUTS
+#include "Engine/Physics/Signals/OnRaycastHit.h"
+#{prefix}
+
+bool #{s["name"]}::GetRaycastHitInputs(usg::ComponentGetter GetComponent, #{s["name"]}::RaycastHitInputs& raycastHitInputs)
+{
+	return #{raycastHitInputGetters.empty? ? "true" : "\n" + raycastHitInputGetters.join(" &&\n")};
+}
+
+#include "Engine/Physics/Raycast.h"
+namespace usg { namespace physics {	namespace details { void RaycastAsync(Entity callbackEntity, uint32 uSystemId, const AsyncRaycastRequest& request); } } }
+void #{s["name"]}::RaycastAsync(const Inputs& inputs, const usg::AsyncRaycastRequest& request)
+{
+	usg::physics::details::RaycastAsync(inputs.self->id, usg::GetSystemId<#{s["name"]}>(),  request);
+}
+
+END_GET_RCHINPUTS
+}
+END_SYSTEM_OUTPUT
+}.join("\n")
+%>
+
+namespace usg
+{
+
+<%=
+registeredComponents = Hash.new
+SYSTEMS.select{ |s| File.identical?(s["sourceFile"], SYSTEM_SOURCE) }.map { |s|
+
+def isRequiredAndMine(c)
+	c["status"] == 1 && c["ownerBitfield"] == 1
+end
+
+prefix = s["isTemplated"] == true ? "template <>\n" : ""
+allComponents = s["inputs"] + s["outputs"] + s["colliderInputs"]
+allComponentTypes = allComponents.map{ |c| c["type"] }.uniq
+allComponentTypes.reject!{|c| registeredComponents.has_key?(c) }
+
+allComponentTypes.each{ |c| registeredComponents[c] = true }
+
+required_components = (s["inputs"].select{|c| isRequiredAndMine c}.map{|c| "::#{c["type"]}"} +
+                       s["outputs"].select{|c| isRequiredAndMine c}.map{|c| "::#{c["type"]}"}).uniq
+
+<<END_SYSTEM_OUTPUT
+
+#{ allComponentTypes.size == 0 ? "" : <<END_REGISTERCOMPONENTS_DEF
+
+#{allComponentTypes.map{ |c| "template<> void RegisterComponent<::#{c}>(SystemCoordinator&);" }.join("\n")}
+
+template<>
+void RegisterComponents< #{s["name"]} >(SystemCoordinator& systemCoordinator)
+{
+#{allComponentTypes.map{ |c| "\tusg::RegisterComponent<::#{c}>(systemCoordinator);" }.join("\n")}
+}
+END_REGISTERCOMPONENTS_DEF
+}
+
+#{ s["signals"].reject{ |sig| !sig.include?("OnEvent") }.map { |sig| "template<> void RegisterEvent<" + sig[/\<(.*?)\>/,1] + ">(SystemCoordinator& sc);"}.join("\n")  }
+
+template<>
+void RegisterSystem< #{s["name"]} >(SystemCoordinator& systemCoordinator)
+{
+	#{allComponentTypes.size == 0 ? "" : <<END_REGISTERCOMPONENT_CALL
+RegisterComponents< #{s["name"]} >(systemCoordinator); 
+END_REGISTERCOMPONENT_CALL
+}
+	const uint32 uSystemId = ::usg::GetSystemId<#{s["name"]}>();
+	InitSystem< #{s["name"]} >();
+	SignalRunner runner;
+	systemCoordinator.RegisterSystem< #{s["name"]} >();
+#{s["signals"].reject{ |sig| sig.include?("OnEvent") }.map{ |sig| "\t{\n\t\tconst bool bSuccess = #{sig}::FillSignalRunner<#{s["name"]}>(runner, uSystemId);\n\t\tASSERT(bSuccess);\n\t\tsystemCoordinator.RegisterSystemWithSignal(uSystemId, #{sig}::ID, runner);\n\t}" }.join("\n")}
+#{s["signals"].reject{ |sig| !sig.include?("OnEvent") }.map{ |sig| "\t{\n\t\tRegisterEvent<#{sig[/\<(.*?)\>/,1]}>(systemCoordinator);\n\t\tconst bool bSuccess = #{sig}::FillSignalRunner<#{s["name"]}>(runner, uSystemId);\n\t\tASSERT(bSuccess);\n\t\tsystemCoordinator.RegisterSystemWithSignal(uSystemId, #{sig}::ID, runner);\n\t}" }.join("\n")}
+
+
+}
+
+template<>
+uint32 GetSystemKey< #{s["name"]} >(uint32 uOffset)
+{
+	uint32 uSystemKey = 0;
+
+	const uint32 uComponentIds[] =
+	{
+#{required_components.map { |c| "\t\tComponent<" + c + ">::GetTypeID()," }.join("\n")}
+	};
+
+	for (auto uId : uComponentIds)
+	{
+		const uint32 uBitfieldOffset = uId / BITFIELD_LENGTH;
+		const uint32 uBitfieldIndex = uId % BITFIELD_LENGTH;
+		if (uBitfieldOffset == uOffset)
+		{
+			uSystemKey |= 1 << uBitfieldIndex;
+		}
+	}
+
+	return uSystemKey;
+}
+END_SYSTEM_OUTPUT
+}.join("\n\n")
+%>
+
+}

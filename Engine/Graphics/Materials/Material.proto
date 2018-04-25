@@ -1,0 +1,173 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Graphics/Device/StateEnums.proto';
+
+package usg.exchange;
+
+message Color {
+	required float r = 1 [default = 0];
+	required float g = 2 [default = 0];
+	required float b = 3 [default = 0];
+	required float a = 4 [default = 0];
+}
+
+enum Texture_Wrap {
+	repeat = 0;
+	mirrored_repeat = 1;
+	clamp_to_edge = 2;
+	clamp_to_border = 3;
+}
+enum Texture_Filter {
+	nearest = 0;
+	linear = 1;
+	nearest_mipmap_nearest = 2;
+	linear_mipmap_nearest = 3;
+	nearest_mipmap_linear = 4;
+	linear_mipmap_linear = 5;
+}
+
+enum Texture_Aniso {
+	aniso_1 = 0;
+	aniso_2 = 1;
+	aniso_4 = 2;
+	aniso_8 = 3;
+	aniso_16 = 4;
+}
+
+message Texture {
+	required string textureName = 1 [(nanopb).max_size = 40];
+	required uint32 wrapS = 2 [default = 0];
+	required uint32 wrapT = 3 [default = 0];
+	required uint32 magFilter = 4 [default = 0];
+	required uint32 minFilter = 5 [default = 0];
+	required uint32 mipFilter = 6 [default = 0];
+	required float  lodBias = 7 [default = 0];
+	required uint32 lodMinLevel = 8 [default = 0];
+	required string textureHint = 9 [(nanopb).max_size = 40];
+	required uint32 anisoLevel = 10 [default = 0];
+}
+
+enum Rasterizer_Mode {
+	MODE_CUSTOM = 0;
+	MODE_OPAQUE = 1;
+	MODE_MASK = 2;
+	MODE_TRANSLUCENT = 3;
+}
+
+enum Translucency_Type {
+	TRANSLUCENCY_OPAQUE = 0;
+	TRANSLUCENCY_TRANSLUCENT = 1;
+	TRANSLUCENCY_ADDITIVE = 2;
+	TRANSLUCENCY_SUBTRACTIVE = 3;
+}
+
+enum Rasterizer_BlendMode {
+	BLEND_MODE_NONE = 0;
+	BLEND_MODE_COLOR = 1;
+	BLEND_MODE_LOGIC = 2;
+}
+
+enum Rasterizer_Attribute {
+	ALPHA_TEST_ENABLE = 0;
+
+	DEPTH_TEST_ENABLE = 1;
+	DEPTH_TEST_WRITE = 2;
+	DEPTH_TEST_MASK = 3;
+}
+
+
+
+message Rasterizer {
+	required uint32 attribute = 1 [default = 0];
+
+
+	required uint32 depthTestFunc = 2  [default = 0];
+
+	required AlphaStateGroup alphaState = 3;
+
+	required uint32 mode = 4 [default = 1];
+	required uint32 cullFace = 5 [default = 1];
+	required uint32 blendMode = 6 [default = 0];
+
+	required uint32 isPolygonOffsetEnable = 7 [default = 0];
+	required int32 polygonOffsetUnit = 8 [default = 0];
+
+	required StencilTest stencilTest = 9;
+
+	required uint32 colorMask = 10 [default = 15]; // 0xF MASK_ALL
+}
+
+
+message StencilTest {
+	required uint32 isEnable = 1 [default = 0];
+	required uint32 func = 2 [default = 0];
+	required uint32 ref = 3 [default = 0];
+	required uint32 mask = 4 [default = 0];
+	required uint32 failOperation = 5 [default = 0];
+	required uint32 zFailOperation = 6 [default = 0];
+	required uint32 passOperation = 7 [default = 0];
+}
+
+enum Material_Constant{
+	TEXTURE_NUM = 7;
+}
+
+enum TextureCoordinator_MappingMethod {
+	UV_COORDINATE = 0;
+	PROJECTION = 1;
+	CUBE_ENV = 2;
+	SPHERE_ENV = 3;
+}
+message TextureCoordinator {
+	required TextureCoordinator_MappingMethod method = 1 [default = UV_COORDINATE];
+	required uint32 sourceCoordinate = 2 [default = 0];
+	required uint32 refCamera = 3 [default = 0];
+	required Vector2f scale = 4;
+	required float rotate = 5 [default = 0.0];
+	required Vector2f translate = 6;
+}
+
+message MaterialAttribute {
+	required uint32 isFogEnable = 1 [default = 0];
+	required uint32 fogIndex = 2 [default = 0];
+	
+	required uint32 translucencyKind = 3 [default = 0];
+	required uint32 lightSetIndex = 4 [default = 0];
+}
+
+
+message LightingLookupTable {
+	required string tableName = 1 [(nanopb).max_size = 40];
+	required string lutFileName = 2 [(nanopb).max_size = 80];
+}
+
+
+// FIXME: This is very wasteful, 1KB per constant set per material
+message ConstantData
+{
+	required string bufferName = 1 [(nanopb).max_size = 40];
+	required uint32 uOffset = 2;
+	required uint32 uSize = 3;
+}
+
+message Material {
+	required string materialName = 1 [(nanopb).max_size = 40];
+	repeated Texture textures = 2 [(nanopb).max_count = 7, (nanopb).has_max_count = true];
+
+	required Rasterizer rasterizer = 5;
+	repeated TextureCoordinator textureCoordinators = 6 [(nanopb).max_count = 7];
+
+	required MaterialAttribute attribute = 7;
+	repeated LightingLookupTable lightingLookupTabels = 8 [(nanopb).max_count = 6, (nanopb).has_max_count = true];
+
+	required string customEffectName = 9 [(nanopb).max_size = 40];
+
+	repeated sint32 constantIndexes = 13 [(nanopb).max_count = 6, (nanopb).has_max_count = true];
+
+	repeated ConstantData constants = 10 [(nanopb).max_count = 4];
+	repeated uint32 constantData = 12 [(nanopb).max_count = 256, (nanopb).has_max_count = true];
+
+}

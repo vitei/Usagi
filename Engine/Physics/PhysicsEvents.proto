@@ -1,0 +1,65 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2016
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Physics/Collision.proto';
+import 'Engine/Physics/PhysicsEnums.proto';
+import 'Engine/Framework/EntityRef.proto';
+import "Engine/Maths/Maths.proto";
+
+package usg.Events;
+
+message FullPhysicsSync
+{
+	required usg.Vector3f		vPosition				= 1;
+	required usg.Quaternionf	qRotation				= 2;
+	required usg.Vector3f		vVelocity				= 3;
+	required usg.Vector3f		vTorque					= 4;
+}
+
+message ApplyForce
+{
+	// World position can be given if force mode is FORCE or IMPULSE. On other force modes, the force is always applied at the center of mass.
+
+	required usg.Vector3f vForce = 1;
+	required ForceMode eForceMode = 2 [default = FORCE];
+	optional usg.Vector3f vWorldPosition = 3;
+}
+
+message ApplyTorque
+{
+	required usg.Vector3f vTorque = 1;
+	required ForceMode eForceMode = 2 [default = FORCE];
+}
+
+message SetLinearVelocity
+{
+	required usg.Vector3f vVelocity = 1;
+}
+
+message SetAngularVelocity
+{
+	required usg.Vector3f vVelocity = 1;
+}
+
+message UpdateCollisionMasks
+{
+	optional uint32 uGroup = 1;
+	optional uint32 uFilter = 2;
+}
+
+message SetRevoluteJointAngleLimits
+{
+	optional float fMin = 1;
+	optional float fMax = 2;
+}
+
+message DestroyJoint
+{
+	
+}
+
+message OnJointBroken
+{
+	
+}

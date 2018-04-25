@@ -1,0 +1,218 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Color.proto";
+import "Engine/Graphics/Device/StateEnums.proto";
+import 'Engine/Graphics/Materials/Material.proto';
+
+package usg.particles;
+
+enum RenderLayer
+{
+	option (nanopb_enumopt).long_names = false;
+	LAYER_OPAQUE = 0;
+	LAYER_TRANSLUCENT = 1;
+	LAYER_SUBTRACTIVE = 2;
+	LAYER_ADDITIVE = 3;
+};
+
+enum ParticleType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	PARTICLE_TYPE_BILLBOARD = 0;
+	PARTICLE_TYPE_DIR_POLYGON = 1;	// Is actually the velocity oriented sprite
+	PARTICLE_TYPE_TRAIL = 2;
+	PARTICLE_TYPE_USER_ORIENTED = 3;
+	PARTICLE_TYPE_Y_AXIS_ALIGNED = 4;
+	PARTICLE_TYPE_COUNT = 5;
+};
+
+
+enum TextureMode
+{
+	option (nanopb_enumopt).long_names = false;
+
+	TEX_MODE_NONE = 0;
+	TEX_MODE_FLIPBOOK_ONCE = 1;
+	TEX_MODE_FLIPBOOK_LOOP = 2;
+	TEX_MODE_RANDOM_IMAGE = 3;
+	TEX_MODE_COUNT = 4;
+};
+
+enum ParticleColorMode
+{
+	option (nanopb_enumopt).long_names = false;
+
+	PARTICLE_COLOR_CONSTANT = 0;
+	PARTICLE_COLOR_RANDOM = 1;
+	PARTICLE_COLOR_ANIMATION = 2;
+	PARTICLE_COLOR_COUNT = 3;
+};
+
+enum EmitterShape
+{
+	option (nanopb_enumopt).long_names = false;
+
+	EMITTER_SHAPE_POINT = 0;
+	EMITTER_SHAPE_SPHERE = 1;
+	EMITTER_SHAPE_CYLINDER = 2;
+	EMITTER_SHAPE_CUBE = 3;
+
+	EMITTER_SHAPE_COUNT = 11;
+};
+
+enum EmissionType
+{
+	option (nanopb_enumopt).long_names = false;	
+	EMISSION_TYPE_TIMED = 0;
+	EMISSION_TYPE_INFINITE = 1;
+	EMISSION_TYPE_ONE_SHOT = 2;
+}
+
+message TextureAnimation
+{
+	required TextureMode  		  		eTexMode = 2 [default = TEX_MODE_NONE];
+	required bool					 	bRandomOffset = 3 [default = false];
+	repeated uint32						animIndex = 4  [(nanopb).max_count = 32];
+	required float						fAnimTimeScale = 5 [default = 30.0];
+}
+
+
+message ParticleColor
+{
+	required ParticleColorMode			eColorMode = 1 [default = PARTICLE_COLOR_CONSTANT];
+	required Color						cColor0 = 2;
+	required Color						cColor1 = 3;
+	required Color						cColor2 = 4;
+	required float						fInTimeEnd = 5 [default = 0.0];
+	required float						fOutTimeStart = 6  [default = 1.0];
+	required float 						fPeak = 9 [default = 1.0];
+	required uint32						uRepetitionCount = 7 [default = 0];
+	required bool						bRandomRepetitionPos = 8  [default = false];
+
+	required float 						fLerpEnvColor = 10 [default = 0.0];
+}
+
+message ParticleAlpha
+{
+	required float						fInitialAlpha = 1 [default = 1.0];
+	required float						fIntermediateAlpha = 2 [default = 1.0];
+	required float						fEndAlpha = 3  [default = 0.0];
+	required float						fFinishInTime = 4 [default = 0.0];
+	required float						fOutStartTiming = 5 [default = 1.0];
+}
+
+message TextureData
+{
+	// TODO: Move the model exchange data out into shared data so we can put the sampler etc in here
+	required string				name = 1 [(nanopb).max_size = 64];
+	required uint32				uPatternRepeatHor = 2  [default = 1];	
+	required uint32				uPatternRepeatVer = 3  [default = 1];
+	
+	required TextureAnimation	textureAnim = 4;
+}
+
+message ParticleRotation
+{
+	required float	fBaseRotation = 1  [default = 0.0];
+	required float	fRandomise = 2  [default = 0.0];
+	required float	fSpeed = 3 [default = 0.0];
+	required float	fSpeedRandomise = 4 [default = 0.0];
+}
+
+message ParticleScale
+{
+	required FloatAnim	standardValue = 1;
+	required float		fRandomness = 2  [default = 0.0];
+	required float		fInitial = 3  [default = 1.0];
+	required float		fIntermediate = 4 [default = 1.0];
+	required float		fEnding = 5 [default = 1.0];
+	required float		fBeginScaleIn = 6 [default = 0.0];
+	required float		fStartScaleOut = 7 [default = 1.0];
+}
+
+message FloatAnimKey
+{
+	required float	fTimeIndex = 1 [default = 0.0];
+	required float	fValue = 2  [default = 1.0];
+}
+
+message FloatAnim
+{
+	repeated FloatAnimKey frames = 1 [(nanopb).max_count = 10];
+}
+
+message EmissionVariables
+{
+	// TODO: Add animation for emission
+	//required bool		bOneTime = 1;
+	required EmissionType eEmissionType = 8;
+	required float		fEmissionTime = 3;
+	required FloatAnim	emissionRate = 4;
+	required float		fReleaseInterval = 5;
+	required float		fReleaseIntervalRandom = 6;
+	required uint32		uMaxParticles = 7;
+
+	required Vector3f	vUserRotation = 9;
+}
+
+
+
+message SortSettings
+{
+	required RenderLayer	eRenderLayer = 1;
+	required uint32			uPriority = 2;
+	required bool			bWriteDepth = 3;
+	optional float 			fDepthOffset = 4;
+	// TODO: Optional depth sort of particles?
+}
+
+message EmitterEmission
+{
+	// Effect information
+	required usg.AlphaStateGroup	blend = 1;
+	required float 					fSoftFadeDistance = 32 [default = 0.0];
+	required SortSettings			sortSettings = 29;
+	repeated TextureData			textureData = 2  [(nanopb).max_count = 2];
+	
+	// Emission
+	required EmissionVariables	emission = 6;
+
+	// Position and velocity
+	required float				fPositionRandomness = 7;
+	required FloatAnim			omniVelocity = 8;
+	required FloatAnim			dirVelocity = 9;
+	required usg.Vector3f		vVelocityDir = 10;
+	required float				fVelocityDirConeDeg = 11;
+	required float				fSpeedRandomness = 12;
+	required bool				bInheritVelocity = 13;
+	optional bool				bLocalEffect = 30;
+	required bool				bCPUPositionUpdate = 24;	// More expensive but a better effect
+	required float				fDrag = 25;
+
+	// Gravity
+	required float				fGravityStrength = 14;
+	required usg.Vector3f		vGravityDir = 15;
+
+	// Particle init data
+	required ParticleType		eParticleType = 16;
+	required FloatAnim			life = 17;
+	required float				fLifeRandomness = 18;
+	required usg.Vector2f		vParticleCenter = 19;
+
+	required ParticleColor		particleColor = 20;
+
+	required ParticleAlpha		particleAlpha = 21;
+
+	required ParticleRotation	particleRotation = 22;
+
+	required ParticleScale		particleScale = 23;
+
+	required EmitterShape		eShape = 26;
+
+	optional Color cBackgroundColor = 31;
+
+}

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>89f35752-516f-4873-88a9-871195e69bfd</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>lvl2vhir.py</StartupFile>
+    <SearchPath>..\;..\lvlUtil\</SearchPath>
+    <WorkingDirectory>./../../../</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>lvl2vhir</Name>
+    <RootNamespace>lvl2vhir</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>-I Data/Entities -d Data/Components/Defaults.yml -o Tools/python/lvl2vhir/hogera.vhir -t Tools/python/lvl2vhir/temp.yml -r Tools/ruby/maya2pb.rb -m level_position_inst Tools/python/lvl2vhir/farm_level.lvl</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Level2Instances.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Level2Yaml.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LevelEditor\Game.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LevelEditor\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lvl2manifest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lvl2vhir.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LevelEditor\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
+  <Import Condition="!Exists($(PtvsTargetsFile))" Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

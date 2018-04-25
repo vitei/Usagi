@@ -1,0 +1,101 @@
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Device/StateEnums.proto";
+import 'Engine/Graphics/Materials/Material.proto';
+
+package usg.SkeletalAnim;
+
+
+enum BlendType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	BLEND_LINEAR = 0;
+	BLEND_CUBIC = 1;
+}
+
+enum CrossFade
+{
+	option (nanopb_enumopt).long_names = false;
+
+	FADE_SMOOTH = 0;
+	FADE_FROZEN = 1;
+	FADE_REVERSE = 2;
+}
+
+enum MotionType
+{
+	option (nanopb_enumopt).long_names = false;	
+
+	MOTION_TYPE_ANIM = 0;
+	MOTION_TYPE_1D_BLEND = 1;
+	MOTION_TYPE_2D_BLEND = 2;
+	MOTION_TYPE_NONE = 3;	// Used when only material anims
+}
+
+message Condition
+{
+	required string	 	name = 1 [(nanopb).max_size = 32];
+	required bool		value = 2 [default=false];
+}
+
+message Modifier
+{
+	required string	 	name = 1 [(nanopb).max_size = 32];
+	required float		value = 2 [default=0.0];
+}
+
+message AnimChain
+{
+	required string	 	entryState = 1 [(nanopb).max_size = 64];
+	repeated Condition  conditions = 2 [(nanopb).max_count = 8];
+	repeated Modifier	modifiers = 3 [(nanopb).max_count = 8];
+	// Events are the same as conditions get automatically reset after each frame
+	repeated Condition  events = 4  [(nanopb).max_count = 8];
+	repeated State 		states = 5 [(nanopb).max_count = 16];
+}
+
+
+message Motion
+{
+	// The parameters used for lerping between the animation grid
+	required string	 	parameterX = 1 [(nanopb).max_size = 64];
+	required string	 	parameterY = 2 [(nanopb).max_size = 64];
+	// The animations
+	repeated Animation  anim = 3 [(nanopb).max_count = 16];
+}
+
+
+message State
+{
+	required string	 	stateName = 1 [(nanopb).max_size = 64];
+	required MotionType eMotionType = 2 [default=MOTION_TYPE_ANIM];
+	optional Animation  anim = 3;
+	optional Motion     motion = 4;
+	repeated MaterialAnim	materialAnims = 5 [(nanopb).max_count = 2];
+	repeated Transition transitions = 6 [(nanopb).max_count = 5];
+	required bool		bHidden = 7 [default = false];
+}
+
+message Animation
+{
+	required string animName = 1 [(nanopb).max_size = 64];
+	required float 	playbackSpeed = 2 [default = 1.0];
+	required float  fLerpX = 3; // For blending purposes
+	required float  fLerpY = 4; // For blending purposes
+}
+
+message Transition
+{
+	required string			targetState = 1 [(nanopb).max_size = 64];
+	required BlendType		blendType = 2 [default=BLEND_LINEAR];
+	required CrossFade		fadeType = 3 [default=FADE_SMOOTH];
+	required float 			blendInTime = 4 [default = 0.0];
+	repeated Condition		conditions = 5 [(nanopb).max_count = 4];
+	required bool 			bWaitOnAnim = 6 [default = false];
+}
+
+message MaterialAnim
+{
+	required string animName = 1 [(nanopb).max_size = 32];
+}

@@ -1,0 +1,3 @@
+# by default, handle everything except this file with LFS
+* filter=lfs diff=lfs merge=lfs
+.gitattributes filter= text diff

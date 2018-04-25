@@ -1,0 +1,36 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import "Engine/Maths/Maths.proto";
+import "Engine/Graphics/Color.proto";
+
+package usg.particles;
+
+message RibbonData
+{
+	required string	textureName     = 1 [(nanopb).max_size = 64];
+	required usg.Vector3f vPosition = 2;
+	required Color		  cStartColor = 3;
+	required Color		  cEndColor = 4;
+	required float		  fLifeTime = 5  [default = 0.5];
+	required float		  fLineWidth = 6  [default = 0.15];
+}
+
+message EmitterData
+{
+	required string		  emitterName     = 1 [(nanopb).max_size = 32];
+	required usg.Vector3f vScale = 3;
+	required usg.Vector3f vRotation = 4;
+	required usg.Vector3f vPosition = 5;
+	required float fParticleScale = 6 [default = 1.0];
+	optional float fReleaseFrame = 7 [default = 1.0];
+}
+
+message EffectGroup
+{
+	repeated EmitterData emitters = 1   [(nanopb).max_count = 32];
+	repeated RibbonData ribbons = 2   [(nanopb).max_count = 8];
+	optional Color cBackgroundColor  = 8;
+	optional uint32 uPreloadCount = 18 [default = 1];
+}

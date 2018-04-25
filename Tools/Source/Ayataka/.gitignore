@@ -1,0 +1,10 @@
+/build-*
+/Ayataka/Debug/
+/Ayataka/Release/*
+*.exe
+*.lib
+*.opensdf
+*.sdf
+*.user
+*.lastbuildstate
+*.vmdc

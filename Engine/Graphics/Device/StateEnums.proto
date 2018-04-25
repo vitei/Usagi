@@ -1,0 +1,118 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Graphics/Color.proto';
+
+package usg;
+
+
+enum CullFace {
+	option (nanopb_enumopt).long_names = false;
+
+	CULL_FACE_NONE = 0;
+	CULL_FACE_BACK = 1;
+	CULL_FACE_FRONT = 2;
+
+	CULL_FACE_FORCE_SIZE = 0x7FFFFFFF;
+}
+
+enum BlendFunc
+{
+	option (nanopb_enumopt).long_names = false;
+
+	BLEND_FUNC_ZERO = 0;
+	BLEND_FUNC_ONE = 1;
+	BLEND_FUNC_SRC_COLOR = 2;
+	BLEND_FUNC_ONE_MINUS_SRC_COLOR = 3;
+	BLEND_FUNC_DST_COLOR = 4;
+	BLEND_FUNC_ONE_MINUS_DST_COLOR = 5;
+	BLEND_FUNC_SRC_ALPHA = 6;
+	BLEND_FUNC_ONE_MINUS_SRC_ALPHA = 7;
+	BLEND_FUNC_DST_ALPHA = 8;
+	BLEND_FUNC_ONE_MINUS_DST_ALPHA = 9;
+	BLEND_FUNC_CONSTANT_COLOR = 10;
+	BLEND_FUNC_ONE_MINUS_CONSTANT_COLOR = 11;
+	BLEND_FUNC_CONSTANT_ALPHA = 12;
+	BLEND_FUNC_ONE_MINUS_CONSTANT_ALPHA = 13;
+	BLEND_FUNC_SRC_ALPHA_SATURATE = 14;
+
+	BLEND_FUNC_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+
+enum BlendEquation
+{
+	option (nanopb_enumopt).long_names = false;
+
+	BLEND_EQUATION_ADD = 0;
+	BLEND_EQUATION_SUBTRACT = 1;
+	BLEND_EQUATION_REVERSE_SUBTRACT = 2;
+	BLEND_EQUATION_MIN = 3;
+	BLEND_EQUATION_MAX = 4;
+
+	BLEND_EQUATION_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum AlphaTest
+{
+	option (nanopb_enumopt).long_names = false;
+
+	ALPHA_TEST_NEVER = 0;
+	ALPHA_TEST_ALWAYS = 1;
+	ALPHA_TEST_EQUAL = 2;
+	ALPHA_TEST_NOTEQUAL = 3;
+	ALPHA_TEST_LESS = 4;
+	ALPHA_TEST_LEQUAL = 5;
+	ALPHA_TEST_GREATER = 6;
+	ALPHA_TEST_GEQUAL = 7;
+
+	ALPHA_TEST_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum DepthTest
+{
+	option (nanopb_enumopt).long_names = false;
+
+	DEPTH_TEST_NEVER = 0;
+	DEPTH_TEST_ALWAYS = 1;
+	DEPTH_TEST_EQUAL = 2;
+	DEPTH_TEST_NOTEQUAL = 3;
+	DEPTH_TEST_LESS = 4;
+	DEPTH_TEST_LEQUAL = 5;
+	DEPTH_TEST_GREATER = 6;
+	DEPTH_TEST_GEQUAL = 7;
+
+	DEPTH_TEST_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+message AlphaStateGroup {
+	required BlendFunc rgbSrcFunc  = 1 [default = BLEND_FUNC_ONE];
+	required BlendFunc rgbDestFunc = 2 [default = BLEND_FUNC_ZERO];
+	required BlendEquation   rgbOp       = 3 [default = BLEND_EQUATION_ADD];
+
+	required BlendFunc alphaSrcFunc  = 4 [default = BLEND_FUNC_ONE];
+	required BlendFunc alphaDestFunc = 5 [default = BLEND_FUNC_ZERO];
+	required BlendEquation   alphaOp       = 6 [default = BLEND_EQUATION_ADD];
+
+	required Color constColor = 7;
+
+	required AlphaTest  alphaTestFunc = 8      [default = ALPHA_TEST_ALWAYS];
+	required float		alphaTestReference = 9 [default = 0.0];
+}
+
+enum StencilOp {
+	option (nanopb_enumopt).long_names = false;
+
+	STENCIL_OP_KEEP      = 0;
+	STENCIL_OP_ZERO      = 1;
+	STENCIL_OP_REPLACE   = 2;
+	STENCIL_OP_INCR      = 3;
+	STENCIL_OP_DECR      = 4;
+	STENCIL_OP_INVERT    = 5;
+	STENCIL_OP_INCR_WRAP = 6;
+	STENCIL_OP_DECR_WRAP = 7;
+
+	STENCIL_OP_FORCE_SIZE = 0x7FFFFFFF;
+}

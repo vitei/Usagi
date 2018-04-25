@@ -1,0 +1,11 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.Processor;
+
+message Merge
+{
+	optional string entityWithID = 1 [(nanopb).max_size = 64];
+}

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+<% for @path, @uuid in filters %>
+    <Filter Include="<%= @path %>">
+      <UniqueIdentifier>{<%= @uuid %>}</UniqueIdentifier>
+    </Filter>
+<% end %>
+
+    <Filter Include="_build">
+      <UniqueIdentifier>{BUILD-UID}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_build\ProtoGen">
+      <UniqueIdentifier>{PROTOGEN-UID}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_build\BoilerGen">
+      <UniqueIdentifier>{BOILERGEN-UID}</UniqueIdentifier>
+    </Filter> 
+
+  </ItemGroup>
+  <ItemGroup>
+<% for @h in headers %>
+<% if locations.has_key?(@h) %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>">
+      <Filter><%= locations[@h] %></Filter>
+    </ClInclude>
+<% else %>
+    <ClInclude Include="..\..\..\..\<%= project_dir + @h %>" />
+<% end %>
+<% end %>
+
+<% for @h in proto_headers %>
+  <ClInclude Include="$(PBProjectDir)<%= @h %>">
+    <Filter>_build\Protogen</Filter>
+  </ClInclude>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @src in sources %>
+<% if locations.has_key?(@src) %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>">
+      <Filter><%= locations[@src] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
+<% end %>
+<% end %>
+
+<% for @src in proto_sources %>
+  <ClCompile Include="$(PBProjectDir)<%= @src %>">
+    <Filter>_build\Protogen</Filter>
+  </ClCompile>
+<% end %>
+
+<% for @src in boilerplate_sources %>
+  <ClCompile Include="$(IntDir)..\<%= @src %>">
+    <Filter>_build\BoilerGen</Filter>
+  </ClCompile>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @p in proto_relative %>
+<% if locations.has_key?(@p) %>
+    <None Include="..\..\..\..\<%= project_dir + @p %>">
+      <Filter><%= locations[@p] %></Filter>
+    </None>
+<% else %>
+    <None Include="..\..\..\..\<%= @p %>" />
+<% end %>
+<% end %>
+  </ItemGroup>
+</Project>

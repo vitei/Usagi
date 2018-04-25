@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <USAGI_STL>$(USAGI_DIR)\Engine\ThirdParty\EASTL</USAGI_STL>
+    <USAGI_STL_INCLUDE>$(USAGI_STL)\include</USAGI_STL_INCLUDE>
+    <USAGI_EABASE_INCLUDE>$(USAGI_STL)\test\packages\EABase\include\Common</USAGI_EABASE_INCLUDE>
+    <USAGI_STL_LIB>$(USAGI_STL)\lib</USAGI_STL_LIB>
+    <USAGI_PHYSICS>$(PHYSX_DIR)</USAGI_PHYSICS>
+    <USAGI_PHYSICS_INCLUDE>$(USAGI_PHYSICS)\Include</USAGI_PHYSICS_INCLUDE>
+  </PropertyGroup>
+  <!-- shared configuration settings, mainly for compiling -->
+  <PropertyGroup>
+    <OutDir>$(USAGI_DIR)\_libs\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(USAGI_DIR)\_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- We need to set this to true to ensure that our custom build rules are run. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <IncludePath>$(VULKAN_SDK)\Include;$(DXSDK_DIR)Include;$(GHS_ROOT)\ansi;$(GHS_ROOT)\scxx;$(USAGI_DIR);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\Engine\ThirdParty\gli;$(USAGI_DIR)\_includes;$(USAGI_DIR)\Engine\ThirdParty\khronos;$(USAGI_DIR)\Engine\ThirdParty\glew\include;$(GHS_ROOT)\include\ppc;$(USAGI_STL_INCLUDE);$(USAGI_EABASE_INCLUDE);$(USAGI_PHYSICS_INCLUDE);$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>VK_USE_PLATFORM_WIN32_KHR;LUA_USER_H=&lt;Engine/Framework/Script/LuaConf.h&gt;;PB_FIELD_32BIT;NN_SWITCH_ENABLE_HOST_IO;EASTL_USER_DEFINED_ALLOCATOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(VK_SDK_PATH);$(USAGI_PHYSICS)\Include;$(USAGI_PHYSICS)\..\PxShared\Include;$(USAGI_DIR)\Engine\ThirdParty\gli;$(USAGI_DIR)\Engine\ThirdParty\gli\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="USAGI_STL">
+      <Value>$(USAGI_STL)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="USAGI_STL_INCLUDE">
+      <Value>$(USAGI_STL_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="USAGI_EABASE_INCLUDE">
+      <Value>$(USAGI_EABASE_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="USAGI_STL_LIB">
+      <Value>$(USAGI_STL_LIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="USAGI_PHYSICS">
+      <Value>$(USAGI_PHYSICS)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="USAGI_PHYSICS_INCLUDE">
+      <Value>$(USAGI_PHYSICS_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
