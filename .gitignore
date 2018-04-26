@@ -25,7 +25,6 @@ Engine/Core/BuildID.h
 build.ninja
 Usagi.sdf
 Usagi.opensdf
-build
 xcuserdata
 Gemfile.lock
 .bundle

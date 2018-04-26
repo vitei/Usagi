@@ -8,7 +8,7 @@ BUILDS          = (ENV["build"]    || "debug").split(",")
 TARGET_PLATFORM = ENV["platform"]  || DEFAULT_PLATFORM
 REGION          = ENV["region"]    || "JP"
 VERBOSITY       = ENV["verbosity"] || "normal"
-PROJECT         = ENV["project"]   || "Kepler"
+PROJECT         = ENV["project"]   || "UsagiTest"
 EMBED_DLP       = ENV["embed_dlp"] || "false"
 CURRENT_DIR     = File.dirname(__FILE__)
 
