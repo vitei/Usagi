@@ -40,7 +40,7 @@ The build process has not been improved or significantly modified and currently 
 1. Build the PhysX binaries  
    [**PhysX Checkout Dir**]\PhysX_3.4\Source\compiler\vc15win64\PhysX.sln and compile for both debug and release  
    Use the project located in Source\compiler\vc15win64  
-   Note that you must currently change the default options to build with Multi-threaded debug and Multi-threaded DLL
+   Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
 
 1. **Optional** Install the **FBX SDK 2018.1.1 VS2015**.  
    Not necessary to run, but required to build the model converter (Ayataka)
@@ -48,7 +48,7 @@ The build process has not been improved or significantly modified and currently 
 
 1. **Optional** Install and build the **Oculus SDK for Windows**.  
    Not necessary to run, but required if you want to make a VR app
-   Again Note that you must currently change the default options to build with Multi-threaded debug and Multi-threaded DLL
+   Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
 1. Clone a **Usagi Project**.  
