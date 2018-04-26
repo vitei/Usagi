@@ -1,7 +1,7 @@
 usagi
 =====
 
-Usagi is a Hierarchical Component-Entity-System based game engine created by [Vitei Inc.](http://www.vitei.com/) designed to priortise performance.  
+Usagi is a Hierarchical Entity-Component-System based game engine created by [Vitei Inc.](http://www.vitei.com/) designed to priortise performance.  
 The Component-Entity-System design has taken the games industry by a storm over the last ten years or so, but we have applied some of our own innovations which come out of arranging our entities in a hierarchy to help control the flow of execution, and allows us to make a number of thread-safe optimisations.  
 
 Usagi was developed to allow us to create demanding action titles on limited hardware, however the unique design of its component entity system should be suitable for any genre and should be even better suited to more modern hardware. It is actually a relatively new engine, work only began on it in 2013, and as such it was designed to be performant on multi-core systems. As Usagi was only ever used in one commerical title which for all practical purposes only had access to a single core, many of benefits remain theoretical. Even on a single core the cache friendly nature of the design did give superb performance however.  
@@ -14,7 +14,7 @@ Usagi was developed to allow us to create demanding action titles on limited har
  2D UI and menu code (due to their dependence on propriatary formats)   
  Some of the networking code (as it did not follow the standards for platform independent coding)  
  
- More detailed information is available in the wiki.  
+ More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
 Getting up and running
 ----------------------
@@ -52,8 +52,8 @@ The build process has not been improved or significantly modified and currently 
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
 1. Clone a **Usagi Project**.  
-   For example UsagiTest  
-   Always clone Usagi repos recursively as we make heavy use of submodules  
+   For example [UsagiTest](https://github.com/vitei/UsagiTest)  
+   Always clone Usagi repos recursively as we make heavy use of submodules
 
 1. From a command window run **Setup.bat**  
    If gems fail to install confirm your ruby version  
