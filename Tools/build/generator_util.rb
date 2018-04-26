@@ -521,9 +521,10 @@ module GeneratorUtil
       source_list << vs_copy
       n.build('cp', {vs_copy => [source_file]})
     elsif is_windows_build || is_nx_emulator_build
-      ['Win32', 'x64'].each do |platform|
+      # 'Win32', no longer supported
+      ['x64'].each do |platform|
         vs_copy = source_file.sub("\/#{config.target_platform}\/", "/#{platform}/")
-        vs_copy = vs_copy.sub("\/debug\/", '/NXEmu_Debug/') if config.target_platform == 'nxe'
+     #   vs_copy = vs_copy.sub("\/debug\/", '/NXEmu_Debug/') if config.target_platform == 'nxe'
         source_list << vs_copy
         n.build('cp', {vs_copy => [source_file]})
       end
