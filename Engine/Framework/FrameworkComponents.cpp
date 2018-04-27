@@ -35,10 +35,10 @@ void OnLoaded<MatrixComponent>(Component<MatrixComponent>& m, ComponentLoadHandl
 {
 	// Hack to ensure matrix is initialized from the transform component
 	Entity e = m.GetEntity();
-	TransformComponent* trans;
+	Required<usg::TransformComponent> trans;
 	MatrixComponent* mat = &m.GetData();
-	GetOutputComponent(e, &trans);
-	if(trans)
+	GetComponent(e, trans);
+	if(trans.IsValid())
 	{
 		mat->matrix = trans->rotation;
 		mat->matrix.SetTranslation( trans->position );

@@ -484,28 +484,28 @@ namespace usg
 		{
 			if (spawnParams.HasTransform())
 			{
-				usg::TransformComponent* pTransform;
-				GetOutputComponent(e, &pTransform);
-				if (pTransform)
+				Required<usg::TransformComponent> trans;
+				GetComponent(e, trans);
+				if (trans.IsValid())
 				{
-					*pTransform = spawnParams.GetTransform();
+					trans.Modify() = spawnParams.GetTransform();
 				}
-				usg::MatrixComponent* pMatrix;
-				GetOutputComponent(e, &pMatrix);
-				if (pMatrix)
+				Required<usg::MatrixComponent> mat;
+				GetComponent(e, mat);
+				if (mat.IsValid())
 				{
-					pMatrix->matrix = spawnParams.GetTransform().rotation;
-					pMatrix->matrix.SetPos(spawnParams.GetTransform().position);
+					mat.Modify().matrix = spawnParams.GetTransform().rotation;
+					mat.Modify().matrix.SetPos(spawnParams.GetTransform().position);
 				}
 			}
 
 			if (spawnParams.HasOwnerNUID())
 			{
-				usg::NetworkOwner* pOwner;
-				GetOutputComponent(e, &pOwner);
-				if (pOwner)
+				Required<usg::NetworkOwner> owner;
+				GetComponent(e, owner);
+				if (owner.IsValid())
 				{
-					pOwner->ownerUID = spawnParams.GetOwnerNUID();
+					owner.Modify().ownerUID = spawnParams.GetOwnerNUID();
 				}
 			}
 

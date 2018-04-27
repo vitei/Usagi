@@ -140,13 +140,13 @@ namespace usg {
 					boundingSphere.SetPos(outputs.shadow.GetRuntimeData().hitResult.vIntersectPoint);
 					boundingSphere.SetRadius(radius);
 
-					usg::GroundDecalsHandle* pDecals;
-					GetOutputComponentFromParent(inputs.matrix.GetEntity(), &pDecals, true);
 
+					Required<usg::GroundDecalsHandle, FromSelfOrParents> Decals;
+					GetComponent(inputs.matrix.GetEntity(), Decals);
 					RuntimeData<ShadowDecalComponent>& decal = outputs.shadow.GetRuntimeData();
 
 					decal.pDecal->AddToScene(inputs.scene.GetRuntimeData().pScene, true);
-					decal.pDecal->SetContents(pGPUData->pDevice, &boundingSphere, pDecals->pGroundDecals->GetVertexBuffer(), indices, indicesNum);
+					decal.pDecal->SetContents(pGPUData->pDevice, &boundingSphere, Decals->pGroundDecals->GetVertexBuffer(), indices, indicesNum);
 					decal.vPrevTestPos = pos;
 				}
 			}

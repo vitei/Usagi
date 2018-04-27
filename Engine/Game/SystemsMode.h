@@ -14,6 +14,7 @@ namespace usg
 	class ComponentEntity;
 	class Scene;
 	class SystemCoordinator;
+	class ComponentManager;
 
 	typedef void(*RegisterSystemsFn) (usg::SystemCoordinator& systemCoordinator);
 
@@ -29,6 +30,7 @@ namespace usg
 
 		virtual void InitNetworking(UsagiNet& usagiNetwork) override;
 		
+		ComponentManager* GetComponentMgr();
 
 	protected:
 		ComponentEntity* GetRootEntity();

@@ -98,6 +98,11 @@ namespace usg
 		m_pImpl->pMessenger.reset(vnew(ALLOC_OBJECT)Messenger(*m_pImpl->pMessageDispatch, m_pImpl->pNetManager));
 	}
 
+	ComponentManager* SystemsMode::GetComponentMgr()
+	{
+		return m_pImpl->pComponentManager.get();
+	}
+
 	ComponentEntity* SystemsMode::GetRootEntity()
 	{
 		return m_pImpl->pRootEntity;

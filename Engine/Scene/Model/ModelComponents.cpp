@@ -133,18 +133,17 @@ namespace usg
 	                                         bool bWasPreviouslyCalled)
 	{
 		// TODO: check bWasPreviouslyCalled ?
-
 		if (p->name[0] != '\0')
 		{
 			// FIXME: Ordering of these loads is important...
-			ModelComponent* pModel = NULL;
-			GetOutputComponent(p.GetEntity(), &pModel);
+			Required<usg::ModelComponent> model;
+			GetComponent(p.GetEntity(), model);
 
 			Required<ActiveDevice, FromSelfOrParents> device;
 			bool bDidGetComponents = GetComponent(p.GetEntity(), device);
 			ASSERT(bDidGetComponents);
 
-			ModelResHndl pResource = ResourceMgr::Inst()->GetModel(device.GetRuntimeData().pDevice, pModel->name, true);
+			ModelResHndl pResource = ResourceMgr::Inst()->GetModel(device.GetRuntimeData().pDevice, model.Modify().name, true);
 			p.GetRuntimeData().pAnimPlayer->Init(pResource->GetDefaultSkeleton(), p->name, true);
 		}
 	}
