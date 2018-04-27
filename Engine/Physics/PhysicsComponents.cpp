@@ -228,7 +228,6 @@ namespace usg
 		if (aggregate.Exists() && !c->bDoNotAttachToParentAggregate)
 		{
 			auto& aggregateComponent = *GameComponents<PhysicsAggregate>::GetComponent(aggregate.Force().GetEntity());
-			ComponentLoadHandles handles;
 			if (aggregateComponent.GetRuntimeData().pAggregate == nullptr)
 			{
 				OnLoaded(aggregateComponent, handles, false);
@@ -906,7 +905,7 @@ namespace usg
 		{
 			return;
 		}
-		OnVehicleColliderLoaded(c);
+		OnVehicleColliderLoaded(c, handles);
 		auto& sceneRtd = physics::GetScene(c).GetRuntimeData().GetData();
 		const memsize uWheelCount = c->uNumWheels;
 		for (memsize i = 0; i < uWheelCount; i++)

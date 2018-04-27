@@ -11,6 +11,7 @@ namespace usg
 	class Scene;
 	class ResourceMgr;
 	class ModelMgr;
+	class ComponentManager;
 
 	namespace physics
 	{
@@ -19,7 +20,11 @@ namespace usg
 
 	struct ComponentLoadHandles
 	{
+		friend ComponentManager;
+	private:
 		ComponentLoadHandles() { pDevice = nullptr; pScene = nullptr; pResourceMgr = nullptr; pPhysicsScene = nullptr; pModelMgr = nullptr; }
+		PRIVATIZE_COPY(ComponentLoadHandles)
+	public:
 
 		GFXDevice*					pDevice;
 		Scene*						pScene;

@@ -569,9 +569,11 @@ namespace usg
 		}
 	}
 
-	void ComponentManager::RegisterResourceHandles(ComponentLoadHandles& handles)
+	void ComponentManager::RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene)
 	{
-		m_componentLoadHandles = handles;
+		m_componentLoadHandles.pDevice = pDevice;
+		m_componentLoadHandles.pResourceMgr = pRes;
+		m_componentLoadHandles.pScene = pScene;
 	}
 
 	void ComponentManager::FillComponentLoadHandles(ComponentLoadHandles& handlesOut, Entity parent)

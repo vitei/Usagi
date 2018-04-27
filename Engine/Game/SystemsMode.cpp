@@ -69,11 +69,7 @@ namespace usg
 		GetComponent(GetRootEntity(), activeDevice);
 		ActiveDevice_init(activeDevice, pDevice);
 
-		ComponentLoadHandles handles;
-		handles.pDevice = pDevice;
-		handles.pResourceMgr = usg::ResourceMgr::Inst();
-		handles.pScene = m_pImpl->pScene;
-		m_pImpl->pComponentManager->RegisterResourceHandles(handles);
+		m_pImpl->pComponentManager->RegisterResourceHandles(pDevice, usg::ResourceMgr::Inst(), m_pImpl->pScene);
 		
 	}
 
