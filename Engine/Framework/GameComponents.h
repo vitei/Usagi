@@ -157,23 +157,35 @@ struct ComponentGetterInt< T, FromParentWith<ComponentType> >
 	}
 };
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional)
+struct ComponentLoadHandles : public ComponentLoadHandlesBase
 {
-	optional = Optional<T, SearchMask>( ComponentGetterInt<T, SearchMask>::GetComponent(uEntity) );
-	return true;
-}
+	friend ComponentManager;
+private:
+	ComponentLoadHandles() {};
+public:
+	template<typename T, typename SearchMask>
+	bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional)
+	{
+		optional = Optional<T, SearchMask>(ComponentGetterInt<T, SearchMask>::GetComponent(uEntity));
+		return true;
+	}
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required)
-{
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
+	template<typename T, typename SearchMask>
+	bool GetComponent(Entity uEntity, Required<T, SearchMask>& required)
+	{
+		Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
 
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
+		bool exists = c != NULL;
+		if (exists) { required = Required<T, SearchMask>(*c); }
 
-	return exists;
-}
+		return exists;
+	}
+
+};
+
+
+
+
 
 bool GetComponent(Entity e, uint32 uComponentType, sint32 iSearchMask, ComponentWrapperBase& wrapper);
 

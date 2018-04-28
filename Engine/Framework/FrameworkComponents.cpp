@@ -37,7 +37,7 @@ void OnLoaded<MatrixComponent>(Component<MatrixComponent>& m, ComponentLoadHandl
 	Entity e = m.GetEntity();
 	Required<usg::TransformComponent> trans;
 	MatrixComponent* mat = &m.GetData();
-	GetComponent(e, trans);
+	handles.GetComponent(e, trans);
 	if(trans.IsValid())
 	{
 		mat->matrix = trans->rotation;

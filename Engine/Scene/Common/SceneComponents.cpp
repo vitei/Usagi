@@ -81,7 +81,7 @@ namespace usg
 	{
 		// TODO: check bWasPreviouslyCalled ?
 		Required<usg::GroundDecalsHandle, FromSelfOrParents> Decals;
-		GetComponent(p.GetEntity(), Decals);
+		handles.GetComponent(p.GetEntity(), Decals);
 
 		// 20160129 n-heckel: This is a temporary work-around until levels are used for ModeGarage.
 		if(Decals.IsValid())
@@ -99,7 +99,7 @@ namespace usg
 	void OnDeactivate<ShadowDecalComponent>(Component<ShadowDecalComponent>& p, ComponentLoadHandles& handles)
 	{
 		Required<usg::GroundDecalsHandle, FromSelfOrParents> Decals;
-		GetComponent(p.GetEntity(), Decals);
+		handles.GetComponent(p.GetEntity(), Decals);
 
 		if(Decals.IsValid())
 		{

@@ -17,7 +17,7 @@ namespace usg
 		auto pModelMgr = handles.pModelMgr;
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
-		GetComponent(p.GetEntity(), visibility);
+		handles.GetComponent(p.GetEntity(), visibility);
 		p.GetRuntimeData().pModel->AddToScene(!visibility.Exists() || visibility.Force()->bVisible);
 		if (p->bShadowCast)
 		{
@@ -92,7 +92,7 @@ namespace usg
 		UVIdentifier* pId = &rotation.Modify().identifier;
 		Entity ent = rotation.GetEntity();
 		Required<ModelComponent, FromSelfOrParents> model;
-		GetComponent(ent, model);
+		handles.GetComponent(ent, model);
 		ASSERT(model.IsValid());
 		pId->uMeshIndex = model.GetRuntimeData().pModel->GetMeshIndex(pId->materialName, Model::IDENTIFIER_MATERIAL);
 	}
@@ -107,7 +107,7 @@ namespace usg
 		UVIdentifier* pId = &translation.Modify().identifier;
 		Entity ent = translation.GetEntity();
 		Required<ModelComponent, FromSelfOrParents> model;
-		GetComponent(ent, model);
+		handles.GetComponent(ent, model);
 		ASSERT(model.IsValid());
 		pId->uMeshIndex = model.GetRuntimeData().pModel->GetMeshIndex(pId->materialName, Model::IDENTIFIER_MATERIAL);
 	}
@@ -137,10 +137,10 @@ namespace usg
 		{
 			// FIXME: Ordering of these loads is important...
 			Required<usg::ModelComponent> model;
-			GetComponent(p.GetEntity(), model);
+			handles.GetComponent(p.GetEntity(), model);
 
 			Required<ActiveDevice, FromSelfOrParents> device;
-			bool bDidGetComponents = GetComponent(p.GetEntity(), device);
+			bool bDidGetComponents = handles.GetComponent(p.GetEntity(), device);
 			ASSERT(bDidGetComponents);
 
 			ModelResHndl pResource = ResourceMgr::Inst()->GetModel(device.GetRuntimeData().pDevice, model.Modify().name, true);

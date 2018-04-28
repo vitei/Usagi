@@ -13,7 +13,7 @@ namespace usg
 	void OnLoaded<HostManagedEntity>(Component<HostManagedEntity>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
 	{
 		Optional<LocalSim> localSim;
-		GetComponent(c.GetEntity(), localSim);
+		handles.GetComponent(c.GetEntity(), localSim);
 		if (localSim.Exists())
 		{
 			localSim.Force().Deactivate(handles);

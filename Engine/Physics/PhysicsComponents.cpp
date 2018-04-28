@@ -42,16 +42,14 @@ namespace usg
 	}
 
 	template<typename ShapeType>
-	static void OnDeactivateShape(Component<ShapeType>& c)
+	static void OnDeactivateShape(Component<ShapeType>& c, ComponentLoadHandles& handles)
 	{
 		auto& rtd = c.GetRuntimeData();
 		rtd.release();
 
-		auto scene = physics::GetScene(c);
-		auto& sceneRtd = scene.GetRuntimeData().GetData();
-		if (sceneRtd.dirtyShapeList.count(&rtd))
+		if (handles.pPhysicsScene->dirtyShapeList.count(&rtd))
 		{
-			sceneRtd.dirtyShapeList.erase(&rtd);
+			handles.pPhysicsScene->dirtyShapeList.erase(&rtd);
 		}
 
 		rtd.shapeAggregateEntity = nullptr;
@@ -66,10 +64,10 @@ namespace usg
 		pMaterial = nullptr;
 	}
 
-	TransformComponent GetTransform(Entity e)
+	TransformComponent GetTransform(Entity e, ComponentLoadHandles& handles)
 	{
 		Optional<TransformComponent> trans;
-		GetComponent(e, trans);
+		handles.GetComponent(e, trans);
 		if (trans.Exists())
 		{
 			return *trans.Force();
@@ -80,17 +78,17 @@ namespace usg
 	}
 
 	// Get an entity's transform relative to some not necessarily direct parent (pass nullptr as parent to get global pose)
-	static physx::PxTransform GetRelativeTransform(Entity parent, Entity child)
+	static physx::PxTransform GetRelativeTransform(Entity parent, Entity child, ComponentLoadHandles& handles)
 	{
 		if (parent == nullptr)
 		{
 			// Use the matrix component to initialize static bodies with no transformcomponent
 			Optional<TransformComponent, FromSelfOrParents> transFromSelfOrParents;
-			GetComponent(child, transFromSelfOrParents);
+			handles.GetComponent(child, transFromSelfOrParents);
 			if (!transFromSelfOrParents.Exists())
 			{
 				Optional<MatrixComponent, FromSelfOrParents> mtxFromSelfOrParents;
-				GetComponent(child, mtxFromSelfOrParents);
+				handles.GetComponent(child, mtxFromSelfOrParents);
 				if (mtxFromSelfOrParents.Exists())
 				{
 					const Quaternionf qRot = mtxFromSelfOrParents.Force()->matrix;
@@ -103,7 +101,7 @@ namespace usg
 			}
 		}
 
-		const TransformComponent usgTrans = GetTransform(child);
+		const TransformComponent usgTrans = GetTransform(child, handles);
 		if (!usgTrans.bInheritFromParent)
 		{
 			return ToPhysXTransform(usgTrans);
@@ -112,7 +110,7 @@ namespace usg
 		Entity e = child;
 		while (e->GetParentEntity() != parent)
 		{
-			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity()));
+			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity(), handles));
 			trans = trans.transform(parentTrans);
 			e = e->GetParentEntity();
 		}
@@ -168,7 +166,7 @@ namespace usg
 		auto& sceneRuntimeData = *handles.pPhysicsScene;
 
 		ASSERT(!c->bDynamic || GameComponents<TransformComponent>::GetComponentData(c.GetEntity()) != nullptr && "Entities with dynamic rigid bodies must have TransformComponent");
-		const physx::PxTransform initialTransform = GetRelativeTransform(nullptr, c.GetEntity());
+		const physx::PxTransform initialTransform = GetRelativeTransform(nullptr, c.GetEntity(), handles);
 		
 		if (c->bDynamic)
 		{
@@ -217,14 +215,14 @@ namespace usg
 		rtd.pActor = rtd.pRigidActor;
 
 		Optional<Identifier> id;
-		GetComponent(c.GetEntity(), id);
+		handles.GetComponent(c.GetEntity(), id);
 		if (id.Exists())
 		{
 			rtd.pActor->setName(id.Force()->name);
 		}
 
 		Optional<PhysicsAggregate, FromSelfOrParents> aggregate;
-		GetComponent(c.GetEntity(), aggregate);
+		handles.GetComponent(c.GetEntity(), aggregate);
 		if (aggregate.Exists() && !c->bDoNotAttachToParentAggregate)
 		{
 			auto& aggregateComponent = *GameComponents<PhysicsAggregate>::GetComponent(aggregate.Force().GetEntity());
@@ -251,7 +249,7 @@ namespace usg
 		}
 
 		Required<RigidBody, FromSelf> rb;
-		GetComponent(c.GetEntity(), rb);
+		handles.GetComponent(c.GetEntity(), rb);
 		OnRigidBodyLoaded(rb, handles);
 	}
 
@@ -460,7 +458,7 @@ namespace usg
 	template<>
 	void OnDeactivate<SphereCollider>(Component<SphereCollider>& c, ComponentLoadHandles& handles)
 	{
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 	}
 
 	// Box Collider
@@ -485,7 +483,7 @@ namespace usg
 	template<>
 	void OnDeactivate<BoxCollider>(Component<BoxCollider>& c, ComponentLoadHandles& handles)
 	{
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 	}
 
 	// Cone Collider
@@ -498,7 +496,7 @@ namespace usg
 			return;
 		}
 
-		auto scene = physics::GetScene(c);
+		auto pScene = handles.pPhysicsScene;
 
 		Vector3f vToCircle;
 		Vector3f vOtherVec = V3F_Z_AXIS;
@@ -529,14 +527,13 @@ namespace usg
 
 		physx::PxDefaultMemoryOutputStream buf;
 		physx::PxConvexMeshCookingResult::Enum result;
-		auto& sceneRtd = scene.GetRuntimeData().GetData();
-		if (!sceneRtd.pCooking->cookConvexMesh(convexDesc, buf, &result))
+		if (!pScene->pCooking->cookConvexMesh(convexDesc, buf, &result))
 		{
 			ASSERT(false && "Failed to generate convex mesh from cone geometry.");
 			return;
 		}
 		physx::PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
-		physx::PxConvexMesh* pConvexMesh = sceneRtd.pPhysics->createConvexMesh(input);
+		physx::PxConvexMesh* pConvexMesh = pScene->pPhysics->createConvexMesh(input);
 		OnShapeLoaded(c, physx::PxConvexMeshGeometry(pConvexMesh), handles);
 		pConvexMesh->release();
 	}
@@ -550,7 +547,7 @@ namespace usg
 	template<>
 	void OnDeactivate<ConeCollider>(Component<ConeCollider>& c, ComponentLoadHandles& handles)
 	{
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 	}
 
 	// Cylinder Collider
@@ -563,9 +560,8 @@ namespace usg
 			return;
 		}
 
-		auto scene = physics::GetScene(c);
 		const memsize uCircleVertexCount = c->has_uCircleVertices ? c->uCircleVertices : Math::Min((memsize)16, 1 + (memsize)(c->fRadius * 5));
-		physx::PxConvexMesh* pConvexMesh = scene.GetRuntimeData().GetData().pMeshCache->GetCylinderMesh(c->vCenter, c->vDirection, c->fRadius, c->fHeight, (uint32)uCircleVertexCount);
+		physx::PxConvexMesh* pConvexMesh = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(c->vCenter, c->vDirection, c->fRadius, c->fHeight, (uint32)uCircleVertexCount);
 		ASSERT(pConvexMesh != nullptr);
 		if (pConvexMesh != nullptr)
 		{
@@ -584,7 +580,7 @@ namespace usg
 	template<>
 	void OnDeactivate<CylinderCollider>(Component<CylinderCollider>& c, ComponentLoadHandles& handles)
 	{
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 		c.GetRuntimeData().pConvexMesh = nullptr;
 	}
 
@@ -635,8 +631,8 @@ namespace usg
 
 		Required<usg::RigidBody, FromSelf> myRigidBody;
 		Required<usg::RigidBody, FromParents> myParentsRigidBody;
-		GetComponent(c.GetEntity(), myRigidBody);
-		GetComponent(c.GetEntity(), myParentsRigidBody);
+		handles.GetComponent(c.GetEntity(), myRigidBody);
+		handles.GetComponent(c.GetEntity(), myParentsRigidBody);
 		EnsureRigidBodyLoaded(myRigidBody, handles);
 		EnsureRigidBodyLoaded(myParentsRigidBody, handles);
 		
@@ -648,18 +644,17 @@ namespace usg
 		Quaternionf q1;
 		q1.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
 		t1.q = ToPhysXQuaternion(q1);
-		t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity()).position);
+		t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity(), handles).position);
 
 		Required<TransformComponent> myTrans;
-		GetComponent(c.GetEntity(), myTrans);
+		handles.GetComponent(c.GetEntity(), myTrans);
 		// myTrans.Modify().bInheritFromParent = false;
 		physx::PxTransform t2(physx::PxIdentity);
 		Quaternionf q2;
 		q2.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
 		t2.q = ToPhysXQuaternion(q2);
 		
-		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
-		auto pJoint = physx::PxRevoluteJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		auto pJoint = physx::PxRevoluteJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
 		c.GetRuntimeData().pJoint = pJoint;
 
 		pJoint->setRevoluteJointFlag(physx::PxRevoluteJointFlag::eDRIVE_ENABLED, c->bEnableMotor);
@@ -694,8 +689,8 @@ namespace usg
 
 		Required<usg::RigidBody, FromSelf> myRigidBody;
 		Optional<usg::RigidBody, FromParents> myParentsRigidBody;
-		GetComponent(c.GetEntity(), myRigidBody);
-		GetComponent(c.GetEntity(), myParentsRigidBody);
+		handles.GetComponent(c.GetEntity(), myRigidBody);
+		handles.GetComponent(c.GetEntity(), myParentsRigidBody);
 		EnsureRigidBodyLoaded(myRigidBody, handles);
 		if (myParentsRigidBody.Exists())
 		{
@@ -709,19 +704,18 @@ namespace usg
 		physx::PxTransform t1(physx::PxIdentity);
 		if (myParentsRigidBody.Exists())
 		{
-			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.Force().GetEntity(), myRigidBody.GetEntity()).position);
+			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.Force().GetEntity(), myRigidBody.GetEntity(), handles).position);
 		}
 		else
 		{
-			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(nullptr, myRigidBody.GetEntity()).position);
+			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(nullptr, myRigidBody.GetEntity(), handles).position);
 		}
 
 		Required<TransformComponent> myTrans;
-		GetComponent(c.GetEntity(), myTrans);
+		handles.GetComponent(c.GetEntity(), myTrans);
 		physx::PxTransform t2(physx::PxIdentity);
 
-		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
-		auto pJoint = physx::PxFixedJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		auto pJoint = physx::PxFixedJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
 		c.GetRuntimeData().pJoint = pJoint;
 
 		OnJointLoaded(pJoint, c);
@@ -754,8 +748,8 @@ namespace usg
 
 		Required<usg::RigidBody, FromSelf> myRigidBody;
 		Optional<usg::RigidBody, FromParents> myParentsRigidBody;
-		GetComponent(c.GetEntity(), myRigidBody);
-		GetComponent(c.GetEntity(), myParentsRigidBody);
+		handles.GetComponent(c.GetEntity(), myRigidBody);
+		handles.GetComponent(c.GetEntity(), myParentsRigidBody);
 		EnsureRigidBodyLoaded(myRigidBody, handles);
 		if (myParentsRigidBody.Exists())
 		{
@@ -766,7 +760,7 @@ namespace usg
 		physx::PxRigidActor* pActor2 = myRigidBody.GetRuntimeData().pRigidActor;
 		ASSERT(pActor2 != nullptr);
 
-		const TransformComponent myTransformRelativeToConnectedParent = TransformTool::GetRelativeTransform(myParentsRigidBody.Exists() ? myParentsRigidBody.Force().GetEntity() : nullptr, myRigidBody.GetEntity());
+		const TransformComponent myTransformRelativeToConnectedParent = TransformTool::GetRelativeTransform(myParentsRigidBody.Exists() ? myParentsRigidBody.Force().GetEntity() : nullptr, myRigidBody.GetEntity(), handles);
 		physx::PxTransform t1(physx::PxIdentity);
 		t1.p = ToPhysXVec3(myTransformRelativeToConnectedParent.position);
 		Quaternionf q1;
@@ -776,8 +770,7 @@ namespace usg
 		physx::PxTransform t2(physx::PxIdentity);
 		t2.q = ToPhysXQuaternion(q1);
 
-		auto scene = physics::GetScene(c).GetRuntimeData().GetData();
-		auto pJoint = physx::PxPrismaticJointCreate(*scene.pPhysics, pActor1, t1, pActor2, t2);
+		auto pJoint = physx::PxPrismaticJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
 		c.GetRuntimeData().pJoint = pJoint;
 
 		OnJointLoaded(pJoint, c);
@@ -795,7 +788,7 @@ namespace usg
 	template<>
 	void OnDeactivate<PhysicsAggregate>(Component<PhysicsAggregate>& c, ComponentLoadHandles& handles)
 	{
-		auto& scene = physics::GetScene(c).GetRuntimeData().GetData();
+		auto& scene = *handles.pPhysicsScene;
 		auto pAggregate = c.GetRuntimeData().pAggregate;
 		if (scene.addAggregateList.count(pAggregate))
 		{
@@ -815,10 +808,9 @@ namespace usg
 			return;
 		}
 
-		auto& scene = physics::GetScene(c).GetRuntimeData().GetData();
-		
-		c.GetRuntimeData().pAggregate = scene.pPhysics->createAggregate(c->uMaxNumBodies, c->bEnableSelfCollisions);
-		scene.addAggregateList.insert(c.GetRuntimeData().pAggregate);
+	
+		c.GetRuntimeData().pAggregate = handles.pPhysicsScene->pPhysics->createAggregate(c->uMaxNumBodies, c->bEnableSelfCollisions);
+		handles.pPhysicsScene->addAggregateList.insert(c.GetRuntimeData().pAggregate);
 	}
 
 	// Mesh Collider
@@ -832,16 +824,14 @@ namespace usg
 		}
 		
 		auto& rtd = c.GetRuntimeData();
-		auto scene = physics::GetScene(c);
 
-		ASSERT(scene.IsValid());
-		physx::PxCooking* pCooking = scene.GetRuntimeData().GetData().pCooking;
+		physx::PxCooking* pCooking = handles.pPhysicsScene->pCooking;
 		ASSERT(pCooking != nullptr);
-		physx::PxPhysics* pPhysics = scene.GetRuntimeData().GetData().pPhysics;
+		physx::PxPhysics* pPhysics = handles.pPhysicsScene->pPhysics;
 		ASSERT(pPhysics != nullptr);
 
 		Required<RigidBody, FromSelfOrParents> rigidBody;
-		GetComponent(c.GetEntity(), rigidBody);
+		handles.GetComponent(c.GetEntity(), rigidBody);
 		if (rigidBody->bDynamic && !c->bConvex)
 		{
 			// Triangle Mesh collider can only be attached to static actors (this is a limitation of PhysX). Split the mesh into convex submeshes if you REALLY need such a complex
@@ -850,7 +840,7 @@ namespace usg
 			c.Modify().bConvex = true;
 		}
 
-		PhysXMeshCache* pMeshCache = scene.GetRuntimeData().GetData().pMeshCache;
+		PhysXMeshCache* pMeshCache = handles.pPhysicsScene->pMeshCache;
 		if (c->bConvex)
 		{
 			physx::PxConvexMesh* pConvexMesh = pMeshCache->GetConvexMesh(c->szCollisionModel, c->szMeshName);
@@ -891,7 +881,7 @@ namespace usg
 	void OnDeactivate<MeshCollider>(Component<MeshCollider>& c, ComponentLoadHandles& handles)
 	{
 		auto& rtd = c.GetRuntimeData();
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 		rtd.pConvexMesh = nullptr;
 		rtd.pTriangleMesh = nullptr;
 	}
@@ -906,12 +896,11 @@ namespace usg
 			return;
 		}
 		OnVehicleColliderLoaded(c, handles);
-		auto& sceneRtd = physics::GetScene(c).GetRuntimeData().GetData();
 		const memsize uWheelCount = c->uNumWheels;
 		for (memsize i = 0; i < uWheelCount; i++)
 		{
 			auto& wheel = c.GetRuntimeData().wheelsData.wheel[i];
-			sceneRtd.dirtyShapeList.insert((PhysXShapeRuntimeData*)&wheel.rtd);
+			handles.pPhysicsScene->dirtyShapeList.insert((PhysXShapeRuntimeData*)&wheel.rtd);
 		}
 	}
 
@@ -927,7 +916,7 @@ namespace usg
 	void OnDeactivate<VehicleCollider>(Component<VehicleCollider>& c, ComponentLoadHandles& handles)
 	{
 		auto& rtd = c.GetRuntimeData();
-		OnDeactivateShape(c);
+		OnDeactivateShape(c, handles);
 		OnVehicleColliderDeactivated(c);
 	}
 

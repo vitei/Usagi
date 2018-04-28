@@ -32,6 +32,12 @@ namespace usg
 		
 		ComponentManager* GetComponentMgr();
 
+		template<typename T, typename SearchMask>
+		void GetComponent(Entity uEntity, Required<T, SearchMask>& required)
+		{
+			Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
+		}
+
 	protected:
 		ComponentEntity* GetRootEntity();
 		Scene& GetScene();

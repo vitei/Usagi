@@ -17,6 +17,7 @@ namespace usg
 
 	struct GenericInputOutputs;
 	class NewEntities;
+	struct ComponentLoadHandles;
 
 	class ComponentType;
 

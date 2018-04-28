@@ -21,7 +21,7 @@ void OnLoaded<Script>(Component<Script>& script, ComponentLoadHandles& handles, 
 
 	ASSERT(script->filename[0] != '\0');
 	Required<LuaVMHandle, FromSelfOrParents> lua;
-	GetComponent<LuaVMHandle>(script.GetEntity(), lua);
+	handles.GetComponent<LuaVMHandle>(script.GetEntity(), lua);
 
 	LuaVM::Module* module = &script.GetRuntimeData().module;
 
@@ -107,7 +107,7 @@ template<>
 void OnDeactivate<Script>(Component<Script>& script, ComponentLoadHandles& handles)
 {
 	Required<LuaVMHandle, FromSelfOrParents> lua;
-	GetComponent<LuaVMHandle>(script.GetEntity(), lua);
+	handles.GetComponent<LuaVMHandle>(script.GetEntity(), lua);
 
 	lua->handle->Unload(script.GetRuntimeData().module);
 }

@@ -63,7 +63,7 @@ namespace usg
 			ASSERT(bodyBone != nullptr);
 			auto& sceneRtd = *handles.pPhysicsScene;
 			r.first = sceneRtd.pMeshCache->GetConvexMesh(vehicle->szCollisionModel,"locatorBody");
-			r.second = ToPhysXTransform(TransformTool::GetRelativeTransform(vehicle.GetEntity(), bodyBone));
+			r.second = ToPhysXTransform(TransformTool::GetRelativeTransform(vehicle.GetEntity(), bodyBone, handles));
 		}
 		else
 		{
@@ -101,14 +101,14 @@ namespace usg
 		Entity e = vehicle.GetEntity();
 
 		Required<TransformComponent> trans;
-		GetComponent(e, trans);
+		handles.GetComponent(e, trans);
 		ASSERT(trans.IsValid());
 
 		Required<CollisionMasks> masks;
-		GetComponent(e, masks);
+		handles.GetComponent(e, masks);
 		
 		Required<RigidBody> rigidBody;
-		GetComponent(e, rigidBody);
+		handles.GetComponent(e, rigidBody);
 		ASSERT(rigidBody->bDynamic);
 		ASSERT(!rigidBody->bKinematic);
 		OnLoaded(*GameComponents<RigidBody>::GetComponent(e), handles, false);
@@ -313,10 +313,10 @@ namespace usg
 		};
 
 		uint32 uWheelsFound = 0;
-		auto wheelFinder = [&](Entity e)
+		auto wheelFinder = [&](Entity e, ComponentLoadHandles& handles)
 		{
 			Optional<Identifier> id;
-			GetComponent(e, id);
+			handles.GetComponent(e, id);
 			if (id.Exists())
 			{
 				const bool bHub = str::CompareLen(id.Force()->name, "locatorHub", 10);
@@ -327,7 +327,7 @@ namespace usg
 					pWheelHub->uIndex = uWheelsFound;
 					pWheelHub->bIsHub = true;
 
-					const auto wheelTrans = TransformTool::GetRelativeTransform(vehicle.GetEntity(), e);
+					const auto wheelTrans = TransformTool::GetRelativeTransform(vehicle.GetEntity(), e, handles);
 					wheelPositions[uWheelsFound] = wheelTrans.position;
 
 					float fWheelRadius = 0;
@@ -337,7 +337,7 @@ namespace usg
 					auto wheelProcessor = [&](Entity wheelEntity)
 					{
 						Optional<Identifier> wheelId;
-						GetComponent(wheelEntity, wheelId);
+						handles.GetComponent(wheelEntity, wheelId);
 						if (wheelEntity == e)
 						{
 							return;
@@ -349,7 +349,7 @@ namespace usg
 							pWheelHub->uIndex = uWheelsFound;
 							pWheelHub->bIsHub = false;
 							bone = wheelEntity;
-							const auto wheelTransFromHub = TransformTool::GetRelativeTransform(e, wheelEntity);
+							const auto wheelTransFromHub = TransformTool::GetRelativeTransform(e, wheelEntity, handles);
 							wheelHelpers[uWheelsFound].vOffsetFromHub = wheelTransFromHub.position;
 						}
 					};
@@ -450,7 +450,7 @@ namespace usg
 		physx::PxCooking* pCooking = handles.pPhysicsScene->pCooking;
 
 		Required<RigidBody> rigidBody;
-		GetComponent(vehicle.GetEntity(),rigidBody);
+		handles.GetComponent(vehicle.GetEntity(),rigidBody);
 		ASSERT(rigidBody.IsValid());
 		
 		// Construct a physx actor with shapes for the chassis and wheels.
@@ -542,7 +542,7 @@ namespace usg
 	void OnVehicleColliderLoaded(Component<Components::VehicleCollider>& c, ComponentLoadHandles& handles)
 	{
 		Required<RigidBody> rigidBody;
-		GetComponent(c.GetEntity(), rigidBody);
+		handles.GetComponent(c.GetEntity(), rigidBody);
 		ASSERT(rigidBody.IsValid() && "You are trying to add VehicleCollider to an entity which has no rigid body. Please add a dynamic rigid body to the entity.");
 
 		const auto& vChassisDims = c->vChassisExtents;
@@ -560,14 +560,12 @@ namespace usg
 		handles.pPhysicsScene->vehicleData.vehicleList.push_back(rtd.pVehicleDrive);
 	}
 
-	void OnVehicleColliderDeactivated(Component<Components::VehicleCollider>& c)
+	void OnVehicleColliderDeactivated(Component<Components::VehicleCollider>& c, ComponentLoadHandles& handles)
 	{
 		auto& rtd = c.GetRuntimeData();
-		auto& sceneRtd = physics::GetScene(c).GetRuntimeData().GetData();
-
-		auto it = std::find(sceneRtd.vehicleData.vehicleList.begin(), sceneRtd.vehicleData.vehicleList.end(), rtd.pVehicleDrive);
-		ASSERT(it != sceneRtd.vehicleData.vehicleList.end());
-		sceneRtd.vehicleData.vehicleList.erase(it);
+		auto it = std::find(handles.pPhysicsScene->vehicleData.vehicleList.begin(), handles.pPhysicsScene->vehicleData.vehicleList.end(), rtd.pVehicleDrive);
+		ASSERT(it != handles.pPhysicsScene->vehicleData.vehicleList.end());
+		handles.pPhysicsScene->vehicleData.vehicleList.erase(it);
 		
 		rtd.pVehicleDrive = nullptr;
 		rtd.pChassisShape = nullptr;

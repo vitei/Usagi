@@ -18,12 +18,11 @@ namespace usg
 		struct PhysicsSceneData;
 	}
 
-	struct ComponentLoadHandles
+	struct ComponentLoadHandlesBase
 	{
-		friend ComponentManager;
-	private:
-		ComponentLoadHandles() { pDevice = nullptr; pScene = nullptr; pResourceMgr = nullptr; pPhysicsScene = nullptr; pModelMgr = nullptr; }
-		PRIVATIZE_COPY(ComponentLoadHandles)
+	protected:
+		ComponentLoadHandlesBase() { pDevice = nullptr; pScene = nullptr; pResourceMgr = nullptr; pPhysicsScene = nullptr; pModelMgr = nullptr; }
+		PRIVATIZE_COPY(ComponentLoadHandlesBase)
 	public:
 
 		GFXDevice*					pDevice;

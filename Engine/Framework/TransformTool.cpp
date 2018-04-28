@@ -5,10 +5,10 @@
 namespace usg
 {
 
-	static TransformComponent GetTransform(Entity e)
+	static TransformComponent GetTransform(Entity e, ComponentLoadHandles& handles)
 	{
 		Optional<TransformComponent> trans;
-		GetComponent(e, trans);
+		handles.GetComponent(e, trans);
 		if (trans.Exists())
 		{
 			return *trans.Force();
@@ -18,13 +18,13 @@ namespace usg
 		return r;
 	}
 
-	TransformComponent TransformTool::GetRelativeTransform(Entity parent, Entity child)
+	TransformComponent TransformTool::GetRelativeTransform(Entity parent, Entity child, ComponentLoadHandles& handles)
 	{
-		TransformComponent usgTrans = GetTransform(child);
+		TransformComponent usgTrans = GetTransform(child, handles);
 		if (!usgTrans.bInheritFromParent)
 		{
 			physx::PxTransform p = ToPhysXTransform(usgTrans);
-			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(parent));
+			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(parent, handles));
 
 			return physics::ToUsgTransform(parentTrans.transformInv(p));
 		}
@@ -32,7 +32,7 @@ namespace usg
 		Entity e = child;
 		while (e->GetParentEntity() != parent)
 		{
-			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity()));
+			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity(), handles));
 			trans = trans.transform(parentTrans);
 			e = e->GetParentEntity();
 		}
