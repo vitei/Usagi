@@ -2,20 +2,10 @@ usagi
 =====
 
 Usagi is a Hierarchical Entity-Component-System based game engine created by [Vitei Inc.](http://www.vitei.com/) designed to priortise performance.  
-The Component-Entity-System design has taken the games industry by a storm over the last ten years or so, but we have applied some of our own innovations which come out of arranging our entities in a hierarchy to help control the flow of execution, and allows us to make a number of thread-safe optimisations.  
-These changes also help make the ECS model far more practical when trying to manage the complex interactions required in a modern game.  
 
-Usagi was developed to allow us to create demanding action titles on limited hardware, however the unique design of its component entity system should be suitable for any genre and should be even better suited to more modern hardware. It is actually a relatively new engine, work only began on it in 2013, and as such it was designed to be performant on multi-core systems. As Usagi was only ever used in one commerical title which for all practical purposes only had access to a single core, many of benefits remain theoretical. Even on a single core the cache friendly nature of the design did give superb performance however.  
+By modifying the ECS design pattern to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
- Internally demos were created for other platforms and as such support for slightly more advanced lighting and effects is in place, but certainly nothing bleeding edge.  
-
-
- Certain code has to be removed for release:   
- Platform specific code other than windows  
- 2D UI and menu code (due to their dependence on propriatary formats)   
- Some of the networking code (as it did not follow the standards for platform independent coding)  
- 
- More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
+More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
 Getting up and running
 ----------------------
