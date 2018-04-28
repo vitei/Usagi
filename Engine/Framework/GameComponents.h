@@ -1,16 +1,8 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
-//
-//  GameComponentDecl.h
-//  Usagi_xcode
-//
-//  Created by Giles on 2/18/14.
-//  Copyright (c) 2014 Vitei. All rights reserved.
-//
-
-#ifndef Usagi_xcode_GameComponents_h
-#define Usagi_xcode_GameComponents_h
+#ifndef _USAGI_GAMECOMPONENTS_H_
+#define _USAGI_GAMECOMPONENTS_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Framework/SystemKey.h"
 #include "Engine/Framework/Component.pb.h"
@@ -115,10 +107,10 @@ public:
 	{
 		GetComponent(uEntity)->RequestFree();
 	}
-    
+
 	static Component<T>* GetComponent(Entity uEntity)
 	{
-		if(uEntity == NULL)
+		if (uEntity == NULL)
 		{
 			return NULL;
 		}
@@ -185,45 +177,6 @@ bool GetComponent(Entity uEntity, Required<T, SearchMask>& required)
 
 bool GetComponent(Entity e, uint32 uComponentType, sint32 iSearchMask, ComponentWrapperBase& wrapper);
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional1, Optional<T, SearchMask>& optional2)
-{
-	bool valid = GetComponent(uEntity, optional1);
-	if(valid) { optional2 = optional1; }
-	return valid;
-}
-
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required1, Required<T, SearchMask>& required2)
-{
-	bool valid = GetComponent(uEntity, required1);
-	if(valid) { required2 = required1; }
-	return valid;
-}
-
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional, Required<T, SearchMask>& required)
-{
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
-	optional = Optional<T, SearchMask>(c);
-
-	return exists;
-}
-
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required, Optional<T, SearchMask>& optional)
-{
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
-	optional = Optional<T, SearchMask>(c);
-
-	return exists;
-}
 
 
 template<typename T>
