@@ -378,7 +378,6 @@ void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl&
 void GFXContext_ps::SetDepthWrite()
 {
 #if 1
-	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_ALWAYS);
 	glEnable(GL_STENCIL_TEST);
@@ -393,7 +392,12 @@ void GFXContext_ps::SetDepthWrite()
 
 void GFXContext_ps::RestorePipelineState()
 {
-	glPopAttrib();
+	PipelineStateHndl pipeline = m_pParent->GetActivePipeline();
+	if (pipeline.IsValid())
+	{
+		m_pParent->InvalidateStates();
+		m_pParent->SetPipelineState(pipeline);
+	}
 }
 
 }
