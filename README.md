@@ -3,6 +3,7 @@ usagi
 
 Usagi is a Hierarchical Entity-Component-System based game engine created by [Vitei Inc.](http://www.vitei.com/) designed to priortise performance.  
 The Component-Entity-System design has taken the games industry by a storm over the last ten years or so, but we have applied some of our own innovations which come out of arranging our entities in a hierarchy to help control the flow of execution, and allows us to make a number of thread-safe optimisations.  
+These changes also help make the ECS model far more practical when trying to manage the complex interactions required in a modern game.  
 
 Usagi was developed to allow us to create demanding action titles on limited hardware, however the unique design of its component entity system should be suitable for any genre and should be even better suited to more modern hardware. It is actually a relatively new engine, work only began on it in 2013, and as such it was designed to be performant on multi-core systems. As Usagi was only ever used in one commerical title which for all practical purposes only had access to a single core, many of benefits remain theoretical. Even on a single core the cache friendly nature of the design did give superb performance however.  
 
