@@ -43,7 +43,10 @@ public:
 		: m_uTypeID(typeID)
 #endif
 		, m_pPrevComponent(NULL)
-		, m_pNextComponent(NULL), m_uEntity(0), m_bDidRunOnLoaded(false)
+		, m_pNextComponent(NULL)
+		, m_uEntity(0)
+		, m_bDidRunOnLoaded(false)
+		, m_bFreeRequested(false)
 	{}
 	~ComponentType() {}
 
@@ -56,11 +59,14 @@ public:
 
 	bool     WasLoaded() const { return m_bDidRunOnLoaded; }
 	void     SetLoaded() { m_bDidRunOnLoaded = true; }
+	bool	 WaitingOnFree() { return m_bFreeRequested; }
+	void	 RequestFree();
 
 	void     Init()
 	{
 		m_uEntity = 0;
 		m_bDidRunOnLoaded = false;
+		m_bFreeRequested = false;
 	}
 
 	virtual void Activate(Entity e);
@@ -86,6 +92,7 @@ protected:
 	Entity         m_uEntity;
 	ModifyId       m_modifyId;
 	bool           m_bDidRunOnLoaded;
+	bool		   m_bFreeRequested;
 
 };
 

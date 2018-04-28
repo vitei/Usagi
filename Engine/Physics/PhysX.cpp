@@ -153,8 +153,7 @@ namespace usg
 				GetComponent(entity, sleepTag);
 				if (sleepTag.Exists())
 				{
-					ComponentLoadHandles handles;	// Not needed for this component
-					GameComponents<SleepTag>::Free(entity, handles);
+					GameComponents<SleepTag>::RequestFree(entity);
 					entity->SetChanged();
 				}
 			}

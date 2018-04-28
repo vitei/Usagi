@@ -56,6 +56,9 @@ namespace usg
 		bool HasChanged() const { return m_bChanged; }
 		void ClearChanged() { m_bChanged = false; }
 		void SetChanged();
+		void SetComponentPendingDelete();
+		bool HasPendingDeletions() { return m_bPendingDeletions; }
+		void HandlePendingDeletes(ComponentLoadHandles& handles);
 
 		bool HaveChildrenChanged() { return m_bChildrenChanged; }
 		void ClearChildrenChanged() { m_bChildrenChanged = false; }
@@ -119,6 +122,7 @@ namespace usg
 		float            m_fCatchupTime;
 		bool             m_bChanged;
 		bool             m_bChildrenChanged;
+		bool			 m_bPendingDeletions;
 		StringPointerHash<ComponentType*> m_pComponents;
 		ComponentType*   m_pFirstComponent;
 		StringPointerHash<GenericInputOutputs*> m_pSystems;

@@ -34,3 +34,12 @@ uint32 ComponentType::GetNextTypeID()
 	static uint32 s_uNextTypeID = 0;
 	return s_uNextTypeID++;
 }
+
+void ComponentType::RequestFree()
+{
+	if (m_uEntity)
+	{
+		m_uEntity->SetComponentPendingDelete();
+		m_bFreeRequested = true;
+	}
+}

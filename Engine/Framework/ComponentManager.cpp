@@ -316,11 +316,19 @@ namespace usg
 	void ComponentManager::CheckEntity(Entity e, bool bOnlyChildren)
 	{
 		e->SetCatchupTime(0.0f);
-		if (!bOnlyChildren && e->HasChanged())
+
+		if (!bOnlyChildren)
 		{
-			++m_uChangedEntities;
-			UpdateEntityIO(e);
-			e->ClearChanged();
+			if (e->HasPendingDeletions())
+			{
+				e->HandlePendingDeletes(m_componentLoadHandles);
+			}
+			if (e->HasChanged())
+			{
+				++m_uChangedEntities;
+				UpdateEntityIO(e);
+				e->ClearChanged();
+			}
 		}
 
 		if (e->HaveChildrenChanged())
@@ -578,7 +586,9 @@ namespace usg
 
 	void ComponentManager::FillComponentLoadHandles(ComponentLoadHandles& handlesOut, Entity parent)
 	{
-		handlesOut = m_componentLoadHandles;
+		handlesOut.pDevice = m_componentLoadHandles.pDevice;
+		handlesOut.pScene = m_componentLoadHandles.pScene;
+		handlesOut.pModelMgr = m_componentLoadHandles.pModelMgr ;
 
 		if (parent)
 		{

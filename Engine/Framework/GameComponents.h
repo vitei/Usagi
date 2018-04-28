@@ -111,9 +111,9 @@ public:
 		GameComponentMgr::Free(c, handles, bRemoveFromEntity);
 	}
 
-	static void Free(Entity uEntity, ComponentLoadHandles& handles, bool bRemoveFromEntity = true)
+	static void RequestFree(Entity uEntity)
 	{
-		Free(GetComponent(uEntity), handles, bRemoveFromEntity);
+		GetComponent(uEntity)->RequestFree();
 	}
     
 	static Component<T>* GetComponent(Entity uEntity)

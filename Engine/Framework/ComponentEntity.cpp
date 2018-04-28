@@ -165,12 +165,39 @@ GenericInputOutputs* ComponentEntity::GetSystem(uint32 uSysIndex) const
 	return m_pSystems.Get(GetSystemIDFromIndex(uSysIndex));
 }
 
+void ComponentEntity::SetComponentPendingDelete()
+{
+	m_bPendingDeletions = true;
+	SetChanged();
+}
+
 void ComponentEntity::SetChanged()
 {
 	m_bChanged = true;
 	ComponentEntity* parent = GetParentEntity();
 	if(parent != nullptr)
 		parent->SetChildrenChanged();
+}
+
+
+void ComponentEntity::HandlePendingDeletes(ComponentLoadHandles& handles)
+{
+	if (!m_bPendingDeletions)
+		return;
+
+	ComponentType* pComponent = m_pFirstComponent;
+	while (pComponent)
+	{
+		// Cache the next pointer as free could remove it from the link
+		ComponentType* pNextComponent = pComponent->GetNextComponent();
+		if (pComponent->WaitingOnFree())
+		{
+			pComponent->Free(handles, true);
+		}
+		pComponent = pNextComponent;
+	}
+
+	m_bPendingDeletions = false;
 }
 
 void ComponentEntity::SetChildrenChanged()
