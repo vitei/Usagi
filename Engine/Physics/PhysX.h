@@ -15,6 +15,9 @@ namespace usg
 	{
 		typedef struct _PhysicsScene PhysicsScene;
 		typedef struct _TransformComponent TransformComponent;
+		typedef struct _MatrixComponent MatrixComponent;
+		typedef struct _CollisionMasks CollisionMasks;
+		typedef struct _RigidBody RigidBody;
 	}
 
 	namespace physics
@@ -101,6 +104,7 @@ namespace usg
 	}
 
 	physx::PxTransform ToPhysXTransform(const Components::TransformComponent& trans);
+	physx::PxTransform ToPhysXTransform(const Components::MatrixComponent& matrix);
 
 	// Physics world initialization / deinitialization
 	
@@ -113,7 +117,7 @@ namespace usg
 
 	// Misc
 
-	void UpdateSimulationFilter(physx::PxShape* pShape, Entity entityWithShape, Entity aggregateEntity);
+	void UpdateSimulationFilter(physx::PxShape* pShape, const usg::Components::CollisionMasks* pMasks, const usg::Components::RigidBody* pBody, Entity aggregateEntity);
 
 	void GenerateOnCollisionSignals(SystemCoordinator& systemCoordinator, Required<usg::Components::PhysicsScene> scene);
 

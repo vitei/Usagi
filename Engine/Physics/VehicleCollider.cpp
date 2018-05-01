@@ -59,7 +59,7 @@ namespace usg
 		usg::pair<physx::PxConvexMesh*, physx::PxTransform> r{nullptr, physx::PxTransform(physx::PxIdentity)};
 		if (vehicle->szCollisionModel[0] != 0)
 		{
-			Entity bodyBone = vehicle.GetEntity()->GetChildEntityByName("locatorBody");
+			Entity bodyBone = vehicle.GetEntity()->GetChildEntityByName(handles, "locatorBody");
 			ASSERT(bodyBone != nullptr);
 			auto& sceneRtd = *handles.pPhysicsScene;
 			r.first = sceneRtd.pMeshCache->GetConvexMesh(vehicle->szCollisionModel,"locatorBody");
@@ -295,7 +295,7 @@ namespace usg
 	}
 
 	// Inspect wheel bones and return number of wheels, their positions and radii.
-	static uint32 FindWheels(Required<VehicleCollider> vehicle, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelWidths, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelRadii, usg::array<Vector3f, PhysicsConstants::VehicleMaxNumWheels>& wheelPositions, usg::array<WheelHelper, PhysicsConstants::VehicleMaxNumWheels>& wheelHelpers)
+	static uint32 FindWheels(Required<VehicleCollider> vehicle, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelWidths, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelRadii, usg::array<Vector3f, PhysicsConstants::VehicleMaxNumWheels>& wheelPositions, usg::array<WheelHelper, PhysicsConstants::VehicleMaxNumWheels>& wheelHelpers, ComponentLoadHandles& handles)
 	{
 		ASSERT(vehicle->szCollisionModel[0] != 0);
 		CollisionModelResHndl collisionModelHandle = ResourceMgr::Inst()->GetCollisionModel(vehicle->szCollisionModel);
@@ -334,7 +334,7 @@ namespace usg
 					float fWheelWidth = 0;
 
 					Entity bone = nullptr;
-					auto wheelProcessor = [&](Entity wheelEntity)
+					auto wheelProcessor = [&](Entity wheelEntity, ComponentLoadHandles& handles)
 					{
 						Optional<Identifier> wheelId;
 						handles.GetComponent(wheelEntity, wheelId);
@@ -354,7 +354,7 @@ namespace usg
 						}
 					};
 
-					e->ProcessEntityRecursively(wheelProcessor);
+					e->ProcessEntityRecursively(wheelProcessor, handles);
 					if (!(fWheelWidth > 0 && fWheelRadius > 0))
 					{
 						// Get wheel extents from the hub instead
@@ -377,7 +377,7 @@ namespace usg
 				}
 			}
 		};
-		vehicle.GetEntity()->ProcessEntityRecursively(wheelFinder);
+		vehicle.GetEntity()->ProcessEntityRecursively(wheelFinder, handles);
 
 		// Find the middle wheels, increase radii of all wheels by a value which makes the middle wheels touch ground
 		// Also find the number of wheels touching ground in the default pose (when applying thrust force to the vehicle, the force is based on number of wheels touching the ground and we use
@@ -424,7 +424,7 @@ namespace usg
 		ASSERT(uNumWheels > 0 || vehicle->szCollisionModel[0] != 0);
 		if (vehicle->szCollisionModel[0] != 0)
 		{
-			uNumWheels = FindWheels(vehicle, wheelWidths, wheelRadii, wheelPositions, wheelHelpers);
+			uNumWheels = FindWheels(vehicle, wheelWidths, wheelRadii, wheelPositions, wheelHelpers, handles);
 			ASSERT(uNumWheels >= 4 && uNumWheels <= PhysicsConstants::VehicleMaxNumWheels && uNumWheels % 2 == 0);
 			vehicle.Modify().uNumWheels = uNumWheels;
 		}

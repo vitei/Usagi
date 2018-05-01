@@ -235,6 +235,22 @@ namespace usg
 			pAggregate->addActor(*rtd.pActor);
 			ASSERT(rtd.pActor->getAggregate() == pAggregate);
 		}
+
+
+		// Go through the parents and inform them physics needs the transform updated
+		// FIXME: This should be done in data by the hierarchy processor rather than at runtime
+		Entity parent = c.GetEntity();
+		while (parent = parent->GetParentEntity())
+		{
+			Optional<TransformComponent> transform;
+			Optional<RigidBodyTransformUpdate> parentMarker;
+			handles.GetComponent(parent, transform);
+			handles.GetComponent(parent, parentMarker);
+			if (transform.Exists() && !parentMarker.Exists())
+			{
+				GameComponents<RigidBodyTransformUpdate>::Create(parent);
+			}
+		}
 		
 		sceneRuntimeData.addActorList.insert(&rtd);
 		sceneRuntimeData.dirtyActorList.insert(&rtd);
@@ -292,14 +308,14 @@ namespace usg
 
 	// Generic Shape Functions
 	template<typename T>
-	static void AddShape(Required<RigidBody, T> rigidBody, physx::PxShape* pShape)
+	static void AddShape(Required<RigidBody, T> rigidBody, physx::PxShape* pShape, ComponentLoadHandles& handles)
 	{
 		physx::PxRigidActor* pActor = rigidBody.GetRuntimeData().pRigidActor;
 		ASSERT(pActor != nullptr && "PhysX actor pointer uninitialized. Are you attempting to add a shape to a rigid body for which OnLoaded has not yet been called?");
 		pActor->attachShape(*pShape);
 
 		Optional<VehicleCollider> vehicle;
-		GetComponent(rigidBody.GetEntity(), vehicle);
+		handles.GetComponent(rigidBody.GetEntity(), vehicle);
 		if (vehicle.Exists())
 		{
 			return;
@@ -329,7 +345,7 @@ namespace usg
 		if (rigidBody.Exists() && rigidBody.Force().GetRuntimeData().pRigidActor == nullptr)
 		{
 			Required<RigidBody, FromSelf> rigidBodyFromSelf;
-			GetComponent(rigidBody.Force().GetEntity(), rigidBodyFromSelf);
+			handles.GetComponent(rigidBody.Force().GetEntity(), rigidBodyFromSelf);
 			ASSERT(rigidBodyFromSelf.IsValid());
 			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
 		}
@@ -341,7 +357,7 @@ namespace usg
 		if (rigidBody.GetRuntimeData().pRigidActor == nullptr)
 		{
 			Required<RigidBody, FromSelf> rigidBodyFromSelf;
-			GetComponent(rigidBody.GetEntity(), rigidBodyFromSelf);
+			handles.GetComponent(rigidBody.GetEntity(), rigidBodyFromSelf);
 			ASSERT(rigidBodyFromSelf.IsValid());
 			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
 		}
@@ -363,12 +379,12 @@ namespace usg
 		Entity shapeAggregateEntity = nullptr;
 		Entity actorEntity = nullptr;
 		Optional<RigidBody, FromSelfOrParents> rigidBody;
-		GetComponent(c.GetEntity(), rigidBody);
+		handles.GetComponent(c.GetEntity(), rigidBody);
 		ASSERT((rigidBody.Exists() || c->bIsTrigger) && "A shape must be attached to a rigid body or be a trigger.");
 		if (rigidBody.Exists())
 		{
 			Optional<PhysicsAggregate, FromSelfOrParents> aggregate;
-			GetComponent(c.GetEntity(), aggregate);
+			handles.GetComponent(c.GetEntity(), aggregate);
 			if (aggregate.Exists() && !rigidBody.Force()->bDoNotAttachToParentAggregate)
 			{
 				shapeAggregateEntity = aggregate.Force().GetEntity();
@@ -394,7 +410,7 @@ namespace usg
 
 		if (c.GetEntity() != actorEntity)
 		{
-			const physx::PxTransform transformRelativeToActor = GetRelativeTransform(actorEntity,c.GetEntity());
+			const physx::PxTransform transformRelativeToActor = GetRelativeTransform(actorEntity,c.GetEntity(), handles);
 			pShape->setLocalPose(physx::PxTransform(ToPhysXVec3(c->vCenter)).transform(transformRelativeToActor));
 		}
 		else
@@ -405,7 +421,7 @@ namespace usg
 		Required<RigidBody> rigidBodyFromSelf;
 		if (rigidBody.Exists())
 		{
-			GetComponent(actorEntity, rigidBodyFromSelf);
+			handles.GetComponent(actorEntity, rigidBodyFromSelf);
 		}
 		else
 		{
@@ -415,7 +431,7 @@ namespace usg
 			RigidBody_init(pRigidBody);
 			pRigidBody->bDynamic = false;
 
-			GetComponent(shapeAggregateEntity, rigidBodyFromSelf);
+			handles.GetComponent(shapeAggregateEntity, rigidBodyFromSelf);
 			OnRigidBodyLoaded(rigidBodyFromSelf, handles);
 		}
 		if (c->bIsTrigger)
@@ -426,12 +442,12 @@ namespace usg
 		
 
 		Optional<Identifier> id;
-		GetComponent(c.GetEntity(), id);
+		handles.GetComponent(c.GetEntity(), id);
 		if (id.Exists())
 		{
 			pShape->setName(id.Force()->name);
 		}
-		AddShape(rigidBodyFromSelf, pShape);
+		AddShape(rigidBodyFromSelf, pShape, handles);
 		handles.pPhysicsScene->dirtyActorList.insert(&rigidBodyFromSelf.GetRuntimeData());
 		handles.pPhysicsScene->dirtyShapeList.insert(&rtd);
 	}
@@ -917,7 +933,7 @@ namespace usg
 	{
 		auto& rtd = c.GetRuntimeData();
 		OnDeactivateShape(c, handles);
-		OnVehicleColliderDeactivated(c);
+		OnVehicleColliderDeactivated(c, handles);
 	}
 
 }

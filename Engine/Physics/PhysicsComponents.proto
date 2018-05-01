@@ -165,6 +165,13 @@ message RigidBody
 	required uint32 uSolverMinVelocityIters = 19 [default = 1];
 }
 
+// FIXME: Should be automatically added any entity with a transform component which doesn't
+// have its own rigid body
+message RigidBodyTransformUpdate
+{
+
+}
+
 message KinematicBodyTag
 {
 

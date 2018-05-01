@@ -18,6 +18,7 @@ namespace usg
 	struct GenericInputOutputs;
 	class NewEntities;
 	struct ComponentLoadHandles;
+	struct UnsafeComponentGetter;
 
 	class ComponentType;
 
@@ -74,8 +75,26 @@ namespace usg
 		uint32* GetRawComponentBitfield() { return &m_uComponentBitfield[0]; }
 		static uint32 NumEntities();
 
-		ComponentEntity* GetChildEntityByName(const char* szName, bool bRecursive = true);
-		ComponentEntity* GetChildEntityByName(uint32 uNameHash, bool bRecursive = true);
+		ComponentEntity* GetChildEntityByName(const UnsafeComponentGetter& getter, const char* szName, bool bRecursive = true);
+		ComponentEntity* GetChildEntityByName(const UnsafeComponentGetter& getter, uint32 uNameHash, bool bRecursive = true);
+
+		template <typename UnaryFunction>
+		void ProcessEntityRecursively(UnaryFunction function, ComponentLoadHandles& handles) {
+			ComponentEntity* pChild = GetChildEntity();
+			function(this, handles);
+
+			if (pChild == NULL) { return; }
+
+			ComponentEntity* pChildSibling = pChild->GetNextSibling();
+
+			while (pChildSibling) {
+				ComponentEntity* pTmp = pChildSibling->GetNextSibling();
+				pChildSibling->ProcessEntityRecursively(function, handles);
+				pChildSibling = pTmp;
+			}
+
+			pChild->ProcessEntityRecursively(function, handles);
+		}
 
 		template <typename UnaryFunction>
 		void ProcessEntityRecursively(UnaryFunction function) {

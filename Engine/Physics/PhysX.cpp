@@ -118,7 +118,7 @@ namespace usg
 		return uId1 < uId2 ? usg::pair<Entity, Entity>(e1, e2) : usg::pair<Entity, Entity>(e2,e1);
 	}
 
-	class ContactReportCallback : public physx::PxSimulationEventCallback
+	class ContactReportCallback : public physx::PxSimulationEventCallback, public UnsafeComponentGetter
 	{
 		Required<EventManagerHandle, FromSelfOrParents> m_eventManagerHandle;
 		Component<usg::Components::PhysicsScene>& m_sceneComponent;
@@ -373,6 +373,15 @@ namespace usg
 		return pxt;
 	}
 
+	physx::PxTransform ToPhysXTransform(const MatrixComponent& matrix)
+	{
+		TransformComponent trans;
+		TransformComponent_init(&trans);
+		trans.rotation = matrix.matrix;
+		trans.position = matrix.matrix.vPos().v3();
+		return ToPhysXTransform(trans);
+	}
+
 	class MyContactModification : public physx::PxContactModifyCallback
 	{
 		void onContactModify(physx::PxContactModifyPair* const pairs, physx::PxU32 count)
@@ -447,7 +456,7 @@ namespace usg
 		p.GetRuntimeData().pSceneData = nullptr;
 	}
 
-	void UpdateSimulationFilter(physx::PxShape* pShape, Entity entityWithShape, Entity aggregateEntity)
+	void UpdateSimulationFilter(physx::PxShape* pShape, const CollisionMasks* pMasks, const RigidBody* pBody, Entity aggregateEntity)
 	{
 		// word0 = my own collision group mask
 		// word1 = collide against filter
@@ -455,30 +464,24 @@ namespace usg
 		// word3 last bits = custom bitmask with information such as whether we should generate contact reports, etc
 		// word3 = material flags (up to 16 bits reserved)
 
-		Required<CollisionMasks, FromSelfOrParents> collisionMasks;
-		GetComponent(entityWithShape, collisionMasks);
+		ASSERT(pMasks && "Shapes must have CollisionMasks component.");
 
-		ASSERT(collisionMasks.IsValid() && "Shapes must have CollisionMasks component.");
-		ASSERT(!aggregateEntity->IsChildOf(collisionMasks.GetEntity()) && "Picked up CollisionMasks from the scene");
-
-		Optional<RigidBody, FromSelfOrParents> rigidBody;
-		GetComponent(entityWithShape, rigidBody);
 
 		physx::PxFilterData filterData = pShape->getSimulationFilterData();
-		filterData.word0 = collisionMasks->uGroup;
-		filterData.word1 = collisionMasks->uFilter;
+		filterData.word0 = pMasks->uGroup;
+		filterData.word1 = pMasks->uFilter;
 		filterData.word2 = aggregateEntity->GetOnCollisionMask();
 		filterData.word3 = 0;
 
-		if (rigidBody.Exists() && rigidBody.Force()->bDisableImpulses)
+		if (pBody && pBody->bDisableImpulses)
 		{
 			filterData.word3 |= static_cast<physx::PxU32>(ShapeBitmask::DisableImpulses);
 		}
-		if (rigidBody.Exists() && rigidBody.Force()->bEnableCCD)
+		if (pBody && pBody->bEnableCCD)
 		{
 			filterData.word3 |= static_cast<physx::PxU32>(ShapeBitmask::CCD);
 		}
-		if (rigidBody.Exists() && rigidBody.Force()->fMaxImpulse > Math::EPSILON)
+		if (pBody && pBody->fMaxImpulse > Math::EPSILON)
 		{
 			filterData.word3 |= static_cast<physx::PxU32>(ShapeBitmask::EnableContactModification);
 		}

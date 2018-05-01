@@ -30,10 +30,14 @@ namespace usg
 		{
 			void RaycastAsync(Entity callbackEntity, uint32 uSystemId, const AsyncRaycastRequest& request)
 			{
+				// FIXME: THREADING ISSUE
+				// We should make access to the raycasts queue publically accessible in a threadsafe way
+				struct Getter : public UnsafeComponentGetter {		}getter ;
 				Required<usg::PhysicsScene, FromSelfOrParents> sceneFromSelfOrParents;
-				GetComponent(callbackEntity, sceneFromSelfOrParents);
+				getter.GetComponent(callbackEntity, sceneFromSelfOrParents);
 				Required<usg::PhysicsScene> scene;
-				GetComponent(sceneFromSelfOrParents.GetEntity(), scene);
+				getter.GetComponent(sceneFromSelfOrParents.GetEntity(), scene);
+				// FIXME: THREADING ISSUE
 
 				ASSERT((request.vTo - request.vFrom).MagnitudeSquared() > Math::EPSILON);
 				ASSERT(request.uMaxHits > 0);

@@ -12,6 +12,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Particles/ParticleComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
+#include "Engine/Framework/GameComponents.h"
 #include "Engine/Framework/Merge.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Graphics/GPUUpdate.h"
@@ -162,7 +163,7 @@ namespace usg
 		for (GameComponents<usg::PhysicsScene>::Iterator it = GameComponents<usg::PhysicsScene>::GetIterator(); !it.IsEnd(); ++it)
 		{
 			Required<PhysicsScene> scene;
-			GetComponent((*it)->GetEntity(), scene);
+			m_componentLoadHandles.GetComponent((*it)->GetEntity(), scene);
 			ExecuteRaycasts(scene, m_eventManager, m_systemCoordinator);
 			GenerateOnCollisionSignals(m_systemCoordinator, scene);
 			GenerateOnTriggerSignals(m_systemCoordinator, scene);
@@ -493,13 +494,13 @@ namespace usg
 			if (spawnParams.HasTransform())
 			{
 				Required<usg::TransformComponent> trans;
-				GetComponent(e, trans);
+				m_componentLoadHandles.GetComponent(e, trans);
 				if (trans.IsValid())
 				{
 					trans.Modify() = spawnParams.GetTransform();
 				}
 				Required<usg::MatrixComponent> mat;
-				GetComponent(e, mat);
+				m_componentLoadHandles.GetComponent(e, mat);
 				if (mat.IsValid())
 				{
 					mat.Modify().matrix = spawnParams.GetTransform().rotation;
@@ -510,7 +511,7 @@ namespace usg
 			if (spawnParams.HasOwnerNUID())
 			{
 				Required<usg::NetworkOwner> owner;
-				GetComponent(e, owner);
+				m_componentLoadHandles.GetComponent(e, owner);
 				if (owner.IsValid())
 				{
 					owner.Modify().ownerUID = spawnParams.GetOwnerNUID();
@@ -551,7 +552,7 @@ namespace usg
 
 		if (merge.has_entityWithID)
 		{
-			e = root->GetChildEntityByName(merge.entityWithID);
+			e = root->GetChildEntityByName(m_componentLoadHandles, merge.entityWithID);
 		}
 
 		ASSERT(e != NULL);
@@ -593,14 +594,14 @@ namespace usg
 		if (parent)
 		{
 			Required<PhysicsScene, FromSelfOrParents> physicsScene;
-			GetComponent(parent, physicsScene);
+			m_componentLoadHandles.GetComponent(parent, physicsScene);
 			if (physicsScene.IsValid())
 			{
 				handlesOut.pPhysicsScene = physicsScene.GetRuntimeData().pSceneData;
 			}
 
 			Required<ModelMgrComponent, FromSelfOrParents> modelMgr;
-			GetComponent(parent, modelMgr);
+			m_componentLoadHandles.GetComponent(parent, modelMgr);
 			if (modelMgr.IsValid())
 			{
 				handlesOut.pModelMgr = modelMgr.GetRuntimeData().pMgr;

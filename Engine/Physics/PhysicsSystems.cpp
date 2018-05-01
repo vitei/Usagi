@@ -109,7 +109,9 @@ namespace usg
 			}
 		};
 
-		class BeginPhysicsSimulationSystem : public System
+
+		// FIXME: This system can't be run on a thread - we need some way of siginalling this
+		class BeginPhysicsSimulationSystem : public System, public UnsafeComponentGetter
 		{
 		public:
 
@@ -150,7 +152,16 @@ namespace usg
 					auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
 					for (auto& dirtyShapeData : mutableRtd.dirtyShapeList)
 					{
-						UpdateSimulationFilter(dirtyShapeData->pShape, dirtyShapeData->entity, dirtyShapeData->shapeAggregateEntity);
+						Required<CollisionMasks, FromSelfOrParents> collisionMasks;
+						GetComponentImpl(dirtyShapeData->entity, collisionMasks);
+
+						Optional<RigidBody, FromSelfOrParents> rigidBody;
+						GetComponentImpl(dirtyShapeData->entity, rigidBody);
+
+						const CollisionMasks* pMasks = &(*collisionMasks);
+						const RigidBody* pBody = rigidBody.Exists() ? &(*rigidBody.Force()) : nullptr;
+
+						UpdateSimulationFilter(dirtyShapeData->pShape, pMasks, pBody, dirtyShapeData->shapeAggregateEntity);
 					}
 					mutableRtd.dirtyShapeList.clear();
 				}
@@ -343,6 +354,7 @@ namespace usg
 			struct Inputs
 			{
 				Required<usg::Components::SimulationActive, FromSelfOrParents> simactive;
+				Required<SceneComponent, FromSelfOrParents> visualScene;
 				Required<usg::PhysicsScene, FromSelf> scene;
 			};
 
@@ -377,9 +389,7 @@ namespace usg
 				if (mutableRtd.diagnostics.bDebugRenderOnNextFrame)
 				{
 					mutableRtd.diagnostics.bDebugRenderOnNextFrame = false;
-					Required<SceneComponent, FromSelf> visualScene;
-					GetComponent(inputs.scene.GetEntity(), visualScene);
-					physics::DebugRender(*visualScene.GetRuntimeData().pScene->GetSceneCamera(0));
+					physics::DebugRender(*inputs.visualScene.GetRuntimeData().pScene->GetSceneCamera(0));
 				}
 #endif
 			}
@@ -502,6 +512,36 @@ namespace usg
 			}
 		};
 		
+		class RigidBodyUpdateWorldMatrix : public System
+		{
+		public:
+			struct Inputs
+			{
+				Optional<MatrixComponent, FromParents>      parentMtx; // Optional parent matrix
+				Required<TransformComponent>				tran;
+				Required<RigidBodyTransformUpdate>			rigidBodyUpdate;
+			};
+
+			struct Outputs
+			{
+				Required<MatrixComponent>      worldMtx;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_TRANSFORM_NESTED_RIGIDBODIES)
+
+			static  void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				Matrix4x4& mOut = outputs.worldMtx.Modify().matrix;
+				mOut = inputs.tran->rotation;
+				mOut.Translate(inputs.tran->position.x, inputs.tran->position.y, inputs.tran->position.z);
+
+				if (inputs.parentMtx.Exists() && inputs.tran->bInheritFromParent)
+				{
+					mOut = mOut * inputs.parentMtx.Force()->matrix;
+				}
+			}
+		};
+
 		class TransformRigidBody : public System
 		{
 		public:
@@ -519,9 +559,9 @@ namespace usg
 			};
 
 			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
-			EXCLUSION(IfHas<SleepTag,FromSelf>, IfHas<TransformComponent, FromParents>)
+			EXCLUSION(IfHas<SleepTag, FromSelf>, IfHas<TransformComponent, FromParents>)
 
-			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
+				static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				ASSERT(inputs.rigidBody->bDynamic);
 				const auto& rtd = inputs.rigidBody.GetRuntimeData();
@@ -539,7 +579,8 @@ namespace usg
 			{
 				Required<RigidBody> rigidBody;
 				Required<DynamicBodyTag> dynamicTag;
-				Required<TransformComponent, FromParents> parentTransform;
+				Required<TransformComponent> transform;
+				Required<MatrixComponent, FromParents> parentMatrix;
 			};
 
 			struct Outputs
@@ -547,16 +588,15 @@ namespace usg
 				Required<TransformComponent> transform;
 			};
 
-			DECLARE_SYSTEM(SYSTEM_TRANSFORM_NESTED_RIGIDBODIES)
+			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
 			EXCLUSION(IfHas<SleepTag, FromSelf>)
 
 			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				// Note that the performance of this solution is very slow. You should generally avoid nested rigid bodies.
 				ASSERT(inputs.rigidBody->bDynamic);
-				TransformComponent& transOut = outputs.transform.Modify();
 				const auto& rtd = inputs.rigidBody.GetRuntimeData();
-				if (!transOut.bInheritFromParent)
+				if (!inputs.transform->bInheritFromParent)
 				{
 					TransformComponent& transOut = outputs.transform.Modify();
 					transOut.position = ToUsgVec3(rtd.pRigidActor->getGlobalPose().p);
@@ -565,15 +605,8 @@ namespace usg
 				}
 
 				const physx::PxTransform& globalTransform = rtd.pRigidActor->getGlobalPose();
-				physx::PxTransform cumulativeParentTransform = ToPhysXTransform(*inputs.parentTransform);
-				Optional<TransformComponent, FromParents> t;
-				GetComponent(inputs.parentTransform.GetEntity(), t);
-				while (t.Exists())
-				{
-					physx::PxTransform pxt = ToPhysXTransform(*t.Force());
-					cumulativeParentTransform = pxt.transform(cumulativeParentTransform);
-					GetComponent(t.Force().GetEntity(), t);
-				}
+				physx::PxTransform cumulativeParentTransform = ToPhysXTransform(*inputs.parentMatrix);
+				
 				const physx::PxTransform localTransform = cumulativeParentTransform.transformInv(globalTransform);
 				outputs.transform.Modify().position = ToUsgVec3(localTransform.p);
 				outputs.transform.Modify().rotation = ToUsgQuaternionf(localTransform.q);

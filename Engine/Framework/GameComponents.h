@@ -157,21 +157,34 @@ struct ComponentGetterInt< T, FromParentWith<ComponentType> >
 	}
 };
 
-struct ComponentLoadHandles : public ComponentLoadHandlesBase
+struct UnsafeComponentGetter
 {
-	friend ComponentManager;
-private:
-	ComponentLoadHandles() {};
 public:
 	template<typename T, typename SearchMask>
-	bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional)
+	bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional) const
+	{
+		return GetComponentImpl(uEntity, optional);
+	}
+
+	template<typename T, typename SearchMask>
+	bool GetComponent(Entity uEntity, Required<T, SearchMask>& required) const
+	{
+		return GetComponentImpl(uEntity, required);
+	}
+
+protected:
+	// Don't want this being constructed just anywhere
+	UnsafeComponentGetter() {};
+
+	template<typename T, typename SearchMask>
+	static bool GetComponentImpl(Entity uEntity, Optional<T, SearchMask>& optional) 
 	{
 		optional = Optional<T, SearchMask>(ComponentGetterInt<T, SearchMask>::GetComponent(uEntity));
 		return true;
 	}
 
 	template<typename T, typename SearchMask>
-	bool GetComponent(Entity uEntity, Required<T, SearchMask>& required)
+	static bool GetComponentImpl(Entity uEntity, Required<T, SearchMask>& required) 
 	{
 		Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
 
@@ -180,7 +193,13 @@ public:
 
 		return exists;
 	}
+};
 
+struct ComponentLoadHandles : public ComponentLoadHandlesBase, public UnsafeComponentGetter
+{
+	friend ComponentManager;
+private:
+	ComponentLoadHandles() {};
 };
 
 

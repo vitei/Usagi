@@ -18,7 +18,7 @@ namespace usg
 
 	typedef void(*RegisterSystemsFn) (usg::SystemCoordinator& systemCoordinator);
 
-	class SystemsMode : public Mode
+	class SystemsMode : public Mode, public UnsafeComponentGetter
 	{
 	public:
 		SystemsMode(RegisterSystemsFn fnGameSysRegister);
@@ -31,12 +31,6 @@ namespace usg
 		virtual void InitNetworking(UsagiNet& usagiNetwork) override;
 		
 		ComponentManager* GetComponentMgr();
-
-		template<typename T, typename SearchMask>
-		void GetComponent(Entity uEntity, Required<T, SearchMask>& required)
-		{
-			Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
-		}
 
 	protected:
 		ComponentEntity* GetRootEntity();
