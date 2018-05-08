@@ -76,6 +76,10 @@
     <ClCompile Include="$(IntDir)..\<%= @src %>" />
 <% end %>
 
+<% for @src in platform_sources %>
+    <ClCompile Include="..\..\..\..\<%= @src %>" />
+<% end %>
+
 <% for @src in sources %>
     <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
 <% end %>
@@ -88,6 +92,11 @@
 <% for @h in headers %>
     <ClInclude Include="..\..\..\..\<%= project_dir + @h %>" />
 <% end %>
+
+<% for @h in platform_headers %>
+    <ClInclude Include="..\..\..\..\<%= @h %>" />
+<% end %>
+
   </ItemGroup>
   <ItemGroup>
 <% for @p in proto %>

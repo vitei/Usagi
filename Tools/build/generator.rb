@@ -85,9 +85,15 @@ def libs(config, platform, n, bp_objects, order_only_deps)
 
     sources = get_sourcelist(source_root, config.target_platform,
                              platform.underscore_dirs_whitelist)
+    platform_sources = get_platform_sourcelist(source_root, config.target_platform, "Engine/",
+                             platform.underscore_dirs_whitelist)
+
     targets = gen_source_targets(sources, config, platform)
     standard_targets = targets.reject{|c, o| c.end_with?('.pb.cpp') || c.end_with?('.lua.cpp')}
     write_file_list(standard_targets.keys, config.code_working_dir, source_root)
+
+    platform_targets = gen_source_targets(platform_sources, config, platform)
+    write_file_list(platform_targets.keys, config.code_working_dir, source_root, ".platform.txt")
 
     proto_sources = get_sourcelist(source_root, config.target_platform)
     proto_files = proto_sources.select{|s| s.end_with?('.proto')}
@@ -144,7 +150,13 @@ def includes(config, platform, n)
 
     headers = get_sourcelist(include_root, config.target_platform,
                              platform.underscore_dirs_whitelist, true)
+
+    platform_headers = get_platform_sourcelist(include_root, config.target_platform, "Engine/",
+                             platform.underscore_dirs_whitelist, true)
+
     write_file_list(headers, config.code_working_dir, include_root, '.headers.txt')
+    write_file_list(platform_headers, config.code_working_dir, include_root, '.platformheaders.txt')
+
     pairs = headers.map {|h| [h, "#{config.includes_output_dir}/#{h}"] }
     targets = Hash[pairs]
 
@@ -232,6 +244,7 @@ def vs_project(config, n, order_only_deps)
     # TODO: fix these when adding the next projects
     rootdir = File.dirname(proj)
     sources = File.join(config.code_working_dir, rootdir, '.sources.txt')
+    platform_source = File.join(config.code_working_dir, rootdir, 'platform.sources.txt')
     options = {:template => 'Engine/Project.vcxproj.erb', :rootdir => rootdir, :guid => guid}
 
     GeneratorUtil.create_project_file(config, n, output, sources, options,
@@ -249,6 +262,7 @@ def vs_project_dll(config, n, order_only_deps)
     # TODO: fix these when adding the next projects
     rootdir = File.dirname(proj)
     sources = File.join(config.code_working_dir, rootdir, '.sources.txt')
+    platform_source = File.join(config.code_working_dir, rootdir, 'platform.sources.txt')
     options = {:template => template, :rootdir => rootdir, :guid => guid}
 
     GeneratorUtil.create_project_file(config, n, output, sources, options,

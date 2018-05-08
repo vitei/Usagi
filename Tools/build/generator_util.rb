@@ -481,7 +481,7 @@ module GeneratorUtil
 
   def GeneratorUtil.create_project_file(config, n, project_file, sources, options,
                                         implicit_deps = [], order_only_deps = [],
-                                        should_fail_on_update = false)
+                                        should_fail_on_update = false, platform_sources = FileList[])
     template = options[:template]
     rootdir = options[:rootdir]
     guid = options.fetch(:guid, nil)
