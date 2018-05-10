@@ -1,0 +1,8 @@
+Automated Usagi Project
+
+Usage:
+
+rakefile <project_name>
+
+Place Usagi in a subdirectory of where you wish to create a new project, then run rake <project_name> to automatically populate the directory with
+all of the files required for as starting point for a new project.

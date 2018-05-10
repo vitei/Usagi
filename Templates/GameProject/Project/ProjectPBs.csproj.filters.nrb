@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<%# ERB template for the KeplerPBs project %>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+<% for @cs in proto_csharp %>
+<% if locations.has_key?(@cs) %>
+    <ClCompile Include="..\<%= @cs %>">
+      <Filter><%= locations[@cs] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="..\<%= @cs %>" />
+<% end %>
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @path, @uuid in filters %>
+    <Filter Include="<%= @path %>">
+      <UniqueIdentifier>{<%= @uuid %>}</UniqueIdentifier>
+    </Filter>
+<% end %>
+  </ItemGroup>
+</Project>

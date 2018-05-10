@@ -609,7 +609,7 @@ def pb_dll(config, n)
   options = {:template => "#{config.project}/#{config.project}PBs.csproj.erb", :rootdir => config.protocol_csharp_output_dir(false)}
   GeneratorUtil.create_project_file(config, n, config.project_csharp_protos_proj,
                                     project_sources, options,
-                                    [project_sources], find_csharp_pb_classes(config))
+                                    [project_sources], find_csharp_pb_classes(config), config.project)
 
   [config.project_csharp_protos_proj]
 end
@@ -629,7 +629,7 @@ def vs_project(config, n, order_only_deps)
 
     GeneratorUtil.create_project_file(config, n, output, sources,
                                       {:template => template, :rootdir => rootdir},
-                                      [], order_only_deps)
+                                      [], order_only_deps, config.project)
     outputs << output
 
     settings_input = "#{proj}.user"

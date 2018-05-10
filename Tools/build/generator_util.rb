@@ -481,10 +481,11 @@ module GeneratorUtil
 
   def GeneratorUtil.create_project_file(config, n, project_file, sources, options,
                                         implicit_deps = [], order_only_deps = [],
-                                        should_fail_on_update = false, platform_sources = FileList[])
+                                        should_fail_on_update = false, platform_sources = FileList[], project_id = "USAGI")
     template = options[:template]
     rootdir = options[:rootdir]
     guid = options.fetch(:guid, nil)
+    projectname = project_id
     # this 'failure' is here so visual studio prompts the user to reload
     # the solution and any changed projects.    
     failure = ''

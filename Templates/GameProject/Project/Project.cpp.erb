@@ -1,0 +1,89 @@
+#include "Engine/Common/Common.h"
+#include "Engine/Core/Utility.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Game/GameUtil.h"
+#include "Engine/Audio/Audio.h"
+#include "Engine/Core/Modules/ModuleManager.h"
+#include "Engine/Layout/StringTable.h"
+#include "Engine/Graphics/Device/GFXContext.h"
+#include "Mode/ModeTitle.h"
+#include "<%= projectname %>.h"
+
+
+static <%= projectname %>* g_spGame = nullptr;
+
+namespace usg
+{
+	usg::GameInterface* CreateGame()
+	{
+		ASSERT(!g_spGame);
+		g_spGame = vnew(usg::ALLOC_OBJECT) <%= projectname %>();
+		return g_spGame;
+	}
+
+}
+
+	bool <%= projectname %>LoadFunc(uint32 uMode, usg::Mode** ppLoadMode)
+	{
+		switch (uMode)
+		{
+		case MODE_TITLE:
+			ASSERT(false);
+			break;
+		default:
+			FATAL_RELEASE(false, "[InitThread::Run] Invalid mode!\n");
+			return false;
+		}
+
+		return true;
+	}
+
+<%= projectname %>::<%= projectname %>() :
+	Inherited()
+{
+}
+
+<%= projectname %>::~<%= projectname %>()
+{
+
+}
+
+
+usg::ModeLoadFunc <%= projectname %>::GetLoadFunc() const
+{
+	return UsagiTestLoadFunc;
+}
+
+
+void <%= projectname %>::Init(usg::GFXDevice* pDevice)
+{
+	Inherited::Init(pDevice);
+//	usg::ModuleManager::Inst()->LoadModule("Oculus.dll");
+	HookupModules(pDevice);
+
+	m_eMode = MODE_TITLE;
+	m_ePrevMode = MODE_NONE;
+
+	StartNextMode(pDevice);
+
+	m_bIsRunning = true;
+}
+
+
+uint32 <%= projectname %>::GetNextMode() const
+{
+	return (uint32)m_eMode;
+}
+
+void <%= projectname %>::ModeFinished()
+{
+	SetNextMode(MODE_TITLE);
+}
+
+void <%= projectname %>::SetNextMode(ModeType eMode)
+{
+	m_eMode = eMode;
+}
+
+
+
