@@ -6,7 +6,7 @@
 #include "Engine/Core/Modules/ModuleManager.h"
 #include "Engine/Layout/StringTable.h"
 #include "Engine/Graphics/Device/GFXContext.h"
-#include "Mode/ModeTitle.h"
+#include "Mode/ModeGame.h"
 #include "<%= projectname %>.h"
 
 
@@ -27,8 +27,8 @@ namespace usg
 	{
 		switch (uMode)
 		{
-		case MODE_TITLE:
-			ASSERT(false);
+		case MODE_GAME:
+			*ppLoadMode = vnew(usg::ALLOC_MODE) ModeGame;
 			break;
 		default:
 			FATAL_RELEASE(false, "[InitThread::Run] Invalid mode!\n");
@@ -61,7 +61,7 @@ void <%= projectname %>::Init(usg::GFXDevice* pDevice)
 //	usg::ModuleManager::Inst()->LoadModule("Oculus.dll");
 	HookupModules(pDevice);
 
-	m_eMode = MODE_TITLE;
+	m_eMode = MODE_GAME;
 	m_ePrevMode = MODE_NONE;
 
 	StartNextMode(pDevice);
@@ -77,7 +77,7 @@ uint32 <%= projectname %>::GetNextMode() const
 
 void <%= projectname %>::ModeFinished()
 {
-	SetNextMode(MODE_TITLE);
+	SetNextMode(MODE_GAME);
 }
 
 void <%= projectname %>::SetNextMode(ModeType eMode)

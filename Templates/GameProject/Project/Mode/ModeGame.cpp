@@ -1,0 +1,162 @@
+﻿#include "Engine/Common/Common.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Device/Display.h"
+#include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Game/GameView.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/HID/Input.h"
+#include "Engine/Graphics/Device/IHeadMountedDisplay.h"
+#include "Engine/Scene/ViewContext.h"
+#include "Engine/Framework/EntitySpawnParams.h"
+#include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Core/stl/utility.h"
+#include "Engine/Layout/StringTable.h"
+#include "Engine/Framework/ComponentEntity.h"
+#include "Engine/Framework/FrameworkComponents.pb.h"
+#include "UsagiTest/Camera/CameraComponents.pb.h"
+#include "UsagiTest/Camera/CameraEvents.pb.h"
+#include "Engine/Framework/EntityLoader.h"
+#include "Engine/Framework/EntityLoaderHandle.h"
+#include "Engine/Framework/EventManager.h"
+#include "ModeGame.h"
+
+void RegisterUsagiTestSystems(usg::SystemCoordinator& systemCoordinator);
+
+ModeGame::ModeGame() :
+	Inherited(RegisterUsagiTestSystems)
+{
+
+}
+
+ModeGame::~ModeGame()
+{
+	vdelete m_pGameView;
+	m_pGameView = nullptr;
+}
+
+void ModeGame::InitRoot()
+{
+	Required<usg::EntityLoaderHandle, FromSelfOrParents> entityLoader;
+	GetComponent(GetRootEntity(), entityLoader);
+	ASSERT(entityLoader.IsValid());
+	
+	entityLoader->pHandle->ApplyTemplateToEntity("Entities/Root.vent", GetRootEntity());
+}
+
+void ModeGame::Init(usg::GFXDevice* pDevice)
+{
+	Inherited::Init(pDevice);
+
+	usg::Scene& scene = GetScene();
+	usg::AABB worldBounds;
+	worldBounds.SetMinMax(-500 * usg::V3F_ONE, 500 * usg::V3F_ONE);
+	scene.Init(pDevice, worldBounds);
+
+	InitRoot();
+	InitGameView(pDevice);
+}
+
+void ModeGame::CleanUp(usg::GFXDevice* pDevice)
+{
+	usg::Scene& scene = GetScene();
+	m_pGameView->CleanUp(pDevice, scene);
+	m_postFX.CleanUp(pDevice);
+	Inherited::CleanUp(pDevice);
+}
+
+
+void ModeGame::InitGameView(usg::GFXDevice* pDevice)
+{
+	usg::Scene& scene = GetScene();
+
+	uint32 uWidthTV, uHeightTV;
+	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidthTV, uHeightTV, false);
+
+	usg::IHeadMountedDisplay* pHMD = pDevice->GetHMD();
+	if(pHMD)
+	{
+		pHMD->GetRenderTargetDim(usg::IHeadMountedDisplay::Eye::Left, 1.0, uWidthTV, uHeightTV);
+	}
+
+	constexpr uint32 uPostFXTV = usg::PostFXSys::EFFECT_SMAA | usg::PostFXSys::EFFECT_BLOOM | usg::PostFXSys::EFFECT_DEFERRED_SHADING; // usg::PostFXSys::EFFECT_SKY_FOG
+	m_postFX.Init(pDevice, uWidthTV, uHeightTV, uPostFXTV);
+	usg::ResourceMgr::Inst()->RegisterRenderPass(m_postFX.GetRenderPass());
+
+	const usg::GFXBounds bounds = m_postFX.GetBounds();
+
+	usg::GFXBounds viewBounds;
+	viewBounds.x = 0; viewBounds.y = 0;
+	viewBounds.width = uWidthTV;
+	viewBounds.height = uHeightTV;
+		
+	usg::GameView* pView = vnew(usg::ALLOC_OBJECT)usg::GameView(pDevice, scene, m_postFXTV, viewBounds, 40.0f, 0.1f, 1000.0f);
+	m_pGameView = pView;
+}
+
+bool ModeGame::Update(float fElapsed)
+{
+	Inherited::Update(fElapsed);
+
+	return false;
+}
+
+void ModeGame::PreDraw(usg::GFXDevice* pDevice, usg::GFXContext* pImmContext)
+{
+
+}
+
+void ModeGame::Draw(usg::Display* pDisplay, usg::IHeadMountedDisplay* pHMD, usg::GFXContext* pImmContext)
+{
+	usg::Scene& scene = GetScene();
+	scene.GetLightMgr().GlobalShadowRender(pImmContext, &scene);
+	scene.GetLightMgr().ViewShadowRender(pImmContext, &scene, m_pGameView->GetViewContext());
+
+	uint32 uDrawCount = pHMD ? 2 : 1;
+	for (uint32 i = 0; i < uDrawCount; i++)
+	{
+		m_postFX.BeginScene(pImmContext, 0);
+		pImmContext->ClearRenderTarget(usg::RenderTarget::CLEAR_FLAG_DS | usg::RenderTarget::CLEAR_FLAG_COLOR_1);
+		m_pGameView->Draw(&m_postFX, pDisplay, pImmContext, nullptr, pHMD ? (i == 0 ? usg::VIEW_LEFT_EYE : usg::VIEW_RIGHT_EYE) : usg::VIEW_CENTRAL);
+		m_postFX.EndScene();
+
+		if (pHMD)
+		{
+			usg::IHeadMountedDisplay::Eye eye = i == 0 ? usg::IHeadMountedDisplay::Eye::Left : usg::IHeadMountedDisplay::Eye::Right;
+			pHMD->Transfer(pImmContext, eye, m_postFX.GetFinalRT());
+		}
+		else
+		{
+			pImmContext->TransferRect(m_postFX.GetFinalRT(), pDisplay, m_postFX.GetBounds(), m_pGameView->GetBounds());
+		}
+	}
+
+
+	if(pHMD)
+	{
+		pHMD->SubmitFrame();
+		pImmContext->TransferSpectatorDisplay(pHMD, pDisplay);
+	}	
+}
+
+void ModeGame::PostDraw(usg::GFXDevice* pDevice)
+{
+	
+}
+
+void ModeGame::NotifyResize(usg::GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight)
+{
+	m_postFX.Resize(pDevice, uWidth, uHeight);
+
+	Required<usg::EventManagerHandle, FromSelfOrParents> eventManager;
+	GetComponent(GetRootEntity(), eventManager);
+	ASSERT(eventManager.IsValid());
+
+	usg::SetAspectRatio setAspectRatio;
+	usg::SetAspectRatio_init(&setAspectRatio);
+	setAspectRatio.fAspectRatio = (float)uWidth/(float)uHeight;
+	eventManager->handle->RegisterEventWithEntity(GetRootEntity(), setAspectRatio, ON_ENTITY|ON_CHILDREN);
+	
+	usg::GFXBounds bounds{ 0, 0, (sint32)uWidth, (sint32)uHeight };
+	m_pGameView->SetBounds(bounds);
+}
+
