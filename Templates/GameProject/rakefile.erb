@@ -7,7 +7,7 @@ DEFAULT_PLATFORM = 'win'
 NINJA_PREFIX = "#{SUBMODULE_DIR}/Tools/bin/"
 
 
-PROJECT         = ENV["project"]   || "<%= @projectname %>"
+PROJECT         = ENV["project"]   || "<%= projectname %>"
 CURRENT_DIR     = File.dirname(__FILE__)
 
 require_relative File.join(SUBMODULE_DIR, 'Tools/build/game_common_rake.rb')
