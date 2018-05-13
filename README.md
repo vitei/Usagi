@@ -62,6 +62,8 @@ The build process has not been improved or significantly modified and currently 
    PHYSX_DIR -> [**PhysX Checkout Dir**]\PhysX_3.4  
    OCULUS_SDK_DIR -> [**Oculus SDK directory**]  
 
+1. Reset to ensure environment variable changes take effect  
+
 1. Follow the instructions in that projects README.md  
 
 Issues
