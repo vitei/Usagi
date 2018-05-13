@@ -36,13 +36,19 @@ end
 def find_pb(pb_type)
   pb_type_ns = pb_type.to_s.split(".").map{ |t| t.to_sym }
 
-  find_pb_in_ns(Object,                             pb_type_ns) ||
+  findResult =  find_pb_in_ns(Object,               pb_type_ns) ||
   find_pb_in_ns(Object.const_get(:Usg),             pb_type_ns) ||
-  find_pb_in_ns(Object.const_get(:Components),      pb_type_ns) ||
   find_pb_in_ns(Usg::const_get(:Ai),                pb_type_ns) ||
   find_pb_in_ns(Usg::const_get(:Components),        pb_type_ns) ||
   find_pb_in_ns(Usg::Ai.const_get(:Pb),             pb_type_ns) ||
   find_pb_in_ns(Usg::Ai::const_get(:Components),    pb_type_ns)
+  
+  # Empty projects may not have any components defined
+  if Object.const_defined?(:Components)
+   findResult = findResult || find_pb_in_ns(Object.const_get(:Components),  pb_type_ns)
+  end
+
+  findResult
 end
 
 def find_bt_pb_enum(pb_type)

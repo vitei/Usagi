@@ -141,7 +141,7 @@
     <ClCompile Include="$(PBProjectDir)<%= @src %>" />
 <% end %>
 
-  <ClCompile Include="..\..\..\<%= @projectname %>\_exclude\stdafx.cpp">
+  <ClCompile Include="..\..\..\$(ProjectName)\_exclude\stdafx.cpp">
     <PrecompiledHeader>Create</PrecompiledHeader>
   </ClCompile>
 

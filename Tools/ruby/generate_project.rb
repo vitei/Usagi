@@ -151,6 +151,7 @@ def write_temporary_files(argv, project_file, filters_file, options)
   sources_file = argv[0]
   template_file = argv[1]
   project_root = to_windows_path(argv[2])
+  projectname = argv[3]
   project_dir = "#{project_root}\\"
   project_guid = options.fetch(:guid, '')
 

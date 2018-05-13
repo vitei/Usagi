@@ -31,7 +31,7 @@ public:
 
 private:
 
-	void InitGameView(usg::GFXDevice* pDevice)
+	void InitGameView(usg::GFXDevice* pDevice);
 	void InitRoot();
 
 	usg::PostFXSys		m_postFX;

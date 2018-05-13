@@ -129,7 +129,7 @@ module GeneratorUtil
            {:description => 'BOILERPLATE $out', :dependencies => :gcc})
 
     n.rule('project',
-           "$ruby #{config.vs_project_generator} #{config.script_dep_opt} $guid -o $out $in $fail_opt $template $rootdir",
+           "$ruby #{config.vs_project_generator} #{config.script_dep_opt} $guid -o $out $in $fail_opt $template $rootdir #{config.project}",
            {:description => 'VS PROJECT $out', :dependencies => :gcc})
 
   end

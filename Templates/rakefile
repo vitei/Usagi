@@ -46,11 +46,6 @@ task :default do
     FileUtils.mkdir_p(projectDir)
     FileUtils.cp_r(files, projectDir)
 
-    files = Dir.glob('GameProject/Project/Mode/*')
-    projectDir = "#{OUTPUT_DIR}\\#{PROJECT_NAME}\\Mode"
-    FileUtils.mkdir_p(projectDir)
-    FileUtils.cp_r(files, projectDir)
-
     files = Dir.glob('GameProject/Project/_exclude/*')
     projectDir = "#{OUTPUT_DIR}\\#{PROJECT_NAME}\\_exclude"
     FileUtils.mkdir_p(projectDir)
@@ -72,6 +67,23 @@ task :default do
         FileUtils.cp_r(file, fileOut)    
       end
     end
+
+    filesOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}"
+    FileUtils.mkdir_p(filesOut)
+    Dir['GameProject/Project/Mode/*'].each do |file|
+      filePathName = Pathname.new(file)
+      fileOut = file.sub("GameProject/Project", filesOut)
+      if filePathName.extname() == ".erb"
+        fileOut = fileOut.sub(".erb", "")
+        copyTemplateFile(file, fileOut)
+        print fileOut
+        print "\n"
+      else
+        FileUtils.cp_r(file, fileOut)    
+        print fileOut
+        print "\n"
+      end
+    end   
 
     projectTemplate = "GameProject/Project.sln.erb"
     projectTemplateOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}.sln"
