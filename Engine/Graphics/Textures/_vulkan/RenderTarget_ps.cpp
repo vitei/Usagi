@@ -30,6 +30,12 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 	// Nothing much to do, all lives in the MRT
 }
 
+void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
+{
+
+}
+
+
 void RenderTarget_ps::SetClearColor(const Color& col)
 {
     

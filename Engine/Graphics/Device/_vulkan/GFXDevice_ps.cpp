@@ -5,7 +5,9 @@
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
+#include "Engine/Graphics/Device/GFXContext.h" 
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
 
@@ -38,6 +40,7 @@ GFXDevice_ps::GFXDevice_ps()
 	m_pQueueProps = NULL;
 	m_uStockCount = 0;
 	m_uDisplayCount = 0;
+	m_fGPUTime = 0.0f;
 }
 
 GFXDevice_ps::~GFXDevice_ps()
@@ -281,6 +284,8 @@ void GFXDevice_ps::Begin()
 	{
 		m_pParent->GetDisplay(i)->GetPlatform().SwapBuffers(m_pParent);
 	}
+
+	// TODO: Update GPU time
 }
 
 void GFXDevice_ps::End()

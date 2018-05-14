@@ -17,11 +17,12 @@ public:
 
 	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags, uint32 uLoc, uint32 uMipmaps);
 	void InitArray(GFXDevice* pDevice, uint32 uBufferId, uint32 uWidth, uint32 uHeight, uint32 uSlices, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags);
+	void CleanUp(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
-	const Texture* GetTexture() const { return &m_texture; }
-	Texture* GetTexture() { return &m_texture; }
+	const TextureHndl& GetTexture() const { return m_texHndl; }
+
 	// Do nothing, no memory management on PC
 	void SetActive(bool bActive) { }
 	void Resolve(GFXContext* pContext, bool bTex) {}
@@ -29,6 +30,7 @@ public:
 	const VkAttachmentDescription& GetDescription() { return m_attachDesc; }
 
 private:
+	TextureHndl	m_texHndl;
 	VkAttachmentDescription m_attachDesc;
 	Texture					m_texture;
 };

@@ -4,6 +4,7 @@
 #ifndef _USG_GRAPHICS_VULKAN_TEXTURE_FORMAT_H
 #define _USG_GRAPHICS_VULKAN_TEXTURE_FORMAT_H
 #include "Engine/Common/Common.h"
+#include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 
 static const VkFormat gColorFormatMap[] =

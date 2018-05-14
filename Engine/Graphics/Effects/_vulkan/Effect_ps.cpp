@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 
 
@@ -17,6 +18,11 @@ namespace usg {
 	}
 	
 	Effect_ps::~Effect_ps()
+	{
+
+	}
+
+	void Effect_ps::CleanUp(GFXDevice* pDevice)
 	{
 
 	}

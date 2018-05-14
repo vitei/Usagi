@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Device/DescriptorData.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, Sampler.h)
 
 namespace usg {
@@ -62,19 +63,12 @@ namespace usg {
 			{
 				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				VkDescriptorImageInfo image = {};
-				image.sampler = pData[i].pTexData->sampler.GetContents()->GetSampler();
-				image.imageView = pData[i].pTexData->pTexture->GetPlatform().GetImageView();
-				image.imageLayout = pData[i].pTexData->pTexture->GetPlatform().GetImageLayout();
+				image.sampler = pData[i].texData.sampler.GetContents()->GetSampler();
+				image.imageView = pData[i].texData.tex->GetPlatform().GetImageView();
+				image.imageLayout = pData[i].texData.tex->GetPlatform().GetImageLayout();
 				images.push_back(image);
 
 				writes[i].pImageInfo = &images.back();
-				break;
-			}
-			case DESCRIPTOR_TYPE_LOOKUP_TABLE:
-			{
-				// Not supporting these anymore, declare them as a 1D texture
-				ASSERT(false);
-
 				break;
 			}
 			default:

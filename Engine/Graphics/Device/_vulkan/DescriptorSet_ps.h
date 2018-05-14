@@ -14,6 +14,7 @@ namespace usg {
 class DescriptorSetLayout;
 class GFXDevice;
 struct DescriptorData;
+class ConstantSet_ps;
 
 class DescriptorSet_ps
 {

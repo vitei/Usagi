@@ -5,7 +5,9 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Core/_win/WinUtil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Device/GFXContext.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Core/stl/vector.h"
 
 extern bool	 g_bFullScreen;

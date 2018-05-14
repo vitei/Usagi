@@ -5,6 +5,7 @@
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, ConstantSet_ps.h)
 #include <vulkan/vulkan.h>
 #include <stdio.h>

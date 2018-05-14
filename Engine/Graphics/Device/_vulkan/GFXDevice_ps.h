@@ -33,6 +33,7 @@ public:
 
 	void Begin();
 	void End();
+	float GetGPUTime() const { return m_fGPUTime; }
 	
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
@@ -97,6 +98,7 @@ private:
 
 	Shader		m_stockShaders[MAX_STOCK_SHADERS];
 	uint32		m_uStockCount;
+	float		m_fGPUTime;
 };
 
 }

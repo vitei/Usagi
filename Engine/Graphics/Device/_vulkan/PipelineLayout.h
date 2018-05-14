@@ -15,7 +15,7 @@ public:
 	PipelineLayout();
 	~PipelineLayout();
 	
-	void Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl);
+	void Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, uint32 uId);
 	const VkPipelineLayout& GetVKLayout() const { return m_layout; }
 private:
 	VkPipelineLayout m_layout;

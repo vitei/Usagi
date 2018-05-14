@@ -3,7 +3,7 @@
 *****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/PipelineState.h"
-#include "Engine/Graphics/Effects/EffectBinding.h"
+#include "Engine/Graphics/Effects/InputBinding.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Device/, PipelineLayout.h)
@@ -11,6 +11,7 @@
 #include API_HEADER(Engine/Graphics/Device/, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device/, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device/, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device/, GFXDevice_ps.h)
 
 namespace usg
 {
@@ -63,7 +64,7 @@ namespace usg
 		multisampleState.rasterizationSamples = g_sampleCounts[decl.eSampleCount];
 
 
-		const Effect* pEffect = decl.pBinding.GetContents()->GetEffect().get();
+		const Effect* pEffect = decl.pEffect.get();
 
 		// Dynamic states as we are aiming for the slightly more flexible directx 12 setup
 		VkDynamicState eDynamicStates[] =

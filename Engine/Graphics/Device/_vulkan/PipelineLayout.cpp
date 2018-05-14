@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "PipelineLayout.h"
 
 namespace usg {
@@ -20,7 +21,7 @@ PipelineLayout::~PipelineLayout()
 }
 	
 
-void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl)
+void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, uint32 uId)
 {
 	VkDescriptorSetLayout* layoutBindings;
 	ScratchObj<VkDescriptorSetLayout> desciptorScratch(layoutBindings, decl.uDescriptorSetCount);

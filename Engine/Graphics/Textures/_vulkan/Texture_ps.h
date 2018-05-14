@@ -24,10 +24,14 @@ public:
 	void Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight);
 	void InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices);
 	void InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices);
+	void InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight);
+	void CleanUp(GFXDevice* pDevice);
+
 	bool Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation);
 	bool Load(GFXDevice* pDevice, const TexturePak& pak, const void* pData) { ASSERT(false); return false; }	// Not yet implemented on PC
 
 	static bool FileExists(const char* szFileName);
+	void NotifyOfTextureID(uint32 uTexID) { }
 
 	uint32 GetWidth () const;
 	uint32 GetHeight() const;

@@ -14,10 +14,12 @@ namespace usg {
 
 ColorBuffer_ps::ColorBuffer_ps()
 {
+	m_texHndl = &m_texture;
 }
 
 ColorBuffer_ps::~ColorBuffer_ps()
 {
+	m_texHndl.reset(NULL);
 }
 
 void ColorBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags, uint32 uLoc, uint32 uMipmaps)
@@ -44,6 +46,11 @@ void ColorBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uBufferId, uint32 uWid
 void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	ASSERT(false);
+}
+
+void ColorBuffer_ps::CleanUp(GFXDevice* pDevice)
+{
+	
 }
 
 

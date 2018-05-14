@@ -15,7 +15,7 @@ public:
 	RenderPass() {};
 	~RenderPass() {};
 	
-	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl);
+	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl, uint32 uId);
 	const VkRenderPass& GetPass() const { return m_renderPass; }
 	uint32 GetCRC() const { return m_uCRCForPass; }
 

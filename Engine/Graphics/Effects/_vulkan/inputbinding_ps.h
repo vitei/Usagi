@@ -14,17 +14,17 @@ class Texture;
 class Effect;
 class GFXDevice;
 
-class EffectBinding_ps
+class InputBinding_ps
 {
 public:
-	EffectBinding_ps();
-	~EffectBinding_ps();
+	InputBinding_ps();
+	~InputBinding_ps();
 
-	void Init(GFXDevice* pDevice, EffectHndl pEffect, const VertexDeclaration** ppDecls, uint32 uCount);
+	void Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uCount);
 	const VkPipelineVertexInputStateCreateInfo& GetVertexInputCreateInfo() const { return m_inputState; }
 
 private:
-	PRIVATIZE_COPY(EffectBinding_ps)
+	PRIVATIZE_COPY(InputBinding_ps)
 
 	VkVertexInputAttributeDescription*		m_pInputAttribs;
 	VkPipelineVertexInputStateCreateInfo	m_inputState;

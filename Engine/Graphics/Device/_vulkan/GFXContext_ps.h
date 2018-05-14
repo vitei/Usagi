@@ -7,7 +7,6 @@
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
-#include "Engine/Graphics/CTREmulationConsts.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -19,6 +18,7 @@ class IndexBuffer;
 class VertexBuffer;
 class ConstantSet;
 class Fog;
+class IHeadMountedDisplay;
 
 class GFXContext_ps
 {
@@ -30,7 +30,8 @@ public:
 
 	void Begin(bool bApplyDefaults);
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);
-	void TransferRect(RenderTarget* pTarget, Display* pDisplay, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight);
+	void TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
+	void TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay);
 	void CopyDepthToSlice(RenderTarget* pSrc, RenderTarget* pDst, uint32 uSlice);
 
 	void End();
@@ -44,13 +45,14 @@ public:
 	void SetRenderTarget(const RenderTarget* pTarget);
 	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
 	void EndRTDraw(const RenderTarget* pTarget);
+	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 
 	void SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev);
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void ClearRenderTarget(RenderTarget* pRT, uint32 uFlags);
 
-	void SetVertexBuffer(const VertexBuffer* pBuffer, const EffectBinding* pBinding, uint32 uSlot);
+	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);
 	void DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstances);
 

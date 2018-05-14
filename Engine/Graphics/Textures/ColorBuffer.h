@@ -6,6 +6,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
+#include "Engine/Resource/ResourceDecl.h"
 #include API_HEADER(Engine/Graphics/Textures, ColorBuffer_ps.h)
 
 namespace usg {

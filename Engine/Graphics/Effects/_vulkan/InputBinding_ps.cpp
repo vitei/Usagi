@@ -3,8 +3,7 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Effects/Effect.h"
-#include "Engine/Graphics/Effects/EffectBinding.h"
-
+#include "InputBinding_ps.h"
 
 
 namespace usg {
@@ -107,7 +106,7 @@ namespace usg {
 		return VK_FORMAT_R32G32B32A32_UINT;
 	}
 
-EffectBinding_ps::EffectBinding_ps()
+InputBinding_ps::InputBinding_ps()
 {
 	for(uint32 i=0; i<MAX_VERTEX_BUFFERS; i++)
 	{
@@ -117,7 +116,7 @@ EffectBinding_ps::EffectBinding_ps()
 	m_pInputAttribs = NULL;
 }
 
-EffectBinding_ps::~EffectBinding_ps()
+InputBinding_ps::~InputBinding_ps()
 {
 	if (m_pInputAttribs != NULL)
 	{
@@ -125,7 +124,7 @@ EffectBinding_ps::~EffectBinding_ps()
 	}
 }
 
-void EffectBinding_ps::Init(GFXDevice* pDevice, EffectHndl pEffect, const VertexDeclaration** ppDecls, uint32 uCount)
+void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uCount)
 {
 	uint32 uElementCount = 0;
 	uint32 uElement = 0;
@@ -143,8 +142,8 @@ void EffectBinding_ps::Init(GFXDevice* pDevice, EffectHndl pEffect, const Vertex
 		}
 	}
 
-	// FIXME: When stable this should all move over to a platofrm specific version of the vertex declaration (as we will be binding by index and not name this will become redundant)
-	m_pInputAttribs = vnew(ALLOC_OBJECT) VkVertexInputAttributeDescription[uElement];
+	// FIXME: When stable this should all move over to a platform specific version of the vertex declaration (as we will be binding by index and not name this will become redundant)
+	m_pInputAttribs = vnew(ALLOC_OBJECT) VkVertexInputAttributeDescription[uElementCount];
 
 	for(uint32 uBuffer=0; uBuffer<uCount; uBuffer++)
 	{
@@ -164,7 +163,7 @@ void EffectBinding_ps::Init(GFXDevice* pDevice, EffectHndl pEffect, const Vertex
 		const VertexElement* pElement = m_pDecl[uBuffer]->GetElements();
 		for(uint32 i=0; i < m_pDecl[uBuffer]->GetElementCount(); i++)
 		{
-			ASSERT(uElement<MAX_VERTEX_STREAMS);
+			ASSERT(uElement<MAX_VERTEX_ATTRIBUTES);
 			ASSERT((pElement->uCount < 4) || (pElement->uCount % 4) == 0);
 			uint32 uLoop = pElement->uCount < 4 ? 1 : pElement->uCount / 4;
 			uint32 uCount = pElement->uCount < 4 ? pElement->uCount : 4;

@@ -8,11 +8,12 @@
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
-#include "Engine/Graphics/LookupTable.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
+#include "Engine/Graphics/Device/PipelineState.h"
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device/, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXContext.h"
 
 #define BUFFER_OFFSET(i) ((void*)(i))
@@ -86,9 +87,14 @@ void GFXContext_ps::Transfer(RenderTarget* pTarget, Display* pDisplay)
 	pDisplay->GetPlatform().Transfer(m_pParent, pTarget);
 }
 
-void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight)
+void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
-	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, uX, uY, uWidth, uHeight);
+	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, srcBounds, dstBounds);
+}
+
+void GFXContext_ps::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay)
+{
+	ASSERT(false);
 }
 
 void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags)
@@ -115,6 +121,11 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 {
 
+}
+
+void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
+{
+	ASSERT(false);
 }
 
 void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev)
@@ -182,7 +193,7 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 }
 
 
-void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const EffectBinding* pBinding, uint32 uSlot)
+void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot)
 {
 	// TODO: Change the interface so we are setting them all at once
 	const VertexBuffer_ps& vbPS = pBuffer->GetPlatform();

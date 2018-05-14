@@ -22,6 +22,7 @@ public:
 	~RenderTarget_ps();
 
 	void InitMRT(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
+	void CleanUp(GFXDevice* pDevice);
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetClearColor(const Color& col);
 

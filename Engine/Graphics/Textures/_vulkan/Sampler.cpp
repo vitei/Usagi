@@ -3,6 +3,7 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, Sampler.h)
 
 namespace usg {

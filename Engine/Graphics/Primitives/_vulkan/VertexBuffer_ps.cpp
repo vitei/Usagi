@@ -5,6 +5,7 @@
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Primitives, VertexBuffer_ps.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 
 namespace usg {
 
@@ -19,7 +20,7 @@ VertexBuffer_ps::~VertexBuffer_ps()
 	
 }
 
-void VertexBuffer_ps::Init(GFXDevice* pDevice, void* pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation)
+void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation)
 {
 	m_uBufferCount = eUpdateType == GPU_USAGE_STATIC ? 1 : GFX_NUM_DYN_BUFF;
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
@@ -63,6 +64,12 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, void* pVerts, uint32 uDataSize, G
 }
 
 
+void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
+{
+	ASSERT(false);
+}
+
+
 void* VertexBuffer_ps::LockData(GFXDevice* pDevice, uint32 uSize)
 {
 	m_uActiveVBO = (m_uActiveVBO + 1) % m_uBufferCount;
@@ -80,7 +87,7 @@ void VertexBuffer_ps::UnlockData(GFXDevice* pDevice, void* pData, uint32 uElemen
 }
 
 
-void VertexBuffer_ps::SetContents(GFXDevice* pDevice, void *pData, uint32 uSize)
+void VertexBuffer_ps::SetContents(GFXDevice* pDevice, const void* const pData, uint32 uSize)
 {
 	m_uActiveVBO = (m_uActiveVBO + 1) % m_uBufferCount;
 	void* pDest = LockData(pDevice, uSize);

@@ -20,6 +20,7 @@ public:
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
 	bool Init(GFXDevice* pDevice, const EffectPak& pak, const void* pData, const char* szPackPath) { ASSERT(false); return false; }	// Not yet implemented on PC
+	void CleanUp(GFXDevice* pDevice);
 
 	uint32 GetStageCount() const { return m_uStageCount; }
 	const VkPipelineShaderStageCreateInfo* GetShaderStageCreateInfo() const { return m_stageCreateInfo; }

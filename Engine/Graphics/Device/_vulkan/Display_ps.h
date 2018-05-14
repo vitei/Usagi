@@ -26,8 +26,8 @@ public:
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
 	void ScreenShot(const char* szFileName);
 
-	void Resize(uint32 uWidth, uint32 uHeight);
-    void Resize();	
+	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
+    void Resize(usg::GFXDevice* pDevice);	
 	
 	// PS
 	void Transfer(GFXContext* pContext, RenderTarget* pTarget);

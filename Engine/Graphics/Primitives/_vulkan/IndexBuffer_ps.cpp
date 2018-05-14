@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Primitives, IndexBuffer_ps.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 
 namespace usg {
 
@@ -19,7 +20,7 @@ IndexBuffer_ps::~IndexBuffer_ps()
 }
 
 
-void IndexBuffer_ps::Init(GFXDevice* pDevice, void* pIndices, uint32 uCount, uint32 uIndexSize, bool bStatic, GPULocation eLocation)
+void IndexBuffer_ps::Init(GFXDevice* pDevice, const void* pIndices, uint32 uCount, uint32 uIndexSize, bool bStatic, GPULocation eLocation)
 {
 	m_uIndexSize = uIndexSize;
 	switch (uIndexSize)
@@ -75,7 +76,12 @@ void IndexBuffer_ps::Init(GFXDevice* pDevice, void* pIndices, uint32 uCount, uin
 	}
 }
 
-void IndexBuffer_ps::SetContents(GFXDevice* pDevice, void* pData, uint32 uIndexCount)
+void IndexBuffer_ps::CleanUp(GFXDevice* pDevice)
+{
+	ASSERT(false);
+}
+
+void IndexBuffer_ps::SetContents(GFXDevice* pDevice, const void* pData, uint32 uIndexCount)
 {
 	m_uActiveIBO = (m_uActiveIBO + 1) % m_uBufferCount;
 	void *pDest;

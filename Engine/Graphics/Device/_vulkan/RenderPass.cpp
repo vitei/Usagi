@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Textures, TextureFormat_ps.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/RenderPassInitData.h"
 #include "Engine/Core/stl/vector.h"

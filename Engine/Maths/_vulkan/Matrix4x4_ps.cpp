@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Maths/Matrix4x4.h"
+#include "Engine/Memory/MemUtil.h"
 
 // 2x multiplier on 33 compared to a DirectX matrix (range 0 to 1) as OpenGL uses the range -1 to 1
 namespace usg

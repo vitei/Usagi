@@ -7,29 +7,27 @@
 #ifndef USG_DEBUG_STATS_VULKAN_H
 #define USG_DEBUG_STATS_VULKAN_H
 #include "Engine/Common/Common.h"
-#include "Engine/Debug/Rendering/DebugRender.h"
+#include "Engine/Debug/Rendering/IDebugStatGroup.h"
 
 namespace usg {
 
 class DebugRender;
 
-class DebugStats_ps
+class DebugStats_ps : public IDebugStatGroup
 {
 public:
-	DebugStats_ps() {}
+	DebugStats_ps() : IDebugStatGroup() {}
 	~DebugStats_ps() {}
 
 	void Init(GFXDevice* pDevice) {}
-	void Update(float fElapsed) {}
+	void Update(float fElapsed) override {}
 
-	void Draw(DebugRender* pRender) {}
-	void PreDraw(GFXDevice* pDevice) {}
-	void PostDraw(GFXDevice* pDevice) {}
+	void Draw(DebugRender* pRender) override {}
+	void PreDraw(GFXDevice* pDevice) override {}
+	void PostDraw(GFXDevice* pDevice) override {}
 
 
 	uint32 GetPageCount() const { return 0; }
-	void SetPage(uint32 uPage) { ASSERT(false); }
-	void SetActive(bool bActive) { ASSERT(bActive==false); };
 
 private:
 };

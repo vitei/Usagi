@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Textures, Sampler.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, TextureFormat_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, Texture_ps.h)
 #include <vector>
@@ -130,12 +131,17 @@ Texture_ps::~Texture_ps()
 
 void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
-
+	ASSERT(false);
 }
 
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
+	ASSERT(false);
+}
 
+void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
+{
+	ASSERT(false);
 }
 
 
@@ -274,6 +280,13 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo)
     err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);
     ASSERT(!err);
 
+}
+
+
+void Texture_ps::CleanUp(GFXDevice* pDevice)
+{
+	// Implement me
+	ASSERT(false);
 }
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)

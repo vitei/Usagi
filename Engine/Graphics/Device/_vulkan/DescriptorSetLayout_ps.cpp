@@ -5,6 +5,8 @@
 #include "Engine/Memory/Memutil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+
 
 const int g_allocGroupSize = 64;
 
