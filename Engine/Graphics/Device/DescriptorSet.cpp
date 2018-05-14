@@ -29,7 +29,7 @@ DescriptorSet::~DescriptorSet()
 
 void DescriptorSet::CleanUp(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.CleanUp(pDevice, m_layoutHndl.GetContents());
 	if (m_pData)
 	{
 		vdelete[] m_pData;

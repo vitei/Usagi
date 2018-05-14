@@ -14,7 +14,7 @@ const VkCullModeFlagBits g_cullFaceMap[] =
 };
 
 
-void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl)
+void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
     m_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;

@@ -5,7 +5,7 @@
 #define _USG_GRAPHICS_EFFECT_BINDING_PS_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
-#include API_HEADER(Engine/Graphics/Effects, EffectBinding_ps.h)
+#include API_HEADER(Engine/Graphics/Effects, InputBinding_ps.h)
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {

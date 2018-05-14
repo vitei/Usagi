@@ -273,28 +273,33 @@ void Display_ps::Use(usg::GFXDevice* pDevice)
 
 void Display_ps::Transfer(GFXContext* pContext, RenderTarget* pTarget)
 {
-	TransferRect(pContext, pTarget, 0, 0, m_uWidth, m_uHeight);
+	GFXBounds bounds = { 0, 0, (sint32)m_uWidth, (sint32)m_uHeight };
+	TransferRect(pContext, pTarget, bounds, bounds);
 }
 
-void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight)
+void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
+	// Currently don't support different bounds
+	ASSERT(dstBounds.height == srcBounds.height);
+	ASSERT(dstBounds.width == srcBounds.width);
+
 	VkImageCopy ic = {};
 	ic.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.srcSubresource.mipLevel = 0;
 	ic.srcSubresource.baseArrayLayer = 0;
 	ic.srcSubresource.layerCount = 1;
-	ic.srcOffset.x = 0;
-	ic.srcOffset.y = 0;
+	ic.srcOffset.x = srcBounds.x;
+	ic.srcOffset.y = srcBounds.y;
 	ic.srcOffset.z = 0;
 	ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.dstSubresource.mipLevel = 0;
 	ic.dstSubresource.baseArrayLayer = 0;
 	ic.dstSubresource.layerCount = 1;
-	ic.dstOffset.x = 0;
-	ic.dstOffset.y = 0;
+	ic.dstOffset.x = dstBounds.x;
+	ic.dstOffset.y = dstBounds.y;
 	ic.dstOffset.z = 0;
-	ic.extent.width = m_uWidth;
-	ic.extent.height = m_uHeight;
+	ic.extent.width = dstBounds.width;
+	ic.extent.height = dstBounds.height;
 	ic.extent.depth = 1;
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
@@ -350,6 +355,22 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 void Display_ps::ScreenShot(const char* szFileName)
 {
 
+}
+
+void Display_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+{
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+}
+
+
+void Display_ps::Resize(usg::GFXDevice* pDevice)
+{
+	RECT dim;
+	GetClientRect(m_hwnd, &dim);
+
+	m_uWidth = dim.right - dim.left;
+	m_uHeight = dim.bottom - dim.top;
 }
 
 }

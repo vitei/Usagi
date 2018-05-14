@@ -44,7 +44,7 @@ namespace usg
 	}
 
 
-void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
+void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, uint32 uId)
 {
 	const RenderPassDecl& decl = initData.GetDecl();
 	// FIXME: Don't use std vector

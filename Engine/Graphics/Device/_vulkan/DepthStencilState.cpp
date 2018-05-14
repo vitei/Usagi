@@ -44,7 +44,7 @@ static const VkStencilOp g_stencilOpMap[] =
 
 
 
-void DepthStencilState::Init(GFXDevice* pDevice, const DepthStencilStateDecl &decl)
+void DepthStencilState::Init(GFXDevice* pDevice, const DepthStencilStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
 

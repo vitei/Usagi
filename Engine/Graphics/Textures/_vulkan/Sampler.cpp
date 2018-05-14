@@ -63,7 +63,7 @@ Sampler::~Sampler()
 
 }
 
-void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl)
+void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 {
 	VkResult err;
 

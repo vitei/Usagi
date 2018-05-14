@@ -49,7 +49,7 @@ static VkColorComponentFlags CalculateColorMask(uint8 uMask)
 }
 
 
-void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl)
+void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
 	memset(m_attState, 0, sizeof(VkPipelineColorBlendAttachmentState)*MAX_RENDER_TARGETS);

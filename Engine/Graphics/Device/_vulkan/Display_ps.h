@@ -31,7 +31,7 @@ public:
 	
 	// PS
 	void Transfer(GFXContext* pContext, RenderTarget* pTarget);
-	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight);
+	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void SwapBuffers(GFXDevice* pDevice);
 
 private:
