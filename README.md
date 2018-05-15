@@ -3,7 +3,7 @@ usagi
 
 Usagi is a Hierarchical Entity-Component-System based game engine created by [Vitei Inc.](http://www.vitei.com/).
 
-By modifying the ECS design pattern to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
+By [modifying](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) the [ECS](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) design pattern to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
@@ -38,7 +38,7 @@ The build process has not been improved or significantly modified and currently 
    https://www.autodesk.com/products/fbx/overview
 
 1. **Optional** Install and build the **Oculus SDK for Windows**.  
-   Not necessary to run, but required if you want to make a VR app
+   Not necessary to run, but required if you want to make a VR app  
    Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
