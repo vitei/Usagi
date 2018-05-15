@@ -9,10 +9,10 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 };
 
 // Input attributes
-in vec3 ao_position;
+ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec4 vo_vColor;
+ATTRIB_LOC(0) out vec4 vo_vColor;
 
 
 void main(void)

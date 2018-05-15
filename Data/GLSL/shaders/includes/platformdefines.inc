@@ -8,6 +8,7 @@
 #define BUFFER_LAYOUT(setIn, val) layout(binding = val, std140) // set = setIn,
 #define SAMPLER_LOC(setIn, val) layout(binding=val) // set = setIn,
 #define ATTRIB_LOC(val) layout(location=val)
+#define AT_LCMP(val, cmp) layout(location=val, component=cmp)
 
 #define SAMPLER_MSAA sampler2D
 

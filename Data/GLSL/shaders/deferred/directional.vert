@@ -3,11 +3,11 @@
 
 
 // Input attributes
-in vec3 ao_position;
+ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec2 vo_vTexCoord;
-out vec3 vo_vFSVector;
+ATTRIB_LOC(0) out vec2 vo_vTexCoord;
+ATTRIB_LOC(1) out vec3 vo_vFSVector;
 
 
 void main(void)

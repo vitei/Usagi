@@ -1,8 +1,8 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/global_3d.inc"
 
-in vec2 vo_vTexCoord;
-in vec3 vo_vFSVector;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
+ATTRIB_LOC(1) in vec3 vo_vFSVector;
 
 layout(location = 0) out vec4 colorOut;
 

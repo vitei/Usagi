@@ -16,21 +16,21 @@ BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance1
 
 in VertexData
 {
-    vec4    vo_vColor;
-    vec2    vo_vSize;
-    float   vo_fRot;
-    vec4    vo_vUVRange[2];
-    vec3    vo_velocity;
+    AT_LCMP(0, 0) vec4    vo_vColor;
+    AT_LCMP(1, 0) vec2    vo_vSize;
+    AT_LCMP(1, 2) float   vo_fRot;
+    AT_LCMP(2, 0) vec4    vo_vUVRange[2];
+    AT_LCMP(4, 0) vec3    vo_velocity;
 
 } vertexData[];
 
 
 out GeometryData
 {
-    vec4    vo_vColor;
-    vec2    vo_vTexcoord[2];
-    vec2    vo_vScreenTex;
-    float   vo_fEyeDepth;
+    AT_LCMP(0, 0) vec4    vo_vColor;
+    AT_LCMP(1, 0) vec2    vo_vTexcoord[2];
+    AT_LCMP(1, 2) vec2    vo_vScreenTex;
+    AT_LCMP(2, 2) float   vo_fEyeDepth;
 
 } geometryData;
 

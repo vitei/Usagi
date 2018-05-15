@@ -4,7 +4,7 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec2 vo_vTexCoord;
+ATTRIB_LOC(0) out vec2 vo_vTexCoord;
 
 
 void main(void)

@@ -7,7 +7,7 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 	vec4  vOffsets[SAMPLE_COUNT];
 };
 
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 

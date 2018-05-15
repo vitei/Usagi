@@ -19,16 +19,16 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 // Line adjacency so we should have 4 points
 in VertexData
 {
-    vec3 	vo_viewPos;
-    float 	vo_fCreateTime;
-    float	vo_fLength;
+    ATTRIB_LOC(0) vec3 	vo_viewPos;
+    ATTRIB_LOC(1) float 	vo_fCreateTime;
+    ATTRIB_LOC(2) float	vo_fLength;
 } vertexData[];
 
 
 out GeometryData
 {
-    vec4 	go_vColor;
-    vec2	go_vTexCoord;
+    ATTRIB_LOC(0) vec4 	go_vColor;
+    ATTRIB_LOC(1) vec2	go_vTexCoord;
 
 } geometryData;
 

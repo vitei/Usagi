@@ -9,7 +9,7 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
 layout(location = 0) out vec4 colorOut;
 

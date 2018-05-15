@@ -184,7 +184,7 @@ bool GLSLShader::Init(const U8String& effectName, GLenum shaderType, const char*
 
 	char defines[256];
 	char* szDefineLoc = defines;
-	strcpy_s(szDefineLoc, 256, "#version 430\n");
+	strcpy_s(szDefineLoc, 256, "#version 450\n");
 	szDefineLoc += 13;
 	if (szDefines)
 	{		

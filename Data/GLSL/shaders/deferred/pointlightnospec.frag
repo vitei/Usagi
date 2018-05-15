@@ -9,10 +9,10 @@ BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
 	vec2		vInvShadowDim;
 };
 
-in vec4 vo_vTexCoord;
-in vec3 vo_vViewRay;
+ATTRIB_LOC(0) in vec4 vo_vTexCoord;
+ATTRIB_LOC(1) in vec3 vo_vViewRay;
 #if USE_LINEAR_DEPTH
-in vec3 vo_vLightPosEye;
+ATTRIB_LOC(2) in vec3 vo_vLightPosEye;
 #endif
 
 out vec4 vColorOut0;

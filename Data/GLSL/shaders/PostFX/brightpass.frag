@@ -3,7 +3,8 @@
 #define  BRIGHT_PASS_THRESHOLD	4.0
 #define  BRIGHT_PASS_OFFSET		10.0
 
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
+
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 
 BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
@@ -11,7 +12,7 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 	float fMiddleGray;
 };
 
-layout(location = 0) out vec4 colorOut;
+ATTRIB_LOC(0) out vec4 colorOut;
 
 void main(void)
 {

@@ -6,10 +6,10 @@ SAMPLER_LOC(1, 5) uniform sampler2D sampler5;	// Linear depth texture
 
 in GeometryData
 {
-    vec4 	vo_vColor;
-    vec2 	vo_vTexcoord;
-    vec2	vo_vScreenTex;
-	float	vo_fEyeDepth;
+	ATTRIB_LOC(0) vec4 	vo_vColor;
+    ATTRIB_LOC(1) vec2 	vo_vTexcoord;
+    ATTRIB_LOC(2) vec2  vo_vScreenTex;
+    ATTRIB_LOC(3) float vo_fEyeDepth;
 
 } geometryData;
 

@@ -5,7 +5,7 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 	 float  fBloomScale;       // Bloom process multiplier
 };
 
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 SAMPLER_LOC(1, 1) uniform sampler2D sampler1;
