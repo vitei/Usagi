@@ -1,8 +1,8 @@
 #include "../includes/platformdefines.inc"
 
-in vec4 go_vColor;
-in vec4 go_vBgColor;
-in vec2 go_vTexCoord;
+ATTRIB_LOC(1) in vec4 go_vColor;
+ATTRIB_LOC(2) in vec4 go_vBgColor;
+ATTRIB_LOC(3) in vec2 go_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 

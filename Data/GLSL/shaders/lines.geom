@@ -7,15 +7,15 @@ layout(triangle_strip, max_vertices = 4) out;
 
 in VertexData
 {
-	vec3 vo_vStart;
-	vec3 vo_vEnd;
-	vec2 vo_vWidth;
-	vec4 vo_vColor;
+	ATTRIB_LOC(0) vec3 vo_vStart;
+	ATTRIB_LOC(1) vec3 vo_vEnd;
+	ATTRIB_LOC(2) vec2 vo_vWidth;
+	ATTRIB_LOC(3) vec4 vo_vColor;
 } VertexIn[];
 
 out GeometryData
 {
-    vec4 	vo_vColor;
+    ATTRIB_LOC(0) vec4 	vo_vColor;
 } geometryData;
 
 vec3 lightDir = vec3(-0.7, 0.4, 0.7);

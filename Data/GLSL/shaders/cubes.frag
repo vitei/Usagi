@@ -4,7 +4,7 @@
 
 in GeometryData
 {
-    vec4 	vo_vColor;
+    ATTRIB_LOC(0) vec4 	vo_vColor;
     
 } geometryData;
 

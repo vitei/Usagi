@@ -14,8 +14,8 @@ ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec3 ao_normal;
 
 // Output attributes
-out vec3 vo_vWorldPos;
-out vec3 vo_vNormal;
+ATTRIB_LOC(0) out vec3 vo_vWorldPos;
+ATTRIB_LOC(1) out vec3 vo_vNormal;
 
 void main(void)
 {

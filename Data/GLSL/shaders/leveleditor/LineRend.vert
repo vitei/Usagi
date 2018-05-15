@@ -11,7 +11,7 @@ BUFFER_LAYOUT(1,  UBO_CUSTOM0_ID) uniform Custom0
 ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec4 ao_color;
 
-out vec4 vo_vColor;
+ATTRIB_LOC(0) out vec4 vo_vColor;
 
 void main(void)
 {

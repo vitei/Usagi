@@ -9,11 +9,11 @@ ATTRIB_LOC(3) in vec3 ao_tangent;
 ATTRIB_LOC(4) in vec3 ao_binormal;
 
 // Output attributes
-out vec2 vo_vTexCoord;
-out vec3 vo_vEyeNormal;
-out vec3 vo_vEyeTangent;
-out vec3 vo_vEyeBinormal;
-out vec3 vo_vEyePosOut;
+ATTRIB_LOC(0) out vec2 vo_vTexCoord;
+ATTRIB_LOC(1) out vec3 vo_vEyeNormal;
+ATTRIB_LOC(2) out vec3 vo_vEyeTangent;
+ATTRIB_LOC(3) out vec3 vo_vEyeBinormal;
+ATTRIB_LOC(4) out vec3 vo_vEyePosOut;
 
 
 

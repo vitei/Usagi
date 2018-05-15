@@ -12,13 +12,12 @@ BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
 	SpotLight	light;
 };
 
+ATTRIB_LOC(0) in vec4 vo_vTexCoord;
+ATTRIB_LOC(1) in vec3 vo_vViewRay;
+ATTRIB_LOC(2) in vec3 vo_vLightPosEye;
+ATTRIB_LOC(3) in vec3 vo_vSpotDirEye;
 
-in vec4 vo_vTexCoord;
-in vec3 vo_vViewRay;
-in vec3 vo_vLightPosEye;
-in vec3 vo_vSpotDirEye;
-
-out vec4 vColorOut0;
+layout(location = 0) out vec4 vColorOut0;
 
 
 void main(void)

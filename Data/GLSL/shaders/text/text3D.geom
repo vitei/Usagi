@@ -8,24 +8,24 @@ layout(triangle_strip, max_vertices = 4) out;
 
 
 // Input attributes
-in vec3 vo_positionTL[];
-in vec3 vo_positionTR[];
-in vec3 vo_positionBL[];
-in vec3 vo_positionBR[];
-in vec4 vo_vColorUpper[];
-in vec4 vo_vColorLower[];
-in vec4 vo_vColorBg[];
-in vec4 vo_vTexCoordRange[];
+ATTRIB_LOC(0) in vec3 vo_positionTL[];
+ATTRIB_LOC(1) in vec3 vo_positionTR[];
+ATTRIB_LOC(2) in vec3 vo_positionBL[];
+ATTRIB_LOC(3) in vec3 vo_positionBR[];
+ATTRIB_LOC(4) in vec4 vo_vColorUpper[];
+ATTRIB_LOC(5) in vec4 vo_vColorLower[];
+ATTRIB_LOC(6) in vec4 vo_vColorBg[];
+ATTRIB_LOC(7) in vec4 vo_vTexCoordRange[];
 
 // 3d position data
-in float vo_fVisiblity[];
-in vec4 vo_transformedPos[];
+ATTRIB_LOC(8) in float vo_fVisiblity[];
+ATTRIB_LOC(9) in vec4 vo_transformedPos[];
 
 // Output attributes
-out vec2 go_vPos;
-out vec4 go_vColor;
-out vec4 go_vBgColor;
-out vec2 go_vTexCoord;
+ATTRIB_LOC(0) out vec2 go_vPos;
+ATTRIB_LOC(1) out vec4 go_vColor;
+ATTRIB_LOC(2) out vec4 go_vBgColor;
+ATTRIB_LOC(3) out vec2 go_vTexCoord;
 
 void CreateVertex(vec3 vLayoutPos, vec2 vTexCoord, vec4 color)
 {

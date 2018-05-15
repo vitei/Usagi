@@ -20,7 +20,7 @@ ATTRIB_LOC(1) in vec3 vo_vViewRay;
 ATTRIB_LOC(2) in vec3 vo_vLightPosEye;
 #endif
 
-out vec4 vColorOut0;
+layout (location=0) out vec4 vColorOut0;
 
 
 #ifdef SHADOW_READ

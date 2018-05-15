@@ -5,9 +5,9 @@ SAMPLER_LOC(1, 1) uniform sampler2D sampler1;
 
 in GeometryData
 {
-    vec4    go_vColor;
-    vec2    go_vTexCoord;
-    vec2	go_vTexCoord2;
+    AT_LCMP(0, 0) vec4  go_vColor;
+    AT_LCMP(1, 0) vec2  go_vTexCoord;
+    AT_LCMP(1, 2) vec2  go_vTexCoord2;
 
 } geometryData;
 

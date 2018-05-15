@@ -1,7 +1,7 @@
 #include "../includes/platformdefines.inc"
 
-in vec4 vo_vColor;
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec4 vo_vColor;
+ATTRIB_LOC(1) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 

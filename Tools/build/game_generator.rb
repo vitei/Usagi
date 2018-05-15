@@ -194,7 +194,7 @@ end
 
 
 def build_vulkan_shaders_for_dir(config, n, shader_dir)
-  targets = FileList["#{shader_dir}/**/*"].exclude{|f| File.directory?(f)}.map do |input|
+  targets = FileList["#{shader_dir}/**/*.vert", "#{shader_dir}/**/*.frag", "#{shader_dir}/**/*.geom"].exclude{|f| File.directory?(f)}.map do |input|
     output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '') + ".spv"
 
     n.build('vulkanshader', {output => [input]},

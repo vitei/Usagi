@@ -6,13 +6,10 @@ ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec2 ao_texCoord0;
 ATTRIB_LOC(2) in vec4 ao_color;
 
-vec4    vo_vColor;
-vec2    vo_vTexCoord;
-
 out VertexData
 {
-    vec4    vo_vColor;
-    vec2    vo_vTexCoord;
+    ATTRIB_LOC(0) vec4    vo_vColor;
+    ATTRIB_LOC(1) vec2    vo_vTexCoord;
 
 } vertexData;
 

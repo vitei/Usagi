@@ -37,14 +37,14 @@ SAMPLER_LOC(1, 3) uniform sampler2D sampler3;
 SAMPLER_LOC(1, 4) uniform samplerCube sampler4;
 
 
-in vec4 vo_vTexCoord01;
-in vec4 vo_vTexCoord23;
-in vec4 vo_vColor;
-in vec3 vo_vNormal;
-in vec3 vo_vTangent;
-in vec3 vo_vBinormal;
-in vec3 vo_vWorldPos;
-in vec3 vo_vViewDir;
+ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
+ATTRIB_LOC(1) in vec4 vo_vTexCoord23;
+ATTRIB_LOC(2) in vec4 vo_vColor;
+ATTRIB_LOC(3) in vec3 vo_vNormal;
+ATTRIB_LOC(4) in vec3 vo_vTangent;
+ATTRIB_LOC(5) in vec3 vo_vBinormal;
+ATTRIB_LOC(6) in vec3 vo_vWorldPos;
+ATTRIB_LOC(7) in vec3 vo_vViewDir;
 
 #ifndef DEFERRED_SHADING
 layout(location = 0) out vec4 colorOut;

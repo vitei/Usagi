@@ -9,11 +9,11 @@ SAMPLER_LOC(1, 2) uniform sampler2D sampler2;
 SAMPLER_LOC(1, 3) uniform sampler2D sampler3;
 SAMPLER_LOC(1, 4) uniform sampler2D sampler4;
 
-in vec2 vo_vTexCoord;
-in vec3 vo_vEyeNormal;
-in vec3 vo_vEyeTangent;
-in vec3 vo_vEyeBinormal;
-in vec3 vo_vEyePosOut;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
+ATTRIB_LOC(1) in vec3 vo_vEyeNormal;
+ATTRIB_LOC(2) in vec3 vo_vEyeTangent;
+ATTRIB_LOC(3) in vec3 vo_vEyeBinormal;
+ATTRIB_LOC(4) in vec3 vo_vEyePosOut;
 
 
 void main(void)

@@ -1,6 +1,6 @@
 #include "../includes/platformdefines.inc"
 
-out vec4 vColorOut0;
+layout (location=0) out vec4 vColorOut0;
 
 void main(void)
 {

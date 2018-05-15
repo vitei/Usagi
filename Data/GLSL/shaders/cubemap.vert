@@ -2,13 +2,13 @@
 #include "includes/global_3d.inc"
 
 // Input attributes
-in vec3 ao_position;
+ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec3 vo_vTexCoord;
+ATTRIB_LOC(0) out vec3 vo_vTexCoord;
 
 // Motion blur
-out vec4 vo_vScreenPos;
+ATTRIB_LOC(1) out vec4 vo_vScreenPos;
 
 void main(void)
 {

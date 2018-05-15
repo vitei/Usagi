@@ -2,8 +2,8 @@
 
 in GeometryData
 {
-    vec4 	vo_vColor;
-    vec2 	vo_vTexcoord;
+    ATTRIB_LOC(0) vec4 	vo_vColor;
+    ATTRIB_LOC(1) vec2 	vo_vTexcoord;
 
 } geometryData;
 

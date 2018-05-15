@@ -6,10 +6,10 @@
 #include "includes/forward_lighting.inc"
 #include "includes/depth_write.inc"
 
-in vec3 vo_vNormal;
-in vec3 vo_vPosition;
-in vec3 vo_vEyePosOut;
-in vec3 vo_vWorldPos;
+ATTRIB_LOC(0) in vec3 vo_vNormal;
+ATTRIB_LOC(1) in vec3 vo_vPosition;
+ATTRIB_LOC(2) in vec3 vo_vEyePosOut;
+ATTRIB_LOC(3) in vec3 vo_vWorldPos;
 
 // in vec4 vo_vScreenPos;
 // in vec4 vo_vPrevScreenPos;

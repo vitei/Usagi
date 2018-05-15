@@ -6,14 +6,14 @@ layout (triangle_strip, max_vertices=24) out;
 
 
 in VertexData {
-    mat3x4  vo_matrix;
-    vec4    vo_vColor;
+    ATTRIB_LOC(0) mat3x4  vo_matrix;
+    ATTRIB_LOC(3) vec4    vo_vColor;
 } VertexIn[];
 
 
 out GeometryData
 {
-    vec4 	vo_vColor;
+    ATTRIB_LOC(0) vec4 	vo_vColor;
 } geometryData;
 
 

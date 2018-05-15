@@ -5,8 +5,8 @@ SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 
 layout(location = 0) out vec4 colorOut;
 
-in vec4  vo_vColor;
-in vec2  vo_vTexCoord;
+ATTRIB_LOC(0) in vec4  vo_vColor;
+ATTRIB_LOC(1) in vec2  vo_vTexCoord;
 
 void main(void)
 { 

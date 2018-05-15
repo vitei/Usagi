@@ -12,18 +12,18 @@ layout (location = 5) in vec4 ao_colBg;
 
 
 // Output attributes
-out vec3 vo_positionTL;
-out vec3 vo_positionTR;
-out vec3 vo_positionBL;
-out vec3 vo_positionBR;
-out vec4 vo_vColorUpper;
-out vec4 vo_vColorLower;
-out vec4 vo_vColorBg;
-out vec4 vo_vTexCoordRange;
+ATTRIB_LOC(0) out vec3 vo_positionTL;
+ATTRIB_LOC(1) out vec3 vo_positionTR;
+ATTRIB_LOC(2) out vec3 vo_positionBL;
+ATTRIB_LOC(3) out vec3 vo_positionBR;
+ATTRIB_LOC(4) out vec4 vo_vColorUpper;
+ATTRIB_LOC(5) out vec4 vo_vColorLower;
+ATTRIB_LOC(6) out vec4 vo_vColorBg;
+ATTRIB_LOC(7) out vec4 vo_vTexCoordRange;
 
 // 3d position data
-out float vo_fVisiblity;
-out vec4 vo_transformedPos;
+ATTRIB_LOC(8) out float vo_fVisiblity;
+ATTRIB_LOC(9) out vec4 vo_transformedPos;
 
 void main(void)
 {

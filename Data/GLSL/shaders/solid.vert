@@ -5,10 +5,10 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 // in vec3 ao_normal;
 
-out vec3 vo_vNormal;
-out vec3 vo_vPosition;
-out vec3 vo_vEyePosOut;
-out vec3 vo_vWorldPos;
+ATTRIB_LOC(0) out vec3 vo_vNormal;
+ATTRIB_LOC(1) out vec3 vo_vPosition;
+ATTRIB_LOC(2) out vec3 vo_vEyePosOut;
+ATTRIB_LOC(3) out vec3 vo_vWorldPos;
 
 // Motion blur
 // out vec4 vo_vScreenPos;

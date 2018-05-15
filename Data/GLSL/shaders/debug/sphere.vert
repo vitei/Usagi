@@ -7,7 +7,7 @@ ATTRIB_LOC(1) in vec4 ao_vPosRadius;
 ATTRIB_LOC(2) in vec4 ao_vColour;
 
 // Output attributes
-out vec4 vo_vColor;
+ATTRIB_LOC(0) out vec4 vo_vColor;
 
 void main(void)
 {

@@ -9,10 +9,10 @@ ATTRIB_LOC(3) in vec4 ao_vColor;
 
 out VertexData
 {
-	vec3 vo_vStart;
-	vec3 vo_vEnd;
-	vec2 vo_vWidth;
-	vec4 vo_vColor;
+	ATTRIB_LOC(0) vec3 vo_vStart;
+	ATTRIB_LOC(1) vec3 vo_vEnd;
+	ATTRIB_LOC(2) vec2 vo_vWidth;
+	ATTRIB_LOC(3) vec4 vo_vColor;
 } vertexData;
 
 void main(void)

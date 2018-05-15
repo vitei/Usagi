@@ -26,14 +26,14 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 
 
 // Output attributes
-out vec4 vo_vTexCoord01;
-out vec4 vo_vTexCoord23;
-out vec4 vo_vColor;
-out vec3 vo_vNormal;
-out vec3 vo_vTangent;
-out vec3 vo_vBinormal;
-out vec3 vo_vWorldPos;
-out vec3 vo_vViewDir;
+ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
+ATTRIB_LOC(1) out vec4 vo_vTexCoord23;
+ATTRIB_LOC(2) out vec4 vo_vColor;
+ATTRIB_LOC(3) out vec3 vo_vNormal;
+ATTRIB_LOC(4) out vec3 vo_vTangent;
+ATTRIB_LOC(5) out vec3 vo_vBinormal;
+ATTRIB_LOC(6) out vec3 vo_vWorldPos;
+ATTRIB_LOC(7) out vec3 vo_vViewDir;
 
 
 

@@ -9,7 +9,7 @@ BUFFER_LAYOUT(1,  UBO_CUSTOM0_ID) uniform Custom0
 
 
 // Input attributes
-in vec3 ao_position;
+ATTRIB_LOC(0) in vec3 ao_position;
 
 void main(void)
 {

@@ -3,12 +3,12 @@
 #include "includes/depth_read.inc"
 
 // Input attributes
-in vec3 ao_position;
+ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec3 vo_vTexCoord;
-out vec4 vo_vScreenTex;
-out vec3 vo_vViewRay;
+ATTRIB_LOC(0) out vec3 vo_vTexCoord;
+ATTRIB_LOC(1) out vec4 vo_vScreenTex;
+ATTRIB_LOC(2) out vec3 vo_vViewRay;
 
 void main(void)
 {

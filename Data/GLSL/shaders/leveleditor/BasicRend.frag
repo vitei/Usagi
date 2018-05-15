@@ -8,8 +8,8 @@ BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
 };
 
 // Input attributes
-in vec3 vo_vWorldPos;
-in vec3 vo_vNormal;
+ATTRIB_LOC(0) in vec3 vo_vWorldPos;
+ATTRIB_LOC(1) in vec3 vo_vNormal;
 
 layout(location = 0) out vec4 colorOut;
 
