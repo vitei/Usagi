@@ -1,3 +1,3 @@
-VS Particles/scripted_vs
-GS Particles/scripted_dir_gs
-PS Particles/scripted_ps
+VS Particles/scripted
+GS Particles/scripted_dir
+PS Particles/scripted

@@ -1,2 +1,2 @@
-VS deferred/pointlight_pos_only_vs
-PS deferred/pos_only_ps
+VS deferred/pointlight_pos_only
+PS deferred/pos_only

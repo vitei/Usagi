@@ -1,3 +1,3 @@
-VS lines_vs
-GS lines_gs
-PS lines_ps
+VS lines
+GS lines
+PS lines

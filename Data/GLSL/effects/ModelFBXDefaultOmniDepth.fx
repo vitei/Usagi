@@ -1,4 +1,4 @@
-VS models/fbxdefault_vs
-GS shadows/depthwriteomni_gs
-PS shadows/depthwriteomni_ps
+VS models/fbxdefault
+GS shadows/depthwriteomni
+PS shadows/depthwriteomni
 DEFINES SHADOW_PASS OMNI_DEPTH

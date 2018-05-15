@@ -1,2 +1,2 @@
-VS PostFX/fader_vs
-PS PostFX/fader_ps
+VS PostFX/fader
+PS PostFX/fader

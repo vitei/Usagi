@@ -1,2 +1,2 @@
-VS shadows/depthwrite_vs
-PS shadows/depthwrite_ps
+VS shadows/depthwrite
+PS shadows/depthwrite

@@ -1,2 +1,2 @@
-VS cubemap_vs
-PS cubemap_ps
+VS cubemap
+PS cubemap

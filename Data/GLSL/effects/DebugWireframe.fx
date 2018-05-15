@@ -1,2 +1,2 @@
-VS debug/wireframe_vs
-PS debug/wireframe_ps
+VS debug/wireframe
+PS debug/wireframe

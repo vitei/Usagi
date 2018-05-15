@@ -1,2 +1,2 @@
-VS PostFX/fullscreen_vs
-PS PostFX/brightpass_ps
+VS PostFX/fullscreen
+PS PostFX/brightpass

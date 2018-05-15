@@ -1,2 +1,2 @@
-VS deferred/spotlight_pos_vs
-PS deferred/spotlight_ps
+VS deferred/spotlight_pos
+PS deferred/spotlight

@@ -1,2 +1,2 @@
-VS leveleditor/LineRend_vs
-PS leveleditor/LineRend_ps
+VS leveleditor/LineRend
+PS leveleditor/LineRend

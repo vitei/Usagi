@@ -1,2 +1,2 @@
-VS solid_vs
-PS solid_ps
+VS solid
+PS solid

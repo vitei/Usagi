@@ -1,2 +1,2 @@
-VS leveleditor/FontRend_vs
-PS leveleditor/FontRend_ps
+VS leveleditor/FontRend
+PS leveleditor/FontRend

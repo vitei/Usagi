@@ -1,3 +1,3 @@
-VS models/fbxdefault_vs
-PS models/fbxdefault_ps
+VS models/fbxdefault
+PS models/fbxdefault
 DEFINES SHADOW_PASS

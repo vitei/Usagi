@@ -1,2 +1,2 @@
-VS deferred/projection_light_pos_vs
-PS deferred/projection_light_ps
+VS deferred/projection_light_pos
+PS deferred/projection_light

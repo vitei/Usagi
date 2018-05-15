@@ -205,6 +205,9 @@ module GeneratorUtil
     n.rule('font', "#{config.font_converter} $in $out_stub",
            {:description => 'FONT $out_stub'})
 
+    n.rule('vulkanshader', "glslc $in -o $out -std=430 -DPLATFORM_PC -DUSE_VULKAN",
+           {:description => 'SHADER $out_stub'})    
+
   end
 
   #####################################################################

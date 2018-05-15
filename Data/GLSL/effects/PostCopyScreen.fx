@@ -1,2 +1,2 @@
-VS PostFX/fullscreen_vs
-PS PostFX/screencopy_ps
+VS PostFX/fullscreen
+PS PostFX/screencopy

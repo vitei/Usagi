@@ -1,3 +1,3 @@
-VS Particles/generic_vs
-GS Particles/generic_gs
-PS Particles/generic_ps
+VS Particles/generic
+GS Particles/generic
+PS Particles/generic

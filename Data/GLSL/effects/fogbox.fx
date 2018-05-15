@@ -1,2 +1,2 @@
-VS fogbox_vs
-PS fogbox_ps
+VS fogbox
+PS fogbox

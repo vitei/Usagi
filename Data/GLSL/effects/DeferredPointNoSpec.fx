@@ -1,2 +1,2 @@
-VS deferred/pointlight_pos_vs
-PS deferred/pointlightnospec_ps
+VS deferred/pointlight_pos
+PS deferred/pointlightnospec

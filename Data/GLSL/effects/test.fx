@@ -1,2 +1,2 @@
-VS test_vs
-PS test_ps
+VS test
+PS test

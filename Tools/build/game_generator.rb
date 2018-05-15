@@ -7,13 +7,13 @@ require 'yaml'
 #####################################################################
 # Utility Functions                                                 #
 #####################################################################
-def build_pc_data(config, n)
+def build_pc_data(config, n, platform)
   data_deps = Set.new
 
   audio = build_audio(config, n)
   data_deps.merge audio
 
-  shaders = build_pc_shaders(config, n)
+  shaders = build_pc_shaders(config, n, platform)
   data_deps.merge shaders
 
   effects = build_pc_effects(config, n)
@@ -45,7 +45,7 @@ def process_data(config, platform, n)
   # Do this first to ensure we have the hierarchy information
   # Convert models
   if config.target_platform == 'win'
-    pc_data = build_pc_data(config, n)
+    pc_data = build_pc_data(config, n, platform)
     data_deps.merge pc_data
   end
 
@@ -168,9 +168,14 @@ def build_audio(config, n)
   targets.values
 end
 
-def build_pc_shaders(config, n)
-  game_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir(false))
-  engine_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir)
+def build_pc_shaders(config, n, platform)
+  if platform.underscore_dirs_whitelist.include?("_vulkan")
+    game_shaders = build_vulkan_shaders_for_dir(config, n, config.pc_shader_dir(false))
+    engine_shaders = build_vulkan_shaders_for_dir(config, n, config.pc_shader_dir)
+  else
+    game_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir(false))
+    engine_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir)
+  end
 
   game_shaders + engine_shaders
 end
@@ -185,6 +190,19 @@ def build_pc_shaders_for_dir(config, n, shader_dir)
   GeneratorUtil.copy_files(n, targets)
 
   targets.map{|i, o| o}
+end
+
+
+def build_vulkan_shaders_for_dir(config, n, shader_dir)
+  targets = FileList["#{shader_dir}/**/*"].exclude{|f| File.directory?(f)}.map do |input|
+    output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '') + ".spv"
+
+    n.build('vulkanshader', {output => [input]},
+        :variables => {'out' => to_windows_path(output),
+        'in' => input})
+
+    output
+  end
 end
 
 def build_pc_effects(config, n)

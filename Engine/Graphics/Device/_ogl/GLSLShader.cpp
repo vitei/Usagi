@@ -85,11 +85,11 @@ void GLSLShader::HandleError(const char* szName, const char** szStrings, uint32 
 		glGetShaderInfoLog(m_shader, blen, &slen, compiler_log);
 		if(szName)
 		{
-			DEBUG_PRINT("GLSL error in %s: %s", szName, compiler_log);
+			DEBUG_PRINT("\nGLSL error in %s: %s", szName, compiler_log);
 		}
 		else
 		{
-			DEBUG_PRINT("GLSL error %s", compiler_log);
+			DEBUG_PRINT("\nGLSL error %s", compiler_log);
 		}
 #ifdef DEBUG_BUILD
 		// Note this may fall over on different vendor hardware
@@ -158,7 +158,22 @@ bool GLSLShader::Init(const U8String& effectName, GLenum shaderType, const char*
 		m_uDefinesCRC = utl::CRC32(szDefines);
 	}
 	// We can't pre-compile these (on PC anyway) as the vendor is responsible for compiling the raw strings
-	U8String filePath = effectName + U8String(".glsl");
+	U8String ext;
+	switch(shaderType)
+	{
+		case GL_VERTEX_SHADER:
+			ext = ".vert";
+			break;
+		case GL_FRAGMENT_SHADER:
+			ext = ".frag";
+			break;
+		case GL_GEOMETRY_SHADER:
+			ext = ".geom";
+			break;
+		default:
+			 ASSERT(false);
+	}
+	U8String filePath = effectName + ext;
 	File shaderFile(filePath.CStr(), FILE_ACCESS_READ);
 	
 	GLchar* buffer[MAX_STRING_ARRAY];
@@ -169,7 +184,7 @@ bool GLSLShader::Init(const U8String& effectName, GLenum shaderType, const char*
 
 	char defines[256];
 	char* szDefineLoc = defines;
-	strcpy_s(szDefineLoc, 256, "#version 330\n");
+	strcpy_s(szDefineLoc, 256, "#version 430\n");
 	szDefineLoc += 13;
 	if (szDefines)
 	{		

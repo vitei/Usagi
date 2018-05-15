@@ -1,2 +1,2 @@
-VS PostFX/lineardepth_vs
-PS PostFX/lineardepth_ps
+VS PostFX/lineardepth
+PS PostFX/lineardepth

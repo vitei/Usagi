@@ -1,2 +1,2 @@
-VS PostFX/fullscreen_vs
-PS PostFX/downscale4x4_ps
+VS PostFX/fullscreen
+PS PostFX/downscale4x4

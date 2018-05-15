@@ -1,4 +1,4 @@
-VS Particles/scripted_vs
-GS Particles/scripted_gs
-PS Particles/scripted_ps
+VS Particles/scripted
+GS Particles/scripted
+PS Particles/scripted
  

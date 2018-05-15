@@ -1,2 +1,2 @@
-VS deferred/directional_vs
-PS deferred/directionalbase_ps
+VS deferred/directional
+PS deferred/directionalbase

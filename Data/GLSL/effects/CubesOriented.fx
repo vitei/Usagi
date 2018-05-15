@@ -1,3 +1,3 @@
-VS cubes_oriented_vs
-GS cubes_oriented_gs
-PS cubes_ps
+VS cubes_oriented
+GS cubes_oriented
+PS cubes

@@ -1,2 +1,2 @@
-VS debug/pos_col_vs
-PS debug/pos_col_ps
+VS debug/pos_col
+PS debug/pos_col

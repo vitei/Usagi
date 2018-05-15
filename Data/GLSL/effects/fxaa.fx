@@ -1,2 +1,2 @@
-VS PostFX/fxaa_vs
-PS PostFX/fxaa_ps
+VS PostFX/fxaa
+PS PostFX/fxaa

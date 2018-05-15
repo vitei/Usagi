@@ -1,2 +1,2 @@
-VS SMAA/SMAAEdgeDetect_vs
-PS SMAA/SMAADepthEdgeDetection_ps
+VS SMAA/SMAAEdgeDetect
+PS SMAA/SMAADepthEdgeDetection

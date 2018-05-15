@@ -1,2 +1,2 @@
-VS deferred/directional_vs
-PS deferred/directionalshadowpass1_ps
+VS deferred/directional
+PS deferred/directionalshadowpass1

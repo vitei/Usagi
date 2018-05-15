@@ -1,3 +1,3 @@
-VS Particles/missile_vs
-GS Particles/missile_gs
-PS Particles/missile_ps
+VS Particles/missile
+GS Particles/missile
+PS Particles/missile
