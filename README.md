@@ -3,7 +3,7 @@ usagi
 
 Usagi is a Hierarchical Entity-Component-System based game engine created by [Vitei Inc.](http://www.vitei.com/).
 
-By [modifying](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) the [ECS](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) design pattern to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
+By [modifying](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) the [ECS](https://github.com/vitei/Usagi/wiki/Component-entity-system) design pattern to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
