@@ -58,6 +58,7 @@ GFXDevice_ps::~GFXDevice_ps()
 	
 }
 
+
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {  
 	m_pParent = pParent;
@@ -65,6 +66,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	m_allocCallbacks.pfnAllocation = VkAllocation;
 	m_allocCallbacks.pfnFree = VkFree;
 	m_allocCallbacks.pfnReallocation = VkReallocation;
+	m_allocCallbacks.pUserData = nullptr;
 	m_allocCallbacks.pfnInternalFree = nullptr;
 	m_allocCallbacks.pfnInternalAllocation = nullptr;
 
@@ -77,7 +79,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
     app_info.applicationVersion = 1;
     app_info.pEngineName = "Usagi_Engine";
     app_info.engineVersion = 1;
-    app_info.apiVersion = VK_API_VERSION_1_0;
+    app_info.apiVersion = VK_API_VERSION_1_1;
 
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
@@ -164,28 +166,32 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
 	
 #ifdef DEBUG_BUILD
-	int validationLayerCount = 1;
+	int validationLayerCount = 2;
 	const char *validationLayerNames[] =
 	{
 		"VK_LAYER_LUNARG_standard_validation", /* Enable validation layers in debug builds to detect validation errors */
+		"VK_LAYER_LUNARG_parameter_validation"
 	};
 #else
 	int validationLayerCount = 0;
 	const char *validationLayerNames[];
 #endif
 
+
+	extensions.clear();
+	extensions.push_back("VK_KHR_swapchain");
     VkDeviceCreateInfo device_info = {};
     device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     device_info.pNext = NULL;
     device_info.queueCreateInfoCount = 1;
     device_info.pQueueCreateInfos = &queue_info;
-    device_info.enabledExtensionCount = 0;
-    device_info.ppEnabledExtensionNames = NULL;
+    device_info.enabledExtensionCount = (uint32)extensions.size();
+    device_info.ppEnabledExtensionNames = extensions.data();
     device_info.enabledLayerCount = validationLayerCount;
     device_info.ppEnabledLayerNames = validationLayerNames;
     device_info.pEnabledFeatures = &enabledFeatures;
 
-    res = vkCreateDevice(m_gpus[0], &device_info, NULL, &m_vkDevice);
+    res = vkCreateDevice(m_gpus[0], &device_info, &m_allocCallbacks, &m_vkDevice);
     ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from
@@ -376,9 +382,24 @@ VkShaderModule GFXDevice_ps::GetShaderFromStock(const U8String &name, VkShaderSt
 
 	if (m_uStockCount < MAX_STOCK_SHADERS)
 	{
+		U8String fullName = name;
+		switch (shaderType)
+		{
+		case VK_SHADER_STAGE_VERTEX_BIT:
+			fullName += ".vert.spv";
+			break;
+		case VK_SHADER_STAGE_GEOMETRY_BIT:
+			fullName += ".geom.spv";
+			break;
+		case VK_SHADER_STAGE_FRAGMENT_BIT:
+			fullName += ".frag.spv";
+			break;
+		default:
+			ASSERT(false);
+		}
 		Shader* pNext = &m_stockShaders[m_uStockCount];
 		pNext->shaderType = shaderType;
-		str::Copy(pNext->name, name.CStr(), USG_MAX_PATH);
+		str::Copy(pNext->name, fullName.CStr(), USG_MAX_PATH);
 
 		size_t size;
 
