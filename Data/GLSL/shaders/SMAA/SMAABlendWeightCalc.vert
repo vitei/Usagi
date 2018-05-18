@@ -33,10 +33,10 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-out vec4 vo_vPosition;
-out vec2 vo_vTexCoord;
-out vec2 vo_vPixCoord;
-out vec4 vo_vOffset[3];
+AT_LCMP(0, 0) out vec4 vo_vPosition;
+AT_LCMP(1, 0) out vec2 vo_vTexCoord;
+AT_LCMP(1, 2) out vec2 vo_vPixCoord;
+AT_LCMP(2, 0) out vec4 vo_vOffset[3];
 
 
 void main(void)

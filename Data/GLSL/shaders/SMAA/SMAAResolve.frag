@@ -29,8 +29,8 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/smaa.inc"
 
-in vec4 vo_vPosition;
-in vec2 vo_vTexCoord;
+ATTRIB_LOC(0) in vec4 vo_vPosition;
+ATTRIB_LOC(1) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;   // CurrentColor
 SAMPLER_LOC(1, 1) uniform sampler2D sampler1;   // PreviousColor

@@ -29,10 +29,10 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/smaa.inc"
 
-in vec4 vo_vPosition;
-in vec2 vo_vTexCoord;
-in vec2 vo_vPixCoord;
-in vec4 vo_vOffset[3];
+AT_LCMP(0, 0) in vec4 vo_vPosition;
+AT_LCMP(1, 0) in vec2 vo_vTexCoord;
+AT_LCMP(1, 2) in vec2 vo_vPixCoord;
+AT_LCMP(2, 0) in vec4 vo_vOffset[3];
 
 layout(location = 0) out vec4 colorOut;
 

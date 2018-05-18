@@ -29,9 +29,9 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/smaa.inc"
 
-in vec4 vo_vPosition;
-in vec2 vo_vTexCoord;
-in vec4 vo_vOffset[3];
+ATTRIB_LOC(0) in vec4 vo_vPosition;
+ATTRIB_LOC(1) in vec2 vo_vTexCoord;
+ATTRIB_LOC(2) in vec4 vo_vOffset[3];
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;   // ColorTex
 #if SMAA_PREDICATION
