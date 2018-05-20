@@ -45,7 +45,8 @@ public:
 	VkImageLayout GetImageLayout() const { return m_imageLayout; }
 
 private:
-	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo);
+	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags);
+	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
 
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;
