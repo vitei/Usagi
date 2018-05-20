@@ -65,12 +65,6 @@ public:
 	RenderPassDecl();
 	~RenderPassDecl();
 
-	enum
-	{
-		MAX_ATTACHMENTS = 10,
-		MAX_SUBPASSES = 5
-	};
-
 	enum AttachmentFlags
 	{
 		AF_MEMORY_REUSE = (1<<0),	// Sharing memory with another target		
@@ -104,6 +98,7 @@ public:
 	
 	struct Attachment
 	{
+		Attachment();
 		AttachmentType		eAttachType;
 		union
 		{

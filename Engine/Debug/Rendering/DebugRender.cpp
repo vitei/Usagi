@@ -72,10 +72,10 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 {
 	// Setup the vertex data
 	{
-		uint8* puIndices;
-		ScratchObj<uint8> scratchIndices(puIndices, MAX_BAR_INDICES);
+		uint16* puIndices;
+		ScratchObj<uint16> scratchIndices(puIndices, MAX_BAR_INDICES);
 
-		uint8* puIndicesTmp = puIndices;
+		uint16* puIndicesTmp = puIndices;
 		for(uint32 i=0; i<MAX_BAR_INDICES/6; i++)
 		{
 			uint32 uBaseIndex = i*4;

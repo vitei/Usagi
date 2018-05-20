@@ -68,7 +68,7 @@ public:
 		{
 			m_pairings[m_uPairs].decl = *pDecl;
 			m_pairings[m_uPairs].state = vnew(ALLOC_OBJECT) ResourceType;
-			m_pairings[m_uPairs].state->Init(pDevice, *pDecl, m_uPairs);
+			m_pairings[m_uPairs].state->Init(pDevice, m_pairings[m_uPairs].decl, m_uPairs);
 			m_uPairs++;
 			uint32 uIndex = m_uPairs - 1;
 			return HandleType(m_pairings[uIndex].state, uIndex);

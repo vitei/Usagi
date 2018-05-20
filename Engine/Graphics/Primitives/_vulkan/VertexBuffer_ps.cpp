@@ -54,7 +54,10 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 		ASSERT(!err);
 	}
 
-	SetContents(pDevice, pVerts, uDataSize);
+	if (pVerts)
+	{
+		SetContents(pDevice, pVerts, uDataSize);
+	}
 
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{

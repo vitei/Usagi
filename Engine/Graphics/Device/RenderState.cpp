@@ -162,6 +162,18 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 		&& bWireframe == rhs.bWireframe );
 }
 
+RenderPassDecl::Attachment::Attachment()
+{
+	eAttachType = ATTACH_COLOR;
+	format.eColor = CF_RGBA_8888;
+	uAttachFlags = 0;
+	eLoadOp = LOAD_OP_DONT_CARE;
+	eStoreOp = STORE_OP_STORE;
+	eSamples = SAMPLE_COUNT_1_BIT;
+	eInitialLayout = LAYOUT_COLOR_ATTACHMENT;
+	eFinalLayout = LAYOUT_COLOR_ATTACHMENT;
+}
+
 RenderPassDecl::RenderPassDecl()
 {
 	pAttachments = NULL;

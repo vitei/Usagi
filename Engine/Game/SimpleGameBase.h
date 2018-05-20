@@ -43,6 +43,7 @@ namespace usg
 		};
 
 
+		usg::RenderPassHndl	m_transitionRenderPass;
 		usg::DebugRender	m_debugRender;
 		usg::DebugStats		m_debug;
 		usg::Mode*			m_pActiveMode;

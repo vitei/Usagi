@@ -48,17 +48,24 @@ namespace usg
 
 	void SimpleGameBase::Init(usg::GFXDevice* pDevice)
 	{
+		usg::RenderPassDecl rpDecl;
+		usg::RenderPassDecl::Attachment attach;
+		rpDecl.pAttachments = &attach;
+		rpDecl.uAttachments = 1;
+		attach.format.eColor = CF_RGBA_8888;
+		m_transitionRenderPass = pDevice->GetRenderPass(rpDecl);
+
 		m_pInternalData->m_pInitThread.reset(vnew(usg::ALLOC_OBJECT)usg::InitThread());
 		m_pInternalData->m_pInitThread->Init(pDevice, GetLoadFunc());
 		m_pInternalData->m_pUsagiInetCore.reset(vnew(usg::ALLOC_NETWORK)usg::UsagiInetCore());
 		usg::physics::init();
-		usg::Fader::Create()->Init(pDevice, usg::RenderPassHndl());
+		usg::Fader::Create()->Init(pDevice, m_transitionRenderPass);
 		usg::Audio::Create()->Init();
 		usg::MusicManager::Create();
 		m_modeTransition.Init(pDevice);
 		m_eState = STATE_LOADING;
 
-		m_debugRender.Init(pDevice, usg::RenderPassHndl());
+		m_debugRender.Init(pDevice, m_transitionRenderPass);
 		m_debugRender.SetDrawArea(0.0f, 0.0f, 1280.f, 720.f);
 		m_debug.Init(pDevice, &m_debugRender);
 		m_debug.RegisterCPUTimer(&m_cpuTimer);
