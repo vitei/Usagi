@@ -20,7 +20,7 @@ public:
 	Debug3D();
 	virtual ~Debug3D();
 
-	void Init(GFXDevice* pDevice, Scene* pScene);
+	void Init(GFXDevice* pDevice, const RenderPassHndl& rp, Scene* pScene);
 	void CleanUp(GFXDevice* pDevice);
 
 	void AddSphere(const Vector3f &vPos, float fRadius, const Color& color);

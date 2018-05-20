@@ -36,7 +36,7 @@ Debug3D::~Debug3D()
 	m_psRenderer = NULL;
 }
 
-void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
+void Debug3D::Init(GFXDevice* pDevice, const RenderPassHndl& rp, Scene* pScene)
 {
 	int i, iC = MAX_SPHERES;
 	
@@ -58,6 +58,7 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugSphere");
+	pipelineState.renderPass = rp;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineState.inputBindings[1].Init(g_instanceVertex, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
 	pipelineState.uInputBindingCount = 2;
