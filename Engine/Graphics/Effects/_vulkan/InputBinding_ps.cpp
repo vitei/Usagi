@@ -137,7 +137,6 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 		}
 	}
 
-	// FIXME: When stable this should all move over to a platform specific version of the vertex declaration (as we will be binding by index and not name this will become redundant)
 	m_pInputAttribs = vnew(ALLOC_OBJECT) VkVertexInputAttributeDescription[uElementCount];
 
 	for(uint32 uBuffer=0; uBuffer<uBufferCount; uBuffer++)
@@ -146,7 +145,7 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 		m_bindingDesc[uBuffer].stride = (uint32)ppDecls[uBuffer]->GetSize();
 		if (ppDecls[uBuffer]->IsInstanceStream())
 		{
-			ASSERT(false);	// Look at the documentation
+			m_bindingDesc[uBuffer].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 		}
 		else
 		{
