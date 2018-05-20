@@ -194,6 +194,9 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		case CT_INT:
 			WriteInt((int*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;
+		case CT_VECTOR4I:
+			WriteVector4((Vector4f*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
+			break;
 		case CT_BOOL:
 			WriteBool((bool*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;
