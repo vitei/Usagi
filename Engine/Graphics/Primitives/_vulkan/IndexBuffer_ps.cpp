@@ -67,7 +67,7 @@ void IndexBuffer_ps::Init(GFXDevice* pDevice, const void* pIndices, uint32 uCoun
 		ASSERT(!err);
 	}
 
-	SetContents(pDevice, pDevice, uCount);
+	SetContents(pDevice, pIndices, uCount);
 
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
