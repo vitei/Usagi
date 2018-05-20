@@ -14,6 +14,23 @@
 
 namespace usg {
 
+#ifdef USE_VK_DEBUG_EXTENSIONS
+static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugString(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
+{
+	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
+	DEBUG_PRINT("%s: %s\n", pLayerPrefix, pMsg);
+	return 1;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugBreak(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
+{
+	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
+	ASSERT_MSG(false, "%s: %s\n", pLayerPrefix, pMsg);
+	return 1;
+}
+#endif
+
+
 void* VKAPI_CALL VkAllocation(void* pUserData, size_t size, size_t align, VkSystemAllocationScope eScope)
 {
 	return mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, size, (uint32)align);
@@ -45,10 +62,19 @@ GFXDevice_ps::GFXDevice_ps()
 
 GFXDevice_ps::~GFXDevice_ps()
 {
+	PFN_vkDestroyDebugReportCallbackEXT DestroyReportCallback = VK_NULL_HANDLE;
+	DestroyReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkDestroyDebugReportCallbackEXT");
+
+	for (uint32 i = 0; i < CALLBACK_COUNT; i++)
+	{
+		DestroyReportCallback(m_instance, m_callbacks[i], nullptr);
+	}
+
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
+
 
 	if (m_pQueueProps)
 	{
@@ -84,6 +110,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
+	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+
 
     // initialize the VkInstanceCreateInfo structure
     VkInstanceCreateInfo inst_info = {};
@@ -110,6 +138,25 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
         return;
     }
 
+	PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallback = VK_NULL_HANDLE;
+	CreateDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugReportCallbackEXT");
+
+
+#ifdef USE_VK_DEBUG_EXTENSIONS
+	VkDebugReportCallbackCreateInfoEXT callback = {
+		VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
+		NULL,                                                       // pNext
+		VK_DEBUG_REPORT_WARNING_BIT_EXT,
+		VkDebugString,                                        // pfnCallback
+		NULL                                                        // pUserData
+	};
+	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[0]);
+	
+	callback.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT;
+	callback.pfnCallback = VkDebugBreak;
+	callback.pUserData = NULL;
+	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[1]);
+#endif
 
     // Enumerate the available GPUs
     uint32 gpu_count = 1;
@@ -123,7 +170,6 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	{ 
 		vkGetPhysicalDeviceMemoryProperties(m_gpus[i], &m_memoryProperites[i]);
 	}
-
     
     // Init the device
     VkDeviceQueueCreateInfo queue_info = {};
@@ -180,6 +226,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
+
     VkDeviceCreateInfo device_info = {};
     device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     device_info.pNext = NULL;

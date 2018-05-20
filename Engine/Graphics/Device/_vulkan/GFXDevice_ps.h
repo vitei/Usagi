@@ -10,6 +10,10 @@
 #include "Engine/Core/Containers/List.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
+#ifdef DEBUG_BUILD
+#define USE_VK_DEBUG_EXTENSIONS
+#endif
+
 namespace usg {
 
 class AlphaState;
@@ -66,7 +70,8 @@ private:
 	{
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
-		MAX_STOCK_SHADERS = 1000
+		MAX_STOCK_SHADERS = 1000,
+		CALLBACK_COUNT = 2
 	};
 
 	// FIXME: Refactor to use the resource manager when we stop supporting platforms that precompile into one unit
@@ -79,6 +84,9 @@ private:
 
 	GFXDevice*							m_pParent;
 
+#ifdef USE_VK_DEBUG_EXTENSIONS
+	VkDebugReportCallbackEXT			m_callbacks[CALLBACK_COUNT];
+#endif
 	VkPhysicalDeviceMemoryProperties	m_memoryProperites[MAX_GPU_COUNT];
 	VkCommandPool						m_cmdPool;
 	VkDevice							m_vkDevice;
