@@ -40,6 +40,8 @@ inline void ASSERT(bool condition)
 	if ( (condition) == false ) \
 	return (value);}
 
+#define ASSERT_MSG( cond, ... ) if(!cond) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__); ASSERT(cond); } 
+
 #else
 #define ASSERT_RETURN( condition ) \
 	if ( (condition) == false) return;
@@ -47,11 +49,10 @@ inline void ASSERT(bool condition)
 	if ( (condition) == false) return (value) ;
 
 #define ASSERT(cond) (void)0
+#define ASSERT_MSG(cond) (void)0
 #endif
 
 
-
-#define ASSERT_MSG( cond, ... ) ASSERT(cond)
 
 // For file loading only, will quit the game on failure, even in release mode
 inline void FATAL_RELEASE_INT( const TCHAR* msg )
