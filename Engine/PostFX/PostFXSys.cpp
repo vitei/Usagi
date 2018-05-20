@@ -66,7 +66,7 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 		{  1.f,  -1.f, 0.5f }, // 3 - BR
 	};
 
-	uint8 iIndices[6] = 
+	uint16 iIndices[6] = 
 	{
 		2, 1, 0, 2, 3, 1, 
 	};
