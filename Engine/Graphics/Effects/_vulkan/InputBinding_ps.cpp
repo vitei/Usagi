@@ -108,10 +108,6 @@ namespace usg {
 
 InputBinding_ps::InputBinding_ps()
 {
-	for(uint32 i=0; i<MAX_VERTEX_BUFFERS; i++)
-	{
-		m_pDecl[i]		= NULL;
-	}
 	m_uBuffers	= 0;
 	m_pInputAttribs = NULL;
 }
@@ -124,17 +120,16 @@ InputBinding_ps::~InputBinding_ps()
 	}
 }
 
-void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uCount)
+void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uBufferCount)
 {
 	uint32 uElementCount = 0;
 	uint32 uElement = 0;
-	m_uBuffers = uCount;
+	m_uBuffers = uBufferCount;
 
-	for (uint32 uBuffer = 0; uBuffer < uCount; uBuffer++)
+	for (uint32 uBuffer = 0; uBuffer < uBufferCount; uBuffer++)
 	{
-		const VertexElement* pElement = m_pDecl[uBuffer]->GetElements();
-		m_pDecl[uBuffer] = ppDecls[uBuffer];
-		for (uint32 i = 0; i < m_pDecl[uBuffer]->GetElementCount(); i++)
+		const VertexElement* pElement = ppDecls[uBuffer]->GetElements();
+		for (uint32 i = 0; i < ppDecls[uBuffer]->GetElementCount(); i++)
 		{
 			uint32 uLoop = pElement->uCount < 4 ? 1 : pElement->uCount / 4;
 			uElementCount+= uLoop;
@@ -145,13 +140,11 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 	// FIXME: When stable this should all move over to a platform specific version of the vertex declaration (as we will be binding by index and not name this will become redundant)
 	m_pInputAttribs = vnew(ALLOC_OBJECT) VkVertexInputAttributeDescription[uElementCount];
 
-	for(uint32 uBuffer=0; uBuffer<uCount; uBuffer++)
+	for(uint32 uBuffer=0; uBuffer<uBufferCount; uBuffer++)
 	{
-		m_pDecl[uBuffer] = ppDecls[uBuffer];
-
 		m_bindingDesc[uBuffer].binding = uBuffer;
-		m_bindingDesc[uBuffer].stride = (uint32)m_pDecl[uBuffer]->GetSize();
-		if (m_pDecl[uBuffer]->IsInstanceStream())
+		m_bindingDesc[uBuffer].stride = (uint32)ppDecls[uBuffer]->GetSize();
+		if (ppDecls[uBuffer]->IsInstanceStream())
 		{
 			ASSERT(false);	// Look at the documentation
 		}
@@ -160,8 +153,8 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 			m_bindingDesc[uBuffer].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		}
 
-		const VertexElement* pElement = m_pDecl[uBuffer]->GetElements();
-		for(uint32 i=0; i < m_pDecl[uBuffer]->GetElementCount(); i++)
+		const VertexElement* pElement = ppDecls[uBuffer]->GetElements();
+		for(uint32 i=0; i < ppDecls[uBuffer]->GetElementCount(); i++)
 		{
 			ASSERT(uElement<MAX_VERTEX_ATTRIBUTES);
 			ASSERT((pElement->uCount < 4) || (pElement->uCount % 4) == 0);
@@ -184,7 +177,7 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 	m_inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	m_inputState.pNext = nullptr;
 	m_inputState.flags = 0;
-	m_inputState.vertexBindingDescriptionCount = uCount;
+	m_inputState.vertexBindingDescriptionCount = uBufferCount;
 	m_inputState.pVertexBindingDescriptions = &m_bindingDesc[0];
 	m_inputState.vertexAttributeDescriptionCount = uElementCount;
 	m_inputState.pVertexAttributeDescriptions = m_pInputAttribs;

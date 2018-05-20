@@ -20,7 +20,7 @@ public:
 	InputBinding_ps();
 	~InputBinding_ps();
 
-	void Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uCount);
+	void Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls, uint32 uBufferCount);
 	const VkPipelineVertexInputStateCreateInfo& GetVertexInputCreateInfo() const { return m_inputState; }
 
 private:
@@ -29,7 +29,6 @@ private:
 	VkVertexInputAttributeDescription*		m_pInputAttribs;
 	VkPipelineVertexInputStateCreateInfo	m_inputState;
 	VkVertexInputBindingDescription			m_bindingDesc[MAX_VERTEX_BUFFERS];
-	const VertexDeclaration*				m_pDecl[MAX_VERTEX_BUFFERS];
 	uint32									m_uBuffers;
 };
 

@@ -32,7 +32,7 @@ void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, ui
 		layoutBindings[i] = decl.descriptorSets[i].GetContents()->GetPlatform().GetVkLayout();
 	}
 
-	createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	createInfo.pNext = NULL;
 	createInfo.pSetLayouts = layoutBindings;
 	createInfo.setLayoutCount = decl.uDescriptorSetCount;
