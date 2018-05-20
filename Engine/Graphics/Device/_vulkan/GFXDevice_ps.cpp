@@ -385,9 +385,9 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 {
 	prefferedProps |= properties;
 	
-	for (uint32 uMemoryType = 0; uMemoryType < 32; ++uMemoryType)
+	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
 	{
-		if (typeBits & (1 << uMemoryType))
+		if (((typeBits >> uMemoryType) && 1) == 1)
 		{
 			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
@@ -399,9 +399,9 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 	}
 
 
-	for (uint32 uMemoryType = 0; uMemoryType < 32; ++uMemoryType)
+	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
 	{
-		if (typeBits & (1 << uMemoryType))
+		if ( ((typeBits >> uMemoryType) && 1) == 1)
 		{
 			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
