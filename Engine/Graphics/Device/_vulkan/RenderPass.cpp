@@ -129,12 +129,17 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 	renderPassInfo.pAttachments = attachmentDescriptions.data();
 	renderPassInfo.subpassCount = static_cast<uint32_t>(subpassDescriptions.size());
 	renderPassInfo.pSubpasses = subpassDescriptions.data();
+
+
+	// Don't forget the render passes! :)
+	ASSERT(renderPassInfo.subpassCount > 0);
 	
 	// TODO: Implement dependencies
 	renderPassInfo.dependencyCount = 0;
 	renderPassInfo.pDependencies = nullptr;
 
-	vkCreateRenderPass(pDevice->GetPlatform().GetVKDevice(), &renderPassInfo, pDevice->GetPlatform().GetAllocCallbacks(), &m_renderPass);
+	VkResult res = vkCreateRenderPass(pDevice->GetPlatform().GetVKDevice(), &renderPassInfo, nullptr, &m_renderPass);
+	ASSERT(res == VK_SUCCESS);
 }
 
 

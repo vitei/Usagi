@@ -146,7 +146,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkDebugReportCallbackCreateInfoEXT callback = {
 		VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
 		NULL,                                                       // pNext
-		VK_DEBUG_REPORT_WARNING_BIT_EXT,
+		VK_DEBUG_REPORT_WARNING_BIT_EXT| VK_DEBUG_REPORT_INFORMATION_BIT_EXT|VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT|VK_DEBUG_REPORT_DEBUG_BIT_EXT,
 		VkDebugString,                                        // pfnCallback
 		NULL                                                        // pUserData
 	};
@@ -212,11 +212,10 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
 	
 #ifdef DEBUG_BUILD
-	int validationLayerCount = 2;
+	int validationLayerCount = 1;
 	const char *validationLayerNames[] =
 	{
-		"VK_LAYER_LUNARG_standard_validation", /* Enable validation layers in debug builds to detect validation errors */
-		"VK_LAYER_LUNARG_parameter_validation"
+		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
 	};
 #else
 	int validationLayerCount = 0;

@@ -1,10 +1,4 @@
-#if 1
-#ifndef PLATFORM_PC
-#version 330
-#endif
 #extension GL_ARB_shading_language_420pack : enable
-//#extension GL_ARB_separate_shader_objects : enable
-//#extension GL_KHR_vulkan_glsl : enable
 #define BUFFER_LAYOUT(setIn, val) layout(binding = val, std140) // set = setIn,
 #define SAMPLER_LOC(setIn, val) layout(binding=val) // set = setIn,
 #define ATTRIB_LOC(val) layout(location=val)
@@ -35,7 +29,8 @@ vec4 GetUV(in vec4 texCoord)
 }
 
 
-#elif (defined PLATFORM_OSX)
+//#elif (defined PLATFORM_OSX)
+#if 0
 
 #define BUFFER_LAYOUT(1, set, val) layout(std140)
 //#define SAMPLER_LOC(1, val) layout(location=val)

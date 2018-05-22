@@ -189,10 +189,12 @@ RenderPassDecl::~RenderPassDecl()
 
 RenderPassDecl::SubPass::SubPass()
 {
-	pInputAttachments = NULL;
-	pColorAttachments = NULL;
-	pResolveAttachments = NULL;
-	puPreserveIndices = NULL;
+	pInputAttachments = nullptr;
+	pColorAttachments = nullptr;
+	pResolveAttachments = nullptr;
+	puPreserveIndices = nullptr;
+	pDepthAttachment = nullptr;
+	
 	uInputCount = 0;
 	uColorCount = 0;
 	uResolveCount = 0;

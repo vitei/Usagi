@@ -50,8 +50,17 @@ namespace usg
 	{
 		usg::RenderPassDecl rpDecl;
 		usg::RenderPassDecl::Attachment attach;
+		usg::RenderPassDecl::SubPass subPass;
+		usg::RenderPassDecl::AttachmentReference ref;
+		ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+		ref.uIndex = 0;
+
+		subPass.pColorAttachments = &ref;
+		subPass.uColorCount = 0;
 		rpDecl.pAttachments = &attach;
 		rpDecl.uAttachments = 1;
+		rpDecl.uSubPasses = 1;
+		rpDecl.pSubPasses = &subPass;
 		attach.format.eColor = CF_RGBA_8888;
 		m_transitionRenderPass = pDevice->GetRenderPass(rpDecl);
 
