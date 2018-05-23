@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include "Engine/Core/stl/vector.h"
 
 extern bool	 g_bFullScreen;
@@ -263,13 +264,69 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_presentComplete);
 	ASSERT(res == VK_SUCCESS);
+
+	usg::RenderPassDecl rpDecl;
+	usg::RenderPassDecl::Attachment attach;
+	usg::RenderPassDecl::SubPass subPass;
+	usg::RenderPassDecl::AttachmentReference ref;
+	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+	ref.uIndex = 0;
+
+	subPass.pColorAttachments = &ref;
+	subPass.uColorCount = 1;
+	rpDecl.pAttachments = &attach;
+	rpDecl.uAttachments = 1;
+	rpDecl.uSubPasses = 1;
+	rpDecl.pSubPasses = &subPass;
+	attach.format.eColor = CF_RGBA_8888;
+	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
+
+	InitFrameBuffers(pDevice);
 }
 
-void Display_ps::Use(usg::GFXDevice* pDevice)
+void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 {
-	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
+	VkRenderPassBeginInfo rp_begin;
+	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	rp_begin.pNext = NULL;
+	rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
+	rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	rp_begin.renderArea.offset.x = 0;
+	rp_begin.renderArea.offset.y = 0;
+	rp_begin.renderArea.extent.width = m_uWidth;
+	rp_begin.renderArea.extent.height = m_uHeight;
+	rp_begin.clearValueCount = 0;
+	rp_begin.pClearValues = nullptr;
+
+	vkCmdBeginRenderPass(cmd, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 }
 
+void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
+{
+	VkResult res;
+	VkImageView attachments[2];
+
+	VkFramebufferCreateInfo fb_info = {};
+	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	fb_info.pNext = NULL;
+	fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
+	fb_info.attachmentCount = 1;
+	fb_info.pAttachments = attachments;
+	fb_info.width = m_uWidth;
+	fb_info.height = m_uHeight;
+	fb_info.layers = 1;
+
+	uint32_t i;
+
+	m_pFramebuffers = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
+
+	for (i = 0; i < m_uSwapChainImageCount; i++)
+	{
+		attachments[0] = m_pSwapchainImageViews[i];
+		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffers[i]);
+		ASSERT(res == VK_SUCCESS);
+	}
+}
 
 void Display_ps::Transfer(GFXContext* pContext, RenderTarget* pTarget)
 {
@@ -335,6 +392,7 @@ void Display_ps::Present()
 
 void Display_ps::SwapBuffers(GFXDevice* pDevice)
 {
+	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
 
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

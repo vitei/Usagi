@@ -19,7 +19,7 @@ public:
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl);
 	void CleanUp(usg::GFXDevice* pDevice);
-	void Use(usg::GFXDevice* pDevice);
+	void SetAsTarget(VkCommandBuffer& cmd);
 
 	void Present();
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
@@ -37,18 +37,27 @@ public:
 private:
 	PRIVATIZE_COPY(Display_ps)
 
-	HWND			m_hwnd;
-	HDC				m_hdc;
-	VkImage*		m_pSwapchainImages;
-	VkImageView*	m_pSwapchainImageViews;
-	VkSurfaceKHR	m_surface;
-	VkSwapchainKHR	m_swapChain;
-	VkSemaphore		m_presentComplete;
-	uint32			m_uSwapChainImageCount;
-	uint32			m_uID;
-	uint32			m_uWidth;
-	uint32			m_uHeight;
-	uint32			m_uActiveImage;
+	void InitFrameBuffers(GFXDevice* pDevice);
+
+	enum 
+	{
+		SWAP_BUFFER_COUNT = 2
+	};
+
+	usg::RenderPassHndl	m_directRenderPass;
+	VkFramebuffer*		m_pFramebuffers;
+	HWND				m_hwnd;
+	HDC					m_hdc;
+	VkImage*			m_pSwapchainImages;
+	VkImageView*		m_pSwapchainImageViews;
+	VkSurfaceKHR		m_surface;
+	VkSwapchainKHR		m_swapChain;
+	VkSemaphore			m_presentComplete;
+	uint32				m_uSwapChainImageCount;
+	uint32				m_uID;
+	uint32				m_uWidth;
+	uint32				m_uHeight;
+	uint32				m_uActiveImage;
 };
 
 }

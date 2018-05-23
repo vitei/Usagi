@@ -69,6 +69,7 @@ namespace usg {
 		const InputBinding* GetInputBindingInt() const { return m_pInputBinding.GetContents(); }
 		PrimitiveType GetPrimitiveType() const { return m_ePrimType; }
 		EffectHndl GetEffect() const { return m_effectHndl; }
+		RenderPassHndl GetRenderPass() const { return m_renderPassHndl; }
 
 		PipelineState_ps& GetPlatform() { return m_platform; }
 		const PipelineState_ps& GetPlatform() const { return m_platform; }
@@ -94,6 +95,7 @@ namespace usg {
 		const AlphaState*			m_pAlphaState;
 		const RasterizerState*		m_pRasterizerState;
 		const DepthStencilState*	m_pDepthStencilState;
+		RenderPassHndl				m_renderPassHndl;
 		EffectHndl					m_effectHndl;
 		InputBindingHndl			m_pInputBinding;
 	};

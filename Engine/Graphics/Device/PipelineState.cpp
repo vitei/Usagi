@@ -59,6 +59,8 @@ void PipelineState::Init(GFXDevice* pDevice, const PipelineInitData& decl, uint3
 	m_pInputBinding = decl.pBinding;
 	m_effectHndl = decl.pEffect;
 
+	m_renderPassHndl = decl.renderPass;
+
 	m_platform.Init(pDevice, decl);
 }
 

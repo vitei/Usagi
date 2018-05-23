@@ -125,7 +125,7 @@ void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 
 void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 {
-	ASSERT(false);
+	pDisplay->GetPlatform().SetAsTarget(m_cmdBuff);
 }
 
 void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev)
