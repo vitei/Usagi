@@ -8,6 +8,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Layout/Global2D.h"
 #include "Engine/Core/String/String_Util.h"
 
 namespace usg {
@@ -24,6 +25,11 @@ struct TextConstants
 struct SolidConstants
 {
 	Matrix4x4	mProj;
+};
+
+const DescriptorDeclaration g_sGlobalDescriptorDummy[] =
+{
+	DESCRIPTOR_END()
 };
 
 static const ShaderConstantDecl g_solidConstantDef[] = 
@@ -120,10 +126,12 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	pipelineState.uInputBindingCount = 1;
 	pipelineState.ePrimType = PT_POINTS;
 
+	DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptorDummy);
 	DescriptorSetLayoutHndl textDescriptors = pDevice->GetDescriptorSetLayout(g_textDescriptorDecl);
 	DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
 	pipelineState.layout.descriptorSets[0] = textDescriptors;
-	pipelineState.layout.uDescriptorSetCount = 1;
+	pipelineState.layout.descriptorSets[1] = textDescriptors;
+	pipelineState.layout.uDescriptorSetCount = 2;
 
 	pipelineState.rasterizerState.eCullFace	= CULL_FACE_NONE;
 
@@ -151,7 +159,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	// Set up the materials
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosCol");
 
-	pipelineState.layout.descriptorSets[0] = solidDescriptors;
+	pipelineState.layout.descriptorSets[1] = solidDescriptors;
 
 	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(pipelineState), solidDescriptors);
 	m_posColConstants.Init(pDevice, g_solidConstantDef);

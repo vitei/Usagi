@@ -164,7 +164,7 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 			{
 				m_pInputAttribs[uElement].binding = uBuffer;
 				m_pInputAttribs[uElement].location = pElement->uAttribId;
-				m_pInputAttribs[uElement].format = GetAttribFormat(pElement->eType, pElement->uCount, pElement->bNormalised);
+				m_pInputAttribs[uElement].format = GetAttribFormat(pElement->eType, uCount, pElement->bNormalised);
 				m_pInputAttribs[uElement].offset = (uint32)pElement->uOffset;
 				uOffset += sizeof(float)*uCount;				
 			}

@@ -77,6 +77,8 @@ VkFormat GetFormatGLI(uint32 uFormat)
 		return VK_FORMAT_R8G8B8A8_UNORM;
 	case gli::format::FORMAT_L8_UNORM_PACK8:
 		return VK_FORMAT_R8_UNORM;
+	case gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16:
+		return VK_FORMAT_BC7_UNORM_BLOCK;
 	default:
 		ASSERT(false);	// See what we end up getting passed through
 	}
