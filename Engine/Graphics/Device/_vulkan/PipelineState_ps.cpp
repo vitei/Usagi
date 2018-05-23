@@ -73,6 +73,12 @@ namespace usg
 			VK_DYNAMIC_STATE_SCISSOR
 		};
 
+		VkPipelineViewportStateCreateInfo vp = {};
+		vp.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		vp.pNext = NULL;
+		vp.viewportCount = 1;
+		vp.scissorCount = 1;
+
 
 		VkPipelineDynamicStateCreateInfo dynamic_info = {};
 
@@ -89,7 +95,7 @@ namespace usg
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
 		pipelineCreateInfo.pRasterizationState = &decl.ras.GetContents()->GetCreateInfo();
 		pipelineCreateInfo.pColorBlendState = &decl.alpha.GetContents()->GetCreateInfo();
-		pipelineCreateInfo.pViewportState = NULL;	// Making this a dynamicall updated bit of info
+		pipelineCreateInfo.pViewportState = &vp;	// Making this a dynamicall updated bit of info
 		pipelineCreateInfo.pDepthStencilState = &decl.depth.GetContents()->GetCreateInfo();
 		pipelineCreateInfo.pDynamicState = &dynamic_info;
 		

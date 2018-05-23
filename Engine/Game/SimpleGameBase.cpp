@@ -56,7 +56,7 @@ namespace usg
 		ref.uIndex = 0;
 
 		subPass.pColorAttachments = &ref;
-		subPass.uColorCount = 0;
+		subPass.uColorCount = 1;
 		rpDecl.pAttachments = &attach;
 		rpDecl.uAttachments = 1;
 		rpDecl.uSubPasses = 1;
