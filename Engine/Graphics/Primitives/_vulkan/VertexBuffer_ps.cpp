@@ -92,7 +92,6 @@ void VertexBuffer_ps::UnlockData(GFXDevice* pDevice, void* pData, uint32 uElemen
 
 void VertexBuffer_ps::SetContents(GFXDevice* pDevice, const void* const pData, uint32 uSize)
 {
-	m_uActiveVBO = (m_uActiveVBO + 1) % m_uBufferCount;
 	void* pDest = LockData(pDevice, uSize);
 
 	memcpy(pDest, pData, uSize);
