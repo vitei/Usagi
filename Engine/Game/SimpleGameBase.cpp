@@ -52,7 +52,11 @@ namespace usg
 		usg::RenderPassDecl::Attachment attach;
 		usg::RenderPassDecl::SubPass subPass;
 		usg::RenderPassDecl::AttachmentReference ref;
+		attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_CLEAR_MEMORY;
+		attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
 		ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+		subPass.uColorCount = 1;
+		subPass.pColorAttachments = &ref;
 		ref.uIndex = 0;
 
 		subPass.pColorAttachments = &ref;

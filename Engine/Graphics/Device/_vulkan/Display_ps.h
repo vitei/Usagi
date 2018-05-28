@@ -33,6 +33,7 @@ public:
 	void Transfer(GFXContext* pContext, RenderTarget* pTarget);
 	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void SwapBuffers(GFXDevice* pDevice);
+	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -52,7 +53,7 @@ private:
 	VkImageView*		m_pSwapchainImageViews;
 	VkSurfaceKHR		m_surface;
 	VkSwapchainKHR		m_swapChain;
-	VkSemaphore			m_presentComplete;
+	VkSemaphore			m_imageAcquired;
 	uint32				m_uSwapChainImageCount;
 	uint32				m_uID;
 	uint32				m_uWidth;

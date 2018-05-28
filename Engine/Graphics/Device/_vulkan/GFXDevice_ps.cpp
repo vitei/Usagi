@@ -105,7 +105,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
     app_info.applicationVersion = 1;
     app_info.pEngineName = "Usagi_Engine";
     app_info.engineVersion = 1;
-    app_info.apiVersion = VK_API_VERSION_1_1;
+	app_info.apiVersion = VK_API_VERSION_1_0;
 
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
@@ -261,6 +261,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	vkGetDeviceQueue(m_vkDevice, queue_info.queueFamilyIndex, 0, &m_queue);
 
+	VkFenceCreateInfo fenceInfo;
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.pNext = NULL;
+	fenceInfo.flags = 0;
+	vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
+
 	//ASSERT(false);	// Need to set up the copy command buffer
 }
 
@@ -332,6 +338,15 @@ const DisplaySettings* GFXDevice_ps::GetDisplayInfo(uint32 uIndex)
 
 void GFXDevice_ps::Begin()
 {
+	static bool bFirst = true;
+	if (!bFirst)
+	{
+		VkResult res;
+		do {
+			res = vkWaitForFences(m_vkDevice, 1, &m_drawFence, VK_TRUE, 100000);
+		} while (res == VK_TIMEOUT);
+	}
+	bFirst = false;
 	for (uint32 i = 0; i < m_pParent->GetValidDisplayCount(); i++)
 	{
 		m_pParent->GetDisplay(i)->GetPlatform().SwapBuffers(m_pParent);
@@ -345,11 +360,17 @@ void GFXDevice_ps::End()
 	// For now just submit our immediate context
 	VkSubmitInfo submitInfo = {};
 	VkCommandBuffer buffers[] = { m_pParent->GetImmediateCtxt()->GetPlatform().GetVkCmdBuffer() };
+	VkPipelineStageFlags pipe_stage_flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = buffers;
+	// FIXME: Semaphores for all displays
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &m_pParent->GetDisplay(0)->GetPlatform().GetImageAcquired();
+	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
-	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
+	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
 
 	// TODO: Not the right place to wait on the GPU

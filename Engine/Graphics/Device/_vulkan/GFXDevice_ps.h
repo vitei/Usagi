@@ -83,6 +83,7 @@ private:
 	};
 
 	GFXDevice*							m_pParent;
+	VkFence								m_drawFence;
 
 #ifdef USE_VK_DEBUG_EXTENSIONS
 	VkDebugReportCallbackEXT			m_callbacks[CALLBACK_COUNT];

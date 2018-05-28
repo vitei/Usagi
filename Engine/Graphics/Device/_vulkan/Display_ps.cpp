@@ -262,7 +262,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	semaphoreCreateInfo.pNext = NULL;
 	semaphoreCreateInfo.flags = 0;
 
-	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_presentComplete);
+	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_imageAcquired);
 	ASSERT(res == VK_SUCCESS);
 
 	usg::RenderPassDecl rpDecl;
@@ -432,17 +432,17 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 		presentInfo.pSwapchains = &m_swapChain;
 		presentInfo.pImageIndices = &m_uActiveImage;
 		// Check if a wait semaphore has been specified to wait for before presenting the image
-		if (m_presentComplete != VK_NULL_HANDLE)
+	/*	if (m_presentComplete != VK_NULL_HANDLE)
 		{
 			presentInfo.pWaitSemaphores = &m_presentComplete;
 			presentInfo.waitSemaphoreCount = 1;
-		}
+		}*/
 		VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
 		ASSERT(res == VK_SUCCESS);
 	}
 	bFirst = false;
 
-	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
+	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_imageAcquired, (VkFence)nullptr, &m_uActiveImage);
 }
 
 void Display_ps::ScreenShot(const char* szFileName)
