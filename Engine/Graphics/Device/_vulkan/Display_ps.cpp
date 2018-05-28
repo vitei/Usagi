@@ -269,7 +269,11 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	usg::RenderPassDecl::Attachment attach;
 	usg::RenderPassDecl::SubPass subPass;
 	usg::RenderPassDecl::AttachmentReference ref;
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_CLEAR_MEMORY;
+	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+	subPass.uColorCount = 1;
+	subPass.pColorAttachments = &ref;
 	ref.uIndex = 0;
 
 	subPass.pColorAttachments = &ref;
@@ -286,6 +290,14 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 {
+	VkClearValue clear_values[2];
+	clear_values[0].color.float32[0] = 1.0f;
+	clear_values[0].color.float32[1] = 0.0f;
+	clear_values[0].color.float32[2] = 0.0f;
+	clear_values[0].color.float32[3] = 1.0f;
+	clear_values[1].depthStencil.depth = 1.0f;
+	clear_values[1].depthStencil.stencil = 0;
+
 	VkRenderPassBeginInfo rp_begin;
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
@@ -295,10 +307,28 @@ void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 	rp_begin.renderArea.offset.y = 0;
 	rp_begin.renderArea.extent.width = m_uWidth;
 	rp_begin.renderArea.extent.height = m_uHeight;
-	rp_begin.clearValueCount = 0;
-	rp_begin.pClearValues = nullptr;
+	rp_begin.clearValueCount = 1;
+	rp_begin.pClearValues = clear_values;
 
 	vkCmdBeginRenderPass(cmd, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+
+	
+	VkViewport viewport;
+	viewport.height = (float)m_uWidth;
+	viewport.width = (float)m_uHeight;
+	viewport.minDepth = (float)0.0f;
+	viewport.maxDepth = (float)1.0f;
+	viewport.x = 0;
+	viewport.y = 0;
+	vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+	VkRect2D scissor;
+	scissor.extent.width = m_uWidth;
+	scissor.extent.height = m_uHeight;
+	scissor.offset.x = 0;
+	scissor.offset.y = 0;
+	vkCmdSetScissor(cmd, 0, 1, &scissor);
+
 }
 
 void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
@@ -392,22 +422,27 @@ void Display_ps::Present()
 
 void Display_ps::SwapBuffers(GFXDevice* pDevice)
 {
-	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
-
-	VkPresentInfoKHR presentInfo = {};
-	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.pNext = NULL;
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = &m_swapChain;
-	presentInfo.pImageIndices = &m_uActiveImage;
-	// Check if a wait semaphore has been specified to wait for before presenting the image
-	if (m_presentComplete != VK_NULL_HANDLE)
+	static bool bFirst = true;
+	if (!bFirst)
 	{
-		presentInfo.pWaitSemaphores = &m_presentComplete;
-		presentInfo.waitSemaphoreCount = 1;
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = NULL;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &m_swapChain;
+		presentInfo.pImageIndices = &m_uActiveImage;
+		// Check if a wait semaphore has been specified to wait for before presenting the image
+		if (m_presentComplete != VK_NULL_HANDLE)
+		{
+			presentInfo.pWaitSemaphores = &m_presentComplete;
+			presentInfo.waitSemaphoreCount = 1;
+		}
+		VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
+		ASSERT(res == VK_SUCCESS);
 	}
-	VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
-	ASSERT(res == VK_SUCCESS);
+	bFirst = false;
+
+	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
 }
 
 void Display_ps::ScreenShot(const char* szFileName)
