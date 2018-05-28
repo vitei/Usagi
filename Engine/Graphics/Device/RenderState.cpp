@@ -197,7 +197,6 @@ RenderPassDecl::SubPass::SubPass()
 	
 	uInputCount = 0;
 	uColorCount = 0;
-	uResolveCount = 0;
 	uPreserveCount = 0;
 }
 
@@ -250,12 +249,15 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 			}
 		}
 
-		for (uint32 uResolve = 0; uResolve < pass.uResolveCount; uResolve++)
+		if (pass.pResolveAttachments)
 		{
-			if (pass.pResolveAttachments[uResolve].eLayout != passRH.pResolveAttachments[uResolve].eLayout
-				|| pass.pResolveAttachments[uResolve].uIndex != passRH.pResolveAttachments[uResolve].uIndex)
+			for (uint32 uResolve = 0; uResolve < pass.uColorCount; uResolve++)
 			{
-				return false;
+				if (pass.pResolveAttachments[uResolve].eLayout != passRH.pResolveAttachments[uResolve].eLayout
+					|| pass.pResolveAttachments[uResolve].uIndex != passRH.pResolveAttachments[uResolve].uIndex)
+				{
+					return false;
+				}
 			}
 		}
 

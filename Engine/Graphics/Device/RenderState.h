@@ -131,7 +131,6 @@ public:
 		uint32*					puPreserveIndices;
 		uint32  uInputCount;
 		uint32  uColorCount;
-		uint32  uResolveCount;
 		uint32  uPreserveCount;
 	};
 

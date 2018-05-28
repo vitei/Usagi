@@ -78,7 +78,7 @@ namespace usg {
 			{
 				uReferences += m_decl.pSubPasses[i].uColorCount;
 				uReferences += m_decl.pSubPasses[i].uInputCount;
-				uReferences += m_decl.pSubPasses[i].uResolveCount;
+				uReferences += m_decl.pSubPasses[i].pResolveAttachments ? m_decl.pSubPasses[i].uColorCount : 0;
 				if (m_decl.pSubPasses[i].pDepthAttachment)
 				{
 					uReferences++;
@@ -119,11 +119,11 @@ namespace usg {
 				uReferenceId += m_decl.pSubPasses[i].uInputCount;
 			}
 
-			if (copyData.m_decl.pSubPasses[i].uResolveCount)
+			if (copyData.m_decl.pSubPasses[i].pResolveAttachments)
 			{
 				m_decl.pSubPasses[i].pResolveAttachments = &m_pReferences[uReferenceId];
-				MemCpy(m_decl.pSubPasses[i].pResolveAttachments, copyData.m_decl.pSubPasses[i].pResolveAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uResolveCount);
-				uReferenceId += m_decl.pSubPasses[i].uResolveCount;
+				MemCpy(m_decl.pSubPasses[i].pResolveAttachments, copyData.m_decl.pSubPasses[i].pResolveAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uColorCount);
+				uReferenceId += m_decl.pSubPasses[i].uColorCount;
 			}
 
 			if (copyData.m_decl.pSubPasses[i].pDepthAttachment != nullptr)

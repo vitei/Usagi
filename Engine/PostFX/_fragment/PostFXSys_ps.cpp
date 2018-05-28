@@ -146,7 +146,6 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	subPasses[0].pDepthAttachment = &attachReferences[1];
 	subPasses[0].uColorCount = 1;
 	subPasses[0].uPreserveCount = 0;
-	subPasses[0].uResolveCount = 0;
 	subPasses[0].pInputAttachments = nullptr;
 	subPasses[0].pResolveAttachments = nullptr;
 	subPasses[0].puPreserveIndices = nullptr;

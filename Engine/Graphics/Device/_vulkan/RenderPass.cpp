@@ -91,6 +91,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		const RenderPassDecl::SubPass& in = decl.pSubPasses[i];
 
 		subpassDescriptions[i].pColorAttachments = in.uColorCount ? &references.data()[uReferenceOffset] : nullptr;
+		subpassDescriptions[i].colorAttachmentCount = in.uColorCount;
 		for (uint32 uAttach = 0; uAttach < in.uColorCount; uAttach++)
 		{
 			references[uReferenceOffset + uAttach].attachment = in.pColorAttachments[uAttach].uIndex;
@@ -99,6 +100,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		uReferenceOffset += in.uColorCount;
 
 		subpassDescriptions[i].pInputAttachments = in.uInputCount ? &references.data()[uReferenceOffset] : nullptr;
+		subpassDescriptions[i].inputAttachmentCount = in.uInputCount;
 		for (uint32 uAttach = 0; uAttach < in.uInputCount; uAttach++)
 		{
 			references[uReferenceOffset + uAttach].attachment = in.pInputAttachments[uAttach].uIndex;
@@ -106,15 +108,19 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		}
 		uReferenceOffset += in.uInputCount;
 
-		subpassDescriptions[i].pResolveAttachments = in.uResolveCount ? &references.data()[uReferenceOffset] : nullptr;
-		for (uint32 uAttach = 0; uAttach < in.uResolveCount; uAttach++)
+		subpassDescriptions[i].pResolveAttachments = in.pResolveAttachments ? &references.data()[uReferenceOffset] : nullptr;
+		if (in.pResolveAttachments)
 		{
-			references[uReferenceOffset + uAttach].attachment = in.pResolveAttachments[uAttach].uIndex;
-			references[uReferenceOffset + uAttach].layout = g_layoutMap[in.pResolveAttachments[uAttach].eLayout];
+			for (uint32 uAttach = 0; uAttach < in.uColorCount; uAttach++)
+			{
+				references[uReferenceOffset + uAttach].attachment = in.pResolveAttachments[uAttach].uIndex;
+				references[uReferenceOffset + uAttach].layout = g_layoutMap[in.pResolveAttachments[uAttach].eLayout];
+			}
+			uReferenceOffset += in.uColorCount;
 		}
-		uReferenceOffset += in.uResolveCount;
 
 		subpassDescriptions[i].pPreserveAttachments = in.uPreserveCount ? &preserve.data()[uPreserveOffset] : nullptr;
+		subpassDescriptions[i].preserveAttachmentCount = in.uPreserveCount;
 		for (uint32 uAttach = 0; uAttach < in.uPreserveCount; uAttach++)
 		{
 			preserve[uPreserveOffset + uAttach] = in.puPreserveIndices[uAttach];
