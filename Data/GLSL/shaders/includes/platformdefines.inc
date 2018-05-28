@@ -1,6 +1,6 @@
 #extension GL_ARB_shading_language_420pack : enable
-#define BUFFER_LAYOUT(setIn, val) layout(binding = val, std140) // set = setIn,
-#define SAMPLER_LOC(setIn, val) layout(binding=val) // set = setIn,
+#define BUFFER_LAYOUT(setIn, val) layout(set = setIn, binding = val, std140)
+#define SAMPLER_LOC(setIn, val) layout(set = setIn, binding=val)
 #define ATTRIB_LOC(val) layout(location=val)
 #define AT_LCMP(val, cmp) layout(location=val, component=cmp)
 
