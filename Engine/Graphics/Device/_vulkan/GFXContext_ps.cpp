@@ -78,6 +78,7 @@ void GFXContext_ps::Begin(bool bApplyDefaults)
 
 void GFXContext_ps::End()
 {
+	vkCmdEndRenderPass(m_cmdBuff);	// End the currently active render pass
 	VkResult res = vkEndCommandBuffer(m_cmdBuff);
 	ASSERT(res == VK_SUCCESS);
 }
