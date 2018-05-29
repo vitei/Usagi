@@ -226,9 +226,9 @@ bool GLSLShader::Init(const U8String& effectName, GLenum shaderType, const char*
     
 	stringArray[0] = defines;
 #ifdef PLATFORM_OSX
-	stringArray[1] = "#define PLATFORM_OSX 1\n";
+	stringArray[1] = "#define PLATFORM_OSX 1\n#define API_OGL\n";
 #else
-	stringArray[1] = "#define PLATFORM_PC 1\n";
+	stringArray[1] = "#define PLATFORM_PC 1\n#define API_OGL\n";
 #endif
 	stringArray[2] = buffer[0];
 	

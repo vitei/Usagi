@@ -70,8 +70,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
 	//const VkAllocationCallbacks* pAllocCB = pDevice->GetPlatform().GetVKAllocCB();
 
-	VkSamplerCreateInfo createInfo;
-
+	VkSamplerCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
     createInfo.pNext = NULL,
 	createInfo.magFilter = g_filterMap[decl.eFilterMag];

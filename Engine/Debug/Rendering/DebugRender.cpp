@@ -129,7 +129,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptorDummy);
 	DescriptorSetLayoutHndl textDescriptors = pDevice->GetDescriptorSetLayout(g_textDescriptorDecl);
 	DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
-	pipelineState.layout.descriptorSets[0] = textDescriptors;
+	pipelineState.layout.descriptorSets[0] = globalDesc;
 	pipelineState.layout.descriptorSets[1] = textDescriptors;
 	pipelineState.layout.uDescriptorSetCount = 2;
 

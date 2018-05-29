@@ -66,7 +66,7 @@ vec4 GetUV(in vec4 texCoord)
 
 #define USE_LINEAR_DEPTH 1
 
-#ifdef PLATFORM_PC
+#ifdef API_OGL
 
 #define UBO_GLOBAL_ID		1
 #define UBO_MATERIAL_ID 	2
@@ -75,7 +75,6 @@ vec4 GetUV(in vec4 texCoord)
 #define UBO_INSTANCE_1_ID 	5
 #define UBO_BONE_ID			6
 #define UBO_CUSTOM0_ID		7
-// The below are not valid on the CTR
 #define UBO_LIGHTING_ID 8
 #define UBO_SHADOW_ID 	9
 #define UBO_COLORS		10
@@ -89,9 +88,8 @@ vec4 GetUV(in vec4 texCoord)
 #define UBO_INSTANCE_1_ID 	2
 #define UBO_BONE_ID			3
 #define UBO_CUSTOM0_ID		3
-// The below are not valid on the CTR
 #define UBO_LIGHTING_ID 	4
-#define UBO_SHADOW_ID 		5	// Slower access from this point on on the switch
+#define UBO_SHADOW_ID 		5
 #define UBO_COLORS			6
 
 #endif
