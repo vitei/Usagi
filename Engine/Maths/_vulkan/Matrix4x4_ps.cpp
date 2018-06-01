@@ -6,7 +6,7 @@
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Memory/MemUtil.h"
 
-// 2x multiplier on 33 compared to a DirectX matrix (range 0 to 1) as OpenGL uses the range -1 to 1
+// Vulkan has inverted y co-ordinates compared to OpenGL and the depth range is in 0 to 1 rather than -1 to 1
 namespace usg
 {
 
@@ -20,14 +20,16 @@ namespace usg
 		_11 = fXScale;
 		_22 = fYScale;
 
-		_33 = (fZFar + fZNear) / (fZFar - fZNear);
+		_33 = (fZFar) / (fZFar - fZNear);
 		_34 = 1.0f;
-		_43 = -(2.0f*fZNear*fZFar) / (fZFar - fZNear);
+		_43 = -(fZNear*fZFar) / (fZFar - fZNear);
 		_44 = 0.0f;
 	}
 
 	void Matrix4x4::PerspectiveRH(float32 fFovY, float32 fAspect, float32 fZNear, float32 fZFar, bool bOrient)
 	{
+		// TODO: Confirm
+		ASSERT(false);
 		float32 fYScale = Math::cotanf(fFovY / 2.f);
 		float32 fXScale = fYScale / fAspect;
 
@@ -44,23 +46,25 @@ namespace usg
 	{
 		LoadIdentity();
 		_11 = 2.f / (fRight - fLeft);
-		_22 = 2.f / (fTop - fBottom);
-		_33 = 2.f / (fZFar - fZNear);
+		_22 = -(2.f / (fTop - fBottom));
+		_33 = 1.f / (fZFar - fZNear);
 		_41 = (fLeft + fRight) / (fLeft - fRight);
-		_42 = (fTop + fBottom) / (fBottom - fTop);
-		_43 = -((fZFar + fZNear) / (fZFar - fZNear));
+		_42 = -((fTop + fBottom) / (fBottom - fTop));
+		_43 = -fZNear / (fZFar - fZNear);
 		_44 = 1.f;
 	}
 
 	void Matrix4x4::OrthographicRH(float32 fLeft, float32 fRight, float32 fBottom, float32 fTop, float32 fZNear, float32 fZFar, bool bOrient)
 	{
+		// TODO: Confirm
+		ASSERT(false);
 		LoadIdentity();
 		_11 = 2.f / (fRight - fLeft);
 		_22 = 2.f / (fTop - fBottom);
-		_33 = 1.f / (fZNear - fZFar);
-		_41 = (fLeft + fRight) / (fLeft - fRight);
+		_33 = 1.f / (fZFar - fZNear);
+		_41 = -(fLeft + fRight) / (fLeft - fRight);
 		_42 = (fTop + fBottom) / (fBottom - fTop);
-		_43 = -((fZFar + fZNear) / (fZFar - fZNear));
+		_43 = -fZNear / (fZFar - fZNear);
 		_44 = 1.f;
 	}
 
