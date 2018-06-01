@@ -55,7 +55,7 @@ namespace usg {
 			{
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
 
-				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;	// Dynamic so that we can update every frame
+				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;	// Dynamic so that we can update every frame
 				writes[i].pBufferInfo = &pData[i].pConstBuffer->GetPlatform().GetDescriptorInfo();
 				m_dynamicBuffers.push_back(&pData[i].pConstBuffer->GetPlatform());
 				break;
@@ -87,14 +87,14 @@ namespace usg {
 
 	void DescriptorSet_ps::Bind(VkCommandBuffer buffer, VkPipelineLayout layout, uint32 uSlot) const
 	{
-		static uint32 uDynamicOffsets[32] = {};
+	/*	static uint32 uDynamicOffsets[32] = {};
 		ASSERT(m_dynamicBuffers.size() < 32);
 
 		for (uint32 i = 0; i < m_dynamicBuffers.size(); i++)
 		{
 			uDynamicOffsets[i] = m_dynamicBuffers[i]->GetActiveBufferOffset();
-		}
+		}*/
 
-		vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, uSlot, 1, &m_descSet.descSet, (uint32)m_dynamicBuffers.size(), uDynamicOffsets);
+		vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, uSlot, 1, &m_descSet.descSet, 0, nullptr);// (uint32)m_dynamicBuffers.size(), uDynamicOffsets);
 	}
 }

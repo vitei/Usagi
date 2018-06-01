@@ -40,7 +40,7 @@ ConstantSet_ps::ConstantSet_ps()
 {
 	m_bDataValid	= false;
 	m_pOwner		= NULL;
-	m_uActiveBuffer	= 0;
+//	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
 }
 
@@ -84,6 +84,9 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
 	eResult = vkAllocateMemory(devicePS.GetVKDevice(), &memAlloc, devicePS.GetAllocCallbacks(), &m_memory);
 	ASSERT(eResult == VK_SUCCESS);
 
+
+	eResult = vkMapMemory(devicePS.GetVKDevice(), m_memory, 0, VK_WHOLE_SIZE, 0, &m_pBoundGPUData);
+	ASSERT(eResult == VK_SUCCESS);
 
 	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memory, 0);
 	ASSERT(eResult == VK_SUCCESS);
@@ -157,8 +160,8 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 {	
 	// FIXME: Assert this only called once per frame
 	// we'll probably want to use standard constant setting for effects
-	if(!bDoubleUpdate)
-		m_uActiveBuffer = (m_uActiveBuffer+1)%GFX_NUM_DYN_BUFF;
+	//if(!bDoubleUpdate)
+		//m_uActiveBuffer = (m_uActiveBuffer+1)%GFX_NUM_DYN_BUFF;
 
 	uint8* pCPUData = (uint8*)m_pOwner->GetCPUData();
 	uint32 uVarCount = m_pOwner->GetVarCount();
@@ -167,9 +170,7 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 	const ShaderConstantDecl* pDecl = m_pOwner->GetDeclaration();
 	const VariableData* pVarData = m_pVarData;
 
-	void* pGPUData;
-	VkResult err = vkMapMemory(pDevice->GetPlatform().GetVKDevice(), m_memory, GetActiveBufferOffset(), m_uGPUSize, 0, &pGPUData);
-	ASSERT(err == VK_SUCCESS);
+	void* pGPUData = m_pBoundGPUData;// +(m_uGPUSize * m_uActiveBuffer);
 
 	for(uint32 i=0; i<uVarCount; i++)
 	{
@@ -207,7 +208,6 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		pVarData++;
 	}
 
-	vkUnmapMemory(pDevice->GetPlatform().GetVKDevice(), m_memory);
 
 	m_bDataValid = true;
 }

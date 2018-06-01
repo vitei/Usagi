@@ -28,7 +28,7 @@ public:
 	void UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate);
 
 	// PS specific functions
-	uint32 GetActiveBufferOffset() const { return m_uOffsets[m_uActiveBuffer]; }
+	//uint32 GetActiveBufferOffset() const { return m_uOffsets[m_uActiveBuffer]; }
 	const VkDescriptorBufferInfo& GetDescriptorInfo() const { return m_descriptor; }
 private:
 	void InitOffsetsAndGPUData(const ShaderConstantDecl* pDecl);
@@ -57,7 +57,7 @@ private:
 
 	const ConstantSet*			m_pOwner;
 
-	uint32						m_uActiveBuffer;
+	//uint32						m_uActiveBuffer;
 
 	uint32						m_uGPUSize;
 	bool						m_bDataValid;
@@ -66,6 +66,7 @@ private:
 	VkDeviceMemory				m_memory;
 
 	VariableData*				m_pVarData;
+	void*						m_pBoundGPUData;
 	uint32						m_uOffsets[GFX_NUM_DYN_BUFF];
 
 	VkDescriptorBufferInfo		m_descriptor;
