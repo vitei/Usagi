@@ -314,8 +314,8 @@ void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 
 	
 	VkViewport viewport;
-	viewport.height = (float)m_uWidth;
-	viewport.width = (float)m_uHeight;
+	viewport.height = (float)m_uHeight;
+	viewport.width = (float)m_uWidth;
 	viewport.minDepth = (float)0.0f;
 	viewport.maxDepth = (float)1.0f;
 	viewport.x = 0;
