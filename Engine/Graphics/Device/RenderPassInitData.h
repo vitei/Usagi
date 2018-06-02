@@ -32,6 +32,7 @@ namespace usg {
 	private:
 
 		RenderPassDecl					m_decl;
+		void*							m_pData;
 
 		// Only set if owns the data
 		RenderPassDecl::AttachmentReference*m_pReferences;

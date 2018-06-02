@@ -70,6 +70,19 @@ public:
 		AF_MEMORY_REUSE = (1<<0),	// Sharing memory with another target		
 	};
 
+	enum StageFlags
+	{
+		SF_BOTTOM_OF_PIPE = (1 << 0),
+		SF_COLOR_ATTACHMENT_OUTPUT = (1 << 1)
+	};
+
+	enum AccessFlags
+	{
+		AC_MEMORY_READ = (1 << 0),
+		AC_COLOR_ATTACHMENT_READ = (1 << 1),
+		AC_COLOR_ATTACHMENT_WRITE = (1 << 2),
+	};
+
 	enum AttachmentLoadOp
 	{
 		LOAD_OP_LOAD_MEMORY,
@@ -94,6 +107,11 @@ public:
 		LAYOUT_UNDEFINED = 0,
 		LAYOUT_COLOR_ATTACHMENT,
 		LAYOUT_DEPTH_STENCIL_ATTACHMENT
+	};
+
+	enum Defines
+	{
+		SUBPASS_EXTERNAL = USG_INVALID_ID
 	};
 	
 	struct Attachment
@@ -134,11 +152,24 @@ public:
 		uint32  uPreserveCount;
 	};
 
-	// FIXME: Should probably have seperate pointers
-	Attachment* pAttachments;
-	SubPass* 	 pSubPasses;
-	uint32		 uAttachments;
-	uint32		 uSubPasses;
+	struct Dependency
+	{
+		Dependency();
+
+		uint32	uSrcSubPass;
+		uint32	uDstSubPass;
+		uint32  uSrcStageFlags;
+		uint32  uDstStageFlags;
+		uint32  uSrcAccessFlags;
+		uint32  uDstAccessFlags;
+	};
+
+	Attachment*		pAttachments;
+	SubPass* 		pSubPasses;
+	Dependency*		pDependencies;
+	uint32			uAttachments;
+	uint32			uSubPasses;
+	uint32			uDependencies;
 
 	bool operator==(const RenderPassDecl& rhs) const;
 };

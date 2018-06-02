@@ -176,10 +176,13 @@ RenderPassDecl::Attachment::Attachment()
 
 RenderPassDecl::RenderPassDecl()
 {
-	pAttachments = NULL;
+	pAttachments = nullptr;
 	uAttachments = 0;
-	pSubPasses = NULL;
+	pSubPasses = nullptr;
 	uSubPasses = 0;
+	pDependencies = nullptr;
+	uDependencies = 0;
+	uDependencies = 0;
 }
 
 RenderPassDecl::~RenderPassDecl()
@@ -201,11 +204,23 @@ RenderPassDecl::SubPass::SubPass()
 }
 
 
+RenderPassDecl::Dependency::Dependency()
+{
+	uSrcSubPass = 0;
+	uDstSubPass = 0;
+	uSrcStageFlags = 0;
+	uDstStageFlags = 0;
+	uSrcAccessFlags = 0;
+	uDstAccessFlags = 0;
+}
+
+
 bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 {
 	// FIXME: Optimise this with a CRC - this will serve us for now
 	if (rhs.uAttachments != uAttachments
-		|| rhs.uSubPasses != uSubPasses)
+		|| rhs.uSubPasses != uSubPasses
+		|| rhs.uDependencies != uDependencies)
 	{
 		return false;
 	}
@@ -213,6 +228,14 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 	for (uint32 i = 0; i < uAttachments; i++)
 	{
 		if (memcmp(&rhs.pAttachments[i], &pAttachments[i], sizeof(RenderPassDecl::Attachment)) != 0)
+		{
+			return false;
+		}
+	}
+
+	for (uint32 i = 0; i < uDependencies; i++)
+	{
+		if (memcmp(&rhs.pDependencies[i], &pDependencies[i], sizeof(RenderPassDecl::Dependency)) != 0)
 		{
 			return false;
 		}
