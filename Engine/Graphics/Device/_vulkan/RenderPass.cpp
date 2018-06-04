@@ -119,10 +119,15 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 
 	uint32 uPreserveOffset = 0;
 	uint32 uReferenceOffset = 0;
+	m_passClearData.resize(decl.uSubPasses);
 	for (uint32 i = 0; i < decl.uSubPasses; i++)
 	{
 		const RenderPassDecl::SubPass& in = decl.pSubPasses[i];
+		m_passClearData[i].bClearDepth = false;
+		m_passClearData[i].uClearCount = 0;
 
+
+		// Colour
 		subpassDescriptions[i].pColorAttachments = in.uColorCount ? &references.data()[uReferenceOffset] : nullptr;
 		subpassDescriptions[i].colorAttachmentCount = in.uColorCount;
 		for (uint32 uAttach = 0; uAttach < in.uColorCount; uAttach++)
@@ -132,6 +137,16 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		}
 		uReferenceOffset += in.uColorCount;
 
+		// Depth
+		if (in.pDepthAttachment)
+		{
+			references[uReferenceOffset].attachment = in.pDepthAttachment->uIndex;
+			references[uReferenceOffset].layout = g_layoutMap[in.pDepthAttachment->eLayout];
+			subpassDescriptions[i].pDepthStencilAttachment = &references.data()[uReferenceOffset];
+			uReferenceOffset++;
+		}
+
+		// Input
 		subpassDescriptions[i].pInputAttachments = in.uInputCount ? &references.data()[uReferenceOffset] : nullptr;
 		subpassDescriptions[i].inputAttachmentCount = in.uInputCount;
 		for (uint32 uAttach = 0; uAttach < in.uInputCount; uAttach++)
@@ -141,6 +156,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		}
 		uReferenceOffset += in.uInputCount;
 
+		// Resolve
 		subpassDescriptions[i].pResolveAttachments = in.pResolveAttachments ? &references.data()[uReferenceOffset] : nullptr;
 		if (in.pResolveAttachments)
 		{
@@ -152,6 +168,8 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 			uReferenceOffset += in.uColorCount;
 		}
 
+
+		// Preserve
 		subpassDescriptions[i].pPreserveAttachments = in.uPreserveCount ? &preserve.data()[uPreserveOffset] : nullptr;
 		subpassDescriptions[i].preserveAttachmentCount = in.uPreserveCount;
 		for (uint32 uAttach = 0; uAttach < in.uPreserveCount; uAttach++)

@@ -43,7 +43,7 @@ public:
 	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
-	void ClearRenderTarget(uint32 uFlags = RenderTarget::CLEAR_FLAG_COLOR);
+	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);
 
 	
 	PipelineStateHndl	GetActivePipeline() { return m_activeStateGroup; }

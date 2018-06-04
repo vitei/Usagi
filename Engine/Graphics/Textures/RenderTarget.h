@@ -17,20 +17,20 @@ public:
 	RenderTarget();
 	~RenderTarget();
 
-	enum ClearFlags
+	enum RTFlags
 	{
-		CLEAR_FLAG_COLOR_0	= (1<<0),
-		CLEAR_FLAG_COLOR_1	= (1<<1),
-		CLEAR_FLAG_COLOR_2	= (1<<2),
-		CLEAR_FLAG_COLOR_3	= (1<<3),
-		CLEAR_FLAG_COLOR_4	= (1<<4),
-		CLEAR_FLAG_COLOR_5	= (1<<5),
-		CLEAR_FLAG_COLOR_6	= (1<<6),
-		CLEAR_FLAG_COLOR_7	= (1<<7),
-		CLEAR_FLAG_COLOR	= (CLEAR_FLAG_COLOR_0|CLEAR_FLAG_COLOR_1|CLEAR_FLAG_COLOR_2|CLEAR_FLAG_COLOR_4),
-		CLEAR_FLAG_DEPTH	= (1<<9),
-		CLEAR_FLAG_STENCIL	= (1<<10),
-		CLEAR_FLAG_DS		= (CLEAR_FLAG_DEPTH|CLEAR_FLAG_STENCIL)
+		RT_FLAG_COLOR_0	= (1<<0),
+		RT_FLAG_COLOR_1	= (1<<1),
+		RT_FLAG_COLOR_2	= (1<<2),
+		RT_FLAG_COLOR_3	= (1<<3),
+		RT_FLAG_COLOR_4	= (1<<4),
+		RT_FLAG_COLOR_5	= (1<<5),
+		RT_FLAG_COLOR_6	= (1<<6),
+		RT_FLAG_COLOR_7	= (1<<7),
+		RT_FLAG_COLOR	= (RT_FLAG_COLOR_0|RT_FLAG_COLOR_1|RT_FLAG_COLOR_2|RT_FLAG_COLOR_4),
+		RT_FLAG_DEPTH	= (1<<9),
+		RT_FLAG_STENCIL	= (1<<10),
+		RT_FLAG_DS		= (RT_FLAG_DEPTH|RT_FLAG_STENCIL)
 	};
 
 	// Fixme, why are we passing in the dimensions again?
@@ -44,7 +44,7 @@ public:
 	uint32 GetHeight() const { return m_platform.GetHeight(); }
 	const TextureHndl& GetColorTexture(uint32 uTex = 0) const { return m_pColorBuffer[uTex]->GetTexture(); }
 	TextureHndl GetDepthTexture() const;
-	void SetClearColor(const Color &col, uint32 uTarget = 0) { m_clearColor[uTarget] = col; m_platform.SetClearColor(col); }
+	void SetClearColor(const Color &col, uint32 uTarget = 0) { m_clearColor[uTarget] = col; m_platform.SetClearColor(col, uTarget); }
 	const Color& GetClearColor(uint32 uTarget=0) { return m_clearColor[uTarget]; }
 	bool SaveToFile(const char* szFileName) { return m_platform.SaveToFile(szFileName);  }
 
@@ -60,14 +60,15 @@ public:
 	bool ConfirmCompataible(ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth);
 	uint32 GetTargetCount() const { return m_uTargetCount; }
 	uint32 GetTargetMask() const { return m_uTargetMask; }
+	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags);
 
 private:
 	RenderTarget_ps	m_platform;
 
-	ColorBuffer*			m_pColorBuffer[MAX_RENDER_TARGETS];
+	ColorBuffer*			m_pColorBuffer[MAX_COLOR_TARGETS];
 	DepthStencilBuffer*		m_pDepth;
 
-	Color					m_clearColor[MAX_RENDER_TARGETS];
+	Color					m_clearColor[MAX_COLOR_TARGETS];
 	float					m_clearDepth;
 	uint8					m_clearStencil;
 	uint32					m_uTargetCount;

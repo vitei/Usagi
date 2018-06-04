@@ -106,7 +106,7 @@ void SetupAlphaStateDecl( AlphaStateDecl& decl, const exchange::Rasterizer& rast
 		decl.blendEqAlpha  = static_cast<BlendEquation>( rasterizer.alphaState.alphaOp );
 	}
 
-	for( int i = 0; i < MAX_RENDER_TARGETS; ++i )
+	for( int i = 0; i < MAX_COLOR_TARGETS; ++i )
 	{
 		decl.uColorMask[i] = rasterizer.colorMask;
 	}
@@ -613,7 +613,7 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, const vector<Ren
 
 		alphaDecl.bBlendEnable = false;
 		uint32 uRenderMask = alphaDecl.uColorMask[0];
-		for (uint32 i = 0; i < MAX_RENDER_TARGETS; i++)
+		for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
 		{
 			alphaDecl.uColorMask[i] = usg::RT_MASK_NONE;
 		}

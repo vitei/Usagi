@@ -135,7 +135,7 @@ namespace usg
 		pContext->BeginGPUTag("SpotShadow");
 
 		pContext->SetRenderTarget(&m_depthTarget);
-		pContext->ClearRenderTarget(RenderTarget::CLEAR_FLAG_DEPTH);
+		pContext->ClearRenderTarget(RenderTarget::RT_FLAG_DEPTH);
 		m_pSceneContext->DrawScene(pContext);
 		pContext->SetRenderTarget(NULL);
 

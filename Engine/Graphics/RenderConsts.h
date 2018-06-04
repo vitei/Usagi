@@ -25,7 +25,7 @@ const uint8	STENCIL_MASK_GEOMETRY	= 0x80;
 const uint8	STENCIL_MASK_EFFECT		= 0x7F;
 
 
-static const int MAX_RENDER_TARGETS = 8;
+static const int MAX_COLOR_TARGETS = 8;
 static const int MAX_TEXTURES		= 8;
 static const int MAX_VERTEX_BUFFERS = 4;
 

@@ -139,7 +139,7 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 	pContext->DisableScissor();
 	if(uTransferFlags & TRANSFER_FLAGS_CLEAR)
 	{
-		pContext->ClearRenderTarget(RenderTarget::CLEAR_FLAG_DS|RenderTarget::CLEAR_FLAG_COLOR_0|RenderTarget::CLEAR_FLAG_COLOR_1 );
+		pContext->ClearRenderTarget(RenderTarget::RT_FLAG_DS|RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1 );
 	}
 	
 	return pTarget;

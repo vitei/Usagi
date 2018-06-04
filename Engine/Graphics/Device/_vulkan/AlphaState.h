@@ -21,7 +21,7 @@ public:
 
 private:
 	VkPipelineColorBlendStateCreateInfo m_createInfo;
-	VkPipelineColorBlendAttachmentState m_attState[MAX_RENDER_TARGETS];
+	VkPipelineColorBlendAttachmentState m_attState[MAX_COLOR_TARGETS];
 };
 
 }

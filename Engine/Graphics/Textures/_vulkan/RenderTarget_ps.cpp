@@ -27,7 +27,10 @@ RenderTarget_ps::~RenderTarget_ps()
 
 void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
-	// Nothing much to do, all lives in the MRT
+	MemClear(&m_colorClearValues, sizeof(m_colorClearValues));
+
+	m_dsClearValue.depthStencil.depth = 1.0f;
+	m_dsClearValue.depthStencil.stencil = 0;
 }
 
 void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
@@ -36,9 +39,12 @@ void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
 }
 
 
-void RenderTarget_ps::SetClearColor(const Color& col)
+void RenderTarget_ps::SetClearColor(const Color& col, uint32 uTarget)
 {
-    
+	m_colorClearValues[uTarget].color.float32[0] = col.r();
+	m_colorClearValues[uTarget].color.float32[1] = col.g();
+	m_colorClearValues[uTarget].color.float32[2] = col.b();
+	m_colorClearValues[uTarget].color.float32[3] = col.a();
 }
 
 

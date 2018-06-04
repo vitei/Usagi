@@ -435,7 +435,7 @@ void ShadowCascade::CreateShadowTex(GFXContext* pContext)
 
 	for (uint32 i = 0; i < CASCADE_COUNT; ++i)
     {
-        pContext->SetRenderTargetLayer(&m_cascadeTarget, i, RenderTarget::CLEAR_FLAG_DEPTH);
+        pContext->SetRenderTargetLayer(&m_cascadeTarget, i, RenderTarget::RT_FLAG_DEPTH);
 		DrawSceneFromLight(pContext, m_pSceneContext[i]);
         pContext->SetRenderTarget(NULL);
 	}

@@ -52,7 +52,7 @@ static VkColorComponentFlags CalculateColorMask(uint8 uMask)
 void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
-	memset(m_attState, 0, sizeof(VkPipelineColorBlendAttachmentState)*MAX_RENDER_TARGETS);
+	memset(m_attState, 0, sizeof(VkPipelineColorBlendAttachmentState)*MAX_COLOR_TARGETS);
 
 	// TODO: Re-implement per target blending
 	m_attState[0].blendEnable = decl.bBlendEnable;
@@ -64,7 +64,7 @@ void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId
 	m_attState[0].srcAlphaBlendFactor = g_blendFactorMap[decl.srcBlendAlpha];
 	m_attState[0].dstAlphaBlendFactor = g_blendFactorMap[decl.dstBlendAlpha];
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		m_attState[i].colorWriteMask	= CalculateColorMask(decl.uColorMask[i]);
 	}

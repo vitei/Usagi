@@ -184,7 +184,7 @@ void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLe
 
 void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 {
-	static VkClearAttachment attachments[MAX_RENDER_TARGETS];
+	static VkClearAttachment attachments[MAX_COLOR_TARGETS];
 	uint32 uClearCount = 0;
 
 	uint32 uGlFlags = 0;

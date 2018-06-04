@@ -17,7 +17,7 @@ namespace usg {
 AlphaStateDecl::AlphaStateDecl()
 {
 	bBlendEnable	= false;
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_ALL;
 	}
@@ -46,7 +46,7 @@ void AlphaStateDecl::InitFromDefinition(const AlphaStateGroup &def)
 					def.alphaOp == BLEND_EQUATION_ADD &&
 					def.rgbOp == BLEND_EQUATION_ADD );
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_ALL;
 	}
@@ -66,7 +66,7 @@ void AlphaStateDecl::SetColor0Only()
 {
 	uColorMask[0]	= RT_MASK_ALL;
 
-	for(int i=1; i<MAX_RENDER_TARGETS; i++)
+	for(int i=1; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_NONE;
 	}
@@ -74,7 +74,7 @@ void AlphaStateDecl::SetColor0Only()
 
 void AlphaStateDecl::SetDepthOnly()
 {
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_NONE;
 	}
@@ -98,7 +98,7 @@ bool AlphaStateDecl::operator==(const AlphaStateDecl& rhs) const
 	if(rhs.bBlendEnable != bBlendEnable)
 		return false;
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		if(uColorMask[i] != rhs.uColorMask[i])
 			return false;

@@ -92,7 +92,7 @@ namespace usg
 		pContext->BeginGPUTag("PointShadow");
 
 		pContext->SetRenderTarget(&m_cubeTarget);
-		pContext->ClearRenderTarget(RenderTarget::CLEAR_FLAG_DEPTH);
+		pContext->ClearRenderTarget(RenderTarget::RT_FLAG_DEPTH);
 		m_pShadowContext->DrawScene(pContext);
 		pContext->SetRenderTarget(NULL);
 

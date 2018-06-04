@@ -48,8 +48,8 @@ public:
 	float GetFinalTargetAspect() { return  (float)m_colorBuffer[BUFFER_LDR_0].GetWidth() / (float)m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
 
 	// For setting up pipelines, will need the render pass in future
-	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice) const;
-	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice) const;
+	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
+	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
 	void SetupDownscale4x4(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight) const;
 	void SetupGaussBlur(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	float GaussianDistribution(float x, float y, float rho) const;

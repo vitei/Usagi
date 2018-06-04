@@ -29,7 +29,7 @@ public:
 	void InitFromDefinition(const AlphaStateGroup &def);
 
 	bool			bBlendEnable;
-	uint32			uColorMask[MAX_RENDER_TARGETS];
+	uint32			uColorMask[MAX_COLOR_TARGETS];
 	BlendFunc		srcBlend;
 	BlendFunc		dstBlend;
 	BlendEquation	blendEq;

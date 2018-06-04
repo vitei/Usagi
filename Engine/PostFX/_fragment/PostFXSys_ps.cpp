@@ -427,7 +427,7 @@ void PostFXSys_ps::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& tex)
 
 
 
-PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice) const
+PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
 {
 	ResourceMgr* pResMgr = ResourceMgr::Inst();
 
@@ -435,9 +435,7 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice) cons
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 
-	RenderPassDecl renderPass;
-	// FIXME: Init the render pass
-	pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
+	pipelineDecl.renderPass = renderPass;
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = multiDesc;
@@ -447,15 +445,13 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice) cons
 	return pDevice->GetPipelineState(pipelineDecl);
 }
 
-PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice) const
+PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
 {
 	ResourceMgr* pResMgr = ResourceMgr::Inst();
 
 	PipelineStateDecl pipelineDecl;
 
-	RenderPassDecl renderPass;
-	// FIXME: Init the render pass
-	pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
+	pipelineDecl.renderPass = renderPass;
 
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
