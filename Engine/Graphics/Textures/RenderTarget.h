@@ -60,7 +60,9 @@ public:
 	bool ConfirmCompataible(ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth);
 	uint32 GetTargetCount() const { return m_uTargetCount; }
 	uint32 GetTargetMask() const { return m_uTargetMask; }
-	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags);
+
+	// Helper function for creating the standard single pass render passes
+	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const vector<RenderPassDecl::Dependency>& dependencies);
 
 private:
 	RenderTarget_ps	m_platform;

@@ -92,7 +92,7 @@ namespace usg {
 		return RenderPassDecl::LOAD_OP_DONT_CARE;
 	}
 
-	RenderPassHndl RenderTarget::CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags)
+	RenderPassHndl RenderTarget::CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const vector<RenderPassDecl::Dependency>& dependencies)
 	{
 		// Shouldn't be trying to load data that you are clearing
 		ASSERT((uLoadFlags & uClearFlags) == 0);
@@ -138,6 +138,9 @@ namespace usg {
 		decl.uAttachments = (uint32)attachments.size();
 		decl.uSubPasses = 1;
 		decl.pSubPasses = &subPass;
+		decl.pDependencies = dependencies.data();
+		decl.uDependencies = (uint32)dependencies.size();
+		
 		return pDevice->GetRenderPass(decl);
 	}
 

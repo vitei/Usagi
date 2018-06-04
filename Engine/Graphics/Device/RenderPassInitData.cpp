@@ -73,22 +73,25 @@ namespace usg {
 		ASSERT(copyData.m_bOwnsDeclaration == false);
 		if (m_decl.uAttachments)
 		{
-			m_decl.pAttachments = (usg::RenderPassDecl::Attachment*)pData;
-			MemCpy(m_decl.pAttachments, copyData.m_decl.pAttachments, uAttachSize);
+			RenderPassDecl::Attachment* pCpyData = (usg::RenderPassDecl::Attachment*)pData;
+			m_decl.pAttachments = pCpyData;
+			MemCpy(pCpyData, copyData.m_decl.pAttachments, uAttachSize);
 			pData += uAttachSize;
 		}
 
+		RenderPassDecl::SubPass* pSubPasses = (usg::RenderPassDecl::SubPass*)pData;
 		if (m_decl.uSubPasses)
 		{
-			m_decl.pSubPasses = (usg::RenderPassDecl::SubPass*)pData;
-			MemCpy(m_decl.pSubPasses, copyData.m_decl.pSubPasses, sizeof(RenderPassDecl::SubPass) * m_decl.uSubPasses);
+			m_decl.pSubPasses = pSubPasses;
+			MemCpy(pSubPasses, copyData.m_decl.pSubPasses, sizeof(RenderPassDecl::SubPass) * m_decl.uSubPasses);
 			pData += uSubPassSize;
 		}
 
 		if (m_decl.uDependencies)
 		{
-			m_decl.pDependencies = (usg::RenderPassDecl::Dependency*)pData;
-			MemCpy(m_decl.pDependencies, copyData.m_decl.pDependencies, sizeof(RenderPassDecl::Dependency) * m_decl.uDependencies);
+			RenderPassDecl::Dependency* pCpyData = (usg::RenderPassDecl::Dependency*)pData;
+			m_decl.pDependencies = pCpyData;
+			MemCpy(pCpyData, copyData.m_decl.pDependencies, sizeof(RenderPassDecl::Dependency) * m_decl.uDependencies);
 			pData += uDependencySize;
 		}
 
@@ -114,35 +117,35 @@ namespace usg {
 		{
 			if (copyData.m_decl.pSubPasses[i].uColorCount)
 			{
-				m_decl.pSubPasses[i].pColorAttachments = &m_pReferences[uReferenceId];
-				MemCpy(m_decl.pSubPasses[i].pColorAttachments, copyData.m_decl.pSubPasses[i].pColorAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uColorCount);
+				pSubPasses[i].pColorAttachments = &m_pReferences[uReferenceId];
+				MemCpy((void*)pSubPasses[i].pColorAttachments, copyData.m_decl.pSubPasses[i].pColorAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uColorCount);
 				uReferenceId += m_decl.pSubPasses[i].uColorCount;
 			}
 
 			if (copyData.m_decl.pSubPasses[i].uInputCount)
 			{
-				m_decl.pSubPasses[i].pInputAttachments = &m_pReferences[uReferenceId];
-				MemCpy(m_decl.pSubPasses[i].pInputAttachments, copyData.m_decl.pSubPasses[i].pInputAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uInputCount);
+				pSubPasses[i].pInputAttachments = &m_pReferences[uReferenceId];
+				MemCpy((void*)pSubPasses[i].pInputAttachments, copyData.m_decl.pSubPasses[i].pInputAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uInputCount);
 				uReferenceId += m_decl.pSubPasses[i].uInputCount;
 			}
 
 			if (copyData.m_decl.pSubPasses[i].pResolveAttachments)
 			{
-				m_decl.pSubPasses[i].pResolveAttachments = &m_pReferences[uReferenceId];
-				MemCpy(m_decl.pSubPasses[i].pResolveAttachments, copyData.m_decl.pSubPasses[i].pResolveAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uColorCount);
+				pSubPasses[i].pResolveAttachments = &m_pReferences[uReferenceId];
+				MemCpy((void*)m_decl.pSubPasses[i].pResolveAttachments, copyData.m_decl.pSubPasses[i].pResolveAttachments, sizeof(RenderPassDecl::AttachmentReference) * m_decl.pSubPasses[i].uColorCount);
 				uReferenceId += m_decl.pSubPasses[i].uColorCount;
 			}
 
 			if (copyData.m_decl.pSubPasses[i].pDepthAttachment != nullptr)
 			{
-				m_decl.pSubPasses[i].pDepthAttachment = &m_pReferences[uReferenceId++];
-				MemCpy(m_decl.pSubPasses[i].pDepthAttachment, copyData.m_decl.pSubPasses[i].pDepthAttachment, sizeof(RenderPassDecl::AttachmentReference));
+				pSubPasses[i].pDepthAttachment = &m_pReferences[uReferenceId++];
+				MemCpy((void*)pSubPasses[i].pDepthAttachment, copyData.m_decl.pSubPasses[i].pDepthAttachment, sizeof(RenderPassDecl::AttachmentReference));
 			}
 
 			if (copyData.m_decl.pSubPasses[i].uPreserveCount)
 			{
-				m_decl.pSubPasses[i].puPreserveIndices = &m_pPreserveData[uPreserveId];
-				MemCpy(m_decl.pSubPasses[i].puPreserveIndices, copyData.m_decl.pSubPasses[i].puPreserveIndices, sizeof(uint32) * m_decl.pSubPasses[i].uPreserveCount);
+				pSubPasses[i].puPreserveIndices = &m_pPreserveData[uPreserveId];
+				MemCpy((void*)pSubPasses[i].puPreserveIndices, copyData.m_decl.pSubPasses[i].puPreserveIndices, sizeof(uint32) * m_decl.pSubPasses[i].uPreserveCount);
 				uPreserveId += m_decl.pSubPasses[i].uPreserveCount;
 			}
 		}

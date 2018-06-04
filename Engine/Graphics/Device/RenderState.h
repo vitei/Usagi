@@ -142,20 +142,25 @@ public:
 	{
 		SubPass();
 
-		AttachmentReference*	pInputAttachments;	
-		AttachmentReference*	pColorAttachments;
-		AttachmentReference*	pDepthAttachment;
-		AttachmentReference*	pResolveAttachments;
-		uint32*					puPreserveIndices;
-		uint32  uInputCount;
-		uint32  uColorCount;
-		uint32  uPreserveCount;
+		// Attachements which can be read during this sub pass
+		const AttachmentReference*	pInputAttachments;	
+		uint32						uInputCount;
+		// Bound render target information
+		const AttachmentReference*	pColorAttachments;
+		uint32						uColorCount;
+		const AttachmentReference*	pDepthAttachment;
+		// Multi-sample resolves
+		const AttachmentReference*	pResolveAttachments;
+		// Attachments not used by this subpass but which must not be altered
+		uint32*						puPreserveIndices;
+		uint32						uPreserveCount;
 	};
 
 	struct Dependency
 	{
 		Dependency();
 
+		// Set src or dst to SUBPASS_EXTERNAL if they are being referenced externally
 		uint32	uSrcSubPass;
 		uint32	uDstSubPass;
 		uint32  uSrcStageFlags;
@@ -164,12 +169,15 @@ public:
 		uint32  uDstAccessFlags;
 	};
 
-	Attachment*		pAttachments;
-	SubPass* 		pSubPasses;
-	Dependency*		pDependencies;
-	uint32			uAttachments;
-	uint32			uSubPasses;
-	uint32			uDependencies;
+	// All the attachments used by this render pass
+	const Attachment*	pAttachments;
+	uint32				uAttachments;
+	// List of passes
+	const SubPass* 		pSubPasses;
+	uint32				uSubPasses;
+	// Dependencies both internal and external
+	const Dependency*	pDependencies;
+	uint32				uDependencies;
 
 	bool operator==(const RenderPassDecl& rhs) const;
 };

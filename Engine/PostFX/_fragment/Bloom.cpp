@@ -108,8 +108,8 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomFinal");
 	m_finalPassEffect = pDevice->GetPipelineState(pipelineDecl);
 
-	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice);
-	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice);
+	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, pipelineDecl.renderPass);
+	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, pipelineDecl.renderPass);
 
 	m_constants[PASS_HOR_BLOOM].Init(pDevice, g_bloomConstantDef);
 	m_constants[PASS_VER_BLOOM].Init(pDevice, g_bloomConstantDef);
