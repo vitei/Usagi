@@ -116,47 +116,6 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	
 	m_uLDRCount=2;
 
-	RenderPassDecl decl;
-	vector<RenderPassDecl::Attachment> attachments;
-	vector<RenderPassDecl::SubPass> subPasses;
-	vector<RenderPassDecl::AttachmentReference> attachReferences;
-	attachments.resize(2);
-	subPasses.resize(1);
-	attachReferences.resize(2);
-
-	attachments[0].eAttachType = RenderPassDecl::ATTACH_COLOR;
-	attachments[0].format.eColor = m_screenRT[TARGET_LDR_0].GetColorBuffer(0)->GetFormat();
-	attachments[0].eSamples = m_screenRT[TARGET_LDR_0].GetColorBuffer(0)->GetSampleCount();
-	attachments[0].uAttachFlags = 0;
-	attachments[0].eInitialLayout = RenderPassDecl::LAYOUT_UNDEFINED;
-	attachments[0].eFinalLayout = RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
-	attachments[0].eLoadOp = RenderPassDecl::LOAD_OP_DONT_CARE;
-	attachments[0].eStoreOp = RenderPassDecl::STORE_OP_STORE;
-
-	attachments[1].eAttachType = RenderPassDecl::ATTACH_DEPTH;
-	attachments[1].format.eDepth = m_screenRT[TARGET_LDR_0].GetDepthStencilBuffer()->GetFormat();
-	attachments[1].eSamples = m_screenRT[TARGET_LDR_0].GetDepthStencilBuffer()->GetSampleCount();
-	attachments[1].uAttachFlags = 0;
-	attachments[1].eInitialLayout = RenderPassDecl::LAYOUT_UNDEFINED;
-	attachments[1].eFinalLayout = RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT;
-	attachments[1].eLoadOp = RenderPassDecl::LOAD_OP_DONT_CARE;
-	attachments[1].eStoreOp = RenderPassDecl::STORE_OP_DONT_CARE;
-
-	subPasses[0].pColorAttachments = &attachReferences[0];
-	subPasses[0].pDepthAttachment = &attachReferences[1];
-	subPasses[0].uColorCount = 1;
-	subPasses[0].uPreserveCount = 0;
-	subPasses[0].pInputAttachments = nullptr;
-	subPasses[0].pResolveAttachments = nullptr;
-	subPasses[0].puPreserveIndices = nullptr;
-
-	decl.pAttachments = attachments.data();
-	decl.uAttachments = (uint32)attachments.size();
-	decl.pSubPasses = subPasses.data();
-	decl.uSubPasses = (uint32)subPasses.size();
-
-	m_renderPass = pDevice->GetRenderPass(decl);
-
 	Color clearCol(1.0f, 0.0f, 0.0f, 0.0f);
 	m_screenRT[TARGET_HDR_LIN_DEPTH].SetClearColor(clearCol, 1);
 	m_screenRT[TARGET_GBUFFER].SetClearColor(clearCol, 1);
@@ -577,6 +536,29 @@ void PostFXSys_ps::SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uin
 
 	cb.Unlock();
 	cb.UpdateData(pDevice);
+}
+
+
+const RenderPassHndl& PostFXSys_ps::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const
+{
+	if (eLayer < RenderNode::LAYER_DEFERRED_SHADING)
+	{
+		if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING))
+		{
+			return m_renderPasses[PASS_GBUFFER_DRAW];
+		}
+		if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_BLOOM))
+		{
+			return m_renderPasses[PASS_HDR_DRAW];
+		}
+		return m_renderPasses[PASS_LDR_DRAW];
+	}
+
+	if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_BLOOM))
+	{
+		return m_renderPasses[PASS_HDR_TRANSPARENT];
+	}
+	return m_renderPasses[PASS_LDR_TRANSPARENT];
 }
 
 }

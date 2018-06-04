@@ -40,7 +40,7 @@ public:
 
 	const TextureHndl& GetLinearDepthTex() const;
 
-	const RenderPassHndl& GetRenderPass() const { return m_renderPass; }
+	const RenderPassHndl& GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const;
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
@@ -90,6 +90,16 @@ protected:
 		TARGET_COUNT
 	};
 
+	enum RENDER_PASSES
+	{
+		PASS_GBUFFER_DRAW = 0,	// First pass deferred
+		PASS_HDR_DRAW, // First pass forward with bloom
+		PASS_LDR_DRAW, // First pass forward with no bloom
+		PASS_LDR_TRANSPARENT,	// Transparent pass no bloom
+		PASS_HDR_TRANSPARENT,	// Transparent pass with bloom
+		PASS_COUNT
+	};
+
 	enum
 	{
 		MAX_DEFAULT_EFFECTS = 20
@@ -106,13 +116,13 @@ protected:
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
 	
+	RenderPassHndl			m_renderPasses[PASS_COUNT];
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
 	RenderTarget			m_screenRT[TARGET_COUNT];
 	RenderTarget*			m_pFinalTarget;
 	RenderTarget*			m_pInitialTarget;
 
-	RenderPassHndl			m_renderPass;
 //	PipelineStateHndl		m_downscale4x4Effect;
 //	PipelineStateHndl		m_downscale2x2Effect;
 //	PipelineStateHndl		m_gaussBlur5x5Effect;

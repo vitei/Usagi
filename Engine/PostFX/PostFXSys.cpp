@@ -93,7 +93,7 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 
 	m_platform.Init(this, pDevice, uInitFlags, uWidth, uHeight);
 
-	pipelineDecl.renderPass = m_platform.GetRenderPass();
+	pipelineDecl.renderPass = GetRenderPass();
 	m_copyMat.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), matDescriptors);
 
 	m_postDepthDescriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(g_postDepthDescriptorDecl));

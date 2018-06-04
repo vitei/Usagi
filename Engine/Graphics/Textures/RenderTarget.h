@@ -62,7 +62,8 @@ public:
 	uint32 GetTargetMask() const { return m_uTargetMask; }
 
 	// Helper function for creating the standard single pass render passes
-	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const vector<RenderPassDecl::Dependency>& dependencies);
+	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, 
+		const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
 
 private:
 	RenderTarget_ps	m_platform;

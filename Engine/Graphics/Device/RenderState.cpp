@@ -182,7 +182,6 @@ RenderPassDecl::RenderPassDecl()
 	uSubPasses = 0;
 	pDependencies = nullptr;
 	uDependencies = 0;
-	uDependencies = 0;
 }
 
 RenderPassDecl::~RenderPassDecl()
@@ -309,6 +308,41 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 
 	// It all matched
 	return true;
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependencyIn()
+{
+	return &ExternalColorDependenciesInAndOut()[0];
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependencyOut()
+{
+	return &ExternalColorDependenciesInAndOut()[1];
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependenciesInAndOut()
+{
+	static Dependency DefaultExternals[2];
+	static bool bHasInit = false;
+	if (!bHasInit)
+	{
+		DefaultExternals[0].uSrcSubPass = SUBPASS_EXTERNAL;
+		DefaultExternals[0].uDstSubPass = 0;
+		DefaultExternals[0].uSrcStageFlags = SF_BOTTOM_OF_PIPE;
+		DefaultExternals[0].uDstStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
+		DefaultExternals[0].uSrcAccessFlags = AC_MEMORY_READ;
+		DefaultExternals[0].uDstAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
+
+		DefaultExternals[1].uSrcSubPass = 0;
+		DefaultExternals[1].uDstSubPass = SUBPASS_EXTERNAL;
+		DefaultExternals[1].uSrcStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
+		DefaultExternals[1].uDstStageFlags = SF_BOTTOM_OF_PIPE;
+		DefaultExternals[1].uSrcAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
+		DefaultExternals[1].uDstAccessFlags = AC_MEMORY_READ;
+		bHasInit = true;
+	}
+
+	return DefaultExternals;
 }
 
 DepthStencilStateDecl::DepthStencilStateDecl()

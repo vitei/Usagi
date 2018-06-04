@@ -175,11 +175,20 @@ public:
 	// List of passes
 	const SubPass* 		pSubPasses;
 	uint32				uSubPasses;
-	// Dependencies both internal and external
+	// Dependencies both internal and external. 
 	const Dependency*	pDependencies;
 	uint32				uDependencies;
 
 	bool operator==(const RenderPassDecl& rhs) const;
+
+
+	// Single subpass utility functions
+	// Dependency on another subpass for input
+	static const Dependency* ExternalColorDependencyIn();
+	// Another subpass is dependent on this pass
+	static const Dependency* ExternalColorDependencyOut();
+	// Array of the above two dependencies basically forcing each pass to execute in order
+	static const Dependency* ExternalColorDependenciesInAndOut();
 };
 
 class DepthStencilStateDecl

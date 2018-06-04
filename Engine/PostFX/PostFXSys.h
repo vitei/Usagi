@@ -56,7 +56,8 @@ public:
 	RenderTarget* GetInitialRT() { return m_platform.GetInitialRT(); }
 	void EndScene();
 
-	const RenderPassHndl& GetRenderPass() const { return m_platform.GetRenderPass(); }
+	// FIXME: Pass in the right value
+	const RenderPassHndl& GetRenderPass() const { return m_platform.GetRenderPass(RenderNode::LAYER_OPAQUE, 0); }
 
 	void DrawFullScreenQuad(GFXContext* pCtxt) const;
 
