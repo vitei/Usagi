@@ -103,7 +103,7 @@ Scene::~Scene()
 	vdelete m_pImpl;
 }
 
-void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, const RenderPassHndl& mainRP, ParticleSet* pSet)
+void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, const SceneRenderPasses& scenePasses, ParticleSet* pSet)
 {
 	for(FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.EmptyBegin(); !it.IsEnd(); ++it)
 	{
@@ -123,7 +123,7 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, const RenderPassHn
 	m_pImpl->octree.Init(worldBounds, 20, 1.2f);
 	m_pImpl->lightMgr.Init(pDevice, this);
 	m_pImpl->particleSystem.Init(pDevice, this, pSet);
-	m_pImpl->debug3D.Init(pDevice, mainRP, this);
+	m_pImpl->debug3D.Init(pDevice, scenePasses, this);
 
 	m_debugStats.Init(&m_pImpl->debug3D, this);
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
@@ -266,9 +266,9 @@ ViewContext* Scene::GetViewContext(uint32 uId)
 	return m_pImpl->viewContexts.GetByIndex(uId);
 }
 
-const RenderPassHndl& Scene::GetRenderPass(uint32 uViewContext)
+const SceneRenderPasses& Scene::GetRenderPasses(uint32 uViewContext)
 {
-	return GetViewContext(uViewContext)->GetRenderPass();
+	return GetViewContext(uViewContext)->GetRenderPasses();
 }
 
 OmniShadowContext* Scene::CreateOmniShadowContext(GFXDevice* pDevice)

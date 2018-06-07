@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Debug/Rendering/Debug3D.h"
+#include "Engine/Scene/ViewContext.h"
 
 namespace usg 
 {
@@ -28,6 +29,8 @@ Debug3D::Debug3D()
 {
 	m_uSpheres = 0;
 	m_uCubes = 0;
+	SetLayer(RenderNode::LAYER_TRANSLUCENT);
+	SetPriority(0);
 }
 
 Debug3D::~Debug3D()
@@ -36,19 +39,47 @@ Debug3D::~Debug3D()
 	m_psRenderer = NULL;
 }
 
-void Debug3D::Init(GFXDevice* pDevice, const RenderPassHndl& rp, Scene* pScene)
+void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 {
 	int i, iC = MAX_SPHERES;
 	
 	MakeSphere(pDevice);
 	
+
+	uint16* pIndices = NULL;
+	ScratchObj<uint16> cubeIndices(pIndices, MAX_CUBES, 4);
+
+	iC = MAX_CUBES;
+	for(i = 0; i < iC; i++)
+	{
+		pIndices[i] = i;
+	}
+
+	m_cubeVB.Init(pDevice, NULL, sizeof(CubeRender::Cube), MAX_CUBES, "Cube", GPU_USAGE_DYNAMIC);
+	m_cubeIB.Init(pDevice, pIndices, MAX_CUBES);
+
+
+
+	m_pRenderGroup = pScene->CreateRenderGroup(NULL);
+
+	RenderNode* pNode = this;
+	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+
+	m_psRenderer = this;
+}
+
+void Debug3D::InitContextData(ViewContext* pContext)
+{
+	RenderPassHndl rp = pContext->GetRenderPasses().GetRenderPass(*this);
+
+
 	// Don't write to the depth, but do read from it
 	PipelineStateDecl pipelineState;
 	//pipelineState.renderPass = pScene->GetRenderPass(0);
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
-	depthDecl.bDepthWrite	= false;
-	depthDecl.bDepthEnable	= true;
-	depthDecl.eDepthFunc	= DEPTH_TEST_LESS;
+	depthDecl.bDepthWrite = false;
+	depthDecl.bDepthEnable = true;
+	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 	// Make these spheres transparent
@@ -70,33 +101,10 @@ void Debug3D::Init(GFXDevice* pDevice, const RenderPassHndl& rp, Scene* pScene)
 
 	pipelineState.inputBindings[0].Init(CubeRender::VertexElements);
 	// Initialize cubes
-	
+
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "CubesOriented");
-
-	uint16* pIndices = NULL;
-	ScratchObj<uint16> cubeIndices(pIndices, MAX_CUBES, 4);
-
-	iC = MAX_CUBES;
-	for(i = 0; i < iC; i++)
-	{
-		pIndices[i] = i;
-	}
-
-	m_cubeVB.Init(pDevice, NULL, sizeof(CubeRender::Cube), MAX_CUBES, "Cube", GPU_USAGE_DYNAMIC);
-	m_cubeIB.Init(pDevice, pIndices, MAX_CUBES);
-
 	pipelineState.ePrimType = PT_POINTS;
 	m_cubePipeline = pDevice->GetPipelineState(pipelineState);
-
-
-	m_pRenderGroup = pScene->CreateRenderGroup(NULL);
-
-	RenderNode* pNode = this;
-	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
-	SetLayer(RenderNode::LAYER_TRANSLUCENT);
-	SetPriority(0);
-
-	m_psRenderer = this;
 }
 
 void Debug3D::CleanUp(GFXDevice* pDevice)

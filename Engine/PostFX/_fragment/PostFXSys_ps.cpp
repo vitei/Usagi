@@ -539,26 +539,9 @@ void PostFXSys_ps::SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uin
 }
 
 
-const RenderPassHndl& PostFXSys_ps::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const
+const SceneRenderPasses& PostFXSys_ps::GetRenderPasses() const
 {
-	if (eLayer < RenderNode::LAYER_DEFERRED_SHADING)
-	{
-		if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING))
-		{
-			return m_renderPasses[PASS_GBUFFER_DRAW];
-		}
-		if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_BLOOM))
-		{
-			return m_renderPasses[PASS_HDR_DRAW];
-		}
-		return m_renderPasses[PASS_LDR_DRAW];
-	}
-
-	if (m_pParent->IsEffectEnabled(PostFXSys::EFFECT_BLOOM))
-	{
-		return m_renderPasses[PASS_HDR_TRANSPARENT];
-	}
-	return m_renderPasses[PASS_LDR_TRANSPARENT];
+	return m_renderPasses;
 }
 
 }

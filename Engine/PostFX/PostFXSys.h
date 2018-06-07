@@ -57,7 +57,7 @@ public:
 	void EndScene();
 
 	// FIXME: Pass in the right value
-	const RenderPassHndl& GetRenderPass() const { return m_platform.GetRenderPass(RenderNode::LAYER_OPAQUE, 0); }
+	const SceneRenderPasses& GetRenderPasses() const { return m_platform.GetRenderPasses(); }
 
 	void DrawFullScreenQuad(GFXContext* pCtxt) const;
 

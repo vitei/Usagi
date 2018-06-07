@@ -33,6 +33,8 @@ IMGuiRenderer::IMGuiRenderer() :
 	g_spGUIRenderer = this;
 	m_vOffset.Assign(0.0f, 0.0f);
 	m_bActive = false;
+	SetLayer(RenderNode::LAYER_OVERLAY);
+	SetPriority(128);	// After the opaque, very last
 }
 
 IMGuiRenderer::~IMGuiRenderer()
@@ -220,7 +222,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 
 	pipeline.layout.uDescriptorSetCount = 1;
 	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(decl);
-	pipeline.renderPass = scene.GetRenderPass(0);
+	pipeline.renderPass = scene.GetRenderPasses(0).GetRenderPass(*this);
 
 	m_pipelineState = pDevice->GetPipelineState(pipeline);
 
@@ -239,8 +241,6 @@ void IMGuiRenderer::AddToScene(Scene* pScene)
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
-	SetLayer(RenderNode::LAYER_OVERLAY);
-	SetPriority(128);	// After the opaque, very last
 }
 
 

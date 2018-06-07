@@ -11,6 +11,7 @@
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Debug/SceneDebugStats.h"
+#include "SceneRenderPasses.h"
 
 namespace usg {
 
@@ -37,7 +38,7 @@ public:
 	Scene();
 	~Scene();
 
-	void			Init(GFXDevice* pDevice, const AABB& worldBounds, const RenderPassHndl& mainRP, ParticleSet* pSet = nullptr);
+	void			Init(GFXDevice* pDevice, const AABB& worldBounds, const SceneRenderPasses& renderPasses, ParticleSet* pSet = nullptr);
 	void			Cleanup(GFXDevice* pDevice);
 	void			Reset();
 
@@ -50,7 +51,7 @@ public:
 	void			DeleteViewContext(ViewContext* pRemove);
 
 	ViewContext*	GetViewContext(uint32 uId);
-	const RenderPassHndl& GetRenderPass(uint32 uViewContext);
+	const SceneRenderPasses& GetRenderPasses(uint32 uViewContext);
 	
 	ShadowContext*	CreateShadowContext(GFXDevice* pDevice);
 	void			DeleteShadowContext(ShadowContext* pRemove);

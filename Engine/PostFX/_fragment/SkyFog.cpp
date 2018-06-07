@@ -33,6 +33,7 @@ static const usg::DescriptorDeclaration g_descriptorDeclFade[] =
 SkyFog::SkyFog(void)
 {
 	m_bValid = false;
+	SetLayer(RenderNode::LAYER_SKY);
 }
 
 SkyFog::~SkyFog(void)
@@ -51,7 +52,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pSys->GetRenderPass();
+	pipeline.renderPass = pSys->GetRenderPasses().GetRenderPass(*this);
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
@@ -114,8 +115,6 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
 	alphaDecl.bBlendEnable = false;
 	mat2.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
-
-	SetLayer(RenderNode::LAYER_SKY);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
 	SamplerDecl depthSamp(SF_POINT, SC_WRAP);

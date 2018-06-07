@@ -18,6 +18,8 @@
 
 namespace usg{
 
+class SceneRenderPasses;
+
 class ViewContext : public SceneContext
 {
 public:
@@ -46,7 +48,7 @@ public:
 	// have different draw distances
 	Fog& GetFog(uint32 uIndex=0) { ASSERT(uIndex<MAX_FOGS); return m_fog[uIndex]; }
 	PostFXSys* GetPostFXSys() { return m_pPostFXSys; }
-	const RenderPassHndl& GetRenderPass() const;
+	const SceneRenderPasses& GetRenderPasses() const;
 
 
 	void PreDraw(GFXContext* pContext, ViewType eViewType);

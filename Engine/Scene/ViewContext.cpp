@@ -319,9 +319,9 @@ namespace usg {
 		}
 	}
 
-	const RenderPassHndl& ViewContext::GetRenderPass() const
+	const SceneRenderPasses& ViewContext::GetRenderPasses() const
 	{
-		return m_pPostFXSys->GetRenderPass();
+		return m_pPostFXSys->GetRenderPasses();
 	}
 
 	void ViewContext::SetShadowColor(usg::Color& color)

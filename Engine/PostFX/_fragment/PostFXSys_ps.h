@@ -14,6 +14,7 @@
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Scene/SceneRenderPasses.h"
 
 namespace usg{
 
@@ -40,7 +41,7 @@ public:
 
 	const TextureHndl& GetLinearDepthTex() const;
 
-	const RenderPassHndl& GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const;
+	const SceneRenderPasses& GetRenderPasses() const;
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
@@ -90,16 +91,6 @@ protected:
 		TARGET_COUNT
 	};
 
-	enum RENDER_PASSES
-	{
-		PASS_GBUFFER_DRAW = 0,	// First pass deferred
-		PASS_HDR_DRAW, // First pass forward with bloom
-		PASS_LDR_DRAW, // First pass forward with no bloom
-		PASS_LDR_TRANSPARENT,	// Transparent pass no bloom
-		PASS_HDR_TRANSPARENT,	// Transparent pass with bloom
-		PASS_COUNT
-	};
-
 	enum
 	{
 		MAX_DEFAULT_EFFECTS = 20
@@ -116,7 +107,7 @@ protected:
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
 	
-	RenderPassHndl			m_renderPasses[PASS_COUNT];
+	SceneRenderPasses		m_renderPasses;
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
 	RenderTarget			m_screenRT[TARGET_COUNT];
