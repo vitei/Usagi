@@ -52,7 +52,6 @@ public:
 	// We can't return this as const as we need to iterate through it
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);
 
-	void RegisterRenderPass(const RenderPassHndl& hndl);
 	void SetModelDir(const char* szModelDir) { m_modelDir = szModelDir; }
 	const U8String& GetModelDir() const { return m_modelDir; }
 	void SetTextureDir(const char* szTextureDir) { m_textureDir = szTextureDir; }

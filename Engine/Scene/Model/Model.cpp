@@ -225,7 +225,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		}
 		usg::Color white(1.0f, 1.0f, 1.0f, 1.0f);
 		m_meshArray[i]->SetBlendColor(white);
-		m_meshArray[i]->SetPipelineState(pMesh->GetPipeline(m_pScene->GetRenderPass(0)).defaultPipeline);
+		m_meshArray[i]->SetPipelineState(pMesh->GetPipeline(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i])).defaultPipeline);
 		m_fScale = 1.0f;
 		m_meshArray[i]->ResetOverrides();
 		if (m_depthMeshArray)
@@ -798,16 +798,17 @@ void Model::SetFade(bool bFade, float fAlpha)
 	if (m_bFade == bFade)
 		return;
 
-	RenderPassHndl renderPass = m_pScene->GetRenderPass(0);
 
+	RenderPassHndl renderPass;
 	for (uint32 i = 0; i < m_uMeshCount; i++)
 	{
 		const usg::ModelResource::Mesh* pResMesh = m_pResource->GetMesh(i);
+		bool bTranslucent = false;
 		if (bFade)
 		{
 			if (pResMesh->bCanFade)
 			{
-				m_meshArray[i]->SetPipelineState(pResMesh->GetPipeline(renderPass).translucentStateCmp);
+				bTranslucent = true;
 				m_meshArray[i]->SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
 				m_meshArray[i]->SetPriority(1);
 			}
@@ -819,10 +820,11 @@ void Model::SetFade(bool bFade, float fAlpha)
 		}
 		else
 		{
-			m_meshArray[i]->SetPipelineState(pResMesh->GetPipeline(renderPass).defaultPipeline);
 			m_meshArray[i]->SetLayer(pResMesh->layer);
 			m_meshArray[i]->SetPriority(pResMesh->priority);
 		}
+		m_meshArray[i]->SetPipelineState(bTranslucent ? pResMesh->GetPipeline(renderPass).translucentStateCmp : pResMesh->GetPipeline(renderPass).defaultPipeline);
+		renderPass = m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]);
 	}
 
 	m_bFade = bFade;

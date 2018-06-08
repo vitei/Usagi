@@ -39,11 +39,13 @@ public:
 	// Platform specific
 	const VkClearValue& GetColourClearValue(uint32 uIndex) const { return m_colorClearValues[uIndex]; }
 	const VkClearValue& GetDSClearValue() const { return m_dsClearValue; }
+	const VkFramebuffer& GetFrameBuffer() const { return m_framebuffer; }
 
 private:
 	// Color + depth for the clear
-	VkClearValue								m_colorClearValues[MAX_COLOR_TARGETS];
-	VkClearValue								m_dsClearValue;
+	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS];
+	VkClearValue	m_dsClearValue;
+	VkFramebuffer	m_framebuffer;
 	// For creating a render pass declaration used with sub passes
 	RenderPassDecl	m_renderPassDecl;
 	Viewport		m_fullScreenVP;

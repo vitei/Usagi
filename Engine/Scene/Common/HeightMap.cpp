@@ -128,7 +128,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 	m_mesh.GetIndexBuffer().Init(pDevice, pIndices, noIndices, PT_TRIANGLES);
 
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pScene->GetRenderPass(0);
+	pipeline.renderPass = pScene->GetRenderPasses(0).GetRenderPass(RenderNode::LAYER_OPAQUE, 0);
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
 	depthDecl.bDepthWrite	= true;
 	depthDecl.bDepthEnable	= true;

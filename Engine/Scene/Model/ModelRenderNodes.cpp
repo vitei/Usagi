@@ -45,7 +45,18 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_uLod = pMesh->uLodIndex;
 	m_bCanHaveShadow = pMesh->layer < RenderNode::LAYER_TRANSLUCENT;
 
-	RenderPassHndl renderPass = pScene->GetRenderPass(0);
+	if (bDepth)
+	{
+		SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
+		SetPriority(0);
+	}
+	else
+	{
+		SetLayer(pMesh->layer);
+		SetPriority(pMesh->priority);
+	}
+
+	RenderPassHndl renderPass = pScene->GetRenderPasses(0).GetRenderPass(*this);
 
 	if (bDepth)
 	{
@@ -88,22 +99,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		}
 	}
 
-	if (bDepth)
-	{
-		SetMaterialCmpVal(pMesh->GetPipeline(renderPass).depthPassPipeline, pMesh->pTextures[0].get());
-
-		SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
-		SetPriority(0);
-	}
-	else
-	{
-		// Set up the material 
-		SetMaterialCmpVal(pMesh->GetPipeline(renderPass).defaultPipeline, pMesh->pTextures[0].get());
-
-		SetLayer(pMesh->layer);
-		SetPriority(pMesh->priority);
-	}
-
+	SetMaterialCmpVal(pMesh->GetPipeline(renderPass).defaultPipeline, pMesh->pTextures[0].get());
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 

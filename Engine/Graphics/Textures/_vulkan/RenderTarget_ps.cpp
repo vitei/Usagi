@@ -31,6 +31,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 	m_dsClearValue.depthStencil.depth = 1.0f;
 	m_dsClearValue.depthStencil.stencil = 0;
+
 }
 
 void RenderTarget_ps::CleanUp(GFXDevice* pDevice)

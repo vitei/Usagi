@@ -142,7 +142,7 @@ bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool 
         
  
 	PipelineStateDecl pipelineDecl;
-	pipelineDecl.renderPass = pScene->GetRenderPass(0);
+	pipelineDecl.renderPass = pScene->GetRenderPasses(0).GetRenderPass(RenderNode::LAYER_OPAQUE, 0);
 	pipelineDecl.inputBindings[0].Init(VertexElements);
 	pipelineDecl.uInputBindingCount = 1;
 

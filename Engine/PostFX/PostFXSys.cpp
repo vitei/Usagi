@@ -77,24 +77,9 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 	m_fullScreenIB.Init(pDevice, iIndices, 6, PT_TRIANGLES);
 
 	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	PipelineStateDecl pipelineDecl;
-	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
-	pipelineDecl.uInputBindingCount = 1;
-	pipelineDecl.ePrimType = PT_TRIANGLES;
-
-	DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-	pipelineDecl.layout.descriptorSets[0] = matDescriptors;
-	pipelineDecl.layout.uDescriptorSetCount = 1;
-
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostCopyScreen");
-
-	// FIXME: PostFX stuff needs fixing for the new interface
-//	m_copyMat.SetFilter(pDevice, 0, pointDecl);
 
 	m_platform.Init(this, pDevice, uInitFlags, uWidth, uHeight);
 
-	pipelineDecl.renderPass = GetRenderPass();
-	m_copyMat.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), matDescriptors);
 
 	m_postDepthDescriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(g_postDepthDescriptorDecl));
 	m_postDepthDescriptor.SetImageSamplerPair(0, m_platform.GetLinearDepthTex(), pDevice->GetSampler(pointDecl));
@@ -104,7 +89,6 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 void PostFXSys::CleanUp(GFXDevice* pDevice)
 {
 	m_postDepthDescriptor.CleanUp(pDevice);
-	m_copyMat.Cleanup(pDevice);
 	m_fullScreenIB.CleanUp(pDevice);
 	m_fullScreenVB.CleanUp(pDevice);
 	m_platform.CleanUp(pDevice);

@@ -137,7 +137,7 @@ namespace usg
 
 		CreateEmitterShape(m_emissionDef.eShape, shapedef);
 		
-		InitMaterial(pDevice, pMgr->GetScene()->GetRenderPass(0), pResource, true);
+		InitMaterial(pDevice, pMgr->GetScene()->GetRenderPasses(0).GetRenderPass(*this), pResource, true);
 		
 		m_materialConsts.Init(pDevice, Particle::g_scriptedParticlePerEffectDecl);
 		m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);

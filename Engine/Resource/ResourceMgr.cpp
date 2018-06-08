@@ -420,19 +420,6 @@ ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName,
 }
 
 
-void ResourceMgr::RegisterRenderPass(const RenderPassHndl& hndl)
-{
-	for (size_t i = 0; i < m_pImpl->renderPasses.size(); i++)
-	{
-		if (m_pImpl->renderPasses[i] == hndl)
-		{
-			return;
-		}
-	}
-	
-	m_pImpl->renderPasses.push_back(hndl);
-}
-
 uint32 ResourceMgr::GetParticleEffectCount()
 {
 	return m_pImpl->particleEffects.GetResourceCount();

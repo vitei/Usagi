@@ -38,7 +38,7 @@ public:
 	Scene();
 	~Scene();
 
-	void			Init(GFXDevice* pDevice, const AABB& worldBounds, const SceneRenderPasses& renderPasses, ParticleSet* pSet = nullptr);
+	void			Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet = nullptr);
 	void			Cleanup(GFXDevice* pDevice);
 	void			Reset();
 

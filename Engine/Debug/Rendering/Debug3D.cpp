@@ -68,7 +68,7 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	m_psRenderer = this;
 }
 
-void Debug3D::InitContextData(ViewContext* pContext)
+void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 {
 	RenderPassHndl rp = pContext->GetRenderPasses().GetRenderPass(*this);
 

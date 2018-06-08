@@ -85,11 +85,13 @@ void GFXContext_ps::End()
 
 void GFXContext_ps::Transfer(RenderTarget* pTarget, Display* pDisplay)
 {
+	vkCmdEndRenderPass(m_cmdBuff);
 	pDisplay->GetPlatform().Transfer(m_pParent, pTarget);
 }
 
 void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
+	vkCmdEndRenderPass(m_cmdBuff);
 	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, srcBounds, dstBounds);
 }
 
@@ -112,10 +114,12 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 		const RenderTarget_ps& rtPS = pTarget->GetPlatform();
 
 
+		//vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 	}
 	else
 	{
-		
+		// TODO: Confirm in a render pass
+		vkCmdEndRenderPass(m_cmdBuff);
 	}
 }
 
@@ -152,6 +156,13 @@ void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport 
 	vkViewport.minDepth = 0.0f;
 	vkViewport.maxDepth = 1.0f;
 	vkCmdSetViewport(m_cmdBuff, 0, 1, &vkViewport);
+
+	VkRect2D scissor;
+	scissor.extent.width = viewport.GetWidth();
+	scissor.extent.height = viewport.GetHeight();
+	scissor.offset.x = viewport.GetLeft();
+	scissor.offset.y = viewport.GetBottom();
+	vkCmdSetScissor(m_cmdBuff, 0, 1, &scissor);
 }
 
 void GFXContext_ps::SetBlendColor(const Color& blendColor)

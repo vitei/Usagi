@@ -103,7 +103,7 @@ Scene::~Scene()
 	vdelete m_pImpl;
 }
 
-void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, const SceneRenderPasses& scenePasses, ParticleSet* pSet)
+void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 {
 	for(FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.EmptyBegin(); !it.IsEnd(); ++it)
 	{
@@ -123,7 +123,7 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, const SceneRenderP
 	m_pImpl->octree.Init(worldBounds, 20, 1.2f);
 	m_pImpl->lightMgr.Init(pDevice, this);
 	m_pImpl->particleSystem.Init(pDevice, this, pSet);
-	m_pImpl->debug3D.Init(pDevice, scenePasses, this);
+	m_pImpl->debug3D.Init(pDevice, this);
 
 	m_debugStats.Init(&m_pImpl->debug3D, this);
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
