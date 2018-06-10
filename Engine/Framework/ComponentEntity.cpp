@@ -5,6 +5,7 @@
 #include "Engine/Framework/GameComponents.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "ComponentEntity.h"
+#include "GameComponents.h"
 #include "ComponentStats.h"
 #include "NewEntities.h"
 #include "Engine/Framework/SystemCoordinator.h"
@@ -165,12 +166,39 @@ GenericInputOutputs* ComponentEntity::GetSystem(uint32 uSysIndex) const
 	return m_pSystems.Get(GetSystemIDFromIndex(uSysIndex));
 }
 
+void ComponentEntity::SetComponentPendingDelete()
+{
+	m_bPendingDeletions = true;
+	SetChanged();
+}
+
 void ComponentEntity::SetChanged()
 {
 	m_bChanged = true;
 	ComponentEntity* parent = GetParentEntity();
 	if(parent != nullptr)
 		parent->SetChildrenChanged();
+}
+
+
+void ComponentEntity::HandlePendingDeletes(ComponentLoadHandles& handles)
+{
+	if (!m_bPendingDeletions)
+		return;
+
+	ComponentType* pComponent = m_pFirstComponent;
+	while (pComponent)
+	{
+		// Cache the next pointer as free could remove it from the link
+		ComponentType* pNextComponent = pComponent->GetNextComponent();
+		if (pComponent->WaitingOnFree())
+		{
+			pComponent->Free(handles, true);
+		}
+		pComponent = pNextComponent;
+	}
+
+	m_bPendingDeletions = false;
 }
 
 void ComponentEntity::SetChildrenChanged()
@@ -190,21 +218,21 @@ void ComponentEntity::Deactivate()
 	ComponentStats::DeactivatedEntity();
 }
 
-ComponentEntity* ComponentEntity::GetChildEntityByName(const uint32 uNameHash, bool bRecursive)
+ComponentEntity* ComponentEntity::GetChildEntityByName(const UnsafeComponentGetter& getter, uint32 uNameHash, bool bRecursive)
 {
 	ComponentEntity* pChild = GetChildEntity();
 	while (pChild)
 	{
 		// skip any entities flagged as dead
 		Optional<StateComponent> state;
-		usg::GetComponent(pChild, state);
+		getter.GetComponent(pChild, state);
 		if (state.Exists() && state.Force()->current == STATUS_DEAD)
 		{
 			continue;
 		}
 
 		Optional<Identifier> id;
-		usg::GetComponent(pChild, id);
+		getter.GetComponent(pChild, id);
 		if (id.Exists() && id.Force().GetRuntimeData().uNameHash == uNameHash)
 		{
 			return pChild;
@@ -212,7 +240,7 @@ ComponentEntity* ComponentEntity::GetChildEntityByName(const uint32 uNameHash, b
 
 		if (bRecursive)
 		{
-			ComponentEntity* pRecursive = pChild->GetChildEntityByName(uNameHash, true);
+			ComponentEntity* pRecursive = pChild->GetChildEntityByName(getter, uNameHash, true);
 			if (pRecursive)
 			{
 				return pRecursive;
@@ -223,9 +251,9 @@ ComponentEntity* ComponentEntity::GetChildEntityByName(const uint32 uNameHash, b
 	return nullptr;
 }
 
-ComponentEntity* ComponentEntity::GetChildEntityByName(const char* szName, bool bRecursive)
+ComponentEntity* ComponentEntity::GetChildEntityByName(const UnsafeComponentGetter& getter, const char* szName, bool bRecursive)
 {
-	return GetChildEntityByName(utl::CRC32(szName), bRecursive);
+	return GetChildEntityByName(getter, utl::CRC32(szName), bRecursive);
 }
 
 ComponentEntity* ComponentEntity::Create(ComponentEntity* parent)

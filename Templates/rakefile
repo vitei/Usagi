@@ -1,0 +1,100 @@
+require 'tempfile'
+require 'fileutils'
+require 'pathname'
+require 'tempfile'
+require 'erb'
+
+PROJECT_NAME = ENV["project"]
+CURRENT_DIR     = File.dirname(__FILE__)
+OUTPUT_DIR = Pathname.new(CURRENT_DIR).parent.parent.to_s
+
+RUBY = "ruby"
+
+
+def copyTemplateFile(input, output_name)
+  projectname = PROJECT_NAME
+  output_file = File.open(output_name, "w")
+  output = ERB.new(File.read(input), nil, '>').result(binding())
+
+  output_file.puts output
+end
+
+task :default do
+  if ENV["project"]
+    projectDir = "#{OUTPUT_DIR}\\#{PROJECT_NAME}"
+    FileUtils.mkdir_p(projectDir)
+
+    # Copy project generator files
+    files = Dir.glob('GameProject/ProjectGenerator/*')
+    projectGenDir = "#{OUTPUT_DIR}\\ProjectGenerator"
+    FileUtils.mkdir_p(projectGenDir)
+    FileUtils.cp_r(files, projectGenDir)
+
+    # Copy raw files
+    files = Dir.glob('GameProject/Tools/*')
+    toolsDir = "#{OUTPUT_DIR}\\Tools"
+    FileUtils.mkdir_p(toolsDir)
+    FileUtils.cp_r(files, toolsDir)
+
+    files = Dir.glob('GameProject/Data/*')
+    dataDir = "#{OUTPUT_DIR}\\Data"
+    FileUtils.mkdir_p(dataDir)
+    FileUtils.cp_r(files, dataDir)
+
+    files = Dir.glob('GameProject/Project/main/*')
+    projectDir = "#{OUTPUT_DIR}\\#{PROJECT_NAME}\\main"
+    FileUtils.mkdir_p(projectDir)
+    FileUtils.cp_r(files, projectDir)
+
+    files = Dir.glob('GameProject/Project/_exclude/*')
+    projectDir = "#{OUTPUT_DIR}\\#{PROJECT_NAME}\\_exclude"
+    FileUtils.mkdir_p(projectDir)
+    FileUtils.cp_r(files, projectDir)
+
+    filesOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}/#{PROJECT_NAME}"
+
+    # Files in the root directory are a combination of erbs, nrbs (which are erbs which the projectgenerator processes and raw files)
+    Dir['GameProject/Project/Project*'].each do |file|
+      filePathName = Pathname.new(file)
+      fileOut = file.sub("GameProject/Project/Project", filesOut)
+      if filePathName.extname() == ".erb"
+        fileOut = fileOut.sub(".erb", "")
+        copyTemplateFile(file, fileOut)
+      elsif filePathName.extname() == ".nrb"
+        fileOut = fileOut.sub(".nrb", ".erb")
+        FileUtils.cp_r(file, fileOut)    
+      else
+        FileUtils.cp_r(file, fileOut)    
+      end
+    end
+
+    filesOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}"
+    FileUtils.mkdir_p(filesOut)
+    Dir['GameProject/Project/Mode/*'].each do |file|
+      filePathName = Pathname.new(file)
+      fileOut = file.sub("GameProject/Project", filesOut)
+      if filePathName.extname() == ".erb"
+        fileOut = fileOut.sub(".erb", "")
+        copyTemplateFile(file, fileOut)
+        print fileOut
+        print "\n"
+      else
+        FileUtils.cp_r(file, fileOut)    
+        print fileOut
+        print "\n"
+      end
+    end   
+
+    projectTemplate = "GameProject/Project.sln.erb"
+    projectTemplateOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}.sln"
+    copyTemplateFile(projectTemplate, projectTemplateOut)
+
+    rakeFileTemplate = "GameProject/rakefile.erb"
+    rakeFileTemplateOut = "#{OUTPUT_DIR}/rakefile"
+    copyTemplateFile(rakeFileTemplate, rakeFileTemplateOut)
+  else
+    print "Project name not specified\n"
+    print "Usage: rake project=<ProjectName>\n"
+   
+  end
+end

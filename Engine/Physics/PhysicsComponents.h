@@ -224,16 +224,6 @@ namespace usg
 			return details::GetVelocityAtPosition(rigidBody.GetRuntimeData(), vWorldPosition);
 		}
 
-		template<typename T>
-		static Required<PhysicsScene> GetScene(Component<T>& c)
-		{
-			Required<PhysicsScene, FromSelfOrParents> sceneFromSelfOrPararents;
-			GetComponent(c.GetEntity(), sceneFromSelfOrPararents);
-			ASSERT(sceneFromSelfOrPararents.IsValid());
-			Required<PhysicsScene> scene;
-			GetComponent(sceneFromSelfOrPararents.GetEntity(), scene);
-			return scene;
-		}
 	}
 }
 

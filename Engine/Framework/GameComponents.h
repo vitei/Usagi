@@ -1,16 +1,8 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
-//
-//  GameComponentDecl.h
-//  Usagi_xcode
-//
-//  Created by Giles on 2/18/14.
-//  Copyright (c) 2014 Vitei. All rights reserved.
-//
-
-#ifndef Usagi_xcode_GameComponents_h
-#define Usagi_xcode_GameComponents_h
+#ifndef _USAGI_GAMECOMPONENTS_H_
+#define _USAGI_GAMECOMPONENTS_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Framework/SystemKey.h"
 #include "Engine/Framework/Component.pb.h"
@@ -111,14 +103,14 @@ public:
 		GameComponentMgr::Free(c, handles, bRemoveFromEntity);
 	}
 
-	static void Free(Entity uEntity, ComponentLoadHandles& handles, bool bRemoveFromEntity = true)
+	static void RequestFree(Entity uEntity)
 	{
-		Free(GetComponent(uEntity), handles, bRemoveFromEntity);
+		GetComponent(uEntity)->RequestFree();
 	}
-    
+
 	static Component<T>* GetComponent(Entity uEntity)
 	{
-		if(uEntity == NULL)
+		if (uEntity == NULL)
 		{
 			return NULL;
 		}
@@ -139,82 +131,6 @@ public:
 		return pPool->_BeginDynamic<Component<T>>();
 	}
 };
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetInputComponent(Entity uEntity, const T** t))
-{
-	*t = GameComponents<T>::GetComponentData(uEntity);
-	return *t != NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetOutputComponent(Entity uEntity, T** t))
-{
-	*t = GameComponents<T>::GetComponentData(uEntity);
-	return *t != NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetOutputComponent(Entity uEntity, Component<T>** t))
-{
-	*t = GameComponents<T>::GetComponent(uEntity);
-	return *t != NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-T* GetComponentFromParentInt(Entity uEntity, bool bCheckCurrentNode))
-{
-	T* component = NULL;
-	Entity uCheckEntity = bCheckCurrentNode ? uEntity : uEntity->GetParentEntity();
-	while(!component && uCheckEntity!=NULL)
-	{
-		component = GameComponents<T>::GetComponentData(uCheckEntity);
-		uCheckEntity = uCheckEntity->GetParentEntity();
-	}
-	return component;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetComponentFromParent(Entity uEntity, const T** i, T** o, bool bCheckCurrentNode))
-{
-	T* component = GetComponentFromParentInt<T>(uEntity, bCheckCurrentNode);
-
-	*i = component;
-	*o = component;
-
-	return component!=NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetOutputComponentFromParent(Entity uEntity, T** i, bool bCheckCurrentNode))
-{
-	T* component = GetComponentFromParentInt<T>(uEntity, bCheckCurrentNode);
-
-	*i = component;
-
-	return component!=NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetComponent(Entity uEntity, const T** i, T** o))
-{
-	*i = *o = GameComponents<T>::GetComponentData(uEntity);
-	return *i != NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetInputComponent(Entity uEntity, const Component<T>** t))
-{
-	*t = GameComponents<T>::GetComponent(uEntity);
-	return *t != NULL;
-}
-
-template<typename T> DEPRECATED("Raw component pointers are no longer supported.  Please use Required<T> or Optional<T> instead.",
-bool GetComponent(Entity uEntity, const Component<T>** i, Component<T>** o))
-{
-	*i = *o = GameComponents<T>::GetComponent(uEntity);
-	return *i != NULL;
-}
 
 struct ComponentGetterBase
 {
@@ -241,136 +157,58 @@ struct ComponentGetterInt< T, FromParentWith<ComponentType> >
 	}
 };
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional)
+struct UnsafeComponentGetter
 {
-	optional = Optional<T, SearchMask>( ComponentGetterInt<T, SearchMask>::GetComponent(uEntity) );
-	return true;
-}
+public:
+	template<typename T, typename SearchMask>
+	bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional) const
+	{
+		return GetComponentImpl(uEntity, optional);
+	}
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required)
+	template<typename T, typename SearchMask>
+	bool GetComponent(Entity uEntity, Required<T, SearchMask>& required) const
+	{
+		return GetComponentImpl(uEntity, required);
+	}
+
+protected:
+	// Don't want this being constructed just anywhere
+	UnsafeComponentGetter() {};
+
+	template<typename T, typename SearchMask>
+	static bool GetComponentImpl(Entity uEntity, Optional<T, SearchMask>& optional) 
+	{
+		optional = Optional<T, SearchMask>(ComponentGetterInt<T, SearchMask>::GetComponent(uEntity));
+		return true;
+	}
+
+	template<typename T, typename SearchMask>
+	static bool GetComponentImpl(Entity uEntity, Required<T, SearchMask>& required) 
+	{
+		Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
+
+		bool exists = c != NULL;
+		if (exists) { required = Required<T, SearchMask>(*c); }
+
+		return exists;
+	}
+};
+
+struct ComponentLoadHandles : public ComponentLoadHandlesBase, public UnsafeComponentGetter
 {
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
+	friend ComponentManager;
+private:
+	ComponentLoadHandles() {};
+};
 
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
 
-	return exists;
-}
+
+
 
 bool GetComponent(Entity e, uint32 uComponentType, sint32 iSearchMask, ComponentWrapperBase& wrapper);
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional1, Optional<T, SearchMask>& optional2)
-{
-	bool valid = GetComponent(uEntity, optional1);
-	if(valid) { optional2 = optional1; }
-	return valid;
-}
 
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required1, Required<T, SearchMask>& required2)
-{
-	bool valid = GetComponent(uEntity, required1);
-	if(valid) { required2 = required1; }
-	return valid;
-}
-
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Optional<T, SearchMask>& optional, Required<T, SearchMask>& required)
-{
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
-	optional = Optional<T, SearchMask>(c);
-
-	return exists;
-}
-
-template<typename T, typename SearchMask>
-bool GetComponent(Entity uEntity, Required<T, SearchMask>& required, Optional<T, SearchMask>& optional)
-{
-	Component<T>* c = ComponentGetterInt<T, SearchMask>::GetComponent(uEntity);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T, SearchMask>(*c); }
-	optional = Optional<T, SearchMask>(c);
-
-	return exists;
-}
-
-template<typename T>
-Component<T>* GetComponentWrapperFromParentInt(Entity uEntity, bool bCheckCurrentNode)
-{
-	Component<T>* component = NULL;
-	Entity uCheckEntity = bCheckCurrentNode ? uEntity : uEntity->GetParentEntity();
-	while(!component && uCheckEntity!=NULL)
-	{
-		component = GameComponents<T>::GetComponent(uCheckEntity);
-		uCheckEntity = uCheckEntity->GetParentEntity();
-	}
-	return component;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Optional<T>& optional, bool bCheckCurrentNode)
-{
-	optional = Optional<T>( GetComponentWrapperFromParentInt<T>(uEntity, bCheckCurrentNode) );
-	return true;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Required<T>& required, bool bCheckCurrentNode)
-{
-	Component<T>* c = GetComponentWrapperFromParentInt<T>(uEntity, bCheckCurrentNode);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T>(*c); }
-
-	return exists;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Optional<T>& optional1, Optional<T>& optional2, bool bCheckCurrentNode)
-{
-	bool valid = GetComponentFromParent(uEntity, optional1, bCheckCurrentNode);
-	if(valid) { optional2 = optional1; }
-	return valid;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Required<T>& required1, Required<T>& required2, bool bCheckCurrentNode)
-{
-	bool valid = GetComponentFromParent(uEntity, required1, bCheckCurrentNode);
-	if(valid) { required2 = required1; }
-	return valid;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Optional<T>& optional, Required<T>& required, bool bCheckCurrentNode)
-{
-	Component<T>* c = GetComponentWrapperFromParentInt<T>(uEntity, bCheckCurrentNode);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T>(*c); }
-	optional = Optional<T>(c);
-
-	return exists;
-}
-
-template<typename T>
-bool GetComponentFromParent(Entity uEntity, Required<T>& required, Optional<T>& optional, bool bCheckCurrentNode)
-{
-	Component<T>* c = GetComponentWrapperFromParentInt<T>(uEntity, bCheckCurrentNode);
-
-	bool exists = c != NULL;
-	if(exists) { required = Required<T>(*c); }
-	optional = Optional<T>(c);
-
-	return exists;
-}
 
 template<typename T>
 bool HasComponent(Entity uEntity)

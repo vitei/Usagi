@@ -85,12 +85,34 @@ def unique_id(path)
   sprintf("%s-%s-%s-%s-%s", hex[0..7], hex[8..11], hex[12..15], hex[16..19], hex[20..31])
 end
 
-def add_to_locations(locations, files, filters)
+def add_to_filter_recursive(dir, filters)
+    dir = dir.tr('/', '\\')
+    path = Pathname.new(dir)
+    parent = path.parent.cleanpath.to_s
+
+    if path.parent.to_s != '.'
+      add_to_filter_recursive(parent, filters)
+    end
+
+    if !filters.has_key?(dir)
+      uniqueId = unique_id(dir)
+      filters.merge!( { dir => uniqueId }  )
+
+    end
+end
+
+def add_to_locations(locations, files, filters, addFilter=false)
   files.each do |s|
     dir = File.dirname(s)
 
-    next if !filters.has_key?(dir)
+    if !filters.has_key?(dir)
+      if addFilter
+        add_to_filter_recursive(dir, filters)
+        print filters
+      end
+    end
 
+    next if !filters.has_key?(dir)
     locations[s] = dir
   end
 
@@ -112,7 +134,7 @@ def build_filter_list(project_root)
 end
 
 def write_dependencies(sources_file, options)
-  suffices = ['.headers', '.boilerplate', '.proto']
+  suffices = ['.headers', '.boilerplate', '.proto', '.platform']
 
   suffices.map do |suffix|
     file = sources_file.sub('.sources', suffix)
@@ -129,11 +151,13 @@ def write_temporary_files(argv, project_file, filters_file, options)
   sources_file = argv[0]
   template_file = argv[1]
   project_root = to_windows_path(argv[2])
+  projectname = argv[3]
   project_dir = "#{project_root}\\"
   project_guid = options.fetch(:guid, '')
 
   sources = adjust_project_path(create_file_list(sources_file), project_root).sort
   headers_file = sources_file.gsub(/\.sources/, '.headers')
+  platform_headers_file = sources_file.gsub(/\.sources/, '.platformheaders')
   headers = adjust_project_path(create_file_list(headers_file), project_root).sort
 
   boilerplate_sources = []
@@ -141,6 +165,18 @@ def write_temporary_files(argv, project_file, filters_file, options)
 
   if File.exists?(boilerplate_file)
     boilerplate_sources = create_file_list(boilerplate_file).sort
+  end
+
+  platform_sources = []
+  platform_headers = []
+  platform_file = sources_file.gsub(/\.sources/, '.platform')
+
+  if File.exists?(platform_file)
+    platform_sources = create_file_list(platform_file).sort
+  end
+
+  if File.exists?(platform_headers_file)
+    platform_headers = create_file_list(platform_headers_file).sort
   end
 
   proto_file = sources_file.gsub(/\.sources/, '.proto')
@@ -185,6 +221,8 @@ def write_temporary_files(argv, project_file, filters_file, options)
   locations = add_to_locations({}, sources, filters)
   locations = add_to_locations(locations, headers, filters)
   locations = add_to_locations(locations, boilerplate_sources, filters)
+  locations = add_to_locations(locations, platform_headers, filters, true)
+  locations = add_to_locations(locations, platform_sources, filters, true)
   locations = add_to_locations(locations, proto_relative, filters)
   locations = add_to_locations(locations, proto_sources, filters)
   locations = add_to_locations(locations, proto_headers, filters)

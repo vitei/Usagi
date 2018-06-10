@@ -12,6 +12,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Particles/ParticleComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
+#include "Engine/Framework/GameComponents.h"
 #include "Engine/Framework/Merge.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Graphics/GPUUpdate.h"
@@ -162,7 +163,7 @@ namespace usg
 		for (GameComponents<usg::PhysicsScene>::Iterator it = GameComponents<usg::PhysicsScene>::GetIterator(); !it.IsEnd(); ++it)
 		{
 			Required<PhysicsScene> scene;
-			GetComponent((*it)->GetEntity(), scene);
+			m_componentLoadHandles.GetComponent((*it)->GetEntity(), scene);
 			ExecuteRaycasts(scene, m_eventManager, m_systemCoordinator);
 			GenerateOnCollisionSignals(m_systemCoordinator, scene);
 			GenerateOnTriggerSignals(m_systemCoordinator, scene);
@@ -316,11 +317,19 @@ namespace usg
 	void ComponentManager::CheckEntity(Entity e, bool bOnlyChildren)
 	{
 		e->SetCatchupTime(0.0f);
-		if (!bOnlyChildren && e->HasChanged())
+
+		if (!bOnlyChildren)
 		{
-			++m_uChangedEntities;
-			UpdateEntityIO(e);
-			e->ClearChanged();
+			if (e->HasPendingDeletions())
+			{
+				e->HandlePendingDeletes(m_componentLoadHandles);
+			}
+			if (e->HasChanged())
+			{
+				++m_uChangedEntities;
+				UpdateEntityIO(e);
+				e->ClearChanged();
+			}
 		}
 
 		if (e->HaveChildrenChanged())
@@ -484,28 +493,28 @@ namespace usg
 		{
 			if (spawnParams.HasTransform())
 			{
-				usg::TransformComponent* pTransform;
-				GetOutputComponent(e, &pTransform);
-				if (pTransform)
+				Required<usg::TransformComponent> trans;
+				m_componentLoadHandles.GetComponent(e, trans);
+				if (trans.IsValid())
 				{
-					*pTransform = spawnParams.GetTransform();
+					trans.Modify() = spawnParams.GetTransform();
 				}
-				usg::MatrixComponent* pMatrix;
-				GetOutputComponent(e, &pMatrix);
-				if (pMatrix)
+				Required<usg::MatrixComponent> mat;
+				m_componentLoadHandles.GetComponent(e, mat);
+				if (mat.IsValid())
 				{
-					pMatrix->matrix = spawnParams.GetTransform().rotation;
-					pMatrix->matrix.SetPos(spawnParams.GetTransform().position);
+					mat.Modify().matrix = spawnParams.GetTransform().rotation;
+					mat.Modify().matrix.SetPos(spawnParams.GetTransform().position);
 				}
 			}
 
 			if (spawnParams.HasOwnerNUID())
 			{
-				usg::NetworkOwner* pOwner;
-				GetOutputComponent(e, &pOwner);
-				if (pOwner)
+				Required<usg::NetworkOwner> owner;
+				m_componentLoadHandles.GetComponent(e, owner);
+				if (owner.IsValid())
 				{
-					pOwner->ownerUID = spawnParams.GetOwnerNUID();
+					owner.Modify().ownerUID = spawnParams.GetOwnerNUID();
 				}
 			}
 
@@ -543,7 +552,7 @@ namespace usg
 
 		if (merge.has_entityWithID)
 		{
-			e = root->GetChildEntityByName(merge.entityWithID);
+			e = root->GetChildEntityByName(m_componentLoadHandles, merge.entityWithID);
 		}
 
 		ASSERT(e != NULL);
@@ -569,26 +578,30 @@ namespace usg
 		}
 	}
 
-	void ComponentManager::RegisterResourceHandles(ComponentLoadHandles& handles)
+	void ComponentManager::RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene)
 	{
-		m_componentLoadHandles = handles;
+		m_componentLoadHandles.pDevice = pDevice;
+		m_componentLoadHandles.pResourceMgr = pRes;
+		m_componentLoadHandles.pScene = pScene;
 	}
 
 	void ComponentManager::FillComponentLoadHandles(ComponentLoadHandles& handlesOut, Entity parent)
 	{
-		handlesOut = m_componentLoadHandles;
+		handlesOut.pDevice = m_componentLoadHandles.pDevice;
+		handlesOut.pScene = m_componentLoadHandles.pScene;
+		handlesOut.pModelMgr = m_componentLoadHandles.pModelMgr ;
 
 		if (parent)
 		{
 			Required<PhysicsScene, FromSelfOrParents> physicsScene;
-			GetComponent(parent, physicsScene);
+			m_componentLoadHandles.GetComponent(parent, physicsScene);
 			if (physicsScene.IsValid())
 			{
 				handlesOut.pPhysicsScene = physicsScene.GetRuntimeData().pSceneData;
 			}
 
 			Required<ModelMgrComponent, FromSelfOrParents> modelMgr;
-			GetComponent(parent, modelMgr);
+			m_componentLoadHandles.GetComponent(parent, modelMgr);
 			if (modelMgr.IsValid())
 			{
 				handlesOut.pModelMgr = modelMgr.GetRuntimeData().pMgr;

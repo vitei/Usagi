@@ -4,7 +4,28 @@ require 'rake'
 require 'rexml/document'
 require 'yaml'
 
-def get_sourcelist(dir, target_platform,
+
+
+def get_platform_sourcelist(dir, target_platform, base_dir, underscore_dirs_whitelist, should_find_headers = false)
+
+  platSrc = FileList[]
+
+  base_path  = dir.sub("#{base_dir}", '')
+  path = Pathname.new(dir)
+  relative_path = path.relative_path_from(Pathname(base_dir))
+
+  underscore_dirs_whitelist.each do |ext|
+
+    type = ext.gsub('_', '')
+    platformList = "Platform/#{type}/#{relative_path}"
+    platSrc.include(get_sourcelist(platformList, target_platform, underscore_dirs_whitelist, should_find_headers))
+
+  end
+
+  platSrc
+end
+
+def get_sourcelist(dir, target_platform, 
                    underscore_dirs_whitelist = false, should_find_headers = false)
   src = FileList[]
   sourceList = "#{dir}/.sources.#{target_platform}"

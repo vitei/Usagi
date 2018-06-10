@@ -54,16 +54,16 @@ namespace usg
 		return convexMesh;
 	}
 
-	static usg::pair<physx::PxConvexMesh*, physx::PxTransform> CreateChassisMesh(Required<VehicleCollider> vehicle, Required<PhysicsScene> scene, const physx::PxVec3 dims, physx::PxPhysics& physics, physx::PxCooking& cooking)
+	static usg::pair<physx::PxConvexMesh*, physx::PxTransform> CreateChassisMesh(Required<VehicleCollider> vehicle, ComponentLoadHandles& handles, const physx::PxVec3 dims, physx::PxPhysics& physics, physx::PxCooking& cooking)
 	{
 		usg::pair<physx::PxConvexMesh*, physx::PxTransform> r{nullptr, physx::PxTransform(physx::PxIdentity)};
 		if (vehicle->szCollisionModel[0] != 0)
 		{
-			Entity bodyBone = vehicle.GetEntity()->GetChildEntityByName("locatorBody");
+			Entity bodyBone = vehicle.GetEntity()->GetChildEntityByName(handles, "locatorBody");
 			ASSERT(bodyBone != nullptr);
-			auto& sceneRtd = scene.GetRuntimeData().GetData();
+			auto& sceneRtd = *handles.pPhysicsScene;
 			r.first = sceneRtd.pMeshCache->GetConvexMesh(vehicle->szCollisionModel,"locatorBody");
-			r.second = ToPhysXTransform(TransformTool::GetRelativeTransform(vehicle.GetEntity(), bodyBone));
+			r.second = ToPhysXTransform(TransformTool::GetRelativeTransform(vehicle.GetEntity(), bodyBone, handles));
 		}
 		else
 		{
@@ -95,23 +95,22 @@ namespace usg
 		return pMat;
 	}
 
-	static physx::PxRigidDynamic* CreateVehicleActor(Required<VehicleCollider> vehicle, const physx::PxVehicleChassisData& chassisData, physx::PxMaterial** wheelMaterials, physx::PxConvexMesh** wheelConvexMeshes, physx::PxMaterial** chassisMaterials, physx::PxConvexMesh* pChassisMesh, physx::PxTransform chassisTransform, const physx::PxU32 uNumChassisMeshes, physx::PxPhysics& physics)
+	static physx::PxRigidDynamic* CreateVehicleActor(Required<VehicleCollider> vehicle, ComponentLoadHandles& handles, const physx::PxVehicleChassisData& chassisData, physx::PxMaterial** wheelMaterials, physx::PxConvexMesh** wheelConvexMeshes, physx::PxMaterial** chassisMaterials, physx::PxConvexMesh* pChassisMesh, physx::PxTransform chassisTransform, const physx::PxU32 uNumChassisMeshes, physx::PxPhysics& physics)
 	{
 		ASSERT(uNumChassisMeshes == 1);
 		Entity e = vehicle.GetEntity();
 
 		Required<TransformComponent> trans;
-		GetComponent(e, trans);
+		handles.GetComponent(e, trans);
 		ASSERT(trans.IsValid());
 
 		Required<CollisionMasks> masks;
-		GetComponent(e, masks);
+		handles.GetComponent(e, masks);
 		
 		Required<RigidBody> rigidBody;
-		GetComponent(e, rigidBody);
+		handles.GetComponent(e, rigidBody);
 		ASSERT(rigidBody->bDynamic);
 		ASSERT(!rigidBody->bKinematic);
-		ComponentLoadHandles handles;
 		OnLoaded(*GameComponents<RigidBody>::GetComponent(e), handles, false);
 
 		auto& vehicleRtd = vehicle.GetRuntimeData();
@@ -296,7 +295,7 @@ namespace usg
 	}
 
 	// Inspect wheel bones and return number of wheels, their positions and radii.
-	static uint32 FindWheels(Required<VehicleCollider> vehicle, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelWidths, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelRadii, usg::array<Vector3f, PhysicsConstants::VehicleMaxNumWheels>& wheelPositions, usg::array<WheelHelper, PhysicsConstants::VehicleMaxNumWheels>& wheelHelpers)
+	static uint32 FindWheels(Required<VehicleCollider> vehicle, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelWidths, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelRadii, usg::array<Vector3f, PhysicsConstants::VehicleMaxNumWheels>& wheelPositions, usg::array<WheelHelper, PhysicsConstants::VehicleMaxNumWheels>& wheelHelpers, ComponentLoadHandles& handles)
 	{
 		ASSERT(vehicle->szCollisionModel[0] != 0);
 		CollisionModelResHndl collisionModelHandle = ResourceMgr::Inst()->GetCollisionModel(vehicle->szCollisionModel);
@@ -314,10 +313,10 @@ namespace usg
 		};
 
 		uint32 uWheelsFound = 0;
-		auto wheelFinder = [&](Entity e)
+		auto wheelFinder = [&](Entity e, ComponentLoadHandles& handles)
 		{
 			Optional<Identifier> id;
-			GetComponent(e, id);
+			handles.GetComponent(e, id);
 			if (id.Exists())
 			{
 				const bool bHub = str::CompareLen(id.Force()->name, "locatorHub", 10);
@@ -328,17 +327,17 @@ namespace usg
 					pWheelHub->uIndex = uWheelsFound;
 					pWheelHub->bIsHub = true;
 
-					const auto wheelTrans = TransformTool::GetRelativeTransform(vehicle.GetEntity(), e);
+					const auto wheelTrans = TransformTool::GetRelativeTransform(vehicle.GetEntity(), e, handles);
 					wheelPositions[uWheelsFound] = wheelTrans.position;
 
 					float fWheelRadius = 0;
 					float fWheelWidth = 0;
 
 					Entity bone = nullptr;
-					auto wheelProcessor = [&](Entity wheelEntity)
+					auto wheelProcessor = [&](Entity wheelEntity, ComponentLoadHandles& handles)
 					{
 						Optional<Identifier> wheelId;
-						GetComponent(wheelEntity, wheelId);
+						handles.GetComponent(wheelEntity, wheelId);
 						if (wheelEntity == e)
 						{
 							return;
@@ -350,12 +349,12 @@ namespace usg
 							pWheelHub->uIndex = uWheelsFound;
 							pWheelHub->bIsHub = false;
 							bone = wheelEntity;
-							const auto wheelTransFromHub = TransformTool::GetRelativeTransform(e, wheelEntity);
+							const auto wheelTransFromHub = TransformTool::GetRelativeTransform(e, wheelEntity, handles);
 							wheelHelpers[uWheelsFound].vOffsetFromHub = wheelTransFromHub.position;
 						}
 					};
 
-					e->ProcessEntityRecursively(wheelProcessor);
+					e->ProcessEntityRecursively(wheelProcessor, handles);
 					if (!(fWheelWidth > 0 && fWheelRadius > 0))
 					{
 						// Get wheel extents from the hub instead
@@ -378,7 +377,7 @@ namespace usg
 				}
 			}
 		};
-		vehicle.GetEntity()->ProcessEntityRecursively(wheelFinder);
+		vehicle.GetEntity()->ProcessEntityRecursively(wheelFinder, handles);
 
 		// Find the middle wheels, increase radii of all wheels by a value which makes the middle wheels touch ground
 		// Also find the number of wheels touching ground in the default pose (when applying thrust force to the vehicle, the force is based on number of wheels touching the ground and we use
@@ -409,7 +408,7 @@ namespace usg
 		return uWheelsFound;
 	}
 
-	static physx::PxVehicleWheels* CreateVehicle(Required<VehicleCollider> vehicle, Required<PhysicsScene> scene)
+	static physx::PxVehicleWheels* CreateVehicle(Required<VehicleCollider> vehicle, ComponentLoadHandles& handles)
 	{
 		const physx::PxVec3 chassisDims = ToPhysXVec3(vehicle->vChassisExtents);
 		const physx::PxF32 wheelWidth = vehicle->fWheelWidth;
@@ -425,7 +424,7 @@ namespace usg
 		ASSERT(uNumWheels > 0 || vehicle->szCollisionModel[0] != 0);
 		if (vehicle->szCollisionModel[0] != 0)
 		{
-			uNumWheels = FindWheels(vehicle, wheelWidths, wheelRadii, wheelPositions, wheelHelpers);
+			uNumWheels = FindWheels(vehicle, wheelWidths, wheelRadii, wheelPositions, wheelHelpers, handles);
 			ASSERT(uNumWheels >= 4 && uNumWheels <= PhysicsConstants::VehicleMaxNumWheels && uNumWheels % 2 == 0);
 			vehicle.Modify().uNumWheels = uNumWheels;
 		}
@@ -447,12 +446,11 @@ namespace usg
 			}
 		}
 
-		auto& sceneRtd = scene.GetRuntimeData().GetData();
-		physx::PxPhysics* pPhysics = sceneRtd.pPhysics;
-		physx::PxCooking* pCooking = sceneRtd.pCooking;
+		physx::PxPhysics* pPhysics = handles.pPhysicsScene->pPhysics;
+		physx::PxCooking* pCooking = handles.pPhysicsScene->pCooking;
 
 		Required<RigidBody> rigidBody;
-		GetComponent(vehicle.GetEntity(),rigidBody);
+		handles.GetComponent(vehicle.GetEntity(),rigidBody);
 		ASSERT(rigidBody.IsValid());
 		
 		// Construct a physx actor with shapes for the chassis and wheels.
@@ -465,13 +463,13 @@ namespace usg
 			{
 				for (physx::PxU32 i = 0; i < uNumWheels; i++)
 				{
-					wheelConvexMeshes[i] = sceneRtd.pMeshCache->GetCylinderMesh(wheelHelpers[i].vOffsetFromHub, V3F_X_AXIS, wheelRadii[i], wheelWidths[i], 8);
+					wheelConvexMeshes[i] = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(wheelHelpers[i].vOffsetFromHub, V3F_X_AXIS, wheelRadii[i], wheelWidths[i], 8);
 					wheelMaterials[i] = CreateMaterial(vehicle->wheelMaterial, pPhysics);
 				}
 			}
 			else
 			{
-				physx::PxConvexMesh* pWheelMesh = sceneRtd.pMeshCache->GetCylinderMesh(V3F_ZERO, V3F_X_AXIS, vehicle->fWheelRadius, vehicle->fWheelWidth, 8);
+				physx::PxConvexMesh* pWheelMesh = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(V3F_ZERO, V3F_X_AXIS, vehicle->fWheelRadius, vehicle->fWheelWidth, 8);
 				for (physx::PxU32 i = 0; i < uNumWheels; i++)
 				{
 					wheelConvexMeshes[i] = pWheelMesh;
@@ -479,14 +477,14 @@ namespace usg
 				}
 			}
 
-			auto chassis = CreateChassisMesh(vehicle, scene, chassisDims, *pPhysics, *pCooking);
+			auto chassis = CreateChassisMesh(vehicle, handles, chassisDims, *pPhysics, *pCooking);
 			physx::PxMaterial* pChassisMaterials[1] = { CreateMaterial(vehicle->chassisMaterial,pPhysics) };
 
 			physx::PxVehicleChassisData rigidBodyData;
 			rigidBodyData.mMOI = ToPhysXVec3(vehicle->vChassisMOI);
 			rigidBodyData.mMass = rigidBody->fMass;
 			rigidBodyData.mCMOffset = ToPhysXVec3(vehicle->vChassisCMOffset);
-			pVehicleActor = CreateVehicleActor(vehicle, rigidBodyData, wheelMaterials, wheelConvexMeshes, pChassisMaterials, chassis.first, chassis.second , 1, *pPhysics);
+			pVehicleActor = CreateVehicleActor(vehicle, handles, rigidBodyData, wheelMaterials, wheelConvexMeshes, pChassisMaterials, chassis.first, chassis.second , 1, *pPhysics);
 
 			const float fFinalMass = pVehicleActor->getMass();
 			rigidBody.Modify().fMass = fFinalMass;
@@ -495,8 +493,7 @@ namespace usg
 #ifndef FINAL_BUILD
 			pChassisShape->setName("VehicleChassis");
 #endif
-			auto& sceneRtd = scene.GetRuntimeData().GetData();
-			sceneRtd.dirtyShapeList.insert((PhysXShapeRuntimeData*)&vehicle.GetRuntimeData());
+			handles.pPhysicsScene->dirtyShapeList.insert((PhysXShapeRuntimeData*)&vehicle.GetRuntimeData());
 		}
 
 		physx::PxVehicleWheelsSimData* wheelsSimData = physx::PxVehicleWheelsSimData::allocate(uNumWheels);
@@ -542,10 +539,10 @@ namespace usg
 		}
 	}
 
-	void OnVehicleColliderLoaded(Component<Components::VehicleCollider>& c)
+	void OnVehicleColliderLoaded(Component<Components::VehicleCollider>& c, ComponentLoadHandles& handles)
 	{
 		Required<RigidBody> rigidBody;
-		GetComponent(c.GetEntity(), rigidBody);
+		handles.GetComponent(c.GetEntity(), rigidBody);
 		ASSERT(rigidBody.IsValid() && "You are trying to add VehicleCollider to an entity which has no rigid body. Please add a dynamic rigid body to the entity.");
 
 		const auto& vChassisDims = c->vChassisExtents;
@@ -555,26 +552,20 @@ namespace usg
 		collider.vChassisMOI = vChassisMOI;
 		collider.fWheelMOI = 0.5f*c->fWheelMass*c->fWheelRadius*c->fWheelRadius;
 
-		Required<PhysicsScene> scene = physics::GetScene(c);
-		ASSERT(scene.IsValid());
-		auto& sceneRtd = scene.GetRuntimeData().GetData();
-
 		auto& rtd = c.GetRuntimeData();
-		rtd.pVehicleDrive = CreateVehicle(Required<VehicleCollider>(c),scene);
+		rtd.pVehicleDrive = CreateVehicle(Required<VehicleCollider>(c),handles);
 		rtd.entity = c.GetEntity();
 		rtd.shapeAggregateEntity = c.GetEntity();
 		
-		sceneRtd.vehicleData.vehicleList.push_back(rtd.pVehicleDrive);
+		handles.pPhysicsScene->vehicleData.vehicleList.push_back(rtd.pVehicleDrive);
 	}
 
-	void OnVehicleColliderDeactivated(Component<Components::VehicleCollider>& c)
+	void OnVehicleColliderDeactivated(Component<Components::VehicleCollider>& c, ComponentLoadHandles& handles)
 	{
 		auto& rtd = c.GetRuntimeData();
-		auto& sceneRtd = physics::GetScene(c).GetRuntimeData().GetData();
-
-		auto it = std::find(sceneRtd.vehicleData.vehicleList.begin(), sceneRtd.vehicleData.vehicleList.end(), rtd.pVehicleDrive);
-		ASSERT(it != sceneRtd.vehicleData.vehicleList.end());
-		sceneRtd.vehicleData.vehicleList.erase(it);
+		auto it = std::find(handles.pPhysicsScene->vehicleData.vehicleList.begin(), handles.pPhysicsScene->vehicleData.vehicleList.end(), rtd.pVehicleDrive);
+		ASSERT(it != handles.pPhysicsScene->vehicleData.vehicleList.end());
+		handles.pPhysicsScene->vehicleData.vehicleList.erase(it);
 		
 		rtd.pVehicleDrive = nullptr;
 		rtd.pChassisShape = nullptr;

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<%# ERB template for the game project %>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4F56406E-EE3A-4920-AA15-ACCAC28EB101}</ProjectGuid>
+    <RootNamespace><%= projectname %></RootNamespace>
+    <ProjectName><%= projectname %></ProjectName>
+    <ApplicationEnvironment>title</ApplicationEnvironment>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(USAGI_DIR)\Engine\CommonProps.props" />
+    <Import Project="$(USAGI_DIR)\Engine\ConditionalProps.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+
+ <ItemDefinitionGroup>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
+      <Message>Rake (Always run because of dummy output)</Message>
+      <Outputs>dummy.dummy</Outputs>
+    </PreBuildEvent>
+ </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4305;4577;4595;4819</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatSpecificWarningsAsErrors>
+      </TreatSpecificWarningsAsErrors>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundationDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDKDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy DLLs to Executable directory</Message>
+      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+    </PostBuildEvent>
+    <Manifest>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  
+ <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DisableSpecificWarnings>4305;4577;4595;4819</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatSpecificWarningsAsErrors>
+      </TreatSpecificWarningsAsErrors>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Common_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Vehicle.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Cooking_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundation_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Extensions.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDK_x64.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy DLLs to Executable directory</Message>
+      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+
+  <PropertyGroup>
+    <SourceDir>$(SolutionDir)<%= project_dir %></SourceDir>
+    <PBProjectDir>$(SolutionDir)_build\proto\<%= project_dir %></PBProjectDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+<% for @src in proto_sources %>
+    <ClCompile Include="$(PBProjectDir)<%= @src %>" />
+<% end %>
+
+  <ClCompile Include="..\..\..\$(ProjectName)\_exclude\stdafx.cpp">
+    <PrecompiledHeader>Create</PrecompiledHeader>
+  </ClCompile>
+
+<% for @h in proto_headers %>
+    <ClInclude Include="$(PBProjectDir)<%= @h %>" />
+<% end %>
+
+<% for @src in boilerplate_sources %>
+    <ClCompile Include="$(IntDir)..\<%= @src %>" />
+<% end %>
+
+<% for @src in sources %>
+    <ClCompile Include="..\..\..\<%= project_dir + @src %>" />
+<% end %>
+
+<% for @h in headers %>
+    <ClInclude Include="..\..\..\<%= project_dir + @h %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+<% for @p in proto %>
+    <None Include="..\..\..\<%= @p %>" />
+<% end %>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\AI\AI.vcxproj">
+      <Project>{fb917b79-9c70-45f8-8674-1428b7895167}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Audio\Audio.vcxproj">
+      <Project>{2219a034-b5ef-44ff-b7dc-981cb58711b5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Common\Common.vcxproj">
+      <Project>{81e3ed0a-3d5f-4689-bdb6-ddf15b06eee4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Core\Core.vcxproj">
+      <Project>{4f44a822-08d7-424a-8d40-72677d8346a4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Debug\Debug.vcxproj">
+      <Project>{505a7767-c568-4303-8979-116ff110c8ff}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Framework\Framework.vcxproj">
+      <Project>{1da383d2-7811-445a-aacc-ca255b994731}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Graphics\Graphics.vcxproj">
+      <Project>{a73a2dde-2075-496c-9770-21395924e08b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\GUI\GUI.vcxproj" />
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\HID\HID.vcxproj">
+      <Project>{6c1ffe72-4fe6-4890-a961-425cac514f62}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Layout\Layout.vcxproj">
+      <Project>{f9b13ed7-9cf4-4151-9cb4-3b7edbae1566}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Maths\Maths.vcxproj">
+      <Project>{258c9d89-38fb-4b1e-81e1-6d32ac81ff17}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Memory\Memory.vcxproj">
+      <Project>{1c319d5b-0060-4653-9000-2ed6c92acaef}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Network\Network.vcxproj">
+      <Project>{f68e2bf2-e65e-422f-bbed-249e476331a0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Particles\Particles.vcxproj">
+      <Project>{10466b50-9371-4f53-815b-a024dd74c7e7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Physics\Physics.vcxproj">
+      <Project>{41e78c13-bdda-4803-9fe5-1fa6b7607685}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\PostFX\PostFX.vcxproj">
+      <Project>{be5cb977-8776-4efb-a718-766cf0026e4d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Resource\Resource.vcxproj">
+      <Project>{8e6b74e5-b0c4-4ac1-8e09-7c97747b3f2e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Scene\Scene.vcxproj">
+      <Project>{6febd175-576b-411d-8173-2833305ae882}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\System\System.vcxproj">
+      <Project>{2ca5c758-fa4d-431a-86ef-79065e243d3e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\ThirdParty\ThirdParty.vcxproj">
+      <Project>{80d73084-d3c6-4e9b-a8e9-6b03e8e97c36}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Usagi\_build\projects\Engine\Game\Game.vcxproj">
+      <Project>{1da383d2-7811-445a-aacc-ca255b994732}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <Target Name="RakeClean" BeforeTargets="Clean">
+    <Exec Command="$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform) clean_bp" />
+  </Target>
+</Project>

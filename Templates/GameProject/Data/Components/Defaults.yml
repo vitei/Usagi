@@ -1,0 +1,34 @@
+Quaternion: {x: 0, y: 0, z: 0, w: 1}
+
+Matrix3x3:
+  m: [1, 0, 0,
+      0, 1, 0,
+      0, 0, 1]
+
+Matrix4x4:
+  m: [1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1]
+
+Box:
+  vCenter:  {x: 0, y: 0, z: 0}
+  vExtents: {x: 1, y: 1, z: 1}
+  mAxes:
+    m: [1, 0, 0,
+        0, 1, 0,
+        0, 0, 1]
+
+PhysicsComponent:
+  fMass: 1
+  fAngularFriction: 0.1
+  fGravity: -1
+  tensor: {x: 1, y: 1, z: 1}
+  gravityNormal: {x: 0, y: 1, z: 0}
+  groundNormal: {x: 0, y: 1, z: 0}
+
+RigidBody:
+  vInertiaTensor: {x: 1, y: 1, z: 1}
+
+LightSpec:
+    direction: { x: 0.0, y: 0.0, z: 1.0 }

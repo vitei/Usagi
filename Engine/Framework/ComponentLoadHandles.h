@@ -11,15 +11,19 @@ namespace usg
 	class Scene;
 	class ResourceMgr;
 	class ModelMgr;
+	class ComponentManager;
 
 	namespace physics
 	{
 		struct PhysicsSceneData;
 	}
 
-	struct ComponentLoadHandles
+	struct ComponentLoadHandlesBase
 	{
-		ComponentLoadHandles() { pDevice = nullptr; pScene = nullptr; pResourceMgr = nullptr; pPhysicsScene = nullptr; pModelMgr = nullptr; }
+	protected:
+		ComponentLoadHandlesBase() { pDevice = nullptr; pScene = nullptr; pResourceMgr = nullptr; pPhysicsScene = nullptr; pModelMgr = nullptr; }
+		PRIVATIZE_COPY(ComponentLoadHandlesBase)
+	public:
 
 		GFXDevice*					pDevice;
 		Scene*						pScene;

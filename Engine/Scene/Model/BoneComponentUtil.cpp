@@ -13,7 +13,7 @@ namespace usg
 template<>
 void OnLoaded<IntermediateBone>(Component<IntermediateBone>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
 {
-	ProcessIntermediateBoneEntity(c.GetEntity(), bWasPreviouslyCalled);
+	ProcessIntermediateBoneEntity(c.GetEntity(), handles, bWasPreviouslyCalled);
 }
 
 template<>
@@ -48,10 +48,10 @@ void InitializeBones(Entity e, ComponentLoadHandles& handles, bool bWasPreviousl
 	Outputs outputs;
 
 	bool bDidSetInputOutputs =
-		GetComponent(e, inputs.id) &&
-		GetComponent(e, inputs.model) &&
-		GetComponent(e, outputs.bone) &&
-		GetComponent(e, outputs.model);
+		handles.GetComponent(e, inputs.id) &&
+		handles.GetComponent(e, inputs.model) &&
+		handles.GetComponent(e, outputs.bone) &&
+		handles.GetComponent(e, outputs.model);
 
 	if (!bDidSetInputOutputs)
 	{
@@ -70,7 +70,7 @@ void InitializeBones(Entity e, ComponentLoadHandles& handles, bool bWasPreviousl
 	}
 }
 
-void InitializeMatrix(Entity e)
+void InitializeMatrix(Entity e, ComponentLoadHandles& handles)
 {
 	ASSERT(e != NULL);
 
@@ -90,10 +90,10 @@ void InitializeMatrix(Entity e)
 	Outputs outputs;
 
 	bool bDidSetInputOutputs =
-		GetComponent(e, inputs.parentMtx) &&
-		GetComponent(e, inputs.tran) &&
-		GetComponent(e, inputs.scale) &&
-		GetComponent(e, outputs.worldMtx);
+		handles.GetComponent(e, inputs.parentMtx) &&
+		handles.GetComponent(e, inputs.tran) &&
+		handles.GetComponent(e, inputs.scale) &&
+		handles.GetComponent(e, outputs.worldMtx);
 
 	if (!bDidSetInputOutputs)
 	{
@@ -133,7 +133,7 @@ void InitializeMatrix(Entity e)
 	outputs.worldMtx.Modify().matrix = mWorld;
 }
 
-void InitializeScale(Entity e)
+void InitializeScale(Entity e, ComponentLoadHandles& handles)
 {
 	ASSERT(e != NULL);
 
@@ -152,9 +152,9 @@ void InitializeScale(Entity e)
 	Outputs outputs;
 
 	bool bDidSetInputOutputs =
-		GetComponent(e, inputs.bone) &&
-		GetComponent(e, inputs.scale) &&
-		GetComponent(e, outputs.scale);
+		handles.GetComponent(e, inputs.bone) &&
+		handles.GetComponent(e, inputs.scale) &&
+		handles.GetComponent(e, outputs.scale);
 
 	if (!bDidSetInputOutputs)
 	{
@@ -164,7 +164,7 @@ void InitializeScale(Entity e)
 	outputs.scale.Modify().scale = inputs.bone->m_scale;
 }
 
-void SetBoneTransforms(Entity e)
+void SetBoneTransforms(Entity e, ComponentLoadHandles& handles)
 {
 	ASSERT(e != NULL);
 
@@ -186,12 +186,12 @@ void SetBoneTransforms(Entity e)
 	Outputs outputs;
 
 	bool bDidSetInputOutputs =
-		GetComponent(e, inputs.mtx) &&
-		GetComponent(e, inputs.id) &&
-		GetComponent(e, inputs.turnable) &&
-		GetComponent(e, inputs.model) &&
-		GetComponent(e, outputs.bone) &&
-		GetComponent(e, inputs.device);
+		handles.GetComponent(e, inputs.mtx) &&
+		handles.GetComponent(e, inputs.id) &&
+		handles.GetComponent(e, inputs.turnable) &&
+		handles.GetComponent(e, inputs.model) &&
+		handles.GetComponent(e, outputs.bone) &&
+		handles.GetComponent(e, inputs.device);
 
 	if (!bDidSetInputOutputs)
 	{
@@ -208,7 +208,7 @@ void SetBoneTransforms(Entity e)
 	outputs.bone.GetRuntimeData().pBone->UpdateConstants(inputs.device.GetRuntimeData().pDevice);
 }
 
-void AddMatrixToEntity(Entity e)
+void AddMatrixToEntity(Entity e, ComponentLoadHandles& handles)
 {
 	ASSERT(e != NULL);
 
@@ -229,11 +229,11 @@ void AddMatrixToEntity(Entity e)
 	Inputs inputs;
 
 	bool bDidSetInputs =
-		GetComponent(e, inputs.bone) &&
-		GetComponent(e, inputs.id) &&
-		GetComponent(e, inputs.intermediate) &&
-		GetComponent(e, inputs.mtx) &&
-		GetComponent(e, inputs.billboard);
+		handles.GetComponent(e, inputs.bone) &&
+		handles.GetComponent(e, inputs.id) &&
+		handles.GetComponent(e, inputs.intermediate) &&
+		handles.GetComponent(e, inputs.mtx) &&
+		handles.GetComponent(e, inputs.billboard);
 
 	if (!bDidSetInputs) { return; }
 
@@ -243,7 +243,7 @@ void AddMatrixToEntity(Entity e)
 	if (!(bIsBone || bIsIntermediateBone)) { return; }
 
 	RootInputs rootInput;
-	bool bHasRootTransform = GetComponent(e, rootInput.transform) && rootInput.transform.Exists();
+	bool bHasRootTransform = handles.GetComponent(e, rootInput.transform) && rootInput.transform.Exists();
 	bool bIsBillboard = inputs.billboard.Exists();
 
 	if (bIsBone && !bIsBillboard && !bHasRootTransform) { return; }
@@ -258,20 +258,20 @@ void ProcessBoneEntity(Entity e, ComponentLoadHandles& handles, bool bWasPreviou
 	ASSERT(e != NULL);
 
 	InitializeBones(e, handles, bWasPreviouslyCalled);
-	AddScaleToEntity(e);
-	InitializeScale(e);
-	AddMatrixToEntity(e);
-	InitializeMatrix(e);
-	SetBoneTransforms(e);
+	AddScaleToEntity(e, handles);
+	InitializeScale(e, handles);
+	AddMatrixToEntity(e, handles);
+	InitializeMatrix(e, handles);
+	SetBoneTransforms(e, handles);
 }
 
-void ProcessIntermediateBoneEntity(Entity e, bool bWasPreviouslyCalled)
+void ProcessIntermediateBoneEntity(Entity e, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
 {
-	AddMatrixToEntity(e);
-	InitializeMatrix(e);
+	AddMatrixToEntity(e, handles);
+	InitializeMatrix(e, handles);
 }
 
-void AddScaleToEntity(Entity e)
+void AddScaleToEntity(Entity e, ComponentLoadHandles& handles)
 {
 	ASSERT(e != NULL);
 
@@ -281,7 +281,7 @@ void AddScaleToEntity(Entity e)
 	};
 
 	RootInputs rootInput;
-	bool bHasRootScale = GetComponent(e, rootInput.scale) && rootInput.scale.Exists();
+	bool bHasRootScale = handles.GetComponent(e, rootInput.scale) && rootInput.scale.Exists();
 
 	if (!bHasRootScale) { return; }
 
@@ -294,8 +294,8 @@ void AddScaleToEntity(Entity e)
 	Inputs inputs;
 
 	bool bDidSetInputs =
-		GetComponent(e, inputs.bone) &&
-		GetComponent(e, inputs.scale);
+		handles.GetComponent(e, inputs.bone) &&
+		handles.GetComponent(e, inputs.scale);
 
 	if (inputs.scale.Exists()) { return; }
 

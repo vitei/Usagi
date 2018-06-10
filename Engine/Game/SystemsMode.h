@@ -6,6 +6,7 @@
 #ifndef _USAGI_SYSTEMS_MODE_H_
 #define _USAGI_SYSTEMS_MODE_H_
 #include "Engine/Common/Common.h"
+#include "Engine/Framework/GameComponents.h"
 #include "Mode.h"
 
 
@@ -14,10 +15,11 @@ namespace usg
 	class ComponentEntity;
 	class Scene;
 	class SystemCoordinator;
+	class ComponentManager;
 
 	typedef void(*RegisterSystemsFn) (usg::SystemCoordinator& systemCoordinator);
 
-	class SystemsMode : public Mode
+	class SystemsMode : public Mode, public UnsafeComponentGetter
 	{
 	public:
 		SystemsMode(RegisterSystemsFn fnGameSysRegister);
@@ -29,6 +31,7 @@ namespace usg
 
 		virtual void InitNetworking(UsagiNet& usagiNetwork) override;
 		
+		ComponentManager* GetComponentMgr();
 
 	protected:
 		ComponentEntity* GetRootEntity();

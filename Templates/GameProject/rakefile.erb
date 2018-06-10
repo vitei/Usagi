@@ -1,0 +1,35 @@
+require 'tempfile'
+require 'fileutils'
+
+SUBMODULE_DIR = 'Usagi'
+DEFAULT_PLATFORM = 'win'
+# TODO: get from the gitlab build artifacts
+NINJA_PREFIX = "#{SUBMODULE_DIR}/Tools/bin/"
+
+
+PROJECT         = ENV["project"]   || "<%= projectname %>"
+CURRENT_DIR     = File.dirname(__FILE__)
+
+require_relative File.join(SUBMODULE_DIR, 'Tools/build/game_common_rake.rb')
+
+BUILDS.each{ |b| directory build_dir(b) }
+
+task :ninja => build_audio + BUILDS.map{|b|build_dir b} do |t|
+  BUILDS.each do |b|
+    deps_option = "-f #{protobuf_depfile(true)} -s #{SUBMODULE_DIR}"
+
+    usagi_ninja_command_succeeded = false
+
+    if File.exists?(SUBMODULE_DIR)
+#     deps_option = "#{SUBMODULE_DIR}/Engine"
+
+      sh "cd #{SUBMODULE_DIR} && rake #{ARGV.clone.reject{ |t| SKIP_USAGI_BUILD.include? t }.join(' ')}" do |finished, status|
+        $usagi_ninja_command_succeeded = finished
+      end
+    end
+
+    sh "#{RUBY} #{SUBMODULE_DIR}/Tools/build/deflist.rb #{PROJECT} #{deps_option} > #{protobuf_depfile}"
+
+    sh "#{RUBY} Tools/build/generator.rb #{b} #{TARGET_PLATFORM} #{REGION} #{PROJECT} #{CURRENT_DIR} #{ninja_file b}"
+  end
+end

@@ -18,16 +18,16 @@ namespace usg
 {
 
 void InitializeBones(Entity e, ComponentLoadHandles& handles, bool bWasPreviouslyCalled);
-void InitializeMatrix(Entity e);
-void InitializeScale(Entity e);
-void SetBoneTransforms(Entity e);
-void AddMatrixToEntity(Entity e);
-void AddScaleToEntity(Entity e);
+void InitializeMatrix(Entity e, ComponentLoadHandles& handles);
+void InitializeScale(Entity e, ComponentLoadHandles& handles);
+void SetBoneTransforms(Entity e, ComponentLoadHandles& handles);
+void AddMatrixToEntity(Entity e, ComponentLoadHandles& handles);
+void AddScaleToEntity(Entity e, ComponentLoadHandles& handles);
 
 // This is a convenience function which calls the four functions
 // listed above.
 void ProcessBoneEntity(Entity e, ComponentLoadHandles& handles, bool bWasPreviouslyCalled);
-void ProcessIntermediateBoneEntity(Entity e, bool bWasPreviouslyCalled);
+void ProcessIntermediateBoneEntity(Entity e, ComponentLoadHandles& handles, bool bWasPreviouslyCalled);
 
 // This functor is for manually re-initializing the model component
 // after you've called ClearModel on it.

@@ -19,12 +19,15 @@ namespace usg
 			{
 				return Color(0.0f, 0.0f, 0.0f, 0.0f);
 			}
+#if 0
+			// TODO: Refactor. Even in debug we shouldn't just be grabbing components
 			Required<CollisionMasks, FromSelfOrParents> masks;
 			GetComponent(c.Force().GetEntity(), masks);
 			if (masks->uGroup == 0 || masks->uFilter == 0)
 			{
 				return Color(0.0f, 0.0f, 0.0f, 0.0f);
 			}
+#endif
 			const bool bIsTrigger = c.Force()->bIsTrigger;
 			return !bIsTrigger ? Color(1, 0, 1, 0.5f) : Color(1, 0, 0, 0.25f + 0.20f*sinf(7.0f*NetTime::GetServerTime()));
 		}
@@ -235,6 +238,11 @@ namespace usg
 
 		void DebugRender(const Camera& camera)
 		{
+			// We are only getting components and its only debug, still this should be fixed
+			struct Getter : public UnsafeComponentGetter
+			{
+
+			} getter;
 			s_uFrameCount++;
 
 			constexpr float VisibilityRadius = 60;
@@ -244,28 +252,28 @@ namespace usg
 			{
 				Entity e = (*it)->GetEntity();
 				Required<RigidBody, FromSelf> rb;
-				GetComponent(e, rb);
+				getter.GetComponent(e, rb);
 				const auto vRigidBodyPos = Vector4f(ToUsgVec3(rb.GetRuntimeData().pRigidActor->getGlobalPose().p),1);
 				if (camera.GetFrustum().ArePointsInFrustum(&vRigidBodyPos, 1) && vRigidBodyPos.v3().GetSquaredDistanceFrom(vCamPos) < VisibilityRadius*VisibilityRadius)
 				{
 					Optional<MeshCollider> meshCollider;
-					GetComponent(e, meshCollider);
+					getter.GetComponent(e, meshCollider);
 					RenderDebugMesh(meshCollider, rb.GetRuntimeData().pRigidActor->getGlobalPose());
 
 					Optional<BoxCollider> boxCollider;
-					GetComponent(e, boxCollider);
+					getter.GetComponent(e, boxCollider);
 					RenderDebugMesh(boxCollider, rb.GetRuntimeData().pRigidActor->getGlobalPose());					
 
 					Optional<VehicleCollider> vehicleCollider;
-					GetComponent(e, vehicleCollider);
+					getter.GetComponent(e, vehicleCollider);
 					RenderDebugMesh(vehicleCollider, rb.GetRuntimeData().pRigidActor->getGlobalPose());
 
 					Optional<CylinderCollider> cylinderCollider;
-					GetComponent(e, cylinderCollider);
+					getter.GetComponent(e, cylinderCollider);
 					RenderDebugMesh(cylinderCollider, rb.GetRuntimeData().pRigidActor->getGlobalPose());
 
 					Optional<ConeCollider> coneCollider;
-					GetComponent(e, coneCollider);
+					getter.GetComponent(e, coneCollider);
 					RenderDebugMesh(coneCollider, rb.GetRuntimeData().pRigidActor->getGlobalPose());
 				}
 
@@ -275,13 +283,13 @@ namespace usg
 			for (auto it = GameComponents<SphereCollider>::GetIterator(); !it.IsEnd(); ++it)
 			{
 				Required<RigidBody, FromSelfOrParents> rb;
-				GetComponent((*it)->GetEntity(), rb);
+				getter.GetComponent((*it)->GetEntity(), rb);
 				const auto& rbPhysXTrans = rb.GetRuntimeData().pRigidActor->getGlobalPose();
 				const auto& vRigidBodyPos = Vector4f(ToUsgVec3(rbPhysXTrans.p), 1);
 				if (camera.GetFrustum().ArePointsInFrustum(&vRigidBodyPos, 1) && vRigidBodyPos.v3().GetSquaredDistanceFrom(vCamPos) < VisibilityRadius*VisibilityRadius)
 				{
 					Optional<SphereCollider> sphereCollider;
-					GetComponent((*it)->GetEntity(), sphereCollider);
+					getter.GetComponent((*it)->GetEntity(), sphereCollider);
 					const auto& sphereLocalTrans = sphereCollider.Force().GetRuntimeData().pShape->getLocalPose();
 					RenderDebugMesh(sphereCollider, rbPhysXTrans.transform(sphereLocalTrans));
 				}

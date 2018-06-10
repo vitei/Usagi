@@ -1,0 +1,36 @@
+#pragma once
+#include "Engine/Common/Common.h"
+#include "Engine/Core/Timer/Timer.h"
+#include "Engine/Debug/DebugStats.h"
+#include "Engine/Core/Timer/ProfilingTimer.h"
+#include "Engine/Game/ModeTransition.h"
+#include "Engine/Game/SimpleGameBase.h"
+#include "Engine/Game/InitThread.h"
+
+enum ModeType
+{
+	MODE_GAME = 0,
+	MODE_NONE
+};
+
+class InitThread;
+
+class <%= projectname %> : public usg::SimpleGameBase
+{
+	typedef usg::SimpleGameBase Inherited;
+public:
+	explicit <%= projectname %>();
+	virtual ~<%= projectname %>();
+
+	virtual void Init(usg::GFXDevice* pDevice) override;
+
+private:
+	void SetNextMode(ModeType eMode);
+	virtual uint32 GetNextMode() const override;
+	virtual void ModeFinished() override;
+	virtual usg::ModeLoadFunc GetLoadFunc() const override;
+
+	ModeType			m_eMode;
+	ModeType			m_ePrevMode;
+	
+};

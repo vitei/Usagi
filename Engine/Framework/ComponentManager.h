@@ -30,7 +30,7 @@ namespace usg
 		ComponentManager(MessageDispatch* dispatch, void(*pGameSystemRegisterFunc)(SystemCoordinator&));
 		~ComponentManager();
 
-		void RegisterResourceHandles(ComponentLoadHandles& handles);
+		void RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene);
 
 		void TriggerAllSignals(float32 fElapsed, GFXDevice* pDevice);
 

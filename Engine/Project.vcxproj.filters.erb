@@ -29,6 +29,16 @@
 <% end %>
 <% end %>
 
+<% for @h in platform_headers %>
+<% if locations.has_key?(@h) %>
+    <ClInclude Include="..\..\..\..\<%= @h %>">
+      <Filter><%= locations[@h] %></Filter>
+    </ClInclude>
+<% else %>
+    <ClInclude Include="..\..\..\..\<%= @h %>" />
+<% end %>
+<% end %>
+
 <% for @h in proto_headers %>
   <ClInclude Include="$(PBProjectDir)<%= @h %>">
     <Filter>_build\Protogen</Filter>
@@ -43,6 +53,16 @@
     </ClCompile>
 <% else %>
     <ClCompile Include="..\..\..\..\<%= project_dir + @src %>" />
+<% end %>
+<% end %>
+
+<% for @src in platform_sources %>
+<% if locations.has_key?(@src) %>
+    <ClCompile Include="..\..\..\..\<%= @src %>">
+      <Filter><%= locations[@src] %></Filter>
+    </ClCompile>
+<% else %>
+    <ClCompile Include="..\..\..\..\<%= @src %>" />
 <% end %>
 <% end %>
 

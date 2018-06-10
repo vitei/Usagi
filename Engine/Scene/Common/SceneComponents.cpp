@@ -80,14 +80,13 @@ namespace usg
 	                                    bool bWasPreviouslyCalled)
 	{
 		// TODO: check bWasPreviouslyCalled ?
-
-		GroundDecalsHandle* pDecals;
-		GetOutputComponentFromParent(p.GetEntity(), &pDecals, true);
+		Required<usg::GroundDecalsHandle, FromSelfOrParents> Decals;
+		handles.GetComponent(p.GetEntity(), Decals);
 
 		// 20160129 n-heckel: This is a temporary work-around until levels are used for ModeGarage.
-		if(pDecals != NULL)
+		if(Decals.IsValid())
 		{
-			p.GetRuntimeData().pDecal = pDecals->pGroundDecals->GetShadowDecal(p->name);
+			p.GetRuntimeData().pDecal = Decals->pGroundDecals->GetShadowDecal(p->name);
 			p.GetRuntimeData().vPrevTestPos.Assign(2000000.f, 2000000.f, 2000000.f);
 		}
 		else
@@ -99,12 +98,12 @@ namespace usg
 	template<>
 	void OnDeactivate<ShadowDecalComponent>(Component<ShadowDecalComponent>& p, ComponentLoadHandles& handles)
 	{
-		GroundDecalsHandle* pDecals;
-		GetOutputComponentFromParent(p.GetEntity(), &pDecals, true);
+		Required<usg::GroundDecalsHandle, FromSelfOrParents> Decals;
+		handles.GetComponent(p.GetEntity(), Decals);
 
-		if(pDecals != NULL)
+		if(Decals.IsValid())
 		{
-			pDecals->pGroundDecals->FreeShadowDecal(p.GetRuntimeData().pDecal);
+			Decals->pGroundDecals->FreeShadowDecal(p.GetRuntimeData().pDecal);
 			p.GetRuntimeData().pDecal = NULL;
 		}
 	}

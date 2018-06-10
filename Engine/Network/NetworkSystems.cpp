@@ -67,6 +67,9 @@ namespace usg
 							DEBUG_PRINT("HostManagedEntity: set client uid to HOST uid of %u\n", (uint32)iHostUID);
 						}
 
+						// No longer allowing GetComponent globaly
+						ASSERT(false);
+#if 0
 						Optional<LocalSim> localSim;
 						GetComponent(e, localSim);
 						if (localSim.Exists())
@@ -76,6 +79,7 @@ namespace usg
 							ASSERT(false);	// Need to be able to manually deactivate components
 							e->ProcessEntityRecursively(details::ChangedSetter());
 						}
+#endif
 					}
 				}
 			}
