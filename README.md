@@ -72,9 +72,9 @@ The build process has not been improved or significantly modified and currently 
 Current Version 0.15
 ----------------------
 
-GetComponent is now hidden and can't be accidentally called in inappropriate places
-There is now a rake file for building an empty project with a default mode
-API/ platform specific code place in Usagi/Platform/<<api_name>> will be picked up by the build allowing code which requires an NDA to be maintained in a seperate repository
+GetComponent is now hidden and can't be accidentally called in inappropriate places  
+There is now a rake file for building an empty project with a default mode  
+API/ platform specific code place in Usagi/Platform/<<api_name>> will be picked up by the build allowing code which requires an NDA to be maintained in a seperate repository  
 
 Issues
 ----------------------
