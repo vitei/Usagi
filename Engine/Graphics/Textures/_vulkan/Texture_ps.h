@@ -35,6 +35,8 @@ public:
 
 	uint32 GetWidth () const;
 	uint32 GetHeight() const;
+	uint32 GetDepth() const;
+	uint32 GetFaces() const;
 
 #ifdef DEBUG_BUILD
 	uint32 GetSizeInMemory() const { return 0; }

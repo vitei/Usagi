@@ -23,6 +23,8 @@ public:
 	~RenderTarget_ps();
 
 	void InitMRT(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
+	void RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass);
+
 	void CleanUp(GFXDevice* pDevice);
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetClearColor(const Color& col, uint32 uTarget);
@@ -37,17 +39,17 @@ public:
 	void EndDraw() { }
 	
 	// Platform specific
-	const VkClearValue& GetColourClearValue(uint32 uIndex) const { return m_colorClearValues[uIndex]; }
-	const VkClearValue& GetDSClearValue() const { return m_dsClearValue; }
+	const VkClearValue* GetClearValues() const { return m_colorClearValues; }
 	const VkFramebuffer& GetFrameBuffer() const { return m_framebuffer; }
 
 private:
 	// Color + depth for the clear
-	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS];
-	VkClearValue	m_dsClearValue;
+	VkFramebufferCreateInfo m_fbCreateInfo;
+	vector<VkImageView>	m_imageViews;
 	VkFramebuffer	m_framebuffer;
+	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS+1];
 	// For creating a render pass declaration used with sub passes
-	RenderPassDecl	m_renderPassDecl;
+	RenderPassHndl	m_renderPass;
 	Viewport		m_fullScreenVP;
 	uint32			m_uCurrentImage;
 	uint32			m_uWidth;

@@ -709,6 +709,16 @@ uint32 Texture_ps::GetHeight() const
 	return m_uHeight;
 }
 
+uint32 Texture_ps::GetDepth() const
+{
+	return m_uDepth;
+}
+
+uint32 Texture_ps::GetFaces() const
+{
+	return m_uFaces;
+}
+
 bool Texture_ps::FileExists(const char* szFileName)
 {
 	U8String file(szFileName);

@@ -112,6 +112,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
 	pBuffers[0] = &m_colorBuffer[BUFFER_LDR_0];
 	m_screenRT[TARGET_LDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
+	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_0, RenderTarget::RT_FLAG_COLOR_0);
 
 	
 	m_uLDRCount=2;

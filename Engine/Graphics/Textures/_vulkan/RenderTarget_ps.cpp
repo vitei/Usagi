@@ -9,6 +9,8 @@
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Textures, RenderTarget_ps.h)
 
 namespace usg {
@@ -21,7 +23,7 @@ RenderTarget_ps::RenderTarget_ps()
 
 RenderTarget_ps::~RenderTarget_ps()
 {
-
+	MemClear(&m_fbCreateInfo, sizeof(m_fbCreateInfo));
 }
 
 
@@ -29,14 +31,48 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 {
 	MemClear(&m_colorClearValues, sizeof(m_colorClearValues));
 
-	m_dsClearValue.depthStencil.depth = 1.0f;
-	m_dsClearValue.depthStencil.stencil = 0;
+	// The depth stencil is the last bound attachment
+	m_colorClearValues[uColorCount].depthStencil.depth = 1.0f;
+	m_colorClearValues[uColorCount].depthStencil.stencil = 0;
+
+	m_imageViews.resize(uColorCount + (pDepth!=nullptr ? 1 : 0));
+	for (uint32 i = 0; i < uColorCount; i++)
+	{
+		m_imageViews[i] = ppColorBuffers[i]->GetTexture()->GetPlatform().GetImageView();
+	}
+
+	if (pDepth)
+	{
+		m_imageViews[uColorCount] = pDepth->GetTexture()->GetPlatform().GetImageView();
+	}
+
+	uint32 uLayerCount = uColorCount ? ppColorBuffers[0]->GetTexture()->GetPlatform().GetFaces() : pDepth->GetTexture()->GetPlatform().GetFaces();
+
+
+	m_fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	m_fbCreateInfo.pNext = NULL;
+	m_fbCreateInfo.attachmentCount = (uint32)m_imageViews.size();
+	m_fbCreateInfo.pAttachments = m_imageViews.data();
+	m_fbCreateInfo.width = m_uWidth;
+	m_fbCreateInfo.height = m_uHeight;
+	m_fbCreateInfo.layers = uLayerCount;
 
 }
 
+
+void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass)
+{
+	m_fbCreateInfo.renderPass = renderPass.GetContents()->GetPass();
+
+	VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &m_fbCreateInfo, NULL, &m_framebuffer);
+	ASSERT(res == VK_SUCCESS);
+
+}
+
+
 void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
 {
-
+	vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_framebuffer, nullptr);
 }
 
 

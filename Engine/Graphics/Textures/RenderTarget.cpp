@@ -92,7 +92,7 @@ namespace usg {
 		return RenderPassDecl::LOAD_OP_DONT_CARE;
 	}
 
-	RenderPassHndl RenderTarget::CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const RenderPassDecl::Dependency* pDependencies, uint32 uDependiences)
+	RenderPassHndl RenderTarget::InitRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const RenderPassDecl::Dependency* pDependencies, uint32 uDependiences)
 	{
 		// Shouldn't be trying to load data that you are clearing
 		ASSERT((uLoadFlags & uClearFlags) == 0);
@@ -141,7 +141,20 @@ namespace usg {
 		decl.pDependencies = pDependencies;
 		decl.uDependencies = uDependiences;
 		
-		return pDevice->GetRenderPass(decl);
+		m_renderPass = pDevice->GetRenderPass(decl);
+
+		m_platform.RenderPassUpdated(pDevice, m_renderPass);
+		return m_renderPass;
+	}
+
+
+	void RenderTarget::SetClearColor(const Color &col, uint32 uTarget)
+	{
+		if (uTarget < m_uTargetCount)
+		{
+			m_clearColor[uTarget] = col;
+			m_platform.SetClearColor(col, uTarget);
+		}
 	}
 
 }

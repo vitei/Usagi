@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Device/PipelineState.h"
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
@@ -112,9 +113,21 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 	if(pTarget)
 	{
 		const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+		uint32 uClearCount = pTarget->GetTargetCount() + (pTarget->GetDepthStencilBuffer() != nullptr ? 1 : 0);
 
+		VkRenderPassBeginInfo rp_begin;
+		rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		rp_begin.pNext = NULL;
+		rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+		rp_begin.framebuffer = rtPS.GetFrameBuffer();
+		rp_begin.renderArea.offset.x = 0;
+		rp_begin.renderArea.offset.y = 0;
+		rp_begin.renderArea.extent.width = pTarget->GetWidth();
+		rp_begin.renderArea.extent.height = pTarget->GetHeight();
+		rp_begin.clearValueCount = uClearCount;
+		rp_begin.pClearValues = rtPS.GetClearValues();
 
-		//vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 	}
 	else
 	{

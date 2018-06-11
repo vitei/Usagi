@@ -36,6 +36,11 @@ public:
 	// Fixme, why are we passing in the dimensions again?
 	void Init(usg::GFXDevice* pDevice, ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth = NULL);
 	void InitMRT(usg::GFXDevice* pDevice, uint32 uColCount, ColorBuffer** ppColorBuffer, DepthStencilBuffer* pDepth = NULL);
+
+	// Create the rneder pass
+	RenderPassHndl InitRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags,
+		const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
+
 	void CleanUp(GFXDevice* pDevice);
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	bool IsValid() const { return m_pDepth || m_uTargetCount; }
@@ -44,7 +49,7 @@ public:
 	uint32 GetHeight() const { return m_platform.GetHeight(); }
 	const TextureHndl& GetColorTexture(uint32 uTex = 0) const { return m_pColorBuffer[uTex]->GetTexture(); }
 	TextureHndl GetDepthTexture() const;
-	void SetClearColor(const Color &col, uint32 uTarget = 0) { m_clearColor[uTarget] = col; m_platform.SetClearColor(col, uTarget); }
+	void SetClearColor(const Color &col, uint32 uTarget = 0);
 	const Color& GetClearColor(uint32 uTarget=0) { return m_clearColor[uTarget]; }
 	bool SaveToFile(const char* szFileName) { return m_platform.SaveToFile(szFileName);  }
 
@@ -60,14 +65,12 @@ public:
 	bool ConfirmCompataible(ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth);
 	uint32 GetTargetCount() const { return m_uTargetCount; }
 	uint32 GetTargetMask() const { return m_uTargetMask; }
-
-	// Helper function for creating the standard single pass render passes
-	RenderPassHndl CreateRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, 
-		const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
+	const RenderPassHndl& GetRenderPass() const { return m_renderPass; }
 
 private:
 	RenderTarget_ps	m_platform;
 
+	RenderPassHndl			m_renderPass;
 	ColorBuffer*			m_pColorBuffer[MAX_COLOR_TARGETS];
 	DepthStencilBuffer*		m_pDepth;
 
