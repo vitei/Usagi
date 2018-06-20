@@ -113,7 +113,6 @@ namespace usg {
 			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
 			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eColor = m_pColorBuffer[i]->GetFormat();
-			attach.eInitialLayout = RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 			ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 			ref.uIndex = i;
 		}
@@ -126,7 +125,6 @@ namespace usg {
 			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
 			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eDepth = m_pDepth->GetFormat();
-			attach.eInitialLayout = RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT;
 			ref.eLayout = usg::RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT;
 			ref.uIndex = m_uTargetCount;
 

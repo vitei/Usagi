@@ -170,7 +170,7 @@ RenderPassDecl::Attachment::Attachment()
 	eLoadOp = LOAD_OP_DONT_CARE;
 	eStoreOp = STORE_OP_STORE;
 	eSamples = SAMPLE_COUNT_1_BIT;
-	eInitialLayout = LAYOUT_COLOR_ATTACHMENT;
+	eInitialLayout = LAYOUT_UNDEFINED;
 	eFinalLayout = LAYOUT_COLOR_ATTACHMENT;
 }
 

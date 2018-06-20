@@ -225,7 +225,10 @@ namespace usg
 		pRenderMode->PreDraw(pDevice, pImmContext);
 		m_debugRender.Updatebuffers(pDevice);
 		pRenderMode->Draw(pDisplay, pHMD, pImmContext);
-		pImmContext->RenderToDisplay(pDisplay);
+		if (!pRenderMode->FinalTargetIsDisplay())
+		{
+			pImmContext->RenderToDisplay(pDisplay);
+		}
 		m_debugRender.Draw(pImmContext);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
