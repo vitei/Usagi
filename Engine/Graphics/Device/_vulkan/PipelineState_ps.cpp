@@ -70,7 +70,8 @@ namespace usg
 		VkDynamicState eDynamicStates[] =
 		{
 			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
+			VK_DYNAMIC_STATE_SCISSOR,
+			VK_DYNAMIC_STATE_BLEND_CONSTANTS
 		};
 
 		VkPipelineViewportStateCreateInfo vp = {};
@@ -84,7 +85,7 @@ namespace usg
 
 		dynamic_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamic_info.pDynamicStates = eDynamicStates;
-		dynamic_info.dynamicStateCount = 2;
+		dynamic_info.dynamicStateCount = 3;
 
 		// FIXME: We need the render target to be passed in
 		pipelineCreateInfo.renderPass = decl.renderPass.GetContents()->GetPass();
