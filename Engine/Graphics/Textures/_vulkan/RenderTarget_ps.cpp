@@ -48,6 +48,16 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 	uint32 uLayerCount = uColorCount ? ppColorBuffers[0]->GetTexture()->GetPlatform().GetFaces() : pDepth->GetTexture()->GetPlatform().GetFaces();
 
+	if (pDepth)
+	{	
+		m_uWidth = pDepth->GetWidth();
+		m_uHeight = pDepth->GetHeight();
+	}
+	else
+	{
+		m_uWidth = ppColorBuffers[0]->GetWidth();
+		m_uHeight = ppColorBuffers[0]->GetHeight();
+	}
 
 	m_fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	m_fbCreateInfo.pNext = NULL;
@@ -56,6 +66,8 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 	m_fbCreateInfo.width = m_uWidth;
 	m_fbCreateInfo.height = m_uHeight;
 	m_fbCreateInfo.layers = uLayerCount;
+
+	m_fullScreenVP.InitViewport(0, 0, m_uWidth, m_uHeight);
 
 }
 
