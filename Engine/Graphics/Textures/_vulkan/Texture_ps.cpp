@@ -205,7 +205,15 @@ void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags
 	vkCmdPipelineBarrier(cmdBuffer, srcStageFlags, destStageFlags, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 }
 
-Texture_ps::Texture_ps()
+Texture_ps::Texture_ps() :
+	  m_memory(VK_NULL_HANDLE)
+	, m_image(VK_NULL_HANDLE)
+	, m_imageView(VK_NULL_HANDLE)
+	, m_imageLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+	, m_uWidth(0)
+	, m_uHeight(0)
+	, m_uDepth(0)
+	, m_uFaces(0)
 {
 
 }
@@ -341,6 +349,13 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
 	ASSERT(res == VK_SUCCESS);
+
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uDepth = 1;
+	m_uFaces = 1;
+
 }
 
 void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags)
@@ -371,6 +386,7 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
     // Bind memory
     err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);
     ASSERT(!err);
+
 
 }
 
