@@ -14,7 +14,7 @@ namespace usg {
 const int GFX_NUM_DYN_BUFF = 2;
 
 const int MAX_VERTEX_ATTRIBUTES = 16;
-const int MAX_DESCRIPTOR_SETS = 4;
+const int MAX_DESCRIPTOR_SETS = 6;
 
 class VertexDeclaration;
 
