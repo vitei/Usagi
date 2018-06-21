@@ -78,7 +78,13 @@ void IndexBuffer_ps::Init(GFXDevice* pDevice, const void* pIndices, uint32 uCoun
 
 void IndexBuffer_ps::CleanUp(GFXDevice* pDevice)
 {
-	ASSERT(false);
+	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
+
+	for (uint32 i=0; i<m_uBufferCount; i++)
+	{
+		vkDestroyBuffer(deviceVK, m_buffer[i], nullptr);
+		vkFreeMemory(deviceVK, m_mem[i], nullptr);
+	}
 }
 
 void IndexBuffer_ps::SetContents(GFXDevice* pDevice, const void* pData, uint32 uIndexCount)

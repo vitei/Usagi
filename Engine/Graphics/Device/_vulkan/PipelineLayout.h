@@ -17,7 +17,12 @@ public:
 	
 	void Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, uint32 uId);
 	const VkPipelineLayout& GetVKLayout() const { return m_layout; }
+
+	uint32 GetDescSetCount() const { return m_uDescSetCount; }
+	uint32 GetDescSetFlags() const { return m_uDescSetFlags; }
 private:
+	uint32			 m_uDescSetCount;
+	uint32			 m_uDescSetFlags;
 	VkPipelineLayout m_layout;
 };
 

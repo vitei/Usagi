@@ -69,7 +69,13 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 
 void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
 {
-	ASSERT(false);
+	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
+
+	for (uint32 i = 0; i < m_uBufferCount; i++)
+	{
+		vkDestroyBuffer(deviceVK, m_buffer[i], nullptr);
+		vkFreeMemory(deviceVK, m_mem[i], nullptr);
+	}
 }
 
 

@@ -51,6 +51,7 @@ namespace usg {
 		const AlphaStateHndl& GetAlphaHndl() const { return m_alphaState; }
 		const DepthStencilStateHndl& GetDepthStencilHndl() const { return m_depthStencilState; }
 		const RasterizerStateHndl& GetRasterizerHndl() const { return m_rasterizerState; }
+		const PipelineLayoutHndl& GetPipelineLayoutHndl() const { return m_pipelineLayout; }
 
 
 		bool operator==(const PipelineState& rhs) const { return ((m_uComparison == rhs.m_uComparison)); }
@@ -80,6 +81,7 @@ namespace usg {
 		AlphaStateHndl			m_alphaState;
 		DepthStencilStateHndl	m_depthStencilState;
 		RasterizerStateHndl		m_rasterizerState;
+		PipelineLayoutHndl		m_pipelineLayout;
 		PrimitiveType			m_ePrimType;
 		// For fast comparisons between state groups
 		union

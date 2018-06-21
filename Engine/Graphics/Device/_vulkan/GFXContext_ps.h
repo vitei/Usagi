@@ -69,6 +69,7 @@ public:
 	// Not valid on the PC
 
 	void RunDeferredList() { ASSERT(false); }
+	void UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags);
 
 	// PS Specific functions
 	VkCommandBuffer GetVkCmdBuffer() { return m_cmdBuff; }

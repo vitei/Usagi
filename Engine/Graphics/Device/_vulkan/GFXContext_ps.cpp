@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Device/PipelineState.h"
+#include API_HEADER(Engine/Graphics/Device, PipelineLayout.h)
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
@@ -85,13 +86,11 @@ void GFXContext_ps::End()
 
 void GFXContext_ps::Transfer(RenderTarget* pTarget, Display* pDisplay)
 {
-	vkCmdEndRenderPass(m_cmdBuff);
 	pDisplay->GetPlatform().Transfer(m_pParent, pTarget);
 }
 
 void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
-	vkCmdEndRenderPass(m_cmdBuff);
 	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, srcBounds, dstBounds);
 }
 
@@ -151,10 +150,29 @@ void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl&
 	vkCmdBindPipeline(m_cmdBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, hndl.GetContents()->GetPlatform().GetPipeline());
 }
 
+void GFXContext_ps::UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags)
+{
+	uint32 flags = activePipeline.GetContents()->GetPipelineLayoutHndl().GetContents()->GetDescSetFlags() & uDirtyFlags;
+	uint32 uBuffers = activePipeline.GetContents()->GetPipelineLayoutHndl().GetContents()->GetDescSetCount();
+	if (flags)
+	{
+		for (uint32 i = 0; i < uBuffers; i++)
+		{
+			if (flags && (1 << i))
+			{
+				if (pDescriptors[i] != nullptr)
+				{
+					pDescriptors[i]->GetPlatform().Bind(m_cmdBuff, m_pipelineLayout, i);
+				}
+			}
+		}
+	}
+}
+
 void GFXContext_ps::SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex)
 {
-	// FIXME: Need to re-apply when the layout changes
-	pSet->GetPlatform().Bind(m_cmdBuff, m_pipelineLayout, uIndex);
+	
+	
 }
 
 void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport)

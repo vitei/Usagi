@@ -9,7 +9,10 @@
 
 namespace usg {
 
-PipelineLayout::PipelineLayout()
+PipelineLayout::PipelineLayout() :
+	  m_uDescSetCount(0)
+	, m_uDescSetFlags(0)
+	, m_layout(VK_NULL_HANDLE)
 {
 
 }
@@ -39,6 +42,14 @@ void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, ui
 
 	VkResult eResult = vkCreatePipelineLayout(pDevice->GetPlatform().GetVKDevice(), &createInfo, nullptr, &m_layout);
 	ASSERT(eResult == VK_SUCCESS);
+
+	// So that we know which descriptor sets to apply
+	m_uDescSetCount = decl.uDescriptorSetCount;
+	m_uDescSetFlags = 0;
+	for (uint32 i = 0; i < m_uDescSetCount; i++)
+	{
+		m_uDescSetFlags |= (1 << i);
+	}
 }
 
 
