@@ -131,6 +131,7 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 
 void PostFXSys::SetPostDepthDescriptors(GFXContext* pCtxt)
 {
+	m_platform.DepthWriteEnded(pCtxt, m_uEffectsEnabled);
 	pCtxt->SetDescriptorSet(&m_postDepthDescriptor, 4);
 }
 

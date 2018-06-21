@@ -13,6 +13,7 @@
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Device/GFXContext.h"
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Core/stl/vector.h"
 
@@ -109,10 +110,12 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR], &m_colorBuffer[BUFFER_LIN_DEPTH] };
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
+	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0);
 	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
+	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0);
 	pBuffers[0] = &m_colorBuffer[BUFFER_LDR_0];
 	m_screenRT[TARGET_LDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
-	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_0, RenderTarget::RT_FLAG_COLOR_0);
+	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_1, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1);
 
 	
 	m_uLDRCount=2;
@@ -255,12 +258,25 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	{
 		m_pDeferredShading->SetEnabled(false);
 	}
+
 	if (uEffectFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
 		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ?  &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
 		m_pSkyFog->SetDestTarget(pDevice, pDst);
 		m_pFinalEffect = m_pSkyFog;
 	}
+
+	// If not using deferred shading the destination target will be overridden when doing the transparency pass
+	// (to allow us to use linear depth for the sky, particles etc)
+	if (pDst == &m_screenRT[TARGET_HDR_LIN_DEPTH])
+	{
+		pDst = &m_screenRT[TARGET_HDR];
+	}
+	if (pDst == &m_screenRT[TARGET_LDR_LIN_DEPTH])
+	{
+		pDst = &m_screenRT[TARGET_LDR_0];
+	}
+
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
 	{
 		m_pBloom->SetSourceTarget(pDevice, pDst);
@@ -296,6 +312,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	{
 		m_pSMAA->SetEnabled(false);
 	}
+
 
 	m_pFinalTarget = pDst;
 
@@ -385,6 +402,23 @@ void PostFXSys_ps::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& tex)
 	}
 }
 
+
+void PostFXSys_ps::DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects)
+{
+	if (uActiveEffects & PostFXSys::EFFECT_DEFERRED_SHADING)
+	{
+		// Nothing to do, depth write ended
+		return;
+	}
+	if (uActiveEffects & PostFXSys::EFFECT_BLOOM)
+	{
+		pContext->SetRenderTarget(&m_screenRT[TARGET_HDR]);
+	}
+	else
+	{
+		pContext->SetRenderTarget(&m_screenRT[TARGET_LDR_0]);
+	}
+}
 
 
 PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
