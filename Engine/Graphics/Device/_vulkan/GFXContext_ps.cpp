@@ -79,7 +79,6 @@ void GFXContext_ps::Begin(bool bApplyDefaults)
 
 void GFXContext_ps::End()
 {
-	vkCmdEndRenderPass(m_cmdBuff);	// End the currently active render pass
 	VkResult res = vkEndCommandBuffer(m_cmdBuff);
 	ASSERT(res == VK_SUCCESS);
 }
@@ -138,7 +137,7 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 
 void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 {
-
+	vkCmdEndRenderPass(m_cmdBuff);
 }
 
 void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)

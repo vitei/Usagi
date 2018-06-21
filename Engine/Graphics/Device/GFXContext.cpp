@@ -109,6 +109,10 @@ void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewpor
 
 void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 {
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+	}
 	m_platform.RenderToDisplay(pDisplay, uClearFlags);
 	m_pActiveRT = nullptr;
 }
