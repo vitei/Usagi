@@ -109,13 +109,15 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	
 	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR], &m_colorBuffer[BUFFER_LIN_DEPTH] };
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
+	m_screenRT[TARGET_HDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_1, RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1);
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
 	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0);
 	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
 	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0);
 	pBuffers[0] = &m_colorBuffer[BUFFER_LDR_0];
 	m_screenRT[TARGET_LDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
-	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_1, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1);
+	// FIXME: When all hooked up properly we don't need to clear RT 0, just doing during so during the testing phase
+	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1);
 
 	
 	m_uLDRCount=2;

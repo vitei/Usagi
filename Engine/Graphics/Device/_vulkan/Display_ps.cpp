@@ -269,7 +269,8 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	usg::RenderPassDecl::Attachment attach;
 	usg::RenderPassDecl::SubPass subPass;
 	usg::RenderPassDecl::AttachmentReference ref;
-	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_CLEAR_MEMORY;
+	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
 	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 	subPass.uColorCount = 1;
@@ -290,14 +291,6 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 {
-	VkClearValue clear_values[2];
-	clear_values[0].color.float32[0] = 1.0f;
-	clear_values[0].color.float32[1] = 0.0f;
-	clear_values[0].color.float32[2] = 0.0f;
-	clear_values[0].color.float32[3] = 1.0f;
-	clear_values[1].depthStencil.depth = 1.0f;
-	clear_values[1].depthStencil.stencil = 0;
-
 	VkRenderPassBeginInfo rp_begin;
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
@@ -307,8 +300,8 @@ void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 	rp_begin.renderArea.offset.y = 0;
 	rp_begin.renderArea.extent.width = m_uWidth;
 	rp_begin.renderArea.extent.height = m_uHeight;
-	rp_begin.clearValueCount = 1;
-	rp_begin.pClearValues = clear_values;
+	rp_begin.clearValueCount = 0;
+	rp_begin.pClearValues = nullptr;
 
 	vkCmdBeginRenderPass(cmd, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 

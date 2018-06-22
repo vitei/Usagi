@@ -231,7 +231,37 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 	uint32 uGlFlags = 0;
 	RenderTarget_ps* pRTPS = &pRT->GetPlatform();
 
-	ASSERT(false);
+	static VkClearAttachment clearAttachments[MAX_COLOR_TARGETS + 1] = {};
+
+	uint32 clearCount = 0;
+	for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
+	{
+		if (uFlags & (RenderTarget::RT_FLAG_COLOR_0 << i))
+		{
+			clearAttachments[clearCount].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			clearAttachments[clearCount].clearValue = pRTPS->GetClearValues()[i];
+			clearAttachments[clearCount].colorAttachment = i;
+
+			clearCount++;
+		}
+	}
+
+	if (uFlags & RenderTarget::RT_FLAG_DEPTH)
+	{
+		clearAttachments[clearCount].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		clearAttachments[clearCount].clearValue.depthStencil = { 1.0f, 0 };
+		clearCount++;
+	}
+
+	VkClearRect clearRect = {};
+	clearRect.layerCount = 1;
+	clearRect.rect.offset = { 0, 0 };
+	clearRect.rect.extent = { pRT->GetWidth(), pRT->GetHeight() };
+
+	if (clearCount)
+	{
+		vkCmdClearAttachments(m_cmdBuff, clearCount, clearAttachments, 1, &clearRect);
+	}
 }
 
 
