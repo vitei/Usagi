@@ -40,7 +40,7 @@ void SceneRenderPasses::RemoveCallback(ChangeCallback callback, void* pUserData)
 }
 
 
-void SceneRenderPasses::SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, RenderPassHndl& hndl)
+void SceneRenderPasses::SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl)
 {
 	
 	for (auto itr = m_entries.begin(); itr != m_entries.end(); ++itr)
@@ -94,7 +94,7 @@ const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, 
 		if (itr->eLayer > eLayer)
 			continue;
 
-		if (itr->eLayer < eLayer || itr->uPriority < uPriority)
+		if (itr->eLayer <= eLayer || itr->uPriority <= uPriority)
 			return itr->hndl;
 	}
 

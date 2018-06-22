@@ -236,6 +236,7 @@ void PostFXSys_ps::CleanUp(GFXDevice* pDevice)
 void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	RenderTarget* pDst = &m_screenRT[TARGET_LDR_LIN_DEPTH];
+	m_renderPasses.ClearAllPasses();
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
@@ -247,6 +248,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 
 	m_pInitialTarget = pDst;
+	m_renderPasses.SetRenderPass(RenderNode::LAYER_OPAQUE, 0, m_pInitialTarget->GetRenderPass());
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
@@ -255,6 +257,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
 		m_pDeferredShading->SetDestTarget(pDevice, pDst);
 		m_pFinalEffect = m_pDeferredShading;
+		m_renderPasses.SetRenderPass(m_pDeferredShading->GetLayer(), m_pDeferredShading->GetPriority(), pDst->GetRenderPass());
 	}
 	else if(m_pDeferredShading)
 	{
@@ -265,6 +268,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	{
 		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ?  &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
 		m_pSkyFog->SetDestTarget(pDevice, pDst);
+		m_renderPasses.SetRenderPass(m_pSkyFog->GetLayer(), m_pSkyFog->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pSkyFog;
 	}
 
@@ -273,10 +277,12 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if (pDst == &m_screenRT[TARGET_HDR_LIN_DEPTH])
 	{
 		pDst = &m_screenRT[TARGET_HDR];
+		m_renderPasses.SetRenderPass(RenderNode::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 	if (pDst == &m_screenRT[TARGET_LDR_LIN_DEPTH])
 	{
 		pDst = &m_screenRT[TARGET_LDR_0];
+		m_renderPasses.SetRenderPass(RenderNode::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
@@ -284,6 +290,8 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pBloom->SetSourceTarget(pDevice, pDst);
 		pDst = &m_screenRT[TARGET_LDR_0];	// Bloom goes out to LDR_0
 		m_pBloom->SetEnabled(true);	
+		m_renderPasses.SetRenderPass(m_pBloom->GetLayer(), m_pBloom->GetPriority(), pDst->GetRenderPass());
+
 		m_pFinalEffect = m_pBloom;
 	}
 	else if (m_pBloom)
@@ -296,6 +304,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pFXAA->SetSourceTarget(pDevice, pDst);
 		pDst = pDst == &m_screenRT[TARGET_LDR_1] ? &m_screenRT[TARGET_LDR_0] : &m_screenRT[TARGET_LDR_1];
 		m_pFXAA->SetEnabled(true);
+		m_renderPasses.SetRenderPass(m_pFXAA->GetLayer(), m_pFXAA->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pFXAA;
 	}
 	else if(m_pFXAA)
@@ -308,6 +317,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pSMAA->SetSourceTarget(pDevice, pDst);
 		pDst = pDst == &m_screenRT[TARGET_LDR_1] ? &m_screenRT[TARGET_LDR_0] : &m_screenRT[TARGET_LDR_1];
 		m_pSMAA->SetEnabled(true);
+		m_renderPasses.SetRenderPass(m_pSMAA->GetLayer(), m_pSMAA->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pSMAA;
 	}
 	else if (m_pSMAA)

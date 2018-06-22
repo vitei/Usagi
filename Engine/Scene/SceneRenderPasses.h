@@ -23,7 +23,7 @@ public:
 
 	void AddCallback(ChangeCallback callback, void* pUserData);
 	void RemoveCallback(ChangeCallback callback, void* pUserData);
-	void SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, RenderPassHndl& hndl);
+	void SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl);
 	void RemovePass(RenderNode::Layer eLayer, uint32 uPriority);
 	void ClearAllPasses();
 	void UpdateEnd();
