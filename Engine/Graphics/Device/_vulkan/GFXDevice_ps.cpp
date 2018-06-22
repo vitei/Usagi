@@ -237,7 +237,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
     device_info.ppEnabledLayerNames = validationLayerNames;
     device_info.pEnabledFeatures = &enabledFeatures;
 
-    res = vkCreateDevice(m_gpus[0], &device_info, &m_allocCallbacks, &m_vkDevice);
+	// Issue with the allocators atm so disabling for now
+    res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
     ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from

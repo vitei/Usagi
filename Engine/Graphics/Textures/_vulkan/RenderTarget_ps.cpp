@@ -17,8 +17,13 @@ namespace usg {
 
 
 RenderTarget_ps::RenderTarget_ps()
+	: m_framebuffer(VK_NULL_HANDLE)
+	, m_uCurrentImage(0)
+	, m_uWidth(0)
+	, m_uHeight(0)
 {
-	
+
+	MemClear(&m_colorClearValues, sizeof(m_colorClearValues));
 }
 
 RenderTarget_ps::~RenderTarget_ps()
@@ -29,8 +34,6 @@ RenderTarget_ps::~RenderTarget_ps()
 
 void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
-	MemClear(&m_colorClearValues, sizeof(m_colorClearValues));
-
 	// The depth stencil is the last bound attachment
 	m_colorClearValues[uColorCount].depthStencil.depth = 1.0f;
 	m_colorClearValues[uColorCount].depthStencil.stencil = 0;
@@ -84,7 +87,10 @@ void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPas
 
 void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
 {
-	vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_framebuffer, nullptr);
+	if (m_framebuffer != VK_NULL_HANDLE)
+	{
+		vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_framebuffer, nullptr);
+	}
 }
 
 
