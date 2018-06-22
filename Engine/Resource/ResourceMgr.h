@@ -14,6 +14,7 @@
 
 namespace usg{
 
+
 enum E_RESOURCE_GROUP
 {
 	E_RESOURCE_INIT = 0,

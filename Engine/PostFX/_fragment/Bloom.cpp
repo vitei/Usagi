@@ -95,18 +95,18 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 
-	RenderPassDecl renderPass;
+	RenderPassDecl renderPassDecl;
 	// FIXME: Init the render pass
 
-	pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
+	RenderPassHndl renderPass = pDevice->GetRenderPass(renderPassDecl);
 
 	ResourceMgr* pRes = ResourceMgr::Inst();
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomMain");
-	m_bloomEffect = pDevice->GetPipelineState(pipelineDecl);
+	m_bloomEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomBrightpass");
-	m_brightPassEffect	= pDevice->GetPipelineState(pipelineDecl);
+	m_brightPassEffect	= pDevice->GetPipelineState(renderPass, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomFinal");
-	m_finalPassEffect = pDevice->GetPipelineState(pipelineDecl);
+	m_finalPassEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
 
 	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, pipelineDecl.renderPass);
 	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, pipelineDecl.renderPass);

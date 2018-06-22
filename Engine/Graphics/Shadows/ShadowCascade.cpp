@@ -100,28 +100,6 @@ void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLig
 
 	m_readConstants.Init(pDevice, g_shadowReadConstDecl);
 
-	//m_pSceneCtxt->Init(&m_shadowCamera, NULL, 0, RenderNode::RENDER_MASK_SHADOW_CAST);
-	// FIXME: Disabling the scene context for now as we get this up and running
-
-#if 0
-	PipelineStateDecl pipeline;
-
-	DepthStencilStateDecl& depthDecl = pipeline.depthState;
-	depthDecl.bDepthWrite = true;
-	depthDecl.bDepthEnable = true;
-	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
-
-    depthDecl.bStencilEnable = false;
-
-	RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
-	rasDecl.eCullFace = CULL_FACE_BACK;
-
-	AlphaStateDecl& alphaDecl = pipeline.alphaState;
-	alphaDecl.bBlendEnable = false;
-    alphaDecl.SetDepthOnly();
-
-	m_pipelineState = pDevice->GetPipelineState(pipeline);
-#endif
 
 	const float32 fScale = (float)uGroupWidth / 2048.0f;
     const float32 fPartSize[] = { 60.0f, 180.0f, 400.0f, 1000.f };

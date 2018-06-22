@@ -52,7 +52,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pSys->GetRenderPasses().GetRenderPass(*this);
+	RenderPassHndl renderPassHndl = pSys->GetRenderPasses().GetRenderPass(*this);
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
@@ -99,7 +99,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "FogSphere");
 
 	Material &mat = m_materialFade;
-	mat.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptorsFade);
+	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
 
 	SamplerDecl sampDecl(SF_LINEAR, SC_CLAMP);	
 	sampDecl.eMipFilter = MF_POINT;
@@ -114,7 +114,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
 	alphaDecl.bBlendEnable = false;
-	mat2.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
+	mat2.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
 	SamplerDecl depthSamp(SF_POINT, SC_WRAP);

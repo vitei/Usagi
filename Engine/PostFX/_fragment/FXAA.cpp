@@ -68,9 +68,9 @@ void FXAA::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	RenderPassDecl renderPass;
 	// FIXME: Init the render pass
 
-	pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
+	RenderPassHndl renderPassHndl = pDevice->GetRenderPass(renderPass);
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), matDescriptors);
+	m_material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipelineDecl), matDescriptors);
 	
 	m_sampler = pDevice->GetSampler(pointDecl);
 

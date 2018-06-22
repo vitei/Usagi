@@ -222,9 +222,8 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 
 	pipeline.layout.uDescriptorSetCount = 1;
 	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(decl);
-	pipeline.renderPass = scene.GetRenderPasses(0).GetRenderPass(*this);
 
-	m_pipelineState = pDevice->GetPipelineState(pipeline);
+	m_pipelineState = pDevice->GetPipelineState(scene.GetRenderPasses(0).GetRenderPass(*this), pipeline);
 
     // Create the vertex buffer
 	m_vertexBuffer.Init(pDevice, NULL, sizeof(PositionUVColVertex), uMaxVerts, "IMGuiRenderer", GPU_USAGE_DYNAMIC, GPU_LOCATION_STANDARD);

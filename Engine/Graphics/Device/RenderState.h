@@ -268,7 +268,6 @@ public:
 	};
 
 	EffectHndl				pEffect;
-	RenderPassHndl			renderPass;
 	InputBinding			inputBindings[MAX_VERTEX_BUFFERS];
 	uint32					uInputBindingCount;
 

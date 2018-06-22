@@ -142,7 +142,6 @@ bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool 
         
  
 	PipelineStateDecl pipelineDecl;
-	pipelineDecl.renderPass = pScene->GetRenderPasses(0).GetRenderPass(RenderNode::LAYER_OPAQUE, 0);
 	pipelineDecl.inputBindings[0].Init(VertexElements);
 	pipelineDecl.uInputBindingCount = 1;
 
@@ -161,7 +160,7 @@ bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool 
 	AlphaStateDecl& alphaDecl = pipelineDecl.alphaState;
     
 	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "CubesOriented");
-	m_mesh.SetPipeline(pDevice->GetPipelineState(pipelineDecl));
+	m_mesh.SetPipeline(pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(RenderNode::LAYER_OPAQUE, 0), pipelineDecl));
     
 	RenderNode* pNode = &m_mesh;
 	pNode->SetLayer(RenderNode::LAYER_OPAQUE);

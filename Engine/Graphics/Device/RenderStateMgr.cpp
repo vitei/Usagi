@@ -187,7 +187,7 @@ RenderPassHndl RenderStateMgr::GetRenderPass(const RenderPassDecl& decl, GFXDevi
 	return hndl;
 }
 
-PipelineStateHndl RenderStateMgr::GetPipelineState(const PipelineStateDecl& decl, GFXDevice* pDevice)
+PipelineStateHndl RenderStateMgr::GetPipelineState(const RenderPassHndl& renderPass, const PipelineStateDecl& decl, GFXDevice* pDevice)
 {
 	AlphaStateHndl alpha = GetAlphaState(&decl.alphaState, pDevice);
 	DepthStencilStateHndl depth = GetDepthStencilState(&decl.depthState, pDevice);
@@ -214,7 +214,7 @@ PipelineStateHndl RenderStateMgr::GetPipelineState(const PipelineStateDecl& decl
 	pipelineInit.pEffect = decl.pEffect;;
 	pipelineInit.layout = layout;
 	pipelineInit.eSampleCount = decl.eSampleCount;
-	pipelineInit.renderPass = decl.renderPass;
+	pipelineInit.renderPass = renderPass;
 	pipelineInit.InitCmpValue();
 
 	PipelineStateHndl hndl = m_pImpl->pipelines.GetState(&pipelineInit, pDevice);

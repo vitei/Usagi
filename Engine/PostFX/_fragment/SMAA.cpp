@@ -120,7 +120,7 @@ namespace usg {
 		RenderPassDecl renderPass;
 		// FIXME: Init the render pass
 
-		pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
+		RenderPassHndl renderPassHndl = pDevice->GetRenderPass(renderPass);
 
 
 
@@ -128,27 +128,27 @@ namespace usg {
 		pipelineDecl.layout.descriptorSets[0] = depthEdgeDescriptors;
 		pipelineDecl.layout.uDescriptorSetCount = 1;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\DepthEdgeDetection");
-		m_depthEdgeDetectEffect = pDevice->GetPipelineState(pipelineDecl);
+		m_depthEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 		// Luma Edge detection
 		pipelineDecl.layout.descriptorSets[0] = colorLumaEdgeDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\LumaEdgeDetection");
-		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(pipelineDecl);
+		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 		// Color edge detection
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\ColorEdgeDetection");
-		m_colorEdgeDetectEffect = pDevice->GetPipelineState(pipelineDecl);
+		m_colorEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 
 		// Blend weight calculation
 		pipelineDecl.layout.descriptorSets[0] = blendWeightDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\BlendWeightCalc");
-		m_blendWeightEffect = pDevice->GetPipelineState(pipelineDecl);
+		m_blendWeightEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[0] = neighborHoodBlendDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\NeighborhoodBlend");
-		m_neighbourBlendEffect = pDevice->GetPipelineState(pipelineDecl);
+		m_neighbourBlendEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 #if SMAA_REPROJECTION
 		// Resolve

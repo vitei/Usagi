@@ -72,7 +72,6 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	
 
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pScene->GetRenderPasses(0).GetRenderPass(*this);
 	pipeline.ePrimType = PT_TRIANGLES;
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
@@ -106,7 +105,7 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	
 	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "TextureProjection");
 
-	m_material.Init( pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_material.Init( pDevice, pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(*this), pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 	m_projConsts.Init( pDevice, g_textureProjectionConstants);
 	m_pixelConstants.Init(pDevice, g_fadeCBDecl);

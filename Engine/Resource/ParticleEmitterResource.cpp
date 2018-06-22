@@ -38,7 +38,7 @@ namespace usg{
 		return true;
 	}
 
-	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, const ParticleEmitterPak& pak, const void* pData, const char* szPackPath)
+	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const ParticleEmitterPak& pak, const void* pData, const char* szPackPath)
 	{
 		U8String fileName = szPackPath;
 		fileName += pak.resHdr.strName;
@@ -55,19 +55,18 @@ namespace usg{
 			return false;
 		}
 
-		Load(pDevice, renderPasses);
+		Load(pDevice);
 
 		return true;
 	}
 
-	void ParticleEmitterResource::Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses)
+	void ParticleEmitterResource::Load(GFXDevice* pDevice)
 	{
 		m_pEffect = GetEffect(pDevice, m_emissionDef.eParticleType);
 
-		PipelineStateDecl pipelineDecl;
-		pipelineDecl.inputBindings[0].Init(Particle::g_scriptedParticleVertexElements);
-		pipelineDecl.uInputBindingCount = 1;
-		pipelineDecl.ePrimType = PT_POINTS;
+		m_stateDecl.inputBindings[0].Init(Particle::g_scriptedParticleVertexElements);
+		m_stateDecl.uInputBindingCount = 1;
+		m_stateDecl.ePrimType = PT_POINTS;
 
 		if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
 		{
@@ -78,22 +77,22 @@ namespace usg{
 			m_descriptorLayout = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDecl);
 		}
 		
-		pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-		pipelineDecl.layout.descriptorSets[1] = m_descriptorLayout;
-		pipelineDecl.layout.uDescriptorSetCount = 2;
+		m_stateDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+		m_stateDecl.layout.descriptorSets[1] = m_descriptorLayout;
+		m_stateDecl.layout.uDescriptorSetCount = 2;
 
 
-		AlphaStateDecl& alphaDecl = pipelineDecl.alphaState;
+		AlphaStateDecl& alphaDecl = m_stateDecl.alphaState;
 		alphaDecl.InitFromDefinition(m_emissionDef.blend);
 
-		DepthStencilStateDecl& depthDecl = pipelineDecl.depthState;
+		DepthStencilStateDecl& depthDecl = m_stateDecl.depthState;
 		depthDecl.bDepthWrite = m_emissionDef.sortSettings.bWriteDepth;
 		depthDecl.bDepthEnable = true;
 		depthDecl.eDepthFunc = DEPTH_TEST_LESS;
 		depthDecl.bStencilEnable = false;
 		depthDecl.eStencilTest = STENCIL_TEST_ALWAYS;
 
-		RasterizerStateDecl& rasState = pipelineDecl.rasterizerState;
+		RasterizerStateDecl& rasState = m_stateDecl.rasterizerState;
 		rasState.eCullFace = CULL_FACE_NONE;
 		if (m_emissionDef.sortSettings.has_fDepthOffset)
 		{
@@ -101,28 +100,16 @@ namespace usg{
 			rasState.fDepthBias = m_emissionDef.sortSettings.fDepthOffset;
 		}
 
-		pipelineDecl.pEffect = m_pEffect;
+		m_stateDecl.pEffect = m_pEffect;
 
-		m_pipelines.resize(renderPasses.size());
-		for (size_t i = 0; i < m_pipelines.size(); i++)
-		{
-			m_pipelines[i].renderPass = renderPasses[i];
-			pipelineDecl.renderPass = renderPasses[i];
-			m_pipelines[i].pipeline = pDevice->GetPipelineState(pipelineDecl);
-		}
+
 		SetReady(true);
 	}
 
-	PipelineStateHndl ParticleEmitterResource::GetPipeline(const RenderPassHndl& renderPass) const
+
+	PipelineStateHndl ParticleEmitterResource::GetPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
 	{
-		for (size_t i = 0; i < m_pipelines.size(); i++)
-		{
-			if (m_pipelines[i].renderPass == renderPass)
-			{
-				return m_pipelines[i].pipeline;
-			}
-		}
-		return PipelineStateHndl(); 
+		return pDevice->GetPipelineState(renderPass, m_stateDecl);
 	}
 
 	EffectHndl ParticleEmitterResource::GetEffect(GFXDevice* pDevice, ::usg::particles::ParticleType eParticleType)

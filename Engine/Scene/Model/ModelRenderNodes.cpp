@@ -60,15 +60,15 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 
 	if (bDepth)
 	{
-		m_deferredPipelineState = pMesh->GetPipeline(renderPass).depthPassPipeline;
-		m_pipelineState = pMesh->GetPipeline(renderPass).depthPassPipeline;
+		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
 	}
 	else
 	{
-		m_deferredPipelineState = pMesh->GetPipeline(renderPass).deferredPipeline;
-		m_pipelineState = pMesh->GetPipeline(renderPass).defaultPipeline;
+		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
 	}
-	m_omniDepthPipelineState = pMesh->GetPipeline(renderPass).omniDepthPassPipeline;
+	m_omniDepthPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.omniDepthPassPipeline);
 
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout);
 

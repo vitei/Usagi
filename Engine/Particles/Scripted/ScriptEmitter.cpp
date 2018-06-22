@@ -164,7 +164,7 @@ namespace usg
 	{
 		if (pResource)
 		{
-			m_material.Init(pDevice, pResource->GetPipeline(renderPass), pResource->GetDescriptorLayout());
+			m_material.Init(pDevice, pResource->GetPipeline(pDevice, renderPass), pResource->GetDescriptorLayout());
 		}
 		else
 		{
@@ -209,11 +209,11 @@ namespace usg
 			pipelineDecl.pEffect = ParticleEmitterResource::GetEffect(pDevice, m_emissionDef.eParticleType);
 			if (bFirst)
 			{
-				m_material.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), pipelineDecl.layout.descriptorSets[1]);
+				m_material.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineDecl), pipelineDecl.layout.descriptorSets[1]);
 			}
 			else
 			{
-				m_material.SetPipelineState(pDevice->GetPipelineState(pipelineDecl));
+				m_material.SetPipelineState(pDevice->GetPipelineState(renderPass, pipelineDecl));
 				m_material.SetDescriptorLayout(pDevice, pipelineDecl.layout.descriptorSets[1]);
 				m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
 				m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM, &m_customConstants);

@@ -172,7 +172,7 @@ ModelResource::~ModelResource()
 }
 
 
-bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, const vector<RenderPassHndl>& renderPasses, bool bInstance, bool bFastMem )
+bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem )
 {
 	m_bNeedsRootNode = false;
 	m_uBoneNodes = 0;
@@ -220,7 +220,7 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, const vect
 
 	m_name = szFileName;
 	SetupHash( m_name.CStr() );
-	SetupMeshes( path, pDevice, renderPasses, p, bFastMem );
+	SetupMeshes( path, pDevice, p, bFastMem );
 	SetupSkeleton( p );
 
 	SetReady(true);
@@ -237,7 +237,7 @@ void ModelResource::CleanUp(GFXDevice* pDevice)
 }
 
 
-void ModelResource::SetupMeshes( const U8String & modelDir, GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, uint8* p, bool bFastMem )
+void ModelResource::SetupMeshes( const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
 {
 	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>( p );
 
@@ -267,7 +267,7 @@ void ModelResource::SetupMeshes( const U8String & modelDir, GFXDevice* pDevice, 
 			}
 		}
 
-		SetupMesh(modelDir, pDevice, renderPasses, pHeader, n, bFastMem);
+		SetupMesh(modelDir, pDevice, pHeader, n, bFastMem);
 
 		m_uMeshCount++;
 	}
@@ -334,7 +334,7 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 }
 
 
-void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
+void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
 {
 	uint8* pT = reinterpret_cast<uint8*>( pHeader );
 
@@ -376,11 +376,6 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, co
 	bindings[0].uVertexSize = (uint32)uVertexSize;
 	pipelineState.uInputBindingCount = 1;
 
-	m_meshArray[m_uMeshCount].pipelines.resize(renderPasses.size());
-	for (size_t i = 0; i < renderPasses.size(); i++)
-	{
-		m_meshArray[m_uMeshCount].pipelines[i].renderPass = renderPasses[i];
-	}
 
 	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
@@ -487,19 +482,12 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, co
 	pipelineState.pEffect = pEffect;
 	m_meshArray[m_uMeshCount].matName = pMaterial->materialName;
 
-	for (size_t i = 0; i < renderPasses.size(); i++)
-	{
-		pipelineState.renderPass = renderPasses[i];
-		m_meshArray[m_uMeshCount].pipelines[i].defaultPipeline = pDevice->GetPipelineState(pipelineState);
-	}
+
+	m_meshArray[m_uMeshCount].pipelines.defaultPipeline = pipelineState;
 
 	pipelineState.pEffect = pDeferredEffect;
 
-	for (size_t i = 0; i < renderPasses.size(); i++)
-	{
-		pipelineState.renderPass = renderPasses[i];
-		m_meshArray[m_uMeshCount].pipelines[i].deferredPipeline = pDevice->GetPipelineState(pipelineState);
-	}
+	m_meshArray[m_uMeshCount].pipelines.deferredPipeline = pipelineState;
 
 	
 	for (uint32 i = 0; i < pMaterial->constants_count; i++)
@@ -583,68 +571,61 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, co
 		}
 	}
 
-	CreateDepthPassMaterial(pDevice, renderPasses, meshIndex, pShape, pMaterial, effectPath);
+	CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial, effectPath);
 }
 
 
-void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName)
+void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName)
 {
+	PipelineStateDecl pipelineState = m_meshArray[m_uMeshCount].pipelines.defaultPipeline;
 
-	for (uint32 i = 0; i < renderPasses.size(); i++)
+	usg::AlphaStateDecl& alphaDecl = pipelineState.alphaState;
+	usg::RasterizerStateDecl& rasDecl = pipelineState.rasterizerState;
+	usg::DepthStencilStateDecl& depthPassP = pipelineState.depthState;
+	depthPassP.bDepthEnable = true;
+	depthPassP.eDepthFunc = usg::DEPTH_TEST_LEQUAL;
+	depthPassP.bStencilEnable = false;
+	depthPassP.bDepthWrite = true;
+	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
+
+	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
+	U8String effectPath = U8String("Effects/") + fxRunTime.GetResource()->GetDepthEffectName();
+
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectPath.CStr());
+
+	alphaDecl.bBlendEnable = false;
+	uint32 uRenderMask = alphaDecl.uColorMask[0];
+	for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
 	{
-		PipelineStateHndl defaultPipeline = m_meshArray[m_uMeshCount].pipelines[i].defaultPipeline;
-
-		PipelineStateDecl pipelineState;
-
-		pDevice->GetPipelineDeclaration(defaultPipeline, pipelineState);
-		usg::AlphaStateDecl& alphaDecl = pipelineState.alphaState;
-		usg::RasterizerStateDecl& rasDecl = pipelineState.rasterizerState;
-		usg::DepthStencilStateDecl& depthPassP = pipelineState.depthState;
-		depthPassP.bDepthEnable = true;
-		depthPassP.eDepthFunc = usg::DEPTH_TEST_LEQUAL;
-		depthPassP.bStencilEnable = false;
-		depthPassP.bDepthWrite = true;
-		depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
-
-		CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
-		U8String effectPath = U8String("Effects/") + fxRunTime.GetResource()->GetDepthEffectName();
-
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectPath.CStr());
-
-		alphaDecl.bBlendEnable = false;
-		uint32 uRenderMask = alphaDecl.uColorMask[0];
-		for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
-		{
-			alphaDecl.uColorMask[i] = usg::RT_MASK_NONE;
-		}
-
-		m_meshArray[m_uMeshCount].pipelines[i].depthPassPipeline = pDevice->GetPipelineState(pipelineState);
-
-		U8String omniDepthName = U8String("Effects/") + fxRunTime.GetResource()->GetOmniDepthEffectName();
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, omniDepthName.CStr());
-
-
-		m_meshArray[m_uMeshCount].pipelines[i].omniDepthPassPipeline = pDevice->GetPipelineState(pipelineState);
-
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectName.CStr());
-		pDevice->GetPipelineDeclaration(defaultPipeline, pipelineState);
-		alphaDecl.bBlendEnable = true;
-		alphaDecl.uColorMask[0] = uRenderMask;
-		alphaDecl.eAlphaTest = usg::ALPHA_TEST_ALWAYS;
-		alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
-		alphaDecl.srcBlend = usg::BLEND_FUNC_CONSTANT_COLOR;
-		alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_CONSTANT_COLOR;
-
-		// Initialize the depth stencil states needed to test against this stencil write
-		depthPassP.bDepthEnable = true;
-		depthPassP.bStencilEnable = false;
-		depthPassP.bDepthWrite = false;
-
-		depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
-		depthPassP.eDepthFunc = usg::DEPTH_TEST_EQUAL;
-
-		m_meshArray[m_uMeshCount].pipelines[i].translucentStateCmp = pDevice->GetPipelineState(pipelineState);
+		alphaDecl.uColorMask[i] = usg::RT_MASK_NONE;
 	}
+
+	m_meshArray[m_uMeshCount].pipelines.depthPassPipeline = pipelineState;
+
+	U8String omniDepthName = U8String("Effects/") + fxRunTime.GetResource()->GetOmniDepthEffectName();
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, omniDepthName.CStr());
+
+
+	m_meshArray[m_uMeshCount].pipelines.omniDepthPassPipeline = pipelineState;
+
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectName.CStr());
+	pipelineState = m_meshArray[m_uMeshCount].pipelines.defaultPipeline;
+	alphaDecl.bBlendEnable = true;
+	alphaDecl.uColorMask[0] = uRenderMask;
+	alphaDecl.eAlphaTest = usg::ALPHA_TEST_ALWAYS;
+	alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
+	alphaDecl.srcBlend = usg::BLEND_FUNC_CONSTANT_COLOR;
+	alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_CONSTANT_COLOR;
+
+	// Initialize the depth stencil states needed to test against this stencil write
+	depthPassP.bDepthEnable = true;
+	depthPassP.bStencilEnable = false;
+	depthPassP.bDepthWrite = false;
+
+	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
+	depthPassP.eDepthFunc = usg::DEPTH_TEST_EQUAL;
+
+	m_meshArray[m_uMeshCount].pipelines.translucentStateCmp = pipelineState;
 }
 
 uint32 ModelResource::GetInstanceDecl()

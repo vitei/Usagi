@@ -36,6 +36,7 @@
 
 namespace usg{
 
+
 	struct ResourceMgr::PIMPL
 	{
 		ResourceData<Texture>					textures;
@@ -51,7 +52,6 @@ namespace usg{
 		ResourceData<ResourcePakHdr>			resourcePaks;
 
 		List<ResourceDataBase>				resourceSets;
-		vector<RenderPassHndl>				renderPasses;
 
 		ResourcePakLoader					pakLoader;
 	};
@@ -124,7 +124,8 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			m_pImpl->resourcePaks.AddResource(pPakHdr);
 			m_pImpl->pakLoader.Load<Texture, TexturePak>(pDevice, m_pImpl->textures);
 			m_pImpl->pakLoader.LoadEffects(pDevice, m_pImpl->effects);
-			m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->renderPasses, m_pImpl->particleEmitters, ".pem");
+			ASSERT(false);
+			m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->particleEmitters, ".pem");
 			m_pImpl->pakLoader.Load<ParticleEffectResource, ParticleEffectPak>(pDevice, m_pImpl->particleEffects, ".pfx");
 			m_pImpl->pakLoader.FinishLoad();
 
@@ -319,7 +320,7 @@ ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const
 			m_pImpl->particleEmitters.StartLoad();
 			ParticleEmitterResource* pResPtr = vnew(ALLOC_RESOURCE_MGR) ParticleEmitterResource;
 
-			bool b = pResPtr->Load(pDevice, m_pImpl->renderPasses, path.CStr());
+			bool b = pResPtr->Load(pDevice, path.CStr());
 			ASSERT(b);
 			pEffect = m_pImpl->particleEmitters.AddResource(pResPtr);
 		}
@@ -413,7 +414,7 @@ ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName,
 	{
 		m_pImpl->models.StartLoad();
 		ModelResource* pNC = vnew(ALLOC_RESOURCE_MGR) ModelResource;
-		pNC->Load(pDevice, u8Name.CStr(), m_pImpl->renderPasses, bInstance, bFastMem);
+		pNC->Load(pDevice, u8Name.CStr(), bInstance, bFastMem);
 		pModel = m_pImpl->models.AddResource(pNC);
 	}
 	return pModel;

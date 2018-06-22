@@ -122,7 +122,6 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	}
 
 	PipelineStateDecl pipelineState;
-	pipelineState.renderPass = renderPass;
 	pipelineState.uInputBindingCount = 1;
 	pipelineState.ePrimType = PT_POINTS;
 
@@ -145,7 +144,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugText");
-	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(pipelineState), textDescriptors);
+	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), textDescriptors);
 	m_textConstants.Init(pDevice, g_textConstantDef);
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
@@ -161,7 +160,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 
 	pipelineState.layout.descriptorSets[1] = solidDescriptors;
 
-	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(pipelineState), solidDescriptors);
+	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), solidDescriptors);
 	m_posColConstants.Init(pDevice, g_solidConstantDef);
 	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_posColConstants);
 	m_posColMaterial.UpdateDescriptors(pDevice);
