@@ -223,7 +223,7 @@ void GFXContext::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pD
 
 void GFXContext::SetPipelineState(PipelineStateHndl hndl)
 {
-#ifndef DISABLE_STATE_SHADOWING
+#if !DISABLE_STATE_SHADOWING
 	if (m_activeStateGroup != hndl)
 #endif
 	{
