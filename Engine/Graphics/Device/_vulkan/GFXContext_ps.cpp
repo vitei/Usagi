@@ -234,7 +234,7 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 	static VkClearAttachment clearAttachments[MAX_COLOR_TARGETS + 1] = {};
 
 	uint32 clearCount = 0;
-	for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
+	for (uint32 i = 0; i < pRT->GetTargetCount(); i++)
 	{
 		if (uFlags & (RenderTarget::RT_FLAG_COLOR_0 << i))
 		{
@@ -246,7 +246,7 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 		}
 	}
 
-	if (uFlags & RenderTarget::RT_FLAG_DEPTH)
+	if (uFlags & RenderTarget::RT_FLAG_DEPTH && pRT->GetDepthStencilBuffer())
 	{
 		clearAttachments[clearCount].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 		clearAttachments[clearCount].clearValue.depthStencil = { 1.0f, 0 };
