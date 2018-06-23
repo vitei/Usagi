@@ -77,7 +77,8 @@ enum ShaderType
 };
 
 
-#define EFFECT_MERGED_BINDING (!(defined PLATFORM_PC || defined PLATFORM_OSX) || (defined USE_VULKAN))
+// Merging on Vulkan as otherwise bindings are a pain
+#define EFFECT_MERGED_BINDING (!(defined PLATFORM_PC || defined PLATFORM_OSX)) //|| (defined USE_VULKAN))
 
 enum ShaderConstantType
 {
@@ -85,20 +86,20 @@ enum ShaderConstantType
 	// them more frequently then you should make multiple buffers
 	SHADER_CONSTANT_GLOBAL = 0,
 	SHADER_CONSTANT_MATERIAL,
-#if EFFECT_MERGED_BINDING
-	SHADER_CONSTANT_MATERIAL_1,	// You can't have the same buffer having different meanings on the PC so hacking with a second material buffer
+#if !EFFECT_MERGED_BINDING
+	SHADER_CONSTANT_MATERIAL_1,	// You can't have the same buffer having different meanings on opengl so hacking with a second material buffer
 #else
 	SHADER_CONSTANT_MATERIAL_1 = SHADER_CONSTANT_MATERIAL,
 #endif
 	SHADER_CONSTANT_INSTANCE,
-#if EFFECT_MERGED_BINDING
+#if !EFFECT_MERGED_BINDING
 	SHADER_CONSTANT_INSTANCE_1,
 #else
 	SHADER_CONSTANT_INSTANCE_1 = SHADER_CONSTANT_INSTANCE,
 #endif
 	SHADER_CONSTANT_BONES,
 
-#if EFFECT_MERGED_BINDING
+#if !EFFECT_MERGED_BINDING
 	SHADER_CONSTANT_CUSTOM,
 #else
 	SHADER_CONSTANT_CUSTOM = SHADER_CONSTANT_BONES,

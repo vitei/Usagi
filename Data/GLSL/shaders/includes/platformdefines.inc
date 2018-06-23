@@ -81,6 +81,21 @@ vec4 GetUV(in vec4 texCoord)
 
 #else
 
+#ifdef API_VULKAN
+
+#define UBO_GLOBAL_ID		0
+#define UBO_MATERIAL_ID 	1
+#define UBO_MATERIAL_1_ID	2
+#define UBO_INSTANCE_ID 	3
+#define UBO_INSTANCE_1_ID 	4
+#define UBO_BONE_ID			5
+#define UBO_CUSTOM0_ID		6
+#define UBO_LIGHTING_ID 	7
+#define UBO_SHADOW_ID 		8
+#define UBO_COLORS			9
+
+#else
+
 #define UBO_GLOBAL_ID		0
 #define UBO_MATERIAL_ID 	1
 #define UBO_MATERIAL_1_ID	1
@@ -91,6 +106,9 @@ vec4 GetUV(in vec4 texCoord)
 #define UBO_LIGHTING_ID 	4
 #define UBO_SHADOW_ID 		5
 #define UBO_COLORS			6
+
+
+#endif
 
 #endif
 

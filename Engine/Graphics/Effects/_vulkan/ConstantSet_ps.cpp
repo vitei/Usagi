@@ -40,6 +40,7 @@ ConstantSet_ps::ConstantSet_ps()
 {
 	m_bDataValid	= false;
 	m_pOwner		= NULL;
+	m_buffer = VK_NULL_HANDLE;
 //	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
 }
@@ -99,11 +100,11 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
 void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 {
 	// Not valid if the owner isn't
-	if (m_pOwner)
+	if (m_pOwner && m_buffer != VK_NULL_HANDLE)
 	{
 		GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
-		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, devicePS.GetAllocCallbacks());
+		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, nullptr);
 	}
 }
 
@@ -151,7 +152,7 @@ void ConstantSet_ps::InitOffsetsAndGPUData(const ShaderConstantDecl* pDecl)
 	m_pVarData	= vnew(ALLOC_SHADER_CONSTANTS) VariableData[m_pOwner->GetVarCount()];
 
 	AppendOffsets(pDecl, 0, uSize, uVars);
-	m_uGPUSize = Math::Roundup(uSize, 16);
+	m_uGPUSize = uSize;
 	ASSERT(uVars == m_pOwner->GetVarCount());
 }
 

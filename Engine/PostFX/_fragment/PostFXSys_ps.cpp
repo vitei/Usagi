@@ -184,7 +184,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	if (uInitFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
 		m_pSkyFog = vnew(ALLOC_OBJECT) SkyFog();
-		m_pSkyFog->Init(pDevice, pParent, &m_screenRT[TARGET_HDR]);
+		m_pSkyFog->Init(pDevice, pParent, uInitFlags&PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSkyFog;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
@@ -248,7 +248,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 
 	m_pInitialTarget = pDst;
-	m_renderPasses.SetRenderPass(RenderNode::LAYER_OPAQUE, 0, m_pInitialTarget->GetRenderPass());
+	m_renderPasses.SetRenderPass(RenderNode::LAYER_BACKGROUND, 0, m_pInitialTarget->GetRenderPass());
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{

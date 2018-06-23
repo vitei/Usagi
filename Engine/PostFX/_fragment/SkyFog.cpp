@@ -52,7 +52,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	RenderPassHndl renderPassHndl = pSys->GetRenderPasses().GetRenderPass(*this);
+	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 

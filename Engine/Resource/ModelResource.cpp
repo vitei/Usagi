@@ -380,15 +380,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineState.layout.descriptorSets[1] = matDescriptors;
-	if (m_meshArray[m_uMeshCount].primitive.eSkinningMode != usg::exchange::SkinningType_NO_SKINNING)
-	{
-		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-		pipelineState.layout.uDescriptorSetCount = 3;
-	}
-	else
-	{
-		pipelineState.layout.uDescriptorSetCount = 2;
-	}
+	pipelineState.layout.uDescriptorSetCount = 2;
 
 	m_meshArray[m_uMeshCount].defaultPipelineDescLayout = matDescriptors;
 

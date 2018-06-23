@@ -3,9 +3,6 @@
 
 #define MAX_LIGHTS 8
 
-// 8 should be enough to handle all of the active LUTs
-SAMPLER_LOC(1, 9) uniform sampler2D lightLUT[6];
-
 // Structures are passed by value so confine this to as small a size as possible
 // Forward shaded point/ spot lights should be avoided in general
 struct Light
@@ -23,7 +20,7 @@ struct Light
 
 
 // All lights (the lights needed for forward shading are always set)
-BUFFER_LAYOUT(1, UBO_LIGHTING_ID) uniform Lighting
+BUFFER_LAYOUT(0, UBO_LIGHTING_ID) uniform Lighting
 {
 	// Will always be dirlights then point lights
 	int 		iDirLightCount;
