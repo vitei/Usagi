@@ -18,7 +18,7 @@ namespace usg
 
 		MemSet(this, 0, sizeof(Matrix4x4));
 		_11 = fXScale;
-		_22 = fYScale;
+		_22 = -fYScale;
 
 		_33 = (fZFar) / (fZFar - fZNear);
 		_34 = 1.0f;
@@ -28,14 +28,12 @@ namespace usg
 
 	void Matrix4x4::PerspectiveRH(float32 fFovY, float32 fAspect, float32 fZNear, float32 fZFar, bool bOrient)
 	{
-		// TODO: Confirm
-		ASSERT(false);
 		float32 fYScale = Math::cotanf(fFovY / 2.f);
 		float32 fXScale = fYScale / fAspect;
 
 		MemSet(this, 0, sizeof(Matrix4x4));
 		_11 = fXScale;
-		_22 = fYScale;
+		_22 = -fYScale;
 		_33 = fZFar / (fZNear - fZFar);
 		_34 = -1.0f;
 		_43 = fZNear*fZFar / (fZNear - fZFar);
