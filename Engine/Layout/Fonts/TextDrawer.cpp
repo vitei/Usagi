@@ -129,7 +129,7 @@ namespace usg
 			FontHndl font = m_pParent->GetFont();
 			const DescriptorSet& desc = font->GetDescriptor();
 
-			pContext->SetDescriptorSet(&desc, 0);
+			pContext->SetDescriptorSet(&desc, 1);
 			pContext->SetVertexBuffer(&m_charVerts);
 			pContext->DrawImmediate(m_uCharCount);
 

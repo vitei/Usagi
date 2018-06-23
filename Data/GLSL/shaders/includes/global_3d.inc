@@ -27,14 +27,14 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 	vec4	vShadowColor;
 };
 #elif defined(OMNI_DEPTH)
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
+BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mMatrices[6];
 	vec4	lightPos;
 	float 	lightFarDist;
 };
 #else
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
+BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mProjMat;
 	mat4 	mViewMat;
