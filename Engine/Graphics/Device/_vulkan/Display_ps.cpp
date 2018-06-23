@@ -363,28 +363,28 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	ASSERT(dstBounds.height == srcBounds.height);
 	ASSERT(dstBounds.width == srcBounds.width);
 
-	VkImageCopy ic = {};
+	VkImageBlit ic = {};
 	ic.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.srcSubresource.mipLevel = 0;
 	ic.srcSubresource.baseArrayLayer = 0;
 	ic.srcSubresource.layerCount = 1;
-	ic.srcOffset.x = srcBounds.x;
-	ic.srcOffset.y = srcBounds.y;
-	ic.srcOffset.z = 0;
+	ic.srcOffsets[0].x = srcBounds.x;
+	ic.srcOffsets[0].y = srcBounds.y;
+	ic.srcOffsets[1].x = srcBounds.x + srcBounds.width;
+	ic.srcOffsets[1].y = srcBounds.y + srcBounds.height;
 	ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.dstSubresource.mipLevel = 0;
 	ic.dstSubresource.baseArrayLayer = 0;
 	ic.dstSubresource.layerCount = 1;
-	ic.dstOffset.x = dstBounds.x;
-	ic.dstOffset.y = dstBounds.y;
-	ic.dstOffset.z = 0;
-	ic.extent.width = dstBounds.width;
-	ic.extent.height = dstBounds.height;
-	ic.extent.depth = 1;
+	ic.dstOffsets[0].x = dstBounds.x;
+	ic.dstOffsets[0].y = dstBounds.y;
+	ic.dstOffsets[1].x = dstBounds.x + dstBounds.width;
+	ic.dstOffsets[1].y = dstBounds.y + dstBounds.height;
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
-	vkCmdCopyImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic);
+	VkFilter filter = srcBounds.width == dstBounds.width ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+	vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
 	pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
