@@ -110,6 +110,7 @@ namespace usg {
 			RenderPassDecl::Attachment& attach = attachments[i];
 			RenderPassDecl::AttachmentReference& ref = refs[i];
 			uint32 uFlag = (1 << i);
+			attach.eAttachType = RenderPassDecl::ATTACH_COLOR;
 			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
 			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eColor = m_pColorBuffer[i]->GetFormat();
@@ -121,7 +122,8 @@ namespace usg {
 		{
 			RenderPassDecl::Attachment& attach = attachments[m_uTargetCount];
 			RenderPassDecl::AttachmentReference& ref = refs[m_uTargetCount];
-			uint32 uFlag = (1 << m_uTargetCount);
+			uint32 uFlag = RenderTarget::RT_FLAG_DS;
+			attach.eAttachType = RenderPassDecl::ATTACH_DEPTH;
 			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
 			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eDepth = m_pDepth->GetFormat();
