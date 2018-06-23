@@ -99,7 +99,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		}
 	}
 
-	SetMaterialCmpVal(pMesh->GetPipeline(renderPass).defaultPipeline, pMesh->pTextures[0].get());
+	SetMaterialCmpVal(pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline), pMesh->pTextures[0].get());
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 

@@ -53,7 +53,7 @@ public:
 	SamplerHndl				GetSampler(const SamplerDecl& decl);
 	DescriptorSetLayoutHndl GetDescriptorSetLayout(const DescriptorDeclaration* pDecl);
 
-	void GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out);
+	void GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
 
 	void PostUpdate();
 	bool Is3DEnabled() const;

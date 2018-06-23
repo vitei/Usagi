@@ -125,7 +125,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			m_pImpl->pakLoader.Load<Texture, TexturePak>(pDevice, m_pImpl->textures);
 			m_pImpl->pakLoader.LoadEffects(pDevice, m_pImpl->effects);
 			ASSERT(false);
-			m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->particleEmitters, ".pem");
+			//m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->particleEmitters, ".pem");
 			m_pImpl->pakLoader.Load<ParticleEffectResource, ParticleEffectPak>(pDevice, m_pImpl->particleEffects, ".pfx");
 			m_pImpl->pakLoader.FinishLoad();
 

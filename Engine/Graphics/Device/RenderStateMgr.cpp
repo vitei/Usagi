@@ -324,7 +324,7 @@ void RenderStateMgr::GetPipelineLayoutDeclaration(const PipelineLayoutHndl layou
 }
 
 // Due to the size of these we are reconstructing them from their handles, there could be 10s of thousands
-void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out)
+void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut)
 {
 	if (pipeline.GetValue() < m_pImpl->pipelines.GetCount())
 	{
@@ -336,7 +336,7 @@ void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipelin
 		out.pEffect = pInitData->pEffect;
 		out.uInputBindingCount = pInitData->pBinding.GetContents()->GetDeclCount();
 		out.ePrimType = pInitData->ePrimType;
-		out.renderPass = pInitData->renderPass;
+		passOut = pInitData->renderPass;
 		for (uint32 i = 0; i < out.uInputBindingCount; i++)
 		{
 			const VertexDeclaration* pDecl = VertexDeclaration::GetDecl(pInitData->pBinding.GetContents()->GetDeclId(i));

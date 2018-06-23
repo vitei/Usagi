@@ -20,7 +20,7 @@ namespace usg{
 
     }
 
-	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, const char* szFileName)
+	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const char* szFileName)
 	{
 		SetupHash(szFileName);
 		ProtocolBufferFile emitterVPB(szFileName);
@@ -33,7 +33,7 @@ namespace usg{
 			return false;
 		}
 
-		Load(pDevice, renderPasses);
+		Load(pDevice);
 
 		return true;
 	}

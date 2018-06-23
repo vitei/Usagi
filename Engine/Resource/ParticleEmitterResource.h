@@ -10,6 +10,7 @@
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Resource/ResourcePak.pb.h"
+#include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/stl/vector.h"
 

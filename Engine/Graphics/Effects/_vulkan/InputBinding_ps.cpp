@@ -13,6 +13,25 @@ namespace usg {
 		switch (uCount)
 		{
 		case 1:
+			return bNormalised ? VK_FORMAT_R8_SNORM : VK_FORMAT_R8_SINT;
+		case 2:
+			return bNormalised ? VK_FORMAT_R8G8_SNORM : VK_FORMAT_R8G8_SINT;
+		case 3:
+			return bNormalised ? VK_FORMAT_R8G8B8_SNORM : VK_FORMAT_R8G8B8_SINT;
+		case 4:
+			return bNormalised ? VK_FORMAT_R8G8B8A8_SNORM : VK_FORMAT_R8G8B8A8_SINT;
+		default:
+			ASSERT(false);
+		}
+
+		return VK_FORMAT_R8G8B8A8_UNORM;
+	}
+
+	VkFormat GetAttribFormatUByte(uint32 uCount, bool bNormalised)
+	{
+		switch (uCount)
+		{
+		case 1:
 			return bNormalised ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8_UINT;
 		case 2:
 			return bNormalised ? VK_FORMAT_R8G8_UNORM : VK_FORMAT_R8G8_UINT;
@@ -92,6 +111,8 @@ namespace usg {
 		{
 		case VE_BYTE:
 			return GetAttribFormatByte(uCount, bNormalised);
+		case VE_UBYTE:
+			return GetAttribFormatUByte(uCount, bNormalised);
 		case VE_SHORT:
 			return GetAttribFormatShort(uCount, bNormalised);
 		case VE_FLOAT:

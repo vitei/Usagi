@@ -369,11 +369,11 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	ASSERT(uCount <= maxElements);
 	memsize uVertexSize;
 	PipelineStateDecl::InputBinding* bindings = pipelineState.inputBindings;
-	VertexElement elements[maxElements + 1];
-	VertexElement singleAttribElements[exchange::Shape::singleAttributes_max_count + 1][2];
-	GetModelDeclUVReusse(pShape, fxRunTime, pMaterial, elements, uVertexSize);
-	bindings[0].Init(elements);
+	VertexElement* pElement = m_meshArray[m_uMeshCount].vertexElements;
+	uint32 elementOffset = GetModelDeclUVReusse(pShape, fxRunTime, pMaterial, pElement, uVertexSize);
+	bindings[0].Init(pElement);
 	bindings[0].uVertexSize = (uint32)uVertexSize;
+	pElement += elementOffset;
 	pipelineState.uInputBindingCount = 1;
 
 
@@ -441,11 +441,12 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		uint32 uSlot = 0;
 		for (size_t i = 0; i < pShape->singleAttributes_count; ++i)
 		{
-			if (!GetSingleAttributeDeclNamed(fxRunTime, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, singleAttribElements[uSlot]))
+			if (!GetSingleAttributeDeclNamed(fxRunTime, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, pElement))
 				continue;
 		
-			bindings[uSlot + 1].Init(singleAttribElements[uSlot], (uint32)uSlot + 1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
+			bindings[uSlot + 1].Init(pElement, (uint32)uSlot + 1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
 			pipelineState.uInputBindingCount++;
+			pElement += 2;
 
 			const Vector4f& value = pShape->singleAttributes[i].value;
 			m_meshArray[m_uMeshCount].vertexBuffer[1 + uSlot].Init(pDevice, (void*)&value, sizeof(float)*pShape->singleAttributes[i].columns, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
@@ -697,7 +698,7 @@ static memsize AlignSize(memsize uSize, memsize uAlign)
 	return uSize + uAdjustment;
 }
 
-void ModelResource::GetModelDeclUVReusse(const exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& offset)
+uint32 ModelResource::GetModelDeclUVReusse(const exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& offset)
 {
 	const exchange::VertexStreamInfo* pInfo = pShape->streamInfo;
 
@@ -757,6 +758,8 @@ void ModelResource::GetModelDeclUVReusse(const exchange::Shape* pShape, const Cu
 	offset = AlignSize(offset, 4);
 
 	elements[uCount] = VERTEX_ELEMENT_CAP;
+
+	return uCount+1;
 }
 
 

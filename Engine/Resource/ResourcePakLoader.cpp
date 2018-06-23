@@ -174,60 +174,11 @@ namespace usg
 		}
 	}
 
-	template <typename TResourceType, typename TResourcePak>
-	void ResourcePakLoader::Load(usg::GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, ResourceData<TResourceType>& resourceData, const char * const szExtension)
-	{
-		if (ResourceLoadHelper<TResourceType>::SkipLoadingIfAppShouldQuit && OS::ShouldQuit())
-		{
-			return;
-		}
-
-		const TResourcePak * pPakHeaders;
-		const ResourceGroup & resourceGroup = GetResourceGroup(pPakHeaders);
-
-		U8String resourceName;
-		for (uint32 i = 0; i < resourceGroup.uCount; i++)
-		{
-			const TResourcePak& pak = pPakHeaders[i];
-			resourceName = m_pathName + pak.resHdr.strName + szExtension;
-			SharedPointer<const TResourceType> pResource = resourceData.GetResourceHndl(resourceName);
-			if (!pResource)
-			{
-				resourceData.StartLoad();
-				TResourceType* pNC = vnew(ALLOC_RESOURCE_MGR) TResourceType;
-				if (m_bBinaryInMemory)
-				{
-					pNC->Load(pDevice, renderPasses, pak, reinterpret_cast<const void*>(m_pData + pak.resHdr.uDataOffset), m_pathName.CStr());
-				}
-				else
-				{
-					ScratchRaw scrath;
-					scrath.Init(pak.resHdr.uDataSize, FILE_READ_ALIGN);
-					bool bDidOpen = false;
-					if (!m_file.IsOpen())
-					{
-						bDidOpen = true;
-						m_file.Open(m_name.CStr());
-					}
-					m_file.SeekPos(pak.resHdr.uDataOffset);
-					m_file.Read(pak.resHdr.uDataSize, scrath.GetRawData());
-					pNC->Load(pDevice, renderPasses, pak, scrath.GetRawData(), m_pathName.CStr());
-					if (!bDidOpen)
-					{
-						m_file.Close();
-					}
-				}
-				resourceData.AddResource(pNC);
-			}
-		}
-	}
-
 	void ResourcePakLoader::FinishLoad()
 	{
 		m_scratch.Free();
 	}
 
 	template void ResourcePakLoader::Load<Texture, TexturePak>(usg::GFXDevice*, ResourceData<Texture>&, const char * const);
-	template void ResourcePakLoader::Load<ParticleEmitterResource, ParticleEmitterPak>(usg::GFXDevice*, const vector<RenderPassHndl>&, ResourceData<ParticleEmitterResource>&, const char * const);
 	template void ResourcePakLoader::Load<ParticleEffectResource, ParticleEffectPak>(usg::GFXDevice*, ResourceData<ParticleEffectResource>&, const char * const);
 }

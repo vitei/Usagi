@@ -27,7 +27,7 @@ public:
 	DescriptorSetLayoutHndl GetDescriptorSetLayout(const DescriptorDeclaration* pDecl, GFXDevice* pDevice);
 	bool					UsesBlendColor(AlphaStateHndl hndl);
 
-	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out);
+	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
 
 	void FinishedStaticLoad();
 	void ClearDynamicResources();

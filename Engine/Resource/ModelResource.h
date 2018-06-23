@@ -45,7 +45,7 @@ public:
 	const SkeletonResource* GetDefaultSkeleton() const {  return &m_defaultSkeleton; }
 
 	static uint32 GetInstanceDecl();
-	static void GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
+	static uint32 GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
 	static uint32 GetBoneIndexCount(const usg::exchange::Shape* pShape);
 	static bool HasAttribute(const usg::exchange::VertexStreamInfo* pInfo, exchange::VertexAttribute attrib, uint32 uCount);
 	static void GetSingleAttributeDecl( usg::exchange::VertexAttribute attr, uint32 uCount, VertexElement element[2] );

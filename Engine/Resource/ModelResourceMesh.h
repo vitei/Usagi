@@ -47,6 +47,9 @@ namespace usg{
 			PipelineStateDecl		translucentStateCmp;
 		} pipelines;
 
+		VertexElement vertexElements[MAX_VERTEX_ATTRIBUTES+1+(2*exchange::Shape::singleAttributes_max_count)];	// +1 for cap
+
+
 
 		void CleanUp(GFXDevice* pDevice)
 		{

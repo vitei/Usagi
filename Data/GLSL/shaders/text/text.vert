@@ -28,15 +28,10 @@ out VertexData
 
 void main(void)
 {
-	vec4 vTL = vec4( ao_posRange.xy, ao_fDepth, 1.0 );
-	vec4 vTR = vec4( ao_posRange.zy, ao_fDepth, 1.0 );
-	vec4 vBL = vec4( ao_posRange.xw, ao_fDepth, 1.0 );
-	vec4 vBR = vec4( ao_posRange.zw, ao_fDepth, 1.0 );
-
- 	vertexData.vo_posTL = vTL * proj;
- 	vertexData.vo_posTR = vTR * proj;
- 	vertexData.vo_posBL = vBL * proj;
- 	vertexData.vo_posBR = vBR * proj;
+ 	vertexData.vo_posTL = vec4( ao_posRange.xy, ao_fDepth, 1.0 ) * proj;
+ 	vertexData.vo_posTR = vec4( ao_posRange.zy, ao_fDepth, 1.0 ) * proj;
+ 	vertexData.vo_posBL = vec4( ao_posRange.xw, ao_fDepth, 1.0 ) * proj;
+ 	vertexData.vo_posBR = vec4( ao_posRange.zw, ao_fDepth, 1.0 ) * proj;
  	
 	vertexData.vo_vColorUpper 		= ao_colUpper;
 	vertexData.vo_vColorLower 		= ao_colLower;		
