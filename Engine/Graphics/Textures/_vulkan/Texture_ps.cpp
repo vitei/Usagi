@@ -511,22 +511,25 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		std::vector<VkBufferImageCopy> bufferCopyRegions;
 		uint32_t offset = 0;
 
-		for (uint32_t i = 0; i < Texture.levels(); i++)
+		for (uint32_t face = 0; face < m_uFaces; face++)
 		{
-			VkBufferImageCopy bufferCopyRegion = {};
-			bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			bufferCopyRegion.imageSubresource.mipLevel = i;
-			bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-			bufferCopyRegion.imageSubresource.layerCount = 1;
-			glm::tvec3<uint32> LevelExtent(Texture.extent(i));
-			bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
-			bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
-			bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
-			bufferCopyRegion.bufferOffset = offset;
+			for (uint32_t i = 0; i < Texture.levels(); i++)
+			{
+				VkBufferImageCopy bufferCopyRegion = {};
+				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				bufferCopyRegion.imageSubresource.mipLevel = i;
+				bufferCopyRegion.imageSubresource.baseArrayLayer = face;
+				bufferCopyRegion.imageSubresource.layerCount = 1;
+				glm::tvec3<uint32> LevelExtent(Texture.extent(i));
+				bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
+				bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
+				bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
+				bufferCopyRegion.bufferOffset = offset;
 
-			bufferCopyRegions.push_back(bufferCopyRegion);
+				bufferCopyRegions.push_back(bufferCopyRegion);
 
-			offset += static_cast<uint32_t>(Texture.size(i));
+				offset += static_cast<uint32_t>(Texture.size(i));
+			}
 		}
 
 		// Set the target texture as optimal tiled
@@ -535,7 +538,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		imageCreateInfo.imageType = eVKImageType;
 		imageCreateInfo.format = eFormatVK;
 		imageCreateInfo.mipLevels = (uint32)Texture.levels();
-		imageCreateInfo.arrayLayers = 1;
+		imageCreateInfo.arrayLayers = m_uFaces;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -560,7 +563,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		subresourceRange.baseMipLevel = 0;
 		subresourceRange.levelCount = (uint32)Texture.levels();
-		subresourceRange.layerCount = 1;
+		subresourceRange.layerCount = m_uFaces;
 
 		// Transfer from initial undefined image layout to the transfer destination layout
 		setImageLayout(copyCmd,	m_image, VK_IMAGE_ASPECT_COLOR_BIT,	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
@@ -587,7 +590,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		view.subresourceRange.baseMipLevel = 0;
 		view.subresourceRange.baseArrayLayer = 0;
-		view.subresourceRange.layerCount = 1;
+		view.subresourceRange.layerCount = m_uFaces;
 		view.subresourceRange.levelCount = (uint32)Texture.levels();
 		view.image = m_image;
 		res = vkCreateImageView(device, &view, nullptr, &m_imageView);
