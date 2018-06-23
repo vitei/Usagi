@@ -7,6 +7,7 @@
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Graphics/Device/GFXContext.h"
@@ -120,35 +121,43 @@ namespace usg {
 		RenderPassDecl renderPass;
 		// FIXME: Init the render pass
 
-		RenderPassHndl renderPassHndl = pDevice->GetRenderPass(renderPass);
+		uint32 uWidth = pSys->GetFinalTargetWidth();
+		uint32 uHeight = pSys->GetFinalTargetHeight();
+		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
+		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
+		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, 0, 0, RenderTarget::RT_FLAG_COLOR_0);
+		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
+		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);
+		m_renderTargets[RT_BLEND_WEIGHT].InitRenderPass(pDevice, 0, 0, RenderTarget::RT_FLAG_COLOR_0);
 
 
 
 		// Depth edge detection
-		pipelineDecl.layout.descriptorSets[0] = depthEdgeDescriptors;
-		pipelineDecl.layout.uDescriptorSetCount = 1;
+		pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+		pipelineDecl.layout.descriptorSets[1] = depthEdgeDescriptors;
+		pipelineDecl.layout.uDescriptorSetCount = 2;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\DepthEdgeDetection");
-		m_depthEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_depthEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Luma Edge detection
 		pipelineDecl.layout.descriptorSets[0] = colorLumaEdgeDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\LumaEdgeDetection");
-		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Color edge detection
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\ColorEdgeDetection");
-		m_colorEdgeDetectEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_colorEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 
 		// Blend weight calculation
 		pipelineDecl.layout.descriptorSets[0] = blendWeightDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\BlendWeightCalc");
-		m_blendWeightEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_blendWeightEffect = pDevice->GetPipelineState(m_renderTargets[RT_BLEND_WEIGHT].GetRenderPass(), pipelineDecl);
 
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[0] = neighborHoodBlendDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\NeighborhoodBlend");
-		m_neighbourBlendEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
 #if SMAA_REPROJECTION
 		// Resolve
@@ -161,12 +170,6 @@ namespace usg {
 
 		UpdateConstants(pDevice, pDst->GetWidth(), pDst->GetHeight());
 
-		uint32 uWidth = pSys->GetFinalTargetWidth();
-		uint32 uHeight = pSys->GetFinalTargetHeight();
- 		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
-		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
-		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
-		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);
 
 		m_lumaColorEdgeDescriptorSet.Init(pDevice, colorLumaEdgeDescriptors);
 		m_depthEdgeDescriptorSet.Init(pDevice, colorLumaEdgeDescriptors);
@@ -213,7 +216,16 @@ namespace usg {
 
 	void SMAA::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	{
-		m_pDestTarget = pDst;
+		if (pDst != m_pDestTarget)
+		{
+			// Need to update the pipeline state if the destination changes
+			PipelineStateDecl decl;
+			RenderPassHndl rpOut;
+			pDevice->GetPipelineDeclaration(m_neighbourBlendEffect, decl, rpOut);
+			m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), decl);
+
+			m_pDestTarget = pDst;
+		}
 	}
 
 	void SMAA::UpdateConstants(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -280,6 +292,7 @@ namespace usg {
 
 	bool SMAA::Draw(GFXContext* pContext, RenderContext& renderContext)
 	{
+
 		if (!GetEnabled())
 			return false;
 
@@ -288,17 +301,17 @@ namespace usg {
 		pContext->SetRenderTarget(&m_renderTargets[RT_EDGES]);
 		pContext->ClearRenderTarget();
 		pContext->SetPipelineState(m_lumaEdgeDetectEffect);
-		pContext->SetDescriptorSet(&m_lumaColorEdgeDescriptorSet, 0);
+		pContext->SetDescriptorSet(&m_lumaColorEdgeDescriptorSet, 1);
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->SetRenderTarget(&m_renderTargets[RT_BLEND_WEIGHT]);
 		pContext->SetPipelineState(m_blendWeightEffect);
-		pContext->SetDescriptorSet(&m_blendWeightDescriptorSet, 0);
+		pContext->SetDescriptorSet(&m_blendWeightDescriptorSet, 1);
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->SetRenderTarget(m_pDestTarget);
 		pContext->SetPipelineState(m_neighbourBlendEffect);
-		pContext->SetDescriptorSet(&m_neighbourBlendDescriptorSet, 0);
+		pContext->SetDescriptorSet(&m_neighbourBlendDescriptorSet, 1);
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->EndGPUTag();
