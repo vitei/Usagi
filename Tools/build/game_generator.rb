@@ -250,7 +250,7 @@ def build_pc_model_textures_for_dir(config, n, textures_dir)
 end
 
 def build_pc_textures_for_dir(config, n, textures_dir)
-  targets = FileList["#{textures_dir}/**/*.tga", "#{textures_dir}/**/*.dds"].map do |input|
+  targets = FileList["#{textures_dir}/**/*.tga", "#{textures_dir}/**/*.dds", "#{textures_dir}/**/*.ktx"].map do |input|
     tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
     path = Pathname.new(input)
     tex = path.relative_path_from(Pathname(textures_dir)).sub_ext('')
