@@ -62,6 +62,10 @@ namespace usg
 	VkAccessFlags GetAccessFlags(uint32 uFlags)
 	{
 		VkAttachmentDescriptionFlags flagsOut = 0;
+		if (uFlags & RenderPassDecl::AC_MEMORY_READ)
+		{
+			flagsOut |= VK_ACCESS_MEMORY_READ_BIT;
+		}
 		if (uFlags & RenderPassDecl::AC_COLOR_ATTACHMENT_READ)
 		{
 			flagsOut |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
