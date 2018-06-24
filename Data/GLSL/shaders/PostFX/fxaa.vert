@@ -24,8 +24,8 @@ DAMAGES.*/
 ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-ATTRIB_LOC(1) out vec2 vo_vPos;
-ATTRIB_LOC(2) out vec4 vo_vPosPos;
+ATTRIB_LOC(0) out vec2 vo_vPos;
+ATTRIB_LOC(1) out vec4 vo_vPosPos;
 
 BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 {
@@ -35,7 +35,7 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 
 void main(void)
 {
-    vec4 vPosition = vec4( ao_position.xy, -0.5, 1.0);
+    vec4 vPosition = vec4( ao_position.xy, 0.0, 1.0);
     
     gl_Position     = vPosition;    
 
