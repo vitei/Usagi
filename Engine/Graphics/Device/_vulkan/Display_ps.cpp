@@ -215,7 +215,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	swap_chain.oldSwapchain = NULL;
 	swap_chain.clipped = true;
 	swap_chain.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	swap_chain.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swap_chain.queueFamilyIndexCount = 0;
 	swap_chain.pQueueFamilyIndices = NULL;
@@ -372,6 +372,7 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	ic.srcOffsets[0].y = srcBounds.y;
 	ic.srcOffsets[1].x = srcBounds.x + srcBounds.width;
 	ic.srcOffsets[1].y = srcBounds.y + srcBounds.height;
+	ic.srcOffsets[1].z = 1;
 	ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.dstSubresource.mipLevel = 0;
 	ic.dstSubresource.baseArrayLayer = 0;
@@ -380,6 +381,7 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	ic.dstOffsets[0].y = dstBounds.y;
 	ic.dstOffsets[1].x = dstBounds.x + dstBounds.width;
 	ic.dstOffsets[1].y = dstBounds.y + dstBounds.height;
+	ic.dstOffsets[1].z = 1;
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
