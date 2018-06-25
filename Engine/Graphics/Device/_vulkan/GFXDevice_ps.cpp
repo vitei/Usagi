@@ -265,7 +265,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkFenceCreateInfo fenceInfo;
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.pNext = NULL;
-	fenceInfo.flags = 0;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 	vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
 
 	//ASSERT(false);	// Need to set up the copy command buffer
@@ -346,6 +346,7 @@ void GFXDevice_ps::Begin()
 		do {
 			res = vkWaitForFences(m_vkDevice, 1, &m_drawFence, VK_TRUE, 100000);
 		} while (res == VK_TIMEOUT);
+		vkResetFences(m_vkDevice, 1, &m_drawFence);
 	}
 	bFirst = false;
 	for (uint32 i = 0; i < m_pParent->GetValidDisplayCount(); i++)
