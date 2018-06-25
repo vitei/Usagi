@@ -20,6 +20,7 @@ const uint32 g_uGPUFormatSize[CT_COUNT] =
 	sizeof(Vector2f),	// CT_VECTOR_2,
 	sizeof(float32),	// CT_FLOAT,
 	sizeof(sint32),		// CT_INT
+	sizeof(sint32)*4,	// CT_INT4
 	4,					// CT_BOOL
 	0,					// CT_STRUCT	(Not a valid size)
 };
@@ -32,9 +33,11 @@ const uint32 g_uGPUAlignments[CT_COUNT] =
 	sizeof(float)*2,	// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int)*4,		// CT_INT4
 	4,					// CT_BOOL
 	sizeof(float)*4		// CT_STRUCT (Not a valid size on it's own)
 };
+
 
 ConstantSet_ps::ConstantSet_ps()
 {
@@ -115,7 +118,6 @@ void ConstantSet_ps::AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffs
 	{
 		if(pDecl->eType == CT_STRUCT)
 		{
-			uint32 uExOffset = 0;
 			for(uint32 i=0; i<pDecl->uiCount; i++)
 			{
 				AppendOffsets(pDecl->pSubDecl, (uint32)(pDecl->uiOffset + (pDecl->uiSize*i)), uSize, uVars);
