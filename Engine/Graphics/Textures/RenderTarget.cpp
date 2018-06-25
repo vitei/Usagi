@@ -8,6 +8,20 @@
 
 namespace usg {
 
+	RenderTarget::RenderPassFlags::RenderPassFlags()
+	{
+		Clear();
+	}
+
+	void RenderTarget::RenderPassFlags::Clear()
+	{
+		uLoadFlags = 0;
+		uClearFlags = 0;
+		uStoreFlags = 0;
+		uShaderReadFlags = 0;
+		uTransferSrcFlags = 0;
+	}
+
 	RenderTarget::RenderTarget()
 	{
 		m_clearDepth = 1.0f;
@@ -92,10 +106,10 @@ namespace usg {
 		return RenderPassDecl::LOAD_OP_DONT_CARE;
 	}
 
-	RenderPassHndl RenderTarget::InitRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags, const RenderPassDecl::Dependency* pDependencies, uint32 uDependiences)
+	RenderPassHndl RenderTarget::InitRenderPass(GFXDevice* pDevice, const RenderPassFlags& flags, const RenderPassDecl::Dependency* pDependencies, uint32 uDependiences)
 	{
 		// Shouldn't be trying to load data that you are clearing
-		ASSERT((uLoadFlags & uClearFlags) == 0);
+		ASSERT((flags.uLoadFlags & flags.uClearFlags) == 0);
 		
 		usg::RenderPassDecl decl;
 		uint32 uAttachments = m_uTargetCount + (m_pDepth ? 1 : 0);
@@ -111,9 +125,21 @@ namespace usg {
 			RenderPassDecl::AttachmentReference& ref = refs[i];
 			uint32 uFlag = (1 << i);
 			attach.eAttachType = RenderPassDecl::ATTACH_COLOR;
-			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
-			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
+			attach.eLoadOp = GetLoadOp(uFlag, flags.uLoadFlags, flags.uClearFlags);
+			attach.eStoreOp = flags.uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eColor = m_pColorBuffer[i]->GetFormat();
+			if (flags.uShaderReadFlags & uFlag)
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_SHADER_READ_ONLY;
+			}
+			else if (flags.uTransferSrcFlags & uFlag)
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+			}
+			else
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+			}
 			ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 			ref.uIndex = i;
 		}
@@ -124,9 +150,22 @@ namespace usg {
 			RenderPassDecl::AttachmentReference& ref = refs[m_uTargetCount];
 			uint32 uFlag = RenderTarget::RT_FLAG_DS;
 			attach.eAttachType = RenderPassDecl::ATTACH_DEPTH;
-			attach.eLoadOp = GetLoadOp(uFlag, uLoadFlags, uClearFlags);
-			attach.eStoreOp = uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
+			attach.eLoadOp = GetLoadOp(uFlag, flags.uLoadFlags, flags.uClearFlags);
+			attach.eStoreOp = flags.uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eDepth = m_pDepth->GetFormat();
+			if (flags.uShaderReadFlags & uFlag)
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_SHADER_READ_ONLY;
+			}
+			else if (flags.uTransferSrcFlags & uFlag)
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+			}
+			else
+			{
+				attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT;
+			}
+
 			ref.eLayout = usg::RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT;
 			ref.uIndex = m_uTargetCount;
 

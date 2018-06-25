@@ -107,17 +107,42 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 		m_screenRT[TARGET_GBUFFER].InitMRT(pDevice, 5, pBuffers, &m_depthStencil);
 	}
 	
+	usg::RenderTarget::RenderPassFlags flags;
 	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR], &m_colorBuffer[BUFFER_LIN_DEPTH] };
+	
+	// HDR target with linear depth
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
-	m_screenRT[TARGET_HDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_1, RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1);
+	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_1;
+	m_screenRT[TARGET_HDR_LIN_DEPTH].InitRenderPass(pDevice, flags);
+
+	// LDR target, no linear depth
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
-	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH);
+	flags.Clear();
+	flags.uLoadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	flags.uClearFlags = 0;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
+
+	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, flags);
+
+	// Second LDR target, no linear depth
 	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
-	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, RenderTarget::RT_FLAG_DEPTH, 0, RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH);
+	flags.Clear();
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
+	flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR;
+	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, flags);
+
+	//  LDR target with linear depth
 	pBuffers[0] = &m_colorBuffer[BUFFER_LDR_0];
 	m_screenRT[TARGET_LDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
+	flags.Clear();
 	// FIXME: When all hooked up properly we don't need to clear RT 0, just doing during so during the testing phase
-	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, 0, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1|RenderTarget::RT_FLAG_DS, RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS);
+	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_1;
+	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, flags);
 
 	
 	m_uLDRCount=2;

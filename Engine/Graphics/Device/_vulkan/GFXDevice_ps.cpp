@@ -380,7 +380,7 @@ void GFXDevice_ps::End()
 	ASSERT(res == VK_SUCCESS);
 }
 
-
+ 
 
 const VkQueueFamilyProperties* GFXDevice_ps::GetQueueProperties(uint32 uIndex)
 {

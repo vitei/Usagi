@@ -62,6 +62,7 @@ namespace usg {
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
 			{
 				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				writes[i].dstBinding += SAMPLER_OFFSET;
 				VkDescriptorImageInfo image = {};
 				image.sampler = pData[i].texData.sampler.GetContents()->GetSampler();
 				image.imageView = pData[i].texData.tex->GetPlatform().GetImageView();

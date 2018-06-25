@@ -31,6 +31,18 @@ public:
 		RT_FLAG_DEPTH	= (1<<9),
 		RT_FLAG_STENCIL	= (1<<10),
 		RT_FLAG_DS		= (RT_FLAG_DEPTH|RT_FLAG_STENCIL)
+
+	};
+
+	struct RenderPassFlags
+	{
+		RenderPassFlags();
+		void Clear();
+		uint32 uLoadFlags;
+		uint32 uClearFlags;
+		uint32 uStoreFlags;
+		uint32 uShaderReadFlags;
+		uint32 uTransferSrcFlags;
 	};
 
 	// Fixme, why are we passing in the dimensions again?
@@ -38,8 +50,7 @@ public:
 	void InitMRT(usg::GFXDevice* pDevice, uint32 uColCount, ColorBuffer** ppColorBuffer, DepthStencilBuffer* pDepth = NULL);
 
 	// Create the rneder pass
-	RenderPassHndl InitRenderPass(GFXDevice* pDevice, uint32 uLoadFlags, uint32 uClearFlags, uint32 uStoreFlags,
-		const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
+	RenderPassHndl InitRenderPass(GFXDevice* pDevice, const RenderPassFlags& flags, const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
 
 	void CleanUp(GFXDevice* pDevice);
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);

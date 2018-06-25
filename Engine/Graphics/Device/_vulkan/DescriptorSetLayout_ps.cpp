@@ -121,8 +121,11 @@ namespace usg {
 			pBindings[i].descriptorType = g_descriptorTypes[pDecl->eDescriptorType];
 			pBindings[i].stageFlags = GetShaderFlags(pDecl->shaderType);
 			pBindings[i].binding = pDecl->uBinding;
-			pBindings[i].descriptorCount = pDecl->uCount; 
-
+			if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				pBindings[i].binding += SAMPLER_OFFSET;
+			}
+			pBindings[i].descriptorCount = pDecl->uCount;
 			poolSize[i].type = pBindings[i].descriptorType;
 			poolSize[i].descriptorCount = pDecl->uCount;
 		}

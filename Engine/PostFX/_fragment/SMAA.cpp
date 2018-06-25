@@ -125,10 +125,12 @@ namespace usg {
 		uint32 uHeight = pSys->GetFinalTargetHeight();
 		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
 		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
-		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, 0, 0, RenderTarget::RT_FLAG_COLOR_0);
+		usg::RenderTarget::RenderPassFlags flags;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
+		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, flags);
 		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
 		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);
-		m_renderTargets[RT_BLEND_WEIGHT].InitRenderPass(pDevice, 0, 0, RenderTarget::RT_FLAG_COLOR_0);
+		m_renderTargets[RT_BLEND_WEIGHT].InitRenderPass(pDevice, flags);
 
 
 

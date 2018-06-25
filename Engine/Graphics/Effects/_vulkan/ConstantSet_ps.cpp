@@ -121,6 +121,8 @@ void ConstantSet_ps::AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffs
 			for(uint32 i=0; i<pDecl->uiCount; i++)
 			{
 				AppendOffsets(pDecl->pSubDecl, (uint32)(pDecl->uiOffset + (pDecl->uiSize*i)), uSize, uVars);
+				// Structs aligned to a register
+				uSize = (uSize + 16 - 1) - ((uSize + 16 - 1) % 16);
 			}
 		}
 		else

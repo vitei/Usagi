@@ -1,6 +1,18 @@
 #extension GL_ARB_shading_language_420pack : enable
 #define BUFFER_LAYOUT(setIn, val) layout(set = setIn, binding = val, std140)
+
+#ifdef API_VULKAN
+
+// TODO: Rewrite binding system to be less wasteful
+#define SAMPLER_OFFSET 10
+#define SAMPLER_LOC(setIn, val) layout(set = setIn, binding=(val+SAMPLER_OFFSET))
+
+#else
+
 #define SAMPLER_LOC(setIn, val) layout(set = setIn, binding=val)
+
+#endif
+
 #define ATTRIB_LOC(val) layout(location=val)
 #define AT_LCMP(val, cmp) layout(location=val, component=cmp)
 
