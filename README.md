@@ -10,6 +10,8 @@ The open source release is currently in progress, for more details see the [intr
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
+
+
 Getting up and running
 ----------------------
 
@@ -97,7 +99,7 @@ Spot and projection lights are not properlly culled
 
 If the window loses focus at the wrong time creating the render targets will fail
 
-The AI can not currently handle a 3D space
+The AI would need updating to be able to control flying vehicles
 
 
 License
