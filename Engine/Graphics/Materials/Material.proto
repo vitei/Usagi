@@ -7,13 +7,6 @@ import 'Engine/Graphics/Device/StateEnums.proto';
 
 package usg.exchange;
 
-message Color {
-	required float r = 1 [default = 0];
-	required float g = 2 [default = 0];
-	required float b = 3 [default = 0];
-	required float a = 4 [default = 0];
-}
-
 enum Texture_Wrap {
 	repeat = 0;
 	mirrored_repeat = 1;
@@ -139,11 +132,6 @@ message MaterialAttribute {
 }
 
 
-message LightingLookupTable {
-	required string tableName = 1 [(nanopb).max_size = 40];
-	required string lutFileName = 2 [(nanopb).max_size = 80];
-}
-
 
 // FIXME: This is very wasteful, 1KB per constant set per material
 message ConstantData
@@ -161,7 +149,6 @@ message Material {
 	repeated TextureCoordinator textureCoordinators = 6 [(nanopb).max_count = 7];
 
 	required MaterialAttribute attribute = 7;
-	repeated LightingLookupTable lightingLookupTabels = 8 [(nanopb).max_count = 6, (nanopb).has_max_count = true];
 
 	required string customEffectName = 9 [(nanopb).max_size = 40];
 

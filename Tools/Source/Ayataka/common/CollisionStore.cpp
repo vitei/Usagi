@@ -328,7 +328,7 @@ void CollisionStore::Store(void *pBuffer, size_t size, const Cmdl &cmdl)
 	}
 
 	// final check
-	ASSERT_MSG( p == pEndOfBinary, "End point is not corresponding" );
+	ASSERT_MSG( (p == pEndOfBinary), "End point is not corresponding" );
 }
 
 size_t CollisionStore::CalcNamesSectionBinarySize( const Cmdl& cmdl )
@@ -354,7 +354,7 @@ void CollisionStore::StoreNamesSection( void* p, size_t size, const Cmdl& cmdl )
 	p = TraverseMaterial( &CollisionStore::StoreMaterialAttributes, p, cmdl );
 
 	// final check
-	ASSERT_MSG( p == pEndOfBinary, "End point is not corresponding" );
+	ASSERT_MSG( (p == pEndOfBinary), "End point is not corresponding" );
 }
 
 size_t CollisionStore::CalcShapeBinarySize( const Cmdl& cmdl, const ::exchange::Shape* pShape )

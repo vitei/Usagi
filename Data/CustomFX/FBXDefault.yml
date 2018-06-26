@@ -18,11 +18,11 @@ Attributes:
   - { index: 9, hint: "uv3" }
 
 Samplers:
-  - { index: 0, hint: "DiffuseColor" }
-  - { index: 1, hint: "NormalMap" }
-  - { index: 2, hint: "EmissiveFactor" }
-  - { index: 3, hint: "SpecularColor" }
-  - { index: 4, hint: "Reflection" }
+  - { index: 0, hint: "DiffuseColor", default: "white_default" }
+  - { index: 1, hint: "NormalMap", default: "normal_default" }
+  - { index: 2, hint: "EmissiveFactor", default: "black_default" }
+  - { index: 3, hint: "SpecularColor", default: "black_default" }
+  - { index: 4, hint: "Reflection", default: "black_default" }
 
 ConstantDefs:
   - name: Material

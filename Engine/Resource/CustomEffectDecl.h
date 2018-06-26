@@ -28,6 +28,7 @@ namespace usg
 		struct Sampler
 		{
 			char 	hint[32];
+			char    texName[64];
 			uint32	uIndex;
 		};
 

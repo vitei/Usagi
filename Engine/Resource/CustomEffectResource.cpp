@@ -169,6 +169,18 @@ namespace usg
 		return ((uint8*)(m_pBinary) + m_pConstantSets[uSet].uDataOffset);
 	}
 
+	const char* CustomEffectResource::GetDefaultTexture(uint32 uSamplerBinding)
+	{
+		for (uint32 i = 0; i < m_pHeader->uSamplerCount; i++)
+		{
+			if (m_pSamplers[i].uIndex == uSamplerBinding)
+			{
+				return m_pSamplers[i].texName;
+			}
+		}
+		return nullptr;
+	}
+
 	const char* CustomEffectResource::GetEffectName() const
 	{
 		return m_pHeader->effectName;
