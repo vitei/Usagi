@@ -1,5 +1,5 @@
 #include "../includes/platformdefines.inc"
-#include "../includes/global_3d.inc"
+#include "../includes/global_2d.inc"
 
 
 // Input/ output definitions
