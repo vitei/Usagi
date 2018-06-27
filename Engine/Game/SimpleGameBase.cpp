@@ -48,25 +48,7 @@ namespace usg
 
 	void SimpleGameBase::Init(usg::GFXDevice* pDevice)
 	{
-		usg::RenderPassDecl rpDecl;
-		usg::RenderPassDecl::Attachment attach;
-		usg::RenderPassDecl::SubPass subPass;
-		usg::RenderPassDecl::AttachmentReference ref;
-		attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_CLEAR_MEMORY;
-		attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
-		ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
-		subPass.uColorCount = 1;
-		subPass.pColorAttachments = &ref;
-		ref.uIndex = 0;
-
-		subPass.pColorAttachments = &ref;
-		subPass.uColorCount = 1;
-		rpDecl.pAttachments = &attach;
-		rpDecl.uAttachments = 1;
-		rpDecl.uSubPasses = 1;
-		rpDecl.pSubPasses = &subPass;
-		attach.format.eColor = CF_RGBA_8888;
-		m_transitionRenderPass = pDevice->GetRenderPass(rpDecl);
+		m_transitionRenderPass = pDevice->GetDisplay(0)->GetRenderPass();
 
 		m_pInternalData->m_pInitThread.reset(vnew(usg::ALLOC_OBJECT)usg::InitThread());
 		m_pInternalData->m_pInitThread->Init(pDevice, GetLoadFunc());
