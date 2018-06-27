@@ -272,7 +272,26 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
 	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
 	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
+	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+
+	usg::RenderPassDecl::Dependency Dependencies[2];
+	Dependencies[0].uSrcSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[0].uDstSubPass = 0;
+	Dependencies[0].uSrcStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[0].uDstStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[0].uSrcAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+	Dependencies[0].uDstAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+
+	Dependencies[1].uSrcSubPass = 0;
+	Dependencies[1].uDstSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[1].uSrcStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[1].uDstStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[1].uSrcAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+	Dependencies[1].uDstAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+
+
 	subPass.uColorCount = 1;
 	subPass.pColorAttachments = &ref;
 	ref.uIndex = 0;
@@ -383,13 +402,21 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	ic.dstOffsets[1].y = dstBounds.y + dstBounds.height;
 	ic.dstOffsets[1].z = 1;
 
+	VkImageSubresourceRange subresourceRange{};
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+	subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
 	VkFilter filter = srcBounds.width == dstBounds.width ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
 	vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
-	pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
+	//pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	//pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 
