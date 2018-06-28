@@ -81,6 +81,7 @@ public:
 		AC_MEMORY_READ = (1 << 0),
 		AC_COLOR_ATTACHMENT_READ = (1 << 1),
 		AC_COLOR_ATTACHMENT_WRITE = (1 << 2),
+		AC_SHADER_READ_BIT = (1<<3)
 	};
 
 	enum AttachmentLoadOp
