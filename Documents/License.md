@@ -47,7 +47,7 @@ Licensed Under: zLib License
 **msdfgen** (submodule)  
 Original Authors: Viktor Chlumsky.  
 Website: https://github.com/Chlumsky/msdfgen  
-Source Location: Engine\ThirdParty\msdfgen
+Source Location: Engine\ThirdParty\msdfgen  
 Licensed under: MIT License  
 
 **LUA** (source)  
