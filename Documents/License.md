@@ -1,13 +1,13 @@
 License Information
 ----------------------
 
-Usagi is released under the MIT License.
-The license can be found in the [here](../LICENSE), and it grants permission to use Usagi for any purpose so long as the license file is distributed along side it.
+Usagi is released under the MIT License.  
+The license can be found [here](../LICENSE), and it grants permission to use Usagi for any purpose so long as the license file is distributed along side it.
 
 Third party licences
 ----------------------
 
-Usagi makes use of a number of third party libraries. Those such as PhysX and the FBX SDK which do not have licenses which allow re-distribution must be installed seperately. 
+Usagi makes use of a number of third party libraries. Those such as PhysX and the FBX SDK which do not have licenses which allow re-distribution must be installed seperately.  
 Below is a list for reference of the third party software included either as part of the distribution or as a submodule. In those cases the corresponding license files are included. The Usagi MIT license does not superceed any of these liceneses. Submodules are forked from the original repositories, please see their history for details of modifications. We have tried to avoid omissions to this list but always check source files and their parent directories to confirm the license of code within this repository.      
 
 **UNICODE**  (source)  
