@@ -138,6 +138,11 @@ bool GFXDevice::Is3DEnabled() const
 	return m_pImpl->platform.Is3DEnabled();
 }
 
+void GFXDevice::WaitIdle() 
+{
+	m_pImpl->platform.WaitIdle(); 
+}
+
 void GFXDevice::GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut)
 {
 	m_pImpl->renderStates.GetPipelineStateDeclaration(pipeline, out, passOut);

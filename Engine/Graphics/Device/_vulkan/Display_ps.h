@@ -29,6 +29,7 @@ public:
 
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
     void Resize(usg::GFXDevice* pDevice);	
+	void Minimized(usg::GFXDevice* pDevice);
 	
 	// PS
 	void Transfer(GFXContext* pContext, RenderTarget* pTarget);

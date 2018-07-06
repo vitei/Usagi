@@ -512,6 +512,11 @@ VkShaderModule GFXDevice_ps::GetShaderFromStock(const U8String &name, VkShaderSt
 	return NULL;
 }
 
+void GFXDevice_ps::WaitIdle()
+{
+	vkDeviceWaitIdle(m_vkDevice);
+}
+
 VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)
 {
 	VkCommandBuffer cmdBuffer;

@@ -6,6 +6,7 @@
 #include "Engine/Core/_win/WinUtil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/GFX.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
@@ -486,6 +487,24 @@ void Display_ps::Resize(usg::GFXDevice* pDevice)
 
 	m_uWidth = dim.right - dim.left;
 	m_uHeight = dim.bottom - dim.top;
+}
+
+void Display_ps::Minimized(usg::GFXDevice* pDevice)
+{
+	RECT dim;
+	int width = 0; int height = 0;
+	while (width == 0 || height == 0) {
+		GetClientRect(m_hwnd, &dim);
+		width = dim.right - dim.left;
+		height = dim.bottom - dim.top;
+		// Sleep for a frame at 120hz
+		::Sleep(8);
+		// Keep handling window message until we get the one that restores the window
+		GFX::PostUpdate();
+	}
+
+	vkDeviceWaitIdle(pDevice->GetPlatform().GetVKDevice());
+
 }
 
 }

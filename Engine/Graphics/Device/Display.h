@@ -42,6 +42,7 @@ public:
 	void ScreenShot(const char* szFileName) { m_platform.ScreenShot(szFileName); }
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) { m_platform.Resize(pDevice, uWidth, uHeight); }
     void Resize(usg::GFXDevice* pDevice) { m_platform.Resize(pDevice); }
+	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
 
 	Display_ps& GetPlatform() { return m_platform; }
 

@@ -57,6 +57,7 @@ public:
 
 	void PostUpdate();
 	bool Is3DEnabled() const;
+	void WaitIdle();
 
 
 	void FinishedStaticLoad();

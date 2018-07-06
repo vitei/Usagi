@@ -59,12 +59,12 @@ namespace WINUTIL
 
 		if (!pDisplaySettings->bWindowed)
 		{
-			dwExStyle = WS_EX_APPWINDOW | WS_EX_TOPMOST;
+			dwExStyle = WS_EX_APPWINDOW;
 			dwStyle = WS_POPUP;
 		}
 		else
 		{
-			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_TOPMOST;
+			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 			dwStyle = WS_OVERLAPPEDWINDOW;
 		}
 

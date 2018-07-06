@@ -79,13 +79,13 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
 	bufCreateInfo.size = m_uGPUSize * GFX_NUM_DYN_BUFF;
 	bufCreateInfo.flags = 0;
 
-	VkResult eResult = vkCreateBuffer(devicePS.GetVKDevice(), &bufCreateInfo, devicePS.GetAllocCallbacks(), &m_buffer);
+	VkResult eResult = vkCreateBuffer(devicePS.GetVKDevice(), &bufCreateInfo, nullptr, &m_buffer);
 	ASSERT(eResult == VK_SUCCESS);
 
 	vkGetBufferMemoryRequirements(devicePS.GetVKDevice(), m_buffer, &memReqs);
 	memAlloc.allocationSize = memReqs.size;
 	memAlloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	eResult = vkAllocateMemory(devicePS.GetVKDevice(), &memAlloc, devicePS.GetAllocCallbacks(), &m_memory);
+	eResult = vkAllocateMemory(devicePS.GetVKDevice(), &memAlloc, nullptr, &m_memory);
 	ASSERT(eResult == VK_SUCCESS);
 
 
@@ -108,6 +108,8 @@ void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 		GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
 		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, nullptr);
+		m_buffer = VK_NULL_HANDLE;
+		m_pOwner = nullptr;
 	}
 }
 

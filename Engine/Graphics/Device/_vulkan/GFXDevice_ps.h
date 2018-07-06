@@ -56,6 +56,7 @@ public:
 	void FinishedStaticLoad() {  }
 	void ClearDynamicResources() {  }
 	bool Is3DEnabled() const { return false; }
+	void WaitIdle();
 
 	// FIXME: Not yet used, should be used with allocations
 	VkAllocationCallbacks* GetAllocCallbacks() { return &m_allocCallbacks; }

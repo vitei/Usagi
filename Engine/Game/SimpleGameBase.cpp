@@ -75,6 +75,7 @@ namespace usg
 	{
 		if (m_pActiveMode)
 		{
+			pDevice->WaitIdle();
 			m_pActiveMode->CleanUp(pDevice);
 			vdelete m_pActiveMode;
 			m_pActiveMode = nullptr;
@@ -231,17 +232,26 @@ namespace usg
 		{
 			usg::Display* const pDisplay = pDevice->GetDisplay(0);
 			uint32 uWidth, uHeight;
+			uint32 uWidthOld, uHeightOld;
 
-
+			pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
 			pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
 			pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
-			if (m_pActiveMode)
+			// Could be an eroneous call if restoring from being minimized
+			if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
 			{
 				m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
 			}
 		}
 		break;
+		case 'WMIN':
+		{
+			usg::Display* const pDisplay = pDevice->GetDisplay(0);
 
+			pDisplay->Minimized(pDevice);
+
+		}
+		break;
 		default:
 			// Does nothing
 			break;
