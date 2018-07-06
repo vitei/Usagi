@@ -24,7 +24,7 @@ ColorBuffer_ps::~ColorBuffer_ps()
 
 void ColorBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags, uint32 uLoc, uint32 uMipmaps)
 {
-	m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uMipmaps);
+	m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uMipmaps, nullptr, TD_TEXTURE2D, uFlags);
 
 	m_attachDesc.format = gColorFormatMap[eFormat];
 	m_attachDesc.samples = VK_SAMPLE_COUNT_1_BIT;

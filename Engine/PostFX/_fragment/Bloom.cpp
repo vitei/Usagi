@@ -129,9 +129,9 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 
 	// Initialise the render targets
-	m_scaledSceneTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, ColorBuffer::FLAG_FAST_MEM);
-	m_brightPassTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, ColorBuffer::FLAG_FAST_MEM);
-	m_bloomSourceTex.Init(pDevice, uScrWidth/8, uScrHeight /8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, ColorBuffer::FLAG_FAST_MEM);
+	m_scaledSceneTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
+	m_brightPassTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
+	m_bloomSourceTex.Init(pDevice, uScrWidth/8, uScrHeight /8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
 
 	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex);
 	m_brightPassRT.Init(pDevice, &m_brightPassTex);

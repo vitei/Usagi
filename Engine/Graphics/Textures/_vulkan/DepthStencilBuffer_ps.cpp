@@ -29,7 +29,7 @@ void DepthStencilBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeig
 	/* VULKAN_KEY_START */
     VkImageCreateInfo image_info = {};
     
-    m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight);
+    m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uFlags);
 
 
 	m_attachDesc.format = gDepthFormatViewMap[eFormat];

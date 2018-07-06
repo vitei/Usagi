@@ -88,6 +88,36 @@ VkFormat GetFormatGLI(uint32 uFormat)
 	return VK_FORMAT_R8G8B8_SNORM;
 }
 
+VkImageUsageFlags GetImageUsage(uint32 uUsage)
+{
+	VkImageUsageFlags flags = 0;
+
+	if (uUsage&TU_FLAG_TRANSFER_SRC)
+	{
+		flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	}
+	if (uUsage&TU_FLAG_SHADER_READ)
+	{
+		flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+	if (uUsage&TU_FLAG_COLOR_ATTACHMENT)
+	{
+		flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	}
+	if (uUsage&TU_FLAG_DEPTH_ATTACHMENT)
+	{
+		flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+
+	// Currently lacking flags mapping to the following:
+	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002,
+	// VK_IMAGE_USAGE_STORAGE_BIT = 0x00000008,
+	// VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = 0x00000040,
+	// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = 0x00000080,
+
+	return flags;
+}
+
 
 void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange)
 {
@@ -241,8 +271,9 @@ void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWi
 }
 
 
-void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim)
+void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim, uint32 uTextureFlags)
 {
+	ASSERT(uTextureFlags & TU_FLAG_COLOR_ATTACHMENT);
     VkImageCreateInfo image_create_info = {};
     image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_create_info.pNext = NULL;
@@ -256,7 +287,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
     image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    image_create_info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    image_create_info.usage = GetImageUsage(uTextureFlags);
     image_create_info.queueFamilyIndexCount = 0;
     image_create_info.pQueueFamilyIndices = NULL;
     image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -289,8 +320,9 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 }
 
 
-void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
+void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uTextureFlags)
 {
+	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
 	const VkFormat depth_format = gDepthFormatViewMap[eFormat];
     VkFormatProperties props;
@@ -323,7 +355,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
 	image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	image_create_info.usage = GetImageUsage(uTextureFlags);
 	image_create_info.queueFamilyIndexCount = 0;
 	image_create_info.pQueueFamilyIndices = NULL;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
