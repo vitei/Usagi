@@ -2,8 +2,7 @@
 #include "../includes/global_3d.inc"
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;	// Particle texture
-SAMPLER_LOC(1, 1) uniform sampler2D sampler1;	// Particle texture
-SAMPLER_LOC(4, 14) uniform sampler2D sampler14;	// Linear depth texture
+SAMPLER_LOC(0, 14) uniform sampler2D sampler14;	// Linear depth texture
 
 
 BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
@@ -14,10 +13,10 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
 
 in GeometryData
 {
-    AT_LCMP(0, 0) vec4    vo_vColor;
-    AT_LCMP(1, 0) vec2    vo_vTexcoord[2];
-    AT_LCMP(1, 2) vec2    vo_vScreenTex;
-    AT_LCMP(2, 2) float   vo_fEyeDepth;
+	ATTRIB_LOC(0) vec4    vo_vColor;
+    ATTRIB_LOC(1) vec2    vo_vTexcoord[2];
+    ATTRIB_LOC(3) vec2    vo_vScreenTex;
+    ATTRIB_LOC(4) float   vo_fEyeDepth;
 
 } geometryData;
 
@@ -26,6 +25,7 @@ layout(location = 0) out vec4 colorOut;
 
 void main(void)
 {
+
 	float zFade = 1.0;
 
 	if(fDepthFade > 0.0)

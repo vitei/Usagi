@@ -63,6 +63,7 @@ private:
 		MAX_FOGS = 1
 	};
 	DescriptorSet			m_globalDescriptors[VIEW_COUNT];
+	DescriptorSet			m_globalDescriptorsWithDepth[VIEW_COUNT];
 	ConstantSet				m_globalConstants[VIEW_COUNT];
 	
 	const Camera*			m_pCamera;

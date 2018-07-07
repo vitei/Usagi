@@ -7,7 +7,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 
-BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance1
+BUFFER_LAYOUT(1, UBO_INSTANCE_1_ID) uniform Instance1
 {
     mat3x4  mUserMat;
     bool    bCustomMatrix;
@@ -16,21 +16,21 @@ BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance1
 
 in VertexData
 {
-    AT_LCMP(0, 0) vec4    vo_vColor;
-    AT_LCMP(1, 0) vec2    vo_vSize;
-    AT_LCMP(1, 2) float   vo_fRot;
-    AT_LCMP(2, 0) vec4    vo_vUVRange[2];
-    AT_LCMP(4, 0) vec3    vo_velocity;
+    ATTRIB_LOC(0) vec4    vo_vColor;
+    ATTRIB_LOC(1) vec2    vo_vSize;
+    ATTRIB_LOC(2) float   vo_fRot;
+    ATTRIB_LOC(3) vec4    vo_vUVRange[2];
+    ATTRIB_LOC(5) vec3    vo_velocity;
 
 } vertexData[];
 
 
 out GeometryData
 {
-    AT_LCMP(0, 0) vec4    vo_vColor;
-    AT_LCMP(1, 0) vec2    vo_vTexcoord[2];
-    AT_LCMP(1, 2) vec2    vo_vScreenTex;
-    AT_LCMP(2, 2) float   vo_fEyeDepth;
+    ATTRIB_LOC(0) vec4    vo_vColor;
+    ATTRIB_LOC(1) vec2    vo_vTexcoord[2];
+    ATTRIB_LOC(3) vec2    vo_vScreenTex;
+    ATTRIB_LOC(4) float   vo_fEyeDepth;
 
 } geometryData;
 

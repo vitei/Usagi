@@ -10,6 +10,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/PostFX/PostEffect.h"
 #include "Engine/Scene/SceneContext.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/PostFX/PostFXSys.h"
@@ -74,6 +75,9 @@ namespace usg {
 
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
+		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
+		SamplerHndl sampler = pDevice->GetSampler(pointDecl);
+		TextureHndl dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
 		m_LightingContext.Init(pDevice);
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
@@ -81,7 +85,14 @@ namespace usg {
 			m_globalDescriptors[i].Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl));
 			m_globalDescriptors[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptors[i], 1);
+			m_globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
+
+			m_globalDescriptorsWithDepth[i].Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl));
+			m_globalDescriptorsWithDepth[i].SetConstantSet(0, &m_globalConstants[i]);
+			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptorsWithDepth[i], 1);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
+			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
 
 		SetDeviceDataLoaded();
@@ -95,6 +106,7 @@ namespace usg {
 		{
 			m_globalConstants[i].CleanUp(pDevice);
 			m_globalDescriptors[i].CleanUp(pDevice);
+			m_globalDescriptorsWithDepth[i].CleanUp(pDevice);
 		}
 	}
 
@@ -215,6 +227,16 @@ namespace usg {
 			globalData->vShadowColor = m_shadowColor;
 			m_globalConstants[i].Unlock();
 			m_globalConstants[i].UpdateData(pDevice);
+
+			if (m_pPostFXSys)
+			{
+				if (m_globalDescriptorsWithDepth[i].GetTextureAtBinding(14) != m_pPostFXSys->GetLinearDepthTex())
+				{
+					// Update the linear depth texture
+					m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pPostFXSys->GetLinearDepthTex(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
+					m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
+				}
+			}
 		}
 
 		// TODO: Handle maximum LOD ID
@@ -313,6 +335,8 @@ namespace usg {
 				{
 					m_pPostFXSys->SetPostDepthDescriptors(pContext);
 				}
+				// FIXME: Handle multiple views
+				pContext->SetDescriptorSet(&m_globalDescriptorsWithDepth[0], 0);
 			}
 			// TODO: Probably are going to want callbacks at the end of certain layers, for grabbing
 			// the linear depth information etc
