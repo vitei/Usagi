@@ -15,6 +15,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Scene/Camera/Camera.h"
@@ -65,9 +66,11 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 
-	RenderPassDecl renderPass;
-	// FIXME: Init the render pass
-	RenderPassHndl renderPassHndl = pDevice->GetRenderPass(renderPass);
+	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
+
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.descriptorSets[1] = pDevice->GetDescriptorSetLayout(g_descriptorGBuffer);
+	pipelineDecl.layout.uDescriptorSetCount = 2;
 
 	// Standard depth stencil
 	DepthStencilStateDecl& depthDecl = pipelineDecl.depthState;

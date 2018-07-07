@@ -1,0 +1,12 @@
+Shaders:
+  - name: ModelFBXDefault
+    vert: models/fbxdefault
+    frag: models/fbxdefault
+    customfx: FBXDefault
+    define_sets:
+      - name: deferred
+        defines: DEFERRED_SHADING
+      - name: shadow
+        defines: SHADOW_PASS
+      - name: omni_depth
+        defines: SHADOW_PASS OMNI_DEPTH

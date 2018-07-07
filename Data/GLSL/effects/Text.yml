@@ -1,0 +1,4 @@
+Shaders:
+  - { name: Text, vert: text/text, geom: text/text, frag: text/text }
+  - { name: Text3D, vert: text/text3D, geom: text/text3D, frag: text/text3D }
+  - { name: DistanceField, vert: text/text, geom: text/text, frag: text/distancefieldtext }

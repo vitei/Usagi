@@ -1,0 +1,35 @@
+Shaders:
+  - { name: DirBase, vert: deferred/directional, frag: deferred/directionalbase }
+  - { name: PointNoSpec, vert: deferred/pointlight_pos, frag: deferred/pointlightnospec }
+  - { name: PointPos, vert: deferred/pointlight_pos_only, frag: deferred/pos_only  }
+  - { name: SpotPos, vert: deferred/spotlight_pos_only, frag: deferred/pos_only  }
+  - name: DirExtraShadow
+    vert: deferred/directional
+    frag: deferred/directionalshadowpass  
+    define_sets:
+      -  name: "1"
+         defines: LIGHT_INDEX 1
+      -  name: "2"
+         defines: LIGHT_INDEX 2
+      -  name: "3"
+         defines: LIGHT_INDEX 3
+      -  name: "4"
+         defines: LIGHT_INDEX 4                           
+  - name: Point
+    vert: deferred/pointlight_pos
+    frag: deferred/pointlight
+    define_sets:
+      - name: shadow
+        defines: SHADOW_READ
+  - name: Spot
+    vert: deferred/spotlight_pos
+    frag: deferred/spotlight
+    define_sets:
+      - name: shadow
+       defines: SHADOW_READ  
+  - name: Projection
+    vert: deferred/projection_light_pos
+    frag: deferred/projection_light
+    define_sets:
+      - name: shadow
+        defines: SHADOW_READ
