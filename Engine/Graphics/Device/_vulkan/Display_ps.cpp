@@ -168,6 +168,8 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	// and is fastest (though it tears).  If not, fall back to FIFO which is
 	// always available.
 	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
+#if 0
 	for (size_t i = 0; i < presentModeCount; i++)
 	{
 		if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -180,6 +182,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 			swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 		}
 	}
+#endif
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to
 	// own only 1 image at a time, besides the images being displayed and
