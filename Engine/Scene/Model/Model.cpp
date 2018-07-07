@@ -225,9 +225,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		}
 		usg::Color white(1.0f, 1.0f, 1.0f, 1.0f);
 		m_meshArray[i]->SetBlendColor(white);
-		ASSERT(false);
-		// Need to cache these pipelines
-//		m_meshArray[i]->SetPipelineState(pMesh->GetPipeline(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i])).defaultPipeline);
+		m_meshArray[i]->SetPipelineState(pDevice->GetPipelineState(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]), pMesh->pipelines.defaultPipeline));
 		m_fScale = 1.0f;
 		m_meshArray[i]->ResetOverrides();
 		if (m_depthMeshArray)
