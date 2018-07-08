@@ -29,7 +29,7 @@ private:
 	void GetShaderNames(const char* effectName, U8String &vsOut, U8String &psOut, U8String &gsOut);
 	VkPipelineShaderStageCreateInfo LoadShader(GFXDevice* pDevice, const U8String &fileName, VkShaderStageFlagBits stage);
 
-	VkPipelineShaderStageCreateInfo m_stageCreateInfo[SHADER_TYPE_COUNT];
+	VkPipelineShaderStageCreateInfo m_stageCreateInfo[ShaderType::COUNT];
 	uint32							m_uStageCount;
 
 	PRIVATIZE_COPY(Effect_ps)

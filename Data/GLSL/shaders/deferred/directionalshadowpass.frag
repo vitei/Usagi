@@ -4,4 +4,5 @@
 #include "../includes/lighting_buffer.inc"
 #include "../includes/shadow/poisson_values.inc"
 #include "../includes/shadow/globalshadow_read.inc"
+#define LIGHT_INDEX 1	// FIXME: Remove and pass in with defines
 #include "../includes/deferred_dirshadow.inc"

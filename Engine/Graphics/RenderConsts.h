@@ -68,12 +68,12 @@ enum DeferredTargets
 	//DT_VELOCITY,
 };
 
-enum ShaderType
+enum class ShaderType : uint32
 {
-	SHADER_TYPE_VS,
-	SHADER_TYPE_PS,
-	SHADER_TYPE_GS,
-	SHADER_TYPE_COUNT
+	VS,
+	PS,
+	GS,
+	COUNT
 };
 
 
