@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		if ((*it)["define_sets"])
 		{
 			YAML::Node defineSets;
-			for (YAML::const_iterator defineIt = defineSets.begin(); it != defineSets.end(); ++defineIt)
+			for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
 			{
 				set.name = def.name + (*defineIt)["name"].as<std::string>();
 				set.defines = (*defineIt)["defines"].as<std::string>();
