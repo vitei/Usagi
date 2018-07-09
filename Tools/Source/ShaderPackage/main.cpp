@@ -10,19 +10,24 @@
 #include <pb.h>
 
 
+const char* g_szExtensions[] =
+{
+	".vert",
+	".geom",
+	".frag"
+};
+
 struct DefineSets
 {
 	std::string name;
 	std::string defines;
-	uint32		CRC[SHADER_TYPE_COUNT];
+	uint32		CRC[(uint32)usg::ShaderType::COUNT];
 };
 
 struct ShaderDefinition
 {
 	std::string name;
-	std::string vert;
-	std::string geom;
-	std::string frag;
+	std::string prog[(uint32)usg::ShaderType::COUNT];
 
 	std::vector<DefineSets> sets;
 };
@@ -30,7 +35,6 @@ struct ShaderDefinition
 struct Shader
 {
 	uint32 CRC32;
-	usg::ShaderType eType;
 	std::string name;
 	void* binary;
 	uint32 binarySize;
@@ -55,17 +59,13 @@ struct Header
 
 int main(int argc, char *argv[])
 {
-	usg::mem::InitialiseDefault();
-	usg::mem::setConventionalMemManagement(true);
-	usg::U8String::InitPool();
-
 	std::string outputstub;
 	std::string inputFile; 
 	std::string outBinary;
 
 	if (argc != 3)
 	{
-		printf("Format should be FontCreator <input.yml> <output_dir>");
+		printf("Format should be ShaderPackage <input.yml> <output_dir>");
 		return -1;
 	}
 
@@ -79,20 +79,20 @@ int main(int argc, char *argv[])
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
 	YAML::Node shaders = mainNode["Shaders"];
-	std::map<uint32, Shader> requiredShaders;
+	std::map<uint32, Shader> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	
 	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
 		ShaderDefinition def;
 		def.name = (*it)["name"].as<std::string>();
-		def.vert = (*it)["vert"].as<std::string>();
-		def.frag = (*it)["frag"].as<std::string>();
+		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
+		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
 		DefineSets set;
 		set.name = def.name;
 		set.defines = "";
 		if ((*it)["geom"])
 		{
-			def.geom = (*it)["geom"].as<std::string>();
+			def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
 		}
 		def.sets.push_back(set);
 		if ((*it)["define_sets"])
@@ -108,20 +108,30 @@ int main(int argc, char *argv[])
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
-			def.sets[i].CRC[usg::ShaderType::SHADER_TYPE_VS] = utl::CRC32((def.vert + def.sets[i].defines + ".vert").c_str());
-			def.sets[i].CRC[usg::ShaderType::SHADER_TYPE_PS] = utl::CRC32((def.frag + def.sets[i].defines + ".frag").c_str());
-			if (!def.geom.empty())
+			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
-				def.sets[i].CRC[usg::ShaderType::SHADER_TYPE_GS] = utl::CRC32((def.geom + def.sets[i].defines + ".geom").c_str());
+				if (!def.prog[j].empty())
+				{
+					def.sets[i].CRC[j] = utl::CRC32((def.prog[j] + def.sets[i].defines).c_str());
+				}
+				else
+				{
+					def.sets[i].CRC[j] = 0;
+				}
+
+				if (def.sets[i].CRC[j] != 0)
+				{
+					if (requiredShaders[j].find(def.sets[i].CRC[j]) == requiredShaders[j].end())
+					{
+						Shader shader;
+						shader.CRC32 = def.sets[i].CRC[j];
+						shader.name = def.prog[i];
+					}
+				}
 			}
-			else
-			{
-				def.sets[i].CRC[usg::ShaderType::SHADER_TYPE_GS] = 0;
-			}
+
 		}
 	}
-
-	usg::U8String::CleanupPool();
 
 	return 0;
 }
