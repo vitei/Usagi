@@ -1,4 +1,4 @@
-Shaders:
+Effects:
   - { name: Text, vert: debug/text, geom: debug/text, frag: debug/text }
   - { name: PosColUV, vert: debug/pos_col_uv, frag: debug/pos_col_uv }
   - { name: PosCol, vert: debug/pos_col, frag: debug/pos_col }

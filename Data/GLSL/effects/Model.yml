@@ -1,4 +1,4 @@
-Shaders:
+Effects:
   - name: FBXDefault
     vert: models/fbxdefault
     frag: models/fbxdefault

@@ -1,4 +1,4 @@
-Shaders:
+Effects:
   - { name: DirBase, vert: deferred/directional, frag: deferred/directionalbase }
   - { name: PointNoSpec, vert: deferred/pointlight_pos, frag: deferred/pointlightnospec }
   - { name: PointPos, vert: deferred/pointlight_pos_only, frag: deferred/pos_only  }

@@ -27,7 +27,7 @@ struct DefineSets
 	uint32		CRC[(uint32)usg::ShaderType::COUNT];
 };
 
-struct ShaderDefinition
+struct EffectDefinition
 {
 	std::string name;
 	std::string prog[(uint32)usg::ShaderType::COUNT];
@@ -88,10 +88,18 @@ int main(int argc, char *argv[])
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
 	YAML::Node shaders = mainNode["Shaders"];
 	std::map<uint32, Shader> requiredShaders[(uint32)usg::ShaderType::COUNT];
+	std::vector<EffectDefinition> effects;
+
+	Header hdr;
+	hdr.uEffectBinaryOffset = sizeof(Header);
+	hdr.uShaderCount = 0;
+	hdr.uEffectCount = 0;
+	hdr.uShaderBinaryOffset = 0;
+	uint32 uShaderBinarySize = 0;
 	
 	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
-		ShaderDefinition def;
+		EffectDefinition def;
 		def.name = (*it)["name"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
@@ -113,6 +121,9 @@ int main(int argc, char *argv[])
 				def.sets.push_back(set);
 			}
 		}
+
+		effects.push_back(def);
+		hdr.uEffectCount += (uint32)def.sets.size();
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
@@ -165,12 +176,41 @@ int main(int argc, char *argv[])
 						fseek(pFileOut, 0, SEEK_END);
 						shader.binarySize = ftell(pFileOut);
 						fseek(pFileOut, 0, SEEK_SET);
+						shader.binary = new uint8[shader.binarySize];
+						fread(shader.binary, 1, shader.binarySize, pFileOut);
+						requiredShaders[j][shader.CRC32] = shader;
+
+						uShaderBinarySize += shader.binarySize + sizeof(ShaderEntry);
+						hdr.uShaderCount++;
 					}
 				}
 			}
-
 		}
 	}
+
+	hdr.uShaderBinaryOffset = hdr.uEffectBinaryOffset + (sizeof(EffectDefinition) * hdr.uEffectCount);
+	uint32 uFileSize = hdr.uShaderBinaryOffset + uShaderBinarySize;
+
+	FILE* pFileOut;
+	CreateDirectory(outBinary.substr(0, outBinary.find_last_of("\\/")).c_str(), NULL);
+	fopen_s(&pFileOut, outBinary.c_str(), "w");
+
+	fwrite(&hdr, sizeof(Header), 1, pFileOut);
+	fwrite(effects.data(), sizeof(EffectDefinition), effects.size(), pFileOut);
+
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+	{
+		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
+		{
+			ShaderEntry entry;
+			entry.eType = (usg::ShaderType)i;
+			strcpy_s(entry.szName, sizeof(entry.szName), (*itr).second.name.c_str());
+			entry.uBinarySize = (*itr).second.binarySize;
+			fwrite(&entry, sizeof(ShaderEntry), 1, pFileOut);
+			fwrite((*itr).second.binary, 1, (*itr).second.binarySize, pFileOut);
+			delete (*itr).second.binary;
+		}
+	}	
 
 	return 0;
 }

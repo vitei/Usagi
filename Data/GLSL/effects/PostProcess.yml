@@ -1,4 +1,4 @@
-Shaders:
+Effects:
   - { name: SMAABlendWeightCalc,    vert: SMAA/SMAABlendWeightCalc, frag: SMAA/SMAABlendWeightCalc }
   - { name: SMAAColorEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAAColorEdgeDetection }
   - { name: SMAADepthEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAADepthEdgeDetection }  
