@@ -8,13 +8,13 @@ Shaders:
     frag: deferred/directionalshadowpass  
     define_sets:
       -  name: "1"
-         defines: LIGHT_INDEX 1
+         defines: LIGHT_INDEX=1
       -  name: "2"
-         defines: LIGHT_INDEX 2
+         defines: LIGHT_INDEX=2
       -  name: "3"
-         defines: LIGHT_INDEX 3
+         defines: LIGHT_INDEX=3
       -  name: "4"
-         defines: LIGHT_INDEX 4                           
+         defines: LIGHT_INDEX=4                           
   - name: Point
     vert: deferred/pointlight_pos
     frag: deferred/pointlight

@@ -7,6 +7,8 @@
 #include "Engine/Core/Utility.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include <yaml-cpp/yaml.h>
+#include <sstream>
+#include <ShaderLang.h>
 #include <pb.h>
 
 
@@ -16,6 +18,7 @@ const char* g_szExtensions[] =
 	".geom",
 	".frag"
 };
+
 
 struct DefineSets
 {
@@ -62,15 +65,20 @@ int main(int argc, char *argv[])
 	std::string outputstub;
 	std::string inputFile; 
 	std::string outBinary;
+	std::string shaderDir;
+	std::string tempDir;
 
-	if (argc != 3)
+	if (argc != 5)
 	{
-		printf("Format should be ShaderPackage <input.yml> <output_dir>");
+		printf("Format should be ShaderPackage <input.yml> <temporary_dir> <output_dir> <shader_dir>");
 		return -1;
 	}
 
 	inputFile = argv[1];
-	outputstub = argv[2];
+	tempDir = argv[2];
+	outputstub = argv[3];
+	shaderDir = argv[4];
+	
 	outBinary = outputstub + ".vsh";
 
 
@@ -97,10 +105,10 @@ int main(int argc, char *argv[])
 		def.sets.push_back(set);
 		if ((*it)["define_sets"])
 		{
-			YAML::Node defineSets;
+			YAML::Node defineSets = (*it)["define_sets"];
 			for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
 			{
-				set.name = def.name + (*defineIt)["name"].as<std::string>();
+				set.name = def.name + "." + (*defineIt)["name"].as<std::string>();
 				set.defines = (*defineIt)["defines"].as<std::string>();
 				def.sets.push_back(set);
 			}
@@ -108,6 +116,19 @@ int main(int argc, char *argv[])
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
+			std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
+			std::string defineList = set.defines;
+			size_t nextDefine = std::string::npos;
+			do
+			{
+				nextDefine = defineList.find_first_of(' ');
+				defines += std::string(" -D") + defineList.substr(0, nextDefine);
+				if (nextDefine != std::string::npos)
+				{
+					defineList = defineList.substr(nextDefine + 1);
+				}
+
+			} while (nextDefine != std::string::npos);
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
 				if (!def.prog[j].empty())
@@ -123,9 +144,27 @@ int main(int argc, char *argv[])
 				{
 					if (requiredShaders[j].find(def.sets[i].CRC[j]) == requiredShaders[j].end())
 					{
+						// Get the input file name
+						std::string inputFileName = def.prog[j] + g_szExtensions[j];
+						std::string outputFileName = inputFileName + ".spv";
+						inputFileName = shaderDir + "\\" + inputFileName;
+						outputFileName = tempDir + "\\" + outputFileName;
 						Shader shader;
 						shader.CRC32 = def.sets[i].CRC[j];
 						shader.name = def.prog[i];
+						std::stringstream command;
+						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
+						CreateDirectory(outputDir.c_str(), NULL);
+						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -std=450 -Werror " << defines;
+						//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
+						// FIXME: code for glslang natively, but for now it is cleaner to use the command line
+						system(command.str().c_str());
+
+						FILE* pFileOut = nullptr;
+						fopen_s(&pFileOut, outputFileName.c_str(), "r");
+						fseek(pFileOut, 0, SEEK_END);
+						shader.binarySize = ftell(pFileOut);
+						fseek(pFileOut, 0, SEEK_SET);
 					}
 				}
 			}
