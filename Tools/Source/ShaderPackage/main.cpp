@@ -8,6 +8,7 @@
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
+#include <fstream>
 #include <ShaderLang.h>
 #include <pb.h>
 
@@ -15,8 +16,8 @@
 const char* g_szExtensions[] =
 {
 	".vert",
-	".geom",
-	".frag"
+	".frag",
+	".geom"
 };
 
 
@@ -67,10 +68,11 @@ int main(int argc, char *argv[])
 	std::string outBinary;
 	std::string shaderDir;
 	std::string tempDir;
+	std::string dependencyFile;
 
-	if (argc != 5)
+	if (argc != 6)
 	{
-		printf("Format should be ShaderPackage <input.yml> <temporary_dir> <output_dir> <shader_dir>");
+		printf("Format should be ShaderPackage <input.yml> <temporary_dir> <output_dir> <shader_dir> <dependency_file>");
 		return -1;
 	}
 
@@ -78,6 +80,7 @@ int main(int argc, char *argv[])
 	tempDir = argv[2];
 	outputstub = argv[3];
 	shaderDir = argv[4];
+	dependencyFile = argv[5];
 	
 	outBinary = outputstub + ".vsh";
 
@@ -86,9 +89,14 @@ int main(int argc, char *argv[])
 
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
-	YAML::Node shaders = mainNode["Shaders"];
+	YAML::Node shaders = mainNode["Effects"];
 	std::map<uint32, Shader> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	std::vector<EffectDefinition> effects;
+	std::stringstream effectDependencies;
+	std::stringstream intermediateDependencies;
+
+
+	effectDependencies << inputFile << ": ";
 
 	Header hdr;
 	hdr.uEffectBinaryOffset = sizeof(Header);
@@ -157,16 +165,16 @@ int main(int argc, char *argv[])
 					{
 						// Get the input file name
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
-						std::string outputFileName = inputFileName + ".spv";
+						std::string outputFileName = def.prog[j] + def.sets[i].name + ".spv";
 						inputFileName = shaderDir + "\\" + inputFileName;
 						outputFileName = tempDir + "\\" + outputFileName;
 						Shader shader;
 						shader.CRC32 = def.sets[i].CRC[j];
-						shader.name = def.prog[i];
+						shader.name = def.prog[j];
 						std::stringstream command;
 						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
 						CreateDirectory(outputDir.c_str(), NULL);
-						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -std=450 -Werror " << defines;
+						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
 						//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
 						// FIXME: code for glslang natively, but for now it is cleaner to use the command line
 						system(command.str().c_str());
@@ -179,6 +187,14 @@ int main(int argc, char *argv[])
 						shader.binary = new uint8[shader.binarySize];
 						fread(shader.binary, 1, shader.binarySize, pFileOut);
 						requiredShaders[j][shader.CRC32] = shader;
+
+						std::string depFileName = outputFileName + ".d";
+						std::ifstream depFile(depFileName);
+
+						effectDependencies << outputFileName << " ";
+						intermediateDependencies << depFile.rdbuf();
+
+						depFile.close();
 
 						uShaderBinarySize += shader.binarySize + sizeof(ShaderEntry);
 						hdr.uShaderCount++;
@@ -211,6 +227,15 @@ int main(int argc, char *argv[])
 			delete (*itr).second.binary;
 		}
 	}	
+	fclose(pFileOut);
+	pFileOut = nullptr;
+
+	// Spit out the dependencies
+	std::ofstream depFile(dependencyFile.c_str(), std::ofstream::binary);
+	depFile.clear();
+	effectDependencies << intermediateDependencies.str();
+	depFile << effectDependencies.str();
+
 
 	return 0;
 }
