@@ -8,6 +8,7 @@
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
+#include <algorithm>
 #include <fstream>
 #include <ShaderLang.h>
 #include <pb.h>
@@ -92,11 +93,14 @@ int main(int argc, char *argv[])
 	YAML::Node shaders = mainNode["Effects"];
 	std::map<uint32, Shader> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	std::vector<EffectDefinition> effects;
+	std::vector<std::string> referencedFiles;
 	std::stringstream effectDependencies;
-	std::stringstream intermediateDependencies;
 
-
-	effectDependencies << inputFile << ": ";
+	{
+		std::string formatted = inputFile;
+		std::replace(formatted.begin(), formatted.end(), '\\', '/');
+		effectDependencies << formatted << ": ";
+	}
 
 	Header hdr;
 	hdr.uEffectBinaryOffset = sizeof(Header);
@@ -165,7 +169,7 @@ int main(int argc, char *argv[])
 					{
 						// Get the input file name
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
-						std::string outputFileName = def.prog[j] + def.sets[i].name + ".spv";
+						std::string outputFileName = "ShaderPackageTMP.spv";
 						inputFileName = shaderDir + "\\" + inputFileName;
 						outputFileName = tempDir + "\\" + outputFileName;
 						Shader shader;
@@ -174,6 +178,8 @@ int main(int argc, char *argv[])
 						std::stringstream command;
 						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
 						CreateDirectory(outputDir.c_str(), NULL);
+						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
+
 						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
 						//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
 						// FIXME: code for glslang natively, but for now it is cleaner to use the command line
@@ -191,9 +197,18 @@ int main(int argc, char *argv[])
 						std::string depFileName = outputFileName + ".d";
 						std::ifstream depFile(depFileName);
 
-						effectDependencies << outputFileName << " ";
-						intermediateDependencies << depFile.rdbuf();
+						std::string intermediateDep;
+						std::getline(depFile, intermediateDep, ':');
+						while ( depFile >> intermediateDep )
+						{
+							std::replace(intermediateDep.begin(), intermediateDep.end(),'\\', '/');
+							if (std::find(referencedFiles.begin(), referencedFiles.end(), intermediateDep) == referencedFiles.end())
+							{
+								referencedFiles.push_back(intermediateDep);
+							}
+						}
 
+						fclose(pFileOut);
 						depFile.close();
 
 						uShaderBinarySize += shader.binarySize + sizeof(ShaderEntry);
@@ -202,6 +217,11 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+	}
+
+	for (uint32 i = 0; i < referencedFiles.size(); i++)
+	{
+		effectDependencies << referencedFiles[i] << " ";
 	}
 
 	hdr.uShaderBinaryOffset = hdr.uEffectBinaryOffset + (sizeof(EffectDefinition) * hdr.uEffectCount);
@@ -233,7 +253,6 @@ int main(int argc, char *argv[])
 	// Spit out the dependencies
 	std::ofstream depFile(dependencyFile.c_str(), std::ofstream::binary);
 	depFile.clear();
-	effectDependencies << intermediateDependencies.str();
 	depFile << effectDependencies.str();
 
 

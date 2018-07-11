@@ -364,7 +364,7 @@ class BuildConfig
   end
 
   def cmdl_converter_dep_opts
-    '-d $out.d'
+    '-d$out.d'
   end
 
   def resource_packer
