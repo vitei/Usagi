@@ -26,7 +26,7 @@ Effects:
     frag: deferred/spotlight
     define_sets:
       - name: shadow
-       defines: SHADOW_READ  
+        defines: SHADOW_READ  
   - name: Projection
     vert: deferred/projection_light_pos
     frag: deferred/projection_light

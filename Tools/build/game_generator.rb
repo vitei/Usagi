@@ -170,8 +170,8 @@ end
 
 def build_pc_shaders(config, n, platform)
   if platform.underscore_dirs_whitelist.include?("_vulkan")
-    game_shaders = build_vulkan_shaders_for_dir(config, n, config.pc_shader_dir(false))
-    engine_shaders = build_vulkan_shaders_for_dir(config, n, config.pc_shader_dir)
+    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false))
+    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir)
   else
     game_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir(false))
     engine_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir)
@@ -200,6 +200,19 @@ def build_vulkan_shaders_for_dir(config, n, shader_dir)
     n.build('vulkanshader', {output => [input]},
         :variables => {'out' => to_windows_path(output),
         'in' => input})
+
+    output
+  end
+end
+
+def build_shader_pak_for_dir(config, n, effect_dir, shader_dir)
+  targets = FileList["#{effect_dir}/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
+    output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".vsh")
+    defines = ""
+    n.build('shaderpack', {output => [input]},
+        :variables => {'out' => to_windows_path(output),
+        'in' => input,
+        'shader_dir' => shader_dir})
 
     output
   end

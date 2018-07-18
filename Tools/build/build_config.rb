@@ -499,6 +499,10 @@ class BuildConfig
     "#{BUILD_DIR}/skel"
   end
 
+  def effect_build_dir
+    "#{BUILD_DIR}/Effects"
+  end
+
   def shader_out_dir
     "#{romfiles_dir}/shaders"
   end

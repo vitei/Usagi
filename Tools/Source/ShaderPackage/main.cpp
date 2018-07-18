@@ -64,27 +64,29 @@ struct Header
 
 int main(int argc, char *argv[])
 {
-	std::string outputstub;
 	std::string inputFile; 
 	std::string outBinary;
 	std::string shaderDir;
 	std::string tempDir;
 	std::string dependencyFile;
+	std::string api;
+	std::string intFileName;
 
 	if (argc != 6)
 	{
-		printf("Format should be ShaderPackage <input.yml> <temporary_dir> <output_dir> <shader_dir> <dependency_file>");
+		printf("Format should be ShaderPackage <input.yml> <output> <temporary_dir> <shader_dir> <api>");
 		return -1;
 	}
 
 	inputFile = argv[1];
-	tempDir = argv[2];
-	outputstub = argv[3];
+	outBinary = argv[2];
+	tempDir = argv[3];
 	shaderDir = argv[4];
-	dependencyFile = argv[5];
+	api = argv[5];
+	//dependencyFile = argv[6];
 	
-	outBinary = outputstub + ".vsh";
-
+	intFileName = inputFile.substr(inputFile.find_last_of("\\/") + 1, inputFile.size());
+	intFileName = intFileName.substr(0, intFileName.find_last_of("."));
 
 	printf("Converting %s", inputFile.c_str());
 
@@ -145,9 +147,9 @@ int main(int argc, char *argv[])
 			do
 			{
 				nextDefine = defineList.find_first_of(' ');
-				defines += std::string(" -D") + defineList.substr(0, nextDefine);
 				if (nextDefine != std::string::npos)
 				{
+					defines += std::string(" -D") + defineList.substr(0, nextDefine);
 					defineList = defineList.substr(nextDefine + 1);
 				}
 
@@ -169,16 +171,16 @@ int main(int argc, char *argv[])
 					{
 						// Get the input file name
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
-						std::string outputFileName = "ShaderPackageTMP.spv";
+						std::string outputFileName = intFileName + ".SPV";
 						inputFileName = shaderDir + "\\" + inputFileName;
 						outputFileName = tempDir + "\\" + outputFileName;
 						Shader shader;
 						shader.CRC32 = def.sets[i].CRC[j];
 						shader.name = def.prog[j];
 						std::stringstream command;
+						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
 						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
 						CreateDirectory(outputDir.c_str(), NULL);
-						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
 
 						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
 						//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
@@ -228,7 +230,9 @@ int main(int argc, char *argv[])
 	uint32 uFileSize = hdr.uShaderBinaryOffset + uShaderBinarySize;
 
 	FILE* pFileOut;
-	CreateDirectory(outBinary.substr(0, outBinary.find_last_of("\\/")).c_str(), NULL);
+	std::replace(outBinary.begin(), outBinary.end(), '/', '\\');
+	std::string tmp = outBinary.substr(0, outBinary.find_last_of("\\/")).c_str();
+	CreateDirectory(tmp.c_str(), NULL);
 	fopen_s(&pFileOut, outBinary.c_str(), "w");
 
 	fwrite(&hdr, sizeof(Header), 1, pFileOut);

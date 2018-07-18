@@ -208,6 +208,9 @@ module GeneratorUtil
     n.rule('vulkanshader', "glslc $in -o $out -std=450 -DPLATFORM_PC -DAPI_VULKAN $defines -Werror",
            {:description => 'SHADER $out_stub'})    
 
+    n.rule('shaderpack', "ShaderPackage $in $out #{config.effect_build_dir} $shader_dir vulkan",
+           {:dependencies => :gcc, :description => 'SHADERPACK $in $out $shader_dir vulkan'})    
+
   end
 
   #####################################################################
