@@ -423,8 +423,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	EffectHndl pEffect;
 	EffectHndl pDeferredEffect;
 
-	U8String effectPath = U8String("Effects/") + fxRunTime.GetResource()->GetEffectName();
-	U8String deferredEffectPath = U8String("Effects/") + fxRunTime.GetResource()->GetDeferredEffectName();
+	U8String effectPath = fxRunTime.GetResource()->GetEffectName();
+	U8String deferredEffectPath = fxRunTime.GetResource()->GetDeferredEffectName();
 
 	
 	if (pShape->singleAttributes_count != 0)
@@ -446,8 +446,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		}
 	}
 
-	pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectPath.CStr());
-	pDeferredEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, deferredEffectPath.CStr());
+	pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
+	pDeferredEffect = ResourceMgr::Inst()->GetEffect(pDevice, deferredEffectPath.CStr());
 
 
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
@@ -582,9 +582,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
 
 	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
-	U8String effectPath = U8String("Effects/") + fxRunTime.GetResource()->GetDepthEffectName();
+	U8String effectPath = fxRunTime.GetResource()->GetDepthEffectName();
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectPath.CStr());
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
 
 	alphaDecl.bBlendEnable = false;
 	uint32 uRenderMask = alphaDecl.uColorMask[0];
@@ -595,13 +595,13 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 
 	m_meshArray[m_uMeshCount].pipelines.depthPassPipeline = pipelineState;
 
-	U8String omniDepthName = U8String("Effects/") + fxRunTime.GetResource()->GetOmniDepthEffectName();
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, omniDepthName.CStr());
+	U8String omniDepthName = fxRunTime.GetResource()->GetOmniDepthEffectName();
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.CStr());
 
 
 	m_meshArray[m_uMeshCount].pipelines.omniDepthPassPipeline = pipelineState;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffectAbsolutePath(pDevice, effectName.CStr());
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectName.CStr());
 	pipelineState = m_meshArray[m_uMeshCount].pipelines.defaultPipeline;
 	alphaDecl.bBlendEnable = true;
 	alphaDecl.uColorMask[0] = uRenderMask;
