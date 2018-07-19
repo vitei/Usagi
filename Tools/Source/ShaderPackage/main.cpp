@@ -21,6 +21,12 @@ const char* g_szExtensions[] =
 	".geom"
 };
 
+struct EffectEntry
+{
+	char		name[USG_MAX_PATH] = {};
+	uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
+	uint32		binarySize;	// 0 on platforms which do not compile complete effect combinations
+};
 
 struct DefineSets
 {
@@ -56,9 +62,10 @@ struct ShaderEntry
 
 struct Header
 {
-	uint32 uShaderBinaryOffset;
+	uint32 uShaderBinaryOffset; // Not valid on platforms which do compile complete effect combinations
 	uint32 uShaderCount;
-	uint32 uEffectBinaryOffset;
+	uint32 uEffectDefinitionOffset;
+	uint32 uEffectBinaryOffset;	// Not valid on platforms which don't compile complete effect combinations
 	uint32 uEffectCount;
 };
 
@@ -103,13 +110,12 @@ int main(int argc, char *argv[])
 		std::replace(formatted.begin(), formatted.end(), '\\', '/');
 		effectDependencies << formatted << ": ";
 	}
-
+	uint32 uShaderBinarySize = 0;
 	Header hdr;
 	hdr.uEffectBinaryOffset = sizeof(Header);
 	hdr.uShaderCount = 0;
 	hdr.uEffectCount = 0;
 	hdr.uShaderBinaryOffset = 0;
-	uint32 uShaderBinarySize = 0;
 	
 	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
@@ -236,7 +242,18 @@ int main(int argc, char *argv[])
 	fopen_s(&pFileOut, outBinary.c_str(), "w");
 
 	fwrite(&hdr, sizeof(Header), 1, pFileOut);
-	fwrite(effects.data(), sizeof(EffectDefinition), effects.size(), pFileOut);
+	for (auto &itr : effects)
+	{
+
+		for (auto &definesItr : itr.sets)
+		{
+			EffectEntry effectEntry;
+			effectEntry.binarySize = 0;	// Not yet supported
+			memcpy(effectEntry.CRC, definesItr.CRC, sizeof(definesItr.CRC));
+			sprintf_s(effectEntry.name, definesItr.name.c_str());
+			fwrite(&effectEntry, sizeof(EffectEntry), 1, pFileOut);
+		}
+	}
 
 	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 	{
