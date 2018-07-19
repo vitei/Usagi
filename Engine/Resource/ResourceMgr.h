@@ -29,7 +29,6 @@ class ResourceMgr
 public:
 	static void Cleanup(usg::GFXDevice* pDevice);
 
-	EffectHndl					GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName);
 	EffectHndl					GetEffect(GFXDevice* pDevice, const char* szEffectName);
 	TextureHndl					GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_STANDARD);
 	TextureHndl					GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_FASTMEM);
@@ -76,6 +75,7 @@ public:
 
 private:
 	ModelResHndl _GetModel(GFXDevice* pDevice, const char* szModelName, bool bInstance, bool bFastMem = true);
+	EffectHndl GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName);
 
 	// TODO: Replace with dynamically resizing stack
 	enum
