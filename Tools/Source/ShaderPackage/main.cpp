@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
+#include "Engine/Resource/EffectPakDecl.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include <yaml-cpp/yaml.h>
@@ -21,12 +22,7 @@ const char* g_szExtensions[] =
 	".geom"
 };
 
-struct EffectEntry
-{
-	char		name[USG_MAX_PATH] = {};
-	uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
-	uint32		binarySize;	// 0 on platforms which do not compile complete effect combinations
-};
+
 
 struct DefineSets
 {
@@ -51,23 +47,6 @@ struct Shader
 	uint32 binarySize;
 };
 
-
-struct ShaderEntry
-{
-	char			szName[256];
-	usg::ShaderType eType;
-	uint32			uBinarySize;
-	// Binary follows directly after
-};
-
-struct Header
-{
-	uint32 uShaderBinaryOffset; // Not valid on platforms which do compile complete effect combinations
-	uint32 uShaderCount;
-	uint32 uEffectDefinitionOffset;
-	uint32 uEffectBinaryOffset;	// Not valid on platforms which don't compile complete effect combinations
-	uint32 uEffectCount;
-};
 
 int main(int argc, char *argv[])
 {
@@ -111,8 +90,8 @@ int main(int argc, char *argv[])
 		effectDependencies << formatted << ": ";
 	}
 	uint32 uShaderBinarySize = 0;
-	Header hdr;
-	hdr.uEffectBinaryOffset = sizeof(Header);
+	usg::EffectPakDecl::Header hdr;
+	hdr.uShaderDeclOffset = sizeof(hdr);
 	hdr.uShaderCount = 0;
 	hdr.uEffectCount = 0;
 	hdr.uShaderBinaryOffset = 0;
@@ -219,7 +198,7 @@ int main(int argc, char *argv[])
 						fclose(pFileOut);
 						depFile.close();
 
-						uShaderBinarySize += shader.binarySize + sizeof(ShaderEntry);
+						uShaderBinarySize += shader.binarySize + sizeof(usg::EffectPakDecl::ShaderEntry);
 						hdr.uShaderCount++;
 					}
 				}
@@ -232,7 +211,10 @@ int main(int argc, char *argv[])
 		effectDependencies << referencedFiles[i] << " ";
 	}
 
-	hdr.uShaderBinaryOffset = hdr.uEffectBinaryOffset + (sizeof(EffectDefinition) * hdr.uEffectCount);
+	hdr.uShaderBinaryOffset = hdr.uShaderBinaryOffset + sizeof(usg::EffectPakDecl::ShaderEntry) * hdr.uShaderCount;
+	hdr.uEffectDefinitionOffset = hdr.uShaderBinaryOffset + uShaderBinarySize;
+	hdr.uEffectBinaryOffset = hdr.uEffectDefinitionOffset + sizeof(usg::EffectPakDecl::EffectEntry) * hdr.uEffectCount;
+
 	uint32 uFileSize = hdr.uShaderBinaryOffset + uShaderBinarySize;
 
 	FILE* pFileOut;
@@ -241,33 +223,50 @@ int main(int argc, char *argv[])
 	CreateDirectory(tmp.c_str(), NULL);
 	fopen_s(&pFileOut, outBinary.c_str(), "w");
 
-	fwrite(&hdr, sizeof(Header), 1, pFileOut);
+	fwrite(&hdr, sizeof(usg::EffectPakDecl::Header), 1, pFileOut);
+
+	// First the shader entries
+	uint32 uBinaryOffset = 0;
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+	{
+		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
+		{
+			usg::EffectPakDecl::ShaderEntry entry;
+			entry.eType = (usg::ShaderType)i;
+			strcpy_s(entry.szName, sizeof(entry.szName), (*itr).second.name.c_str());
+			entry.uBinarySize = (*itr).second.binarySize;
+			entry.uBinaryOffset = uBinaryOffset;
+			entry.CRC = (*itr).second.CRC32;
+			uBinaryOffset += entry.uBinarySize;
+			fwrite(&entry, sizeof(usg::EffectPakDecl::ShaderEntry), 1, pFileOut);
+		}
+	}	
+
+	// Now the shader binaries
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+	{
+		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
+		{
+			fwrite((*itr).second.binary, 1, (*itr).second.binarySize, pFileOut);
+			delete (*itr).second.binary;
+		}
+	}
+
+	// Now the effect headers
 	for (auto &itr : effects)
 	{
 
 		for (auto &definesItr : itr.sets)
 		{
-			EffectEntry effectEntry;
-			effectEntry.binarySize = 0;	// Not yet supported
+			usg::EffectPakDecl::EffectEntry effectEntry;
+			effectEntry.uBinarySize = 0;	// Not yet supported
+			effectEntry.uBinaryOffset = 0;
 			memcpy(effectEntry.CRC, definesItr.CRC, sizeof(definesItr.CRC));
 			sprintf_s(effectEntry.name, definesItr.name.c_str());
-			fwrite(&effectEntry, sizeof(EffectEntry), 1, pFileOut);
+			fwrite(&effectEntry, sizeof(usg::EffectPakDecl::EffectEntry), 1, pFileOut);
 		}
 	}
 
-	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
-	{
-		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
-		{
-			ShaderEntry entry;
-			entry.eType = (usg::ShaderType)i;
-			strcpy_s(entry.szName, sizeof(entry.szName), (*itr).second.name.c_str());
-			entry.uBinarySize = (*itr).second.binarySize;
-			fwrite(&entry, sizeof(ShaderEntry), 1, pFileOut);
-			fwrite((*itr).second.binary, 1, (*itr).second.binarySize, pFileOut);
-			delete (*itr).second.binary;
-		}
-	}	
 	fclose(pFileOut);
 	pFileOut = nullptr;
 
