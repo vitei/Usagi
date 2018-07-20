@@ -17,6 +17,7 @@ public:
 	~ScratchRaw();
    
 	void* GetRawData() { return m_pRawData; }
+	void* GetDataAtOffset(uint32 uOffset) { return ((uint8*)m_pRawData) + uOffset; }
 
 	static void InitMemory(uint32 uSize);
 protected:
