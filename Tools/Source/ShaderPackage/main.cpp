@@ -7,6 +7,7 @@
 #include "Engine/Resource/EffectPakDecl.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
+#include "../ResourcePak/ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <algorithm>
@@ -22,6 +23,26 @@ const char* g_szExtensions[] =
 	".geom"
 };
 
+struct EffectEntry : public ResourceEntry
+{
+	virtual void* GetData() override { return nullptr; }
+	virtual uint32 GetDataSize() override { return 0; };
+	virtual void* GetCustomHeader() { return &entry; }
+	virtual uint32 GetCustomHeaderSize() { return sizeof(entry); }
+
+	usg::PakFileDecl::EffectEntry entry;
+};
+
+struct ShaderEntry : public ResourceEntry
+{
+	virtual void* GetData() override { return binary; }
+	virtual uint32 GetDataSize() override { return binarySize; };
+	virtual void* GetCustomHeader() { return nullptr; }
+	virtual uint32 GetCustomHeaderSize() { return 0; }
+
+	void* binary;
+	uint32 binarySize;
+};
 
 
 struct DefineSets
@@ -37,14 +58,6 @@ struct EffectDefinition
 	std::string prog[(uint32)usg::ShaderType::COUNT];
 
 	std::vector<DefineSets> sets;
-};
-
-struct Shader
-{
-	uint32 CRC32;
-	std::string name;
-	void* binary;
-	uint32 binarySize;
 };
 
 
@@ -79,7 +92,7 @@ int main(int argc, char *argv[])
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
 	YAML::Node shaders = mainNode["Effects"];
-	std::map<uint32, Shader> requiredShaders[(uint32)usg::ShaderType::COUNT];
+	std::map<uint32, ShaderEntry> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	std::vector<EffectDefinition> effects;
 	std::vector<std::string> referencedFiles;
 	std::stringstream effectDependencies;
@@ -141,9 +154,10 @@ int main(int argc, char *argv[])
 			} while (nextDefine != std::string::npos);
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
+				std::string progName = def.prog[j] + def.sets[i].defines + g_szExtensions[j] + ".SPV";
 				if (!def.prog[j].empty())
 				{
-					def.sets[i].CRC[j] = utl::CRC32((def.prog[j] + def.sets[i].defines).c_str());
+					def.sets[i].CRC[j] = utl::CRC32(progName.c_str());
 				}
 				else
 				{
@@ -159,9 +173,8 @@ int main(int argc, char *argv[])
 						std::string outputFileName = intFileName + ".SPV";
 						inputFileName = shaderDir + "\\" + inputFileName;
 						outputFileName = tempDir + "\\" + outputFileName;
-						Shader shader;
-						shader.CRC32 = def.sets[i].CRC[j];
-						shader.name = def.prog[j];
+						ShaderEntry shader;
+						shader.name = progName;
 						std::stringstream command;
 						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
 						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
@@ -179,7 +192,7 @@ int main(int argc, char *argv[])
 						fseek(pFileOut, 0, SEEK_SET);
 						shader.binary = new uint8[shader.binarySize];
 						fread(shader.binary, 1, shader.binarySize, pFileOut);
-						requiredShaders[j][shader.CRC32] = shader;
+						requiredShaders[j][def.sets[i].CRC[j]] = shader;
 
 						std::string depFileName = outputFileName + ".d";
 						std::ifstream depFile(depFileName);
@@ -217,64 +230,45 @@ int main(int argc, char *argv[])
 
 	uint32 uFileSize = hdr.uShaderBinaryOffset + uShaderBinarySize;
 
-	FILE* pFileOut;
-	std::replace(outBinary.begin(), outBinary.end(), '/', '\\');
-	std::string tmp = outBinary.substr(0, outBinary.find_last_of("\\/")).c_str();
-	CreateDirectory(tmp.c_str(), NULL);
-	fopen_s(&pFileOut, outBinary.c_str(), "w");
-
-	fwrite(&hdr, sizeof(usg::EffectPakDecl::Header), 1, pFileOut);
-
-	// First the shader entries
-	uint32 uBinaryOffset = 0;
-	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+	std::vector<ResourceEntry*> resources;
+	std::vector<EffectEntry> effectEntries;
+	for (auto& effectItr : effects)
 	{
-		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
+		for (auto& setItr : effectItr.sets)
 		{
-			usg::EffectPakDecl::ShaderEntry entry;
-			entry.eType = (usg::ShaderType)i;
-			strcpy_s(entry.szName, sizeof(entry.szName), (*itr).second.name.c_str());
-			entry.uBinarySize = (*itr).second.binarySize;
-			entry.uBinaryOffset = uBinaryOffset;
-			entry.CRC = (*itr).second.CRC32;
-			uBinaryOffset += entry.uBinarySize;
-			fwrite(&entry, sizeof(usg::EffectPakDecl::ShaderEntry), 1, pFileOut);
-		}
-	}	
-
-	// Now the shader binaries
-	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
-	{
-		for (auto itr = requiredShaders[i].begin(); itr != requiredShaders[i].end(); ++itr)
-		{
-			fwrite((*itr).second.binary, 1, (*itr).second.binarySize, pFileOut);
-			delete (*itr).second.binary;
+			EffectEntry effect;
+			effect.name = setItr.name;
+			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
+			effectEntries.push_back(effect);
+			resources.push_back( &effectEntries.back() );
 		}
 	}
 
-	// Now the effect headers
-	for (auto &itr : effects)
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 	{
-
-		for (auto &definesItr : itr.sets)
+		for (auto& itr : requiredShaders[i])
 		{
-			usg::EffectPakDecl::EffectEntry effectEntry;
-			effectEntry.uBinarySize = 0;	// Not yet supported
-			effectEntry.uBinaryOffset = 0;
-			memcpy(effectEntry.CRC, definesItr.CRC, sizeof(definesItr.CRC));
-			sprintf_s(effectEntry.name, definesItr.name.c_str());
-			fwrite(&effectEntry, sizeof(usg::EffectPakDecl::EffectEntry), 1, pFileOut);
+			ResourceEntry* entry = &itr.second;
+			resources.push_back(entry);
 		}
 	}
 
-	fclose(pFileOut);
-	pFileOut = nullptr;
+	// Write out the file
+	ResourcePakExporter::Export(outBinary.c_str(), resources);
 
-	// Spit out the dependencies
-	std::ofstream depFile(dependencyFile.c_str(), std::ofstream::binary);
-	depFile.clear();
-	depFile << effectDependencies.str();
+	// Delete the binary data
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+	{
+		for (auto& itr : requiredShaders[i])
+		{
+			if (itr.second.binary)
+			{
+				delete itr.second.binary;
+				itr.second.binary = nullptr;
+			}
 
+		}
+	}
 
 	return 0;
 }
