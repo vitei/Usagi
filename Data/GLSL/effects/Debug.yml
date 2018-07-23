@@ -4,4 +4,5 @@ Effects:
   - { name: PosCol, vert: debug/pos_col, frag: debug/pos_col }
   - { name: Sphere, vert: debug/sphere, frag: debug/sphere }
   - { name: Cubes, vert: cubes, geom: cubes, frag: cubes }
-  - { name: Solid, vert: solid, frag: soild }
+  - { name: Solid, vert: solid, frag: solid }
+  
