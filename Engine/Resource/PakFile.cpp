@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Memory/ScratchRaw.h"
 #include "PakDecl.h"
@@ -47,10 +48,26 @@ namespace usg
 		for (uint32 i = 0; i < pHeader->uFileCount; i++)
 		{
 			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo+pFileInfo->uTotalFileInfoSize);
+			LoadFile(pDevice, pFileInfo, scratch.GetRawData());
 
 
 		}
 		
+	}
+
+
+	void PakFile::LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
+	{
+		U8String name = pFileInfo->szName;
+		name.ToLower();
+
+
+		if (name.HasExtension("spv"))
+		{
+			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
+			pShader->Init(pDevice, pFileInfo->szName, ((uint8*)pFileScratch) + pFileInfo->uDataOffset, pFileInfo->uDataSize);
+			m_resources.push_back(pShader);
+		}
 	}
 
 	void PakFile::CleanUp(GFXDevice* pDevice)

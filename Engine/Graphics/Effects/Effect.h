@@ -18,7 +18,7 @@ class GFXDevice;
 class Effect : public ResourceBase
 {
 public:
-	Effect() {}
+	Effect() { m_resourceType = ResourceType::EFFECT; }
 	virtual ~Effect() {}
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);

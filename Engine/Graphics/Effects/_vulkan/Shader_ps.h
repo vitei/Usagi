@@ -16,17 +16,17 @@ public:
 	Shader_ps();
 	~Shader_ps();
 
-	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const void* pHeader, const void* pData);
+	void Init(GFXDevice* pDevice, const char* szEffectName) { ASSERT(false); }
+	bool Init(GFXDevice* pDevice, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice);
 
 	// PS
 	VkShaderModule GetShaderModule() { return m_shaderModule; }
 
 private:
-	VkShaderModule	m_shaderModule;
+	VkShaderModule			m_shaderModule;
 
-	PRIVATIZE_COPY(Effect_ps)
+	PRIVATIZE_COPY(Shader_ps)
 };
 
 }

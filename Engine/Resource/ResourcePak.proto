@@ -3,15 +3,6 @@ import 'Engine/Graphics/RenderConsts.proto';
 
 package usg;
 
-enum ResourceType
-{
-	RESOURCE_TEXTURE		  = 0;
-	RESOURCE_EFFECT			  = 1;
-	RESOURCE_PARTICLE_EMITTER = 2;
-	RESOURCE_PARTICLE_EFFECT  = 3;
-	RESOURCE_FORCE_SIZE		  = 0x7FFFFFFF; // Force enum size to sizeof(int32_t)
-}
-
 
 message ResourceGroup
 {
@@ -30,7 +21,6 @@ message Resources
 
 message ResourceHeader
 {
-	required ResourceType eResourceType = 1;
 	required string strName = 2 [(nanopb).max_size = 60, (nanopb).has_max_size = true];
 	required uint32 uNameCRC =	3;
 	required uint32 uDataOffset = 4;	// The platform specific data offset from the beginning of the PS data

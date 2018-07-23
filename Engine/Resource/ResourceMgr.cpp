@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Graphics/Effects/Effect.h"
+#include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ResourceMgr.h"
@@ -41,6 +42,7 @@ namespace usg{
 	struct ResourceMgr::PIMPL
 	{
 		ResourceData<Texture>					textures;
+		ResourceData<Shader>					shaders;
 		ResourceData<Effect>					effects;
 		ResourceData<ModelResource>				models;
 		ResourceData<Font>						fonts;
@@ -69,6 +71,7 @@ ResourceMgr::ResourceMgr(void)
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->skeletalAnims);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->textures);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->effects);
+	m_pImpl->resourceSets.AddToEnd(&m_pImpl->shaders);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->fonts);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->protocolBuffers);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->collisionModel);

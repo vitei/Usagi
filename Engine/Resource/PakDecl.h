@@ -5,6 +5,7 @@
 #ifndef _USG_RESOURCE_PAK_FILE_DECL_H_
 #define _USG_RESOURCE_PAK_FILE_DECL_H_
 #include "Engine/Common/Common.h"
+#include "Engine/Graphics/RenderConsts.h"
 
 namespace usg
 {
@@ -39,6 +40,11 @@ namespace usg
 		struct EffectEntry
 		{
 			uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
+		};
+
+		struct ShaderEntry
+		{
+			ShaderType	eShaderType;
 		};
 
 	}

@@ -11,6 +11,14 @@ namespace usg
 
 	class GFXDevice;
 
+	enum class ResourceType : uint32
+	{
+		UNDEFINED = 0,
+		TEXTURE,
+		SHADER,
+		EFFECT
+	};
+
 	class ResourceBase
 	{
 	public:
@@ -18,6 +26,7 @@ namespace usg
 		{
 			m_nameHash = 0;
 			m_dataHash = 0;
+			m_resourceType = ResourceType::UNDEFINED;
 			m_bReady = false;
 		}
 		virtual ~ResourceBase() {}
@@ -36,8 +45,9 @@ namespace usg
 			m_nameHash = ResourceDictionary::calcNameHash( name );
 			m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
 		}
-		NameHash	m_nameHash;
-		DataHash	m_dataHash;
+		NameHash		m_nameHash;
+		DataHash		m_dataHash;
+		ResourceType	m_resourceType;
 
 		bool		m_bReady;
 	};

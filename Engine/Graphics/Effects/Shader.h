@@ -18,11 +18,11 @@ class GFXDevice;
 class Shader : public ResourceBase
 {
 public:
-	Shader() {}
+	Shader() { m_resourceType = ResourceType::SHADER; }
 	virtual ~Shader() {}
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const char* szEffectName, const void* pData);
+	bool Init(GFXDevice* pDevice, const char* szEffectName, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 
 	Shader_ps& GetPlatform() { return m_platform; }
@@ -30,7 +30,7 @@ public:
 	const U8String& GetName() const { return m_name; }
 
 private:
-	PRIVATIZE_COPY(Effect)
+	PRIVATIZE_COPY(Shader)
 
 	U8String	m_name;
 	Shader_ps	m_platform;
@@ -45,11 +45,11 @@ inline void Shader::Init(GFXDevice* pDevice, const char* szEffectName)
 	SetReady(true);
 }
 
-inline bool Shader::Init(GFXDevice* pDevice, const char* szEffectName, const void* pData)
+inline bool Shader::Init(GFXDevice* pDevice, const char* szEffectName, const void* pData, uint32 uDataSize)
 {
 	m_name = szEffectName;
 	SetupHash(m_name.CStr());
-	bool bLoaded = m_platform.Init(pDevice, pData);
+	bool bLoaded = m_platform.Init(pDevice, pData, uDataSize);
 	// FIXME: This should be done internally
 	SetReady(true);
 	return bLoaded;

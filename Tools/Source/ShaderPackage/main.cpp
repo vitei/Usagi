@@ -37,8 +37,10 @@ struct ShaderEntry : public ResourceEntry
 {
 	virtual void* GetData() override { return binary; }
 	virtual uint32 GetDataSize() override { return binarySize; };
-	virtual void* GetCustomHeader() { return nullptr; }
-	virtual uint32 GetCustomHeaderSize() { return 0; }
+	virtual void* GetCustomHeader() { return &entry; }
+	virtual uint32 GetCustomHeaderSize() { return sizeof(entry); }
+
+	usg::PakFileDecl::ShaderEntry entry;
 
 	void* binary;
 	uint32 binarySize;
@@ -179,6 +181,7 @@ int main(int argc, char *argv[])
 						system(command.str().c_str());
 
 						FILE* pFileOut = nullptr;
+						shader.entry.eShaderType = (usg::ShaderType)(j);
 						fopen_s(&pFileOut, outputFileName.c_str(), "r");
 						fseek(pFileOut, 0, SEEK_END);
 						shader.binarySize = ftell(pFileOut);
@@ -227,11 +230,6 @@ int main(int argc, char *argv[])
 		}
 	} 
 
-	for (auto& effectItr : effectEntries)
-	{
-		resources.push_back(&effectItr);
-	}
-
 	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 	{
 		for (auto& itr : requiredShaders[i])
@@ -239,6 +237,11 @@ int main(int argc, char *argv[])
 			ResourceEntry* entry = &itr.second;
 			resources.push_back(entry);
 		}
+	}
+
+	for (auto& effectItr : effectEntries)
+	{
+		resources.push_back(&effectItr);
 	}
 
 	// Write out the file

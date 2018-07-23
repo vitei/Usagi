@@ -8,6 +8,8 @@
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Resource/ResourceBase.h"
+#include "Engine/Resource/PakDecl.h"
+#include "Engine/Core/stl/vector.h"
 #include "CustomEffectDecl.h"
 
 namespace usg
@@ -22,8 +24,13 @@ namespace usg
 		void Load(GFXDevice* pDevice, const char* szFileName);
 		void CleanUp(GFXDevice* pDevice);
 
+		// This should be valid before threading so we can return handles to resources
+		usg::vector<ResourceBase*>& GetResources() { return m_resources; }
 
 	private:
+		void LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFielInfo, void* pFileScratch);
+
+		usg::vector<ResourceBase*>	m_resources;
 
 	};
 
