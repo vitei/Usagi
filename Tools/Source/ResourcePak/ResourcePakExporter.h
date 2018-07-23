@@ -50,11 +50,11 @@ namespace ResourcePakExporter
 			fileInfo.CRC = utl::CRC32(fileInfo.szName);
 			fileInfo.uCustomHeaderSize = entries[i]->GetCustomHeaderSize();
 			fileInfo.uDependenciesCount = (uint32)entries[i]->dependencies.size();
-			fileInfo.uDataOffset = uDataOffset;
 			fileInfo.uDataSize = entries[i]->GetDataSize();
+			fileInfo.uDataOffset = fileInfo.uDataSize > 0 ? uDataOffset : USG_INVALID_ID;
 			// TODO: Probably want to have an alignment value for the data
 			fileInfo.uTotalFileInfoSize = (uint32)(sizeof(fileInfo) + entries[i]->GetCustomHeaderSize() + (sizeof(usg::PakFileDecl::Dependency) * entries[i]->dependencies.size()));
-			uDataOffset += fileInfo.uDataOffset;
+			uDataOffset += fileInfo.uDataSize;
 			fwrite(&fileInfo, sizeof(fileInfo), 1, pFileOut);
 
 			if (fileInfo.uCustomHeaderSize > 0)

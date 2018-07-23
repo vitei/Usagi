@@ -25,6 +25,7 @@
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Core/String/String_Util.h"
+#include "Engine/Resource/PakFile.h"
 #include <cstring>
 
 #ifdef DEBUG_BUILD
@@ -83,6 +84,8 @@ ResourceMgr::ResourceMgr(void)
 	m_fontDir = "Fonts/";
 
 	ResourceDictionary::init();
+
+
 }
 
 ResourceMgr::~ResourceMgr(void)

@@ -4,7 +4,7 @@
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
-#include "Engine/Resource/EffectPakDecl.h"
+#include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "../ResourcePak/ResourcePakExporter.h"
@@ -102,12 +102,6 @@ int main(int argc, char *argv[])
 		std::replace(formatted.begin(), formatted.end(), '\\', '/');
 		effectDependencies << formatted << ": ";
 	}
-	uint32 uShaderBinarySize = 0;
-	usg::EffectPakDecl::Header hdr;
-	hdr.uShaderDeclOffset = sizeof(hdr);
-	hdr.uShaderCount = 0;
-	hdr.uEffectCount = 0;
-	hdr.uShaderBinaryOffset = 0;
 	
 	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
@@ -135,7 +129,6 @@ int main(int argc, char *argv[])
 		}
 
 		effects.push_back(def);
-		hdr.uEffectCount += (uint32)def.sets.size();
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
@@ -171,8 +164,8 @@ int main(int argc, char *argv[])
 						// Get the input file name
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
 						std::string outputFileName = intFileName + ".SPV";
-						inputFileName = shaderDir + "\\" + inputFileName;
-						outputFileName = tempDir + "\\" + outputFileName;
+						inputFileName = shaderDir + "/" + inputFileName;
+						outputFileName = tempDir + "/" + outputFileName;
 						ShaderEntry shader;
 						shader.name = progName;
 						std::stringstream command;
@@ -210,9 +203,6 @@ int main(int argc, char *argv[])
 
 						fclose(pFileOut);
 						depFile.close();
-
-						uShaderBinarySize += shader.binarySize + sizeof(usg::EffectPakDecl::ShaderEntry);
-						hdr.uShaderCount++;
 					}
 				}
 			}
@@ -224,12 +214,6 @@ int main(int argc, char *argv[])
 		effectDependencies << referencedFiles[i] << " ";
 	}
 
-	hdr.uShaderBinaryOffset = hdr.uShaderBinaryOffset + sizeof(usg::EffectPakDecl::ShaderEntry) * hdr.uShaderCount;
-	hdr.uEffectDefinitionOffset = hdr.uShaderBinaryOffset + uShaderBinarySize;
-	hdr.uEffectBinaryOffset = hdr.uEffectDefinitionOffset + sizeof(usg::EffectPakDecl::EffectEntry) * hdr.uEffectCount;
-
-	uint32 uFileSize = hdr.uShaderBinaryOffset + uShaderBinarySize;
-
 	std::vector<ResourceEntry*> resources;
 	std::vector<EffectEntry> effectEntries;
 	for (auto& effectItr : effects)
@@ -240,8 +224,12 @@ int main(int argc, char *argv[])
 			effect.name = setItr.name;
 			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
 			effectEntries.push_back(effect);
-			resources.push_back( &effectEntries.back() );
 		}
+	} 
+
+	for (auto& effectItr : effectEntries)
+	{
+		resources.push_back(&effectItr);
 	}
 
 	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
