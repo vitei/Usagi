@@ -363,6 +363,10 @@ class BuildConfig
     "#{tools_bin_dir}/Ayataka.exe"
   end
 
+def shader_pack
+    "#{tools_bin_dir}/ShaderPackage.exe"
+  end
+
   def cmdl_converter_dep_opts
     '-d$out.d'
   end
