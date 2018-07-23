@@ -11,7 +11,8 @@ Technical limitations were the biggest threat to what we were able to accomplish
 
 By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
-The main difficulty with Usagi is that it requires a different way of thinking. There is a stronger emphasis on design philosophy than with other engines which, whislt requiring some time to adjust to, leads to better, cleaner, and more maintainable code in the long run.  
+The main difficulty with Usagi is that it requires a different way of thinking. There is a stronger emphasis on design philosophy than with other engines which, whilst requiring some time to adjust to, leads to better, cleaner, and more maintainable code in the long run.   
+
 The engine has been proven on a commerical title as well as several internal demos on numerous platforms and APIs.  
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
