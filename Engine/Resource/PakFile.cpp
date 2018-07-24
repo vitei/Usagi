@@ -72,6 +72,7 @@ namespace usg
 		{
 			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
 			pEffect->Init(pDevice, this, pFileInfo, pData);
+			m_resources[pFileInfo->CRC] = pEffect;
 		}
 	}
 

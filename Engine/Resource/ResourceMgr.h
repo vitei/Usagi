@@ -75,7 +75,6 @@ public:
 
 private:
 	ModelResHndl _GetModel(GFXDevice* pDevice, const char* szModelName, bool bInstance, bool bFastMem = true);
-	EffectHndl GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName);
 
 	// TODO: Replace with dynamically resizing stack
 	enum

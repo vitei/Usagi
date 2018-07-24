@@ -18,6 +18,7 @@
 #include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Layout/Fonts/Font.h"
+#include "Engine/Core/stl/string.h"
 #include "Engine/Resource/ResourceData.h"
 #include "Engine/Resource/ResourceDictionary.h"
 #include "Engine/Resource/ResourcePak.pb.h"
@@ -55,8 +56,6 @@ namespace usg{
 		ResourceData<ResourcePakHdr>			resourcePaks;
 
 		List<ResourceDataBase>				resourceSets;
-
-		ResourcePakLoader					pakLoader;
 	};
 
 ResourceMgr* ResourceMgr::m_pResource = nullptr;
@@ -112,6 +111,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 {
 	U8String name = szPath;
 	name += szName;
+	name += ".pak";
 	SharedPointer<const ResourcePakHdr> hndl = m_pImpl->resourcePaks.GetResourceHndl(name.CStr());
 	// Only load if we don't already have one
 	if (!hndl)
@@ -122,18 +122,27 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			ProfilingTimer loadTimer;
 			loadTimer.Start();
 #endif
-
-			m_pImpl->pakLoader.StartLoad(szPath, szName);
-			ResourcePakHdr* pPakHdr = vnew(ALLOC_RESOURCE_MGR) ResourcePakHdr;
-			m_pImpl->resourcePaks.StartLoad();
-			pPakHdr->Init(m_pImpl->pakLoader);
-			m_pImpl->resourcePaks.AddResource(pPakHdr);
-			m_pImpl->pakLoader.Load<Texture, TexturePak>(pDevice, m_pImpl->textures);
-			m_pImpl->pakLoader.LoadEffects(pDevice, m_pImpl->effects);
-			ASSERT(false);
-			//m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->particleEmitters, ".pem");
-			m_pImpl->pakLoader.Load<ParticleEffectResource, ParticleEffectPak>(pDevice, m_pImpl->particleEffects, ".pfx");
-			m_pImpl->pakLoader.FinishLoad();
+			PakFile pakFile;
+			// TODO: We should be creating the resources on the main thread but then doing the loading on another thread
+			pakFile.Load(pDevice, name.CStr());
+			usg::map<uint32, ResourceBase*>& resources = pakFile.GetResources();
+			for (auto& itr : resources)
+			{
+				switch (itr.second->GetResourceType())
+				{
+				case ResourceType::EFFECT:
+					m_pImpl->effects.AddResource((Effect*)itr.second);
+					break;
+				case ResourceType::SHADER:
+					m_pImpl->shaders.AddResource((Shader*)itr.second);
+					break;
+				case ResourceType::TEXTURE:
+					m_pImpl->textures.AddResource((Texture*)itr.second);
+					break;
+				default:
+					ASSERT(false);
+				}
+			}
 
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			loadTimer.Stop();
@@ -144,9 +153,24 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 	// Nothing on PC yet so no assert
 }
 
-EffectHndl ResourceMgr::GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName)
+
+EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 {
 	U8String u8Name = szEffectName;
+	usg::string stringName = szEffectName;
+	if (stringName.find_first_of(".") != string::npos)
+	{
+		// New system
+		string packageName = stringName.substr(0, stringName.find_first_of("."));
+		LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
+		u8Name += ".fx";
+	}
+	else
+	{
+		// Old system
+		u8Name = m_effectDir + szEffectName;
+	}
+
 	EffectHndl pEffect = m_pImpl->effects.GetResourceHndl(u8Name);
 
 	// TODO: Remove from the final build, should load in blocks
@@ -159,12 +183,7 @@ EffectHndl ResourceMgr::GetEffectAbsolutePath(GFXDevice* pDevice, const char* sz
 	}
 
 	return pEffect;
-}
 
-EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
-{
-	U8String u8Name = m_effectDir + szEffectName;
-	return GetEffectAbsolutePath(pDevice, u8Name.CStr());
 
 }
 
@@ -281,9 +300,6 @@ TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureNam
 ModelResHndl ResourceMgr::GetModel(GFXDevice* pDevice, const char* szModelName, bool bFastMem)
 {
 	const bool bInstance = false;
-	PakFile file;
-	file.Load(pDevice, "Effects/Model.pak");
-
 	return _GetModel( pDevice, szModelName, bInstance, bFastMem);
 }
 

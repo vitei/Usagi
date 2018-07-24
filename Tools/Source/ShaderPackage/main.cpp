@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 	std::string dependencyFile;
 	std::string api;
 	std::string intFileName;
+	std::string packageName;
 
 	if (argc != 6)
 	{
@@ -86,6 +87,7 @@ int main(int argc, char *argv[])
 	tempDir = argv[3];
 	shaderDir = argv[4];
 	api = argv[5];
+
 	//dependencyFile = argv[6];
 	
 	intFileName = inputFile.substr(inputFile.find_last_of("\\/") + 1, inputFile.size());
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
 		DefineSets set;
-		set.name = def.name + ".fx";
+		set.name = intFileName + "." + def.name + ".fx";
 		set.defineSetName = "";
 		set.definesAsCRC = "";
 		set.defines = "";
@@ -128,7 +130,8 @@ int main(int argc, char *argv[])
 			YAML::Node defineSets = (*it)["define_sets"];
 			for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
 			{
-				set.name = def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
+				// Package.Effect.DefineSet.fx
+				set.name = intFileName + "." + def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
 				set.defines = (*defineIt)["defines"].as<std::string>();
 				set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
 				set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
 			} while (nextDefine != std::string::npos);
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
-				std::string progName = def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
+				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
 				if (!def.prog[j].empty())
 				{
 					def.sets[i].CRC[j] = utl::CRC32(progName.c_str());
