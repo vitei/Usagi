@@ -26,18 +26,17 @@ namespace usg {
 	bool Shader_ps::Init(GFXDevice* pDevice, const void* pData, uint32 uDataSize)
 	{	
 		VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
-		VkShaderModule shaderModule;
-		VkShaderModuleCreateInfo moduleCreateInfo;
+		VkShaderModuleCreateInfo moduleCreateInfo = {};
 		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		moduleCreateInfo.pNext = NULL;
 		moduleCreateInfo.codeSize = uDataSize;
 		moduleCreateInfo.pCode = (uint32_t*)pData;
 		moduleCreateInfo.flags = 0;
 
-		VkResult result = vkCreateShaderModule(vkDevice, &moduleCreateInfo, NULL, &shaderModule);
+		VkResult result = vkCreateShaderModule(vkDevice, &moduleCreateInfo, NULL, &m_shaderModule);
 		ASSERT(result == VK_SUCCESS);
 
-		return result == VK_SUCCESS && shaderModule != VK_NULL_HANDLE;
+		return result == VK_SUCCESS && m_shaderModule != VK_NULL_HANDLE;
 
 	}
 

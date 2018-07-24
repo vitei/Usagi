@@ -91,7 +91,7 @@ namespace usg
 		alpha.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 		alpha.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
-		pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Fader");
+		pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.Fader");
 		m_Material.Init(pDevice, pDevice->GetPipelineState(renderPass, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 
