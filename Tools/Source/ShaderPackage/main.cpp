@@ -37,8 +37,8 @@ struct ShaderEntry : public ResourceEntry
 {
 	virtual void* GetData() override { return binary; }
 	virtual uint32 GetDataSize() override { return binarySize; };
-	virtual void* GetCustomHeader() { return &entry; }
-	virtual uint32 GetCustomHeaderSize() { return sizeof(entry); }
+	virtual void* GetCustomHeader() { return nullptr; }//{ return &entry; }
+	virtual uint32 GetCustomHeaderSize() {return 0; }//{ return sizeof(entry); }
 
 	usg::PakFileDecl::ShaderEntry entry;
 
@@ -51,6 +51,8 @@ struct DefineSets
 {
 	std::string name;
 	std::string defines;
+	std::string defineSetName;
+	std::string definesAsCRC;
 	uint32		CRC[(uint32)usg::ShaderType::COUNT];
 };
 
@@ -112,7 +114,9 @@ int main(int argc, char *argv[])
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
 		DefineSets set;
-		set.name = def.name;
+		set.name = def.name + ".fx";
+		set.defineSetName = "";
+		set.definesAsCRC = "";
 		set.defines = "";
 		if ((*it)["geom"])
 		{
@@ -126,6 +130,8 @@ int main(int argc, char *argv[])
 			{
 				set.name = def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
 				set.defines = (*defineIt)["defines"].as<std::string>();
+				set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
+				set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
 				def.sets.push_back(set);
 			}
 		}
@@ -147,7 +153,7 @@ int main(int argc, char *argv[])
 			} while (nextDefine != std::string::npos);
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
-				std::string progName = def.prog[j] + def.sets[i].defines + g_szExtensions[j] + ".SPV";
+				std::string progName = def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
 				if (!def.prog[j].empty())
 				{
 					def.sets[i].CRC[j] = utl::CRC32(progName.c_str());

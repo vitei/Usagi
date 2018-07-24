@@ -22,7 +22,7 @@ namespace usg
 
 		struct FileInfo
 		{
-			char			szName[64];
+			char			szName[128];
 			uint32			CRC;
 			uint32			uTotalFileInfoSize;
 			uint32			uCustomHeaderSize;	// Straight after file info
@@ -33,7 +33,7 @@ namespace usg
 
 		struct Dependency
 		{
-			char   szName[64];
+			char   szName[128];
 			uint32 FileCRC;
 			uint32 PakIndex;	// USG_INVALID_ID if not present in this pak file
 		};

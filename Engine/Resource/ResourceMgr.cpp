@@ -282,7 +282,7 @@ ModelResHndl ResourceMgr::GetModel(GFXDevice* pDevice, const char* szModelName, 
 {
 	const bool bInstance = false;
 	PakFile file;
-	file.Load(pDevice, "Effects/Model.vsh");
+	file.Load(pDevice, "Effects/Model.pak");
 
 	return _GetModel( pDevice, szModelName, bInstance, bFastMem);
 }

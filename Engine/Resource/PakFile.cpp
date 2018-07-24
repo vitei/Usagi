@@ -48,10 +48,8 @@ namespace usg
 		const PakFileDecl::FileInfo* pFileInfo = scratch.GetDataAtOffset<PakFileDecl::FileInfo>(sizeof(PakFileDecl::ResourcePakHdr));
 		for (uint32 i = 0; i < pHeader->uFileCount; i++)
 		{
-			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo+pFileInfo->uTotalFileInfoSize);
 			LoadFile(pDevice, pFileInfo, scratch.GetRawData());
-
-
+			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo + pFileInfo->uTotalFileInfoSize);
 		}
 		
 	}
@@ -62,17 +60,18 @@ namespace usg
 		U8String name = pFileInfo->szName;
 		name.ToLower();
 
+		void* pData = pFileInfo->uDataOffset == USG_INVALID_ID ? nullptr : ((uint8*)pFileScratch) + pFileInfo->uDataOffset;
 
 		if (name.HasExtension("spv"))
 		{
 			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
-			pShader->Init(pDevice, pFileInfo->szName, ((uint8*)pFileScratch) + pFileInfo->uDataOffset, pFileInfo->uDataSize);
+			pShader->Init(pDevice, pFileInfo->szName, pData, pFileInfo->uDataSize);
 			m_resources[pFileInfo->CRC] = pShader;
 		}
 		else if (name.HasExtension("fx"))
 		{
 			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
-			pEffect->Init(pDevice, this, pFileInfo, ((uint8*)pFileScratch) + pFileInfo->uDataOffset);
+			pEffect->Init(pDevice, this, pFileInfo, pData);
 		}
 	}
 

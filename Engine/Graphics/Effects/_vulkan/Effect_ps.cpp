@@ -125,7 +125,7 @@ namespace usg {
 		m_uStageCount = 0;
 		for (uint32 i = 0; i < (uint32)ShaderType::COUNT; i++)
 		{
-			if (pEffectHdr->CRC[i] != USG_INVALID_ID)
+			if (pEffectHdr->CRC[i] != 0)
 			{
 				ResourceBase* pResourceBase = pakFile->GetResource(pEffectHdr->CRC[i]);
 				ASSERT(pResourceBase && pResourceBase->GetResourceType() == ResourceType::SHADER);

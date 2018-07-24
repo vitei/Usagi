@@ -207,7 +207,7 @@ end
 
 def build_shader_pak_for_dir(config, n, effect_dir, shader_dir)
   targets = FileList["#{effect_dir}/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
-    output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".vsh")
+    output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".pak")
     defines = ""
     n.build('shaderpack', {output => [input]},
         { :implicit_deps => [config.shader_pack],
