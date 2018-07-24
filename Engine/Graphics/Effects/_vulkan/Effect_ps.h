@@ -5,12 +5,13 @@
 #define _USG_GRAPHICS_PC_EFFECT_PS_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
+#include "Engine/Resource/PakDecl.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
 
 class GFXDevice;
-typedef struct _EffectPak EffectPak;
+class PakFile;
 
 class Effect_ps
 {
@@ -19,7 +20,7 @@ public:
 	~Effect_ps();
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const EffectPak& pak, const void* pData, const char* szPackPath) { ASSERT(false); return false; }	// Not yet implemented on PC
+	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice);
 
 	uint32 GetStageCount() const { return m_uStageCount; }

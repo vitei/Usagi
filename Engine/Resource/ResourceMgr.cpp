@@ -281,6 +281,9 @@ TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureNam
 ModelResHndl ResourceMgr::GetModel(GFXDevice* pDevice, const char* szModelName, bool bFastMem)
 {
 	const bool bInstance = false;
+	PakFile file;
+	file.Load(pDevice, "Effects/Model.vsh");
+
 	return _GetModel( pDevice, szModelName, bInstance, bFastMem);
 }
 

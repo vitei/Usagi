@@ -22,7 +22,7 @@ public:
 	virtual ~Effect() {}
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const EffectPak& pak, const void* pData, const char* szPackPath);
+	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 	//void Apply() const;
 
@@ -46,12 +46,11 @@ inline void Effect::Init(GFXDevice* pDevice, const char* szEffectName)
 	SetReady(true);
 }
 
-inline bool Effect::Init(GFXDevice* pDevice, const EffectPak& pak, const void* pData, const char* szPackPath)
+inline bool Effect::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
 {
-	m_name = szPackPath;
-	m_name += pak.resHdr.strName;
+	m_name = pFileHeader->szName;
 	SetupHash(m_name.CStr());
-	bool bLoaded = m_platform.Init(pDevice, pak, pData, szPackPath);
+	bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
 	// FIXME: This should be done internally
 	SetReady(true);
 	return bLoaded;

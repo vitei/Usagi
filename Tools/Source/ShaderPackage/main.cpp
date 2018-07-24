@@ -124,13 +124,11 @@ int main(int argc, char *argv[])
 			YAML::Node defineSets = (*it)["define_sets"];
 			for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
 			{
-				set.name = def.name + "." + (*defineIt)["name"].as<std::string>();
+				set.name = def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
 				set.defines = (*defineIt)["defines"].as<std::string>();
 				def.sets.push_back(set);
 			}
 		}
-
-		effects.push_back(def);
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
@@ -210,6 +208,7 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+		effects.push_back(def);
 	}
 
 	for (uint32 i = 0; i < referencedFiles.size(); i++)

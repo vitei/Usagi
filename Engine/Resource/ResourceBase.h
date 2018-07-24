@@ -37,7 +37,7 @@ namespace usg
 		virtual void CleanUp(GFXDevice* pDevice) {}
 		bool IsReady() const { return m_bReady; }
 		void SetReady(bool bReady) { m_bReady = bReady; }
-
+		ResourceType GetResourceType() const { return m_resourceType; }
 
 	protected:
 		void SetupHash( const char* name )

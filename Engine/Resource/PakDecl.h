@@ -35,6 +35,7 @@ namespace usg
 		{
 			char   szName[64];
 			uint32 FileCRC;
+			uint32 PakIndex;	// USG_INVALID_ID if not present in this pak file
 		};
 
 		struct EffectEntry
@@ -46,6 +47,19 @@ namespace usg
 		{
 			ShaderType	eShaderType;
 		};
+
+		template <class HeaderType>
+		inline const HeaderType* GetCustomHeader(const FileInfo* pFileInfo)
+		{
+			ASSERT(sizeof(HeaderType) == pFileInfo->uCustomHeaderSize);
+			return (HeaderType*)(((uint8*)pFileInfo) + sizeof(FileInfo));
+		}
+
+		inline const Dependency* GetDependencies(const FileInfo* pFileInfo)
+		{
+			return (Dependency*)(((uint8*)pFileInfo) + sizeof(FileInfo) + pFileInfo->uCustomHeaderSize);
+		}
+
 
 	}
 

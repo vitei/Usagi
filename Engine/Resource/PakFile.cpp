@@ -11,6 +11,7 @@
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Effects/Shader.h"
+#include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Memory/ScratchRaw.h"
 #include "PakDecl.h"
@@ -66,8 +67,23 @@ namespace usg
 		{
 			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
 			pShader->Init(pDevice, pFileInfo->szName, ((uint8*)pFileScratch) + pFileInfo->uDataOffset, pFileInfo->uDataSize);
-			m_resources.push_back(pShader);
+			m_resources[pFileInfo->CRC] = pShader;
 		}
+		else if (name.HasExtension("fx"))
+		{
+			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
+			pEffect->Init(pDevice, this, pFileInfo, ((uint8*)pFileScratch) + pFileInfo->uDataOffset);
+		}
+	}
+
+	ResourceBase* PakFile::GetResource(uint32 uCRC)
+	{
+		if (m_resources.find(uCRC) != m_resources.end())
+		{
+			return m_resources[uCRC];
+		}
+
+		return nullptr;
 	}
 
 	void PakFile::CleanUp(GFXDevice* pDevice)

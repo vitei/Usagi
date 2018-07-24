@@ -76,6 +76,7 @@ namespace usg
 
 	void ResourcePakLoader::LoadEffects(usg::GFXDevice* pDevice, ResourceData<Effect>& effectData)
 	{
+#if 0
 		U8String effectName;
 		for (uint32 i = 0; i < m_header.effects.uCount; i++)
 		{
@@ -111,6 +112,7 @@ namespace usg
 				effectData.AddResource(pNC);
 			}
 		}
+#endif
 	}
 
 	template<typename TResourceType>
