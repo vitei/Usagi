@@ -5,7 +5,7 @@ Usagi is a Hierarchical [Entity-Component-System](https://github.com/vitei/Usagi
 
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine.  
 
-As other studios were increasingly switching to third party engines due to the power offered by modern hardware, Vitei was developing for Nintendo hardware.  
+As other studios were increasingly switching to third party engines due to the power offered by modern hardware, Vitei was developing for Nintendo platforms.  
 
 Technical limitations were the biggest threat to what we were able to accomplish, and so, despite our small team size, we set about creating our own engine. Every aspect of Usagi's design was driven by performance considerations. The type of games we make meant the required feature sets were small enough to be manageable.
 
