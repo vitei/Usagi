@@ -29,7 +29,7 @@ namespace ResourcePakExporter
 		}
 
 		FILE* pFileOut = nullptr;
-		fopen_s(&pFileOut, szFileName, "w");
+		fopen_s(&pFileOut, szFileName, "wb");
 
 		if (!pFileOut)
 		{
@@ -79,10 +79,7 @@ namespace ResourcePakExporter
 		// Now do the data
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			for (uint32 i = 0; i < entries.size(); i++)
-			{
-				fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
-			}
+			fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
 		}
 
 		fclose(pFileOut);

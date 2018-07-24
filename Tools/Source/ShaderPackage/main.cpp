@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
 						FILE* pFileOut = nullptr;
 						shader.entry.eShaderType = (usg::ShaderType)(j);
-						fopen_s(&pFileOut, outputFileName.c_str(), "r");
+						fopen_s(&pFileOut, outputFileName.c_str(), "rb");
 						fseek(pFileOut, 0, SEEK_END);
 						shader.binarySize = ftell(pFileOut);
 						fseek(pFileOut, 0, SEEK_SET);
