@@ -96,7 +96,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	//alphaDecl.SetColor0Only();
 	alphaDecl.bBlendEnable = true;
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "FogSphere");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FogSphere");
 
 	Material &mat = m_materialFade;
 	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
@@ -109,7 +109,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	SamplerHndl point = pDevice->GetSampler(sampDecl);
 
 	Material &mat2 = m_materialNoFade;
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "FogSphereFar");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FogSphereFar");
 	pipeline.layout.descriptorSets[1] = matDescriptors;
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);

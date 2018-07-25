@@ -62,7 +62,7 @@ void FXAA::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.ePrimType = PT_TRIANGLES;
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "fxaa");
+	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FXAA");
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	

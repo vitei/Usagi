@@ -1,8 +1,8 @@
 Shader:
-  name: "ModelFBXDefault"
-  deferred: "ModelFBXDefaultDeferred"
-  shadow: "ModelFBXDefaultDepth"
-  omniShadow: "ModelFBXDefaultOmniDepth"
+  name: "Model.FBXDefault"
+  deferred: "Model.FBXDefault.deferred"
+  shadow: "Model.FBXDefault.depth"
+  omniShadow: "Model.FBXDefault.omni_depth"
 
 Attributes:
   - { index: 0, hint: "position" }

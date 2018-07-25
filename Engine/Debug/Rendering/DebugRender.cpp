@@ -143,7 +143,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugText");
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Text");
 	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), textDescriptors);
 	m_textConstants.Init(pDevice, g_textConstantDef);
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
@@ -156,7 +156,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	alphaDecl.bBlendEnable = true;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_DIFFUSE));
 	// Set up the materials
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosCol");
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
 
 	pipelineState.layout.descriptorSets[1] = solidDescriptors;
 

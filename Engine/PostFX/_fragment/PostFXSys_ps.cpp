@@ -169,14 +169,14 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	pipelineDecl.layout.descriptorSets[0] = multiDesc;
 	pipelineDecl.layout.uDescriptorSetCount = 1;
 
-	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostDownscale2x2");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Downscale2x2");
 	m_downscale4x4Effect = pDevice->GetPipelineState(pipelineDecl);
-	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostGauss5x5");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Gauss5x5");
 	m_gaussBlur5x5Effect = pDevice->GetPipelineState(pipelineDecl);
 
 	pipelineDecl.layout.descriptorSets[0] = singleDesc;
 
-	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostCopyScreen");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.CopyScreen");
 	m_downscale2x2Effect = pDevice->GetPipelineState(pipelineDecl);
 #endif
 
@@ -470,7 +470,7 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, cons
 	pipelineDecl.layout.descriptorSets[0] = multiDesc;
 	pipelineDecl.layout.uDescriptorSetCount = 1;
 
-	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostDownscale2x2");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Downscale2x2");
 	return pDevice->GetPipelineState(renderPass, pipelineDecl);
 }
 
@@ -489,7 +489,7 @@ PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, const R
 	pipelineDecl.layout.uDescriptorSetCount = 1;
 
 	// FIXME: Cache rather than grabbing the resource mgr
-	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostGauss5x5");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Gauss5x5");
 	return pDevice->GetPipelineState(renderPass, pipelineDecl);
 
 }

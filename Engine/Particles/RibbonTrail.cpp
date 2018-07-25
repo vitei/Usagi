@@ -127,7 +127,7 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	usg::RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 	rasDecl.eCullFace	= usg::CULL_FACE_NONE;
 
-	pipeline.pEffect = pRes->GetEffect(pDevice, "RibbonTrail");
+	pipeline.pEffect = pRes->GetEffect(pDevice, "Particles.RibbonTrail");
 
 	m_material.Init(pDevice, pDevice->GetPipelineState(pMgr->GetScene()->GetRenderPasses(0).GetRenderPass(*this), pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 	m_constantSet.Init(pDevice, g_ribbonEffectDecl);

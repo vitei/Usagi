@@ -138,33 +138,33 @@ namespace usg {
 		pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		pipelineDecl.layout.descriptorSets[1] = depthEdgeDescriptors;
 		pipelineDecl.layout.uDescriptorSetCount = 2;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\DepthEdgeDetection");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAADepthEdgeDetection");
 		m_depthEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Luma Edge detection
 		pipelineDecl.layout.descriptorSets[0] = colorLumaEdgeDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\LumaEdgeDetection");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAALumaEdgeDetection");
 		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Color edge detection
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\ColorEdgeDetection");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAAColorEdgeDetection");
 		m_colorEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 
 		// Blend weight calculation
 		pipelineDecl.layout.descriptorSets[0] = blendWeightDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\BlendWeightCalc");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAABlendWeightCalc");
 		m_blendWeightEffect = pDevice->GetPipelineState(m_renderTargets[RT_BLEND_WEIGHT].GetRenderPass(), pipelineDecl);
 
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[0] = neighborHoodBlendDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\NeighborhoodBlend");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
 		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
 #if SMAA_REPROJECTION
 		// Resolve
 		pipelineDecl.layout.descriptorSets[0] = resolveDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "SMAA\\Resolve");
+		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAAResolve");
 		m_resolveEffect = pDevice->GetPipelineState(pipelineDecl);
 #endif
 

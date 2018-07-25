@@ -65,9 +65,9 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	pipeline.renderPass = pScene->GetRenderPass(0);
 
-	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "DebugWireframe");
+	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
 	m_objectMat.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
-	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "DebugWireframe");
+	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
 	m_gridMat.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 	m_objectConstants.Init(pDevice, g_transformConstantDef);

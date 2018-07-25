@@ -216,7 +216,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 		RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 		rasDecl.eCullFace	= CULL_FACE_NONE;
 	}
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosColUV");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipeline.uInputBindingCount = 1;
 

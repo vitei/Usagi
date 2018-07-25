@@ -4,5 +4,6 @@ Effects:
   - { name: PosCol, vert: debug/pos_col, frag: debug/pos_col }
   - { name: Sphere, vert: debug/sphere, frag: debug/sphere }
   - { name: Cubes, vert: cubes, geom: cubes, frag: cubes }
+  - { name: CubesOriented, vert: cubes_oriented, geom: cubes_oriented, frag: cubes }
   - { name: Solid, vert: solid, frag: solid }
   

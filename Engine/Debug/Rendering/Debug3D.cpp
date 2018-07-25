@@ -88,7 +88,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugSphere");
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Sphere");
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineState.inputBindings[1].Init(g_instanceVertex, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
 	pipelineState.uInputBindingCount = 2;
@@ -101,7 +101,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	pipelineState.inputBindings[0].Init(CubeRender::VertexElements);
 	// Initialize cubes
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "CubesOriented");
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
 	pipelineState.ePrimType = PT_POINTS;
 	m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
 }

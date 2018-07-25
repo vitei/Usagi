@@ -101,11 +101,11 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	RenderPassHndl renderPass = pDevice->GetRenderPass(renderPassDecl);
 
 	ResourceMgr* pRes = ResourceMgr::Inst();
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomMain");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomMain");
 	m_bloomEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomBrightpass");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomBrightpass");
 	m_brightPassEffect	= pDevice->GetPipelineState(renderPass, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "BloomFinal");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomFinal");
 	m_finalPassEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
 
 	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, renderPass);

@@ -115,34 +115,36 @@ int main(int argc, char *argv[])
 		def.name = (*it)["name"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
-		DefineSets set;
-		set.name = intFileName + "." + def.name + ".fx";
-		set.defineSetName = "";
-		set.definesAsCRC = "";
-		set.defines = "";
-		if ((*it)["geom"])
 		{
-			def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
-		}
-		def.sets.push_back(set);
-		if ((*it)["define_sets"])
-		{
-			YAML::Node defineSets = (*it)["define_sets"];
-			for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
+			DefineSets set;
+			set.name = intFileName + "." + def.name + ".fx";
+			set.defineSetName = "";
+			set.definesAsCRC = "";
+			set.defines = "";
+			if ((*it)["geom"])
 			{
-				// Package.Effect.DefineSet.fx
-				set.name = intFileName + "." + def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
-				set.defines = (*defineIt)["defines"].as<std::string>();
-				set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
-				set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
-				def.sets.push_back(set);
+				def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
+			}
+			def.sets.push_back(set);
+			if ((*it)["define_sets"])
+			{
+				YAML::Node defineSets = (*it)["define_sets"];
+				for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
+				{
+					// Package.Effect.DefineSet.fx
+					set.name = intFileName + "." + def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
+					set.defines = (*defineIt)["defines"].as<std::string>();
+					set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
+					set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
+					def.sets.push_back(set);
+				}
 			}
 		}
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
 			std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
-			std::string defineList = set.defines;
+			std::string defineList = def.sets[i].defines;
 			size_t nextDefine = std::string::npos;
 			do
 			{

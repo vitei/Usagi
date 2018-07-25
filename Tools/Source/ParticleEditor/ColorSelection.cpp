@@ -205,7 +205,7 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	pipeline.alphaState.blendEq = usg::BLEND_EQUATION_ADD;
 	pipeline.alphaState.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 	pipeline.alphaState.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
-	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosColUV");
+	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
 	pipeline.renderPass = scene.GetRenderPass(0);
 	m_cursors[CURSOR_POINTER].material.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
 	m_cursors[CURSOR_HUE].material.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
@@ -302,7 +302,7 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 
 
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(usg::VT_POSITION_DIFFUSE));
-	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosCol");
+	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
 
 	m_material.Init(pDevice, pDevice->GetPipelineState(pipeline), solidDescriptors);
 	m_constants.Init(pDevice, g_solidConstantDef);
