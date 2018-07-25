@@ -33,6 +33,7 @@ namespace usg
 
 	void PakFile::Load(GFXDevice* pDevice, const char* szFileName)
 	{
+		SetupHash(szFileName);
 		File pakFile(szFileName);
 		ScratchRaw scratch(pakFile.GetSize(), FILE_READ_ALIGN);
 		pakFile.Read(pakFile.GetSize(), scratch.GetRawData());

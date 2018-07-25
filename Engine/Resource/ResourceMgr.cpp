@@ -144,6 +144,9 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 				}
 			}
 
+			ResourcePakHdr* pHdr = vnew(ALLOC_OBJECT)ResourcePakHdr;
+			pHdr->Init(pakFile);
+			m_pImpl->resourcePaks.AddResource(pHdr);
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			loadTimer.Stop();
 			DEBUG_PRINT("Loaded %s in %f seconds\n", name.CStr(), loadTimer.GetTotalSeconds());
