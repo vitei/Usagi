@@ -317,6 +317,8 @@ namespace usg {
 		// Iterate through the list of visible objects, drawing them
 		RenderNode::RenderContext renderContext;
 		renderContext.eRenderPass = m_pPostFXSys->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING) ? RenderNode::RENDER_PASS_DEFERRED : RenderNode::RENDER_PASS_FORWARD;
+		// FIXME: Handle multiple views
+		renderContext.pGlobalDescriptors = &m_globalDescriptors[0];
 		renderContext.pPostFX = m_pPostFXSys;
 
 		for (uint32 uLayer = 0; uLayer < RenderNode::LAYER_COUNT; uLayer++)
@@ -337,6 +339,7 @@ namespace usg {
 				}
 				// FIXME: Handle multiple views
 				pContext->SetDescriptorSet(&m_globalDescriptorsWithDepth[0], 0);
+				renderContext.pGlobalDescriptors = &m_globalDescriptorsWithDepth[0];
 			}
 			// TODO: Probably are going to want callbacks at the end of certain layers, for grabbing
 			// the linear depth information etc

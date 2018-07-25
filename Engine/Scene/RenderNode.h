@@ -74,7 +74,7 @@ public:
 	struct RenderContext
 	{
 		RenderContext() : pPostFX(nullptr), eRenderPass(RENDER_PASS_FORWARD) {}
-
+		const class DescriptorSet* pGlobalDescriptors;
 		PostFXSys* pPostFX;
 		RenderPass eRenderPass;
 	};
