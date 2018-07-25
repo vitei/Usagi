@@ -161,14 +161,14 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	m_sphereShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointNoSpec");
 	m_sphereShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadow");
 	m_sphereShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 	// Fixme no spec versions
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
 	m_spotShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	m_spotShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.SpotShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadow");
 	m_spotShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 
@@ -176,7 +176,7 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	m_projShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
 	m_projShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.ProjectionShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadow");
 	m_projShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 	// Front face
@@ -195,7 +195,7 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	m_sphereShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointNoSpec");
 	m_sphereShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadow");
 	m_sphereShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 	// Fixme no spec versions
@@ -203,14 +203,14 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	m_spotShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
 	m_spotShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.SpotShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadow");
 	m_spotShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
 	m_projShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
 	m_projShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.ProjectionShadow");
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadow");
 	m_projShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 

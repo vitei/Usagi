@@ -96,6 +96,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 
 	m_screenRT[TARGET_HDR].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
 
+	usg::RenderTarget::RenderPassFlags flags;
 	if(bDeferred)
 	{
 		m_colorBuffer[BUFFER_DIFFUSE].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 0); // 4th component is specular power
@@ -104,13 +105,20 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 		m_colorBuffer[BUFFER_SPECULAR].Init(pDevice, uWidth, uHeight, CF_RGBA_5551, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 4);
 		ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_DIFFUSE], &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL], &m_colorBuffer[BUFFER_EMISSIVE], &m_colorBuffer[BUFFER_SPECULAR] };
 		m_screenRT[TARGET_GBUFFER].InitMRT(pDevice, 5, pBuffers, &m_depthStencil);
+
+		flags.Clear();
+		flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_DS;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3;
+		m_screenRT[TARGET_GBUFFER].InitRenderPass(pDevice, flags);
 	}
 	
-	usg::RenderTarget::RenderPassFlags flags;
+	
 	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR], &m_colorBuffer[BUFFER_LIN_DEPTH] };
 	
 	// HDR target with linear depth
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
+	flags.Clear();
 	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_1;
@@ -142,6 +150,8 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_1;
 	m_screenRT[TARGET_LDR_LIN_DEPTH].InitRenderPass(pDevice, flags);
+
+
 
 	
 	m_uLDRCount=2;

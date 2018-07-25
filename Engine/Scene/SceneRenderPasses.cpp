@@ -95,7 +95,10 @@ const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, 
 			continue;
 
 		if (itr->eLayer <= eLayer || itr->uPriority <= uPriority)
+		{
+			ASSERT(itr->hndl.IsValid());
 			return itr->hndl;
+		}
 	}
 
 	ASSERT(false);

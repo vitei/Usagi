@@ -33,3 +33,6 @@ Effects:
     define_sets:
       - name: shadow
         defines: SHADOW_READ
+  - name: ProjectionPos
+    vert: deferred/projection_light_pos_only
+    frag: deferred/pos_only
