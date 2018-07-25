@@ -264,7 +264,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 	pContext->SetRenderTarget(m_pDestTarget);
 	// Set the textures for the G buffer to be read from
-	pContext->SetDescriptorSet(&m_readDescriptors, 0);
+	pContext->SetDescriptorSet(&m_readDescriptors, 1);
 
 	pContext->BeginGPUTag("DirLights");
 	//if(uLightCount > 0)

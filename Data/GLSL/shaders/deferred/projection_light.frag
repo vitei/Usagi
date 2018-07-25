@@ -6,7 +6,7 @@
 #include "../includes/shadow/projectionshadow_read.inc"
 
 
-BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 {
 	ProjectionLight	light;
 };

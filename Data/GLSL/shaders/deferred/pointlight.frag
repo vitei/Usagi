@@ -4,7 +4,7 @@
 #include "../includes/lighting_structs.inc"
 #include "../includes/shadow/poisson_values.inc"
 
-BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 {
 	PointLight	light;
 	vec2		vInvShadowDim;

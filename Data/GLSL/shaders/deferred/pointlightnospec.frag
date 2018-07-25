@@ -3,7 +3,7 @@
 #include "../includes/deferred_read.inc"
 #include "../includes/lighting_structs.inc"
 
-BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 {
 	PointLight	light;
 	vec2		vInvShadowDim;
