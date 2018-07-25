@@ -298,11 +298,11 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 					pContext->SetPipelineState(effect);
 					m_pSys->DrawFullScreenQuad(pContext);
 				}
+				else
+				{
+					pFirstShadowedLight = (*it);
+				}
 				uShadowIndex++;
-			}
-			else
-			{
-				pFirstShadowedLight = (*it);
 			}
 			uLightIndex++;
 			if (uLightIndex > MAX_EXTRA_DIR_LIGHTS)
