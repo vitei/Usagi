@@ -40,7 +40,7 @@ inline void ASSERT(bool condition)
 	if ( (condition) == false ) \
 	return (value);}
 
-#define ASSERT_MSG( cond, ... ) if(!cond) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__); ASSERT(cond); } 
+#define ASSERT_MSG( cond, ... ) if(!(cond)) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__); ASSERT(cond); } 
 
 #else
 #define ASSERT_RETURN( condition ) \
