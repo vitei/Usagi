@@ -17,6 +17,7 @@ namespace usg {
 AlphaStateDecl::AlphaStateDecl()
 {
 	bBlendEnable	= false;
+	uColorTargets = MAX_COLOR_TARGETS;
 	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_ALL;
@@ -64,11 +65,28 @@ void AlphaStateDecl::InitFromDefinition(const AlphaStateGroup &def)
 
 void AlphaStateDecl::SetColor0Only()
 {
+	uColorTargets = 1;
 	uColorMask[0]	= RT_MASK_ALL;
 
 	for(int i=1; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_NONE;
+	}
+}
+
+
+void AlphaStateDecl::EnableMultipleTargets(uint32 uCount)
+{
+	uColorTargets = uCount;
+
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		uColorMask[i] = RT_MASK_ALL;
+	}
+
+	for (int i = uCount; i < MAX_COLOR_TARGETS; i++)
+	{
+		uColorMask[i] = RT_MASK_NONE;
 	}
 }
 
@@ -98,7 +116,10 @@ bool AlphaStateDecl::operator==(const AlphaStateDecl& rhs) const
 	if(rhs.bBlendEnable != bBlendEnable)
 		return false;
 
-	for(int i=0; i<MAX_COLOR_TARGETS; i++)
+	if (rhs.uColorTargets != uColorTargets)
+		return false;
+
+	for(uint32 i=0; i<uColorTargets; i++)
 	{
 		if(uColorMask[i] != rhs.uColorMask[i])
 			return false;

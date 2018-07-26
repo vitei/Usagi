@@ -24,11 +24,13 @@ public:
 
 	void SetDepthOnly();
 	void SetColor0Only();
+	void EnableMultipleTargets(uint32 uCount);
 	bool UsesBlendColor() const;
 
 	void InitFromDefinition(const AlphaStateGroup &def);
 
 	bool			bBlendEnable;
+	uint32			uColorTargets;
 	uint32			uColorMask[MAX_COLOR_TARGETS];
 	BlendFunc		srcBlend;
 	BlendFunc		dstBlend;
