@@ -146,13 +146,19 @@ int main(int argc, char *argv[])
 			std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
 			std::string defineList = def.sets[i].defines;
 			size_t nextDefine = std::string::npos;
-			do
+			while(!defineList.empty())
 			{
 				nextDefine = defineList.find_first_of(' ');
 				if (nextDefine != std::string::npos)
 				{
 					defines += std::string(" -D") + defineList.substr(0, nextDefine);
 					defineList = defineList.substr(nextDefine + 1);
+				}
+				else
+				{
+					// The last define
+					defines += std::string(" -D") + defineList;
+					defineList.clear();
 				}
 
 			} while (nextDefine != std::string::npos);
@@ -237,7 +243,7 @@ int main(int argc, char *argv[])
 			effect.name = setItr.name;
 			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
 			effectEntries.push_back(effect);
-		}
+		} 
 	} 
 
 	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
@@ -270,6 +276,12 @@ int main(int argc, char *argv[])
 
 		}
 	}
+
+	// Spit out the dependencies
+	std::ofstream depFile(dependencyFile.c_str(), std::ofstream::binary);
+	depFile.clear();
+	depFile << effectDependencies.str();
+
 
 	return 0;
 }
