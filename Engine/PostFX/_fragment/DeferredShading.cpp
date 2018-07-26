@@ -79,7 +79,7 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	depthDecl.eDepthFunc		= DEPTH_TEST_ALWAYS;
 	depthDecl.bStencilEnable	= true;
 	depthDecl.SetOperation(STENCIL_OP_KEEP, STENCIL_OP_KEEP, STENCIL_OP_KEEP);
-	depthDecl.eStencilTest		= STENCIL_TEST_EQUAL;
+	depthDecl.eStencilTest		= STENCIL_TEST_ALWAYS;
 	depthDecl.SetMask(STENCIL_MASK_GEOMETRY, STENCIL_MASK_EFFECT, STENCIL_GEOMETRY);
 
 	// Alpha disabled
@@ -89,7 +89,7 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 
 	// Front face
 	RasterizerStateDecl& rasDecl = pipelineDecl.rasterizerState;
-	rasDecl.eCullFace = CULL_FACE_BACK;
+	rasDecl.eCullFace = CULL_FACE_NONE;
 
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.DirBase");
 	m_baseDirPass = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
@@ -128,10 +128,14 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 
 
 	// Light volume back face
+	pipelineDecl.layout.uDescriptorSetCount = 3;
+	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.ProjectionPos");
 	m_projShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointPos");
 	m_sphereShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.SpotPos");;
 	m_spotShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
@@ -156,8 +160,6 @@ void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pD
 	alphaDecl.dstBlend = BLEND_FUNC_ONE;
 	alphaDecl.srcBlend = BLEND_FUNC_ONE;
 
-
-	pipelineDecl.layout.uDescriptorSetCount = 3;
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point");

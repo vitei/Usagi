@@ -11,7 +11,7 @@ BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 };
 
 #ifdef SHADOW_READ
-SAMPLER_LOC(1, 15) uniform samplerCubeShadow sampler15;	
+SAMPLER_LOC(3, 15) uniform samplerCubeShadow sampler15;	
 #endif
 
 ATTRIB_LOC(0) in vec4 vo_vTexCoord;
