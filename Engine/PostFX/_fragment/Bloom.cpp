@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Bloom.h"
 
 namespace usg {
@@ -95,53 +96,61 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 
-	RenderPassDecl renderPassDecl;
-	// FIXME: Init the render pass
+	DescriptorSetLayoutHndl desc1Tex = pDevice->GetDescriptorSetLayout(g_descriptor1Tex);
+	DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptor2Tex);
 
-	RenderPassHndl renderPass = pDevice->GetRenderPass(renderPassDecl);
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.uDescriptorSetCount = 2;
+
+	// Initialise the render targets
+	uint32 uScrWidth = pSys->GetFinalTargetWidth();
+	uint32 uScrHeight = pSys->GetFinalTargetHeight();
+
+	m_scaledSceneTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_brightPassTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_bloomSourceTex.Init(pDevice, uScrWidth / 8, uScrHeight / 8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+
+	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex);
+	m_brightPassRT.Init(pDevice, &m_brightPassTex);
+	m_bloomSourceRT.Init(pDevice, &m_bloomSourceTex);
+	RenderTarget::RenderPassFlags flags;
+	flags.uClearFlags = 0;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
+	m_scaledSceneRT.InitRenderPass(pDevice, flags);
+	m_brightPassRT.InitRenderPass(pDevice, flags);
+	m_bloomSourceRT.InitRenderPass(pDevice, flags);
+
+	for (int i = 0; i < BLOOM_PASS_TEXTURES; i++)
+	{
+		m_bloomTex[i].Init(pDevice, uScrWidth / 8, uScrHeight / 8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+		m_bloomRT[i].Init(pDevice, &m_bloomTex[i]);
+		m_bloomRT[i].InitRenderPass(pDevice, flags);
+	}
 
 	ResourceMgr* pRes = ResourceMgr::Inst();
+	pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomMain");
-	m_bloomEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
-	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomBrightpass");
-	m_brightPassEffect	= pDevice->GetPipelineState(renderPass, pipelineDecl);
+	m_bloomEffect = pDevice->GetPipelineState(m_bloomRT[1].GetRenderPass(), pipelineDecl);
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomBrightPass");
+	m_brightPassEffect	= pDevice->GetPipelineState(m_brightPassRT.GetRenderPass(), pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomFinal");
-	m_finalPassEffect = pDevice->GetPipelineState(renderPass, pipelineDecl);
+	pipelineDecl.layout.descriptorSets[1] = desc2Tex;
+	m_finalPassEffect = pDevice->GetPipelineState(m_pDestTarget->GetRenderPass(), pipelineDecl);
 
-	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, renderPass);
-	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, renderPass);
+	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, m_bloomSourceRT.GetRenderPass());
+	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, m_scaledSceneRT.GetRenderPass());
 
 	m_constants[PASS_HOR_BLOOM].Init(pDevice, g_bloomConstantDef);
 	m_constants[PASS_VER_BLOOM].Init(pDevice, g_bloomConstantDef);
 	m_constants[PASS_FINAL].Init(pDevice, g_bloomFinalConstantDef);
 	m_constants[PASS_BRIGHT_PASS].Init(pDevice, g_bloomFinalConstantDef);
 
-	DescriptorSetLayoutHndl desc1Tex = pDevice->GetDescriptorSetLayout(g_descriptor1Tex);
-	DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptor2Tex);
-
 	m_descriptors[PASS_BRIGHT_PASS].Init(pDevice, desc1Tex);
 	m_descriptors[PASS_HOR_BLOOM].Init(pDevice, desc1Tex);
 	m_descriptors[PASS_VER_BLOOM].Init(pDevice, desc1Tex);
 	m_descriptors[PASS_FINAL].Init(pDevice, desc2Tex);
 
-	uint32 uScrWidth	= pSys->GetFinalTargetWidth();
-	uint32 uScrHeight	= pSys->GetFinalTargetHeight();
-
-
-	// Initialise the render targets
-	m_scaledSceneTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
-	m_brightPassTex.Init(pDevice, uScrWidth/4, uScrHeight /4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
-	m_bloomSourceTex.Init(pDevice, uScrWidth/8, uScrHeight /8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT);
-
-	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex);
-	m_brightPassRT.Init(pDevice, &m_brightPassTex);
-	m_bloomSourceRT.Init(pDevice, &m_bloomSourceTex);
-
-	for(int i=0; i<BLOOM_PASS_TEXTURES; i++)
-	{
-		m_bloomTex[i].Init(pDevice, uScrWidth/8, uScrHeight /8, CF_RGB_HDR);
-		m_bloomRT[i].Init(pDevice, &m_bloomTex[i]);
-	}
 
 	BloomBrightPassConstants* pConsts = m_constants[PASS_BRIGHT_PASS].Lock<BloomBrightPassConstants>();
 	pConsts->vMiddleGray.x = 0.005f;
@@ -256,45 +265,45 @@ bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 		return false;
 
 	pContext->BeginGPUTag("Bloom");
-
 	// Downscale 4x4
 	pContext->SetRenderTarget(&m_scaledSceneRT);
 	pContext->SetPipelineState(m_downscalePipeline);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_4X4], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_4X4], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	// Bright pass
 	pContext->SetRenderTarget(&m_brightPassRT);
 	pContext->SetPipelineState(m_brightPassEffect);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_BRIGHT_PASS], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_BRIGHT_PASS], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	// Gauss blur to the bloom source
 	pContext->SetRenderTarget(&m_bloomSourceRT);
 	pContext->SetPipelineState(m_gaussBlurPipeline);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_GUASS_BRIGHT_PASS], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_GUASS_BRIGHT_PASS], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 	
 
 	// Perform another gaussian blur
 	pContext->SetRenderTarget(&m_bloomRT[2]);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_GUASS_BLOOM_SRC], 0);
+	pContext->SetPipelineState(m_gaussBlurPipeline);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_GUASS_BLOOM_SRC], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
-
+	
 	// Perform the horizontal bloom
 	pContext->SetRenderTarget(&m_bloomRT[1]);
 	pContext->SetPipelineState(m_bloomEffect);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_HOR_BLOOM], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_HOR_BLOOM], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	// Perform the vertical bloom
 	pContext->SetRenderTarget(&m_bloomRT[0]);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_VER_BLOOM], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_VER_BLOOM], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	// Perform the vertical bloom, transferring into a non HDR destination RT
 	pContext->SetRenderTarget(m_pDestTarget);
-	pContext->SetDescriptorSet(&m_descriptors[PASS_FINAL], 0);
+	pContext->SetDescriptorSet(&m_descriptors[PASS_FINAL], 1);
 	pContext->SetPipelineState(m_finalPassEffect);
 	m_pSys->DrawFullScreenQuad(pContext);
 

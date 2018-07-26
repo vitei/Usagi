@@ -10,6 +10,7 @@
 #include "LinearDepth.h"
 #include "DeferredShading.h"
 #include "SkyFog.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -94,8 +95,6 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	m_depthStencil.Init(pDevice, uWidth, uHeight, DF_DEPTH_24_S8, eSamples);
 
 
-	m_screenRT[TARGET_HDR].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
-
 	usg::RenderTarget::RenderPassFlags flags;
 	if(bDeferred)
 	{
@@ -130,6 +129,13 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_1;
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitRenderPass(pDevice, flags);
+
+	flags.Clear();
+	flags.uLoadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	flags.uClearFlags = 0;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	m_screenRT[TARGET_HDR].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
+	m_screenRT[TARGET_HDR].InitRenderPass(pDevice, flags);
 
 	// LDR target, no linear depth
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
@@ -491,8 +497,9 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, cons
 	pipelineDecl.uInputBindingCount = 1;
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
-	pipelineDecl.layout.descriptorSets[0] = multiDesc;
-	pipelineDecl.layout.uDescriptorSetCount = 1;
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.descriptorSets[1] = multiDesc;
+	pipelineDecl.layout.uDescriptorSetCount = 2;
 
 	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Downscale2x2");
 	return pDevice->GetPipelineState(renderPass, pipelineDecl);
@@ -509,8 +516,9 @@ PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, const R
 	pipelineDecl.uInputBindingCount = 1;
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
-	pipelineDecl.layout.descriptorSets[0] = multiDesc;
-	pipelineDecl.layout.uDescriptorSetCount = 1;
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.descriptorSets[1] = multiDesc;
+	pipelineDecl.layout.uDescriptorSetCount = 2;
 
 	// FIXME: Cache rather than grabbing the resource mgr
 	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "PostProcess.Gauss5x5");
