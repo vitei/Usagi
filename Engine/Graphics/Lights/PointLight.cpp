@@ -50,6 +50,12 @@ const DescriptorDeclaration g_pointLightDesc[] =
 	DESCRIPTOR_END()
 };
 
+
+const DescriptorDeclaration* PointLight::GetDescriptorDecl()
+{
+	return g_pointLightDesc;
+}
+
 PointLight::PointLight()
 :Light(LIGHT_TYPE_POS)
 {

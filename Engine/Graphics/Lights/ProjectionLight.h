@@ -53,6 +53,8 @@ public:
 
 	void ShadowRender(GFXContext* pContext) override;
 
+	static const DescriptorDeclaration* GetDescriptorDecl();
+
 protected:
 	 void RegenerateInternals();
 

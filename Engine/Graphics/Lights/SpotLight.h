@@ -56,6 +56,8 @@ public:
 	const DescriptorSet* GetDescriptorSet() const;
 	const ProjectionShadow* GetShadow() const { return m_pShadow; }
 
+	static const DescriptorDeclaration* GetDescriptorDecl();
+
 protected:
 	void UpdateSpherePosRadius();
 

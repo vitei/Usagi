@@ -49,6 +49,8 @@ public:
 	void GPUUpdate(GFXDevice* pDevice) override;
 	void ShadowRender(GFXContext* pContext) override;
 
+	static const DescriptorDeclaration* GetDescriptorDecl();
+
 protected:
 
 	ConstantSet		m_constants;

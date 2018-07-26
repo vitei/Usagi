@@ -52,6 +52,11 @@ const DescriptorDeclaration g_spotLightShadowDescDecl[] =
 };
 
 
+const DescriptorDeclaration* SpotLight::GetDescriptorDecl()
+{
+	return g_spotLightShadowDescDecl;
+}
+
 SpotLight::SpotLight()
 :Light(LIGHT_TYPE_SPOT)
 {

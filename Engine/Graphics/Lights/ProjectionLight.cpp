@@ -52,6 +52,11 @@ const DescriptorDeclaration g_projLightShadowDescDecl[] =
 };
 
 
+const DescriptorDeclaration* ProjectionLight::GetDescriptorDecl()
+{
+	return g_projLightShadowDescDecl;
+}
+
 ProjectionLight::ProjectionLight()
 :Light(LIGHT_TYPE_PROJ)
 {
