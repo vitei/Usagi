@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 	api = argv[5];
 
 	//dependencyFile = argv[6];
+	dependencyFile = outBinary + ".d";
 	
 	intFileName = inputFile.substr(inputFile.find_last_of("\\/") + 1, inputFile.size());
 	intFileName = intFileName.substr(0, intFileName.find_last_of("."));
@@ -116,16 +117,26 @@ int main(int argc, char *argv[])
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
 		{
-			DefineSets set;
-			set.name = intFileName + "." + def.name + ".fx";
-			set.defineSetName = "";
-			set.definesAsCRC = "";
-			set.defines = "";
-			if ((*it)["geom"])
+			bool bHasDefault = true;
+			if ((*it)["has_default"])
 			{
-				def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
+				bHasDefault = (*it)["has_default"].as<bool>();
 			}
-			def.sets.push_back(set);
+
+			DefineSets set;
+			if (bHasDefault)
+			{
+				set.name = intFileName + "." + def.name + ".fx";
+				set.defineSetName = "";
+				set.definesAsCRC = "";
+				set.defines = "";
+				if ((*it)["geom"])
+				{
+					def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
+				}
+				def.sets.push_back(set);
+			}
+
 			if ((*it)["define_sets"])
 			{
 				YAML::Node defineSets = (*it)["define_sets"];

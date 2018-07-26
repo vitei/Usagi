@@ -6,6 +6,7 @@ Effects:
   - name: DirExtraShadow
     vert: deferred/directional
     frag: deferred/directionalshadowpass  
+    has_default: false
     define_sets:
       -  name: "1"
          defines: LIGHT_INDEX=1
