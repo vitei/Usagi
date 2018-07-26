@@ -96,6 +96,9 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 
+	RasterizerStateDecl& rasDecl = pipelineDecl.rasterizerState;
+	rasDecl.eCullFace = CULL_FACE_NONE;
+
 	DescriptorSetLayoutHndl desc1Tex = pDevice->GetDescriptorSetLayout(g_descriptor1Tex);
 	DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptor2Tex);
 
