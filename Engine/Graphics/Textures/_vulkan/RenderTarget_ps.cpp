@@ -77,6 +77,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass)
 {
+	CleanUp(pDevice);
 	m_fbCreateInfo.renderPass = renderPass.GetContents()->GetPass();
 
 	VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &m_fbCreateInfo, NULL, &m_framebuffer);
@@ -103,10 +104,9 @@ void RenderTarget_ps::SetClearColor(const Color& col, uint32 uTarget)
 }
 
 
-void RenderTarget_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+void RenderTarget_ps::Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
-	// TODO: Implement
-	ASSERT(false);
+	InitMRT(pDevice, uCount, ppColorBuffers, pDepth);
 }
 
 

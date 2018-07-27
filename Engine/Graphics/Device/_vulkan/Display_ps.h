@@ -41,6 +41,10 @@ private:
 	PRIVATIZE_COPY(Display_ps)
 
 	void InitFrameBuffers(GFXDevice* pDevice);
+	void DestroySwapChain(GFXDevice* pDevice);
+	void RecreateSwapChain(GFXDevice* pDevice);
+	void CreateSwapChain(GFXDevice* pDevice);
+	void CreateSwapChainImageViews(GFXDevice* pDevice);
 
 	enum 
 	{
@@ -56,6 +60,7 @@ private:
 	VkSurfaceKHR		m_surface;
 	VkSwapchainKHR		m_swapChain;
 	VkSemaphore			m_imageAcquired;
+	VkFormat			m_swapChainImageFormat;
 	uint32				m_uSwapChainImageCount;
 	uint32				m_uID;
 	uint32				m_uWidth;

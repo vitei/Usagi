@@ -294,6 +294,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.pQueueFamilyIndices = NULL;
     image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
 
     Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -309,6 +310,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
 
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
@@ -327,6 +329,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
 	const VkFormat depth_format = gDepthFormatViewMap[eFormat];
+
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};
     vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), depth_format, &props);
@@ -362,6 +365,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	image_create_info.pQueueFamilyIndices = NULL;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
 
     Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -381,6 +385,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
 
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
@@ -394,13 +399,36 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 
 }
 
-void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags)
+
+void Texture_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+{
+	m_imageCreateInfo.extent.width = uWidth;
+	m_imageCreateInfo.extent.height = uHeight;
+	Init(pDevice, m_imageCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, uWidth > m_uWidth || uHeight > m_uHeight);
+
+
+	// Create the image view
+	m_imageViewCreateInfo.image = m_image;
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &m_imageViewCreateInfo, NULL, &m_imageView);
+	ASSERT(res == VK_SUCCESS);
+
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+}
+
+
+void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory)
 {
 	VkMemoryAllocateInfo mem_alloc = {};
 
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
     // Create the image
+	if (m_image)
+	{
+		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_image = VK_NULL_HANDLE;
+	}
     VkResult err = vkCreateImage(vKDevice, &createInfo, NULL, &m_image);
     ASSERT(!err);
 
@@ -413,11 +441,19 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
     mem_alloc.allocationSize = mem_reqs.size;
     mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, flags);
 
+	if (bInitMemory)
+	{
+		if (m_memory)
+		{
+			vkFreeMemory(vKDevice, m_memory, nullptr);
+			m_memory = nullptr;
+		}
 
-    // Allocate memory
-    err = vkAllocateMemory(vKDevice, &mem_alloc, NULL,
-                           &m_memory);
-    ASSERT(!err);
+		// Allocate memory
+		err = vkAllocateMemory(vKDevice, &mem_alloc, NULL,
+			&m_memory);
+		ASSERT(!err);
+	}
 
     // Bind memory
     err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);

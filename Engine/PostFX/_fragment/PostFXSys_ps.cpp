@@ -404,7 +404,7 @@ void PostFXSys_ps::ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uH
 	{
 		if (screenRT.IsValid())
 		{
-			screenRT.Resize(pDevice, uScaledWidth, uScaledHeight);
+			screenRT.Resize(pDevice);
 		}
 	}
 

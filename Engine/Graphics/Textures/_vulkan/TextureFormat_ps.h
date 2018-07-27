@@ -25,6 +25,7 @@ static const VkFormat gColorFormatMap[] =
 	VK_FORMAT_R8_UNORM,							// CF_R_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
 	VK_FORMAT_R8G8B8A8_UNORM,					// CF_SRGBA
+	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
 };
 
 static const VkFormat gDepthFormatViewMap[] =

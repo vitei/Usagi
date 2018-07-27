@@ -238,14 +238,14 @@ void Bloom::Resize(GFXDevice* pDevice, uint32 uScrWidth, uint32 uSrcHeight)
 	m_brightPassTex.Resize(pDevice, uScrWidth / 4, uSrcHeight / 4);
 	m_bloomSourceTex.Resize(pDevice, uScrWidth / 8, uSrcHeight / 8);
 
-	m_scaledSceneRT.Resize(pDevice, uScrWidth / 4, uSrcHeight / 4);
-	m_brightPassRT.Resize(pDevice, uScrWidth / 4, uSrcHeight / 4);
-	m_bloomSourceRT.Resize(pDevice, uScrWidth / 8, uSrcHeight / 8);
+	m_scaledSceneRT.Resize(pDevice);
+	m_brightPassRT.Resize(pDevice);
+	m_bloomSourceRT.Resize(pDevice);
 
 	for (int i = 0; i < BLOOM_PASS_TEXTURES; i++)
 	{
 		m_bloomTex[i].Resize(pDevice, uScrWidth / 8, uScrWidth / 8);
-		m_bloomRT[i].Resize(pDevice, uScrWidth / 8, uScrWidth / 8);
+		m_bloomRT[i].Resize(pDevice);
 	}
 
 	// The internal texture info has changed

@@ -30,19 +30,47 @@ Display_ps::Display_ps()
 	m_uSwapChainImageCount = 0;
 }
 
+
+void Display_ps::DestroySwapChain(GFXDevice* pDevice)
+{
+	if (m_swapChain != VK_NULL_HANDLE)
+	{
+		for (uint32 i = 0; i < m_uSwapChainImageCount; i++)
+		{
+			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffers[i], nullptr);
+			m_pFramebuffers[i] = VK_NULL_HANDLE;
+		}
+
+		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
+		{
+			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pSwapchainImageViews[i], nullptr);
+			m_pSwapchainImageViews[i] = VK_NULL_HANDLE;
+		}
+
+
+		vdelete[] m_pSwapchainImages;
+		vdelete[] m_pSwapchainImageViews;
+		vdelete[] m_pFramebuffers;
+
+		vkDestroySwapchainKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, nullptr);
+		m_swapChain = VK_NULL_HANDLE;
+
+		m_uSwapChainImageCount = 0;
+	}
+}
+
 void Display_ps::CleanUp(usg::GFXDevice* pDevice)
 {
 	if (m_swapChain != VK_NULL_HANDLE)
 	{
-		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
-		{
-			// FIXME: Move to cleanup function
-			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pSwapchainImageViews[i], pDevice->GetPlatform().GetAllocCallbacks());
-		}
-		vdelete[] m_pSwapchainImages;
-		vdelete[] m_pSwapchainImageViews;
+		DestroySwapChain(pDevice);
 	}
-	m_uSwapChainImageCount = 0;
+
+	if (m_surface != VK_NULL_HANDLE)
+	{
+		vkDestroySurfaceKHR(pDevice->GetPlatform().GetVKInstance(), m_surface, nullptr);
+		m_surface = VK_NULL_HANDLE;
+	}
 }
 
 Display_ps::~Display_ps()
@@ -76,17 +104,77 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	createInfo.pNext = NULL;
 	createInfo.hinstance = WINUTIL::GetInstanceHndl();
 	createInfo.hwnd = m_hwnd;
-	res = vkCreateWin32SurfaceKHR(devicePS.GetVKInstance(), &createInfo, devicePS.GetAllocCallbacks(), &m_surface);
+	res = vkCreateWin32SurfaceKHR(devicePS.GetVKInstance(), &createInfo, nullptr, &m_surface);
 	// END PC SPECIFIC CODE
 
 	ASSERT(res == VK_SUCCESS);
+
+	
+
+	CreateSwapChain(pDevice);
+	CreateSwapChainImageViews(pDevice);
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphoreCreateInfo.pNext = NULL;
+	semaphoreCreateInfo.flags = 0;
+
+	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_imageAcquired);
+	ASSERT(res == VK_SUCCESS);
+
+	usg::RenderPassDecl rpDecl;
+	usg::RenderPassDecl::Attachment attach;
+	usg::RenderPassDecl::SubPass subPass;
+	usg::RenderPassDecl::AttachmentReference ref;
+	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
+	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+
+	usg::RenderPassDecl::Dependency Dependencies[2];
+	Dependencies[0].uSrcSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[0].uDstSubPass = 0;
+	Dependencies[0].uSrcStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[0].uDstStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[0].uSrcAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+	Dependencies[0].uDstAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+
+	Dependencies[1].uSrcSubPass = 0;
+	Dependencies[1].uDstSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[1].uSrcStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[1].uDstStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[1].uSrcAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+	Dependencies[1].uDstAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+
+
+	subPass.uColorCount = 1;
+	subPass.pColorAttachments = &ref;
+	ref.uIndex = 0;
+
+	subPass.pColorAttachments = &ref;
+	subPass.uColorCount = 1;
+	rpDecl.pAttachments = &attach;
+	rpDecl.uAttachments = 1;
+	rpDecl.uSubPasses = 1;
+	rpDecl.pSubPasses = &subPass;
+	attach.format.eColor = CF_RGBA_8888;	// FIXME: Match the true format
+	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
+
+	InitFrameBuffers(pDevice);
+}
+
+void Display_ps::CreateSwapChain(GFXDevice* pDevice)
+{
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
 	// Iterate over each queue to learn whether it supports presenting:
 	vector<VkBool32> supportsPresent;
 	supportsPresent.resize(devicePS.GetQueueFamilyCount());
 	for (uint32_t i = 0; i < devicePS.GetQueueFamilyCount(); i++)
 	{
-		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface,	&supportsPresent[i]);
+		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface, &supportsPresent[i]);
 	}
 
 	// Search for a graphics queue and a present queue in the array of queue
@@ -115,7 +203,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	// Get the list of VkFormats that are supported:
 	uint32_t formatCount;
-	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
+	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
 	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, surfFormats);
@@ -140,7 +228,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	ASSERT(res == VK_SUCCESS);
 
 	uint32_t presentModeCount;
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface,	&presentModeCount, NULL);
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	vector<VkPresentModeKHR> presentModes;
 	presentModes.resize(presentModeCount);
@@ -188,7 +276,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	// own only 1 image at a time, besides the images being displayed and
 	// queued for display):
 	uint32_t desiredNumberOfSwapChainImages = surfCapabilities.minImageCount + 1;
-	if ((surfCapabilities.maxImageCount > 0) &&	(desiredNumberOfSwapChainImages > surfCapabilities.maxImageCount))
+	if ((surfCapabilities.maxImageCount > 0) && (desiredNumberOfSwapChainImages > surfCapabilities.maxImageCount))
 	{
 		// Application must settle for fewer images than desired:
 		desiredNumberOfSwapChainImages = surfCapabilities.maxImageCount;
@@ -219,12 +307,12 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	swap_chain.oldSwapchain = NULL;
 	swap_chain.clipped = true;
 	swap_chain.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	swap_chain.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swap_chain.queueFamilyIndexCount = 0;
 	swap_chain.pQueueFamilyIndices = NULL;
 
-	res = vkCreateSwapchainKHR(devicePS.GetVKDevice(), &swap_chain, devicePS.GetAllocCallbacks(), &m_swapChain);
+	res = vkCreateSwapchainKHR(devicePS.GetVKDevice(), &swap_chain, nullptr, &m_swapChain);
 	ASSERT(res == VK_SUCCESS);
 
 	// Get the 
@@ -232,17 +320,21 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	m_pSwapchainImages = vnew(ALLOC_GFX_RENDER_TARGET) VkImage[m_uSwapChainImageCount];
 	m_pSwapchainImageViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_uSwapChainImageCount];
-	ASSERT(m_pSwapchainImages!=NULL);
+	ASSERT(m_pSwapchainImages != NULL);
 	res = vkGetSwapchainImagesKHR(devicePS.GetVKDevice(), m_swapChain, &m_uSwapChainImageCount, m_pSwapchainImages);
 	ASSERT(res == VK_SUCCESS);
 
+	m_swapChainImageFormat = eFormat;
+}
 
+void Display_ps::CreateSwapChainImageViews(GFXDevice* pDevice)
+{
 	for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
 	{
 		VkImageViewCreateInfo color_image_view = {};
 		color_image_view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		color_image_view.pNext = NULL;
-		color_image_view.format = eFormat;
+		color_image_view.format = m_swapChainImageFormat;
 		color_image_view.components.r = VK_COMPONENT_SWIZZLE_R;
 		color_image_view.components.g = VK_COMPONENT_SWIZZLE_G;
 		color_image_view.components.b = VK_COMPONENT_SWIZZLE_B;
@@ -257,59 +349,9 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 		color_image_view.image = m_pSwapchainImages[i];
 
-		res = vkCreateImageView(devicePS.GetVKDevice(), &color_image_view, devicePS.GetAllocCallbacks(), &m_pSwapchainImageViews[i]);
+		VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &color_image_view, nullptr, &m_pSwapchainImageViews[i]);
 		ASSERT(res == VK_SUCCESS);
 	}
-
-	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	semaphoreCreateInfo.pNext = NULL;
-	semaphoreCreateInfo.flags = 0;
-
-	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_imageAcquired);
-	ASSERT(res == VK_SUCCESS);
-
-	usg::RenderPassDecl rpDecl;
-	usg::RenderPassDecl::Attachment attach;
-	usg::RenderPassDecl::SubPass subPass;
-	usg::RenderPassDecl::AttachmentReference ref;
-	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
-	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
-	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
-	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
-	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
-	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
-
-	usg::RenderPassDecl::Dependency Dependencies[2];
-	Dependencies[0].uSrcSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
-	Dependencies[0].uDstSubPass = 0;
-	Dependencies[0].uSrcStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
-	Dependencies[0].uDstStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
-	Dependencies[0].uSrcAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
-	Dependencies[0].uDstAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
-
-	Dependencies[1].uSrcSubPass = 0;
-	Dependencies[1].uDstSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
-	Dependencies[1].uSrcStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
-	Dependencies[1].uDstStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
-	Dependencies[1].uSrcAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
-	Dependencies[1].uDstAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
-
-
-	subPass.uColorCount = 1;
-	subPass.pColorAttachments = &ref;
-	ref.uIndex = 0;
-
-	subPass.pColorAttachments = &ref;
-	subPass.uColorCount = 1;
-	rpDecl.pAttachments = &attach;
-	rpDecl.uAttachments = 1;
-	rpDecl.uSubPasses = 1;
-	rpDecl.pSubPasses = &subPass;
-	attach.format.eColor = CF_RGBA_8888;
-	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
-
-	InitFrameBuffers(pDevice);
 }
 
 void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
@@ -365,7 +407,6 @@ void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
 	uint32_t i;
 
 	m_pFramebuffers = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
-
 	for (i = 0; i < m_uSwapChainImageCount; i++)
 	{
 		attachments[0] = m_pSwapchainImageViews[i];
@@ -476,10 +517,26 @@ void Display_ps::ScreenShot(const char* szFileName)
 
 }
 
+
+void Display_ps::RecreateSwapChain(GFXDevice* pDevice)
+{
+	VkDevice device = pDevice->GetPlatform().GetVKDevice();
+	vkDeviceWaitIdle(device);
+
+	DestroySwapChain(pDevice);
+
+	CreateSwapChain(pDevice);
+	CreateSwapChainImageViews(pDevice);
+	InitFrameBuffers(pDevice);
+
+}
+
 void Display_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;
+
+	RecreateSwapChain(pDevice);
 }
 
 
@@ -488,8 +545,7 @@ void Display_ps::Resize(usg::GFXDevice* pDevice)
 	RECT dim;
 	GetClientRect(m_hwnd, &dim);
 
-	m_uWidth = dim.right - dim.left;
-	m_uHeight = dim.bottom - dim.top;
+	Resize(pDevice, dim.right - dim.left, m_uHeight = dim.bottom - dim.top);
 }
 
 void Display_ps::Minimized(usg::GFXDevice* pDevice)

@@ -70,12 +70,12 @@ void DepthStencilBuffer_ps::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 u
 
 void DepthStencilBuffer_ps::CleanUp(GFXDevice* pDevice)
 {
-
+	m_texture.CleanUp(pDevice);
 }
 
 void DepthStencilBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
-	ASSERT(false);
+	m_texture.GetPlatform().Resize(pDevice, uWidth, uHeight);
 }
 
 }

@@ -26,6 +26,7 @@ public:
 	void InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices);
 	void InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight);
 	void CleanUp(GFXDevice* pDevice);
+	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	bool Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation);
 	bool Load(GFXDevice* pDevice, const TexturePak& pak, const void* pData) { ASSERT(false); return false; }	// Not yet implemented on PC
@@ -47,13 +48,15 @@ public:
 	VkImageLayout GetImageLayout() const { return m_imageLayout; }
 
 private:
-	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags);
+	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
 
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;
 	VkImageView		m_imageView;
 	VkImageLayout	m_imageLayout;
+	VkImageCreateInfo m_imageCreateInfo;
+	VkImageViewCreateInfo m_imageViewCreateInfo;
 	uint32			m_uWidth;
 	uint32			m_uHeight;
 	uint32			m_uDepth;

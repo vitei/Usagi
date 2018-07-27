@@ -26,7 +26,7 @@ public:
 	void RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass);
 
 	void CleanUp(GFXDevice* pDevice);
-	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
+	void Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
 	void SetClearColor(const Color& col, uint32 uTarget);
 
 	uint32 GetWidth() const { return m_uWidth; }

@@ -154,6 +154,7 @@ enum ColorFormat
 	CF_R_8,
 	CF_NORMAL,
 	CF_SRGBA,
+	CF_UNDEFINED,
 	CF_COUNT,
 	CF_INVALID
 };

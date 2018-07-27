@@ -280,7 +280,7 @@ namespace usg {
 			if (m_colorBuffers[i].IsValid())
 			{
 				m_colorBuffers[i].Resize(pDevice, uWidth, uHeight);
-				m_renderTargets[i].Resize(pDevice, uWidth, uHeight);
+				m_renderTargets[i].Resize(pDevice);
 			}
 		}
 

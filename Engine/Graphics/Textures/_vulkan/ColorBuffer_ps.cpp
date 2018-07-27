@@ -45,12 +45,12 @@ void ColorBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uBufferId, uint32 uWid
 
 void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
-	ASSERT(false);
+	m_texture.GetPlatform().Resize(pDevice, uWidth, uHeight);
 }
 
 void ColorBuffer_ps::CleanUp(GFXDevice* pDevice)
 {
-	
+	m_texture.CleanUp(pDevice);
 }
 
 
