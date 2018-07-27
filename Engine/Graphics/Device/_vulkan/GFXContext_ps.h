@@ -20,6 +20,7 @@ class ConstantSet;
 class Fog;
 class IHeadMountedDisplay;
 
+
 class GFXContext_ps
 {
 public:

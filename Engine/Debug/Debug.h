@@ -21,6 +21,7 @@ void FatalInFinal(const char *file, int line, const char* func, const char *form
 #ifndef FINAL_BUILD
 // But only actually print out the log on a debug build
 #define DEBUG_PRINT( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__)
+#define WARNING( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_WARNING|DEBUG_MSG_LOG,__VA_ARGS__)
 #define LOG_MSG( uFlags, ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, uFlags, __VA_ARGS__)
 #else
 #define DEBUG_PRINT( ... ) ((void) 0)

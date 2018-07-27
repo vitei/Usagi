@@ -9,7 +9,9 @@
 #include "Engine/Graphics/Effects/InputBinding.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Device/DescriptorSet.h"
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
+#include API_HEADER(Engine/Graphics/Device, PipelineLayout.h)
 #include "GFXDevice.h"
 #include "GFXContext.h"
 
@@ -237,9 +239,31 @@ void GFXContext::SetPipelineState(PipelineStateHndl hndl)
 	//m_platform.SetBlendColor(group.GetBlendColor());
 }
 
+void GFXContext::ValidateDescriptors()
+{
+#if CONFIRM_PIPELINE_VALIDITY
+	PipelineLayout* layout = m_activeStateGroup.GetContents()->GetPipelineLayoutHndl().GetContents();
+
+	for (uint32 i = 0; i < layout->GetDecl().uDescriptorSetCount; i++)
+	{
+		if (!m_pActiveDescSets[i] || layout->GetDecl().descriptorSets[i] != m_pActiveDescSets[i]->GetLayoutHndl())
+		{
+			if (m_pActiveDescSets[i] && m_pActiveDescSets[i]->GetValid())
+			{
+				WARNING("Incompatailable descriptor set bound at slot %u\n", i);
+			}
+			else
+			{
+				WARNING("Missing descriptor set at slot %u\n", i);
+			}
+		}
+	}
+#endif
+}
+
 void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 {
-#ifdef DEBUG_BUILD
+#if CONFIRM_GFX_CMD_VALIDITY
 	bool bValid = false;
 	for (int i = 0; i < MAX_VERTEX_BUFFERS; i++)
 	{
@@ -253,6 +277,9 @@ void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 #endif
 	if (m_uDirtyDescSetFlags)
 	{
+#if CONFIRM_PIPELINE_VALIDITY
+		ValidateDescriptors();
+#endif
 		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
 	}
 	m_platform.DrawImmediate(uCount, uOffset);
@@ -263,6 +290,9 @@ void GFXContext::DrawIndexed(const IndexBuffer* pBuffer)
 {
 	if (m_uDirtyDescSetFlags)
 	{
+#if CONFIRM_PIPELINE_VALIDITY
+		ValidateDescriptors();
+#endif
 		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
 	}
 	m_platform.DrawIndexed(pBuffer, 0, pBuffer->GetIndexCount(), 1);

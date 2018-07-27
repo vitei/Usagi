@@ -45,7 +45,9 @@ public:
 
 	// FIXME: REMOVE THESE ACCESSORS WHEN COMPLETE
 	const DescriptorSetLayout*	GetLayoutDesc() const { return m_pLayoutDesc;  }
+	const DescriptorSetLayoutHndl& GetLayoutHndl() const { return m_layoutHndl; }
 	const DescriptorData*		GetData() const { return m_pData; }
+
 
 	DescriptorSet_ps&       GetPlatform()       { return m_platform; }
 	const DescriptorSet_ps& GetPlatform() const { return m_platform; }

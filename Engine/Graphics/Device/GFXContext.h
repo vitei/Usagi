@@ -67,6 +67,7 @@ public:
 	RenderTarget* GetActiveRenderTarget() const{ return m_pActiveRT; }
 
 	void	InvalidateStates();
+	void	ValidateDescriptors();
 private:
 
 	PRIVATIZE_COPY(GFXContext);

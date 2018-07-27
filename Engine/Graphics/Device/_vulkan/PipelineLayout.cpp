@@ -30,6 +30,8 @@ void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, ui
 	ScratchObj<VkDescriptorSetLayout> desciptorScratch(layoutBindings, decl.uDescriptorSetCount);
 	VkPipelineLayoutCreateInfo createInfo = {};
 
+	InitBase(decl);
+
 	for(uint32 i=0; i<decl.uDescriptorSetCount; i++)
 	{
 		layoutBindings[i] = decl.descriptorSets[i].GetContents()->GetPlatform().GetVkLayout();

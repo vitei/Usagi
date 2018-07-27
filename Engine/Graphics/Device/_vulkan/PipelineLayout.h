@@ -5,11 +5,12 @@
 #define _USG_GRAPHICS_DEVICE_PC_PIPELINELAYOUT_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/RenderState.h"
+#include "Engine/Graphics/Device/PipelineLayoutBase.h"
 #include <vulkan/vulkan.h>
 
 namespace usg {
 
-class PipelineLayout
+class PipelineLayout : public  PipelineLayoutBase
 {
 public:
 	PipelineLayout();
