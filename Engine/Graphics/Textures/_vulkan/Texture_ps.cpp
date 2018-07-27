@@ -61,8 +61,10 @@ VkFormat GetFormatGLI(uint32 uFormat)
 {
 	switch (uFormat)
 	{
-	case gli::format::FORMAT_RGBA8_SNORM_PACK8:
+	case gli::format::FORMAT_RGB8_SNORM_PACK8:
 		return VK_FORMAT_R8G8B8_SNORM;
+	case gli::format::FORMAT_RGBA8_SNORM_PACK8:
+		return VK_FORMAT_R8G8B8A8_SNORM;
 	case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8: // GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 		return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
 	case gli::format::FORMAT_RGBA_DXT3_UNORM_BLOCK16: // GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
@@ -368,10 +370,10 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	view_info.pNext = NULL;
 	view_info.image = m_image;
 	view_info.format = image_create_info.format;
-	view_info.components.r = VK_COMPONENT_SWIZZLE_R;
-	view_info.components.g = VK_COMPONENT_SWIZZLE_G;
-	view_info.components.b = VK_COMPONENT_SWIZZLE_B;
-	view_info.components.a = VK_COMPONENT_SWIZZLE_A;
+	view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 	view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 	view_info.subresourceRange.baseMipLevel = 0;
 	view_info.subresourceRange.levelCount = 1;

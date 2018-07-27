@@ -111,6 +111,7 @@ namespace usg {
 		pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
 		pipelineDecl.uInputBindingCount = 1;
 		pipelineDecl.ePrimType = PT_TRIANGLES;
+		pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
 		usg::DescriptorSetLayoutHndl colorLumaEdgeDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorColorLumaEdgeDecl);
 		usg::DescriptorSetLayoutHndl depthEdgeDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDepthEdgeDecl);
@@ -118,17 +119,14 @@ namespace usg {
 		usg::DescriptorSetLayoutHndl neighborHoodBlendDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorNeighbourhoodBlendDecl);
 		usg::DescriptorSetLayoutHndl resolveDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorResolveDecl);
 
-		RenderPassDecl renderPass;
-		// FIXME: Init the render pass
-
 		uint32 uWidth = pSys->GetFinalTargetWidth();
 		uint32 uHeight = pSys->GetFinalTargetHeight();
-		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
+		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
 		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, flags);
-		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888);
+		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);
 		m_renderTargets[RT_BLEND_WEIGHT].InitRenderPass(pDevice, flags);
 
@@ -142,7 +140,7 @@ namespace usg {
 		m_depthEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Luma Edge detection
-		pipelineDecl.layout.descriptorSets[0] = colorLumaEdgeDescriptors;
+		pipelineDecl.layout.descriptorSets[1] = colorLumaEdgeDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAALumaEdgeDetection");
 		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
@@ -152,12 +150,12 @@ namespace usg {
 
 
 		// Blend weight calculation
-		pipelineDecl.layout.descriptorSets[0] = blendWeightDescriptors;
+		pipelineDecl.layout.descriptorSets[1] = blendWeightDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAABlendWeightCalc");
 		m_blendWeightEffect = pDevice->GetPipelineState(m_renderTargets[RT_BLEND_WEIGHT].GetRenderPass(), pipelineDecl);
 
 		// Neighbourhood blend
-		pipelineDecl.layout.descriptorSets[0] = neighborHoodBlendDescriptors;
+		pipelineDecl.layout.descriptorSets[1] = neighborHoodBlendDescriptors;
 		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
 		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 

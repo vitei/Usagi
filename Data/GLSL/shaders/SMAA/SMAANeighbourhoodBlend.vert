@@ -40,7 +40,7 @@ ATTRIB_LOC(2) out vec4 vo_vOffset;
 
 void main(void)
 {
-	vec4 vPosition = vec4( ao_position.xy, -0.5, 1.0);
+	vec4 vPosition = vec4( ao_position.xy, 0.0, 1.0);
  	
  	gl_Position		= vPosition;	
 
