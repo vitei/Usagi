@@ -43,12 +43,12 @@ extern "C" void cDebugprintf(const char *szFile, int line, const char* func, uin
 	va_start( vlist, format );
 	if (uFlags & DEBUG_MSG_ERROR)
 	{
-		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsg), format, vlist);
+		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsgB), format, vlist);
 		str::ParseVariableArgsC(g_errorMsg, sizeof(g_errorMsg), "ERROR: %s", g_errorMsgB);
 	}
 	if (uFlags & DEBUG_MSG_WARNING)
 	{
-		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsg), format, vlist);
+		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsgB), format, vlist);
 		str::ParseVariableArgsC(g_errorMsg, sizeof(g_errorMsg), "WARNING: %s", g_errorMsgB);
 	}
 	else
