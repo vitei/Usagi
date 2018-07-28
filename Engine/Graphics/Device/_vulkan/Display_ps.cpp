@@ -28,6 +28,7 @@ Display_ps::Display_ps()
 	m_swapChain = VK_NULL_HANDLE;
 	m_uActiveImage = 0;
 	m_uSwapChainImageCount = 0;
+	m_bWindowResized = false;
 }
 
 
@@ -505,7 +506,10 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 			presentInfo.waitSemaphoreCount = 1;
 		}*/
 		VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
-		ASSERT(res == VK_SUCCESS);
+		if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR || m_bWindowResized)
+		{
+			RecreateSwapChain(pDevice);
+		}
 	}
 	bFirst = false;
 
@@ -528,6 +532,7 @@ void Display_ps::RecreateSwapChain(GFXDevice* pDevice)
 	CreateSwapChain(pDevice);
 	CreateSwapChainImageViews(pDevice);
 	InitFrameBuffers(pDevice);
+	m_bWindowResized = false;
 
 }
 
@@ -536,7 +541,7 @@ void Display_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;
 
-	RecreateSwapChain(pDevice);
+	m_bWindowResized = true;
 }
 
 

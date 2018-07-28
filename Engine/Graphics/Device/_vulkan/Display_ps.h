@@ -66,6 +66,7 @@ private:
 	uint32				m_uWidth;
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
+	bool				m_bWindowResized;
 };
 
 }
