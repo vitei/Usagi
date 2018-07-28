@@ -50,6 +50,7 @@ public:
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
+	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
 
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;

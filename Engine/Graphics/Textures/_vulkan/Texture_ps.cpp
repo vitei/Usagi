@@ -257,19 +257,93 @@ Texture_ps::~Texture_ps()
 
 }
 
+
+void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage)
+{
+	VkImageCreateInfo image_create_info = {};
+
+	VkFormatProperties props;
+	if (eUsage & TU_FLAG_DEPTH_ATTACHMENT)
+	{
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormat, &props);
+		if (props.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			image_create_info.tiling = VK_IMAGE_TILING_LINEAR;
+		}
+		else if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+		}
+		else
+		{
+			// Try other depth formats? 
+			ASSERT_MSG(false, "Depth format unsupported.\n");
+			return;
+		}
+	}
+
+	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	image_create_info.pNext = NULL;
+	image_create_info.imageType = VK_IMAGE_TYPE_2D;
+	image_create_info.format = eFormat;
+	image_create_info.extent.width = uWidth;
+	image_create_info.extent.height = uHeight;
+	image_create_info.extent.depth = 1;
+	image_create_info.mipLevels = 1;
+	image_create_info.arrayLayers = uArrayCount;
+	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	image_create_info.usage = eUsage;
+	image_create_info.queueFamilyIndexCount = 0;
+	image_create_info.pQueueFamilyIndices = NULL;
+	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
+
+	Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	VkImageViewCreateInfo view_info = {};
+	view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	view_info.pNext = NULL;
+	view_info.image = m_image;
+	view_info.format = image_create_info.format;
+	view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	view_info.subresourceRange.baseMipLevel = 0;
+	view_info.subresourceRange.levelCount = 1;
+	view_info.subresourceRange.baseArrayLayer = 0;
+	view_info.subresourceRange.layerCount = uArrayCount;
+	view_info.viewType = eViewType;
+	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
+
+	// Create the image view
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
+	ASSERT(res == VK_SUCCESS);
+
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uDepth = 1;
+	m_uFaces = uArrayCount;
+}
+
 void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
-	ASSERT(false);
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT| TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gColorFormatMap[eFormat], imageUsage);
 }
 
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
-	ASSERT(false);
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[eFormat], imageUsage);
 }
 
 void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
 {
-	ASSERT(false);
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gColorFormatMap[eFormat], imageUsage);
 }
 
 
