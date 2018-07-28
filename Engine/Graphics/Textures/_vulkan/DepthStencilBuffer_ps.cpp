@@ -76,6 +76,8 @@ void DepthStencilBuffer_ps::CleanUp(GFXDevice* pDevice)
 void DepthStencilBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	m_texture.GetPlatform().Resize(pDevice, uWidth, uHeight);
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
 }
 
 }
