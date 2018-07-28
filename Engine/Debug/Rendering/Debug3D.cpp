@@ -190,7 +190,7 @@ void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 
 bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	if(m_uSpheres != 0)
+	if(m_uSpheres != 0 && m_spherePipeline.IsValid())
 	{
 		pContext->SetPipelineState(m_spherePipeline);
 		pContext->SetVertexBuffer(&m_sphereVB, 0);
@@ -198,7 +198,7 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 		pContext->DrawIndexedEx(&m_sphereIB, 0, m_sphereIB.GetIndexCount(), m_uSpheres);
 	}
 
-	if(m_uCubes != 0)
+	if(m_uCubes != 0 && m_cubePipeline.IsValid())
 	{
 		pContext->SetPipelineState(m_cubePipeline);
 		pContext->SetVertexBuffer(&m_cubeVB);

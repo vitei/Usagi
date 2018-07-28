@@ -248,9 +248,11 @@ void Bloom::Resize(GFXDevice* pDevice, uint32 uScrWidth, uint32 uSrcHeight)
 		m_bloomRT[i].Resize(pDevice);
 	}
 
-	// The internal texture info has changed
-	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
-	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
+	for (uint32 i = 0; i < PASS_COUNT; i++)
+	{
+		// These passes don't change
+		m_descriptors[i].UpdateDescriptors(pDevice);
+	}
 }
 
 void Bloom::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)

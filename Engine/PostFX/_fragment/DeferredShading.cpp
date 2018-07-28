@@ -263,6 +263,12 @@ void DeferredShading::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
 	m_readDescriptors.UpdateDescriptors(pDevice);
 }
 
+void DeferredShading::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+{
+	// The internal data has changed
+	m_readDescriptors.UpdateDescriptors(pDevice);
+}
+
 bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	ViewContext* pSceneCtxt = m_pSys->GetActiveViewContext();

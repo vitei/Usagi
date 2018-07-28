@@ -27,6 +27,7 @@ public:
 
 	virtual void Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst);
 	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) { m_pDestTarget = pDst; }
 	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
