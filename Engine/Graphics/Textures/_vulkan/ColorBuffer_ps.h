@@ -27,12 +27,15 @@ public:
 	void SetActive(bool bActive) { }
 	void Resolve(GFXContext* pContext, bool bTex) {}
 
-	const VkAttachmentDescription& GetDescription() { return m_attachDesc; }
+	VkImageView GetLayerView(uint32 uLayer) { return m_pLayerViews[uLayer]; }
 
 private:
-	TextureHndl	m_texHndl;
-	VkAttachmentDescription m_attachDesc;
+	void InitLayerViews(GFXDevice* pDevice);
+	void FreeLayerViews(GFXDevice* pDevice);
+
+	TextureHndl				m_texHndl;
 	Texture					m_texture;
+	VkImageView*			m_pLayerViews;
 };
 
 }

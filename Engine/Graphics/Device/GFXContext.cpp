@@ -119,7 +119,7 @@ void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	m_pActiveRT = nullptr;
 }
 
-void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uint32 uClearFlags)
+void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 {
 	bool bHadDS = false;
 	if(m_pActiveRT)
@@ -136,7 +136,7 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uin
 		{
 			bool bHasDS = pTarget->GetDepthStencilBuffer()!=NULL;
 
-			m_platform.SetRenderTargetLayer(pTarget, uLayer, 0);
+			m_platform.SetRenderTargetLayer(pTarget, uLayer);
 			m_pActiveRT = pTarget;
 
 			
@@ -148,10 +148,6 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uin
 		}
 
 		ApplyViewport(pTarget->GetViewport());
-		if (uClearFlags)
-		{
-			m_platform.ClearRenderTarget(pTarget, uClearFlags);
-		}
 	}
 }
 

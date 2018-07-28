@@ -115,6 +115,12 @@ void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLig
 
     m_cascadeBuffer.InitArray(pDevice, uGroupHeight, uGroupHeight, CASCADE_COUNT, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
 	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+
+	usg::RenderTarget::RenderPassFlags flags;
+	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+	m_cascadeTarget.InitRenderPass(pDevice, flags);
 	
 	Color color = Color(1.0f, 1.0f, 1.0f, 1.0f);
     m_cascadeTarget.SetClearColor(color);
@@ -413,7 +419,7 @@ void ShadowCascade::CreateShadowTex(GFXContext* pContext)
 
 	for (uint32 i = 0; i < CASCADE_COUNT; ++i)
     {
-        pContext->SetRenderTargetLayer(&m_cascadeTarget, i, RenderTarget::RT_FLAG_DEPTH);
+        pContext->SetRenderTargetLayer(&m_cascadeTarget, i);
 		DrawSceneFromLight(pContext, m_pSceneContext[i]);
         pContext->SetRenderTarget(NULL);
 	}

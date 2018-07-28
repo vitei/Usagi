@@ -40,7 +40,7 @@ public:
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport = NULL);
-	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
+	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
 	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);

@@ -41,10 +41,18 @@ public:
 	// Platform specific
 	const VkClearValue* GetClearValues() const { return m_colorClearValues; }
 	const VkFramebuffer& GetFrameBuffer() const { return m_framebuffer; }
+	const VkFramebuffer& GetLayerFrameBuffer(uint32 uLayer) const { return m_layerInfo[uLayer].frameBuffer;	}
 
 private:
+
+	struct LayerInfo
+	{
+		VkFramebufferCreateInfo createInfo;
+		VkFramebuffer			frameBuffer;
+	};
 	// Color + depth for the clear
 	VkFramebufferCreateInfo m_fbCreateInfo;
+	vector<LayerInfo> m_layerInfo;
 	vector<VkImageView>	m_imageViews;
 	VkFramebuffer	m_framebuffer;
 	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS+1];

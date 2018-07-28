@@ -29,15 +29,18 @@ public:
 
 	void SetActive(bool bActive) {}
 
-	const VkAttachmentDescription& GetDescription() { return m_attachDesc; }
+	VkImageView GetLayerView(uint32 uLayer) { return m_pLayerViews[uLayer]; }
 
 private:
+	void InitLayerViews(GFXDevice* pDevice);
+	void FreeLayerViews(GFXDevice* pDevice);
+
 	TextureHndl				m_textureHndl;
-	VkAttachmentDescription m_attachDesc;
 	Texture					m_texture;
 	uint32					m_uWidth;
 	uint32					m_uHeight;
 	bool					m_bHasStencil;
+	VkImageView*			m_pLayerViews;
 };
 
 }

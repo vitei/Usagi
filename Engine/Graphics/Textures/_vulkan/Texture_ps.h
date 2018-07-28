@@ -46,6 +46,8 @@ public:
 	VkImage GetImage() const { return m_image; }
 	VkImageView GetImageView() const { return m_imageView; }
 	VkImageLayout GetImageLayout() const { return m_imageLayout; }
+	// Caller is responsible for cleaning up this view
+	VkImageView CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) const;
 
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);

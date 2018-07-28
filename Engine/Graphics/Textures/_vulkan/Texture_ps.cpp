@@ -328,6 +328,21 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_uFaces = uArrayCount;
 }
 
+VkImageView Texture_ps::CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) const
+{
+	ASSERT(m_uFaces > uLayer);
+	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
+	view_info.subresourceRange.baseArrayLayer = uLayer;
+	view_info.subresourceRange.layerCount = 1;
+	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+	VkImageView view;
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &view);
+	ASSERT(res == VK_SUCCESS);
+
+	return view;
+}
+
 void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT| TU_FLAG_SHADER_READ);

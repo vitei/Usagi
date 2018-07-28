@@ -33,7 +33,6 @@ public:
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);
 	void TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay);
-	void CopyDepthToSlice(RenderTarget* pSrc, RenderTarget* pDst, uint32 uSlice);
 
 	void End();
 	void ForceFinishDraw() { }
@@ -44,7 +43,7 @@ public:
 	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void SetRenderTarget(const RenderTarget* pTarget);
-	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
+	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayers);
 	void EndRTDraw(const RenderTarget* pTarget);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 
@@ -56,11 +55,6 @@ public:
 	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);
 	void DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstances);
-
-	// FIXME: Implement or remove me (there for the benefit of CTR compatability)
-	void SetFog(const Fog* pFog) {}
-	void SetTexCoordSource(uint32 uUnit, uint32 uSource) {}
-	void BindLUTToSampler(uint32 uSampler, const class LookupTable* pTable) {}
 
 	void SetBlendColor(const Color& color);
 

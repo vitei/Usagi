@@ -99,10 +99,27 @@ void GFXContext_ps::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display*
 	ASSERT(false);
 }
 
-void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags)
+void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 {
-	// TODO: Implement me
+	if (pTarget)
+	{
+		const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+		uint32 uClearCount = pTarget->GetTargetCount() + (pTarget->GetDepthStencilBuffer() != nullptr ? 1 : 0);
 
+		VkRenderPassBeginInfo rp_begin;
+		rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		rp_begin.pNext = NULL;
+		rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+		rp_begin.framebuffer = rtPS.GetLayerFrameBuffer(uLayer);
+		rp_begin.renderArea.offset.x = 0;
+		rp_begin.renderArea.offset.y = 0;
+		rp_begin.renderArea.extent.width = pTarget->GetWidth();
+		rp_begin.renderArea.extent.height = pTarget->GetHeight();
+		rp_begin.clearValueCount = uClearCount;
+		rp_begin.pClearValues = rtPS.GetClearValues();
+
+		vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+	}
 }
 
 
@@ -287,12 +304,6 @@ void GFXContext_ps::DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, 
 	vkCmdDrawIndexed(m_cmdBuff, uIndexCount, uInstances, uStartIndex, 0, 0);
 }
 
-
-
-void GFXContext_ps::CopyDepthToSlice(RenderTarget* pSrc, RenderTarget* pDst, uint32 uSlice)
-{
-	
-}
 
 
 void GFXContext_ps::ImageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
