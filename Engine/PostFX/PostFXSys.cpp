@@ -90,6 +90,8 @@ void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 void PostFXSys::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	m_platform.Resize(pDevice, uWidth, uHeight);
+	// Textures have been recreated so need to rebind the descriptors
+	m_platform.EnableEffects(pDevice, m_uEffectsEnabled);
 	m_uTargetWidth = uWidth;
 	m_uTargetHeight = uHeight; 
 }
