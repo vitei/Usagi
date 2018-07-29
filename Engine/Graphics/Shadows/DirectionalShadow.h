@@ -24,8 +24,6 @@ public:
 	virtual void CreateShadowTex(GFXContext* pContext) = 0;
 	virtual void Finished(GFXContext* pContext) = 0;
 
-	virtual void PrepareRender(GFXContext* pContext) const = 0;
-
 private:
 
 };

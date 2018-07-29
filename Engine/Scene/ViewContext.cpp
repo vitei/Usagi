@@ -86,12 +86,19 @@ namespace usg {
 			m_globalDescriptors[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptors[i], 1);
 			m_globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
+			// FIXME: Want a dummy depth array texture
+			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, sampler, 0);
+			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, sampler, 1);
+
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
 
 			m_globalDescriptorsWithDepth[i].Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl));
 			m_globalDescriptorsWithDepth[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptorsWithDepth[i], 1);
 			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, sampler, 0);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, sampler, 1);
+
 			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
 
@@ -237,6 +244,11 @@ namespace usg {
 					m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pPostFXSys->GetLinearDepthTex(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
 					m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 				}
+			}
+			const vector<TextureHndl>& cascadeTextures = m_LightingContext.GetCascadeTextures();
+			for (uint32 i = 0; i < cascadeTextures.size(); i++)
+			{
+				m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, cascadeTextures[i], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), i);
 			}
 		}
 

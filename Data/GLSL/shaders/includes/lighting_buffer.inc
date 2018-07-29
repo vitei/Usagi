@@ -2,6 +2,9 @@
 #define _LIGHTING_BUFFER_INC
 
 #define MAX_LIGHTS 8
+#define MAX_CASCADES 2
+
+SAMPLER_LOC(0, 15) uniform sampler2DArrayShadow sampler15[MAX_CASCADES];	// Shadow cascades
 
 // Structures are passed by value so confine this to as small a size as possible
 // Forward shaded point/ spot lights should be avoided in general
@@ -29,6 +32,7 @@ BUFFER_LAYOUT(0, UBO_LIGHTING_ID) uniform Lighting
 	int 		iSpotLightCount;
 	vec4		vAmbientLight;
 	Light 		lights[MAX_LIGHTS];
+	Cascade 	cascades[MAX_CASCADES];
 };
 
 

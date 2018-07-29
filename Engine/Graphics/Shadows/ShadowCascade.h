@@ -32,16 +32,31 @@ public:
 	void GPUUpdate(GFXDevice* pDevice);
 	virtual void CreateShadowTex(GFXContext* pContext);
 	virtual void Finished(GFXContext* pContext);
-	void PrepareRender(GFXContext* pContext) const override;
 
-	const ConstantSet* GetShadowReadConstants() { return &m_readConstants; }
+	const ConstantSet* GetShadowReadConstants() const { return &m_readConstants; }
 	ShadowContext* GetContext(uint32 uContext) { return m_pSceneContext[uContext]; }
+	TextureHndl GetTexture() const { return m_cascadeBuffer.GetTexture(); }
 
 	enum
 	{
 		CASCADE_COUNT = 4,	// MAX is 4
 		MAX_CASCADES = 4
 	};
+
+	struct ShadowReadConstants
+	{
+		Matrix4x4   mCascadeMtx[ShadowCascade::MAX_CASCADES];
+		Matrix4x4   mCascadeMtxVInv[ShadowCascade::MAX_CASCADES];
+		Vector4f    vSplitDist;
+		Vector4f	vFadeSplitDist;	// We give the next cascade a little extra to allow us to fade between
+		Vector4f	vInvFadeLength;
+		Vector4f    vBias;
+		Vector4f    vSampleRange;
+		Vector2f    vInvShadowDim;
+	};
+
+	const ShadowReadConstants& GetShadowReadConstantData() const { return m_readConstantsData; }
+	static const ShaderConstantDecl* GetDecl();
 
 private:
 
@@ -76,10 +91,9 @@ private:
 	PointFrustum			m_frustum[MAX_CASCADES];
 	Matrix4x4				m_matShadowProj[MAX_CASCADES];
 
-	DescriptorSet			m_readDescriptor;
-
 	const DirLight*			m_pLight;
 	ConstantSet				m_readConstants;
+	ShadowReadConstants		m_readConstantsData;
 
 	Matrix4x4				m_shadowViewMtx;
 	StandardCamera			m_cascadeCamera[MAX_CASCADES];

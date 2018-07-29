@@ -208,7 +208,14 @@ void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
 		if( (*it)->IsActive() )
 		{
 			(*it)->SetVisibleFrame(m_uActiveFrame);
-			lightsOut.AddToEnd(*it);
+			if ((*it)->GetShadowEnabled())
+			{
+				lightsOut.AddToEnd(*it);
+			}
+			else
+			{
+				lightsOut.AddToFront(*it);
+			}
 		}
 	}
 

@@ -310,7 +310,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 				if (uShadowIndex > 0)
 				{
 					PipelineStateHndl& effect = m_additionalShadowPass[uLightIndex-1];
-					(*it)->GetCascade()->PrepareRender(pContext);
+					//(*it)->GetCascade()->PrepareRender(pContext);
 					pContext->SetPipelineState(effect);
 					m_pSys->DrawFullScreenQuad(pContext);
 				}
@@ -393,7 +393,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	if (pFirstShadowedLight)
 	{
 		// Reset the first shadowed lights constants for the subsequent forward rendering
-		pFirstShadowedLight->GetCascade()->PrepareRender(pContext);
+//		pFirstShadowedLight->GetCascade()->PrepareRender(pContext);
 	}
 
 

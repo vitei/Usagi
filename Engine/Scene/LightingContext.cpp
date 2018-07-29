@@ -12,6 +12,7 @@
 namespace usg {
 
 #define MAX_LIGHTS	8
+#define MAX_CASCADES 2
 
 struct LightConsts
 {
@@ -34,6 +35,7 @@ struct LightingConsts
 	int				iSpotLightCount;
 	Vector4f		vGlobalAmbient;
 	LightConsts		lights[MAX_LIGHTS];
+	ShadowCascade::ShadowReadConstants cascades[MAX_CASCADES];
 };
 
 static const ShaderConstantDecl g_lightDecl[] = 
@@ -58,6 +60,7 @@ static const ShaderConstantDecl g_dirLightingDecl[] =
 	SHADER_CONSTANT_ELEMENT( LightingConsts, iSpotLightCount, CT_INT, 1),
 	SHADER_CONSTANT_ELEMENT( LightingConsts, vGlobalAmbient, CT_VECTOR_4, 1 ),
 	SHADER_CONSTANT_STRUCT_ARRAY(LightingConsts, lights, g_lightDecl, MAX_LIGHTS ),
+	SHADER_CONSTANT_STRUCT_ARRAY(LightingConsts, cascades, ShadowCascade::GetDecl(), MAX_CASCADES),
 	SHADER_CONSTANT_END()
 };
 
@@ -128,6 +131,8 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 
 	// FIXME: If we re-implemenet deferred shading we need the per light constants to be updated somewhere
 	uint32 uLightCount = 0;
+	uint32 uCascadeCount = 0;
+	m_cascadeTextures.clear();
 	for(List<DirLight>::Iterator it = dirLights.Begin(); !it.IsEnd() && uLightCount < MAX_LIGHTS; ++it)
 	{
 		const DirLight* pLight = *it;
@@ -135,10 +140,24 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 		LightConsts* pLightConst = &pLightingData->lights[uLightCount];
 		if (pLight->GetShadowEnabled())
 		{
+			if (uCascadeCount >= MAX_CASCADES)
+			{
+				// Ignore this light
+				DEBUG_PRINT("Dropping additional shadow cascades\n");
+				break;
+			}
 			if (pLightingData->iCascadeLightStart == (-1))
 			{
 				pLightingData->iCascadeLightStart = (int)uLightCount;
 			}
+			pLightingData->cascades[uCascadeCount] = pLight->GetCascade()->GetShadowReadConstantData();
+			m_cascadeTextures.push_back(pLight->GetCascade()->GetTexture());
+			uCascadeCount++;
+		}
+		else
+		{
+			// We are expecting shadowed lights to come last
+			ASSERT(uCascadeCount == 0);
 		}
 		pLightingData->iDirLightCount++;		
 		pLightConst->vDirection = (-pLight->GetDirection() * mViewMat);
@@ -225,6 +244,11 @@ const List<ProjectionLight>& LightingContext::GetProjLightsInView() const
 	return m_visProjLights;
 }
 
+const vector<TextureHndl>& LightingContext::GetCascadeTextures() const
+{
+	return m_cascadeTextures;
+}
+
 void LightingContext::AddConstantsToDescriptor(DescriptorSet& desc, uint32 uIndex) const
 {
 	desc.SetConstantSet(uIndex, &m_lightingConstants);
@@ -232,14 +256,7 @@ void LightingContext::AddConstantsToDescriptor(DescriptorSet& desc, uint32 uInde
 
 void LightingContext::SetPrimaryShadowDesc(GFXContext* pContext)
 {
-	for (List<DirLight>::Iterator it = m_visDirLights.Begin(); !it.IsEnd(); ++it)
-	{
-		if ((*it)->GetShadowEnabled())
-		{
-			(*it)->GetCascade()->PrepareRender(pContext);
-			return;
-		}
-	}
+
 }
 
 }

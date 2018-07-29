@@ -5,6 +5,17 @@
 
 #define USE_SKYBOX_FOG
 
+struct Cascade
+{
+	mat4		mCascadeMtx[4];
+    mat4        mCascadeMtxInvView[4];
+	vec4		vSplitDistance;
+    vec4        vFadeSplitDist;
+    vec4        vInvFadeLength;
+	vec4		vDepthBias;
+    vec4        vSampleRange;
+    vec2        vInvShadowDim;
+};
 
 #ifndef SHADOW_PASS
 BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals

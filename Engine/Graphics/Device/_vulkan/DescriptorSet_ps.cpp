@@ -54,27 +54,38 @@ namespace usg {
 			switch (pLayout->GetDeclaration(i)->eDescriptorType)
 			{
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
-
+			{
 				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;	// Dynamic so that we can update every frame
-				writes[i].pBufferInfo = &pData[i].pConstBuffer->GetPlatform().GetDescriptorInfo();
-				m_dynamicBuffers.push_back(&pData[i].pConstBuffer->GetPlatform());
+				writes[i].pBufferInfo = &pData->pConstBuffer->GetPlatform().GetDescriptorInfo();
+				size_t uIndex = m_dynamicBuffers.size();
+				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				{
+					m_dynamicBuffers.push_back(&pData[j].pConstBuffer->GetPlatform());
+				}
 				break;
+			}
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
 			{
 				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				writes[i].dstBinding += SAMPLER_OFFSET;
-				VkDescriptorImageInfo image = {};
-				image.sampler = pData[i].texData.sampler.GetContents()->GetSampler();
-				image.imageView = pData[i].texData.tex->GetPlatform().GetImageView();
-				image.imageLayout = pData[i].texData.tex->GetPlatform().GetImageLayout();
-				images.push_back(image);
+				size_t uIndex = images.size();
+				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				{
+					VkDescriptorImageInfo image = {};
+					image.sampler = pData[j].texData.sampler.GetContents()->GetSampler();
+					image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					image.imageLayout = pData[j].texData.tex->GetPlatform().GetImageLayout();
+					images.push_back(image);
+				}
 
-				writes[i].pImageInfo = &images.back();
+				writes[i].pImageInfo = &images[uIndex];
 				break;
 			}
 			default:
 				ASSERT(false);
 			}
+
+			pData += pLayout->GetDeclaration(i)->uCount;
 		}
 
 		vkUpdateDescriptorSets(pDevice->GetPlatform().GetVKDevice(), pLayout->GetDeclarationCount(), writes.data(), 0, nullptr);

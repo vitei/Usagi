@@ -22,30 +22,26 @@ const float FADE_BUFFER = 0.96f;
 
 namespace usg {
 
-struct ShadowReadConstants
-{
-    Matrix4x4   mCascadeMtx[ShadowCascade::MAX_CASCADES];
-    Matrix4x4   mCascadeMtxVInv[ShadowCascade::MAX_CASCADES];
-    Vector4f    vSplitDist;
-	Vector4f	vFadeSplitDist;	// We give the next cascade a little extra to allow us to fade between
-	Vector4f	vInvFadeLength;
-    Vector4f    vBias;
-	Vector4f    vSampleRange;
-	Vector2f    vInvShadowDim;
-};
+
 
 static const ShaderConstantDecl g_shadowReadConstDecl[] = 
 {
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, mCascadeMtx[0],       CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, mCascadeMtxVInv[0],   CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, vSplitDist,           CT_VECTOR_4, 1 ),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vFadeSplitDist,        CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vInvFadeLength,        CT_VECTOR_4, 1),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, vBias,                CT_VECTOR_4, 1 ),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vSampleRange,          CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vInvShadowDim,         CT_VECTOR_2, 1),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtx[0],      CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtxVInv[0],   CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vSplitDist,           CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vFadeSplitDist,       CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vInvFadeLength,       CT_VECTOR_4, 1),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vBias,                CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vSampleRange,         CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vInvShadowDim,        CT_VECTOR_2, 1),
     SHADER_CONSTANT_END()
 };
+
+
+const ShaderConstantDecl* ShadowCascade::GetDecl()
+{
+	return g_shadowReadConstDecl;
+}
 
 ShadowCascade::ShadowCascade()
 {
@@ -69,7 +65,6 @@ ShadowCascade::~ShadowCascade()
 
 void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_readDescriptor.CleanUp(pDevice);
 	m_readConstants.CleanUp(pDevice);
 	m_cascadeTarget.CleanUp(pDevice);
 	m_cascadeBuffer.CleanUp(pDevice);
@@ -128,10 +123,6 @@ void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLig
 	SamplerDecl samplerDecl(SF_LINEAR, SC_CLAMP);
 	samplerDecl.bEnableCmp = true;
 	samplerDecl.eCmpFnc = CF_LESS;
-	m_readDescriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_shadowReadDescriptorDecl));
-	m_readDescriptor.SetConstantSet(0, &m_readConstants);
-	m_readDescriptor.SetImageSamplerPair(1, m_cascadeBuffer.GetTexture(), pDevice->GetSampler(samplerDecl));
-	m_readDescriptor.UpdateDescriptors(pDevice);
 }
 
 
@@ -188,6 +179,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
 	readData->vInvFadeLength.Assign(invFadeRange[0], invFadeRange[1], invFadeRange[2], invFadeRange[3]);
 	readData->vInvShadowDim.Assign(1.f / (float)m_cascadeBuffer.GetWidth(), 1.f / (float)m_cascadeBuffer.GetHeight());
 
+	m_readConstantsData = *readData;
     m_readConstants.Unlock();
 	
 }
@@ -440,10 +432,5 @@ void ShadowCascade::DrawSceneFromLight(GFXContext* pGFXCtxt, ShadowContext* pSha
     
 }
 
-
-void ShadowCascade::PrepareRender(GFXContext* pContext) const
-{
-	pContext->SetDescriptorSet(&m_readDescriptor, 3);
-}
 
 }
