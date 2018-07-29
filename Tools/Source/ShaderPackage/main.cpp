@@ -197,6 +197,8 @@ int main(int argc, char *argv[])
 						ShaderEntry shader;
 						shader.name = progName;
 						std::stringstream command;
+						// Delete the last instance of this file
+						DeleteFile(outputFileName.c_str());
 						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
 						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
 						CreateDirectory(outputDir.c_str(), NULL);
@@ -209,6 +211,9 @@ int main(int argc, char *argv[])
 						FILE* pFileOut = nullptr;
 						shader.entry.eShaderType = (usg::ShaderType)(j);
 						fopen_s(&pFileOut, outputFileName.c_str(), "rb");
+						// FIXME: Should do cleanup
+						if (!pFileOut)
+							return -1;
 						fseek(pFileOut, 0, SEEK_END);
 						shader.binarySize = ftell(pFileOut);
 						fseek(pFileOut, 0, SEEK_SET);
