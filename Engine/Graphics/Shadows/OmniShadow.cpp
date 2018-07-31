@@ -31,6 +31,12 @@ namespace usg
 	{
 		m_cubeBuffer.InitCube(pDevice, uResX, uResY, DF_DEPTH_32F);
 		m_cubeTarget.Init(pDevice, NULL, &m_cubeBuffer);
+		usg::RenderTarget::RenderPassFlags flags;
+		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+		m_cubeTarget.InitRenderPass(pDevice, flags);
+
 		m_descriptorSet.Init(pDevice, pDevice->GetDescriptorSetLayout(g_pointShadowDesc));
 		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
 		samp.bEnableCmp = true;
