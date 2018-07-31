@@ -127,7 +127,7 @@ enum TextureUsageFlags
 	TU_FLAG_NONE = 0,
 	TU_FLAG_TRANSFER_SRC = (1 << 0),
 	TU_FLAG_FAST_MEM = (1 << 1),
-	TU_FLAG_SHADER_READ = (1 << 3),
+	TU_FLAG_SHADER_READ = (1 << 2),
 	TU_FLAG_COLOR_ATTACHMENT = (1 << 3),
 	TU_FLAG_DEPTH_ATTACHMENT = (1 << 4),
 	TU_FLAG_USE_HI_Z = (1 << 5),	// Depth-stencil textures only

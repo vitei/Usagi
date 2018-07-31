@@ -357,8 +357,8 @@ void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidt
 
 void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
 {
-	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_SHADER_READ);
-	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gColorFormatMap[eFormat], imageUsage);
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[eFormat], imageUsage);
 }
 
 
