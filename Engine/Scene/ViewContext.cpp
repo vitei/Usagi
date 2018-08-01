@@ -192,6 +192,8 @@ namespace usg {
 
 		Matrix4x4 mTmp;
 
+		m_LightingContext.Update(pDevice, this);
+
 		// Lock the buffer
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
@@ -314,9 +316,6 @@ namespace usg {
 			}
 		}
 
-
-
-		m_LightingContext.Update(pDevice, this);
 	}
 
 
