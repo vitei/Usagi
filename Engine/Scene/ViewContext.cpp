@@ -242,14 +242,16 @@ namespace usg {
 				{
 					// Update the linear depth texture
 					m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pPostFXSys->GetLinearDepthTex(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
-					m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 				}
 			}
 			const vector<TextureHndl>& cascadeTextures = m_LightingContext.GetCascadeTextures();
-			for (uint32 i = 0; i < cascadeTextures.size(); i++)
+			for (uint32 j = 0; j < cascadeTextures.size() && j<2; j++)
 			{
-				m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, cascadeTextures[i], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), i);
+				m_globalDescriptors[i].SetImageSamplerPairAtBinding(15, cascadeTextures[j], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), j);
+				m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, cascadeTextures[j], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), j);
 			}
+			m_globalDescriptors[i].UpdateDescriptors(pDevice);
+			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
 
 		// TODO: Handle maximum LOD ID
