@@ -82,6 +82,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	createInfo.mipLodBias = decl.LodBias;
 	createInfo.anisotropyEnable = decl.eAnisoLevel != SamplerDecl::ANISO_LEVEL_1;
 	createInfo.maxAnisotropy = g_anisoLevel[decl.eAnisoLevel];
+	createInfo.compareEnable = decl.bEnableCmp;
 	createInfo.compareOp = decl.bEnableCmp ? g_cmpFuncMap[decl.eCmpFnc] : VK_COMPARE_OP_NEVER;
 	createInfo.minLod = (float)decl.LodMinLevel;
 	createInfo.maxLod = 0.0f;

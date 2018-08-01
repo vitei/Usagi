@@ -75,8 +75,12 @@ namespace usg {
 
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
+		SamplerDecl shadowSamp(SF_LINEAR, SC_CLAMP);
+		shadowSamp.bEnableCmp = true;
+		shadowSamp.eCmpFnc = CF_LESS;
 		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
 		SamplerHndl sampler = pDevice->GetSampler(pointDecl);
+		SamplerHndl shadowSampler = pDevice->GetSampler(shadowSamp);
 		TextureHndl dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
 		m_LightingContext.Init(pDevice);
 		for (int i = 0; i < VIEW_COUNT; i++)
@@ -87,8 +91,8 @@ namespace usg {
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptors[i], 1);
 			m_globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
 			// FIXME: Want a dummy depth array texture
-			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, sampler, 0);
-			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, sampler, 1);
+			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 0);
+			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 1);
 
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
 
@@ -96,8 +100,8 @@ namespace usg {
 			m_globalDescriptorsWithDepth[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptorsWithDepth[i], 1);
 			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, sampler, 0);
-			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, sampler, 1);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 0);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 1);
 
 			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
