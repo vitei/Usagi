@@ -581,6 +581,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	depthPassP.bDepthWrite = true;
 	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
 
+	usg::DescriptorSetLayoutHndl globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_shadowGlobalDescriptorDecl);
+	pipelineState.layout.descriptorSets[0] = globalDescriptors;
+
 	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
 	U8String effectPath = fxRunTime.GetResource()->GetDepthEffectName();
 
@@ -597,6 +600,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 
 	U8String omniDepthName = fxRunTime.GetResource()->GetOmniDepthEffectName();
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.CStr());
+
+	globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_omniShadowGlobalDescriptorDecl);
+	pipelineState.layout.descriptorSets[0] = globalDescriptors;
 
 
 	m_meshArray[m_uMeshCount].pipelines.omniDepthPassPipeline = pipelineState;
