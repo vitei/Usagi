@@ -80,6 +80,22 @@ namespace usg
 		return tmpMatrix;
 	}
 
+
+	Matrix4x4 Matrix4x4::TextureBiasMatrix()
+	{
+		Matrix4x4 texBias = Matrix4x4::Identity();
+		// Map -1 to 1 for X and Y to 0 to 1
+		// Leave Z unaltered (0 to 1)
+		texBias.M[0][0] = 0.5f;
+		texBias.M[1][1] = 0.5f;
+		texBias.M[2][2] = 1.0f;
+		texBias.M[3][0] = 0.5f;
+		texBias.M[3][1] = 0.5f;
+		texBias.M[3][2] = 0.0f;
+
+		return texBias;
+	}
+
 	/*
 	void Matrix4x4::Orthographic(float32 fLeft, float32 fRight, float32 fBottom, float32 fTop, float32 fZNear, float32 fZFar, bool bOrient)
 	{

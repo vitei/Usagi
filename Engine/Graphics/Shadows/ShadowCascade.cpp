@@ -140,18 +140,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
 
     ShadowReadConstants* readData = m_readConstants.Lock<ShadowReadConstants>();
 
-    Matrix4x4 texBias;
-    texBias.LoadIdentity();
-    texBias.M[0][0] = 0.5f;
-#ifdef PLATFORM_WIIU
-    texBias.M[1][1] = -0.5f;
-#else
-    texBias.M[1][1] = 0.5f;
-#endif
-    texBias.M[2][2] = 0.5f;
-    texBias.M[3][0] = 0.5f;
-    texBias.M[3][1] = 0.5f;
-    texBias.M[3][2] = 0.5f;
+	Matrix4x4 texBias = Matrix4x4::TextureBiasMatrix();
 	
     Matrix4x4 mInvView;
     sceneCam.GetViewMatrix().GetInverse(mInvView);

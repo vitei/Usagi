@@ -103,14 +103,7 @@ namespace usg
 
 		m_camera.SetUp(mViewMat, mProj);
 
-	    Matrix4x4 texBias;
-	    texBias.LoadIdentity();
-	    texBias.M[0][0] = 0.5f;
-	    texBias.M[1][1] = 0.5f;	// Set to -0.5f for inverted texture reads
-	    texBias.M[2][2] = 0.5f;
-	    texBias.M[3][0] = 0.5f;
-	    texBias.M[3][1] = 0.5f;
-	    texBias.M[3][2] = 0.5f;
+		Matrix4x4 texBias = Matrix4x4::TextureBiasMatrix();
 
 		SpotShadowConstants* pData = m_readConstants.Lock<SpotShadowConstants>();
 		pData->mLightMtx = mViewMat * mProj * texBias;

@@ -134,6 +134,7 @@ public:
 	void TransformPerspective(float x, float y, float z, Vector4f& vecOut);
 
 
+	static Matrix4x4 TextureBiasMatrix();
 	static Matrix4x4 TranslationMatrix(const Vector3f& t)
 	{
 		Matrix4x4 mtx;
