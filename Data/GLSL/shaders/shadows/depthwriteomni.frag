@@ -1,12 +1,5 @@
 #include "../includes/platformdefines.inc"
-
-// FIXME: When defines are working in vulkan include global_3d.inc instead
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
-{
-	mat4 	mMatrices[6];
-	vec4	lightPos;
-	float 	lightFarDist;
-};
+#include "../includes/global_3d.inc"
 
 ATTRIB_LOC(0) in vec4 go_vFragPos;
 

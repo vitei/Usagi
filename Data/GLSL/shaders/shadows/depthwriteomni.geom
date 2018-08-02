@@ -1,11 +1,5 @@
 #include "../includes/platformdefines.inc"
-
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
-{
-    mat4    mMatrices[6];
-    vec4    lightPos;
-    float   lightFarDist;
-};
+#include "../includes/global_3d.inc"
 
 layout (triangles) in;
 layout (triangle_strip, max_vertices=18) out;

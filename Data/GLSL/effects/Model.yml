@@ -8,5 +8,11 @@ Effects:
         defines: DEFERRED_SHADING
       - name: depth
         defines: SHADOW_PASS
+  - name: FBXDefault
+    vert: models/fbxdefault
+    geom: shadows/depthwriteomni
+    frag: shadows/depthwriteomni
+    has_default: false
+    define_sets:
       - name: omni_depth
         defines: SHADOW_PASS OMNI_DEPTH
