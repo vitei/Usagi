@@ -1,9 +1,9 @@
 #ifndef SHADOW_PASS
 
 #ifdef SHADOW_READ
-SAMPLER_LOC(1, 15) uniform sampler2DShadow sampler15;
+SAMPLER_LOC(2, 15) uniform sampler2DShadow sampler15;
 
-BUFFER_LAYOUT(1, UBO_SHADOW_ID) uniform Shadow
+BUFFER_LAYOUT(2, UBO_SHADOW_ID) uniform Shadow
 {
     mat4        mShadowMtx;
     mat4        mShadowMtxInvView;

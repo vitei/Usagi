@@ -54,6 +54,11 @@ const DescriptorDeclaration g_spotLightShadowDescDecl[] =
 
 const DescriptorDeclaration* SpotLight::GetDescriptorDecl()
 {
+	return g_spotLightDescDecl;
+}
+
+const DescriptorDeclaration* SpotLight::GetDescriptorDeclShadow()
+{
 	return g_spotLightShadowDescDecl;
 }
 

@@ -9,12 +9,6 @@
 namespace usg
 {
 
-	const DescriptorDeclaration g_pointShadowDesc[] =
-	{
-		DESCRIPTOR_ELEMENT(0, DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
-		DESCRIPTOR_END()
-	};
-
 	OmniShadow::OmniShadow()
 	{
 		m_pShadowContext = nullptr;
@@ -37,13 +31,6 @@ namespace usg
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 		m_cubeTarget.InitRenderPass(pDevice, flags);
 
-		m_descriptorSet.Init(pDevice, pDevice->GetDescriptorSetLayout(g_pointShadowDesc));
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
-		samp.bEnableCmp = true;
-		samp.eCmpFnc = CF_LESS;
-		m_descriptorSet.SetImageSamplerPair(0, m_cubeBuffer.GetTexture(), pDevice->GetSampler(samp));
-		m_descriptorSet.UpdateDescriptors(pDevice);
-
 		m_pShadowContext = pScene->CreateOmniShadowContext(pDevice);
 		m_pShadowContext->Init(&m_sphere);
 		m_pShadowContext->SetActive(false);
@@ -52,9 +39,13 @@ namespace usg
 		m_bEnableUpdate = true;
 	}
 
+	TextureHndl OmniShadow::GetShadowTexture()
+	{
+		return m_cubeBuffer.GetTexture();
+	}
+
 	void OmniShadow::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	{
-		m_descriptorSet.CleanUp(pDevice);
 		m_cubeBuffer.CleanUp(pDevice);
 		m_cubeTarget.CleanUp(pDevice);
 		if (m_pShadowContext)

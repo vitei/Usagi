@@ -54,6 +54,11 @@ const DescriptorDeclaration g_projLightShadowDescDecl[] =
 
 const DescriptorDeclaration* ProjectionLight::GetDescriptorDecl()
 {
+	return g_projLightDescDesc;
+}
+
+const DescriptorDeclaration* ProjectionLight::GetDescriptorDeclShadow()
+{
 	return g_projLightShadowDescDecl;
 }
 

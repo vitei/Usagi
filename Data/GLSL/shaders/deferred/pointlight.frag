@@ -11,7 +11,7 @@ BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 };
 
 #ifdef SHADOW_READ
-SAMPLER_LOC(0, 0) uniform samplerCubeShadow sampler0;	
+SAMPLER_LOC(2, 9) uniform samplerCubeShadow sampler9;	
 #endif
 
 ATTRIB_LOC(0) in vec4 vo_vTexCoord;
@@ -53,7 +53,7 @@ float ShadowCalculationSoft(vec3 fragPos)
 	{
 		float sampleBias = fBias * length(poissonDisk12[i]);
 		vec4 tc = vec4( vFragToLight + (((poissonDisk12[i].x * vRight) + (poissonDisk12[i].y * vUp)) * fDiskRadius), fCurrentDepth + sampleBias);
-		fShadow += texture(sampler0, tc);
+		fShadow += texture(sampler9, tc);
 	}
 	fShadow /= float(12);  
 
@@ -69,7 +69,7 @@ float ShadowCalculation(vec3 fragPos)
     vFragToLight.y = 1.0 - vFragToLight.y;
 	vec4 tc = vec4( normalize(vFragToLight), fCurrentDepth + fBias);
 
-    float readValue = texture(sampler0, tc);
+    float readValue = texture(sampler9, tc);
     
     return readValue;
 }  
