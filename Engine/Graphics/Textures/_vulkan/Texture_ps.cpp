@@ -266,11 +266,7 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	if (eUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
 	{
 		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormat, &props);
-		if (props.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
-		{
-			image_create_info.tiling = VK_IMAGE_TILING_LINEAR;
-		}
-		else if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
 		{
 			image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 		}
