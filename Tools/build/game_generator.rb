@@ -16,9 +16,6 @@ def build_pc_data(config, n, platform)
   shaders = build_pc_shaders(config, n, platform)
   data_deps.merge shaders
 
-  effects = build_pc_effects(config, n)
-  data_deps.merge effects
-
   textures = build_pc_textures(config, n)
   data_deps.merge textures
 
@@ -219,26 +216,8 @@ def build_shader_pak_for_dir(config, n, effect_dir, shader_dir)
   end
 end
 
-def build_pc_effects(config, n)
-  game_effects = build_pc_effects_for_dir(config, n, config.effects_dir(false))
-  engine_effects = build_pc_effects_for_dir(config, n, config.effects_dir)
 
-  game_effects + engine_effects
-end
 
-def build_pc_effects_for_dir(config, n, effects_dir)
-  effects = FileList["#{effects_dir}/**/*"].exclude { |f| File.directory?(f) }
-
-  targets = effects.map do |input|
-    output = "#{config.effects_out_dir}/" + input.sub(/#{effects_dir}\//, '')
-
-    [input, output]
-  end
-
-  GeneratorUtil.copy_files(n, targets)
-
-  targets.map{|i, o| o}
-end
 
 def build_pc_textures(config, n)
   game_textures = build_pc_textures_for_dir(config, n, config.textures_dir(false))
