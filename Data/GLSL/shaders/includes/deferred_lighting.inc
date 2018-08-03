@@ -47,7 +47,7 @@ void main(void)
 		if(vPos.z < cascades[0].vSplitDistance.w)
 		{
 			vec3 vWorldPos = (vec4(vPos,1.0) * mInvViewMat).xyz;
-			float fShadow = SampleShadowmap(vPos.z, vWorldPos.xyz, cascades[0], sampler15[0]);
+			float fShadow = SampleShadowmap(vPos.z, vWorldPos.xyz, 0);
 			vec4 vShadowMul = mix(vShadowColor, vec4(1.0), fShadow);
 
 			vDiffuse *= vShadowMul;

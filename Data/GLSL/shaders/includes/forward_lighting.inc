@@ -104,7 +104,7 @@ void DirectionLighting(vec3 vNormal, vec3 vViewDir, vec3 vWorldPos, float fViewD
 		}
 		else
 		{
-			float fShadow = SampleShadowmap(fViewDepth, vWorldPos, cascades[0], sampler15[0]);
+			float fShadow = SampleShadowmap(fViewDepth, vWorldPos, 0);
 			vec4 vShadowMul = mix(vShadowColor, vec4(1.0), fShadow);
 			// For now assuming always one light
 			{

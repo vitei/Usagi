@@ -1,8 +1,8 @@
 #include "includes/platformdefines.inc"
 #include "includes/global_3d.inc"
 #include "includes/shadow/poisson_values.inc"
-#include "includes/shadow/globalshadow_read.inc"
 #include "includes/lighting_buffer.inc"
+#include "includes/shadow/globalshadow_read.inc"
 #include "includes/forward_lighting.inc"
 #include "includes/depth_write.inc"
 
