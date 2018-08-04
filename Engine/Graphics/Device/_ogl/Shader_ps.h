@@ -9,11 +9,11 @@
 
 namespace usg {
 
-class GLSLShader
+class Shader_ps
 {
 public:
-	GLSLShader();
-	~GLSLShader();
+	Shader_ps();
+	~Shader_ps();
 
 	bool Init(const U8String& effectName, GLenum shaderType, const char* szDefines);
 	bool Init(char** szStrings, uint32 uCount, GLenum shaderType, const char* szName = NULL);

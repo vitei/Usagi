@@ -15,12 +15,12 @@ namespace usg {
 const int MAX_STRING_ARRAY = 30;
 
 
-GLSLShader::GLSLShader()
+Shader_ps::Shader_ps()
 {
 	m_shader = GL_INVALID_INDEX;
 }
 
-GLSLShader::~GLSLShader()
+Shader_ps::~Shader_ps()
 {
 	if (m_shader != GL_INVALID_INDEX)
 	{
@@ -29,7 +29,7 @@ GLSLShader::~GLSLShader()
 	}
 }
 
-void GLSLShader::PrintErrors(const char* compiler_log, const char** szStrings, uint32 uArrayCount)
+void Shader_ps::PrintErrors(const char* compiler_log, const char** szStrings, uint32 uArrayCount)
 {
 	// Horribly nasty code for my convenience. Ok as the game will fall over anyway if we reached here
 	const char* log = compiler_log;
@@ -73,7 +73,7 @@ void GLSLShader::PrintErrors(const char* compiler_log, const char** szStrings, u
 	}
 }
 
-void GLSLShader::HandleError(const char* szName, const char** szStrings, uint32 uArrayCount)
+void Shader_ps::HandleError(const char* szName, const char** szStrings, uint32 uArrayCount)
 {
 	GLint blen = 0;	
 	GLsizei slen = 0;
@@ -101,7 +101,7 @@ void GLSLShader::HandleError(const char* szName, const char** szStrings, uint32 
 }
 
 
-bool GLSLShader::Init(char** szStrings, uint32 uCount, GLenum shaderType, const char* szName)
+bool Shader_ps::Init(char** szStrings, uint32 uCount, GLenum shaderType, const char* szName)
 {
 	
    // for(int i=0; i<uCount; i++)
@@ -126,7 +126,7 @@ bool GLSLShader::Init(char** szStrings, uint32 uCount, GLenum shaderType, const 
 	return true;
 }
 
-bool GLSLShader::LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
+bool Shader_ps::LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
 {
 	szPragmaLine = strstr(szProgram, "#include");
 	if(!szPragmaLine)
@@ -151,7 +151,7 @@ bool GLSLShader::LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNex
 	return true;
 }
 
-bool GLSLShader::Init(const U8String& effectName, GLenum shaderType, const char* szDefines)
+bool Shader_ps::Init(const U8String& effectName, GLenum shaderType, const char* szDefines)
 {    
 	if (szDefines)
 	{

@@ -62,8 +62,97 @@ struct EffectDefinition
 	std::string prog[(uint32)usg::ShaderType::COUNT];
 
 	std::vector<DefineSets> sets;
+
 };
 
+bool ParseManually(const char* szFileName, const char* szDefines, std::string& fileOut, std::vector<std::string>& referencedFiles);
+
+
+bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+{
+	std::string shaderCode;
+	std::string defines = setDefines;
+	defines += " PLATFORM_PC";
+	defines += " API_OGL";
+	
+	if (ParseManually(inputFileName.c_str(), defines.c_str(), shaderCode, referencedFiles))
+	{
+		shader.binary = new uint8[shaderCode.size()];
+		memcpy(shader.binary, shaderCode.data(), shaderCode.size());
+		shader.binarySize = (uint32)shaderCode.size();
+		return true;
+	}
+	return false;
+}
+
+bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+{
+	// Get the input file name
+	std::string outputFileName = tempFileName;
+
+	std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
+	std::string defineList = setDefines;
+	size_t nextDefine = std::string::npos;
+	while (!defineList.empty())
+	{
+		nextDefine = defineList.find_first_of(' ');
+		if (nextDefine != std::string::npos)
+		{
+			defines += std::string(" -D") + defineList.substr(0, nextDefine);
+			defineList = defineList.substr(nextDefine + 1);
+		}
+		else
+		{
+			// The last define
+			defines += std::string(" -D") + defineList;
+			defineList.clear();
+		}
+
+	} while (nextDefine != std::string::npos);
+
+	std::stringstream command;
+	// Delete the last instance of this file
+	DeleteFile(outputFileName.c_str());
+	std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
+	std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
+	CreateDirectory(outputDir.c_str(), NULL);
+
+	command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
+	//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
+	// FIXME: code for glslang natively, but for now it is cleaner to use the command line
+	system(command.str().c_str());
+
+	FILE* pFileOut = nullptr;
+	fopen_s(&pFileOut, outputFileName.c_str(), "rb");
+	// FIXME: Should do cleanup
+	if (!pFileOut)
+		return false;
+	fseek(pFileOut, 0, SEEK_END);
+	shader.binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	shader.binary = new uint8[shader.binarySize];
+	fread(shader.binary, 1, shader.binarySize, pFileOut);
+
+
+	std::string depFileName = outputFileName + ".d";
+	std::ifstream depFile(depFileName);
+
+	std::string intermediateDep;
+	std::getline(depFile, intermediateDep, ':');
+	while (depFile >> intermediateDep)
+	{
+		std::replace(intermediateDep.begin(), intermediateDep.end(), '\\', '/');
+		if (std::find(referencedFiles.begin(), referencedFiles.end(), intermediateDep) == referencedFiles.end())
+		{
+			referencedFiles.push_back(intermediateDep);
+		}
+	}
+
+	fclose(pFileOut);
+	depFile.close();
+
+	return true;
+}
 
 int main(int argc, char *argv[])
 {
@@ -154,25 +243,6 @@ int main(int argc, char *argv[])
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
-			std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
-			std::string defineList = def.sets[i].defines;
-			size_t nextDefine = std::string::npos;
-			while(!defineList.empty())
-			{
-				nextDefine = defineList.find_first_of(' ');
-				if (nextDefine != std::string::npos)
-				{
-					defines += std::string(" -D") + defineList.substr(0, nextDefine);
-					defineList = defineList.substr(nextDefine + 1);
-				}
-				else
-				{
-					// The last define
-					defines += std::string(" -D") + defineList;
-					defineList.clear();
-				}
-
-			} while (nextDefine != std::string::npos);
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
 				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
@@ -189,54 +259,31 @@ int main(int argc, char *argv[])
 				{
 					if (requiredShaders[j].find(def.sets[i].CRC[j]) == requiredShaders[j].end())
 					{
-						// Get the input file name
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
-						std::string outputFileName = intFileName + ".SPV";
 						inputFileName = shaderDir + "/" + inputFileName;
-						outputFileName = tempDir + "/" + outputFileName;
 						ShaderEntry shader;
 						shader.name = progName;
-						std::stringstream command;
-						// Delete the last instance of this file
-						DeleteFile(outputFileName.c_str());
-						std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
-						std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
-						CreateDirectory(outputDir.c_str(), NULL);
-
-						command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
-						//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
-						// FIXME: code for glslang natively, but for now it is cleaner to use the command line
-						system(command.str().c_str());
-
-						FILE* pFileOut = nullptr;
 						shader.entry.eShaderType = (usg::ShaderType)(j);
-						fopen_s(&pFileOut, outputFileName.c_str(), "rb");
-						// FIXME: Should do cleanup
-						if (!pFileOut)
-							return -1;
-						fseek(pFileOut, 0, SEEK_END);
-						shader.binarySize = ftell(pFileOut);
-						fseek(pFileOut, 0, SEEK_SET);
-						shader.binary = new uint8[shader.binarySize];
-						fread(shader.binary, 1, shader.binarySize, pFileOut);
-						requiredShaders[j][def.sets[i].CRC[j]] = shader;
-
-						std::string depFileName = outputFileName + ".d";
-						std::ifstream depFile(depFileName);
-
-						std::string intermediateDep;
-						std::getline(depFile, intermediateDep, ':');
-						while ( depFile >> intermediateDep )
+						bool bSuccess = false;
+						if (api == "vulkan")
 						{
-							std::replace(intermediateDep.begin(), intermediateDep.end(),'\\', '/');
-							if (std::find(referencedFiles.begin(), referencedFiles.end(), intermediateDep) == referencedFiles.end())
-							{
-								referencedFiles.push_back(intermediateDep);
-							}
+							std::string tempFileName = intFileName + ".SPV";
+							tempFileName = tempDir + "/" + tempFileName;
+							bSuccess = CompileVulkanShader(inputFileName, def.sets[i].defines, tempFileName, shader, referencedFiles);
 						}
-
-						fclose(pFileOut);
-						depFile.close();
+						else if (api == "ogl")
+						{
+							bSuccess = CompileOGLShader(inputFileName, def.sets[i].defines, shader, referencedFiles);
+						}
+						else
+						{
+							ASSERT(false);
+						}
+						if (!bSuccess)
+						{
+							return -1;
+						}
+						requiredShaders[j][def.sets[i].CRC[j]] = shader;
 					}
 				}
 			}

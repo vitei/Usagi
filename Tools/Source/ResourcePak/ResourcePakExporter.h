@@ -18,7 +18,7 @@ struct ResourceEntry
 
 namespace ResourcePakExporter
 {
-	bool Export(const char* szFileName, std::vector<ResourceEntry*>& entries)
+	inline bool Export(const char* szFileName, std::vector<ResourceEntry*>& entries)
 	{
 		uint32 uDataOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
 		for (uint32 i = 0; i < entries.size(); i++)
