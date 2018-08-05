@@ -167,26 +167,14 @@ end
 
 def build_pc_shaders(config, n, platform)
   if platform.underscore_dirs_whitelist.include?("_vulkan")
-    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false))
-    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir)
+    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false), 'vulkan')
+    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir, 'vulkan')
   else
-    game_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir(false))
-    engine_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir)
+    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false), 'ogl')
+    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir, 'ogl')
   end
 
   game_shaders + engine_shaders
-end
-
-def build_pc_shaders_for_dir(config, n, shader_dir)
-  targets = FileList["#{shader_dir}/**/*"].exclude{|f| File.directory?(f)}.map do |input|
-    output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '')
-
-    [input, output]
-  end
-
-  GeneratorUtil.copy_files(n, targets)
-
-  targets.map{|i, o| o}
 end
 
 
@@ -202,7 +190,7 @@ def build_vulkan_shaders_for_dir(config, n, shader_dir)
   end
 end
 
-def build_shader_pak_for_dir(config, n, effect_dir, shader_dir)
+def build_shader_pak_for_dir(config, n, effect_dir, shader_dir, api)
   targets = FileList["#{effect_dir}/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
     output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".pak")
     defines = ""
@@ -210,7 +198,8 @@ def build_shader_pak_for_dir(config, n, effect_dir, shader_dir)
         { :implicit_deps => [config.shader_pack],
           :variables => {'out' => to_windows_path(output),
         'in' => input,
-        'shader_dir' => shader_dir}} )
+        'shader_dir' => shader_dir,
+        'api' => api }} )
 
     output
   end

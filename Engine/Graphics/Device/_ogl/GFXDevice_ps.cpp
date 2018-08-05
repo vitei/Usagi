@@ -19,7 +19,6 @@ OpenGLContext	GFXDevice_ps::m_sContext;
 GFXDevice_ps::GFXDevice_ps()
 {
 	m_pParent = NULL;
-	m_uStockCount = 0;
 	m_uQueryId = 0;
 	m_fGPUTime = 0.0f;
 	for (uint32 i = 0; i < GFX_NUM_DYN_BUFF; i++)
@@ -127,30 +126,6 @@ void GFXDevice_ps::Begin()
 void GFXDevice_ps::End()
 {
 	glEndQuery(GL_TIME_ELAPSED);
-}
-
-GLSLShader* GFXDevice_ps::GetShaderFromStock(const U8String &name, GLenum eType, const char* szDefines)
-{
-	uint32 uCRC = szDefines ? utl::CRC32(szDefines) : 0;
-	for(uint32 uId=0; uId<m_uStockCount; uId++)
-	{
-		if( m_stockShaders[uId].GetName() == name && m_stockShaders[uId].GetShaderType() == eType && m_stockShaders[uId].GetDefinesCRC() == uCRC)
-		{
-			return &m_stockShaders[uId];
-		}
-	}
-
-	if(m_uStockCount<MAX_STOCK_SHADERS)
-	{
-		GLSLShader* pNext = &m_stockShaders[m_uStockCount];
-		if( pNext->Init(name, eType, szDefines) )
-		{
-			m_uStockCount++;
-			return pNext;
-		}
-	}
-	
-	return NULL;
 }
 
 

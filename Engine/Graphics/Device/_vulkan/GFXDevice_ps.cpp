@@ -55,7 +55,6 @@ GFXDevice_ps::GFXDevice_ps()
 	m_uQueueFamilyCount = 0;
 	m_uGPUCount = 0;
 	m_pQueueProps = NULL;
-	m_uStockCount = 0;
 	m_uDisplayCount = 0;
 	m_fGPUTime = 0.0f;
 }
@@ -438,79 +437,6 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 	return ~0U;
 }
 
-
-VkShaderModule GFXDevice_ps::GetShaderFromStock(const U8String &name, VkShaderStageFlagBits shaderType)
-{
-	for (uint32 uId = 0; uId < m_uStockCount; uId++)
-	{
-		if (m_stockShaders[uId].shaderType == shaderType && str::Compare(m_stockShaders[uId].name, name.CStr()))
-		{
-			return m_stockShaders[uId].module;
-		}
-	}
-
-	if (m_uStockCount < MAX_STOCK_SHADERS)
-	{
-		U8String fullName = name;
-		switch (shaderType)
-		{
-		case VK_SHADER_STAGE_VERTEX_BIT:
-			fullName += ".vert.spv";
-			break;
-		case VK_SHADER_STAGE_GEOMETRY_BIT:
-			fullName += ".geom.spv";
-			break;
-		case VK_SHADER_STAGE_FRAGMENT_BIT:
-			fullName += ".frag.spv";
-			break;
-		default:
-			ASSERT(false);
-		}
-		Shader* pNext = &m_stockShaders[m_uStockCount];
-		pNext->shaderType = shaderType;
-		str::Copy(pNext->name, fullName.CStr(), USG_MAX_PATH);
-
-		size_t size;
-
-		FILE *fp = NULL;
-		fopen_s(&fp, pNext->name, "rb");
-		ASSERT(fp!=NULL);
-
-		fseek(fp, 0L, SEEK_END);
-		size = ftell(fp);
-
-		fseek(fp, 0L, SEEK_SET);
-
-		//shaderCode = malloc(size);
-		char *shaderCode = new char[size];
-		size_t retval = fread(shaderCode, size, 1, fp);
-		ASSERT(retval == 1);
-		ASSERT(size > 0);
-
-		fclose(fp);
-
-		VkShaderModule shaderModule;
-		VkShaderModuleCreateInfo moduleCreateInfo;
-		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		moduleCreateInfo.pNext = NULL;
-		moduleCreateInfo.codeSize = size;
-		moduleCreateInfo.pCode = (uint32_t*)shaderCode;
-		moduleCreateInfo.flags = 0;
-
-		VkResult result = vkCreateShaderModule(m_vkDevice, &moduleCreateInfo, NULL, &shaderModule);
-		ASSERT(result == VK_SUCCESS);
-
-		delete[] shaderCode;
-
-		return shaderModule;
-
-		m_uStockCount++;
-		return pNext->module;
-	}
-
-	ASSERT(false);
-	return NULL;
-}
 
 void GFXDevice_ps::WaitIdle()
 {

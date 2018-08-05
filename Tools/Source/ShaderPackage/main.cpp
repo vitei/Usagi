@@ -37,8 +37,8 @@ struct ShaderEntry : public ResourceEntry
 {
 	virtual void* GetData() override { return binary; }
 	virtual uint32 GetDataSize() override { return binarySize; };
-	virtual void* GetCustomHeader() { return nullptr; }//{ return &entry; }
-	virtual uint32 GetCustomHeaderSize() {return 0; }//{ return sizeof(entry); }
+	virtual void* GetCustomHeader() { return &entry; }
+	virtual uint32 GetCustomHeaderSize() {return sizeof(entry); }
 
 	usg::PakFileDecl::ShaderEntry entry;
 
@@ -72,14 +72,16 @@ bool CompileOGLShader(const std::string& inputFileName, const std::string& setDe
 {
 	std::string shaderCode;
 	std::string defines = setDefines;
-	defines += " PLATFORM_PC";
-	defines += " API_OGL";
+	if(setDefines.size() > 0)
+		defines += " ";
+	defines += "PLATFORM_PC ";
+	defines += "API_OGL";
 	
 	if (ParseManually(inputFileName.c_str(), defines.c_str(), shaderCode, referencedFiles))
 	{
-		shader.binary = new uint8[shaderCode.size()];
-		memcpy(shader.binary, shaderCode.data(), shaderCode.size());
-		shader.binarySize = (uint32)shaderCode.size();
+		shader.binary = new uint8[shaderCode.size()+1];
+		memcpy(shader.binary, shaderCode.data(), shaderCode.size()+1);
+		shader.binarySize = (uint32)shaderCode.size()+1;
 		return true;
 	}
 	return false;

@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Core/File/File.h"
+#include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/String/String_Util.h"
 #include API_HEADER(Engine/Graphics/Device, GLSLShader.h)
@@ -103,8 +104,37 @@ void Effect_ps::GetShaderNames(const char* effectName, U8String &vsOut, U8String
 	}
 }
 
+
+bool Effect_ps::Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize)
+{
+	const PakFileDecl::EffectEntry* pEffectHdr = PakFileDecl::GetCustomHeader<PakFileDecl::EffectEntry>(pFileHeader);
+
+	Shader* pShaders[(uint32)ShaderType::COUNT] = {};
+
+	for (uint32 i = 0; i < (uint32)ShaderType::COUNT; i++)
+	{
+		if (pEffectHdr->CRC[i] != 0)
+		{
+			ResourceBase* pResourceBase = pakFile->GetResource(pEffectHdr->CRC[i]);
+			ASSERT(pResourceBase && pResourceBase->GetResourceType() == ResourceType::SHADER);
+			if (pResourceBase)
+			{
+				pShaders[i] = (Shader*)pResourceBase;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	Init(pShaders[(int)ShaderType::VS], pShaders[(int)ShaderType::PS], pShaders[(int)ShaderType::GS]);
+
+	return true;
+}
+
 void Effect_ps::Init(GFXDevice* pDevice, const char* szEffectName)
 {
+#if 0
 	GLSLShader* pVertex		= NULL;
 	GLSLShader* pFragment	= NULL;
 	GLSLShader* pGeometry	= NULL;
@@ -138,18 +168,19 @@ void Effect_ps::Init(GFXDevice* pDevice, const char* szEffectName)
 	}
 
 	Init(pVertex, pFragment, pGeometry);
-	
+#endif
+	ASSERT(false);
 }
 
 
-void Effect_ps::Init(const GLSLShader* pVertex, const GLSLShader* pFrag, const GLSLShader* pGeom)
+void Effect_ps::Init(const Shader* pVertex, const Shader* pFrag, const Shader* pGeom)
 {
 	m_programObject =  glCreateProgram();
-	glAttachShader(m_programObject, pVertex->GetHandle());
-	glAttachShader(m_programObject, pFrag->GetHandle());
+	glAttachShader(m_programObject, pVertex->GetPlatform().GetHandle());
+	glAttachShader(m_programObject, pFrag->GetPlatform().GetHandle());
 	if(pGeom)
 	{
-		glAttachShader(m_programObject, pGeom->GetHandle());
+		glAttachShader(m_programObject, pGeom->GetPlatform().GetHandle());
 	}
 
 	glLinkProgram(m_programObject);

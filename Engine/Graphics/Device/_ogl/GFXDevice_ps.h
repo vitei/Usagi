@@ -37,11 +37,10 @@ public:
 
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
-	GLSLShader* GetShaderFromStock(const U8String &name, GLenum shaderType, const char* szDefines);
-
 	void FinishedStaticLoad() {  }
 	void ClearDynamicResources() {  }
 	bool Is3DEnabled() const { return false; }
+	void WaitIdle() {}
 
 	// Bit of a hack to get around this legacy opengl stuff, we need a window that matches the pixel format of all the windows we intend to use
 	// to set up our original opengl context. Must be called first
@@ -52,8 +51,7 @@ public:
 private:
 	enum
 	{
-		MAX_DISPLAY_COUNT = 4,	// TODO: Remove hardcoding
-		MAX_STOCK_SHADERS = 1000
+		MAX_DISPLAY_COUNT = 4	// TODO: Remove hardcoding
 	};
 
 	GFXDevice*		m_pParent;
@@ -61,8 +59,6 @@ private:
 	uint32			m_uDisplayCount;
 	static OpenGLContext	m_sContext;
 
-	GLSLShader	m_stockShaders[MAX_STOCK_SHADERS];
-	uint32		m_uStockCount;
 	GLuint		m_uPerformanceQueries[GFX_NUM_DYN_BUFF];
 	uint32		m_uQueryId;
 	float		m_fGPUTime;

@@ -27,7 +27,7 @@ private:
 	GLenum				m_srcAlpha;
 	GLenum				m_dstRgb;
 	GLenum				m_dstAlpha;
-	uint32				m_uColorMask[MAX_RENDER_TARGETS];
+	uint32				m_uColorMask[MAX_COLOR_TARGETS];
 
 	GLenum				m_eAlphaTest;
 	float32				m_fAlphaRef;

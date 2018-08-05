@@ -63,9 +63,22 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 		{
 			strcpy_s(szDefineLoc, &defines[256] - szDefineLoc, "#define ");
 			szDefineLoc += 8;
+			while (*szDefines == ' ')
+			{
+				szDefines++;
+			} 
+
 			do
 			{
-				*szDefineLoc++ = *szDefines;
+				if (*szDefines == '=')
+				{
+					*szDefineLoc++ = ' ';
+				}
+				else
+				{
+					*szDefineLoc++ = *szDefines;
+				}
+				
 				szDefines++;
 			} while (*szDefines != ' ' && *szDefines != '\0');
 			*szDefineLoc++ = '\n';
@@ -95,14 +108,9 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 
 
 	stringArray[0] = defines;
-#ifdef PLATFORM_OSX
-	stringArray[1] = "#define PLATFORM_OSX 1\n#define API_OGL\n";
-#else
-	stringArray[1] = "#define PLATFORM_PC 1\n#define API_OGL\n";
-#endif
-	stringArray[2] = buffer[0];
+	stringArray[1] = buffer[0];
 
-	uint32 uArrayIndex = 2;
+	uint32 uArrayIndex = 1;
 	bool bFound = true;
 	char* szPragma = NULL;
 	while (bFound)
@@ -129,9 +137,12 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 
 		FILE* pIncludeFile;
 		std::string includeName = szFileName;
-		includeName = includeName.substr(0, includeName.find_last_of("."));
+		includeName = includeName.substr(0, includeName.find_last_of("\\/"));
+		includeName += "/";
 		includeName += szPragma;
-		referencedFiles.push_back(includeName);
+		char fullPath[256];
+		_fullpath(fullPath, includeName.c_str(), 256);
+		referencedFiles.push_back(fullPath);
 		fopen_s(&pIncludeFile, includeName.c_str(), "rb");
 		ASSERT(pIncludeFile);
 		if (!pIncludeFile)
@@ -156,7 +167,7 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 	}
 
 	fileOut = "";
-	for (uint32 i = 0; i < uArrayIndex; i++)
+	for (uint32 i = 0; i < uArrayIndex+1; i++)
 	{
 		fileOut += stringArray[i];
 	}

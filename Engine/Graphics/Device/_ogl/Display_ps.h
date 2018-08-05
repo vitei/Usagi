@@ -27,11 +27,13 @@ public:
 	void Transfer(RenderTarget* pTarget);
 	void TransferRect(RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void Present();
+	RenderPassHndl& GetRenderPass() { return m_directRenderPass; }
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { xOut = m_uWidth; yOut = m_uHeight; return true; }
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { xOut = m_uWidth; yOut = m_uHeight; return true; }
 	void ScreenShot(const char* szFileName);
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
     void Resize(GFXDevice* pDevice);
+    void Minimized(usg::GFXDevice* pDevice) {}
 	void SetDirty() { m_bDirty = true; }
 	
 	//RenderTarget &GetRenderTarget() { return m_renderTarget; }
@@ -45,6 +47,7 @@ private:
 
 	static OpenGLContext	m_sContext;
 
+	usg::RenderPassHndl	m_directRenderPass;
 	HDC				m_hdc;
 	WindHndl		m_hwnd;
 	uint32			m_uID;

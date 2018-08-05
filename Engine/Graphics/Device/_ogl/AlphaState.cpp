@@ -63,7 +63,7 @@ void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId
 	m_eAlphaTest = g_alphaTestMap[decl.eAlphaTest];
 	m_fAlphaRef = ((float)decl.uAlphaRef)/255.f;
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		m_uColorMask[i]	= decl.uColorMask[i];
 	}
@@ -90,7 +90,7 @@ void AlphaState::Apply() const
 	}
      */
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 	//	glColorMaski(i, m_uColorMask[i]&RT_MASK_RED, m_uColorMask[i]&RT_MASK_GREEN, m_uColorMask[i]&RT_MASK_BLUE, m_uColorMask[i]&RT_MASK_ALPHA);
 		glColorMaski(i, (m_uColorMask[i] & RT_MASK_RED) != 0, (m_uColorMask[i] & RT_MASK_GREEN) != 0, (m_uColorMask[i] & RT_MASK_BLUE) != 0, (m_uColorMask[i] & RT_MASK_ALPHA) != 0);

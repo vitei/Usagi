@@ -2,6 +2,7 @@
 
 in GeometryData
 {
+	ATTRIB_LOC(0) vec2  go_vPos;
     ATTRIB_LOC(1) vec4 	go_vColor;
     ATTRIB_LOC(2) vec4 	go_vBgColor;	// Not currently used on standard font rendering
     ATTRIB_LOC(3) vec2 	go_vTexcoord;

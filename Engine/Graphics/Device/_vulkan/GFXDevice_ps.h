@@ -51,8 +51,6 @@ public:
 	uint32 GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags properties, VkMemoryPropertyFlags prefferedProps = 0) const;
 	VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
 
-	VkShaderModule GetShaderFromStock(const U8String &name, VkShaderStageFlagBits shaderType);
-
 	void FinishedStaticLoad() {  }
 	void ClearDynamicResources() {  }
 	bool Is3DEnabled() const { return false; }
@@ -71,7 +69,6 @@ private:
 	{
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
-		MAX_STOCK_SHADERS = 1000,
 		CALLBACK_COUNT = 2
 	};
 
@@ -106,8 +103,6 @@ private:
 	DisplaySettings						m_diplayInfo[MAX_DISPLAY_COUNT];
 	uint32								m_uDisplayCount;
 
-	Shader		m_stockShaders[MAX_STOCK_SHADERS];
-	uint32		m_uStockCount;
 	float		m_fGPUTime;
 };
 

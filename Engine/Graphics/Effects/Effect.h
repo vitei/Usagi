@@ -8,7 +8,8 @@
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/ResourcePak.pb.h"
+#include "Engine/Resource/PakFile.h"
+
 
 namespace usg {
 

@@ -21,8 +21,7 @@ public:
 	Shader() { m_resourceType = ResourceType::SHADER; }
 	virtual ~Shader() {}
 
-	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const char* szEffectName, const void* pData, uint32 uDataSize);
+	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 
 	Shader_ps& GetPlatform() { return m_platform; }
@@ -37,19 +36,11 @@ private:
 };
 
 
-inline void Shader::Init(GFXDevice* pDevice, const char* szEffectName)
+inline bool Shader::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
 {
-	m_name = szEffectName;
-	SetupHash( m_name.CStr() );
-	m_platform.Init( pDevice, szEffectName );
-	SetReady(true);
-}
-
-inline bool Shader::Init(GFXDevice* pDevice, const char* szEffectName, const void* pData, uint32 uDataSize)
-{
-	m_name = szEffectName;
+	m_name = pFileHeader->szName;
 	SetupHash(m_name.CStr());
-	bool bLoaded = m_platform.Init(pDevice, pData, uDataSize);
+	bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
 	// FIXME: This should be done internally
 	SetReady(true);
 	return bLoaded;

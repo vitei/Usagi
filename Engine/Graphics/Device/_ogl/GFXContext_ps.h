@@ -47,7 +47,7 @@ public:
 	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void SetRenderTarget(const RenderTarget* pTarget);
-	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
+	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer);
 	void EndRTDraw(const RenderTarget* pTarget);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 
@@ -66,6 +66,7 @@ public:
 	void BeginGPUTag(const char* szName) {}
 	void EndGPUTag() {}
 	void EnableProfiling(bool bProfile) {}
+	void UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags) {}
 
 
 private:

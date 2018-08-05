@@ -205,11 +205,8 @@ module GeneratorUtil
     n.rule('font', "#{config.font_converter} $in $out_stub",
            {:description => 'FONT $out_stub'})
 
-    n.rule('vulkanshader', "glslc $in -o $out -std=450 -DPLATFORM_PC -DAPI_VULKAN $defines -Werror",
-           {:description => 'SHADER $out_stub'})    
-
-    n.rule('shaderpack', "#{config.shader_pack} $in $out #{config.effect_build_dir} $shader_dir vulkan",
-           {:dependencies => :gcc, :description => 'SHADERPACK $in $out $shader_dir vulkan'})    
+    n.rule('shaderpack', "#{config.shader_pack} $in $out #{config.effect_build_dir} $shader_dir $api",
+           {:dependencies => :gcc, :description => 'SHADERPACK $in $out $shader_dir $api'})    
 
   end
 

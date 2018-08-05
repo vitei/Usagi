@@ -7,10 +7,12 @@
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include OS_HEADER(Engine/Graphics/Device, OpenGLIncludes.h)
+#include "Engine/Resource/PakFile.h"
+
 
 namespace usg {
 
-class GLSLShader;
+class Shader;
 class Texture;
 class U8String;
 class GFXDevice;
@@ -23,7 +25,7 @@ public:
 	~Effect_ps();
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
-	bool Init(GFXDevice* pDevice, const EffectPak& pak, const void* pData, const char* szPackPath) { ASSERT(false); return false; }	// Not yet implemented on PC
+	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice) {}
 	GLuint GetProgram() const { return m_programObject; }
 
@@ -32,7 +34,7 @@ public:
 private:
 	PRIVATIZE_COPY(Effect_ps)
 	
-	void Init(const GLSLShader* pVertex, const GLSLShader* pFrag, const GLSLShader* pGeom);
+	void Init(const Shader* pVertex, const Shader* pFrag, const Shader* pGeom);
 	void HandleError();
 	void GetShaderNames(const char* effectName, U8String &vsOut, U8String &psOut, U8String &gsOut, U8String &defines);
 

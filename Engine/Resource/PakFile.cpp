@@ -66,7 +66,7 @@ namespace usg
 		if (name.HasExtension("spv"))
 		{
 			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
-			pShader->Init(pDevice, pFileInfo->szName, pData, pFileInfo->uDataSize);
+			pShader->Init(pDevice, this, pFileInfo, pData);
 			m_resources[pFileInfo->CRC] = pShader;
 		}
 		else if (name.HasExtension("fx"))

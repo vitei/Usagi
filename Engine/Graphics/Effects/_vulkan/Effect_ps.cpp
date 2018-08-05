@@ -85,36 +85,9 @@ namespace usg {
 	}
 
 
-	VkPipelineShaderStageCreateInfo Effect_ps::LoadShader(GFXDevice* pDevice, const U8String &fileName, VkShaderStageFlagBits stage)
-	{
-		VkPipelineShaderStageCreateInfo shaderStage = {};
-		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStage.stage = stage;
-
-		shaderStage.module = pDevice->GetPlatform().GetShaderFromStock(fileName.CStr(), stage);
-
-		ASSERT(shaderStage.module != NULL);
-		shaderStage.pName = "main"; // Entry point, could be anything...
-
-		return shaderStage;
-	}
-
 	void Effect_ps::Init(GFXDevice* pDevice, const char* szEffectName)
 	{
-		U8String vertexName;
-		U8String pixelName;
-		U8String geomName;
-
-		GetShaderNames(szEffectName, vertexName, pixelName, geomName);
-
-		m_uStageCount = 0;
-		m_stageCreateInfo[m_uStageCount++] = LoadShader(pDevice, vertexName, VK_SHADER_STAGE_VERTEX_BIT);
-		m_stageCreateInfo[m_uStageCount++] = LoadShader(pDevice, pixelName, VK_SHADER_STAGE_FRAGMENT_BIT);
-
-		if (geomName.Length() > 0)
-		{
-			m_stageCreateInfo[m_uStageCount++] = LoadShader(pDevice, geomName, VK_SHADER_STAGE_GEOMETRY_BIT);
-		}
+		ASSERT(false);
 	}
 
 

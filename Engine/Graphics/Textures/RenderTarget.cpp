@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
+#include "Engine/Core/stl/vector.h"
 #include "RenderTarget.h"
 
 namespace usg {

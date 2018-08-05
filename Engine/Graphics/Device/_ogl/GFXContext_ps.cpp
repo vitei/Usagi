@@ -112,7 +112,7 @@ void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const
 }
 
 
-void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags)
+void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 {
 	const RenderTarget_ps& rtPS = pTarget->GetPlatform();
 	GLuint uDst = pTarget->GetPlatform().GetLayerFBO(uLayer);
@@ -121,9 +121,10 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 //	glDrawBuffers(rtPS.GetTargetCount(), rtPS.GetBindings());  
 //	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, pTarget->GetDepthStencilBuffer()->GetTexture()->GetPlatform().GetTexHndl(), 0, uLayer);	
 
+#if 0
 	uint32 uGlFlags = 0;
-	uGlFlags |= (RenderTarget::CLEAR_FLAG_DEPTH&uClearFlags) != 0 ? GL_DEPTH_BUFFER_BIT : 0;
-	uGlFlags |= (RenderTarget::CLEAR_FLAG_STENCIL&uClearFlags) != 0 ? GL_STENCIL_BUFFER_BIT : 0;
+	uGlFlags |= (RenderTarget::RT_FLAG_DEPTH&uClearFlags) != 0 ? GL_DEPTH_BUFFER_BIT : 0;
+	uGlFlags |= (RenderTarget::RT_FLAG_STENCIL&uClearFlags) != 0 ? GL_STENCIL_BUFFER_BIT : 0;
 //	glClearStencil(0x00);
 //	glClearDepth(1.0f);
 	if(uGlFlags)
@@ -132,6 +133,7 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 		glClear(uGlFlags);
 		RestorePipelineState();
 	}
+#endif
 	ERROR_CHECK
 }
 
@@ -167,9 +169,9 @@ void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 
 	SetDepthWrite();
 
-	for (int i = 0; i < MAX_RENDER_TARGETS; i++)
+	for (int i = 0; i < MAX_COLOR_TARGETS; i++)
 	{
-		uint32 uTargetFlag = RenderTarget::CLEAR_FLAG_COLOR_0 << i;
+		uint32 uTargetFlag = RenderTarget::RT_FLAG_COLOR_0 << i;
 		if ((uClearFlags & uTargetFlag) )
 		{
 			usg::Color color(0.0f, 0.0f, 0.0f, 0.0f);
@@ -177,7 +179,7 @@ void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 		}
 	}
 
-	if (uClearFlags & RenderTarget::CLEAR_FLAG_DEPTH)
+	if (uClearFlags & RenderTarget::RT_FLAG_DEPTH)
 	{
 		glClearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0);
 	}
@@ -217,17 +219,17 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 
 	if(!pRT || pRT->GetPlatform().GetDepthTarget()!=NULL)
 	{
-		uGlFlags |= (RenderTarget::CLEAR_FLAG_DEPTH&uFlags)!=0 ? GL_DEPTH: 0;
-		uGlFlags |= (RenderTarget::CLEAR_FLAG_STENCIL&uFlags)!=0 ? GL_STENCIL : 0;
+		uGlFlags |= (RenderTarget::RT_FLAG_DEPTH&uFlags)!=0 ? GL_DEPTH: 0;
+		uGlFlags |= (RenderTarget::RT_FLAG_STENCIL&uFlags)!=0 ? GL_STENCIL : 0;
 
 		bUseDepthStencil = uGlFlags != 0;
 	}
 
 	SetDepthWrite();
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
-		uint32 uTargetFlag = RenderTarget::CLEAR_FLAG_COLOR_0 << i;
+		uint32 uTargetFlag = RenderTarget::RT_FLAG_COLOR_0 << i;
 		if( (uFlags & uTargetFlag) && (!pRT || pRT->GetColorBuffer(i)!=NULL) )
 		{
 			glColorMaski(i, 0xff, 0xff, 0xff, 0xff);

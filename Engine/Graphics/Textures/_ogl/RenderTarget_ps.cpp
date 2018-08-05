@@ -31,7 +31,7 @@ RenderTarget_ps::RenderTarget_ps()
 {
 	m_FBO		= GL_INVALID_INDEX;
 
-	for (uint32 i = 0; i < MAX_RENDER_TARGETS; i++)
+	for (uint32 i = 0; i < MAX_COLOR_TARGETS; i++)
 	{
 		m_pColorBuffers[i] = nullptr;
 	}
@@ -89,14 +89,14 @@ void RenderTarget_ps::InitMRT(usg::GFXDevice* pDevice, uint32 uCount, ColorBuffe
 		uHeight = pDepth->GetHeight();
 	}
 
-	ASSERT(uCount < MAX_RENDER_TARGETS);
+	ASSERT(uCount < MAX_COLOR_TARGETS);
 
 	m_fullScreenVP.InitViewport(0, 0, uWidth, uHeight);
 
 	glGenFramebuffers(1, &m_FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
-	bool bLocCheck[MAX_RENDER_TARGETS] = {};
+	bool bLocCheck[MAX_COLOR_TARGETS] = {};
 
 	m_uSlices = 1;
 
@@ -184,7 +184,7 @@ void RenderTarget_ps::InitMRT(usg::GFXDevice* pDevice, uint32 uCount, ColorBuffe
 	
 }
 
-void RenderTarget_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+void RenderTarget_ps::Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
 	if ((m_uTargets > 0) || (m_pDepthTarget != NULL))
 	{
@@ -192,7 +192,7 @@ void RenderTarget_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHei
 	}
 }
 
-void RenderTarget_ps::SetClearColor(const Color& col)
+void RenderTarget_ps::SetClearColor(const Color& col, uint32 uTarget)
 {
     
 }
