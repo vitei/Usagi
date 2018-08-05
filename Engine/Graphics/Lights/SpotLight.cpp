@@ -212,10 +212,10 @@ Matrix4x4 SpotLight::MakeRotationDir(const Vector4f& vDirection)
 	return mTmp;
 }
 
-const DescriptorSet* SpotLight::GetDescriptorSet() const
+const DescriptorSet* SpotLight::GetDescriptorSet(bool bWithShadow) const
 {
 	// FIXME: If shadow is disabled we need to return the standard set
-	if (GetShadowEnabled())
+	if (GetShadowEnabled() && bWithShadow)
 	{
 		return &m_descriptorSetShadow;
 	}

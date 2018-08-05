@@ -127,9 +127,9 @@ void PointLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
 }
 
 
-const DescriptorSet* PointLight::GetDescriptorSet() const
+const DescriptorSet* PointLight::GetDescriptorSet(bool bWithShadow) const
 {
-	if (GetShadowEnabled())
+	if (GetShadowEnabled() && bWithShadow)
 	{
 		return &m_descriptorSetShadow;
 	}

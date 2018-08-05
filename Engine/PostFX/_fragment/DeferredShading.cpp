@@ -350,8 +350,8 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	for(List<PointLight>::Iterator it = pointLights.Begin(); !it.IsEnd(); ++it)
 	{
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
-		mesh.pDescriptorSet = (*it)->GetDescriptorSet();
-		mesh.pShadowDescriptorSet = nullptr;
+		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
+		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
 		
 		switch( eClass )
 		{
@@ -376,8 +376,8 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	for (List<SpotLight>::Iterator it = spotLights.Begin(); !it.IsEnd(); ++it)
 	{
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
-		mesh.pDescriptorSet = (*it)->GetDescriptorSet();
-		mesh.pShadowDescriptorSet = nullptr;
+		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
+		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
 
 		switch( eClass )
 		{
@@ -420,8 +420,8 @@ void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 	for (List<ProjectionLight>::Iterator it = projLights.Begin(); !it.IsEnd(); ++it)
 	{
 		ProjectionLight* pLight = (*it);
-		mesh.pDescriptorSet = pLight->GetDescriptorSet();
-		mesh.pShadowDescriptorSet = nullptr;
+		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
+		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
 
 		// Tex reads are at 1
 		pContext->SetDescriptorSet(mesh.pDescriptorSet, 2);
@@ -465,7 +465,6 @@ void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh
 	if (bShadow)
 	{
 		pContext->SetPipelineState(shaders.pLightingShadowEffect);
-		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 3);
 	}
 	else if (bSpecular)
 	{
@@ -475,7 +474,7 @@ void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh
 	{
 		pContext->SetPipelineState(shaders.pLightingNoSpecEffect);
 	}
-
+	pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 
 	DrawMesh(pContext, mesh);
 }
@@ -498,7 +497,7 @@ void DeferredShading::DrawLightVolumeFarPlane(GFXContext* pContext, const MeshDa
 		pContext->SetPipelineState(shaders.pLightingFarPlaneNoSpecEffect);
 	}
 
-	pContext->SetDescriptorSet(mesh.pDescriptorSet, 2);
+	pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 
 	DrawMesh(pContext, mesh);
 }

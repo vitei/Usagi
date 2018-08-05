@@ -28,7 +28,7 @@ public:
 	void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
 	void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
 
-	const DescriptorSet* GetDescriptorSet() const;
+	const DescriptorSet* GetDescriptorSet(bool bWithShadow) const;
 
 	virtual void	SetPosition(const Vector4f &position);
 
