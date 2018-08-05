@@ -121,11 +121,11 @@ namespace usg{
 		case particles::PARTICLE_TYPE_BILLBOARD:
 		case particles::PARTICLE_TYPE_USER_ORIENTED:
 		case particles::PARTICLE_TYPE_Y_AXIS_ALIGNED:
-			return pRes->GetEffect(pDevice, "ScriptedParticle");
+			return pRes->GetEffect(pDevice, "Particles.Scripted");
 		case particles::PARTICLE_TYPE_DIR_POLYGON:
-			return pRes->GetEffect(pDevice, "ScriptedDirParticle");
+			return pRes->GetEffect(pDevice, "Particles.ScriptedDir");
 		case particles::PARTICLE_TYPE_TRAIL:
-			return pRes->GetEffect(pDevice, "ScriptedTrailParticle");
+			return pRes->GetEffect(pDevice, "Particles.ScriptedTrail");
 		default:
 			ASSERT(false);
 			return NULL;
