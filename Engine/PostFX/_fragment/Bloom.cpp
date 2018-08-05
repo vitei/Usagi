@@ -303,6 +303,7 @@ bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 	// Perform the vertical bloom
 	pContext->SetRenderTarget(&m_bloomRT[0]);
+	pContext->SetPipelineState(m_bloomEffect);
 	pContext->SetDescriptorSet(&m_descriptors[PASS_VER_BLOOM], 1);
 	m_pSys->DrawFullScreenQuad(pContext);
 
