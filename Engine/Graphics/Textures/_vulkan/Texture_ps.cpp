@@ -551,10 +551,17 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
 void Texture_ps::CleanUp(GFXDevice* pDevice)
 {
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
+	if (m_image)
+	{
+		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_image = VK_NULL_HANDLE;
+	}
+
 	if (m_memory != VK_NULL_HANDLE)
 	{
 		vkFreeMemory(vKDevice, m_memory, nullptr);
 		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_memory = VK_NULL_HANDLE;
 	}
 }
 

@@ -75,6 +75,7 @@ namespace usg {
 
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
+		const Scene* pScene = GetScene();
 		SamplerDecl shadowSamp(SF_LINEAR, SC_CLAMP);
 		shadowSamp.bEnableCmp = true;
 		shadowSamp.eCmpFnc = CF_LESS;
@@ -90,9 +91,7 @@ namespace usg {
 			m_globalDescriptors[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptors[i], 1);
 			m_globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			// FIXME: Want a dummy depth array texture
-			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 0);
-			m_globalDescriptors[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 1);
+			m_globalDescriptors[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
 
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
 
@@ -100,8 +99,7 @@ namespace usg {
 			m_globalDescriptorsWithDepth[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptorsWithDepth[i], 1);
 			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 0);
-			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, dummyDepth, shadowSampler, 1);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
 
 			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
@@ -250,12 +248,9 @@ namespace usg {
 					m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pPostFXSys->GetLinearDepthTex(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
 				}
 			}
-			const vector<TextureHndl>& cascadeTextures = m_LightingContext.GetCascadeTextures();
-			for (uint32 j = 0; j < cascadeTextures.size() && j<2; j++)
-			{
-				m_globalDescriptors[i].SetImageSamplerPairAtBinding(15, cascadeTextures[j], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), j);
-				m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, cascadeTextures[j], m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15), j);
-			}
+			
+			m_globalDescriptors[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
 			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}

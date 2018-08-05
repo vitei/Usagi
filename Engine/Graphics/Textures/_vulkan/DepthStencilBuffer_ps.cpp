@@ -109,6 +109,8 @@ void DepthStencilBuffer_ps::FreeLayerViews(GFXDevice* pDevice)
 		{
 			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pLayerViews[i], nullptr);
 		}
+		vdelete[] m_pLayerViews;
+		m_pLayerViews = nullptr;
 	}
 }
 

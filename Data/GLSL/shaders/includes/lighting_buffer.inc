@@ -4,7 +4,7 @@
 #define MAX_LIGHTS 8
 #define MAX_CASCADES 2
 
-SAMPLER_LOC(0, 15) uniform sampler2DArrayShadow sampler15[MAX_CASCADES];	// Shadow cascades
+SAMPLER_LOC(0, 15) uniform sampler2DArrayShadow sampler15;	// Shadow cascades
 
 // Structures are passed by value so confine this to as small a size as possible
 // Forward shaded point/ spot lights should be avoided in general

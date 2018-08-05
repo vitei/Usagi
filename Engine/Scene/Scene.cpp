@@ -244,11 +244,11 @@ void Scene::DeleteRenderGroup(RenderGroup* pRemove)
 ViewContext* Scene::CreateViewContext(GFXDevice* pDevice)
 {
 	ViewContext* pContext = m_pImpl->viewContexts.Alloc();
+	pContext->SetScene(this);
 	if (!pContext->IsDeviceDataValid())
 	{
 		pContext->InitDeviceData(pDevice);
 	}
-	pContext->SetScene(this);
 	m_pImpl->sceneContexts.AddToEnd(pContext);
 	return pContext;
 }

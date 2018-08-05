@@ -5,8 +5,6 @@
 #ifndef _USG_POSTFX_SHADOWS_SHADOW_CASCADE_H_
 #define _USG_POSTFX_SHADOWS_SHADOW_CASCADE_H_
 #include "Engine/Common/Common.h"
-#include "Engine/Graphics/Textures/DepthStencilBuffer.h"
-#include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Scene/Camera/StandardCamera.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Shadows/DirectionalShadow.h"
@@ -26,7 +24,7 @@ public:
 	ShadowCascade();
 	virtual ~ShadowCascade();
 
-	virtual void Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight, uint32 uGroupWidth, uint32 uGroupHeight);
+	virtual void Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight);
 	void Cleanup(GFXDevice* pDevice, Scene* pScene);
 	virtual void Update(const Camera &sceneCam);
 	void GPUUpdate(GFXDevice* pDevice);
@@ -35,7 +33,6 @@ public:
 
 	const ConstantSet* GetShadowReadConstants() const { return &m_readConstants; }
 	ShadowContext* GetContext(uint32 uContext) { return m_pSceneContext[uContext]; }
-	TextureHndl GetTexture() const { return m_cascadeBuffer.GetTexture(); }
 
 	enum
 	{
@@ -47,6 +44,7 @@ public:
 	{
 		Matrix4x4   mCascadeMtx[ShadowCascade::MAX_CASCADES];
 		Matrix4x4   mCascadeMtxVInv[ShadowCascade::MAX_CASCADES];
+		int			iArrayIndices[ShadowCascade::MAX_CASCADES];	// Now sharing a single texture array between cascades so we need the indices
 		Vector4f    vSplitDist;
 		Vector4f	vFadeSplitDist;	// We give the next cascade a little extra to allow us to fade between
 		Vector4f	vInvFadeLength;
@@ -99,15 +97,8 @@ private:
 	StandardCamera			m_cascadeCamera[MAX_CASCADES];
 	ShadowContext*			m_pSceneContext[MAX_CASCADES];
 
-#if !RENDER_TO_LAYER
-	DepthStencilBuffer		m_depthBuffer;
-	RenderTarget			m_depthTarget;
-	ColorBuffer				m_cascadeBuffer;
-#else
-	DepthStencilBuffer		m_cascadeBuffer;
-#endif
-	
-	RenderTarget			m_cascadeTarget;
+	class RenderTarget*		m_pRenderTarget;
+	vector<uint32>			m_cascadeIndices;
 };
 
 }

@@ -34,7 +34,6 @@ public:
 	const List<PointLight>&	GetPointLightsInView() const;
 	const List<SpotLight>&	GetSpotLightsInView() const;
 	const List<ProjectionLight>& GetProjLightsInView() const;
-	const vector<TextureHndl>& GetCascadeTextures() const;
 
 	void ClearLists();
 
@@ -59,7 +58,6 @@ private:
 	List<PointLight>		m_visPointLights;
 	List<SpotLight>			m_visSpotLights;
 	List<ProjectionLight>	m_visProjLights;
-	vector<TextureHndl>		m_cascadeTextures;
 };
 
 }

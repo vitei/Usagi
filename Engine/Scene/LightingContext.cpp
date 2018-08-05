@@ -132,7 +132,6 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 	// FIXME: If we re-implemenet deferred shading we need the per light constants to be updated somewhere
 	uint32 uLightCount = 0;
 	uint32 uCascadeCount = 0;
-	m_cascadeTextures.clear();
 	for(List<DirLight>::Iterator it = dirLights.Begin(); !it.IsEnd() && uLightCount < MAX_LIGHTS; ++it)
 	{
 		const DirLight* pLight = *it;
@@ -151,7 +150,6 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 				pLightingData->iCascadeLightStart = (int)uLightCount;
 			}
 			pLightingData->cascades[uCascadeCount] = pLight->GetCascade()->GetShadowReadConstantData();
-			m_cascadeTextures.push_back(pLight->GetCascade()->GetTexture());
 			uCascadeCount++;
 		}
 		else
@@ -244,10 +242,6 @@ const List<ProjectionLight>& LightingContext::GetProjLightsInView() const
 	return m_visProjLights;
 }
 
-const vector<TextureHndl>& LightingContext::GetCascadeTextures() const
-{
-	return m_cascadeTextures;
-}
 
 void LightingContext::AddConstantsToDescriptor(DescriptorSet& desc, uint32 uIndex) const
 {

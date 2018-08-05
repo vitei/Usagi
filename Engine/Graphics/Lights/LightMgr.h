@@ -7,6 +7,8 @@
 #define USG_LIGHT_MGR_H
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Textures/DepthStencilBuffer.h"
+#include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Core/stl/Vector.h"
 #include "Engine/Memory/FastPool.h"
@@ -33,11 +35,16 @@ public:
 
 	// TODO: Add names to these lights?
 	void			Init(GFXDevice* pDevice, Scene* pParent);
+	void			SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution);
+	RenderTarget*	AddShadowCascadeLayers(GFXDevice* pDevice, uint32 uCount, vector<uint32>& uIndicesOut);
+	void			FreeShadowCascadeLayers(const vector<uint32>& indices);
 	void			CleanUp(GFXDevice* pDevice);
 	void			Update(float fDelta, uint32 uFrame);
 	void			GPUUpdate(GFXDevice* pDevice);
 	void			GlobalShadowRender(GFXContext* pContext, Scene* pScene);
 	void			ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext* pView);
+
+	TextureHndl		GetShadowCascadeImage() const;
 
 	DirLight*		AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName = NULL);
 	void			RemoveDirLight(DirLight* pLight);
@@ -148,6 +155,11 @@ private:
 	LightInstances<SpotLight>		m_spotLights;
 	LightInstances<ProjectionLight>	m_projLights;
 	Color							m_ambient;
+
+	DepthStencilBuffer		m_cascadeBuffer;
+	RenderTarget			m_cascadeTarget;
+	vector<uint32>			m_uFreeLayers;
+	uint32					m_shadowMapRes;
 
 	Scene*					m_pParent;
 	Color					m_skyColor;

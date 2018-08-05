@@ -9,6 +9,7 @@ struct Cascade
 {
 	mat4		mCascadeMtx[4];
     mat4        mCascadeMtxInvView[4];
+    int			iArrayIndices[4];
 	vec4		vSplitDistance;
     vec4        vFadeSplitDist;
     vec4        vInvFadeLength;

@@ -26,6 +26,7 @@ m_pParent(nullptr)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
+	m_shadowMapRes = 2048;
 }
 
 LightMgr::~LightMgr(void)
@@ -35,6 +36,68 @@ LightMgr::~LightMgr(void)
 void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 {
 	m_pParent = pParent;
+
+	// Set up an initial dummy array for binding purposes
+	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
+	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+	usg::RenderTarget::RenderPassFlags flags;
+	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+	m_cascadeTarget.InitRenderPass(pDevice, flags);
+	m_uFreeLayers.push_back(0);
+	m_uFreeLayers.push_back(1);
+}
+
+
+void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution)
+{
+	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
+	m_shadowMapRes = uResolution;
+	if (m_cascadeBuffer.GetSlices() > 1)
+	{
+		m_cascadeBuffer.Resize(pDevice, uResolution, uResolution);
+		m_cascadeTarget.Resize(pDevice);
+	}
+}
+
+
+RenderTarget* LightMgr::AddShadowCascadeLayers(GFXDevice* pDevice, uint32 uCount, vector<uint32>& uIndicesOut)
+{
+	uIndicesOut.clear();
+	if (m_uFreeLayers.size() < uCount || m_cascadeBuffer.GetWidth() != m_shadowMapRes)
+	{
+		uint32 uAdditionalLayers = uCount - (uint32)m_uFreeLayers.size();
+		uint32 uPrevLayers = m_cascadeBuffer.GetSlices();
+		m_cascadeBuffer.CleanUp(pDevice);
+		m_cascadeTarget.CleanUp(pDevice);
+		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uAdditionalLayers + uPrevLayers, DF_DEPTH_32F);
+		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+		usg::RenderTarget::RenderPassFlags flags;
+		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+		m_cascadeTarget.InitRenderPass(pDevice, flags);
+		for (uint32 i = uPrevLayers; i < (uPrevLayers + uAdditionalLayers); i++)
+		{
+			m_uFreeLayers.push_back(i);
+		}
+	}
+	
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		uIndicesOut.push_back( (*m_uFreeLayers.begin()) );
+		m_uFreeLayers.erase(m_uFreeLayers.begin());
+	}
+	return &m_cascadeTarget;
+}
+
+void LightMgr::FreeShadowCascadeLayers(const vector<uint32>& indices)
+{
+	for (auto layer : indices)
+	{
+		m_uFreeLayers.push_back(layer);
+	}
 }
 
 void LightMgr::CleanUp(GFXDevice* pDevice)
@@ -43,6 +106,8 @@ void LightMgr::CleanUp(GFXDevice* pDevice)
 	m_spotLights.CleanUp(pDevice, m_pParent);
 	m_pointLights.CleanUp(pDevice, m_pParent);
 	m_projLights.CleanUp(pDevice, m_pParent);
+	m_cascadeTarget.CleanUp(pDevice);
+	m_cascadeBuffer.CleanUp(pDevice);
 }
 
 
@@ -82,6 +147,12 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	}
 
 
+}
+
+
+TextureHndl	LightMgr::GetShadowCascadeImage() const
+{
+	return m_cascadeBuffer.GetTexture();
 }
 
 void LightMgr::GPUUpdate(GFXDevice* pDevice)
