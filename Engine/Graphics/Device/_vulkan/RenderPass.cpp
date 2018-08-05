@@ -129,13 +129,10 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 
 	uint32 uPreserveOffset = 0;
 	uint32 uReferenceOffset = 0;
-	m_passClearData.resize(decl.uSubPasses);
+
 	for (uint32 i = 0; i < decl.uSubPasses; i++)
 	{
 		const RenderPassDecl::SubPass& in = decl.pSubPasses[i];
-		m_passClearData[i].bClearDepth = false;
-		m_passClearData[i].uClearCount = 0;
-
 
 		// Colour
 		subpassDescriptions[i].pColorAttachments = in.uColorCount ? &references.data()[uReferenceOffset] : nullptr;
