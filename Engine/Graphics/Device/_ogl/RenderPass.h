@@ -11,12 +11,14 @@ namespace usg {
 class RenderPass
 {
 public:
-	RenderPass() {};
+	RenderPass() { m_uClearFlags = 0; };
 	~RenderPass() {};
 	
-	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl, uint32 uId) {}
+	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl, uint32 uId);
+	uint32 GetClearFlags() { return m_uClearFlags; }
 
 private:
+	uint32 m_uClearFlags;
 	
 };
 
