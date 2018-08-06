@@ -17,6 +17,7 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Effects/InputBinding.h"
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
@@ -121,7 +122,7 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 //	glDrawBuffers(rtPS.GetTargetCount(), rtPS.GetBindings());  
 //	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, pTarget->GetDepthStencilBuffer()->GetTexture()->GetPlatform().GetTexHndl(), 0, uLayer);	
 
-#if 0
+	uint32 uClearFlags = pTarget->GetRenderPass().GetContents()->GetClearFlags();
 	uint32 uGlFlags = 0;
 	uGlFlags |= (RenderTarget::RT_FLAG_DEPTH&uClearFlags) != 0 ? GL_DEPTH_BUFFER_BIT : 0;
 	uGlFlags |= (RenderTarget::RT_FLAG_STENCIL&uClearFlags) != 0 ? GL_STENCIL_BUFFER_BIT : 0;
@@ -133,12 +134,11 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 		glClear(uGlFlags);
 		RestorePipelineState();
 	}
-#endif
 	ERROR_CHECK
 }
 
 
-void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
+void GFXContext_ps::SetRenderTarget(RenderTarget* pTarget)
 {
 	if(pTarget)
 	{
@@ -146,6 +146,12 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 		glBindFramebuffer(GL_FRAMEBUFFER, rtPS.GetOGLFBO());
 
 		glDrawBuffers(rtPS.GetTargetCount(), rtPS.GetBindings());  
+
+		uint32 uClearFlags = pTarget->GetRenderPass().GetContents()->GetClearFlags();
+		if (uClearFlags)
+		{
+			ClearRenderTarget(pTarget, uClearFlags);
+		}
 
 	}
 	else

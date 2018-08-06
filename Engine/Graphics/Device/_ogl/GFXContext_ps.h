@@ -46,7 +46,7 @@ public:
 	void ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport);
 	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
-	void SetRenderTarget(const RenderTarget* pTarget);
+	void SetRenderTarget(RenderTarget* pTarget);
 	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer);
 	void EndRTDraw(const RenderTarget* pTarget);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
