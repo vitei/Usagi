@@ -66,6 +66,7 @@ public:
 
 	RenderTarget* GetActiveRenderTarget() const{ return m_pActiveRT; }
 
+	void	InvalidatePipelineOnly();
 	void	InvalidateStates();
 	void	ValidateDescriptors();
 private:

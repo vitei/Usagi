@@ -160,6 +160,11 @@ void GFXContext::End()
 	m_platform.End();
 }
 
+void GFXContext::InvalidatePipelineOnly()
+{
+	m_activeStateGroup.Invalidate();
+}
+
 void GFXContext::InvalidateStates()
 {
 	m_pActiveBinding = NULL;

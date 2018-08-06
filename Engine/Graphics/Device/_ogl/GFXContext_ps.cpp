@@ -401,7 +401,7 @@ void GFXContext_ps::RestorePipelineState()
 	PipelineStateHndl pipeline = m_pParent->GetActivePipeline();
 	if (pipeline.IsValid())
 	{
-		m_pParent->InvalidateStates();
+		m_pParent->InvalidatePipelineOnly();
 		m_pParent->SetPipelineState(pipeline);
 	}
 }
