@@ -252,8 +252,6 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 
 
 	RestorePipelineState();
-	// Push and pop of the states isn't working
-	m_pParent->InvalidateStates();
 	ERROR_CHECK
 }
 
