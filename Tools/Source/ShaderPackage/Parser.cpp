@@ -53,6 +53,12 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 	if (!pShaderFile)
 		return false;
 
+	// Add this file to the set of references
+	std::string fullName = szFileName;
+	char fullPath[256];
+	_fullpath(fullPath, fullName.c_str(), 256);
+	referencedFiles.push_back(fullPath);
+
 	char defines[256];
 	char* szDefineLoc = defines;
 	strcpy_s(szDefineLoc, 256, "#version 450\n");
@@ -140,7 +146,6 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 		includeName = includeName.substr(0, includeName.find_last_of("\\/"));
 		includeName += "/";
 		includeName += szPragma;
-		char fullPath[256];
 		_fullpath(fullPath, includeName.c_str(), 256);
 		referencedFiles.push_back(fullPath);
 		fopen_s(&pIncludeFile, includeName.c_str(), "rb");
