@@ -14,15 +14,15 @@ layout (location = 6) in vec4 ao_colFg;
 // Output attributes
 out VertexData
 {
-	ATTRIB_LOC(0) vec4 vo_posTL;
-    ATTRIB_LOC(1) vec4 vo_posTR;
-    ATTRIB_LOC(2) vec4 vo_posBL;
-    ATTRIB_LOC(3) vec4 vo_posBR;
-    ATTRIB_LOC(4) vec4 vo_vColorUpper;
-    ATTRIB_LOC(5) vec4 vo_vColorLower;
-    ATTRIB_LOC(6) vec4 vo_vBgColor;
-    ATTRIB_LOC(7) vec4 vo_vFgColor;
-    ATTRIB_LOC(8) vec4 vo_vUVRange;
+	INT_LOC(0) vec4 vo_posTL;
+    INT_LOC(1) vec4 vo_posTR;
+    INT_LOC(2) vec4 vo_posBL;
+    INT_LOC(3) vec4 vo_posBR;
+    INT_LOC(4) vec4 vo_vColorUpper;
+    INT_LOC(5) vec4 vo_vColorLower;
+    INT_LOC(6) vec4 vo_vBgColor;
+    INT_LOC(7) vec4 vo_vFgColor;
+    INT_LOC(8) vec4 vo_vUVRange;
 } vertexData;
 
 

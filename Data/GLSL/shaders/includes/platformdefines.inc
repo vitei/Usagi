@@ -6,11 +6,13 @@
 #define BUFFER_LAYOUT(setIn, val) layout(set = setIn, binding = val, std140)
 #define SAMPLER_OFFSET 10
 #define SAMPLER_LOC(setIn, val) layout(set = setIn, binding=(val+SAMPLER_OFFSET))
+#define INT_ATTRIB_LOC(val) layout(location=val)
 
 #else
 
 #define BUFFER_LAYOUT(setIn, val) layout(binding = val, std140)
 #define SAMPLER_LOC(setIn, val) layout(binding=val)
+#define INT_LOC(val)
 
 #endif
 
