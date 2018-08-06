@@ -14,7 +14,7 @@ float GetShadowValue(vec4 shadowPos, in int shadowIdx, int cascadeIndex)
     vec4 tc;
     tc.xyz = shadowPos.xyz / shadowPos.w;
     tc.z += bias;
-    tc.w = float(cascadeIndex);
+    tc.w = float( (CASCADE_COUNT*shadowIdx) + cascadeIndex);
 
     float d = texture(sampler15, tc.xywz);
 
@@ -25,7 +25,7 @@ float GetShadowValueSoft(vec4 shadowPos, in int shadowIdx, int index)
 {
     float bias = cascades[shadowIdx].vDepthBias[index];
     vec4 tc;
-    tc.w = float(index);
+    tc.w = float( (CASCADE_COUNT*shadowIdx) + index );
 
     float d = 0.0;
     vec2 vDiskRadius = cascades[shadowIdx].vSampleRange[index] * cascades[shadowIdx].vInvShadowDim.xy;

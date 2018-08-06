@@ -44,7 +44,6 @@ public:
 	{
 		Matrix4x4   mCascadeMtx[ShadowCascade::MAX_CASCADES];
 		Matrix4x4   mCascadeMtxVInv[ShadowCascade::MAX_CASCADES];
-		int			iArrayIndices[ShadowCascade::MAX_CASCADES];	// Now sharing a single texture array between cascades so we need the indices
 		Vector4f    vSplitDist;
 		Vector4f	vFadeSplitDist;	// We give the next cascade a little extra to allow us to fade between
 		Vector4f	vInvFadeLength;

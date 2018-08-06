@@ -2,7 +2,7 @@
 #define _LIGHTING_BUFFER_INC
 
 #define MAX_LIGHTS 8
-#define MAX_CASCADES 2
+#define MAX_CASCADE_SETS 2
 
 SAMPLER_LOC(0, 15) uniform sampler2DArrayShadow sampler15;	// Shadow cascades
 
@@ -32,7 +32,7 @@ BUFFER_LAYOUT(0, UBO_LIGHTING_ID) uniform Lighting
 	int 		iSpotLightCount;
 	vec4		vAmbientLight;
 	Light 		lights[MAX_LIGHTS];
-	Cascade 	cascades[MAX_CASCADES];
+	Cascade 	cascades[MAX_CASCADE_SETS];
 };
 
 

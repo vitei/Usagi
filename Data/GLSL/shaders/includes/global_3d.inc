@@ -4,12 +4,12 @@
 // use binding ... to make use of that
 
 #define USE_SKYBOX_FOG
+#define CASCADE_COUNT 4
 
 struct Cascade
 {
-	mat4		mCascadeMtx[4];
-    mat4        mCascadeMtxInvView[4];
-    int			iArrayIndices[4];
+	mat4		mCascadeMtx[CASCADE_COUNT];
+    mat4        mCascadeMtxInvView[CASCADE_COUNT];
 	vec4		vSplitDistance;
     vec4        vFadeSplitDist;
     vec4        vInvFadeLength;

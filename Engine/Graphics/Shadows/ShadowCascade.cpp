@@ -28,7 +28,6 @@ static const ShaderConstantDecl g_shadowReadConstDecl[] =
 {
     SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtx[0],      CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
     SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtxVInv[0],   CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
-	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, iArrayIndices,       CT_INT, ShadowCascade::MAX_CASCADES),
 
     SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vSplitDist,           CT_VECTOR_4, 1 ),
 	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vFadeSplitDist,       CT_VECTOR_4, 1),
@@ -129,11 +128,6 @@ void ShadowCascade::Update(const Camera& sceneCam)
 	
     Matrix4x4 mInvView;
     sceneCam.GetViewMatrix().GetInverse(mInvView);
-
-	for (uint32 i=0; i<(uint32)m_cascadeIndices.size(); i++)
-	{
-		readData->iArrayIndices[i] = m_cascadeIndices[i];
-	}
 	
     for(uint32 i=0; i<CASCADE_COUNT; i++)
     {
