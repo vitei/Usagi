@@ -25,6 +25,7 @@ public:
 	virtual ~ShadowCascade();
 
 	virtual void Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight);
+	void AssignRenderTarget(RenderTarget* pTarget, uint32 uStartIndex);
 	void Cleanup(GFXDevice* pDevice, Scene* pScene);
 	virtual void Update(const Camera &sceneCam);
 	void GPUUpdate(GFXDevice* pDevice);
@@ -97,7 +98,7 @@ private:
 	ShadowContext*			m_pSceneContext[MAX_CASCADES];
 
 	class RenderTarget*		m_pRenderTarget;
-	vector<uint32>			m_cascadeIndices;
+	uint32					m_uCascadeStartIndex;
 };
 
 }

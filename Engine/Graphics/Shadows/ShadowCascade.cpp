@@ -48,6 +48,7 @@ ShadowCascade::ShadowCascade()
 {
 	m_uGroupWidth = 0;
 	m_uGroupHeight = 0;
+	m_uCascadeStartIndex = 0;
 	m_pRenderTarget = nullptr;
 
 	for (int i = 0; i < MAX_CASCADES; i++)
@@ -78,11 +79,26 @@ void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	}
 }
 
-void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight)
+void ShadowCascade::AssignRenderTarget(RenderTarget* pTarget, uint32 uStartIndex)
 {
-	m_pRenderTarget = pScene->GetLightMgr().AddShadowCascadeLayers(pDevice, CASCADE_COUNT, m_cascadeIndices);
+	m_pRenderTarget = pTarget;
 	m_uGroupWidth = m_pRenderTarget->GetWidth();
 	m_uGroupHeight = m_pRenderTarget->GetHeight();
+
+	const float32 fScale = (float)m_uGroupWidth / 2048.0f;
+	const float32 fPartSize[] = { 30.0f, 160.0f, 400.0f, 1000.f };
+
+	for (uint32 i = 0; i < CASCADE_COUNT; i++)
+	{
+		m_fPartitions0To1[i] = fPartSize[i] * fScale;
+	}
+
+	m_fCascadePartitionsMax = fPartSize[CASCADE_COUNT - 1];
+}
+
+
+void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight)
+{
 	m_pLight = pLight;
 
 	// TODO: May want an optimized shadow context
@@ -94,18 +110,6 @@ void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLig
 	}
 
 	m_readConstants.Init(pDevice, g_shadowReadConstDecl);
-
-
-	const float32 fScale = (float)m_uGroupWidth / 2048.0f;
-    const float32 fPartSize[] = { 60.0f, 180.0f, 400.0f, 1000.f };
-
-    for(uint32 i=0; i<CASCADE_COUNT; i++)  
-    {
-        m_fPartitions0To1[i] = fPartSize[i] * fScale;
-    }
-
-	m_fCascadePartitionsMax = fPartSize[CASCADE_COUNT-1];
-
 
 }
 
@@ -137,7 +141,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
 
 	float fBiasMul = 100.0f;
 
-    readData->vBias.Assign(-0.0000015f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
+    readData->vBias.Assign(-0.0000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
 	readData->vSampleRange.Assign(3.0f, 2.5f, 2.0f, 0.5f);
 
 	float fadeDistances[MAX_CASCADES];
@@ -159,6 +163,9 @@ void ShadowCascade::Update(const Camera& sceneCam)
 
 void ShadowCascade::GPUUpdate(GFXDevice* pDevice)
 {
+	if (!m_pRenderTarget)
+		return;
+
 	m_readConstants.UpdateData(pDevice);
 }
 
@@ -379,12 +386,15 @@ void ShadowCascade::InitFrame(const Camera& sceneCam)
 
 void ShadowCascade::CreateShadowTex(GFXContext* pContext)
 {
+	if (!m_pRenderTarget)
+		return;
+
     pContext->BeginGPUTag("Shadow");
 
 
 	for (uint32 i = 0; i < CASCADE_COUNT; ++i)
     {
-        pContext->SetRenderTargetLayer(m_pRenderTarget, m_cascadeIndices[i]);
+        pContext->SetRenderTargetLayer(m_pRenderTarget, m_uCascadeStartIndex + i);
 		DrawSceneFromLight(pContext, m_pSceneContext[i]);
         pContext->SetRenderTarget(NULL);
 	}

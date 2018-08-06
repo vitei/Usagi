@@ -7,6 +7,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Graphics/Lights/LightSpec.pb.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Graphics/Lights/PointLight.h"
@@ -45,8 +46,6 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 	m_cascadeTarget.InitRenderPass(pDevice, flags);
-	m_uFreeLayers.push_back(0);
-	m_uFreeLayers.push_back(1);
 }
 
 
@@ -62,43 +61,22 @@ void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution
 }
 
 
-RenderTarget* LightMgr::AddShadowCascadeLayers(GFXDevice* pDevice, uint32 uCount, vector<uint32>& uIndicesOut)
+void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 {
-	uIndicesOut.clear();
-	if (m_uFreeLayers.size() < uCount || m_cascadeBuffer.GetWidth() != m_shadowMapRes)
+	if (m_cascadeBuffer.GetWidth() != m_shadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
 	{
-		uint32 uAdditionalLayers = uCount - (uint32)m_uFreeLayers.size();
-		uint32 uPrevLayers = m_cascadeBuffer.GetSlices();
 		m_cascadeBuffer.CleanUp(pDevice);
 		m_cascadeTarget.CleanUp(pDevice);
-		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uAdditionalLayers + uPrevLayers, DF_DEPTH_32F);
+		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uLayers, DF_DEPTH_32F);
 		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 		m_cascadeTarget.InitRenderPass(pDevice, flags);
-		for (uint32 i = uPrevLayers; i < (uPrevLayers + uAdditionalLayers); i++)
-		{
-			m_uFreeLayers.push_back(i);
-		}
 	}
-	
-	for (uint32 i = 0; i < uCount; i++)
-	{
-		uIndicesOut.push_back( (*m_uFreeLayers.begin()) );
-		m_uFreeLayers.erase(m_uFreeLayers.begin());
-	}
-	return &m_cascadeTarget;
 }
 
-void LightMgr::FreeShadowCascadeLayers(const vector<uint32>& indices)
-{
-	for (auto layer : indices)
-	{
-		m_uFreeLayers.push_back(layer);
-	}
-}
 
 void LightMgr::CleanUp(GFXDevice* pDevice)
 {
@@ -116,10 +94,6 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	// TODO: Handle multiple viewcontexts for the shodows
 	ViewContext* pContext= m_pParent->GetViewContext(0);
 	m_uActiveFrame = uFrame;
-	for (auto itr : m_dirLights.GetActiveLights())
-	{
-		itr->UpdateCascade(*pContext->GetCamera(), 0);
-	}
 
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
@@ -128,10 +102,13 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	GetActiveDirLights(dirLights);
 
 	// Now find the most influential shadowed directional light and make it the first
+	uint32 uCascadeIndex = 0;
 	for (uint32 i = 0; i < m_dirLights.GetActiveLights().size(); i++)
 	{
 		if (m_dirLights.GetActiveLights()[i]->GetShadowEnabled())
 		{
+			m_dirLights.GetActiveLights()[i]->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
+			uCascadeIndex += ShadowCascade::CASCADE_COUNT;
 			if (m_uShadowedDirLightIndex == UINT_MAX)
 			{
 				m_uShadowedDirLightIndex = i;
@@ -144,6 +121,11 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	{
 		// No shadowed lights, set the index to be beyond the list
 		m_uShadowedDirLightIndex = (uint32)m_dirLights.GetActiveLights().size();
+	}
+
+	for (auto itr : m_dirLights.GetActiveLights())
+	{
+		itr->UpdateCascade(*pContext->GetCamera(), 0);
 	}
 
 
@@ -221,6 +203,15 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 	if(szName)
 		pLight->SetName(szName);
 	ASSERT(pLight);
+
+	if (bSupportsShadow)
+		m_uShadowedDirLights++;
+
+	if (m_cascadeBuffer.GetSlices() < ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights)
+	{
+		InitShadowCascade(pDevice, ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights);
+	}
+
 	return pLight;
 }
 

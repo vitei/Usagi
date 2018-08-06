@@ -31,6 +31,7 @@ public:
 	virtual const Vector4f&	GetDirection() const;
 
 	const ShadowCascade* GetCascade() const { return m_pShadowCascade; }
+	ShadowCascade* GetCascade() { return m_pShadowCascade; }
 
 	bool operator < (DirLight& rhs);
 protected:
