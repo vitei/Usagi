@@ -389,6 +389,7 @@ namespace usg
 						}
 					}
 				}
+				bComplete |= GameComponents<StateComponent>::GetIterator().IsEnd();
 			}
 		}
 
