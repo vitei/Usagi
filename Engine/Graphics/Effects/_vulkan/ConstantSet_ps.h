@@ -23,16 +23,18 @@ public:
 	ConstantSet_ps();
 	~ConstantSet_ps();
 
-	void Init(GFXDevice* pDevice, const ConstantSet& owner);
+	void Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage);
 	void CleanUp(GFXDevice* pDevice);
 	void UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate);
 
 	// PS specific functions
-	//uint32 GetActiveBufferOffset() const { return m_uOffsets[m_uActiveBuffer]; }
-	const VkDescriptorBufferInfo& GetDescriptorInfo() const { return m_descriptor; }
+	uint32 GetActiveBufferOffset() const { return m_uOffsets[m_uActiveBuffer]; }
+	const VkDescriptorBufferInfo& GetBaseDescriptorInfo() const { return m_descriptor[0]; }
+	const VkDescriptorBufferInfo& GetDescriptorInfo() const { return m_descriptor[m_uActiveBuffer]; }
 private:
-	void InitOffsetsAndGPUData(const ShaderConstantDecl* pDecl);
+	void InitOffsets(const ShaderConstantDecl* pDecl);
 	void AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffset, uint32& uSize, uint32& uVarCount);
+	void* GetGPUData(uint32 uActiveBuffer);
 
 	// This may all seem wasteful on the PC, but when you have to switch endian for the benefit
 	// of the GPU anyway it becomes necessary
@@ -57,9 +59,9 @@ private:
 
 	const ConstantSet*			m_pOwner;
 
-	//uint32						m_uActiveBuffer;
+	uint32						m_uActiveBuffer;
 
-	uint32						m_uGPUSize;
+	memsize						m_uGPUSize;
 	bool						m_bDataValid;
 
 	VkBuffer					m_buffer;
@@ -68,8 +70,9 @@ private:
 	VariableData*				m_pVarData;
 	void*						m_pBoundGPUData;
 	uint32						m_uOffsets[GFX_NUM_DYN_BUFF];
+	uint32						m_uBufferCount;
 
-	VkDescriptorBufferInfo		m_descriptor;
+	VkDescriptorBufferInfo		m_descriptor[GFX_NUM_DYN_BUFF];
 };
 
 

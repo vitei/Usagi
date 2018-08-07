@@ -499,4 +499,15 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	}
 }
 
+
+const VkPhysicalDeviceProperties* GFXDevice_ps::GetPhysicalProperties(uint32 uGPU)
+{
+	if (uGPU < m_uGPUCount)
+	{
+		return &m_deviceProperties[uGPU];
+	}
+
+	return nullptr;
+}
+
 }

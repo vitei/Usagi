@@ -51,7 +51,7 @@ void ConstantSet::AppendDeclaration(const ShaderConstantDecl* pDecl)
 	}
 }
 
-void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl)
+void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUUsage eUsage, void* pData)
 {
 	// FIXME: This is only safe as long as it's not a dynamically loaded declaration!
 	// We should pass in a flag saying whether or not to copy this data
@@ -63,9 +63,27 @@ void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl)
 	// Accunt for CPU padding
 	m_uSize = (m_uSize + 4 - 1) - ((m_uSize + 4 - 1) % 4);
 
-	m_pCPUData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_SHADER_CONSTANTS, m_uSize, 4);
+	if (eUsage == GPU_USAGE_STATIC)
+	{
+		// Temporarily set data to be this input data
+		m_pCPUData = pData;
+	}
+	else
+	{
+		m_pCPUData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_SHADER_CONSTANTS, m_uSize, 4);
+	}
 
-	m_platform.Init(pDevice, *this);
+	m_platform.Init(pDevice, *this, eUsage);
+
+	if (pData)
+	{
+		UpdateData(pDevice);
+	}
+
+	if (eUsage == GPU_USAGE_STATIC)
+	{
+		m_pCPUData = nullptr;
+	}
 
 }
 
@@ -77,6 +95,11 @@ void ConstantSet::CleanUp(GFXDevice* pDevice)
 
 void* ConstantSet::Lock(uint32 uSize)
 {
+	if (m_eUsage == GPU_USAGE_STATIC)
+	{
+		ASSERT(false);
+		return nullptr;
+	}
 	ASSERT(m_uSize==uSize);
 	m_bLocked = true;
 	return m_pCPUData;

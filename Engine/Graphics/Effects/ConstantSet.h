@@ -27,7 +27,7 @@ public:
 	~ConstantSet(); 
 
 	// Only need to pass in an effect if this is a dynamic constant set
-	void Init(class GFXDevice* pDevice, const ShaderConstantDecl* pDecl);
+	void Init(class GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUUsage eUsage = GPU_USAGE_DYNAMIC, void* pData = nullptr);
 	void CleanUp(class GFXDevice* pDevice);
 	bool IsValid() const { return m_uSize > 0; }
 
@@ -53,6 +53,7 @@ private:
 
 	void AppendDeclaration(const ShaderConstantDecl* pDecl);
 
+	GPUUsage					m_eUsage;
 	ConstantSet_ps				m_platform;
 
 	const ShaderConstantDecl*	m_pDecl;

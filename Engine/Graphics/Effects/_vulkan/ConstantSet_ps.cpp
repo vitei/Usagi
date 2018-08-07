@@ -44,8 +44,9 @@ ConstantSet_ps::ConstantSet_ps()
 	m_bDataValid	= false;
 	m_pOwner		= NULL;
 	m_buffer = VK_NULL_HANDLE;
-//	m_uActiveBuffer	= 0;
+	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
+	m_uBufferCount = 0;
 }
 
 ConstantSet_ps::~ConstantSet_ps()
@@ -53,18 +54,20 @@ ConstantSet_ps::~ConstantSet_ps()
 	utl::SafeArrayDelete(&m_pVarData);
 }
 
-void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
+void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage)
 {
+	// TODO: Obey usage so we don't allocate extra memory for static buffers
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+	memsize uPerBufferAlign = devicePS.GetPhysicalProperties(0)->limits.minUniformBufferOffsetAlignment;
 	m_pOwner = &owner;	
 
-	InitOffsetsAndGPUData( m_pOwner->GetDeclaration() );
+	m_uBufferCount = 1;
 
-	uint32 uOffset = 0;
-	for (uint32 i = 0; i < GFX_NUM_DYN_BUFF; i++)
+	InitOffsets( m_pOwner->GetDeclaration() );
+	memsize uUnAlignedSize = m_uGPUSize;
+	if (m_uBufferCount > 1)
 	{
-		m_uOffsets[i] = uOffset;
-		uOffset += m_uGPUSize;
+		m_uGPUSize = AlignSizeUp(m_uGPUSize, uPerBufferAlign);
 	}
 
 
@@ -76,7 +79,7 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
 	bufCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufCreateInfo.pNext = NULL;
 	bufCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	bufCreateInfo.size = m_uGPUSize * GFX_NUM_DYN_BUFF;
+	bufCreateInfo.size = m_uGPUSize * m_uBufferCount;
 	bufCreateInfo.flags = 0;
 
 	VkResult eResult = vkCreateBuffer(devicePS.GetVKDevice(), &bufCreateInfo, nullptr, &m_buffer);
@@ -95,9 +98,22 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
 	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memory, 0);
 	ASSERT(eResult == VK_SUCCESS);
 
-	m_descriptor.offset = 0;
-	m_descriptor.buffer = m_buffer;
-	m_descriptor.range = m_uGPUSize;
+	// Used for dynamic uniform buffers
+	memsize uOffset = 0;
+	for (uint32 i = 0; i < m_uBufferCount; i++)
+	{
+		m_uOffsets[i] = (uint32)uOffset;
+		uOffset += m_uGPUSize;
+	}
+
+	// Only 8 dynamic uniform buffers are guaranteed across all stages (the no is 15 on my 1070) so need to support
+	// buffer flipping for standard constant buffers too
+	for (uint32 i = 0; i < m_uBufferCount; i++)
+	{
+		m_descriptor[i].offset = i * m_uGPUSize;
+		m_descriptor[i].buffer = m_buffer;
+		m_descriptor[i].range = uUnAlignedSize;
+	}
 }
 
 void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
@@ -150,7 +166,7 @@ void ConstantSet_ps::AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffs
 	}	
 }
 
-void ConstantSet_ps::InitOffsetsAndGPUData(const ShaderConstantDecl* pDecl)
+void ConstantSet_ps::InitOffsets(const ShaderConstantDecl* pDecl)
 {
 	// TODO: Proper allocation, alignment issues, etc
 	uint32 uSize = 0;
@@ -159,16 +175,21 @@ void ConstantSet_ps::InitOffsetsAndGPUData(const ShaderConstantDecl* pDecl)
 
 	AppendOffsets(pDecl, 0, uSize, uVars);
 	m_uGPUSize = uSize;
+
 	ASSERT(uVars == m_pOwner->GetVarCount());
+}
+
+void* ConstantSet_ps::GetGPUData(uint32 uActiveBuffer)
+{
+	void* pGPUData = (void*)((uint8*)(m_pBoundGPUData) +(m_uGPUSize * uActiveBuffer));
+	return pGPUData;
 }
 
 
 void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 {	
-	// FIXME: Assert this only called once per frame
-	// we'll probably want to use standard constant setting for effects
-	//if(!bDoubleUpdate)
-		//m_uActiveBuffer = (m_uActiveBuffer+1)%GFX_NUM_DYN_BUFF;
+	if(!bDoubleUpdate)
+		m_uActiveBuffer = (m_uActiveBuffer+1)% m_uBufferCount;
 
 	uint8* pCPUData = (uint8*)m_pOwner->GetCPUData();
 	uint32 uVarCount = m_pOwner->GetVarCount();
@@ -177,7 +198,7 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 	const ShaderConstantDecl* pDecl = m_pOwner->GetDeclaration();
 	const VariableData* pVarData = m_pVarData;
 
-	void* pGPUData = m_pBoundGPUData;// +(m_uGPUSize * m_uActiveBuffer);
+	void* pGPUData = GetGPUData(m_uActiveBuffer);
 
 	for(uint32 i=0; i<uVarCount; i++)
 	{

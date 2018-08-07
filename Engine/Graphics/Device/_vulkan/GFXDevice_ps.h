@@ -62,6 +62,7 @@ public:
 	VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin);
 	void FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free);
 	VkQueue GetQueue() { return m_queue; }
+	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
 private:
 	void EnumerateDisplays();
