@@ -9,7 +9,6 @@
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/ResourcePak.pb.h"
 #include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/stl/vector.h"
@@ -24,7 +23,6 @@ public:
     virtual ~ParticleEmitterResource();
 
 	bool Load(GFXDevice* pDevice, const char* szFileName);
-	bool Load(GFXDevice* pDevice, const ParticleEmitterPak& pak, const void* pData, const char* szPackPath);
 
 	const particles::EmitterEmission& GetEmissionDetails() const { return m_emissionDef;  }
 	const usg::particles::EmitterShapeDetails& GetShapeDetails() const { return m_shapeDef; }

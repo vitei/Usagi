@@ -21,8 +21,6 @@
 #include "Engine/Core/stl/string.h"
 #include "Engine/Resource/ResourceData.h"
 #include "Engine/Resource/ResourceDictionary.h"
-#include "Engine/Resource/ResourcePak.pb.h"
-#include "Engine/Resource/ResourcePakLoader.h"
 #include "Engine/Resource/ResourcePakHdr.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Core/Containers/List.h"

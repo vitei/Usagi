@@ -38,27 +38,6 @@ namespace usg{
 		return true;
 	}
 
-	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const ParticleEmitterPak& pak, const void* pData, const char* szPackPath)
-	{
-		U8String fileName = szPackPath;
-		fileName += pak.resHdr.strName;
-		fileName += ".pem";
-
-		SetupHash(fileName.CStr());
-		ProtocolBufferMemory emitterVPB(pData, pak.resHdr.uDataSize);
-		bool bReadSucceeded = emitterVPB.Read(&m_emissionDef);
-		ASSERT(bReadSucceeded);
-		bReadSucceeded &= emitterVPB.Read(&m_shapeDef);
-
-		if (!bReadSucceeded)
-		{
-			return false;
-		}
-
-		Load(pDevice);
-
-		return true;
-	}
 
 	void ParticleEmitterResource::Load(GFXDevice* pDevice)
 	{

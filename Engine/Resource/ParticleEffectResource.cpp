@@ -26,20 +26,5 @@ namespace usg{
 		return bReadSucceeded;
 	}
 
-	bool ParticleEffectResource::Load(GFXDevice* pDevice, const ParticleEffectPak& pak, const void* pData, const char* szPackPath)
-	{
-		UNUSED_VAR(pDevice);
-		U8String fileName = szPackPath;
-		fileName += pak.resHdr.strName;
-		m_name = fileName;
-		m_name.RemovePath();
-		fileName += ".pfx";
-
-		SetupHash(fileName.CStr());
-		ProtocolBufferMemory effectVPB(pData, pak.resHdr.uDataSize);
-		bool bReadSucceeded = effectVPB.Read(&m_definition);
-		SetReady(true);
-		return bReadSucceeded;
-	}
 }
 
