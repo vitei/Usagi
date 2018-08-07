@@ -26,9 +26,12 @@ public:
 	void SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl);
 	void RemovePass(RenderNode::Layer eLayer, uint32 uPriority);
 	void ClearAllPasses();
+	void ClearPrevPasses();
 	void UpdateEnd();
-	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const;
-	const RenderPassHndl GetRenderPass(const RenderNode& node) const;
+	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet = false) const;
+	const RenderPassHndl GetRenderPass(const RenderNode& node, bool bPrevSet = false) const;
+	bool GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const;
+	bool RenderPassesUpdated() const { return !m_prevEntries.empty(); }
 
 private:
 	PRIVATIZE_COPY(SceneRenderPasses);
@@ -51,6 +54,7 @@ private:
 		}
 	};
 
+	// Callbacks aren't necessary for render nodes connected to the scene, they will be automatically notified of changes
 	struct CallbackData
 	{
 		ChangeCallback	fnCallback;
@@ -58,6 +62,7 @@ private:
 	};
 
 	vector<RenderPassEntry>	m_entries;
+	vector<RenderPassEntry>	m_prevEntries;
 	vector<CallbackData>	m_callbacks;
 };
 

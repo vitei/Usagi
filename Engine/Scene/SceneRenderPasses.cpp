@@ -75,7 +75,13 @@ void SceneRenderPasses::RemovePass(RenderNode::Layer eLayer, uint32 uPriority)
 
 void SceneRenderPasses::ClearAllPasses()
 {
+	m_prevEntries = m_entries;
 	m_entries.clear();
+}
+
+void SceneRenderPasses::ClearPrevPasses()
+{
+	m_prevEntries.clear();
 }
 
 void SceneRenderPasses::UpdateEnd()
@@ -87,9 +93,10 @@ void SceneRenderPasses::UpdateEnd()
 	}
 }
 
-const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority) const
+const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet) const
 {
-	for (auto itr = m_entries.rbegin(); itr != m_entries.rend(); ++itr)
+	auto& set = bPrevSet ? m_prevEntries : m_entries;
+	for (auto itr = set.rbegin(); itr != set.rend(); ++itr)
 	{
 		if (itr->eLayer > eLayer)
 			continue;
@@ -105,11 +112,16 @@ const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, 
 	return RenderPassHndl();
 }
 
-const RenderPassHndl SceneRenderPasses::GetRenderPass(const RenderNode& node) const
+const RenderPassHndl SceneRenderPasses::GetRenderPass(const RenderNode& node, bool bPrevSet) const
 {
-	return GetRenderPass(node.GetLayer(), node.GetPriority());
+	return GetRenderPass(node.GetLayer(), node.GetPriority(), bPrevSet);
 }
 
 
+bool SceneRenderPasses::GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const
+{
+	// TODO: This could definitely be sped up
+	hndlOut = GetRenderPass(node);
+	return GetRenderPass(node, false) != hndlOut;
 }
 
