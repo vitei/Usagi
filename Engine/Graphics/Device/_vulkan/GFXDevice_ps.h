@@ -87,6 +87,7 @@ private:
 	VkDebugReportCallbackEXT			m_callbacks[CALLBACK_COUNT];
 #endif
 	VkPhysicalDeviceMemoryProperties	m_memoryProperites[MAX_GPU_COUNT];
+	VkPhysicalDeviceProperties			m_deviceProperties[MAX_GPU_COUNT];
 	VkCommandPool						m_cmdPool;
 	VkDevice							m_vkDevice;
 	VkInstance							m_instance;

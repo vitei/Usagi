@@ -168,6 +168,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	for (uint32 i = 0; i < m_uGPUCount; i++)
 	{ 
 		vkGetPhysicalDeviceMemoryProperties(m_gpus[i], &m_memoryProperites[i]);
+		vkGetPhysicalDeviceProperties(m_gpus[i], &m_deviceProperties[i]);
 	}
     
     // Init the device
