@@ -47,6 +47,7 @@ public:
 	const ConstantSet_ps& GetPlatform() const { return m_platform; }
 
 	bool GetDirty() const { return m_bDirty;  }
+	uint32 GetLastUpdate() const { return m_uLastUpdate; }
 
 private:
 	PRIVATIZE_COPY(ConstantSet)

@@ -39,6 +39,8 @@ public:
 
 	// Only call when finalizing or upon changing something internal
 	void UpdateDescriptors(GFXDevice* pDevice);
+	// Confirms update descriptors has been changed since internal data has been updated
+	bool IsUptoDate() const;
 
 	bool GetValid() const { return m_bValid; }
 
@@ -60,6 +62,7 @@ private:
 	DescriptorData*				m_pData;
 	bool 						m_bValid;
 	uint32						m_uDataCount;
+	uint32						m_uLastUpdate;
 
 	DescriptorSetLayoutHndl		m_layoutHndl;
 	const DescriptorSetLayout*	m_pLayoutDesc;

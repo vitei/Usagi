@@ -374,10 +374,6 @@ void GFXDevice_ps::End()
 
 	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
-
-	// TODO: Not the right place to wait on the GPU
-	res = vkQueueWaitIdle(m_queue);
-	ASSERT(res == VK_SUCCESS);
 }
 
  

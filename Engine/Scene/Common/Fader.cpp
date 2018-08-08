@@ -182,6 +182,7 @@ namespace usg
 		pConst->fFade = sfAlpha;
 		m_constants.Unlock();
 		m_constants.UpdateData(pDevice);
+		m_Material.UpdateDescriptors(pDevice);
 	}
 
 

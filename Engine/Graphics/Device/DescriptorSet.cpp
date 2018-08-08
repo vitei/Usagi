@@ -6,6 +6,7 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
+#include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Graphics/Device/DescriptorData.h"
 
 namespace usg {
@@ -15,6 +16,7 @@ DescriptorSet::DescriptorSet()
 	, m_pData(nullptr)
 	, m_bValid(false)
 	, m_uDataCount(0)
+	, m_uLastUpdate(USG_INVALID_ID)
 	, m_layoutHndl()
 	, m_pLayoutDesc(nullptr)
 {
@@ -106,6 +108,21 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 
 	// And GPU update
 	UpdateDescriptors(pDevice);
+}
+
+bool DescriptorSet::IsUptoDate() const
+{
+	for (uint32 i = 0; i < m_pLayoutDesc->GetResourceCount(); i++)
+	{
+		if (m_pData[i].eDescType == DESCRIPTOR_TYPE_CONSTANT_BUFFER)
+		{
+			if (m_pData[i].pConstBuffer && m_pData[i].pConstBuffer->GetLastUpdate() > m_uLastUpdate)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
@@ -209,7 +226,9 @@ void DescriptorSet::UpdateDescriptors(GFXDevice* pDevice)
 		}
 	}
 	#endif
-	m_platform.UpdateDescriptors(pDevice, m_pLayoutDesc, m_pData);
+	bool bDoubleUpdate = m_uLastUpdate == pDevice->GetFrameCount();
+	m_platform.UpdateDescriptors(pDevice, m_pLayoutDesc, m_pData, bDoubleUpdate);
+	m_uLastUpdate = pDevice->GetFrameCount();
 	m_bValid = true;
 }
 

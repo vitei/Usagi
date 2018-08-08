@@ -12,6 +12,8 @@ namespace usg {
 	DescriptorSet_ps::DescriptorSet_ps()
 	{
 		m_bValid = false;
+		// TODO: We should support startic buffers
+		m_uBuffers = 0;	
 	}
 
 	DescriptorSet_ps::~DescriptorSet_ps()
@@ -21,7 +23,12 @@ namespace usg {
 
 	void DescriptorSet_ps::Init(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
 	{
-		m_descSet = pLayout->GetPlatform().AllocDescriptorSet(pDevice);
+		m_uBuffers = GFX_NUM_DYN_BUFF;
+		m_uActiveSet = m_uBuffers - 1;
+		for (uint32 i = 0; i < m_uBuffers; i++)
+		{
+			m_descSet[i] = pLayout->GetPlatform().AllocDescriptorSet(pDevice);
+		}
 
 		m_bValid = true;
 	}
@@ -30,12 +37,19 @@ namespace usg {
 	{
 		if (m_bValid)
 		{
-			pLayout->GetPlatform().FreeDescriptorSet(pDevice, m_descSet);
+			for (uint32 i = 0; i < m_uBuffers; i++)
+			{
+				pLayout->GetPlatform().FreeDescriptorSet(pDevice, m_descSet[i]);
+			}
 		}
 	}
 
-	void DescriptorSet_ps::UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData)
+	void DescriptorSet_ps::UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData, bool bDoubleUpdate)
 	{
+		if (!bDoubleUpdate)
+		{
+			m_uActiveSet = (m_uActiveSet + 1) % m_uBuffers;
+		}
 		vector<VkDescriptorImageInfo> images;
 		images.reserve(pLayout->GetNumberOfType(DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER));
 
@@ -48,7 +62,7 @@ namespace usg {
 		{
 			writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			writes[i].pNext = NULL;
-			writes[i].dstSet = m_descSet.descSet;
+			writes[i].dstSet = m_descSet[m_uActiveSet].descSet;
 			writes[i].dstBinding = pLayout->GetDeclaration(i)->uBinding;
 			writes[i].descriptorCount = pLayout->GetDeclaration(i)->uCount;
 			switch (pLayout->GetDeclaration(i)->eDescriptorType)
@@ -91,11 +105,6 @@ namespace usg {
 		vkUpdateDescriptorSets(pDevice->GetPlatform().GetVKDevice(), pLayout->GetDeclarationCount(), writes.data(), 0, nullptr);
 	}
 
-	void DescriptorSet_ps::NotifyBufferChanged(uint32 uLayoutIndex, uint32 uSubIndex, const DescriptorData* pData)
-	{
-		// Do nothing - was only for the 3DS
-	}
-
 
 	void DescriptorSet_ps::Bind(VkCommandBuffer buffer, VkPipelineLayout layout, uint32 uSlot) const
 	{
@@ -107,6 +116,6 @@ namespace usg {
 			uDynamicOffsets[i] = m_dynamicBuffers[i]->GetActiveBufferOffset();
 		}*/
 
-		vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, uSlot, 1, &m_descSet.descSet, 0, nullptr);// (uint32)m_dynamicBuffers.size(), uDynamicOffsets);
+		vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, uSlot, 1, &m_descSet[m_uActiveSet].descSet, 0, nullptr);// (uint32)m_dynamicBuffers.size(), uDynamicOffsets);
 	}
 }
