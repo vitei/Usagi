@@ -507,7 +507,7 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, DependencyTracker* pDependencies)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies)
 {
 	m_pDependencies = pDependencies;
 
@@ -533,34 +533,43 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, DependencyTracker* pDepende
 			AddIdentityBone(pSkeleton);
 		}
 		cmdl.SetSkeleton(pSkeleton);
-		ReadAnimations(cmdl, modelScene);
-		ReadMeshRecursive(cmdl, pRootNode);
+		if (!bSkeletonOnly)
+		{
+			ReadAnimations(cmdl, modelScene);
+			ReadMeshRecursive(cmdl, pRootNode);
+		}
 	}
 
-	// Calculate the bounding sphere sizes
-	for (uint32 n = 0; n < cmdl.GetShapeNum(); n++)
+	if (!bSkeletonOnly)
 	{
-		// AABB
-		::exchange::Shape* pShape = cmdl.GetShapePtr(n);
-		Vector3 vMin, vMax;
-		LoaderUtil::setupShapeAABB(vMin, vMax, cmdl.GetStreamPtr(pShape->GetPositionStreamRefIndex()));
-		pShape->SetAABB(vMin, vMax);
+		// Calculate the bounding sphere sizes
+		for (uint32 n = 0; n < cmdl.GetShapeNum(); n++)
+		{
+			// AABB
+			::exchange::Shape* pShape = cmdl.GetShapePtr(n);
+			Vector3 vMin, vMax;
+			LoaderUtil::setupShapeAABB(vMin, vMax, cmdl.GetStreamPtr(pShape->GetPositionStreamRefIndex()));
+			pShape->SetAABB(vMin, vMax);
 
-		// AABB -> BoundingSphere
-		Vector3 center = (vMax + vMin) / 2.0f;
-		::usg::exchange::Sphere& sphere = pShape->pb().boundingSphere;
-		sphere.center.x = center.x;
-		sphere.center.y = center.y;
-		sphere.center.z = center.z;
-		Vector3 vRadius = vMax - center;
-		sphere.radius = vRadius.calcLength();
+			// AABB -> BoundingSphere
+			Vector3 center = (vMax + vMin) / 2.0f;
+			::usg::exchange::Sphere& sphere = pShape->pb().boundingSphere;
+			sphere.center.x = center.x;
+			sphere.center.y = center.y;
+			sphere.center.z = center.z;
+			Vector3 vRadius = vMax - center;
+			sphere.radius = vRadius.calcLength();
+		}
 	}
-
 	if (PostProcessSkeleton(cmdl))
 	{
 		//mError = -1;
 	}
-	PostProcessing(cmdl);
+
+	if (!bSkeletonOnly)
+	{
+		PostProcessing(cmdl);
+	}
 
 
 }

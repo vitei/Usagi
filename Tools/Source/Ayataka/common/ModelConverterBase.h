@@ -11,7 +11,7 @@ public:
 	ModelConverterBase();
 	virtual ~ModelConverterBase();
 
-	virtual int  Load( const aya::string& path, bool bAsCollision, DependencyTracker* pDependencies ) = 0;
+	virtual int  Load( const aya::string& path, bool bAsCollision, bool bSkeletonOnly, DependencyTracker* pDependencies ) = 0;
 	virtual void Process( void ) = 0;
 	void Store( size_t alignment, bool bSwapEndian );
 	void StoreCollisionBinary( bool bBigEndian );
