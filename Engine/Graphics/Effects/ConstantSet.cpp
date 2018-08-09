@@ -105,7 +105,7 @@ void* ConstantSet::Lock(uint32 uSize)
 	return m_pCPUData;
 }
 
-void ConstantSet::UpdateData(GFXDevice* pDevice)
+bool ConstantSet::UpdateData(GFXDevice* pDevice)
 {
 	if(m_bDirty)
 	{
@@ -121,7 +121,9 @@ void ConstantSet::UpdateData(GFXDevice* pDevice)
 		m_platform.UpdateBuffer(pDevice, bDoubleUpdate);
 		m_bDirty = false;
 		m_uLastUpdate = pDevice->GetFrameCount();
+		return true;
 	}
+	return false;
 }
 
 void  ConstantSet::Unlock()

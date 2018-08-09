@@ -41,7 +41,8 @@ public:
 	void* Lock(uint32 uSize);
 	void  Unlock();
 
-	void UpdateData(GFXDevice* pDevice);
+	// Returns true if data was dirty and device update performed, otherwise false
+	bool UpdateData(GFXDevice* pDevice);
 
 	ConstantSet_ps& GetPlatform() { return m_platform; }
 	const ConstantSet_ps& GetPlatform() const { return m_platform; }
