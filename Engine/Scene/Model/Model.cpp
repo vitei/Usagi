@@ -228,11 +228,13 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		m_meshArray[i]->SetPipelineState(pDevice->GetPipelineState(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]), pMesh->pipelines.defaultPipeline));
 		m_fScale = 1.0f;
 		m_meshArray[i]->ResetOverrides();
+		m_meshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
 		if (m_depthMeshArray)
 		{
 			DescriptorSet& depthDesc = m_depthMeshArray[i]->GetDescriptorSet();
 			depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 			m_depthMeshArray[i]->ResetOverrides();
+			m_depthMeshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
 		}
 	}
 }
