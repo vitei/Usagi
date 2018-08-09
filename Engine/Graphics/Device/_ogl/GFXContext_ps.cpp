@@ -307,6 +307,7 @@ void GFXContext_ps::SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex)
 				break;
 			}
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+			case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
 				//if(pDecl->shaderType != SHADER_FLAG_PIXEL)
 				ASSERT(pInst->pConstBuffer->GetDirty() == false);
 				pInst->pConstBuffer->GetPlatform().Bind((ShaderConstantType)(pDecl->uBinding + j));

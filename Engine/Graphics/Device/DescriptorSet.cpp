@@ -94,6 +94,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 				break;
 			}
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+			case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
 				m_pData[uDataIndex].pConstBuffer = copy.m_pData[uDataIndex].pConstBuffer;
 				break;
 			default:
@@ -128,7 +129,7 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
 	ASSERT(uSubIndex < pDecl->uCount);
 
-	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER);
+	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER || pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC);
 	ASSERT(pBuffer!=nullptr);
 	uint32 uResourceIndex = m_pLayoutDesc->GetResourceIndex(uLayoutIndex, uSubIndex);
 
@@ -156,7 +157,8 @@ void DescriptorSet::SetConstantSetAtBinding(uint32 uBinding, const ConstantSet* 
 	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
 	{
 		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
-		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER && uBinding == pDecl->uBinding && (pDecl->shaderType & uFlags)!=0 )
+		if ( (pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER || pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC)
+			&& uBinding == pDecl->uBinding && (pDecl->shaderType & uFlags)!=0 )
 		{
 			SetConstantSet(i, pBuffer,uSubIndex);
 			bFound = true;
