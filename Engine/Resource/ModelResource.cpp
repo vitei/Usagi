@@ -299,7 +299,7 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 
 	if(!bAnimated)
 	{
-		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER;
+		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC;
 		decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
 		decl[uIndex].uCount = 1;
 		decl[uIndex].uBinding = SHADER_CONSTANT_INSTANCE;
