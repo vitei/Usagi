@@ -258,6 +258,10 @@ void GFXContext::ValidateDescriptors()
 				WARNING("Missing descriptor set at slot %u\n", i);
 			}
 		}
+		if (m_pActiveDescSets[i] && !m_pActiveDescSets[i]->IsUptoDate())
+		{
+			WARNING("Out of date descriptor set at slot %u\n", i);
+		}
 	}
 #endif
 }
