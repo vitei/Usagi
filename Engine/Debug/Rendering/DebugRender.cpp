@@ -149,7 +149,6 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
 	m_textMaterial.SetTexture(0, m_font.GetTexture(), pDevice->GetSampler(pointDecl));
-	m_textMaterial.UpdateDescriptors(pDevice);
 
 
 	pipelineState.ePrimType = PT_TRIANGLES;
@@ -163,7 +162,6 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), solidDescriptors);
 	m_posColConstants.Init(pDevice, g_solidConstantDef);
 	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_posColConstants);
-	m_posColMaterial.UpdateDescriptors(pDevice);
 
 
 	ASSERT(m_psRenderer==NULL);
@@ -335,8 +333,13 @@ void DebugRender::Updatebuffers(GFXDevice* pDevice)
 		m_charVerts.SetContents(pDevice, m_textBufferTmp, m_uCharCount);
 	}
 
-	m_posColConstants.UpdateData(pDevice);
-	m_textConstants.UpdateData(pDevice);
+	bool bUpdated = m_posColConstants.UpdateData(pDevice);
+	bUpdated |= m_textConstants.UpdateData(pDevice);
+	if (bUpdated)
+	{
+		m_textMaterial.UpdateDescriptors(pDevice);
+		m_posColMaterial.UpdateDescriptors(pDevice);
+	}
 }
 
 void DebugRender::Draw(GFXContext* pContext)
