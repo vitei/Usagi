@@ -39,7 +39,7 @@ private:
 	DescriptorSetLayout_ps	m_platform;
 	DeclarationInfo*		m_pDeclInfo;
 	uint32					m_uResources;
-	uint32					m_uTypedResources[DESCRIPTOR_TYPE_CONSTANT_BUFFER];
+	uint32					m_uTypedResources[DESCRIPTOR_TYPE_INVALID];
 	uint32					m_uDecls;
 };
 
