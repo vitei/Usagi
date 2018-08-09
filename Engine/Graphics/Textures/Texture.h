@@ -40,6 +40,9 @@ public:
 	uint32 GetSizeInMemory() const { return m_platform.GetSizeInMemory(); }
 #endif
 
+	// For keeping track of resizing/ recreation
+	uint32 GetUpdateIdx() const { return m_platform.GetUpdateIdx(); }
+
 	enum 
 	{
 		MAX_TEXTUTRE_IDS = 4096

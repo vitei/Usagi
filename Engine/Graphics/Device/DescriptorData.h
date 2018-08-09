@@ -26,6 +26,8 @@ struct DescriptorData
 
 	const ConstantSet*		pConstBuffer;
 
+	uint32					uLastUpdateIdx;
+
 	
 	// Other types use a raw pointer to the appropriate type
 };

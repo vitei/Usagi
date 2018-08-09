@@ -48,7 +48,7 @@ public:
 	const ConstantSet_ps& GetPlatform() const { return m_platform; }
 
 	bool GetDirty() const { return m_bDirty;  }
-	uint32 GetLastUpdate() const { return m_uLastUpdate; }
+	uint32 GetUpdateIdx() const { return m_uUpdateCount; }
 
 private:
 	PRIVATIZE_COPY(ConstantSet)
@@ -64,6 +64,7 @@ private:
 	uint32						m_uSize;
 	bool						m_bLocked;
 	bool						m_bDirty;
+	uint32						m_uUpdateCount;
 	uint32						m_uLastUpdate;
 };
 

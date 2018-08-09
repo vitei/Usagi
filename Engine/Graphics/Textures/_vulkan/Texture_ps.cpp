@@ -244,6 +244,7 @@ Texture_ps::Texture_ps() :
 	, m_image(VK_NULL_HANDLE)
 	, m_imageView(VK_NULL_HANDLE)
 	, m_imageLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+	, m_uUpdateCount(0)
 	, m_uWidth(0)
 	, m_uHeight(0)
 	, m_uDepth(0)
@@ -322,6 +323,7 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_uHeight = uHeight;
 	m_uDepth = 1;
 	m_uFaces = uArrayCount;
+	m_uUpdateCount++;
 }
 
 VkImageView Texture_ps::CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) const
@@ -499,6 +501,7 @@ void Texture_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;
+	m_uUpdateCount++;
 }
 
 
@@ -543,7 +546,7 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
     // Bind memory
     err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);
     ASSERT(!err);
-
+	m_uUpdateCount++;
 
 }
 
@@ -581,6 +584,8 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 		tmp = filename + ".dds";
 		return LoadWithGLI(pDevice, tmp.CStr());
 	}
+
+	m_uUpdateCount++;
 
 	return false;
 }

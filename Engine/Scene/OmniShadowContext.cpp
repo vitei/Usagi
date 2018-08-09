@@ -115,6 +115,7 @@ void OmniShadowContext::Update(GFXDevice* pDevice)
 
 	m_globalConstants.Unlock();
 	m_globalConstants.UpdateData(pDevice);
+	m_descriptorSet.UpdateDescriptors(pDevice);
 
 	for (List<RenderGroup>::Iterator it = GetVisibleGroups().Begin(); !it.IsEnd(); ++it)
 	{

@@ -55,6 +55,8 @@ public:
 	const DescriptorSet_ps& GetPlatform() const { return m_platform; }
 
 private:
+	void UpdateTimeTags();
+
 	DescriptorSet(DescriptorSet &rhs) { ASSERT(false); }
 	DescriptorSet& operator=(DescriptorSet &rhs) { ASSERT(false); return *this; }
 

@@ -38,6 +38,7 @@ public:
 	uint32 GetHeight() const;
 	uint32 GetDepth() const;
 	uint32 GetFaces() const;
+	uint32 GetUpdateIdx() const { return m_uUpdateCount; }
 
 #ifdef DEBUG_BUILD
 	uint32 GetSizeInMemory() const { return 0; }
@@ -60,6 +61,7 @@ private:
 	VkImageLayout	m_imageLayout;
 	VkImageCreateInfo m_imageCreateInfo;
 	VkImageViewCreateInfo m_imageViewCreateInfo;
+	uint32			m_uUpdateCount;
 	uint32			m_uWidth;
 	uint32			m_uHeight;
 	uint32			m_uDepth;

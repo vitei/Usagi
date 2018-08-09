@@ -16,6 +16,7 @@ ConstantSet::ConstantSet()
 	m_pCPUData	= NULL;
 	m_bDirty	= false;
 	m_uVarCount = 0;
+	m_uUpdateCount = 0;
 	m_uLastUpdate = USG_INVALID_ID;
 }
 
@@ -121,6 +122,7 @@ bool ConstantSet::UpdateData(GFXDevice* pDevice)
 		m_platform.UpdateBuffer(pDevice, bDoubleUpdate);
 		m_bDirty = false;
 		m_uLastUpdate = pDevice->GetFrameCount();
+		m_uUpdateCount++;
 		return true;
 	}
 	return false;
