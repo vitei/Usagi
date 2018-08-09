@@ -70,6 +70,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSetLayoutHndl& layo
 		for (uint32 j = 0; j < pDecl->uCount; j++)
 		{
 			m_pData[m_uDataCount].eDescType = pDecl->eDescriptorType;
+			m_pData[m_uDataCount].uLastUpdateIdx = USG_INVALID_ID;
 			m_uDataCount++;
 		}
 	}
@@ -183,6 +184,7 @@ void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& 
 	// I feel so dirty doing this but we know for a fact that we created this pointer and it saves a lot of extra hassle to get around it
 	m_pData[uResourceIndex].texData.tex = pTexture;
 	m_pData[uResourceIndex].texData.sampler = sampler;
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
 }
 
 void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuffer, uint32 uSubIndex)
@@ -196,6 +198,7 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 	uint32 uResourceIndex = m_pLayoutDesc->GetResourceIndex(uLayoutIndex, uSubIndex);
 
 	m_pData[uResourceIndex].pConstBuffer = pBuffer;
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
 }
 
 
@@ -263,6 +266,8 @@ SamplerHndl DescriptorSet::GetSamplerAtBinding(uint32 uBinding) const
 
 void DescriptorSet::UpdateDescriptors(GFXDevice* pDevice)
 {
+	// Do our best to avoid doing this at all, anything updated each frame should use dynamic
+	// constants or push constants (push constants not yet available)
 	if (!m_bValid || !IsUptoDate())
 	{
 		bool bDoubleUpdate = m_uLastUpdate == pDevice->GetFrameCount();
