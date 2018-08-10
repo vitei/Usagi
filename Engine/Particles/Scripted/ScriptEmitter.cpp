@@ -537,13 +537,10 @@ namespace usg
 		// Custom and transform constants are dynamic, don't need to update descriptors on their behalf
 		m_customConstants.UpdateData(pDevice);
 		m_gsTransform.UpdateData(pDevice);
-		bool bUpdated = m_materialConsts.UpdateData(pDevice);
-		bUpdated |= m_fragConsts.UpdateData(pDevice);
-		if (bUpdated)
-		{
-			m_material.UpdateDescriptors(pDevice);
-		}
+		m_materialConsts.UpdateData(pDevice);
+		m_fragConsts.UpdateData(pDevice);
 		Inherited::UpdateBuffers(pDevice);
+		m_material.UpdateDescriptors(pDevice);
 	}
 
 	void ScriptEmitter::UpdateParticleCPUDataInt(void* pGPUData, void* pMetaDataVoid, float fElapsed)

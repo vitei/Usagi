@@ -61,7 +61,7 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 	memsize uPerBufferAlign = devicePS.GetPhysicalProperties(0)->limits.minUniformBufferOffsetAlignment;
 	m_pOwner = &owner;	
 
-	m_uBufferCount = GFX_NUM_DYN_BUFF;
+	m_uBufferCount = 15;
 
 	InitOffsets( m_pOwner->GetDeclaration() );
 	memsize uUnAlignedSize = m_uGPUSize;
