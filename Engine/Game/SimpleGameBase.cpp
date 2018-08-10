@@ -251,6 +251,11 @@ namespace usg
 			pDisplay->Minimized(pDevice);
 
 		}
+		case 'ONSZ':
+		{
+			// About to resize
+			pDevice->WaitIdle();
+		}
 		break;
 		default:
 			// Does nothing
