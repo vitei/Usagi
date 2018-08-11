@@ -8,8 +8,8 @@ ATTRIB_LOC(3) in vec4 ao_color;
 
 out VertexData
 {
-	ATTRIB_LOC(0) mat3x4	vo_matrix;
-	ATTRIB_LOC(4) vec4    vo_vColor;
+	INT_LOC(0) mat3x4	vo_matrix;
+	INT_LOC(3) vec4     vo_vColor;
 } vertexData;
 
 void main(void)

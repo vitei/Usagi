@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Scene/Camera/Camera.h"
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Debug/Rendering/Debug3D.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/PostFX/PostEffect.h"
 #include "Engine/Scene/SceneContext.h"
@@ -124,7 +125,7 @@ namespace usg {
 
 	}
 
-	void ViewContext::Init(const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
+	void ViewContext::Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
 	{
 		SetHighestLOD(uHighestLOD);
 		SetRenderMask(uRenderMask);
@@ -132,6 +133,7 @@ namespace usg {
 
 		m_pCamera = pCamera;
 		m_searchObject.Init(GetScene(), this, m_pCamera->GetFrustum(), uRenderMask);
+		Debug3D::GetRenderer()->InitContextData(pDevice, this);
 	}
 
 

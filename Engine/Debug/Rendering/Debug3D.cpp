@@ -99,11 +99,13 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	m_spherePipeline = pDevice->GetPipelineState(rp, pipelineState);
 
 	pipelineState.inputBindings[0].Init(CubeRender::VertexElements);
+	pipelineState.uInputBindingCount = 1;
 	// Initialize cubes
 
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
 	pipelineState.ePrimType = PT_POINTS;
-	m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
+	// FIXME: Issue on Vulkan with this effect
+	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
 }
 
 void Debug3D::CleanUp(GFXDevice* pDevice)

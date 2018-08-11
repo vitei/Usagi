@@ -19,7 +19,7 @@ namespace usg
 		cam.SetUp(m, fAspect, fFov, fNear, fFar);
 
 		usg::ViewContext* pContext = scene.CreateViewContext(pDevice);
-		pContext->Init(&cam, &postFXSys);
+		pContext->Init(pDevice, &cam, &postFXSys);
 
 		SetViewContext(*pContext);
 
