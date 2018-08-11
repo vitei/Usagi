@@ -92,10 +92,16 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	RECT dim;
 	GetClientRect(hndl, &dim);
+	m_uWidth = m_uHeight = 0;
 
-	m_uWidth = dim.right - dim.left;
-	m_uHeight = dim.bottom - dim.top;
-
+	// Sometimes the window is getting minimized AS I'm creating it
+	while (m_uWidth == 0 || m_uHeight == 0)
+	{
+		GetClientRect(m_hwnd, &dim);
+		m_uWidth = dim.right - dim.left;
+		m_uHeight = dim.bottom - dim.top;
+		::Sleep(8);
+	}
 
 	VkResult res;
 
