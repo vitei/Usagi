@@ -39,6 +39,7 @@ public:
 		m_descriptorSet.SetConstantSetAtBinding(uConstant, pSet, 0, uFlags); 
 	}
 
+	void UpdateRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass);
 	void UpdateDescriptors(GFXDevice* pDevice) { m_descriptorSet.UpdateDescriptors(pDevice); }
 	TextureHndl GetTexture(uint32 uBinding) const { return m_descriptorSet.GetTextureAtBinding(uBinding); }
 	SamplerHndl GetSampler(uint32 uBinding) const { return m_descriptorSet.GetSamplerAtBinding(uBinding); }

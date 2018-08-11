@@ -135,7 +135,12 @@ void SkyFog::CleanUp(GFXDevice* pDevice)
 
 void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
-	m_pDestTarget = pDst;
+	if (pDst != m_pDestTarget)
+	{
+		m_pDestTarget = pDst;
+		m_materialFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+		m_materialNoFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+	}
 }
 
 void SkyFog::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
