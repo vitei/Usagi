@@ -1,2 +1,0 @@
-VS deferred/projection_light_pos_only
-PS deferred/pos_only

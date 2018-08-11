@@ -1,2 +1,0 @@
-VS SMAA/SMAAPassThrough
-PS SMAA/SMAAResolve

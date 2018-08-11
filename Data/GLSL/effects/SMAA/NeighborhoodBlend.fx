@@ -1,2 +1,0 @@
-VS SMAA/SMAANeighbourhoodBlend
-PS SMAA/SMAANeighbourhoodBlend

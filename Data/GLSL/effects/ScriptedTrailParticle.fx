@@ -1,3 +1,0 @@
-VS Particles/scripted_trail
-GS Particles/scripted_trail
-PS Particles/scripted_trail

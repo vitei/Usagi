@@ -1,2 +1,0 @@
-VS fogspherefar
-PS fogboxfar

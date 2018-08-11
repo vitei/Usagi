@@ -1,2 +1,0 @@
-VS cubemap
-PS cubemap

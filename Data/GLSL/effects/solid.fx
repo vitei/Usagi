@@ -1,2 +1,0 @@
-VS solid
-PS solid

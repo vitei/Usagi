@@ -1,3 +1,0 @@
-VS deferred/pointlight_pos
-PS deferred/pointlight
-DEFINES SHADOW_READ

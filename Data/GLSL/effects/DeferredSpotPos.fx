@@ -1,2 +1,0 @@
-VS deferred/spotlight_pos_only
-PS deferred/pos_only

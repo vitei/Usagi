@@ -1,2 +1,0 @@
-VS fogsphere
-PS fogbox
