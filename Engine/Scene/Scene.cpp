@@ -129,6 +129,12 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
 }
 
+const RenderPassHndl& Scene::GetShadowRenderPass() const
+{
+	return m_pImpl->lightMgr.GetShadowPassHndl();
+}
+
+
 void Scene::Cleanup(GFXDevice* pDevice)
 {
 	m_pImpl->debug3D.CleanUp(pDevice);

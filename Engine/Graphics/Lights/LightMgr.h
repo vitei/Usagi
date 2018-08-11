@@ -74,6 +74,7 @@ public:
 
 	uint32 GetShadowedDirLightCount() const { return m_uShadowedDirLights; }
 	uint32 GetShadowedDirLightIndex() const { return m_uShadowedDirLightIndex; }
+	const RenderPassHndl& GetShadowPassHndl() const { return m_cascadeTarget.GetRenderPass(); }
 
 
 private:	

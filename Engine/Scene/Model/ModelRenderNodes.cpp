@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/Scene.h"
  
 
 namespace usg {
@@ -60,6 +61,8 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 
 	if (bDepth)
 	{
+		// FIXME: This is only valid for shadow render passes, need another pipeline for scene pre depth passes
+		renderPass = pScene->GetShadowRenderPass();
 		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
 		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
 	}
@@ -68,7 +71,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
 		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
 	}
-	m_omniDepthPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.omniDepthPassPipeline);
+	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->pipelines.omniDepthPassPipeline);
 
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout);
 

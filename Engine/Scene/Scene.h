@@ -78,6 +78,7 @@ public:
 	const Camera*	GetSceneCamera(uint32 uIndex) const;
 
 	ParticleMgr&	GetParticleMgr();
+	const RenderPassHndl& GetShadowRenderPass() const;
 #ifndef FINAL_BUILD
 	List<SceneContext>& GetSceneContexts();
 #endif

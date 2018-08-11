@@ -12,7 +12,7 @@ ATTRIB_LOC(5) in vec4 ao_color;
 ATTRIB_LOC(6) in vec2 ao_texCoord[4];
 ATTRIB_LOC(10) in vec3 ao_binormal;
 
-#include "../includes/model_skinned_vs.inc"
+#include "../includes/model_transform.inc"
 
 // FIXME: Seperate out into seperate vertex and pixel buffers
 BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material

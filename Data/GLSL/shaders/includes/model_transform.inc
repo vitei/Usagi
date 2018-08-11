@@ -1,6 +1,7 @@
-#ifndef _MODEL_COMMON_VS_INC
-#define _MODEL_COMMON_VS_INC
+#ifndef _MODEL_TRANSFORM_VS_INC
+#define _MODEL_TRANSFORM_VS_INC
 
+#ifdef HAS_SKELETON
 BUFFER_LAYOUT(1,  UBO_BONE_ID) uniform Bones
 {
 	mat3x4 	mBonePalette[255];
@@ -45,6 +46,15 @@ vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
 		return ApplyWorldTransformSkinning( vVertex, iBoneCount );
 	}
 }
+
+#else
+
+vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
+{
+	return vec4( vVertex * mModelMat, vVertex.w);
+}
+
+#endif
 
 
 #endif
