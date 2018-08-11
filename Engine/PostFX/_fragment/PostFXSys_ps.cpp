@@ -108,7 +108,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 		flags.Clear();
 		flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4 | RenderTarget::RT_FLAG_DS;
-		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
 		m_screenRT[TARGET_GBUFFER].InitRenderPass(pDevice, flags);
 	}
 	
