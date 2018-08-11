@@ -612,7 +612,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		m_uWidth = Extent.x;
 		m_uHeight = Extent.y;
 		m_uDepth = Extent.z;
-		m_uFaces = (uint32)Texture.faces();
+		m_uFaces = FaceTotal;
 
 		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormatVK, &formatProperties);
 		GFXDevice_ps& devicePS = pDevice->GetPlatform();

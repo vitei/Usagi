@@ -33,7 +33,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	usg::Vector2f vTextureSize(64.f, 64.f);
 	int defaultRepeat[] = { 1, 1 };
 	m_window.Init("Texture", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
-	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", usg::GPU_LOCATION_STANDARD);
+	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", true, usg::GPU_LOCATION_STANDARD);
 	vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 	m_texture.Init(pDevice, "Particle tex", vTextureSize, m_pTexture);
 	m_fileList.Init("Textures/particles/", ".dds");

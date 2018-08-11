@@ -75,7 +75,6 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 		lFileFormat = sdkManager->GetIOPluginRegistry()->FindReaderIDByDescription("FBX binary (*.fbx)");;
 	}
 
-
 	if (!importer->Initialize(path.c_str(), lFileFormat) == true)
 	{
 		// open failed

@@ -552,12 +552,14 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 				sampDecl.LodBias = texture.lodBias;
 				sampDecl.LodMinLevel = texture.lodMinLevel;
 
-				// FIXME: HACK HACK HACK!!!! HACK FOR TESTING!!!
-				if (strcmp(texture.textureHint, "reflection0") == 0)
+
+				// First check the models local textures
+				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.CStr(), false, eGPULocation);
+				if (m_meshArray[m_uMeshCount].pTextures[uIndex].get() == nullptr)
 				{
-					pathName = "textures/sky_fine01";
+					// Fallback to absolute path, passing in true for replace missing texture just in case
+					m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, texture.textureName, true, eGPULocation);
 				}
-				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.CStr(), eGPULocation);
 
 				m_meshArray[m_uMeshCount].samplers[uIndex] = pDevice->GetSampler(sampDecl);
 			}

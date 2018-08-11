@@ -245,7 +245,7 @@ ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 	return pFile;
 }
 
-TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, GPULocation eGPULocation)
+TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex, GPULocation eGPULocation)
 {
 	U8String u8Name = szTextureName;
 	TextureHndl	pTexture = m_pImpl->textures.GetResourceHndl(u8Name);
@@ -264,7 +264,7 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 		else
 		{
 			DEBUG_PRINT("Unable to load texture %s\n", szTextureName);
-			if(!str::Find(szTextureName, "missing_texture"))
+			if(!str::Find(szTextureName, "missing_texture") && bReplaceMissingTex)
 			{
 				return GetTextureAbsolutePath(pDevice, "Textures/missing_texture", eGPULocation);
 			}
@@ -294,7 +294,7 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation)
 {
 	U8String path = m_textureDir + szTextureName;
-	return GetTextureAbsolutePath(pDevice, path.CStr(), eLocation);
+	return GetTextureAbsolutePath(pDevice, path.CStr(), true, eLocation);
 }
 
 
