@@ -125,6 +125,7 @@ namespace usg {
 		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, flags);
 		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);

@@ -92,6 +92,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 
+
 	m_depthStencil.Init(pDevice, uWidth, uHeight, DF_DEPTH_24_S8, eSamples);
 
 
@@ -140,20 +141,33 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 
 	// LDR target, no linear depth
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
+	m_screenRT[TARGET_LDR_0_TRANSFER_SRC].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
+	m_screenRT[TARGET_LDR_0_POST_DEPTH].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
+
+	// Second LDR target, no linear depth
+	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
+	m_screenRT[TARGET_LDR_1_TRANSFER_SRC].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
+
 	flags.Clear();
-	flags.uLoadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	flags.uLoadFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uClearFlags = 0;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 
 	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, flags);
+	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, flags);
 
-	// Second LDR target, no linear depth
-	m_screenRT[TARGET_LDR_1].Init(pDevice, &m_colorBuffer[BUFFER_LDR_1], &m_depthStencil);
+	flags.uShaderReadFlags = 0;
+	flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR_0;
+
+	m_screenRT[TARGET_LDR_0_TRANSFER_SRC].InitRenderPass(pDevice, flags);
+	m_screenRT[TARGET_LDR_1_TRANSFER_SRC].InitRenderPass(pDevice, flags);
+
 	flags.Clear();
+	flags.uLoadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
 	flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR;
-	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, flags);
+	m_screenRT[TARGET_LDR_0_POST_DEPTH].InitRenderPass(pDevice, flags);
 
 	//  LDR target with linear depth
 	pBuffers[0] = &m_colorBuffer[BUFFER_LDR_0];
@@ -293,6 +307,9 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	RenderTarget* pDst = &m_screenRT[TARGET_LDR_LIN_DEPTH];
 	m_renderPasses.ClearAllPasses();
+	
+
+	// Find
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{

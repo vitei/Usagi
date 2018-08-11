@@ -89,6 +89,9 @@ protected:
 		TARGET_LDR_LIN_DEPTH,
 		TARGET_LDR_0,
 		TARGET_LDR_1,
+		TARGET_LDR_0_POST_DEPTH,	// After depth, maintain load color without acting on it
+		TARGET_LDR_0_TRANSFER_SRC,	// Final target to be transfered to the screen
+		TARGET_LDR_1_TRANSFER_SRC,  // Final target to be transfered to the screen
 		TARGET_COUNT
 	};
 
