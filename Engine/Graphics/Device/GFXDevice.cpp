@@ -118,6 +118,18 @@ PipelineStateHndl GFXDevice::GetPipelineState(const RenderPassHndl& hndl, const 
 	return m_pImpl->renderStates.GetPipelineState(hndl, decl, this);
 }
 
+
+void GFXDevice::ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, PipelineStateHndl& hndlInOut)
+{
+	if (!renderPass.IsValid())
+		return;
+	PipelineStateDecl declOut;
+	RenderPassHndl oldRenderPass;
+	GetPipelineDeclaration(hndlInOut, declOut, oldRenderPass);
+
+	hndlInOut = GetPipelineState(renderPass, declOut);
+}
+
 RenderPassHndl GFXDevice::GetRenderPass(const RenderPassDecl& decl)
 {
 	return m_pImpl->renderStates.GetRenderPass(decl, this);

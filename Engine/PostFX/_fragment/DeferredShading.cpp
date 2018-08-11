@@ -275,6 +275,53 @@ void DeferredShading::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 	m_readDescriptors.UpdateDescriptors(pDevice);
 }
 
+
+void DeferredShading::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
+{ 
+	if (m_pDestTarget != pDst)
+	{
+		RenderPassHndl renderPassHndl = pDst->GetRenderPass();
+		// This is obviously not ideal, but it shouldn't normally happen. You'd have to be turning off bloom at run time.
+		// If it does happen we can cache all the combinations we see
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_baseDirPass);
+
+		for (uint32 i = 0; i < MAX_EXTRA_DIR_LIGHTS; i++)
+		{
+			pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_additionalShadowPass[i]);
+		}
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pStencilWriteEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pStencilWriteEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pStencilWriteEffect);
+		
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneEffect);
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingEffect);
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneNoSpecEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneNoSpecEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneNoSpecEffect);
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneShadowEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneShadowEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneShadowEffect);
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingNoSpecEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingNoSpecEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingNoSpecEffect);
+
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingShadowEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingShadowEffect);
+		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingShadowEffect);
+
+		m_pDestTarget = pDst;
+	}
+}
+
 bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	ViewContext* pSceneCtxt = m_pSys->GetActiveViewContext();

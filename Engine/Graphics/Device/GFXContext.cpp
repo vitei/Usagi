@@ -232,6 +232,13 @@ void GFXContext::SetPipelineState(PipelineStateHndl hndl)
 	{
 		PipelineState& group = *(hndl.GetContents());
 
+#ifdef CONFIRM_PIPELINE_VALIDITY
+		if (GetActiveRenderTarget() && (hndl.GetContents()->GetRenderPass() != GetActiveRenderTarget()->GetRenderPass()))
+		{
+			WARNING("The render pass is not that which was promised\n");
+		}
+#endif
+
 		m_platform.SetPipelineState(hndl, m_activeStateGroup);
 		m_activeStateGroup = hndl;
 		m_pActiveBinding = group.GetInputBindingInt();
