@@ -377,7 +377,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	pipelineState.uInputBindingCount = 1;
 
 
-	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING);
+	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
+	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineState.layout.descriptorSets[1] = matDescriptors;
 	pipelineState.layout.uDescriptorSetCount = 2;
@@ -425,7 +426,11 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	U8String effectPath = fxRunTime.GetResource()->GetEffectName();
 	U8String deferredEffectPath = fxRunTime.GetResource()->GetDeferredEffectName();
-
+	if (bAnimated)
+	{
+		effectPath += ".skel";
+		deferredEffectPath += ".skel";
+	}
 	
 	if (pShape->singleAttributes_count != 0)
 	{
@@ -572,6 +577,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName)
 {
+	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
+
 	PipelineStateDecl pipelineState = m_meshArray[m_uMeshCount].pipelines.defaultPipeline;
 
 	usg::AlphaStateDecl& alphaDecl = pipelineState.alphaState;
@@ -588,6 +595,10 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 
 	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
 	U8String effectPath = fxRunTime.GetResource()->GetDepthEffectName();
+	if (bAnimated)
+	{
+		effectPath += ".skel";
+	}
 
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
 
@@ -601,6 +612,10 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	m_meshArray[m_uMeshCount].pipelines.depthPassPipeline = pipelineState;
 
 	U8String omniDepthName = fxRunTime.GetResource()->GetOmniDepthEffectName();
+	if (bAnimated)
+	{
+		omniDepthName += ".skel";
+	}
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.CStr());
 
 	globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_omniShadowGlobalDescriptorDecl);
