@@ -234,11 +234,42 @@ int main(int argc, char *argv[])
 				for (YAML::const_iterator defineIt = defineSets.begin(); defineIt != defineSets.end(); ++defineIt)
 				{
 					// Package.Effect.DefineSet.fx
-					set.name = intFileName + "." + def.name + "." + (*defineIt)["name"].as<std::string>() + ".fx";
+					set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
+					set.name = intFileName + "." + def.name + set.defineSetName + ".fx";
 					set.defines = (*defineIt)["defines"].as<std::string>();
 					set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
-					set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
 					def.sets.push_back(set);
+				}
+			}
+
+			uint32 uStandardSets = (uint32)def.sets.size();
+
+			// Anything in a "global" define set is a combination of defines appended to every other shader
+			if ((*it)["global_sets"])
+			{
+				YAML::Node globalSets = (*it)["global_sets"];
+				for (YAML::const_iterator globalIt = globalSets.begin(); globalIt != globalSets.end(); ++globalIt)
+				{
+					// Package.Effect.DefineSet.fx
+					std::string name = (*globalIt)["name"].as<std::string>();
+					std::string defines = (*globalIt)["defines"].as<std::string>();
+
+					for (uint32 i = 0; i < uStandardSets; i++)
+					{
+						set = def.sets[i];
+						if (set.defines.length() > 0)
+						{
+							set.defines = set.defines + " " + defines;
+						}
+						else
+						{
+							set.defines = defines;
+						}
+						set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
+						set.defineSetName = set.defineSetName + std::string(".") + (*globalIt)["name"].as<std::string>();
+						set.name = intFileName + "." + def.name + set.defineSetName + ".fx";
+						def.sets.push_back(set);
+					}
 				}
 			}
 		}
