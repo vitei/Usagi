@@ -104,6 +104,7 @@ public:
 	virtual void VisibilityUpdate(GFXDevice* pDevice, const Vector4f &vTransformOffset) {}
 
 	float GetDepthSortValue() const { return m_pParent->GetSortingDistance(); }
+	uint64 GetComparisonValue() const { return m_uComparisonVal; }
 
 protected:
 	void SetPostEffect(bool bPostEffect) { m_bPostEffect = bPostEffect; }

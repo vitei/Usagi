@@ -68,6 +68,9 @@ protected:
 	void SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	void ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
+	PostEffect* GetFinalEffect();
+	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
+
 	enum COLOR_BUFFERS
 	{
 		BUFFER_HDR = 0,
