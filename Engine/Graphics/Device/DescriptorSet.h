@@ -39,18 +39,24 @@ public:
 
 	// Only call when finalizing or upon changing something internal
 	void UpdateDescriptors(GFXDevice* pDevice);
+	// Confirms update descriptors has been changed since internal data has been updated
+	bool IsUptoDate() const;
 
 	bool GetValid() const { return m_bValid; }
 
 
 	// FIXME: REMOVE THESE ACCESSORS WHEN COMPLETE
 	const DescriptorSetLayout*	GetLayoutDesc() const { return m_pLayoutDesc;  }
+	const DescriptorSetLayoutHndl& GetLayoutHndl() const { return m_layoutHndl; }
 	const DescriptorData*		GetData() const { return m_pData; }
+
 
 	DescriptorSet_ps&       GetPlatform()       { return m_platform; }
 	const DescriptorSet_ps& GetPlatform() const { return m_platform; }
 
 private:
+	void UpdateTimeTags();
+
 	DescriptorSet(DescriptorSet &rhs) { ASSERT(false); }
 	DescriptorSet& operator=(DescriptorSet &rhs) { ASSERT(false); return *this; }
 
@@ -58,6 +64,7 @@ private:
 	DescriptorData*				m_pData;
 	bool 						m_bValid;
 	uint32						m_uDataCount;
+	uint32						m_uLastUpdate;
 
 	DescriptorSetLayoutHndl		m_layoutHndl;
 	const DescriptorSetLayout*	m_pLayoutDesc;

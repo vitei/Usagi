@@ -104,7 +104,7 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, DependencyTracker* pDependencies);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
 
 private:

@@ -37,7 +37,7 @@ public:
 	void PostDraw();
 	void GetTexDim(Vector2f& vDimOut);
 
-	const DescriptorSet* GetDescriptorSet() { return &m_descriptorSet; }
+	TextureHndl GetShadowTexture();
 
 	enum
 	{
@@ -49,7 +49,6 @@ private:
 	OmniShadowContext*		m_pShadowContext;
 	Sphere					m_sphere;
 
-	DescriptorSet			m_descriptorSet;
 	DepthStencilBuffer		m_cubeBuffer;
 	RenderTarget			m_cubeTarget;
 	bool					m_bStatic;

@@ -5,12 +5,31 @@
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
+#include "Engine/Graphics/Device/GFXContext.h" 
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
 
 
 namespace usg {
+
+#ifdef USE_VK_DEBUG_EXTENSIONS
+static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugString(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
+{
+	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
+	DEBUG_PRINT("%s: %s\n", pLayerPrefix, pMsg);
+	return 1;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugBreak(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
+{
+	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
+	ASSERT_MSG(false, "%s: %s\n", pLayerPrefix, pMsg);
+	return 1;
+}
+#endif
+
 
 void* VKAPI_CALL VkAllocation(void* pUserData, size_t size, size_t align, VkSystemAllocationScope eScope)
 {
@@ -36,16 +55,25 @@ GFXDevice_ps::GFXDevice_ps()
 	m_uQueueFamilyCount = 0;
 	m_uGPUCount = 0;
 	m_pQueueProps = NULL;
-	m_uStockCount = 0;
 	m_uDisplayCount = 0;
+	m_fGPUTime = 0.0f;
 }
 
 GFXDevice_ps::~GFXDevice_ps()
 {
+	PFN_vkDestroyDebugReportCallbackEXT DestroyReportCallback = VK_NULL_HANDLE;
+	DestroyReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkDestroyDebugReportCallbackEXT");
+
+	for (uint32 i = 0; i < CALLBACK_COUNT; i++)
+	{
+		DestroyReportCallback(m_instance, m_callbacks[i], nullptr);
+	}
+
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
+
 
 	if (m_pQueueProps)
 	{
@@ -55,6 +83,7 @@ GFXDevice_ps::~GFXDevice_ps()
 	
 }
 
+
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {  
 	m_pParent = pParent;
@@ -62,6 +91,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	m_allocCallbacks.pfnAllocation = VkAllocation;
 	m_allocCallbacks.pfnFree = VkFree;
 	m_allocCallbacks.pfnReallocation = VkReallocation;
+	m_allocCallbacks.pUserData = nullptr;
 	m_allocCallbacks.pfnInternalFree = nullptr;
 	m_allocCallbacks.pfnInternalAllocation = nullptr;
 
@@ -74,11 +104,13 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
     app_info.applicationVersion = 1;
     app_info.pEngineName = "Usagi_Engine";
     app_info.engineVersion = 1;
-    app_info.apiVersion = VK_API_VERSION_1_0;
+	app_info.apiVersion = VK_API_VERSION_1_0;
 
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
+	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+
 
     // initialize the VkInstanceCreateInfo structure
     VkInstanceCreateInfo inst_info = {};
@@ -105,6 +137,25 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
         return;
     }
 
+	PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallback = VK_NULL_HANDLE;
+	CreateDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugReportCallbackEXT");
+
+
+#ifdef USE_VK_DEBUG_EXTENSIONS
+	VkDebugReportCallbackCreateInfoEXT callback = {
+		VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
+		NULL,                                                       // pNext
+		VK_DEBUG_REPORT_WARNING_BIT_EXT| VK_DEBUG_REPORT_INFORMATION_BIT_EXT|VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT|VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+		VkDebugString,                                        // pfnCallback
+		NULL                                                        // pUserData
+	};
+	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[0]);
+	
+	callback.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT;
+	callback.pfnCallback = VkDebugBreak;
+	callback.pUserData = NULL;
+	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[1]);
+#endif
 
     // Enumerate the available GPUs
     uint32 gpu_count = 1;
@@ -117,8 +168,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	for (uint32 i = 0; i < m_uGPUCount; i++)
 	{ 
 		vkGetPhysicalDeviceMemoryProperties(m_gpus[i], &m_memoryProperites[i]);
+		vkGetPhysicalDeviceProperties(m_gpus[i], &m_deviceProperties[i]);
 	}
-
     
     // Init the device
     VkDeviceQueueCreateInfo queue_info = {};
@@ -164,25 +215,30 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	int validationLayerCount = 1;
 	const char *validationLayerNames[] =
 	{
-		"VK_LAYER_LUNARG_standard_validation", /* Enable validation layers in debug builds to detect validation errors */
+		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
 	};
 #else
 	int validationLayerCount = 0;
 	const char *validationLayerNames[];
 #endif
 
+
+	extensions.clear();
+	extensions.push_back("VK_KHR_swapchain");
+
     VkDeviceCreateInfo device_info = {};
     device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     device_info.pNext = NULL;
     device_info.queueCreateInfoCount = 1;
     device_info.pQueueCreateInfos = &queue_info;
-    device_info.enabledExtensionCount = 0;
-    device_info.ppEnabledExtensionNames = NULL;
+    device_info.enabledExtensionCount = (uint32)extensions.size();
+    device_info.ppEnabledExtensionNames = extensions.data();
     device_info.enabledLayerCount = validationLayerCount;
     device_info.ppEnabledLayerNames = validationLayerNames;
     device_info.pEnabledFeatures = &enabledFeatures;
 
-    res = vkCreateDevice(m_gpus[0], &device_info, NULL, &m_vkDevice);
+	// Issue with the allocators atm so disabling for now
+    res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
     ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from
@@ -205,6 +261,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	EnumerateDisplays();
 
 	vkGetDeviceQueue(m_vkDevice, queue_info.queueFamilyIndex, 0, &m_queue);
+
+	VkFenceCreateInfo fenceInfo;
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.pNext = NULL;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+	vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
 
 	//ASSERT(false);	// Need to set up the copy command buffer
 }
@@ -277,10 +339,22 @@ const DisplaySettings* GFXDevice_ps::GetDisplayInfo(uint32 uIndex)
 
 void GFXDevice_ps::Begin()
 {
+	static bool bFirst = true;
+	if (!bFirst)
+	{
+		VkResult res;
+		do {
+			res = vkWaitForFences(m_vkDevice, 1, &m_drawFence, VK_TRUE, 100000);
+		} while (res == VK_TIMEOUT);
+		vkResetFences(m_vkDevice, 1, &m_drawFence);
+	}
+	bFirst = false;
 	for (uint32 i = 0; i < m_pParent->GetValidDisplayCount(); i++)
 	{
 		m_pParent->GetDisplay(i)->GetPlatform().SwapBuffers(m_pParent);
 	}
+
+	// TODO: Update GPU time
 }
 
 void GFXDevice_ps::End()
@@ -288,19 +362,21 @@ void GFXDevice_ps::End()
 	// For now just submit our immediate context
 	VkSubmitInfo submitInfo = {};
 	VkCommandBuffer buffers[] = { m_pParent->GetImmediateCtxt()->GetPlatform().GetVkCmdBuffer() };
+	VkPipelineStageFlags pipe_stage_flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = buffers;
+	// FIXME: Semaphores for all displays
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &m_pParent->GetDisplay(0)->GetPlatform().GetImageAcquired();
+	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
-	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
-	ASSERT(res == VK_SUCCESS);
-
-	// TODO: Not the right place to wait on the GPU
-	res = vkQueueWaitIdle(m_queue);
+	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
 }
 
-
+ 
 
 const VkQueueFamilyProperties* GFXDevice_ps::GetQueueProperties(uint32 uIndex)
 {
@@ -327,9 +403,9 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 {
 	prefferedProps |= properties;
 	
-	for (uint32 uMemoryType = 0; uMemoryType < 32; ++uMemoryType)
+	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
 	{
-		if (typeBits & (1 << uMemoryType))
+		if (((typeBits >> uMemoryType) && 1) == 1)
 		{
 			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
@@ -341,9 +417,9 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 	}
 
 
-	for (uint32 uMemoryType = 0; uMemoryType < 32; ++uMemoryType)
+	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
 	{
-		if (typeBits & (1 << uMemoryType))
+		if ( ((typeBits >> uMemoryType) && 1) == 1)
 		{
 			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
@@ -359,62 +435,9 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 }
 
 
-VkShaderModule GFXDevice_ps::GetShaderFromStock(const U8String &name, VkShaderStageFlagBits shaderType)
+void GFXDevice_ps::WaitIdle()
 {
-	for (uint32 uId = 0; uId < m_uStockCount; uId++)
-	{
-		if (m_stockShaders[uId].shaderType == shaderType && str::Compare(m_stockShaders[uId].name, name.CStr()))
-		{
-			return m_stockShaders[uId].module;
-		}
-	}
-
-	if (m_uStockCount < MAX_STOCK_SHADERS)
-	{
-		Shader* pNext = &m_stockShaders[m_uStockCount];
-		pNext->shaderType = shaderType;
-		str::Copy(pNext->name, name.CStr(), USG_MAX_PATH);
-
-		size_t size;
-
-		FILE *fp = NULL;
-		fopen_s(&fp, pNext->name, "rb");
-		ASSERT(fp!=NULL);
-
-		fseek(fp, 0L, SEEK_END);
-		size = ftell(fp);
-
-		fseek(fp, 0L, SEEK_SET);
-
-		//shaderCode = malloc(size);
-		char *shaderCode = new char[size];
-		size_t retval = fread(shaderCode, size, 1, fp);
-		ASSERT(retval == 1);
-		ASSERT(size > 0);
-
-		fclose(fp);
-
-		VkShaderModule shaderModule;
-		VkShaderModuleCreateInfo moduleCreateInfo;
-		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		moduleCreateInfo.pNext = NULL;
-		moduleCreateInfo.codeSize = size;
-		moduleCreateInfo.pCode = (uint32_t*)shaderCode;
-		moduleCreateInfo.flags = 0;
-
-		VkResult result = vkCreateShaderModule(m_vkDevice, &moduleCreateInfo, NULL, &shaderModule);
-		ASSERT(result == VK_SUCCESS);
-
-		delete[] shaderCode;
-
-		return shaderModule;
-
-		m_uStockCount++;
-		return pNext->module;
-	}
-
-	ASSERT(false);
-	return NULL;
+	vkDeviceWaitIdle(m_vkDevice);
 }
 
 VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)
@@ -470,6 +493,17 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	{
 		vkFreeCommandBuffers(m_vkDevice, m_cmdPool, 1, &commandBuffer);
 	}
+}
+
+
+const VkPhysicalDeviceProperties* GFXDevice_ps::GetPhysicalProperties(uint32 uGPU)
+{
+	if (uGPU < m_uGPUCount)
+	{
+		return &m_deviceProperties[uGPU];
+	}
+
+	return nullptr;
 }
 
 }

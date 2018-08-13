@@ -137,7 +137,7 @@ namespace usg
 
 		CreateEmitterShape(m_emissionDef.eShape, shapedef);
 		
-		InitMaterial(pDevice, pMgr->GetScene()->GetRenderPass(0), pResource, true);
+		InitMaterial(pDevice, pMgr->GetScene()->GetRenderPasses(0).GetRenderPass(*this), pResource, true);
 		
 		m_materialConsts.Init(pDevice, Particle::g_scriptedParticlePerEffectDecl);
 		m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
@@ -164,7 +164,7 @@ namespace usg
 	{
 		if (pResource)
 		{
-			m_material.Init(pDevice, pResource->GetPipeline(renderPass), pResource->GetDescriptorLayout());
+			m_material.Init(pDevice, pResource->GetPipeline(pDevice, renderPass), pResource->GetDescriptorLayout());
 		}
 		else
 		{
@@ -209,11 +209,11 @@ namespace usg
 			pipelineDecl.pEffect = ParticleEmitterResource::GetEffect(pDevice, m_emissionDef.eParticleType);
 			if (bFirst)
 			{
-				m_material.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), pipelineDecl.layout.descriptorSets[1]);
+				m_material.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineDecl), pipelineDecl.layout.descriptorSets[1]);
 			}
 			else
 			{
-				m_material.SetPipelineState(pDevice->GetPipelineState(pipelineDecl));
+				m_material.SetPipelineState(pDevice->GetPipelineState(renderPass, pipelineDecl));
 				m_material.SetDescriptorLayout(pDevice, pipelineDecl.layout.descriptorSets[1]);
 				m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
 				m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM, &m_customConstants);
@@ -534,11 +534,13 @@ namespace usg
 
 	void ScriptEmitter::UpdateBuffers(GFXDevice* pDevice)
 	{
+		// Custom and transform constants are dynamic, don't need to update descriptors on their behalf
 		m_customConstants.UpdateData(pDevice);
 		m_gsTransform.UpdateData(pDevice);
 		m_materialConsts.UpdateData(pDevice);
 		m_fragConsts.UpdateData(pDevice);
 		Inherited::UpdateBuffers(pDevice);
+		m_material.UpdateDescriptors(pDevice);
 	}
 
 	void ScriptEmitter::UpdateParticleCPUDataInt(void* pGPUData, void* pMetaDataVoid, float fElapsed)

@@ -1,2 +1,0 @@
-VS materials/normalmap_vs
-PS materials/normalmap_deferred_ps

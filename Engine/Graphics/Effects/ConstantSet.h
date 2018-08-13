@@ -27,7 +27,7 @@ public:
 	~ConstantSet(); 
 
 	// Only need to pass in an effect if this is a dynamic constant set
-	void Init(class GFXDevice* pDevice, const ShaderConstantDecl* pDecl);
+	void Init(class GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUUsage eUsage = GPU_USAGE_DYNAMIC, void* pData = nullptr);
 	void CleanUp(class GFXDevice* pDevice);
 	bool IsValid() const { return m_uSize > 0; }
 
@@ -41,18 +41,21 @@ public:
 	void* Lock(uint32 uSize);
 	void  Unlock();
 
-	void UpdateData(GFXDevice* pDevice);
+	// Returns true if data was dirty and device update performed, otherwise false
+	bool UpdateData(GFXDevice* pDevice);
 
 	ConstantSet_ps& GetPlatform() { return m_platform; }
 	const ConstantSet_ps& GetPlatform() const { return m_platform; }
 
 	bool GetDirty() const { return m_bDirty;  }
+	uint32 GetUpdateIdx() const { return m_uUpdateCount; }
 
 private:
 	PRIVATIZE_COPY(ConstantSet)
 
 	void AppendDeclaration(const ShaderConstantDecl* pDecl);
 
+	GPUUsage					m_eUsage;
 	ConstantSet_ps				m_platform;
 
 	const ShaderConstantDecl*	m_pDecl;
@@ -61,6 +64,7 @@ private:
 	uint32						m_uSize;
 	bool						m_bLocked;
 	bool						m_bDirty;
+	uint32						m_uUpdateCount;
 	uint32						m_uLastUpdate;
 };
 

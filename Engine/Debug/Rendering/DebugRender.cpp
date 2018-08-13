@@ -8,6 +8,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Layout/Global2D.h"
 #include "Engine/Core/String/String_Util.h"
 
 namespace usg {
@@ -24,6 +25,11 @@ struct TextConstants
 struct SolidConstants
 {
 	Matrix4x4	mProj;
+};
+
+const DescriptorDeclaration g_sGlobalDescriptorDummy[] =
+{
+	DESCRIPTOR_END()
 };
 
 static const ShaderConstantDecl g_solidConstantDef[] = 
@@ -72,10 +78,10 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 {
 	// Setup the vertex data
 	{
-		uint8* puIndices;
-		ScratchObj<uint8> scratchIndices(puIndices, MAX_BAR_INDICES);
+		uint16* puIndices;
+		ScratchObj<uint16> scratchIndices(puIndices, MAX_BAR_INDICES);
 
-		uint8* puIndicesTmp = puIndices;
+		uint16* puIndicesTmp = puIndices;
 		for(uint32 i=0; i<MAX_BAR_INDICES/6; i++)
 		{
 			uint32 uBaseIndex = i*4;
@@ -116,14 +122,15 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	}
 
 	PipelineStateDecl pipelineState;
-	pipelineState.renderPass = renderPass;
 	pipelineState.uInputBindingCount = 1;
 	pipelineState.ePrimType = PT_POINTS;
 
+	DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D);
 	DescriptorSetLayoutHndl textDescriptors = pDevice->GetDescriptorSetLayout(g_textDescriptorDecl);
 	DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
-	pipelineState.layout.descriptorSets[0] = textDescriptors;
-	pipelineState.layout.uDescriptorSetCount = 1;
+	pipelineState.layout.descriptorSets[0] = globalDesc;
+	pipelineState.layout.descriptorSets[1] = textDescriptors;
+	pipelineState.layout.uDescriptorSetCount = 2;
 
 	pipelineState.rasterizerState.eCullFace	= CULL_FACE_NONE;
 
@@ -136,27 +143,25 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugText");
-	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(pipelineState), textDescriptors);
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Text");
+	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), textDescriptors);
 	m_textConstants.Init(pDevice, g_textConstantDef);
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
 	m_textMaterial.SetTexture(0, m_font.GetTexture(), pDevice->GetSampler(pointDecl));
-	m_textMaterial.UpdateDescriptors(pDevice);
 
 
 	pipelineState.ePrimType = PT_TRIANGLES;
 	alphaDecl.bBlendEnable = true;
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_DIFFUSE));
 	// Set up the materials
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosCol");
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
 
-	pipelineState.layout.descriptorSets[0] = solidDescriptors;
+	pipelineState.layout.descriptorSets[1] = solidDescriptors;
 
-	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(pipelineState), solidDescriptors);
+	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), solidDescriptors);
 	m_posColConstants.Init(pDevice, g_solidConstantDef);
 	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_posColConstants);
-	m_posColMaterial.UpdateDescriptors(pDevice);
 
 
 	ASSERT(m_psRenderer==NULL);
@@ -328,8 +333,13 @@ void DebugRender::Updatebuffers(GFXDevice* pDevice)
 		m_charVerts.SetContents(pDevice, m_textBufferTmp, m_uCharCount);
 	}
 
-	m_posColConstants.UpdateData(pDevice);
-	m_textConstants.UpdateData(pDevice);
+	bool bUpdated = m_posColConstants.UpdateData(pDevice);
+	bUpdated |= m_textConstants.UpdateData(pDevice);
+	if (bUpdated)
+	{
+		m_textMaterial.UpdateDescriptors(pDevice);
+		m_posColMaterial.UpdateDescriptors(pDevice);
+	}
 }
 
 void DebugRender::Draw(GFXContext* pContext)

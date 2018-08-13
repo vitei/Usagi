@@ -15,7 +15,7 @@ DescriptorSetLayout::DescriptorSetLayout()
 	m_pDeclInfo = NULL;
 	m_uResources = 0;
 	m_uDecls = 0;
-	for (uint32 i = 0; i < DESCRIPTOR_TYPE_CONSTANT_BUFFER; i++)
+	for (uint32 i = 0; i < DESCRIPTOR_TYPE_INVALID; i++)
 	{
 		m_uTypedResources[i] = 0;
 	}

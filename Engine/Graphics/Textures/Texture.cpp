@@ -2,7 +2,6 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
-#include "Engine/Resource/ResourcePak.pb.h"
 #include "Texture.h" 
 
 namespace usg {
@@ -74,17 +73,6 @@ bool Texture::Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLoca
 	return bLoaded;
 }
 
-bool Texture::Load(GFXDevice* pDevice, const TexturePak& pak, const void* pData, const char* szPackPath)
-{
-	// FIXME: When this is the only version store the width and height etc here
-	m_name = szPackPath;
-	m_name += pak.resHdr.strName;
-	SetupHash(m_name.CStr());
-	bool bLoaded = m_platform.Load(pDevice, pak, pData);
-	// FIXME: This should be done internally
-	SetReady(true);
-	return bLoaded;
-}
 
 }
 

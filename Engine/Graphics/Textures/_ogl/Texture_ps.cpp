@@ -39,7 +39,7 @@ static const GLTextureFormatMap gTextureFormatMap[] =
 	{ GL_SRGB8_ALPHA8,		GL_RGBA,			GL_UNSIGNED_BYTE }		// CF_SRGBA
 };
 
-static_assert(ARRAY_SIZE(gTextureFormatMap) == CF_COUNT, "Number of entries in gTextureFormatMap doesn't match the ColorFormat enum, has an extra value been added?");
+static_assert(ARRAY_SIZE(gTextureFormatMap) == CF_UNDEFINED, "Number of entries in gTextureFormatMap doesn't match the ColorFormat enum, has an extra value been added?");
 
 static const GLTextureFormatMap gDepthFormatMap[] =
 {

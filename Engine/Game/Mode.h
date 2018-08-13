@@ -33,6 +33,7 @@ namespace usg
 		virtual bool IsNetworked() { return false; }
 		virtual void InitNetworking(UsagiNet& usagiNetwork) { ASSERT(false); }
 		virtual bool AllowActivation() { return true; }
+		virtual bool FinalTargetIsDisplay() const { return false; }
 
 		virtual void NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight) {}
 	

@@ -6,6 +6,8 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
+#include "Engine/Graphics/Effects/ConstantSet.h"
+#include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Device/DescriptorData.h"
 
 namespace usg {
@@ -15,6 +17,7 @@ DescriptorSet::DescriptorSet()
 	, m_pData(nullptr)
 	, m_bValid(false)
 	, m_uDataCount(0)
+	, m_uLastUpdate(USG_INVALID_ID)
 	, m_layoutHndl()
 	, m_pLayoutDesc(nullptr)
 {
@@ -29,7 +32,7 @@ DescriptorSet::~DescriptorSet()
 
 void DescriptorSet::CleanUp(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.CleanUp(pDevice, m_layoutHndl.GetContents());
 	if (m_pData)
 	{
 		vdelete[] m_pData;
@@ -67,6 +70,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSetLayoutHndl& layo
 		for (uint32 j = 0; j < pDecl->uCount; j++)
 		{
 			m_pData[m_uDataCount].eDescType = pDecl->eDescriptorType;
+			m_pData[m_uDataCount].uLastUpdateIdx = USG_INVALID_ID;
 			m_uDataCount++;
 		}
 	}
@@ -94,6 +98,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 				break;
 			}
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+			case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
 				m_pData[uDataIndex].pConstBuffer = copy.m_pData[uDataIndex].pConstBuffer;
 				break;
 			default:
@@ -108,6 +113,65 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 	UpdateDescriptors(pDevice);
 }
 
+
+void DescriptorSet::UpdateTimeTags()
+{
+	for (uint32 i = 0; i < m_pLayoutDesc->GetResourceCount(); i++)
+	{
+		switch (m_pData[i].eDescType)
+		{
+		case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+		case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
+		{
+			if (m_pData[i].pConstBuffer)
+			{
+				m_pData[i].uLastUpdateIdx = m_pData[i].pConstBuffer->GetUpdateIdx();
+			}
+			break;
+		}
+		case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+		{
+			if (m_pData[i].texData.tex.get() != nullptr)
+			{
+				m_pData[i].uLastUpdateIdx = m_pData[i].texData.tex->GetUpdateIdx();
+			}
+			break;
+		}
+		default:
+			ASSERT(false);
+		}
+	}
+}
+
+bool DescriptorSet::IsUptoDate() const
+{
+	for (uint32 i = 0; i < m_pLayoutDesc->GetResourceCount(); i++)
+	{
+		switch(m_pData[i].eDescType)
+		{
+			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+			{
+				if (!m_pData[i].pConstBuffer || (m_pData[i].pConstBuffer->GetUpdateIdx() != m_pData[i].uLastUpdateIdx) )
+				{
+					return false;
+				}
+				break;
+			}
+			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			{
+				if (!m_pData[i].texData.tex.get() || (m_pData[i].texData.tex->GetUpdateIdx() != m_pData[i].uLastUpdateIdx) )
+				{
+					return false;
+				}
+				break;
+			}
+			default:
+				break;
+		}
+	}
+	return true;
+}
+
 void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
 {
 	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
@@ -120,6 +184,7 @@ void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& 
 	// I feel so dirty doing this but we know for a fact that we created this pointer and it saves a lot of extra hassle to get around it
 	m_pData[uResourceIndex].texData.tex = pTexture;
 	m_pData[uResourceIndex].texData.sampler = sampler;
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
 }
 
 void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuffer, uint32 uSubIndex)
@@ -128,11 +193,12 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
 	ASSERT(uSubIndex < pDecl->uCount);
 
-	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER);
+	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER || pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC);
 	ASSERT(pBuffer!=nullptr);
 	uint32 uResourceIndex = m_pLayoutDesc->GetResourceIndex(uLayoutIndex, uSubIndex);
 
 	m_pData[uResourceIndex].pConstBuffer = pBuffer;
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
 }
 
 
@@ -156,7 +222,8 @@ void DescriptorSet::SetConstantSetAtBinding(uint32 uBinding, const ConstantSet* 
 	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
 	{
 		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
-		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER && uBinding == pDecl->uBinding && (pDecl->shaderType & uFlags)!=0 )
+		if ( (pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER || pDecl->eDescriptorType == DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC)
+			&& uBinding == pDecl->uBinding && (pDecl->shaderType & uFlags)!=0 )
 		{
 			SetConstantSet(i, pBuffer,uSubIndex);
 			bFound = true;
@@ -199,18 +266,16 @@ SamplerHndl DescriptorSet::GetSamplerAtBinding(uint32 uBinding) const
 
 void DescriptorSet::UpdateDescriptors(GFXDevice* pDevice)
 {
-	#ifdef DEBUG_BUILD
-	for(uint32 i=0; i<m_pLayoutDesc->GetResourceCount(); i++)
+	// Do our best to avoid doing this at all, anything updated each frame should use dynamic
+	// constants or push constants (push constants not yet available)
+	if (!m_bValid || !IsUptoDate())
 	{
-		if (m_pData[i].eDescType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-		{
-			ASSERT(m_pData[i].texData.tex.get() != nullptr);
-			ASSERT(m_pData[i].texData.sampler.IsValid());
-		}
+		bool bDoubleUpdate = m_uLastUpdate == pDevice->GetFrameCount();
+		m_platform.UpdateDescriptors(pDevice, m_pLayoutDesc, m_pData, bDoubleUpdate);
+		m_uLastUpdate = pDevice->GetFrameCount();
+		UpdateTimeTags();
+		m_bValid = true;
 	}
-	#endif
-	m_platform.UpdateDescriptors(pDevice, m_pLayoutDesc, m_pData);
-	m_bValid = true;
 }
 
 }

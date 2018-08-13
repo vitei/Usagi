@@ -9,7 +9,7 @@
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/ResourcePak.pb.h"
+#include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/stl/vector.h"
 
@@ -22,18 +22,17 @@ public:
 	ParticleEmitterResource();
     virtual ~ParticleEmitterResource();
 
-	bool Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, const char* szFileName);
-	bool Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, const ParticleEmitterPak& pak, const void* pData, const char* szPackPath);
+	bool Load(GFXDevice* pDevice, const char* szFileName);
 
 	const particles::EmitterEmission& GetEmissionDetails() const { return m_emissionDef;  }
 	const usg::particles::EmitterShapeDetails& GetShapeDetails() const { return m_shapeDef; }
-	PipelineStateHndl GetPipeline(const RenderPassHndl& renderPass) const;
+	PipelineStateHndl GetPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
 	DescriptorSetLayoutHndl GetDescriptorLayout() const { return m_descriptorLayout;  }
 
 	static EffectHndl GetEffect(GFXDevice* pDevice, ::usg::particles::ParticleType eParticleType);
 
 private:
-	void Load(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses);
+	void Load(GFXDevice* pDevice);
 
 protected:
 
@@ -41,14 +40,9 @@ protected:
 	particles::EmitterShapeDetails		m_shapeDef;
 	EffectHndl							m_pEffect;
 
-	struct PipelineSet
-	{
-		RenderPassHndl		renderPass;
-		PipelineStateHndl	pipeline;
-	};
-
-	vector<PipelineSet>					m_pipelines;
 	DescriptorSetLayoutHndl				m_descriptorLayout;
+
+	PipelineStateDecl			m_stateDecl;
 };
 
 }

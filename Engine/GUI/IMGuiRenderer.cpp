@@ -33,6 +33,8 @@ IMGuiRenderer::IMGuiRenderer() :
 	g_spGUIRenderer = this;
 	m_vOffset.Assign(0.0f, 0.0f);
 	m_bActive = false;
+	SetLayer(RenderNode::LAYER_OVERLAY);
+	SetPriority(128);	// After the opaque, very last
 }
 
 IMGuiRenderer::~IMGuiRenderer()
@@ -214,15 +216,14 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 		RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 		rasDecl.eCullFace	= CULL_FACE_NONE;
 	}
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugPosColUV");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipeline.uInputBindingCount = 1;
 
 	pipeline.layout.uDescriptorSetCount = 1;
 	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(decl);
-	pipeline.renderPass = scene.GetRenderPass(0);
 
-	m_pipelineState = pDevice->GetPipelineState(pipeline);
+	m_pipelineState = pDevice->GetPipelineState(scene.GetRenderPasses(0).GetRenderPass(*this), pipeline);
 
     // Create the vertex buffer
 	m_vertexBuffer.Init(pDevice, NULL, sizeof(PositionUVColVertex), uMaxVerts, "IMGuiRenderer", GPU_USAGE_DYNAMIC, GPU_LOCATION_STANDARD);
@@ -239,8 +240,6 @@ void IMGuiRenderer::AddToScene(Scene* pScene)
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
-	SetLayer(RenderNode::LAYER_OVERLAY);
-	SetPriority(128);	// After the opaque, very last
 }
 
 

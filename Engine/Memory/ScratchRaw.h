@@ -20,6 +20,10 @@ public:
 	void Init(memsize uSize, memsize uAlign);
 	void Free();
 	void* GetRawData() { return m_pRawData; }
+	void* GetDataAtOffset(uint32 uOffset) { return ((uint8*)m_pRawData) + uOffset; }
+
+	template <class MemoryType>
+	MemoryType* GetDataAtOffset(uint32 uOffset) { return (MemoryType*)( (uint8*)m_pRawData + uOffset); }
 
 	static void InitMemory(memsize uSize);
 

@@ -8,11 +8,14 @@
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
-#include "Engine/Graphics/LookupTable.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
+#include "Engine/Graphics/Device/PipelineState.h"
+#include API_HEADER(Engine/Graphics/Device, PipelineLayout.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device/, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXContext.h"
 
 #define BUFFER_OFFSET(i) ((void*)(i))
@@ -86,15 +89,37 @@ void GFXContext_ps::Transfer(RenderTarget* pTarget, Display* pDisplay)
 	pDisplay->GetPlatform().Transfer(m_pParent, pTarget);
 }
 
-void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight)
+void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
-	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, uX, uY, uWidth, uHeight);
+	pDisplay->GetPlatform().TransferRect(m_pParent, pTarget, srcBounds, dstBounds);
 }
 
-void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags)
+void GFXContext_ps::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay)
 {
-	// TODO: Implement me
+	ASSERT(false);
+}
 
+void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
+{
+	if (pTarget)
+	{
+		const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+		uint32 uClearCount = pTarget->GetTargetCount() + (pTarget->GetDepthStencilBuffer() != nullptr ? 1 : 0);
+
+		VkRenderPassBeginInfo rp_begin;
+		rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		rp_begin.pNext = NULL;
+		rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+		rp_begin.framebuffer = rtPS.GetLayerFrameBuffer(uLayer);
+		rp_begin.renderArea.offset.x = 0;
+		rp_begin.renderArea.offset.y = 0;
+		rp_begin.renderArea.extent.width = pTarget->GetWidth();
+		rp_begin.renderArea.extent.height = pTarget->GetHeight();
+		rp_begin.clearValueCount = uClearCount;
+		rp_begin.pClearValues = rtPS.GetClearValues();
+
+		vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+	}
 }
 
 
@@ -103,18 +128,37 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 	if(pTarget)
 	{
 		const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+		uint32 uClearCount = pTarget->GetTargetCount() + (pTarget->GetDepthStencilBuffer() != nullptr ? 1 : 0);
 
+		VkRenderPassBeginInfo rp_begin;
+		rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		rp_begin.pNext = NULL;
+		rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+		rp_begin.framebuffer = rtPS.GetFrameBuffer();
+		rp_begin.renderArea.offset.x = 0;
+		rp_begin.renderArea.offset.y = 0;
+		rp_begin.renderArea.extent.width = pTarget->GetWidth();
+		rp_begin.renderArea.extent.height = pTarget->GetHeight();
+		rp_begin.clearValueCount = uClearCount;
+		rp_begin.pClearValues = rtPS.GetClearValues();
 
+		vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 	}
 	else
 	{
-		
+		// TODO: Confirm in a render pass
+		vkCmdEndRenderPass(m_cmdBuff);
 	}
 }
 
 void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 {
+	vkCmdEndRenderPass(m_cmdBuff);
+}
 
+void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
+{
+	pDisplay->GetPlatform().SetAsTarget(m_cmdBuff);
 }
 
 void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev)
@@ -123,10 +167,29 @@ void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl&
 	vkCmdBindPipeline(m_cmdBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, hndl.GetContents()->GetPlatform().GetPipeline());
 }
 
+void GFXContext_ps::UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags)
+{
+	uint32 flags = activePipeline.GetContents()->GetPipelineLayoutHndl().GetContents()->GetDescSetFlags() & uDirtyFlags;
+	uint32 uBuffers = activePipeline.GetContents()->GetPipelineLayoutHndl().GetContents()->GetDescSetCount();
+	if (flags)
+	{
+		for (uint32 i = 0; i < uBuffers; i++)
+		{
+			if (flags && (1 << i))
+			{
+				if (pDescriptors[i] != nullptr)
+				{
+					pDescriptors[i]->GetPlatform().Bind(m_cmdBuff, m_pipelineLayout, i);
+				}
+			}
+		}
+	}
+}
+
 void GFXContext_ps::SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex)
 {
-	// FIXME: Need to re-apply when the layout changes
-	pSet->GetPlatform().Bind(m_cmdBuff, m_pipelineLayout, uIndex);
+	
+	
 }
 
 void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport)
@@ -140,6 +203,13 @@ void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport 
 	vkViewport.minDepth = 0.0f;
 	vkViewport.maxDepth = 1.0f;
 	vkCmdSetViewport(m_cmdBuff, 0, 1, &vkViewport);
+
+	VkRect2D scissor;
+	scissor.extent.width = viewport.GetWidth();
+	scissor.extent.height = viewport.GetHeight();
+	scissor.offset.x = viewport.GetLeft();
+	scissor.offset.y = viewport.GetBottom();
+	vkCmdSetScissor(m_cmdBuff, 0, 1, &scissor);
 }
 
 void GFXContext_ps::SetBlendColor(const Color& blendColor)
@@ -172,17 +242,47 @@ void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLe
 
 void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 {
-	static VkClearAttachment attachments[MAX_RENDER_TARGETS];
+	static VkClearAttachment attachments[MAX_COLOR_TARGETS];
 	uint32 uClearCount = 0;
 
 	uint32 uGlFlags = 0;
 	RenderTarget_ps* pRTPS = &pRT->GetPlatform();
 
-	ASSERT(false);
+	static VkClearAttachment clearAttachments[MAX_COLOR_TARGETS + 1] = {};
+
+	uint32 clearCount = 0;
+	for (uint32 i = 0; i < pRT->GetTargetCount(); i++)
+	{
+		if (uFlags & (RenderTarget::RT_FLAG_COLOR_0 << i))
+		{
+			clearAttachments[clearCount].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			clearAttachments[clearCount].clearValue = pRTPS->GetClearValues()[i];
+			clearAttachments[clearCount].colorAttachment = i;
+
+			clearCount++;
+		}
+	}
+
+	if (uFlags & RenderTarget::RT_FLAG_DEPTH && pRT->GetDepthStencilBuffer())
+	{
+		clearAttachments[clearCount].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		clearAttachments[clearCount].clearValue.depthStencil = { 1.0f, 0 };
+		clearCount++;
+	}
+
+	VkClearRect clearRect = {};
+	clearRect.layerCount = 1;
+	clearRect.rect.offset = { 0, 0 };
+	clearRect.rect.extent = { pRT->GetWidth(), pRT->GetHeight() };
+
+	if (clearCount)
+	{
+		vkCmdClearAttachments(m_cmdBuff, clearCount, clearAttachments, 1, &clearRect);
+	}
 }
 
 
-void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const EffectBinding* pBinding, uint32 uSlot)
+void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot)
 {
 	// TODO: Change the interface so we are setting them all at once
 	const VertexBuffer_ps& vbPS = pBuffer->GetPlatform();
@@ -204,12 +304,6 @@ void GFXContext_ps::DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, 
 	vkCmdDrawIndexed(m_cmdBuff, uIndexCount, uInstances, uStartIndex, 0, 0);
 }
 
-
-
-void GFXContext_ps::CopyDepthToSlice(RenderTarget* pSrc, RenderTarget* pDst, uint32 uSlice)
-{
-	
-}
 
 
 void GFXContext_ps::ImageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -234,5 +328,121 @@ void GFXContext_ps::ImageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkA
 	vkCmdPipelineBarrier(m_cmdBuff, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &imb);
 }
 
+void GFXContext_ps::SetImageLayout(VkImage image, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange, VkPipelineStageFlags srcStageMask,
+	VkPipelineStageFlags dstStageMask)
+{
+	// Create an image barrier object
+	VkImageMemoryBarrier imageMemoryBarrier = {};
+	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	imageMemoryBarrier.oldLayout = oldImageLayout;
+	imageMemoryBarrier.newLayout = newImageLayout;
+	imageMemoryBarrier.image = image;
+	imageMemoryBarrier.subresourceRange = subresourceRange;
+
+	// Source layouts (old)
+	// Source access mask controls actions that have to be finished on the old layout
+	// before it will be transitioned to the new layout
+	switch (oldImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		// Image layout is undefined (or does not matter)
+		// Only valid as initial layout
+		// No flags required, listed only for completeness
+		imageMemoryBarrier.srcAccessMask = 0;
+		break;
+
+	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		// Image is preinitialized
+		// Only valid as initial layout for linear images, preserves memory contents
+		// Make sure host writes have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		// Image is a color attachment
+		// Make sure any writes to the color buffer have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		// Image is a depth/stencil attachment
+		// Make sure any writes to the depth/stencil buffer have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		// Image is a transfer source 
+		// Make sure any reads from the image have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		// Image is a transfer destination
+		// Make sure any writes to the image have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		// Image is read by a shader
+		// Make sure any shader reads from the image have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		// Other source layouts aren't handled (yet)
+		break;
+	}
+
+	// Target layouts (new)
+	// Destination access mask controls the dependency for the new image layout
+	switch (newImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		// Image will be used as a transfer destination
+		// Make sure any writes to the image have been finished
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		// Image will be used as a transfer source
+		// Make sure any reads from the image have been finished
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		// Image will be used as a color attachment
+		// Make sure any writes to the color buffer have been finished
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		// Image layout will be used as a depth/stencil attachment
+		// Make sure any writes to depth/stencil buffer have been finished
+		imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		// Image will be read in a shader (sampler, input attachment)
+		// Make sure any writes to the image have been finished
+		if (imageMemoryBarrier.srcAccessMask == 0)
+		{
+			imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		// Other source layouts aren't handled (yet)
+		break;
+	}
+
+	// Put barrier inside setup command buffer
+	vkCmdPipelineBarrier(
+		m_cmdBuff,
+		srcStageMask,
+		dstStageMask,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &imageMemoryBarrier);
+}
 
 }

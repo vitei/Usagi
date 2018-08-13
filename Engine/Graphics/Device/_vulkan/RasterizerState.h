@@ -15,7 +15,7 @@ public:
 	RasterizerState() {};
 	~RasterizerState() {};
 
-	void Init(GFXDevice* pDevice, const RasterizerStateDecl &decl);
+	void Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, uint32 uId);
 	const VkPipelineRasterizationStateCreateInfo& GetCreateInfo() { return m_createInfo; }
 
 private:

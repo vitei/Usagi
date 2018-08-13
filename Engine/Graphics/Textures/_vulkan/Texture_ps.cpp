@@ -7,9 +7,12 @@
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Textures, Sampler.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, TextureFormat_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, Texture_ps.h)
 #include <vector>
+// Using gli for now, should eventually exclusively use ktx
+#include "gli/gli.hpp"
 
 namespace usg {
 
@@ -31,6 +34,7 @@ struct KtxHeader
 	uint32		bytesOfKeyValueData;
 };
 
+
 VkFormat GetFormat(uint32 uFormat)
 {
 	switch (uFormat)
@@ -50,6 +54,70 @@ VkFormat GetFormat(uint32 uFormat)
 	}
 
 	return VK_FORMAT_R8G8B8_SNORM;
+}
+
+
+VkFormat GetFormatGLI(uint32 uFormat)
+{
+	switch (uFormat)
+	{
+	case gli::format::FORMAT_RGB8_SNORM_PACK8:
+		return VK_FORMAT_R8G8B8_SNORM;
+	case gli::format::FORMAT_RGBA8_SNORM_PACK8:
+		return VK_FORMAT_R8G8B8A8_SNORM;
+	case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8: // GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+		return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT3_UNORM_BLOCK16: // GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+		return VK_FORMAT_BC2_UNORM_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16:
+		return VK_FORMAT_BC3_UNORM_BLOCK;
+	case gli::format::FORMAT_BGR8_UNORM_PACK8:
+		return VK_FORMAT_B8G8R8_UNORM;
+	case gli::format::FORMAT_RG8_UNORM_PACK8:
+		return VK_FORMAT_R8G8_UNORM;
+	case gli::format::FORMAT_RGBA8_UNORM_PACK8:
+		return VK_FORMAT_R8G8B8A8_UNORM;
+	case gli::format::FORMAT_L8_UNORM_PACK8:
+		return VK_FORMAT_R8_UNORM;
+	case gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16:
+		return VK_FORMAT_BC7_UNORM_BLOCK;
+	case gli::format::FORMAT_BGRA8_UNORM_PACK8:
+		return VK_FORMAT_B8G8R8A8_UNORM;
+	default:
+		ASSERT(false);	// See what we end up getting passed through
+	}
+
+	return VK_FORMAT_R8G8B8_SNORM;
+}
+
+VkImageUsageFlags GetImageUsage(uint32 uUsage)
+{
+	VkImageUsageFlags flags = 0;
+
+	if (uUsage&TU_FLAG_TRANSFER_SRC)
+	{
+		flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	}
+	if (uUsage&TU_FLAG_SHADER_READ)
+	{
+		flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+	if (uUsage&TU_FLAG_COLOR_ATTACHMENT)
+	{
+		flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	}
+	if (uUsage&TU_FLAG_DEPTH_ATTACHMENT)
+	{
+		flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+
+	// Currently lacking flags mapping to the following:
+	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002,
+	// VK_IMAGE_USAGE_STORAGE_BIT = 0x00000008,
+	// VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = 0x00000040,
+	// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = 0x00000080,
+
+	return flags;
 }
 
 
@@ -75,50 +143,112 @@ void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags
 	switch (oldImageLayout)
 	{
 	case VK_IMAGE_LAYOUT_UNDEFINED:
-		// Only valid as initial layout, memory contents are not preserved
-		// Can be accessed directly, no source dependency required
+		// Image layout is undefined (or does not matter)
+		// Only valid as initial layout
+		// No flags required, listed only for completeness
 		imageMemoryBarrier.srcAccessMask = 0;
 		break;
+
 	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		// Image is preinitialized
 		// Only valid as initial layout for linear images, preserves memory contents
-		// Make sure host writes to the image have been finished
+		// Make sure host writes have been finished
 		imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
 		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		// Image is a color attachment
+		// Make sure any writes to the color buffer have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		// Image is a depth/stencil attachment
+		// Make sure any writes to the depth/stencil buffer have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		// Image is a transfer source 
+		// Make sure any reads from the image have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
 	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-		// Old layout is transfer destination
+		// Image is a transfer destination
 		// Make sure any writes to the image have been finished
 		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		// Image is read by a shader
+		// Make sure any shader reads from the image have been finished
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		// Other source layouts aren't handled (yet)
 		break;
 	}
 
 	// Target layouts (new)
+	// Destination access mask controls the dependency for the new image layout
 	switch (newImageLayout)
 	{
-	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-		// Transfer source (copy, blit)
-		// Make sure any reads from the image have been finished
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		break;
 	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-		// Transfer destination (copy, blit)
+		// Image will be used as a transfer destination
 		// Make sure any writes to the image have been finished
 		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		// Image will be used as a transfer source
+		// Make sure any reads from the image have been finished
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		// Image will be used as a color attachment
+		// Make sure any writes to the color buffer have been finished
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		// Image layout will be used as a depth/stencil attachment
+		// Make sure any writes to depth/stencil buffer have been finished
+		imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
 	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		// Shader read (sampler, input attachment)
+		// Image will be read in a shader (sampler, input attachment)
+		// Make sure any writes to the image have been finished
+		if (imageMemoryBarrier.srcAccessMask == 0)
+		{
+			imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
 		imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		break;
+	default:
+		// Other source layouts aren't handled (yet)
+		break;
 	}
-
 	// Put barrier on top of pipeline
-	VkPipelineStageFlags srcStageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-	VkPipelineStageFlags destStageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	VkPipelineStageFlags srcStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+	VkPipelineStageFlags destStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
 	// Put barrier inside setup command buffer
 	vkCmdPipelineBarrier(cmdBuffer, srcStageFlags, destStageFlags, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 }
 
-Texture_ps::Texture_ps()
+Texture_ps::Texture_ps() :
+	  m_memory(VK_NULL_HANDLE)
+	, m_image(VK_NULL_HANDLE)
+	, m_imageView(VK_NULL_HANDLE)
+	, m_imageLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+	, m_uUpdateCount(0)
+	, m_uWidth(0)
+	, m_uHeight(0)
+	, m_uDepth(0)
+	, m_uFaces(0)
 {
 
 }
@@ -128,19 +258,111 @@ Texture_ps::~Texture_ps()
 
 }
 
+
+void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage)
+{
+	VkImageCreateInfo image_create_info = {};
+
+	VkFormatProperties props;
+	if (eUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+	{
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormat, &props);
+		if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+		}
+		else
+		{
+			// Try other depth formats? 
+			ASSERT_MSG(false, "Depth format unsupported.\n");
+			return;
+		}
+	}
+
+	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	image_create_info.pNext = NULL;
+	image_create_info.imageType = VK_IMAGE_TYPE_2D;
+	image_create_info.format = eFormat;
+	image_create_info.extent.width = uWidth;
+	image_create_info.extent.height = uHeight;
+	image_create_info.extent.depth = 1;
+	image_create_info.mipLevels = 1;
+	image_create_info.arrayLayers = uArrayCount;
+	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	image_create_info.usage = eUsage;
+	image_create_info.queueFamilyIndexCount = 0;
+	image_create_info.pQueueFamilyIndices = NULL;
+	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
+
+	Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	VkImageViewCreateInfo view_info = {};
+	view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	view_info.pNext = NULL;
+	view_info.image = m_image;
+	view_info.format = image_create_info.format;
+	view_info.subresourceRange.aspectMask = eUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+	view_info.subresourceRange.baseMipLevel = 0;
+	view_info.subresourceRange.levelCount = 1;
+	view_info.subresourceRange.baseArrayLayer = 0;
+	view_info.subresourceRange.layerCount = uArrayCount;
+	view_info.viewType = eViewType;
+	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
+
+	// Create the image view
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
+	ASSERT(res == VK_SUCCESS);
+
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uDepth = 1;
+	m_uFaces = uArrayCount;
+	m_uUpdateCount++;
+}
+
+VkImageView Texture_ps::CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) const
+{
+	ASSERT(m_uFaces > uLayer);
+	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
+	view_info.subresourceRange.baseArrayLayer = uLayer;
+	view_info.subresourceRange.layerCount = 1;
+	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+	VkImageView view;
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &view);
+	ASSERT(res == VK_SUCCESS);
+
+	return view;
+}
+
 void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
-
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT| TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gColorFormatMap[eFormat], imageUsage);
 }
 
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[eFormat], imageUsage);
+}
 
+void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
+{
+	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[eFormat], imageUsage);
 }
 
 
-void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim)
+void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim, uint32 uTextureFlags)
 {
+	ASSERT(uTextureFlags & TU_FLAG_COLOR_ATTACHMENT);
     VkImageCreateInfo image_create_info = {};
     image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_create_info.pNext = NULL;
@@ -152,15 +374,16 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.mipLevels = uMipmaps;
     image_create_info.arrayLayers = 1;
     image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
-    image_create_info.tiling = VK_IMAGE_TILING_LINEAR;
+    image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    image_create_info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    image_create_info.usage = GetImageUsage(uTextureFlags);
     image_create_info.queueFamilyIndexCount = 0;
     image_create_info.pQueueFamilyIndices = NULL;
     image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
 
-    Init(pDevice, image_create_info);
+    Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	VkImageViewCreateInfo view_info = {};
 	view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -174,17 +397,26 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
 
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
 	ASSERT(res == VK_SUCCESS);
+
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uDepth = 1;
+	m_uFaces = 1;
 }
 
 
-void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
+void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uTextureFlags)
 {
+	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
 	const VkFormat depth_format = gDepthFormatViewMap[eFormat];
+
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};
     vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), depth_format, &props);
@@ -215,23 +447,24 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
 	image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	image_create_info.usage = GetImageUsage(uTextureFlags);
 	image_create_info.queueFamilyIndexCount = 0;
 	image_create_info.pQueueFamilyIndices = NULL;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	image_create_info.flags = 0;
+	m_imageCreateInfo = image_create_info;
 
-    Init(pDevice, image_create_info);
+    Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	VkImageViewCreateInfo view_info = {};
 	view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	view_info.pNext = NULL;
 	view_info.image = m_image;
 	view_info.format = image_create_info.format;
-	view_info.components.r = VK_COMPONENT_SWIZZLE_R;
-	view_info.components.g = VK_COMPONENT_SWIZZLE_G;
-	view_info.components.b = VK_COMPONENT_SWIZZLE_B;
-	view_info.components.a = VK_COMPONENT_SWIZZLE_A;
+	view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 	view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 	view_info.subresourceRange.baseMipLevel = 0;
 	view_info.subresourceRange.levelCount = 1;
@@ -239,19 +472,51 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
+	m_imageViewCreateInfo = view_info;
 
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
 	ASSERT(res == VK_SUCCESS);
+
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uDepth = 1;
+	m_uFaces = 1;
+
 }
 
-void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo)
+
+void Texture_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+{
+	m_imageCreateInfo.extent.width = uWidth;
+	m_imageCreateInfo.extent.height = uHeight;
+	Init(pDevice, m_imageCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, uWidth > m_uWidth || uHeight > m_uHeight);
+
+
+	// Create the image view
+	m_imageViewCreateInfo.image = m_image;
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &m_imageViewCreateInfo, NULL, &m_imageView);
+	ASSERT(res == VK_SUCCESS);
+
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+	m_uUpdateCount++;
+}
+
+
+void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory)
 {
 	VkMemoryAllocateInfo mem_alloc = {};
 
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
     // Create the image
+	if (m_image)
+	{
+		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_image = VK_NULL_HANDLE;
+	}
     VkResult err = vkCreateImage(vKDevice, &createInfo, NULL, &m_image);
     ASSERT(!err);
 
@@ -262,20 +527,249 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo)
     mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     mem_alloc.pNext = NULL;
     mem_alloc.allocationSize = mem_reqs.size;
-    mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, flags);
 
+	if (bInitMemory)
+	{
+		if (m_memory)
+		{
+			vkFreeMemory(vKDevice, m_memory, nullptr);
+			m_memory = nullptr;
+		}
 
-    // Allocate memory
-    err = vkAllocateMemory(vKDevice, &mem_alloc, NULL,
-                           &m_memory);
-    ASSERT(!err);
+		// Allocate memory
+		err = vkAllocateMemory(vKDevice, &mem_alloc, NULL,
+			&m_memory);
+		ASSERT(!err);
+	}
 
     // Bind memory
     err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);
     ASSERT(!err);
+	m_uUpdateCount++;
 
 }
 
+
+void Texture_ps::CleanUp(GFXDevice* pDevice)
+{
+	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
+	if (m_image)
+	{
+		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_image = VK_NULL_HANDLE;
+	}
+
+	if (m_memory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(vKDevice, m_memory, nullptr);
+		vkDestroyImage(vKDevice, m_image, nullptr);
+		m_memory = VK_NULL_HANDLE;
+	}
+}
+
+
+bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
+{
+	U8String filename = szFileName;
+
+	U8String tmp = filename + ".ktx";
+
+	if (File::FileStatus(tmp.CStr()) == FILE_STATUS_VALID)
+	{
+		return LoadWithGLI(pDevice, tmp.CStr());
+	}
+	else
+	{
+		tmp = filename + ".dds";
+		return LoadWithGLI(pDevice, tmp.CStr());
+	}
+
+	m_uUpdateCount++;
+
+	return false;
+}
+
+// Based on texture loading code from https://github.com/SaschaWillems/Vulkan
+// That project uses an old version of GLI however. Still need to support more than 2D textures
+bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
+{
+	bool bReturn = true;
+	{
+		VkResult res;
+		mem::setConventionalMemManagement(true);
+		usg::File texFile(szFileName);
+		void* scratchMemory = NULL;
+		ScratchRaw::Init(&scratchMemory, texFile.GetSize(), 4);
+		texFile.Read(texFile.GetSize(), scratchMemory);
+		gli::texture Texture = gli::load((char*)scratchMemory, texFile.GetSize());
+
+		VkFormatProperties formatProperties;
+		VkFormat eFormatVK = GetFormatGLI(Texture.format());
+
+		glm::tvec3<uint32> const Extent(Texture.extent());
+		uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
+		m_uWidth = Extent.x;
+		m_uHeight = Extent.y;
+		m_uDepth = Extent.z;
+		m_uFaces = FaceTotal;
+
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormatVK, &formatProperties);
+		GFXDevice_ps& devicePS = pDevice->GetPlatform();
+		VkDevice device = devicePS.GetVKDevice();
+
+		VkMemoryAllocateInfo memAllocInfo = {};
+		memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		VkMemoryRequirements memReqs = {};
+
+		VkImageType eVKImageType = VK_IMAGE_TYPE_2D;
+		VkImageViewType eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
+		if (m_uHeight > 1)
+		{
+			if (m_uDepth > 1)
+			{
+				eVKImageType = VK_IMAGE_TYPE_3D;
+				eVKImageViewType = VK_IMAGE_VIEW_TYPE_3D;
+			}
+			else if (m_uFaces > 1)
+			{
+				eVKImageType = VK_IMAGE_TYPE_2D;
+				eVKImageViewType = VK_IMAGE_VIEW_TYPE_CUBE;
+			}
+			else
+			{
+				eVKImageType = VK_IMAGE_TYPE_2D;
+				eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
+			}
+		}
+		else
+		{
+			eVKImageType = VK_IMAGE_TYPE_1D;
+			eVKImageViewType = VK_IMAGE_VIEW_TYPE_1D;
+		}
+
+		// Create a staging area that contains the raw image data
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingMemory;
+
+		VkBufferCreateInfo bufferCreateInfo = {};
+		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCreateInfo.size = Texture.size();
+		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		res = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &stagingBuffer);
+
+		vkGetBufferMemoryRequirements(device, stagingBuffer, &memReqs);
+
+		memAllocInfo.allocationSize = memReqs.size;
+		memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		res = vkAllocateMemory(device, &memAllocInfo, nullptr, &stagingMemory);
+		res = vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0);
+
+		// Copy texture data into staging buffer
+		uint8_t *data;
+		res = vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void **)&data);
+		memcpy(data, Texture.data(), Texture.size());
+		vkUnmapMemory(device, stagingMemory);
+
+		// Setup copy regions for each mip
+		std::vector<VkBufferImageCopy> bufferCopyRegions;
+		uint32_t offset = 0;
+
+		for (uint32_t face = 0; face < m_uFaces; face++)
+		{
+			for (uint32_t i = 0; i < Texture.levels(); i++)
+			{
+				VkBufferImageCopy bufferCopyRegion = {};
+				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				bufferCopyRegion.imageSubresource.mipLevel = i;
+				bufferCopyRegion.imageSubresource.baseArrayLayer = face;
+				bufferCopyRegion.imageSubresource.layerCount = 1;
+				glm::tvec3<uint32> LevelExtent(Texture.extent(i));
+				bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
+				bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
+				bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
+				bufferCopyRegion.bufferOffset = offset;
+
+				bufferCopyRegions.push_back(bufferCopyRegion);
+
+				offset += static_cast<uint32_t>(Texture.size(i));
+			}
+		}
+
+		// Set the target texture as optimal tiled
+		VkImageCreateInfo imageCreateInfo = {};
+		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageCreateInfo.imageType = eVKImageType;
+		imageCreateInfo.format = eFormatVK;
+		imageCreateInfo.mipLevels = (uint32)Texture.levels();
+		imageCreateInfo.arrayLayers = m_uFaces;
+		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageCreateInfo.extent = { m_uWidth, m_uHeight, m_uDepth };
+		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
+		res = vkCreateImage(device, &imageCreateInfo, nullptr, &m_image);
+
+		vkGetImageMemoryRequirements(device, m_image, &memReqs);
+
+		memAllocInfo.allocationSize = memReqs.size;
+		memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		res = vkAllocateMemory(device, &memAllocInfo, nullptr, &m_memory);
+		res = vkBindImageMemory(device, m_image, m_memory, 0);
+
+		VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+		// Image barrier for optimal image
+		VkImageSubresourceRange subresourceRange = {};
+		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subresourceRange.baseMipLevel = 0;
+		subresourceRange.levelCount = (uint32)Texture.levels();
+		subresourceRange.layerCount = m_uFaces;
+
+		// Transfer from initial undefined image layout to the transfer destination layout
+		setImageLayout(copyCmd,	m_image, VK_IMAGE_ASPECT_COLOR_BIT,	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+
+		// Copy staging buffer
+		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
+
+		// All mip levels have been copied so change to read only
+		m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		setImageLayout(copyCmd,	m_image, VK_IMAGE_ASPECT_COLOR_BIT,	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
+
+		devicePS.FlushCommandBuffer(copyCmd, true);
+
+		// Clean up staging resources
+		vkFreeMemory(device, stagingMemory, nullptr);
+		vkDestroyBuffer(device, stagingBuffer, nullptr);
+
+		VkImageViewCreateInfo view = {};
+		view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		view.viewType = eVKImageViewType;
+		view.format = eFormatVK;
+		view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+
+		view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		view.subresourceRange.baseMipLevel = 0;
+		view.subresourceRange.baseArrayLayer = 0;
+		view.subresourceRange.layerCount = m_uFaces;
+		view.subresourceRange.levelCount = (uint32)Texture.levels();
+		view.image = m_image;
+		res = vkCreateImageView(device, &view, nullptr, &m_imageView);
+
+	}
+	mem::setConventionalMemManagement(false);
+	return bReturn;
+}
+
+
+// Standard ktx loading below this point (should switch back to this as gli has a pretty slow memcopy)
+#if 0
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
 	U8String tmp = szFileName;
@@ -452,8 +946,9 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, nullptr, &m_imageView);
 	ASSERT(res == VK_SUCCESS);
 
-	return false;
+	return true;
 }
+#endif
 
 uint32 Texture_ps::GetWidth() const
 {
@@ -465,10 +960,26 @@ uint32 Texture_ps::GetHeight() const
 	return m_uHeight;
 }
 
+uint32 Texture_ps::GetDepth() const
+{
+	return m_uDepth;
+}
+
+uint32 Texture_ps::GetFaces() const
+{
+	return m_uFaces;
+}
+
 bool Texture_ps::FileExists(const char* szFileName)
 {
-	ASSERT(false);
-	return false;
+	U8String file(szFileName);
+	file += ".dds";
+	if (File::FileStatus(file.CStr()) == FILE_STATUS_VALID)
+		return true;
+
+	file = szFileName;
+	file += ".ktx";
+	return File::FileStatus(file.CStr()) == FILE_STATUS_VALID;
 }
 
 }

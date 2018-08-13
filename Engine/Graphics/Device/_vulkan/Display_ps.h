@@ -19,36 +19,54 @@ public:
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl);
 	void CleanUp(usg::GFXDevice* pDevice);
-	void Use(usg::GFXDevice* pDevice);
+	void SetAsTarget(VkCommandBuffer& cmd);
 
 	void Present();
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
 	void ScreenShot(const char* szFileName);
+	const RenderPassHndl& GetRenderPass() { return m_directRenderPass; }
 
-	void Resize(uint32 uWidth, uint32 uHeight);
-    void Resize();	
+	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
+    void Resize(usg::GFXDevice* pDevice);	
+	void Minimized(usg::GFXDevice* pDevice);
 	
 	// PS
 	void Transfer(GFXContext* pContext, RenderTarget* pTarget);
-	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight);
+	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void SwapBuffers(GFXDevice* pDevice);
+	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
 
-	HWND			m_hwnd;
-	HDC				m_hdc;
-	VkImage*		m_pSwapchainImages;
-	VkImageView*	m_pSwapchainImageViews;
-	VkSurfaceKHR	m_surface;
-	VkSwapchainKHR	m_swapChain;
-	VkSemaphore		m_presentComplete;
-	uint32			m_uSwapChainImageCount;
-	uint32			m_uID;
-	uint32			m_uWidth;
-	uint32			m_uHeight;
-	uint32			m_uActiveImage;
+	void InitFrameBuffers(GFXDevice* pDevice);
+	void DestroySwapChain(GFXDevice* pDevice);
+	void RecreateSwapChain(GFXDevice* pDevice);
+	void CreateSwapChain(GFXDevice* pDevice);
+	void CreateSwapChainImageViews(GFXDevice* pDevice);
+
+	enum 
+	{
+		SWAP_BUFFER_COUNT = 2
+	};
+
+	usg::RenderPassHndl	m_directRenderPass;
+	VkFramebuffer*		m_pFramebuffers;
+	HWND				m_hwnd;
+	HDC					m_hdc;
+	VkImage*			m_pSwapchainImages;
+	VkImageView*		m_pSwapchainImageViews;
+	VkSurfaceKHR		m_surface;
+	VkSwapchainKHR		m_swapChain;
+	VkSemaphore			m_imageAcquired;
+	VkFormat			m_swapChainImageFormat;
+	uint32				m_uSwapChainImageCount;
+	uint32				m_uID;
+	uint32				m_uWidth;
+	uint32				m_uHeight;
+	uint32				m_uActiveImage;
+	bool				m_bWindowResized;
 };
 
 }

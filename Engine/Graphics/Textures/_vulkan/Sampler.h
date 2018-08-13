@@ -15,7 +15,7 @@ public:
 	Sampler();
 	~Sampler();
 
-	void Init(GFXDevice* pDevice, const SamplerDecl &decl);
+	void Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId);
 	void CleanUp(GFXDevice* pDevice);
 
 	// PS specific

@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Debug/Rendering/Debug3D.h"
+#include "Engine/Scene/ViewContext.h"
 
 namespace usg 
 {
@@ -28,6 +29,8 @@ Debug3D::Debug3D()
 {
 	m_uSpheres = 0;
 	m_uCubes = 0;
+	SetLayer(RenderNode::LAYER_TRANSLUCENT);
+	SetPriority(0);
 }
 
 Debug3D::~Debug3D()
@@ -42,35 +45,6 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	
 	MakeSphere(pDevice);
 	
-	// Don't write to the depth, but do read from it
-	PipelineStateDecl pipelineState;
-	//pipelineState.renderPass = pScene->GetRenderPass(0);
-	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
-	depthDecl.bDepthWrite	= false;
-	depthDecl.bDepthEnable	= true;
-	depthDecl.eDepthFunc	= DEPTH_TEST_LESS;
-
-	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
-	// Make these spheres transparent
-	alphaDecl.bBlendEnable = true;
-	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
-	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
-	alphaDecl.blendEq = BLEND_EQUATION_ADD;
-
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DebugSphere");
-	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
-	pipelineState.inputBindings[1].Init(g_instanceVertex, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
-	pipelineState.uInputBindingCount = 2;
-
-	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-	pipelineState.layout.uDescriptorSetCount = 1;
-
-	m_spherePipeline = pDevice->GetPipelineState(pipelineState);
-
-	pipelineState.inputBindings[0].Init(CubeRender::VertexElements);
-	// Initialize cubes
-	
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "CubesOriented");
 
 	uint16* pIndices = NULL;
 	ScratchObj<uint16> cubeIndices(pIndices, MAX_CUBES, 4);
@@ -84,18 +58,54 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	m_cubeVB.Init(pDevice, NULL, sizeof(CubeRender::Cube), MAX_CUBES, "Cube", GPU_USAGE_DYNAMIC);
 	m_cubeIB.Init(pDevice, pIndices, MAX_CUBES);
 
-	pipelineState.ePrimType = PT_POINTS;
-	m_cubePipeline = pDevice->GetPipelineState(pipelineState);
 
 
 	m_pRenderGroup = pScene->CreateRenderGroup(NULL);
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
-	SetLayer(RenderNode::LAYER_TRANSLUCENT);
-	SetPriority(0);
 
 	m_psRenderer = this;
+}
+
+void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
+{
+	RenderPassHndl rp = pContext->GetRenderPasses().GetRenderPass(*this);
+
+
+	// Don't write to the depth, but do read from it
+	PipelineStateDecl pipelineState;
+	//pipelineState.renderPass = pScene->GetRenderPass(0);
+	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
+	depthDecl.bDepthWrite = false;
+	depthDecl.bDepthEnable = true;
+	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
+
+	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
+	// Make these spheres transparent
+	alphaDecl.bBlendEnable = true;
+	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
+	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
+	alphaDecl.blendEq = BLEND_EQUATION_ADD;
+
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Sphere");
+	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
+	pipelineState.inputBindings[1].Init(g_instanceVertex, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
+	pipelineState.uInputBindingCount = 2;
+
+	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineState.layout.uDescriptorSetCount = 1;
+
+	m_spherePipeline = pDevice->GetPipelineState(rp, pipelineState);
+
+	pipelineState.inputBindings[0].Init(CubeRender::VertexElements);
+	pipelineState.uInputBindingCount = 1;
+	// Initialize cubes
+
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
+	pipelineState.ePrimType = PT_POINTS;
+	// FIXME: Issue on Vulkan with this effect
+	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
 }
 
 void Debug3D::CleanUp(GFXDevice* pDevice)
@@ -182,7 +192,7 @@ void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 
 bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	if(m_uSpheres != 0)
+	if(m_uSpheres != 0 && m_spherePipeline.IsValid())
 	{
 		pContext->SetPipelineState(m_spherePipeline);
 		pContext->SetVertexBuffer(&m_sphereVB, 0);
@@ -190,7 +200,7 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 		pContext->DrawIndexedEx(&m_sphereIB, 0, m_sphereIB.GetIndexCount(), m_uSpheres);
 	}
 
-	if(m_uCubes != 0)
+	if(m_uCubes != 0 && m_cubePipeline.IsValid())
 	{
 		pContext->SetPipelineState(m_cubePipeline);
 		pContext->SetVertexBuffer(&m_cubeVB);

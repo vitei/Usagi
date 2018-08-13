@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/Scene.h"
  
 
 namespace usg {
@@ -45,19 +46,32 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_uLod = pMesh->uLodIndex;
 	m_bCanHaveShadow = pMesh->layer < RenderNode::LAYER_TRANSLUCENT;
 
-	RenderPassHndl renderPass = pScene->GetRenderPass(0);
-
 	if (bDepth)
 	{
-		m_deferredPipelineState = pMesh->GetPipeline(renderPass).depthPassPipeline;
-		m_pipelineState = pMesh->GetPipeline(renderPass).depthPassPipeline;
+		SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
+		SetPriority(0);
 	}
 	else
 	{
-		m_deferredPipelineState = pMesh->GetPipeline(renderPass).deferredPipeline;
-		m_pipelineState = pMesh->GetPipeline(renderPass).defaultPipeline;
+		SetLayer(pMesh->layer);
+		SetPriority(pMesh->priority);
 	}
-	m_omniDepthPipelineState = pMesh->GetPipeline(renderPass).omniDepthPassPipeline;
+
+	RenderPassHndl renderPass = pScene->GetRenderPasses(0).GetRenderPass(*this);
+
+	if (bDepth)
+	{
+		// FIXME: This is only valid for shadow render passes, need another pipeline for scene pre depth passes
+		renderPass = pScene->GetShadowRenderPass();
+		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
+	}
+	else
+	{
+		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
+	}
+	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->pipelines.omniDepthPassPipeline);
 
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout);
 
@@ -88,22 +102,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		}
 	}
 
-	if (bDepth)
-	{
-		SetMaterialCmpVal(pMesh->GetPipeline(renderPass).depthPassPipeline, pMesh->pTextures[0].get());
-
-		SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
-		SetPriority(0);
-	}
-	else
-	{
-		// Set up the material 
-		SetMaterialCmpVal(pMesh->GetPipeline(renderPass).defaultPipeline, pMesh->pTextures[0].get());
-
-		SetLayer(pMesh->layer);
-		SetPriority(pMesh->priority);
-	}
-
+	SetMaterialCmpVal(pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline), pMesh->pTextures[0].get());
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 

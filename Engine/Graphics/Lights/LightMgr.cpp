@@ -7,6 +7,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Graphics/Lights/LightSpec.pb.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Graphics/Lights/PointLight.h"
@@ -26,6 +27,7 @@ m_pParent(nullptr)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
+	m_shadowMapRes = 2048;
 }
 
 LightMgr::~LightMgr(void)
@@ -35,7 +37,46 @@ LightMgr::~LightMgr(void)
 void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 {
 	m_pParent = pParent;
+
+	// Set up an initial dummy array for binding purposes
+	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
+	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+	usg::RenderTarget::RenderPassFlags flags;
+	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+	m_cascadeTarget.InitRenderPass(pDevice, flags);
 }
+
+
+void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution)
+{
+	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
+	m_shadowMapRes = uResolution;
+	if (m_cascadeBuffer.GetSlices() > 1)
+	{
+		m_cascadeBuffer.Resize(pDevice, uResolution, uResolution);
+		m_cascadeTarget.Resize(pDevice);
+	}
+}
+
+
+void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
+{
+	if (m_cascadeBuffer.GetWidth() != m_shadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
+	{
+		m_cascadeBuffer.CleanUp(pDevice);
+		m_cascadeTarget.CleanUp(pDevice);
+		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uLayers, DF_DEPTH_32F);
+		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+		usg::RenderTarget::RenderPassFlags flags;
+		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
+		m_cascadeTarget.InitRenderPass(pDevice, flags);
+	}
+}
+
 
 void LightMgr::CleanUp(GFXDevice* pDevice)
 {
@@ -43,6 +84,8 @@ void LightMgr::CleanUp(GFXDevice* pDevice)
 	m_spotLights.CleanUp(pDevice, m_pParent);
 	m_pointLights.CleanUp(pDevice, m_pParent);
 	m_projLights.CleanUp(pDevice, m_pParent);
+	m_cascadeTarget.CleanUp(pDevice);
+	m_cascadeBuffer.CleanUp(pDevice);
 }
 
 
@@ -51,10 +94,6 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	// TODO: Handle multiple viewcontexts for the shodows
 	ViewContext* pContext= m_pParent->GetViewContext(0);
 	m_uActiveFrame = uFrame;
-	for (auto itr : m_dirLights.GetActiveLights())
-	{
-		itr->UpdateCascade(*pContext->GetCamera(), 0);
-	}
 
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
@@ -63,10 +102,13 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	GetActiveDirLights(dirLights);
 
 	// Now find the most influential shadowed directional light and make it the first
+	uint32 uCascadeIndex = 0;
 	for (uint32 i = 0; i < m_dirLights.GetActiveLights().size(); i++)
 	{
 		if (m_dirLights.GetActiveLights()[i]->GetShadowEnabled())
 		{
+			m_dirLights.GetActiveLights()[i]->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
+			uCascadeIndex += ShadowCascade::CASCADE_COUNT;
 			if (m_uShadowedDirLightIndex == UINT_MAX)
 			{
 				m_uShadowedDirLightIndex = i;
@@ -81,7 +123,18 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 		m_uShadowedDirLightIndex = (uint32)m_dirLights.GetActiveLights().size();
 	}
 
+	for (auto itr : m_dirLights.GetActiveLights())
+	{
+		itr->UpdateCascade(*pContext->GetCamera(), 0);
+	}
 
+
+}
+
+
+TextureHndl	LightMgr::GetShadowCascadeImage() const
+{
+	return m_cascadeBuffer.GetTexture();
 }
 
 void LightMgr::GPUUpdate(GFXDevice* pDevice)
@@ -150,6 +203,15 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 	if(szName)
 		pLight->SetName(szName);
 	ASSERT(pLight);
+
+	if (bSupportsShadow)
+		m_uShadowedDirLights++;
+
+	if (m_cascadeBuffer.GetSlices() < ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights)
+	{
+		InitShadowCascade(pDevice, ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights);
+	}
+
 	return pLight;
 }
 
@@ -208,7 +270,14 @@ void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
 		if( (*it)->IsActive() )
 		{
 			(*it)->SetVisibleFrame(m_uActiveFrame);
-			lightsOut.AddToEnd(*it);
+			if ((*it)->GetShadowEnabled())
+			{
+				lightsOut.AddToEnd(*it);
+			}
+			else
+			{
+				lightsOut.AddToFront(*it);
+			}
 		}
 	}
 

@@ -4,6 +4,9 @@
 
 # selectively turn off handling for certain extensions
 *.glsl text diff
+*.vert text diff
+*.frag text diff
+*.geom text diff
 *.hlsl text diff
 *.fx text diff
 *.h text diff

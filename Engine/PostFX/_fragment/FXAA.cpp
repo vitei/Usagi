@@ -9,6 +9,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Core/stl/vector.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "FXAA.h"
 
@@ -31,7 +32,7 @@ static const ShaderConstantDecl g_fxaaConstantDef[] =
 static const DescriptorDeclaration g_descriptorDecl[] =
 {
 	DESCRIPTOR_ELEMENT(0,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
-	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_ALL),
+	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_VS_PS),
 	DESCRIPTOR_END()
 };
 
@@ -61,22 +62,19 @@ void FXAA::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.ePrimType = PT_TRIANGLES;
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "fxaa");
+	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FXAA");
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-
-	RenderPassDecl renderPass;
-	// FIXME: Init the render pass
-
-	pipelineDecl.renderPass = pDevice->GetRenderPass(renderPass);
-
-	m_material.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), matDescriptors);
 	
 	m_sampler = pDevice->GetSampler(pointDecl);
 
 
-	pipelineDecl.layout.descriptorSets[0] = matDescriptors;
-	pipelineDecl.layout.uDescriptorSetCount = 1;
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.descriptorSets[1] = matDescriptors;
+	pipelineDecl.layout.uDescriptorSetCount = 2;
+	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
+
+	m_material.Init(pDevice, pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl), matDescriptors);
 
 	m_constantSet.Init(pDevice, g_fxaaConstantDef);
 	
@@ -109,7 +107,14 @@ void FXAA::CleanUp(GFXDevice* pDevice)
 
 void FXAA::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
-	m_pDestTarget = pDst;
+	if (m_pDestTarget != pDst)
+	{
+		m_pDestTarget = pDst;
+		PipelineStateDecl decl;
+		RenderPassHndl hndlTmp;
+		pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl, hndlTmp);
+		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), decl));
+	}
 }
 
 void FXAA::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)

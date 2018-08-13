@@ -20,7 +20,7 @@ public:
 
 	// Set up the defaults
 	void Init(GFXDevice* pDevice, const DescriptorSetLayout* pLayout) {}
-	void CleanUp(GFXDevice* pDevice) {}
+	void CleanUp(GFXDevice* pDevice, DescriptorSetLayout* pLayout) {}
 
 	void UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData) {}
 	void NotifyBufferChanged(uint32 uLayoutIndex, uint32 uSubIndex, const DescriptorData* pData) {}

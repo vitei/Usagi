@@ -40,29 +40,15 @@ namespace usg{
 
 		struct PipelineGroup
 		{
-			RenderPassHndl			renderPass;
+			PipelineStateDecl		defaultPipeline;
+			PipelineStateDecl		deferredPipeline;
+			PipelineStateDecl		depthPassPipeline;
+			PipelineStateDecl		omniDepthPassPipeline;
+			PipelineStateDecl		translucentStateCmp;
+		} pipelines;
 
-			PipelineStateHndl		defaultPipeline;
-			PipelineStateHndl		deferredPipeline;
-			PipelineStateHndl		depthPassPipeline;
-			PipelineStateHndl		omniDepthPassPipeline;
-			PipelineStateHndl		translucentStateCmp;
-		};
+		VertexElement vertexElements[MAX_VERTEX_ATTRIBUTES+1+(2*exchange::Shape::singleAttributes_max_count)];	// +1 for cap
 
-		vector<PipelineGroup>	pipelines;
-
-		const PipelineGroup& GetPipeline(const RenderPassHndl& hndl) const
-		{
-			for (uint32 i = 0; i < pipelines.size(); i++)
-			{
-				if (hndl == pipelines[i].renderPass)
-				{
-					return pipelines[i];
-				}
-			}
-			ASSERT(false);
-			return pipelines[0];
-		}
 
 
 		void CleanUp(GFXDevice* pDevice)

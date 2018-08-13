@@ -1,3 +1,0 @@
-VS deferred/projection_light_pos_vs
-PS deferred/projection_light_ps
-DEFINES SHADOW_READ

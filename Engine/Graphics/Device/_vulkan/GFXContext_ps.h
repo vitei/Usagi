@@ -7,7 +7,6 @@
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
-#include "Engine/Graphics/CTREmulationConsts.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -19,6 +18,8 @@ class IndexBuffer;
 class VertexBuffer;
 class ConstantSet;
 class Fog;
+class IHeadMountedDisplay;
+
 
 class GFXContext_ps
 {
@@ -30,8 +31,8 @@ public:
 
 	void Begin(bool bApplyDefaults);
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);
-	void TransferRect(RenderTarget* pTarget, Display* pDisplay, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight);
-	void CopyDepthToSlice(RenderTarget* pSrc, RenderTarget* pDst, uint32 uSlice);
+	void TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
+	void TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay);
 
 	void End();
 	void ForceFinishDraw() { }
@@ -42,35 +43,30 @@ public:
 	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
 	void SetRenderTarget(const RenderTarget* pTarget);
-	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
+	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayers);
 	void EndRTDraw(const RenderTarget* pTarget);
+	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 
 	void SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev);
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void ClearRenderTarget(RenderTarget* pRT, uint32 uFlags);
 
-	void SetVertexBuffer(const VertexBuffer* pBuffer, const EffectBinding* pBinding, uint32 uSlot);
+	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);
 	void DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstances);
-
-	// FIXME: Implement or remove me (there for the benefit of CTR compatability)
-	void SetFog(const Fog* pFog) {}
-	void SetTexCoordSource(uint32 uUnit, uint32 uSource) {}
-	void BindLUTToSampler(uint32 uSampler, const class LookupTable* pTable) {}
 
 	void SetBlendColor(const Color& color);
 
 	void BeginGPUTag(const char* szName) {}
 	void EndGPUTag() {}
 	void EnableProfiling(bool bProfile) {}
-	// Not valid on the PC
-
-	void RunDeferredList() { ASSERT(false); }
+	void UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags);
 
 	// PS Specific functions
 	VkCommandBuffer GetVkCmdBuffer() { return m_cmdBuff; }
 	void ImageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void SetImageLayout(VkImage image, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange, VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
 private:
 

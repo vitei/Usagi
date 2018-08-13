@@ -17,6 +17,7 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Effects/InputBinding.h"
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
@@ -112,7 +113,7 @@ void GFXContext_ps::TransferRect(RenderTarget* pTarget, Display* pDisplay, const
 }
 
 
-void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags)
+void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 {
 	const RenderTarget_ps& rtPS = pTarget->GetPlatform();
 	GLuint uDst = pTarget->GetPlatform().GetLayerFBO(uLayer);
@@ -121,9 +122,10 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 //	glDrawBuffers(rtPS.GetTargetCount(), rtPS.GetBindings());  
 //	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, pTarget->GetDepthStencilBuffer()->GetTexture()->GetPlatform().GetTexHndl(), 0, uLayer);	
 
+	uint32 uClearFlags = pTarget->GetRenderPass().GetContents()->GetClearFlags();
 	uint32 uGlFlags = 0;
-	uGlFlags |= (RenderTarget::CLEAR_FLAG_DEPTH&uClearFlags) != 0 ? GL_DEPTH_BUFFER_BIT : 0;
-	uGlFlags |= (RenderTarget::CLEAR_FLAG_STENCIL&uClearFlags) != 0 ? GL_STENCIL_BUFFER_BIT : 0;
+	uGlFlags |= (RenderTarget::RT_FLAG_DEPTH&uClearFlags) != 0 ? GL_DEPTH_BUFFER_BIT : 0;
+	uGlFlags |= (RenderTarget::RT_FLAG_STENCIL&uClearFlags) != 0 ? GL_STENCIL_BUFFER_BIT : 0;
 //	glClearStencil(0x00);
 //	glClearDepth(1.0f);
 	if(uGlFlags)
@@ -136,7 +138,7 @@ void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLa
 }
 
 
-void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
+void GFXContext_ps::SetRenderTarget(RenderTarget* pTarget)
 {
 	if(pTarget)
 	{
@@ -144,6 +146,12 @@ void GFXContext_ps::SetRenderTarget(const RenderTarget* pTarget)
 		glBindFramebuffer(GL_FRAMEBUFFER, rtPS.GetOGLFBO());
 
 		glDrawBuffers(rtPS.GetTargetCount(), rtPS.GetBindings());  
+
+		uint32 uClearFlags = pTarget->GetRenderPass().GetContents()->GetClearFlags();
+		if (uClearFlags)
+		{
+			ClearRenderTarget(pTarget, uClearFlags);
+		}
 
 	}
 	else
@@ -167,9 +175,9 @@ void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 
 	SetDepthWrite();
 
-	for (int i = 0; i < MAX_RENDER_TARGETS; i++)
+	for (int i = 0; i < MAX_COLOR_TARGETS; i++)
 	{
-		uint32 uTargetFlag = RenderTarget::CLEAR_FLAG_COLOR_0 << i;
+		uint32 uTargetFlag = RenderTarget::RT_FLAG_COLOR_0 << i;
 		if ((uClearFlags & uTargetFlag) )
 		{
 			usg::Color color(0.0f, 0.0f, 0.0f, 0.0f);
@@ -177,7 +185,7 @@ void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 		}
 	}
 
-	if (uClearFlags & RenderTarget::CLEAR_FLAG_DEPTH)
+	if (uClearFlags & RenderTarget::RT_FLAG_DEPTH)
 	{
 		glClearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0);
 	}
@@ -217,17 +225,17 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 
 	if(!pRT || pRT->GetPlatform().GetDepthTarget()!=NULL)
 	{
-		uGlFlags |= (RenderTarget::CLEAR_FLAG_DEPTH&uFlags)!=0 ? GL_DEPTH: 0;
-		uGlFlags |= (RenderTarget::CLEAR_FLAG_STENCIL&uFlags)!=0 ? GL_STENCIL : 0;
+		uGlFlags |= (RenderTarget::RT_FLAG_DEPTH&uFlags)!=0 ? GL_DEPTH: 0;
+		uGlFlags |= (RenderTarget::RT_FLAG_STENCIL&uFlags)!=0 ? GL_STENCIL : 0;
 
 		bUseDepthStencil = uGlFlags != 0;
 	}
 
 	SetDepthWrite();
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
-		uint32 uTargetFlag = RenderTarget::CLEAR_FLAG_COLOR_0 << i;
+		uint32 uTargetFlag = RenderTarget::RT_FLAG_COLOR_0 << i;
 		if( (uFlags & uTargetFlag) && (!pRT || pRT->GetColorBuffer(i)!=NULL) )
 		{
 			glColorMaski(i, 0xff, 0xff, 0xff, 0xff);
@@ -244,8 +252,6 @@ void GFXContext_ps::ClearRenderTarget(RenderTarget* pRT, uint32 uFlags)
 
 
 	RestorePipelineState();
-	// Push and pop of the states isn't working
-	m_pParent->InvalidateStates();
 	ERROR_CHECK
 }
 
@@ -301,6 +307,7 @@ void GFXContext_ps::SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex)
 				break;
 			}
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
+			case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
 				//if(pDecl->shaderType != SHADER_FLAG_PIXEL)
 				ASSERT(pInst->pConstBuffer->GetDirty() == false);
 				pInst->pConstBuffer->GetPlatform().Bind((ShaderConstantType)(pDecl->uBinding + j));
@@ -395,7 +402,7 @@ void GFXContext_ps::RestorePipelineState()
 	PipelineStateHndl pipeline = m_pParent->GetActivePipeline();
 	if (pipeline.IsValid())
 	{
-		m_pParent->InvalidateStates();
+		m_pParent->InvalidatePipelineOnly();
 		m_pParent->SetPipelineState(pipeline);
 	}
 }

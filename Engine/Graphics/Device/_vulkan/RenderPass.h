@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_DEVICE_PC_RENDERPASS_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/RenderState.h"
+#include "Engine/Core/stl/vector.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -15,11 +16,13 @@ public:
 	RenderPass() {};
 	~RenderPass() {};
 	
-	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl);
+	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl, uint32 uId);
 	const VkRenderPass& GetPass() const { return m_renderPass; }
 	uint32 GetCRC() const { return m_uCRCForPass; }
 
 private:
+
+	
 	VkRenderPass m_renderPass;
 	uint32		 m_uCRCForPass;
 };

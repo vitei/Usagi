@@ -7,17 +7,14 @@ require 'yaml'
 #####################################################################
 # Utility Functions                                                 #
 #####################################################################
-def build_pc_data(config, n)
+def build_pc_data(config, n, platform)
   data_deps = Set.new
 
   audio = build_audio(config, n)
   data_deps.merge audio
 
-  shaders = build_pc_shaders(config, n)
+  shaders = build_pc_shaders(config, n, platform)
   data_deps.merge shaders
-
-  effects = build_pc_effects(config, n)
-  data_deps.merge effects
 
   textures = build_pc_textures(config, n)
   data_deps.merge textures
@@ -45,7 +42,7 @@ def process_data(config, platform, n)
   # Do this first to ensure we have the hierarchy information
   # Convert models
   if config.target_platform == 'win'
-    pc_data = build_pc_data(config, n)
+    pc_data = build_pc_data(config, n, platform)
     data_deps.merge pc_data
   end
 
@@ -168,45 +165,48 @@ def build_audio(config, n)
   targets.values
 end
 
-def build_pc_shaders(config, n)
-  game_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir(false))
-  engine_shaders = build_pc_shaders_for_dir(config, n, config.pc_shader_dir)
+def build_pc_shaders(config, n, platform)
+  if platform.underscore_dirs_whitelist.include?("_vulkan")
+    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false), 'vulkan')
+    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir, 'vulkan')
+  else
+    game_shaders = build_shader_pak_for_dir(config, n, config.effects_dir(false), config.pc_shader_dir(false), 'ogl')
+    engine_shaders = build_shader_pak_for_dir(config, n, config.effects_dir, config.pc_shader_dir, 'ogl')
+  end
 
   game_shaders + engine_shaders
 end
 
-def build_pc_shaders_for_dir(config, n, shader_dir)
-  targets = FileList["#{shader_dir}/**/*"].exclude{|f| File.directory?(f)}.map do |input|
-    output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '')
 
-    [input, output]
+def build_vulkan_shaders_for_dir(config, n, shader_dir)
+  targets = FileList["#{shader_dir}/**/*.vert", "#{shader_dir}/**/*.frag", "#{shader_dir}/**/*.geom"].exclude{|f| File.directory?(f)}.map do |input|
+    output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '') + ".spv"
+    defines = ""
+    n.build('vulkanshader', {output => [input]},
+        :variables => {'out' => to_windows_path(output),
+        'in' => input})
+
+    output
   end
-
-  GeneratorUtil.copy_files(n, targets)
-
-  targets.map{|i, o| o}
 end
 
-def build_pc_effects(config, n)
-  game_effects = build_pc_effects_for_dir(config, n, config.effects_dir(false))
-  engine_effects = build_pc_effects_for_dir(config, n, config.effects_dir)
+def build_shader_pak_for_dir(config, n, effect_dir, shader_dir, api)
+  targets = FileList["#{effect_dir}/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
+    output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".pak")
+    defines = ""
+    n.build('shaderpack', {output => [input]},
+        { :implicit_deps => [config.shader_pack],
+          :variables => {'out' => to_windows_path(output),
+        'in' => input,
+        'shader_dir' => shader_dir,
+        'api' => api }} )
 
-  game_effects + engine_effects
-end
-
-def build_pc_effects_for_dir(config, n, effects_dir)
-  effects = FileList["#{effects_dir}/**/*"].exclude { |f| File.directory?(f) }
-
-  targets = effects.map do |input|
-    output = "#{config.effects_out_dir}/" + input.sub(/#{effects_dir}\//, '')
-
-    [input, output]
+    output
   end
-
-  GeneratorUtil.copy_files(n, targets)
-
-  targets.map{|i, o| o}
 end
+
+
+
 
 def build_pc_textures(config, n)
   game_textures = build_pc_textures_for_dir(config, n, config.textures_dir(false))
@@ -232,7 +232,7 @@ def build_pc_model_textures_for_dir(config, n, textures_dir)
 end
 
 def build_pc_textures_for_dir(config, n, textures_dir)
-  targets = FileList["#{textures_dir}/**/*.tga", "#{textures_dir}/**/*.dds"].map do |input|
+  targets = FileList["#{textures_dir}/**/*.tga", "#{textures_dir}/**/*.dds", "#{textures_dir}/**/*.ktx"].map do |input|
     tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
     path = Pathname.new(input)
     tex = path.relative_path_from(Pathname(textures_dir)).sub_ext('')

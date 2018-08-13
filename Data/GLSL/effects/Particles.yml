@@ -1,0 +1,5 @@
+Effects:
+  - { name: ScriptedTrail, vert: Particles/scripted_trail, geom: Particles/scripted_trail, frag: Particles/scripted_trail }
+  - { name: Scripted, vert: Particles/scripted, geom: Particles/scripted, frag: Particles/scripted }
+  - { name: ScriptedDir, vert: Particles/scripted, geom: Particles/scripted_dir, frag: Particles/scripted }
+  - { name: RibbonTrail, vert: effects/ribbon, geom: effects/ribbon, frag: effects/ribbon  }

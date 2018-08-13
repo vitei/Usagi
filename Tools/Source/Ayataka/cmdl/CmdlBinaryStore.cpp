@@ -165,7 +165,7 @@ void CmdlBinaryStore::store(void* pBuffer, size_t size, const Cmdl& cmdl, size_t
 	swapEndian_Struct( pHeader, mbSwapEndian );
 
 	// final check
-	ASSERT_MSG( p == pEndOfBinary, "End point is not corresponding" );
+	ASSERT_MSG( (p == pEndOfBinary), "End point is not corresponding" );
 }
 
 void* CmdlBinaryStore::StoreShapes(void* p, const Cmdl& cmdl, size_t alignment)

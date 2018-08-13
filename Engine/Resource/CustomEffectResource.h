@@ -41,6 +41,7 @@ namespace usg
 		uint32 GetBindingPoint(uint32 uSet);
 
 		void* GetDefaultData(uint32 uSet) const;
+		const char* GetDefaultTexture(uint32 uSampler);
 
 		const char* GetEffectName() const;
 		const char* GetDeferredEffectName() const;

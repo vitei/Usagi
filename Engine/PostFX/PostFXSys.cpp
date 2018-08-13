@@ -15,18 +15,6 @@
 
 namespace usg {
 
-static const DescriptorDeclaration g_descriptorDecl[] =
-{
-	DESCRIPTOR_ELEMENT(0,		DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
-	DESCRIPTOR_END()
-};
-
-static const DescriptorDeclaration g_postDepthDescriptorDecl[] =
-{
-	DESCRIPTOR_ELEMENT(14,		DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
-	DESCRIPTOR_END()
-};
-
 
 PostFXSys::PostFXSys()
 {
@@ -66,7 +54,7 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 		{  1.f,  -1.f, 0.5f }, // 3 - BR
 	};
 
-	uint8 iIndices[6] = 
+	uint16 iIndices[6] = 
 	{
 		2, 1, 0, 2, 3, 1, 
 	};
@@ -76,35 +64,13 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 	m_fullScreenVB.Init(pDevice, verts, sizeof(PositionVertex), 4, "FullScreenVB");
 	m_fullScreenIB.Init(pDevice, iIndices, 6, PT_TRIANGLES);
 
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	PipelineStateDecl pipelineDecl;
-	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
-	pipelineDecl.uInputBindingCount = 1;
-	pipelineDecl.ePrimType = PT_TRIANGLES;
-
-	DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-	pipelineDecl.layout.descriptorSets[0] = matDescriptors;
-	pipelineDecl.layout.uDescriptorSetCount = 1;
-
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostCopyScreen");
-
-	// FIXME: PostFX stuff needs fixing for the new interface
-//	m_copyMat.SetFilter(pDevice, 0, pointDecl);
+	m_dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
 
 	m_platform.Init(this, pDevice, uInitFlags, uWidth, uHeight);
-
-	pipelineDecl.renderPass = m_platform.GetRenderPass();
-	m_copyMat.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), matDescriptors);
-
-	m_postDepthDescriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(g_postDepthDescriptorDecl));
-	m_postDepthDescriptor.SetImageSamplerPair(0, m_platform.GetLinearDepthTex(), pDevice->GetSampler(pointDecl));
-	m_postDepthDescriptor.UpdateDescriptors(pDevice);
 }
 
 void PostFXSys::CleanUp(GFXDevice* pDevice)
 {
-	m_postDepthDescriptor.CleanUp(pDevice);
-	m_copyMat.Cleanup(pDevice);
 	m_fullScreenIB.CleanUp(pDevice);
 	m_fullScreenVB.CleanUp(pDevice);
 	m_platform.CleanUp(pDevice);
@@ -124,9 +90,9 @@ void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 void PostFXSys::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	m_platform.Resize(pDevice, uWidth, uHeight);
+
 	m_uTargetWidth = uWidth;
 	m_uTargetHeight = uHeight; 
-	m_postDepthDescriptor.UpdateDescriptors(pDevice);
 }
 
 RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
@@ -139,7 +105,7 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 	pContext->DisableScissor();
 	if(uTransferFlags & TRANSFER_FLAGS_CLEAR)
 	{
-		pContext->ClearRenderTarget(RenderTarget::CLEAR_FLAG_DS|RenderTarget::CLEAR_FLAG_COLOR_0|RenderTarget::CLEAR_FLAG_COLOR_1 );
+		pContext->ClearRenderTarget(RenderTarget::RT_FLAG_DS|RenderTarget::RT_FLAG_COLOR_0|RenderTarget::RT_FLAG_COLOR_1 );
 	}
 	
 	return pTarget;
@@ -147,7 +113,7 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 
 void PostFXSys::SetPostDepthDescriptors(GFXContext* pCtxt)
 {
-	pCtxt->SetDescriptorSet(&m_postDepthDescriptor, 4);
+	m_platform.DepthWriteEnded(pCtxt, m_uEffectsEnabled);
 }
 
 void PostFXSys::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl)

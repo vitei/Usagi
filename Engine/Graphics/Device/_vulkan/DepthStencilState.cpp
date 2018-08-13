@@ -44,7 +44,7 @@ static const VkStencilOp g_stencilOpMap[] =
 
 
 
-void DepthStencilState::Init(GFXDevice* pDevice, const DepthStencilStateDecl &decl)
+void DepthStencilState::Init(GFXDevice* pDevice, const DepthStencilStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
 
@@ -53,16 +53,23 @@ void DepthStencilState::Init(GFXDevice* pDevice, const DepthStencilStateDecl &de
     m_createInfo.depthWriteEnable = decl.bDepthWrite ? VK_TRUE : VK_FALSE;
     m_createInfo.depthCompareOp = g_depthTestMap[decl.eDepthFunc];
     m_createInfo.depthBoundsTestEnable = VK_FALSE;
-    m_createInfo.back.failOp = g_stencilOpMap[decl.eStencilFailOp];
-    m_createInfo.back.depthFailOp = g_stencilOpMap[decl.eDepthFailOp];
-    m_createInfo.back.passOp = g_stencilOpMap[decl.ePassOp];
+    m_createInfo.back.failOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_STENCIL_FAIL_BACK]];
+    m_createInfo.back.depthFailOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_DEPTH_FAIL_BACK]];
+    m_createInfo.back.passOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_PASS_BACK]];
     m_createInfo.back.compareOp = g_stencilTestMap[decl.eStencilTest];
-    m_createInfo.back.writeMask = (uint32)decl.uMask[STENCIL_WRITE_MASK];
-    m_createInfo.back.compareMask = (uint32)decl.uMask[STENCIL_CMP_MASK];
-    m_createInfo.back.reference = (uint32)decl.uMask[STENCIL_REF];
+    m_createInfo.back.writeMask = (uint32)decl.uMask[STENCIL_WRITE_MASK_BACK];
+    m_createInfo.back.compareMask = (uint32)decl.uMask[STENCIL_CMP_MASK_BACK];
+    m_createInfo.back.reference = (uint32)decl.uMask[STENCIL_REF_BACK];
+
+	m_createInfo.front.failOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_STENCIL_FAIL]];
+	m_createInfo.front.depthFailOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_DEPTH_FAIL]];
+	m_createInfo.front.passOp = g_stencilOpMap[decl.eStencilOps[SOP_TYPE_PASS]];
+	m_createInfo.front.compareOp = g_stencilTestMap[decl.eStencilTest];
+	m_createInfo.front.writeMask = (uint32)decl.uMask[STENCIL_WRITE_MASK];
+	m_createInfo.front.compareMask = (uint32)decl.uMask[STENCIL_CMP_MASK];
+	m_createInfo.front.reference = (uint32)decl.uMask[STENCIL_REF];
+
     m_createInfo.stencilTestEnable = decl.bStencilEnable;
-    // TODO: Re-implement seperate front and back stencil
-    m_createInfo.front = m_createInfo.back;
 }
 
 

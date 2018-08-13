@@ -70,6 +70,7 @@ task :default do
 
     filesOut = "#{OUTPUT_DIR}/#{PROJECT_NAME}"
     FileUtils.mkdir_p(filesOut)
+    FileUtils.mkdir_p("#{filesOut}/Mode")
     Dir['GameProject/Project/Mode/*'].each do |file|
       filePathName = Pathname.new(file)
       fileOut = file.sub("GameProject/Project", filesOut)

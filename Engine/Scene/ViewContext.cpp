@@ -7,9 +7,11 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Scene/Camera/Camera.h"
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Debug/Rendering/Debug3D.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/PostFX/PostEffect.h"
 #include "Engine/Scene/SceneContext.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/PostFX/PostFXSys.h"
@@ -74,6 +76,14 @@ namespace usg {
 
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
+		const Scene* pScene = GetScene();
+		SamplerDecl shadowSamp(SF_LINEAR, SC_CLAMP);
+		shadowSamp.bEnableCmp = true;
+		shadowSamp.eCmpFnc = CF_LESS;
+		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
+		SamplerHndl sampler = pDevice->GetSampler(pointDecl);
+		SamplerHndl shadowSampler = pDevice->GetSampler(shadowSamp);
+		TextureHndl dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
 		m_LightingContext.Init(pDevice);
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
@@ -81,7 +91,18 @@ namespace usg {
 			m_globalDescriptors[i].Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl));
 			m_globalDescriptors[i].SetConstantSet(0, &m_globalConstants[i]);
 			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptors[i], 1);
+			m_globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
+			m_globalDescriptors[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+
 			m_globalDescriptors[i].UpdateDescriptors(pDevice);
+
+			m_globalDescriptorsWithDepth[i].Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl));
+			m_globalDescriptorsWithDepth[i].SetConstantSet(0, &m_globalConstants[i]);
+			m_LightingContext.AddConstantsToDescriptor(m_globalDescriptorsWithDepth[i], 1);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+
+			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
 
 		SetDeviceDataLoaded();
@@ -95,6 +116,7 @@ namespace usg {
 		{
 			m_globalConstants[i].CleanUp(pDevice);
 			m_globalDescriptors[i].CleanUp(pDevice);
+			m_globalDescriptorsWithDepth[i].CleanUp(pDevice);
 		}
 	}
 
@@ -103,7 +125,7 @@ namespace usg {
 
 	}
 
-	void ViewContext::Init(const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
+	void ViewContext::Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
 	{
 		SetHighestLOD(uHighestLOD);
 		SetRenderMask(uRenderMask);
@@ -111,6 +133,7 @@ namespace usg {
 
 		m_pCamera = pCamera;
 		m_searchObject.Init(GetScene(), this, m_pCamera->GetFrustum(), uRenderMask);
+		Debug3D::GetRenderer()->InitContextData(pDevice, this);
 	}
 
 
@@ -169,6 +192,8 @@ namespace usg {
 
 		Matrix4x4 mTmp;
 
+		m_LightingContext.Update(pDevice, this);
+
 		// Lock the buffer
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
@@ -215,6 +240,21 @@ namespace usg {
 			globalData->vShadowColor = m_shadowColor;
 			m_globalConstants[i].Unlock();
 			m_globalConstants[i].UpdateData(pDevice);
+
+			if (m_pPostFXSys)
+			{
+				// Always update as the image could be resized
+				//if (m_globalDescriptorsWithDepth[i].GetTextureAtBinding(14) != m_pPostFXSys->GetLinearDepthTex() )
+				{
+					// Update the linear depth texture
+					m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pPostFXSys->GetLinearDepthTex(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
+				}
+			}
+			
+			m_globalDescriptors[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
+			m_globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
+			m_globalDescriptors[i].UpdateDescriptors(pDevice);
+			m_globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
 
 		// TODO: Handle maximum LOD ID
@@ -273,9 +313,6 @@ namespace usg {
 			}
 		}
 
-
-
-		m_LightingContext.Update(pDevice, this);
 	}
 
 
@@ -295,6 +332,8 @@ namespace usg {
 		// Iterate through the list of visible objects, drawing them
 		RenderNode::RenderContext renderContext;
 		renderContext.eRenderPass = m_pPostFXSys->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING) ? RenderNode::RENDER_PASS_DEFERRED : RenderNode::RENDER_PASS_FORWARD;
+		// FIXME: Handle multiple views
+		renderContext.pGlobalDescriptors = &m_globalDescriptors[0];
 		renderContext.pPostFX = m_pPostFXSys;
 
 		for (uint32 uLayer = 0; uLayer < RenderNode::LAYER_COUNT; uLayer++)
@@ -313,15 +352,18 @@ namespace usg {
 				{
 					m_pPostFXSys->SetPostDepthDescriptors(pContext);
 				}
+				// FIXME: Handle multiple views
+				pContext->SetDescriptorSet(&m_globalDescriptorsWithDepth[0], 0);
+				renderContext.pGlobalDescriptors = &m_globalDescriptorsWithDepth[0];
 			}
 			// TODO: Probably are going to want callbacks at the end of certain layers, for grabbing
 			// the linear depth information etc
 		}
 	}
 
-	const RenderPassHndl& ViewContext::GetRenderPass() const
+	const SceneRenderPasses& ViewContext::GetRenderPasses() const
 	{
-		return m_pPostFXSys->GetRenderPass();
+		return m_pPostFXSys->GetRenderPasses();
 	}
 
 	void ViewContext::SetShadowColor(usg::Color& color)

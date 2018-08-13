@@ -363,8 +363,12 @@ class BuildConfig
     "#{tools_bin_dir}/Ayataka.exe"
   end
 
+def shader_pack
+    "#{tools_bin_dir}/ShaderPackage.exe"
+  end
+
   def cmdl_converter_dep_opts
-    '-d $out.d'
+    '-d$out.d'
   end
 
   def resource_packer
@@ -497,6 +501,10 @@ class BuildConfig
 
   def skeleton_out_dir
     "#{BUILD_DIR}/skel"
+  end
+
+  def effect_build_dir
+    "#{BUILD_DIR}/Effects"
   end
 
   def shader_out_dir

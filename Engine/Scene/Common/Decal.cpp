@@ -65,10 +65,13 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	// Initialise the memory for this decal
 	m_indexBuffer.Init( pDevice, (uint16*)NULL, indicesMax, false );
 
+
+	// Render just before the sky
+	SetPriority(127);
+	SetLayer(RenderNode::LAYER_OPAQUE);
 	
 
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pScene->GetRenderPass(0);
 	pipeline.ePrimType = PT_TRIANGLES;
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
@@ -102,7 +105,7 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	
 	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "TextureProjection");
 
-	m_material.Init( pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_material.Init( pDevice, pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(*this), pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 	m_projConsts.Init( pDevice, g_textureProjectionConstants);
 	m_pixelConstants.Init(pDevice, g_fadeCBDecl);
@@ -123,10 +126,6 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	SetTexture(pDevice, pTexture);
 	//m_material.UpdateDescriptors(pDevice);
 
-	
-	// Render just before the sky
-	SetPriority(127);
-	SetLayer(RenderNode::LAYER_OPAQUE);
 }
 
 

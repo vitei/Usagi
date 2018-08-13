@@ -56,7 +56,8 @@ public:
 	RenderTarget* GetInitialRT() { return m_platform.GetInitialRT(); }
 	void EndScene();
 
-	const RenderPassHndl& GetRenderPass() const { return m_platform.GetRenderPass(); }
+	// FIXME: Pass in the right value
+	const SceneRenderPasses& GetRenderPasses() const { return m_platform.GetRenderPasses(); }
 
 	void DrawFullScreenQuad(GFXContext* pCtxt) const;
 
@@ -84,7 +85,8 @@ public:
 
 	const PostFXSys_ps& GetPlatform() const { return m_platform; }
 
-
+	const TextureHndl& GetLinearDepthTex() const { return m_platform.GetLinearDepthTex();  }
+	const TextureHndl& GetDummyDepth() { return m_dummyDepth; }
 
 protected:
 	PRIVATIZE_COPY(PostFXSys)
@@ -96,8 +98,8 @@ protected:
 		MAX_POST_EFFECTS = 10
 	};
 
-	DescriptorSet		m_postDepthDescriptor; // Such as linear depth texture
 	RenderTarget*		m_pDepthTarget;
+	TextureHndl			m_dummyDepth;
 
 	PostEffect*			m_pPostEffects[MAX_POST_EFFECTS];
 	uint32				m_uPostEffects;

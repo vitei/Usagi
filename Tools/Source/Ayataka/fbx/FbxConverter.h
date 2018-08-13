@@ -10,7 +10,7 @@ public:
 	FbxConverter();
 	virtual ~FbxConverter();
 
-	virtual int  Load(const aya::string& path, bool bAsCollision, DependencyTracker* pDependencies);
+	virtual int  Load(const aya::string& path, bool bAsCollision, bool bSkeletonOnly, DependencyTracker* pDependencies);
 	void Process( void );
 
 private:

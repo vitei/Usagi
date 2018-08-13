@@ -5,6 +5,8 @@
 #include "Engine/Memory/Memutil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+
 
 const int g_allocGroupSize = 64;
 
@@ -14,7 +16,7 @@ namespace usg {
 	{
 		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,	// DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 0,
 		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 			// DESCRIPTOR_TYPE_CONSTANT_BUFFER,
-		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER	// DESCRIPTOR_TYPE_LOOKUP_TABLE,
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC	// DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC,
 	};
 
 	VkShaderStageFlags GetShaderFlags(ShaderTypeFlags eFlags)
@@ -119,8 +121,11 @@ namespace usg {
 			pBindings[i].descriptorType = g_descriptorTypes[pDecl->eDescriptorType];
 			pBindings[i].stageFlags = GetShaderFlags(pDecl->shaderType);
 			pBindings[i].binding = pDecl->uBinding;
-			pBindings[i].descriptorCount = pDecl->uCount; 
-
+			if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				pBindings[i].binding += SAMPLER_OFFSET;
+			}
+			pBindings[i].descriptorCount = pDecl->uCount;
 			poolSize[i].type = pBindings[i].descriptorType;
 			poolSize[i].descriptorCount = pDecl->uCount;
 		}

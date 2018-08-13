@@ -1,2 +1,0 @@
-VS deferred/pointlight_pos_vs
-PS deferred/pointlight_ps

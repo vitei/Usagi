@@ -8,7 +8,7 @@
 #define _USG_RESOURCE_PAK_HEADER_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/ResourcePakLoader.h"
+#include "Engine/Resource/PakFile.h"
 
 namespace usg {
 
@@ -18,10 +18,9 @@ public:
 	ResourcePakHdr() { }
 	virtual ~ResourcePakHdr() {}
 
-	bool Init(const ResourcePakLoader& loader)
+	bool Init(const PakFile& loader)
 	{
-		// TODO: Copy headers
-		SetupHash(loader.GetName().CStr());
+		m_nameHash = loader.GetNameHash();
 		return true;
 	}
 

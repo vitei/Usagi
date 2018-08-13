@@ -2,8 +2,8 @@
 #define _DEFERRED_LIGHTING_INC
 
 
-in vec2 vo_vTexCoord;
-in vec3 vo_vFSVector;
+ATTRIB_LOC(0) in vec2 vo_vTexCoord;
+ATTRIB_LOC(1) in vec3 vo_vFSVector;
 
 
 layout(location = 0) out vec4 colorOut;
@@ -44,10 +44,10 @@ void main(void)
 	{
 		// Apply the first shadowed light
 		CalculateDirectionalLighting(iCascadeLightStart, vNormal, vFSVector, fSpecPow, vDiffuse, vSpecular);	
-		if(vPos.z < vSplitDistance.w)
+		if(vPos.z < cascades[0].vSplitDistance.w)
 		{
 			vec3 vWorldPos = (vec4(vPos,1.0) * mInvViewMat).xyz;
-			float fShadow = SampleShadowmap(vPos.z, vWorldPos.xyz);
+			float fShadow = SampleShadowmap(vPos.z, vWorldPos.xyz, 0);
 			vec4 vShadowMul = mix(vShadowColor, vec4(1.0), fShadow);
 
 			vDiffuse *= vShadowMul;

@@ -1,6 +1,7 @@
 #include "MaterialDefinitionExporter.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Core/String/String_Util.h"
+#include "Engine/Memory/MemUtil.h"
 #include "Engine/Core/Utility.h"
 #include "common.h"
 #include <yaml-cpp/yaml.h>
@@ -170,6 +171,14 @@ int MaterialDefinitionExporter::Load(const char* path)
 		usg::CustomEffectDecl::Sampler sampler;
 		strcpy_s(sampler.hint, sizeof(sampler.hint), (*it)["hint"].as<std::string>().c_str());
 		sampler.uIndex = (*it)["index"].as<uint32>();
+		if ((*it)["default"])
+		{
+			strcpy_s(sampler.texName, sizeof(sampler.texName), (*it)["default"].as<std::string>().c_str());
+		}
+		else
+		{
+			usg::MemClear(sampler.texName, sizeof(sampler.texName));
+		}
 		m_samplers.push_back(sampler);
 	}
 

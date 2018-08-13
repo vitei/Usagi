@@ -3,20 +3,24 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, TextureFormat_ps.h)
 #include "DepthStencilBuffer_ps.h"
 
 namespace usg {
 
-DepthStencilBuffer_ps::DepthStencilBuffer_ps()
+DepthStencilBuffer_ps::DepthStencilBuffer_ps() 
+	: m_uWidth(0)
+	, m_uHeight(0)
+	, m_pLayerViews(nullptr)
 {
-	m_uWidth = 0;
-	m_uHeight = 0;
+
+	m_textureHndl = &m_texture;
 }
 
 DepthStencilBuffer_ps::~DepthStencilBuffer_ps()
 {
-
+	m_textureHndl.reset(NULL);
 }
 
 
@@ -28,18 +32,7 @@ void DepthStencilBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeig
 	/* VULKAN_KEY_START */
     VkImageCreateInfo image_info = {};
     
-    m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight);
-
-
-	m_attachDesc.format = gDepthFormatViewMap[eFormat];
-	m_attachDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-	m_attachDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	m_attachDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	m_attachDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	m_attachDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	m_attachDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	m_attachDesc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
+    m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uFlags);
 
 	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
 }
@@ -52,13 +45,73 @@ void DepthStencilBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 
 	
 	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices);
 
+	if (uSlices > 1)
+	{
+		ASSERT(m_pLayerViews == nullptr);
+		m_pLayerViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[uSlices];
+		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
+		{
+			m_pLayerViews[i] = m_texture.GetPlatform().CreateLayerImageView(pDevice, i);
+		}
+	}
+	InitLayerViews(pDevice);
+
 
 	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
 }
 
+
+void DepthStencilBuffer_ps::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples, uint32 uFlags)
+{
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+
+	m_texture.GetPlatform().InitCubeMap(pDevice, eFormat, uWidth, uHeight);
+	ASSERT(m_pLayerViews == nullptr);
+	InitLayerViews(pDevice);
+
+	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
+}
+
+void DepthStencilBuffer_ps::CleanUp(GFXDevice* pDevice)
+{
+	FreeLayerViews(pDevice);
+	m_texture.CleanUp(pDevice);
+}
+
 void DepthStencilBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
-	ASSERT(false);
+	FreeLayerViews(pDevice);
+	m_texture.GetPlatform().Resize(pDevice, uWidth, uHeight);
+	InitLayerViews(pDevice);
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+}
+
+void DepthStencilBuffer_ps::InitLayerViews(GFXDevice* pDevice)
+{
+	if (m_texture.GetPlatform().GetFaces() > 1)
+	{
+		m_pLayerViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_texture.GetPlatform().GetFaces()];
+
+		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
+		{
+			m_pLayerViews[i] = m_texture.GetPlatform().CreateLayerImageView(pDevice, i);
+		}
+	}
+}
+
+void DepthStencilBuffer_ps::FreeLayerViews(GFXDevice* pDevice)
+{
+	if (m_pLayerViews)
+	{
+		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
+		{
+			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pLayerViews[i], nullptr);
+		}
+		vdelete[] m_pLayerViews;
+		m_pLayerViews = nullptr;
+	}
 }
 
 }

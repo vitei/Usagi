@@ -14,7 +14,7 @@
 
 // Suppress the definition of min/max of minwindef.h
 #define NOMINMAX
-//#define USE_VULKAN
+#define USE_VULKAN
 
 //#include <winext/cafe.h>
 #include <windows.h>
@@ -50,9 +50,11 @@
 #define NO_OPERATION __noop
 
 #define NO_INLINE_TEMPL
-#define Z_RANGE_0_TO_1 0
 #ifndef USE_VULKAN
 #define OGL_UVS 1
+#define Z_RANGE_0_TO_1 0
+#else
+#define Z_RANGE_0_TO_1 1
 #endif
 
 typedef unsigned char      uint8;

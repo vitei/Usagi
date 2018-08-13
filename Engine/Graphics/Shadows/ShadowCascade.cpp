@@ -22,35 +22,34 @@ const float FADE_BUFFER = 0.96f;
 
 namespace usg {
 
-struct ShadowReadConstants
-{
-    Matrix4x4   mCascadeMtx[ShadowCascade::MAX_CASCADES];
-    Matrix4x4   mCascadeMtxVInv[ShadowCascade::MAX_CASCADES];
-    Vector4f    vSplitDist;
-	Vector4f	vFadeSplitDist;	// We give the next cascade a little extra to allow us to fade between
-	Vector4f	vInvFadeLength;
-    Vector4f    vBias;
-	Vector4f    vSampleRange;
-	Vector2f    vInvShadowDim;
-};
+
 
 static const ShaderConstantDecl g_shadowReadConstDecl[] = 
 {
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, mCascadeMtx[0],       CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, mCascadeMtxVInv[0],   CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, vSplitDist,           CT_VECTOR_4, 1 ),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vFadeSplitDist,        CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vInvFadeLength,        CT_VECTOR_4, 1),
-    SHADER_CONSTANT_ELEMENT( ShadowReadConstants, vBias,                CT_VECTOR_4, 1 ),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vSampleRange,          CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(ShadowReadConstants, vInvShadowDim,         CT_VECTOR_2, 1),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtx[0],      CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, mCascadeMtxVInv[0],   CT_MATRIX_44, ShadowCascade::MAX_CASCADES ),
+
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vSplitDist,           CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vFadeSplitDist,       CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vInvFadeLength,       CT_VECTOR_4, 1),
+    SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vBias,                CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vSampleRange,         CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(ShadowCascade::ShadowReadConstants, vInvShadowDim,        CT_VECTOR_2, 1),
     SHADER_CONSTANT_END()
 };
+
+
+const ShaderConstantDecl* ShadowCascade::GetDecl()
+{
+	return g_shadowReadConstDecl;
+}
 
 ShadowCascade::ShadowCascade()
 {
 	m_uGroupWidth = 0;
 	m_uGroupHeight = 0;
+	m_uCascadeStartIndex = 0;
+	m_pRenderTarget = nullptr;
 
 	for (int i = 0; i < MAX_CASCADES; i++)
 	{
@@ -69,10 +68,7 @@ ShadowCascade::~ShadowCascade()
 
 void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_readDescriptor.CleanUp(pDevice);
 	m_readConstants.CleanUp(pDevice);
-	m_cascadeTarget.CleanUp(pDevice);
-	m_cascadeBuffer.CleanUp(pDevice);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
 		if (m_pSceneContext[i])
@@ -83,10 +79,26 @@ void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	}
 }
 
-void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight, uint32 uGroupWidth, uint32 uGroupHeight)
+void ShadowCascade::AssignRenderTarget(RenderTarget* pTarget, uint32 uStartIndex)
 {
-	m_uGroupWidth = uGroupWidth;
-	m_uGroupHeight = uGroupHeight;
+	m_pRenderTarget = pTarget;
+	m_uGroupWidth = m_pRenderTarget->GetWidth();
+	m_uGroupHeight = m_pRenderTarget->GetHeight();
+
+	const float32 fScale = (float)m_uGroupWidth / 2048.0f;
+	const float32 fPartSize[] = { 30.0f, 160.0f, 400.0f, 1000.f };
+
+	for (uint32 i = 0; i < CASCADE_COUNT; i++)
+	{
+		m_fPartitions0To1[i] = fPartSize[i] * fScale;
+	}
+
+	m_fCascadePartitionsMax = fPartSize[CASCADE_COUNT - 1];
+}
+
+
+void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight)
+{
 	m_pLight = pLight;
 
 	// TODO: May want an optimized shadow context
@@ -97,57 +109,8 @@ void ShadowCascade::Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLig
 		m_pSceneContext[i]->SetActive(true);
 	}
 
-
 	m_readConstants.Init(pDevice, g_shadowReadConstDecl);
 
-	//m_pSceneCtxt->Init(&m_shadowCamera, NULL, 0, RenderNode::RENDER_MASK_SHADOW_CAST);
-	// FIXME: Disabling the scene context for now as we get this up and running
-
-#if 0
-	PipelineStateDecl pipeline;
-
-	DepthStencilStateDecl& depthDecl = pipeline.depthState;
-	depthDecl.bDepthWrite = true;
-	depthDecl.bDepthEnable = true;
-	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
-
-    depthDecl.bStencilEnable = false;
-
-	RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
-	rasDecl.eCullFace = CULL_FACE_BACK;
-
-	AlphaStateDecl& alphaDecl = pipeline.alphaState;
-	alphaDecl.bBlendEnable = false;
-    alphaDecl.SetDepthOnly();
-
-	m_pipelineState = pDevice->GetPipelineState(pipeline);
-#endif
-
-	const float32 fScale = (float)uGroupWidth / 2048.0f;
-    const float32 fPartSize[] = { 60.0f, 180.0f, 400.0f, 1000.f };
-
-    for(uint32 i=0; i<CASCADE_COUNT; i++)  
-    {
-        m_fPartitions0To1[i] = fPartSize[i] * fScale;
-    }
-
-	m_fCascadePartitionsMax = fPartSize[CASCADE_COUNT-1];
-
-	// We copy the results from the depth target into this buffer for now (once MRTs are working might be able to do something smarter)
-
-    m_cascadeBuffer.InitArray(pDevice, uGroupHeight, uGroupHeight, CASCADE_COUNT, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
-	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
-	
-	Color color = Color(1.0f, 1.0f, 1.0f, 1.0f);
-    m_cascadeTarget.SetClearColor(color);
-
-	SamplerDecl samplerDecl(SF_LINEAR, SC_CLAMP);
-	samplerDecl.bEnableCmp = true;
-	samplerDecl.eCmpFnc = CF_LESS;
-	m_readDescriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(SceneConsts::g_shadowReadDescriptorDecl));
-	m_readDescriptor.SetConstantSet(0, &m_readConstants);
-	m_readDescriptor.SetImageSamplerPair(1, m_cascadeBuffer.GetTexture(), pDevice->GetSampler(samplerDecl));
-	m_readDescriptor.UpdateDescriptors(pDevice);
 }
 
 
@@ -165,18 +128,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
 
     ShadowReadConstants* readData = m_readConstants.Lock<ShadowReadConstants>();
 
-    Matrix4x4 texBias;
-    texBias.LoadIdentity();
-    texBias.M[0][0] = 0.5f;
-#ifdef PLATFORM_WIIU
-    texBias.M[1][1] = -0.5f;
-#else
-    texBias.M[1][1] = 0.5f;
-#endif
-    texBias.M[2][2] = 0.5f;
-    texBias.M[3][0] = 0.5f;
-    texBias.M[3][1] = 0.5f;
-    texBias.M[3][2] = 0.5f;
+	Matrix4x4 texBias = Matrix4x4::TextureBiasMatrix();
 	
     Matrix4x4 mInvView;
     sceneCam.GetViewMatrix().GetInverse(mInvView);
@@ -189,7 +141,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
 
 	float fBiasMul = 100.0f;
 
-    readData->vBias.Assign(-0.0000015f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
+    readData->vBias.Assign(-0.0000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
 	readData->vSampleRange.Assign(3.0f, 2.5f, 2.0f, 0.5f);
 
 	float fadeDistances[MAX_CASCADES];
@@ -202,14 +154,18 @@ void ShadowCascade::Update(const Camera& sceneCam)
     readData->vSplitDist.Assign(m_fPartitions0To1[0], m_fPartitions0To1[1], m_fPartitions0To1[2], m_fPartitions0To1[3]);
 	readData->vFadeSplitDist.Assign(fadeDistances[0], fadeDistances[1], fadeDistances[2], fadeDistances[3]);
 	readData->vInvFadeLength.Assign(invFadeRange[0], invFadeRange[1], invFadeRange[2], invFadeRange[3]);
-	readData->vInvShadowDim.Assign(1.f / (float)m_cascadeBuffer.GetWidth(), 1.f / (float)m_cascadeBuffer.GetHeight());
+	readData->vInvShadowDim.Assign(1.f / (float)m_pRenderTarget->GetWidth(), 1.f / (float)m_pRenderTarget->GetHeight());
 
+	m_readConstantsData = *readData;
     m_readConstants.Unlock();
 	
 }
 
 void ShadowCascade::GPUUpdate(GFXDevice* pDevice)
 {
+	if (!m_pRenderTarget)
+		return;
+
 	m_readConstants.UpdateData(pDevice);
 }
 
@@ -430,12 +386,15 @@ void ShadowCascade::InitFrame(const Camera& sceneCam)
 
 void ShadowCascade::CreateShadowTex(GFXContext* pContext)
 {
+	if (!m_pRenderTarget)
+		return;
+
     pContext->BeginGPUTag("Shadow");
 
 
 	for (uint32 i = 0; i < CASCADE_COUNT; ++i)
     {
-        pContext->SetRenderTargetLayer(&m_cascadeTarget, i, RenderTarget::CLEAR_FLAG_DEPTH);
+        pContext->SetRenderTargetLayer(m_pRenderTarget, m_uCascadeStartIndex + i);
 		DrawSceneFromLight(pContext, m_pSceneContext[i]);
         pContext->SetRenderTarget(NULL);
 	}
@@ -456,10 +415,5 @@ void ShadowCascade::DrawSceneFromLight(GFXContext* pGFXCtxt, ShadowContext* pSha
     
 }
 
-
-void ShadowCascade::PrepareRender(GFXContext* pContext) const
-{
-	pContext->SetDescriptorSet(&m_readDescriptor, 3);
-}
 
 }

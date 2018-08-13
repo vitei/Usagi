@@ -10,6 +10,10 @@
 #include "Engine/Core/Containers/List.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
+#ifdef DEBUG_BUILD
+#define USE_VK_DEBUG_EXTENSIONS
+#endif
+
 namespace usg {
 
 class AlphaState;
@@ -33,6 +37,7 @@ public:
 
 	void Begin();
 	void End();
+	float GetGPUTime() const { return m_fGPUTime; }
 	
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
@@ -46,11 +51,10 @@ public:
 	uint32 GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags properties, VkMemoryPropertyFlags prefferedProps = 0) const;
 	VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
 
-	VkShaderModule GetShaderFromStock(const U8String &name, VkShaderStageFlagBits shaderType);
-
 	void FinishedStaticLoad() {  }
 	void ClearDynamicResources() {  }
 	bool Is3DEnabled() const { return false; }
+	void WaitIdle();
 
 	// FIXME: Not yet used, should be used with allocations
 	VkAllocationCallbacks* GetAllocCallbacks() { return &m_allocCallbacks; }
@@ -58,6 +62,7 @@ public:
 	VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin);
 	void FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free);
 	VkQueue GetQueue() { return m_queue; }
+	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
 private:
 	void EnumerateDisplays();
@@ -65,7 +70,7 @@ private:
 	{
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
-		MAX_STOCK_SHADERS = 1000
+		CALLBACK_COUNT = 2
 	};
 
 	// FIXME: Refactor to use the resource manager when we stop supporting platforms that precompile into one unit
@@ -77,8 +82,13 @@ private:
 	};
 
 	GFXDevice*							m_pParent;
+	VkFence								m_drawFence;
 
+#ifdef USE_VK_DEBUG_EXTENSIONS
+	VkDebugReportCallbackEXT			m_callbacks[CALLBACK_COUNT];
+#endif
 	VkPhysicalDeviceMemoryProperties	m_memoryProperites[MAX_GPU_COUNT];
+	VkPhysicalDeviceProperties			m_deviceProperties[MAX_GPU_COUNT];
 	VkCommandPool						m_cmdPool;
 	VkDevice							m_vkDevice;
 	VkInstance							m_instance;
@@ -95,8 +105,7 @@ private:
 	DisplaySettings						m_diplayInfo[MAX_DISPLAY_COUNT];
 	uint32								m_uDisplayCount;
 
-	Shader		m_stockShaders[MAX_STOCK_SHADERS];
-	uint32		m_uStockCount;
+	float		m_fGPUTime;
 };
 
 }

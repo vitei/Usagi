@@ -46,9 +46,27 @@ static const ShaderConstantDecl g_pointLightConstsDecl[] =
 
 const DescriptorDeclaration g_pointLightDesc[] =
 {
-	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_ALL),
+	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM, DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC, 1, SHADER_FLAG_ALL),
 	DESCRIPTOR_END()
 };
+
+const DescriptorDeclaration g_pointLightShadowDesc[] =
+{
+	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM, DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC, 1, SHADER_FLAG_ALL),
+	DESCRIPTOR_ELEMENT(9, DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+	DESCRIPTOR_END()
+};
+
+const DescriptorDeclaration* PointLight::GetDescriptorDecl()
+{
+	return g_pointLightDesc;
+}
+
+const DescriptorDeclaration* PointLight::GetDescriptorDeclShadow()
+{
+	return g_pointLightShadowDesc;
+
+}
 
 PointLight::PointLight()
 :Light(LIGHT_TYPE_POS)
@@ -76,6 +94,18 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	{
 		m_pShadow = vnew(ALLOC_OBJECT) OmniShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
+
+		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		samp.bEnableCmp = true;
+		samp.eCmpFnc = CF_LESS;
+
+		desc = pDevice->GetDescriptorSetLayout(g_pointLightShadowDesc);
+		m_descriptorSetShadow.Init(pDevice, desc);
+		m_descriptorSetShadow.SetConstantSet(0, &m_constants);
+		m_descriptorSetShadow.SetImageSamplerPair(1, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
+		m_descriptorSetShadow.UpdateDescriptors(pDevice);
+
+
 	}
 
 	Light::Init(pDevice, pScene, bSupportsShadow);
@@ -86,6 +116,7 @@ void PointLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
 {
 	if (m_pShadow)
 	{
+		m_descriptorSetShadow.CleanUp(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		vdelete m_pShadow;
 		m_pShadow = nullptr;
@@ -93,6 +124,16 @@ void PointLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
 	m_constants.CleanUp(pDevice);
 	m_descriptorSet.CleanUp(pDevice);
 	Light::CleanUp(pDevice, pScene);
+}
+
+
+const DescriptorSet* PointLight::GetDescriptorSet(bool bWithShadow) const
+{
+	if (GetShadowEnabled() && bWithShadow)
+	{
+		return &m_descriptorSetShadow;
+	}
+	return &m_descriptorSet;
 }
 
 void PointLight::GPUUpdate(GFXDevice* pDevice)
@@ -132,15 +173,6 @@ void PointLight::ShadowRender(GFXContext* pContext)
 	{
 		m_pShadow->CreateShadowTex(pContext);
 	}
-}
-
-const DescriptorSet* PointLight::GetShadowDescriptorSet()
-{
-	if (m_pShadow)
-	{
-		return m_pShadow->GetDescriptorSet();
-	}
-	return nullptr;
 }
 
 bool PointLight::IsInRange(AABB& testBox)

@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Textures, TextureFormat_ps.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/RenderPassInitData.h"
 #include "Engine/Core/stl/vector.h"
@@ -28,10 +29,12 @@ namespace usg
 	{
 		VK_IMAGE_LAYOUT_UNDEFINED,						// LAYOUT_UNDEFINED = 0,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,		// LAYOUT_COLOR_ATTACHMENT,
-		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL// LAYOUT_DEPTH_STENCIL_ATTACHMENT
+		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,// LAYOUT_DEPTH_STENCIL_ATTACHMENT
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,		// LAYOUT_SHADER_READ_ONLY
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
 	};
 
-	VkAttachmentDescriptionFlags GetFlags(uint32 uFlags)
+	VkAttachmentDescriptionFlags GetAttachFlags(uint32 uFlags)
 	{
 		VkAttachmentDescriptionFlags flagsOut = 0;
 		if (uFlags & RenderPassDecl::AF_MEMORY_REUSE)
@@ -43,7 +46,45 @@ namespace usg
 	}
 
 
-void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
+	VkAccessFlags GetStageFlags(uint32 uFlags)
+	{
+		VkAttachmentDescriptionFlags flagsOut = 0;
+		if (uFlags & RenderPassDecl::SF_BOTTOM_OF_PIPE)
+		{
+			flagsOut |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		}
+		if (uFlags & RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT)
+		{
+			flagsOut |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+
+		return flagsOut;
+	}
+
+	VkAccessFlags GetAccessFlags(uint32 uFlags)
+	{
+		VkAttachmentDescriptionFlags flagsOut = 0;
+		if (uFlags & RenderPassDecl::AC_MEMORY_READ)
+		{
+			flagsOut |= VK_ACCESS_MEMORY_READ_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_COLOR_ATTACHMENT_READ)
+		{
+			flagsOut |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE)
+		{
+			flagsOut |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_SHADER_READ_BIT)
+		{
+			flagsOut |= VK_ACCESS_SHADER_READ_BIT;
+		}
+
+		return flagsOut;
+	}
+
+void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, uint32 uId)
 {
 	const RenderPassDecl& decl = initData.GetDecl();
 	// FIXME: Don't use std vector
@@ -59,10 +100,13 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
 	vector<VkAttachmentReference> references;
 	references.resize(initData.GetReferenceCount());
 
+	vector<VkSubpassDependency> dependencies;
+	dependencies.resize(decl.uDependencies);
+
 	for (uint32 i = 0; i < decl.uAttachments; i++)
 	{
 		const RenderPassDecl::Attachment& in = decl.pAttachments[i];
-		attachmentDescriptions[i].flags = GetFlags(in.uAttachFlags);
+		attachmentDescriptions[i].flags = GetAttachFlags(in.uAttachFlags);
 		switch (in.eAttachType)
 		{
 		case RenderPassDecl::ATTACH_COLOR:
@@ -85,11 +129,14 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
 
 	uint32 uPreserveOffset = 0;
 	uint32 uReferenceOffset = 0;
+
 	for (uint32 i = 0; i < decl.uSubPasses; i++)
 	{
 		const RenderPassDecl::SubPass& in = decl.pSubPasses[i];
 
+		// Colour
 		subpassDescriptions[i].pColorAttachments = in.uColorCount ? &references.data()[uReferenceOffset] : nullptr;
+		subpassDescriptions[i].colorAttachmentCount = in.uColorCount;
 		for (uint32 uAttach = 0; uAttach < in.uColorCount; uAttach++)
 		{
 			references[uReferenceOffset + uAttach].attachment = in.pColorAttachments[uAttach].uIndex;
@@ -97,7 +144,18 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
 		}
 		uReferenceOffset += in.uColorCount;
 
+		// Depth
+		if (in.pDepthAttachment)
+		{
+			references[uReferenceOffset].attachment = in.pDepthAttachment->uIndex;
+			references[uReferenceOffset].layout = g_layoutMap[in.pDepthAttachment->eLayout];
+			subpassDescriptions[i].pDepthStencilAttachment = &references.data()[uReferenceOffset];
+			uReferenceOffset++;
+		}
+
+		// Input
 		subpassDescriptions[i].pInputAttachments = in.uInputCount ? &references.data()[uReferenceOffset] : nullptr;
+		subpassDescriptions[i].inputAttachmentCount = in.uInputCount;
 		for (uint32 uAttach = 0; uAttach < in.uInputCount; uAttach++)
 		{
 			references[uReferenceOffset + uAttach].attachment = in.pInputAttachments[uAttach].uIndex;
@@ -105,15 +163,22 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
 		}
 		uReferenceOffset += in.uInputCount;
 
-		subpassDescriptions[i].pResolveAttachments = in.uResolveCount ? &references.data()[uReferenceOffset] : nullptr;
-		for (uint32 uAttach = 0; uAttach < in.uResolveCount; uAttach++)
+		// Resolve
+		subpassDescriptions[i].pResolveAttachments = in.pResolveAttachments ? &references.data()[uReferenceOffset] : nullptr;
+		if (in.pResolveAttachments)
 		{
-			references[uReferenceOffset + uAttach].attachment = in.pResolveAttachments[uAttach].uIndex;
-			references[uReferenceOffset + uAttach].layout = g_layoutMap[in.pResolveAttachments[uAttach].eLayout];
+			for (uint32 uAttach = 0; uAttach < in.uColorCount; uAttach++)
+			{
+				references[uReferenceOffset + uAttach].attachment = in.pResolveAttachments[uAttach].uIndex;
+				references[uReferenceOffset + uAttach].layout = g_layoutMap[in.pResolveAttachments[uAttach].eLayout];
+			}
+			uReferenceOffset += in.uColorCount;
 		}
-		uReferenceOffset += in.uResolveCount;
 
+
+		// Preserve
 		subpassDescriptions[i].pPreserveAttachments = in.uPreserveCount ? &preserve.data()[uPreserveOffset] : nullptr;
+		subpassDescriptions[i].preserveAttachmentCount = in.uPreserveCount;
 		for (uint32 uAttach = 0; uAttach < in.uPreserveCount; uAttach++)
 		{
 			preserve[uPreserveOffset + uAttach] = in.puPreserveIndices[uAttach];
@@ -128,12 +193,29 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData)
 	renderPassInfo.pAttachments = attachmentDescriptions.data();
 	renderPassInfo.subpassCount = static_cast<uint32_t>(subpassDescriptions.size());
 	renderPassInfo.pSubpasses = subpassDescriptions.data();
-	
-	// TODO: Implement dependencies
-	renderPassInfo.dependencyCount = 0;
-	renderPassInfo.pDependencies = nullptr;
 
-	vkCreateRenderPass(pDevice->GetPlatform().GetVKDevice(), &renderPassInfo, pDevice->GetPlatform().GetAllocCallbacks(), &m_renderPass);
+
+	// Don't forget the render passes! :)
+	ASSERT(renderPassInfo.subpassCount > 0);
+	
+	for (uint32 i = 0; i < decl.uDependencies; i++)
+	{
+		const RenderPassDecl::Dependency& in = decl.pDependencies[i];
+
+		dependencies[i].srcSubpass = in.uSrcSubPass == RenderPassDecl::SUBPASS_EXTERNAL ? VK_SUBPASS_EXTERNAL : in.uSrcSubPass;
+		dependencies[i].dstSubpass = in.uDstSubPass == RenderPassDecl::SUBPASS_EXTERNAL ? VK_SUBPASS_EXTERNAL : in.uDstSubPass;
+		dependencies[i].srcAccessMask = GetAccessFlags(in.uSrcAccessFlags);
+		dependencies[i].dstAccessMask = GetAccessFlags(in.uDstAccessFlags);
+		dependencies[i].srcStageMask = GetStageFlags(in.uSrcStageFlags);
+		dependencies[i].dstStageMask = GetStageFlags(in.uDstStageFlags);
+		dependencies[i].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	}
+	renderPassInfo.dependencyCount = decl.uDependencies;
+	renderPassInfo.pDependencies = dependencies.data();
+	
+
+	VkResult res = vkCreateRenderPass(pDevice->GetPlatform().GetVKDevice(), &renderPassInfo, nullptr, &m_renderPass);
+	ASSERT(res == VK_SUCCESS);
 }
 
 

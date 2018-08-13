@@ -57,7 +57,6 @@ namespace usg
 		);
 
 		PipelineStateDecl pipelineState;
-		pipelineState.renderPass = renderPass;
 		pipelineState.inputBindings[0].Init(g_textVertDecl);
 		pipelineState.uInputBindingCount = 1;
 		pipelineState.ePrimType = PT_POINTS;
@@ -74,13 +73,13 @@ namespace usg
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "DistanceFieldText");
-		m_pipeline = pDevice->GetPipelineState(pipelineState);
+		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.DistanceField");
+		m_pipeline = pDevice->GetPipelineState(renderPass, pipelineState);
 		dsDecl.bDepthEnable = true;
 		dsDecl.eDepthFunc = DEPTH_TEST_LESS;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text3D");
+		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.Text3D");
 		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
-		m_pipeline3D = pDevice->GetPipelineState(pipelineState);
+		m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
 		
 		m_bufferValid = true;
 	}
@@ -130,7 +129,7 @@ namespace usg
 			FontHndl font = m_pParent->GetFont();
 			const DescriptorSet& desc = font->GetDescriptor();
 
-			pContext->SetDescriptorSet(&desc, 0);
+			pContext->SetDescriptorSet(&desc, 1);
 			pContext->SetVertexBuffer(&m_charVerts);
 			pContext->DrawImmediate(m_uCharCount);
 

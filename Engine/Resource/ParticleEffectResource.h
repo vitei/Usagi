@@ -9,7 +9,6 @@
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/ResourcePak.pb.h"
 #include "Engine/Core/String/U8String.h"
 
 namespace usg{
@@ -23,7 +22,6 @@ public:
     virtual ~ParticleEffectResource();
 
 	bool Load(const char* szFileName);
-	bool Load(GFXDevice* pDevice, const ParticleEffectPak& pak, const void* pData, const char* szPackPath);
 
 	const particles::EffectGroup& GetEffectGroup() const { return m_definition; }
 	uint32 GetEmitterCount() const { return m_definition.emitters_count; }

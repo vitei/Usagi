@@ -6,6 +6,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
+#include "Engine/Resource/ResourceDecl.h"
 #include API_HEADER(Engine/Graphics/Textures, ColorBuffer_ps.h)
 
 namespace usg {
@@ -16,14 +17,6 @@ public:
 	ColorBuffer();
 	~ColorBuffer();
 
-	enum InitFlags
-	{
-		FLAG_NONE				= 0,
-		FLAG_FINAL_TARGET		= (1<<0),
-		FLAG_FAST_MEM			= (1<<1),
-		FLAG_READ_AS_TEXTURE	= (1<<4)
-	};
-
 	enum Type
 	{
 		TYPE_2D = 0,
@@ -33,8 +26,8 @@ public:
 		TYPE_FORCE_ENUM_SIZE = 0xFFFFFFFF
 	};
 
-	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = FLAG_NONE, uint32 uRTLoc = 0, uint32 uMipCount=1);
-	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = FLAG_NONE);
+	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_OFFSCREEN_COLOR, uint32 uRTLoc = 0, uint32 uMipCount=1);
+	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_OFFSCREEN_COLOR);
 	void CleanUp(GFXDevice* pDevice);
 
 	void			Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);

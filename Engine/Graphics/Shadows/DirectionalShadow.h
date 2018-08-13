@@ -19,12 +19,10 @@ public:
 	DirectionalShadow() {}
 	~DirectionalShadow() {}
 
-	virtual void Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight, uint32 uTexWidth, uint32 uTexHeight) = 0;
+	virtual void Init(GFXDevice* pDevice, Scene* pScene, const DirLight* pLight) = 0;
 	virtual void Update(const Camera &sceneCam) = 0;
 	virtual void CreateShadowTex(GFXContext* pContext) = 0;
 	virtual void Finished(GFXContext* pContext) = 0;
-
-	virtual void PrepareRender(GFXContext* pContext) const = 0;
 
 private:
 

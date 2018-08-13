@@ -33,6 +33,7 @@ static const usg::DescriptorDeclaration g_descriptorDeclFade[] =
 SkyFog::SkyFog(void)
 {
 	m_bValid = false;
+	SetLayer(RenderNode::LAYER_SKY);
 }
 
 SkyFog::~SkyFog(void)
@@ -51,7 +52,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	pipeline.renderPass = pSys->GetRenderPass();
+	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
@@ -95,10 +96,10 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 
 	//alphaDecl.SetColor0Only();
 	alphaDecl.bBlendEnable = true;
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "FogSphere");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FogSphere");
 
 	Material &mat = m_materialFade;
-	mat.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptorsFade);
+	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
 
 	SamplerDecl sampDecl(SF_LINEAR, SC_CLAMP);	
 	sampDecl.eMipFilter = MF_POINT;
@@ -108,14 +109,12 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	SamplerHndl point = pDevice->GetSampler(sampDecl);
 
 	Material &mat2 = m_materialNoFade;
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "FogSphereFar");
+	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.FogSphereFar");
 	pipeline.layout.descriptorSets[1] = matDescriptors;
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
 	alphaDecl.bBlendEnable = false;
-	mat2.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
-
-	SetLayer(RenderNode::LAYER_SKY);
+	mat2.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
 	SamplerDecl depthSamp(SF_POINT, SC_WRAP);
@@ -136,7 +135,12 @@ void SkyFog::CleanUp(GFXDevice* pDevice)
 
 void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
-	m_pDestTarget = pDst;
+	if (pDst != m_pDestTarget)
+	{
+		m_pDestTarget = pDst;
+		m_materialFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+		m_materialNoFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+	}
 }
 
 void SkyFog::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -325,7 +329,8 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	pContext->BeginGPUTag("Sky");
 
-	pContext->SetRenderTarget(m_pDestTarget);
+	// Setting the destination target now handled outside
+	//pContext->SetRenderTarget(m_pDestTarget);
 	m_materialFade.Apply(pContext);
 	pContext->SetVertexBuffer(&m_vertexBuffer);
 	pContext->DrawIndexed(&m_indexBuffer);

@@ -52,6 +52,16 @@ const DescriptorDeclaration g_projLightShadowDescDecl[] =
 };
 
 
+const DescriptorDeclaration* ProjectionLight::GetDescriptorDecl()
+{
+	return g_projLightDescDesc;
+}
+
+const DescriptorDeclaration* ProjectionLight::GetDescriptorDeclShadow()
+{
+	return g_projLightShadowDescDecl;
+}
+
 ProjectionLight::ProjectionLight()
 :Light(LIGHT_TYPE_PROJ)
 {
@@ -219,9 +229,9 @@ void ProjectionLight::RegenerateInternals()
 	m_bDirty = true;
 }
 
-const DescriptorSet* ProjectionLight::GetDescriptorSet() const
+const DescriptorSet* ProjectionLight::GetDescriptorSet(bool bWithShadow) const
 {
-	if (GetShadowEnabled())
+	if (GetShadowEnabled() && bWithShadow)
 	{
 		return &m_descriptorSetShadow;
 	}

@@ -2,9 +2,9 @@
 #define _LIGHTING_BUFFER_INC
 
 #define MAX_LIGHTS 8
+#define MAX_CASCADE_SETS 2
 
-// 8 should be enough to handle all of the active LUTs
-SAMPLER_LOC(1, 9) uniform sampler2D lightLUT[6];
+SAMPLER_LOC(0, 15) uniform sampler2DArrayShadow sampler15;	// Shadow cascades
 
 // Structures are passed by value so confine this to as small a size as possible
 // Forward shaded point/ spot lights should be avoided in general
@@ -23,7 +23,7 @@ struct Light
 
 
 // All lights (the lights needed for forward shading are always set)
-BUFFER_LAYOUT(1, UBO_LIGHTING_ID) uniform Lighting
+BUFFER_LAYOUT(0, UBO_LIGHTING_ID) uniform Lighting
 {
 	// Will always be dirlights then point lights
 	int 		iDirLightCount;
@@ -32,6 +32,7 @@ BUFFER_LAYOUT(1, UBO_LIGHTING_ID) uniform Lighting
 	int 		iSpotLightCount;
 	vec4		vAmbientLight;
 	Light 		lights[MAX_LIGHTS];
+	Cascade 	cascades[MAX_CASCADE_SETS];
 };
 
 

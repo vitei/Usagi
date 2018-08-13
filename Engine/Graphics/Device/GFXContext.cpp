@@ -9,7 +9,9 @@
 #include "Engine/Graphics/Effects/InputBinding.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Device/DescriptorSet.h"
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
+#include API_HEADER(Engine/Graphics/Device, PipelineLayout.h)
 #include "GFXDevice.h"
 #include "GFXContext.h"
 
@@ -109,11 +111,15 @@ void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewpor
 
 void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 {
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+	}
 	m_platform.RenderToDisplay(pDisplay, uClearFlags);
 	m_pActiveRT = nullptr;
 }
 
-void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uint32 uClearFlags)
+void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 {
 	bool bHadDS = false;
 	if(m_pActiveRT)
@@ -130,7 +136,7 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uin
 		{
 			bool bHasDS = pTarget->GetDepthStencilBuffer()!=NULL;
 
-			m_platform.SetRenderTargetLayer(pTarget, uLayer, 0);
+			m_platform.SetRenderTargetLayer(pTarget, uLayer);
 			m_pActiveRT = pTarget;
 
 			
@@ -142,10 +148,6 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer,  uin
 		}
 
 		ApplyViewport(pTarget->GetViewport());
-		if (uClearFlags)
-		{
-			m_platform.ClearRenderTarget(pTarget, uClearFlags);
-		}
 	}
 }
 
@@ -158,10 +160,17 @@ void GFXContext::End()
 	m_platform.End();
 }
 
+void GFXContext::InvalidatePipelineOnly()
+{
+	m_activeStateGroup.Invalidate();
+}
+
 void GFXContext::InvalidateStates()
 {
 	m_pActiveBinding = NULL;
 	m_activeStateGroup.Invalidate();
+
+	m_uDirtyDescSetFlags = 0xFFFFFFFF;
 
 	/*for(uint32 uConstant = 0; uConstant < SHADER_CONSTANT_COUNT; uConstant++ )
 	{
@@ -185,6 +194,11 @@ void GFXContext::InvalidateStates()
 
 void GFXContext::Transfer(RenderTarget* pTarget, Display* pDisplay)
 {
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+		m_pActiveRT = nullptr;
+	}
 	BeginGPUTag("Transfer");
 	m_platform.Transfer(pTarget, pDisplay);
 	EndGPUTag();
@@ -193,6 +207,11 @@ void GFXContext::Transfer(RenderTarget* pTarget, Display* pDisplay)
 
 void GFXContext::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+		m_pActiveRT = nullptr;
+	}
 	BeginGPUTag("TransferRect");
 	m_platform.TransferRect(pTarget, pDisplay, srcBounds, dstBounds);
 	EndGPUTag();
@@ -207,22 +226,56 @@ void GFXContext::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pD
 
 void GFXContext::SetPipelineState(PipelineStateHndl hndl)
 {
-#ifndef DISABLE_STATE_SHADOWING
+#if !DISABLE_STATE_SHADOWING
 	if (m_activeStateGroup != hndl)
 #endif
 	{
 		PipelineState& group = *(hndl.GetContents());
 
+#ifdef CONFIRM_PIPELINE_VALIDITY
+		if (GetActiveRenderTarget() && (hndl.GetContents()->GetRenderPass() != GetActiveRenderTarget()->GetRenderPass()))
+		{
+			WARNING("The render pass is not that which was promised\n");
+		}
+#endif
+
 		m_platform.SetPipelineState(hndl, m_activeStateGroup);
 		m_activeStateGroup = hndl;
 		m_pActiveBinding = group.GetInputBindingInt();
+		m_uDirtyDescSetFlags = 0xFFFFFFFF;
 	}
 	//m_platform.SetBlendColor(group.GetBlendColor());
 }
 
+void GFXContext::ValidateDescriptors()
+{
+#if CONFIRM_PIPELINE_VALIDITY
+	PipelineLayout* layout = m_activeStateGroup.GetContents()->GetPipelineLayoutHndl().GetContents();
+
+	for (uint32 i = 0; i < layout->GetDecl().uDescriptorSetCount; i++)
+	{
+		if (!m_pActiveDescSets[i] || layout->GetDecl().descriptorSets[i] != m_pActiveDescSets[i]->GetLayoutHndl())
+		{
+			if (m_pActiveDescSets[i] && m_pActiveDescSets[i]->GetValid())
+			{
+				WARNING("Incompatailable descriptor set bound at slot %u\n", i);
+			}
+			else
+			{
+				WARNING("Missing descriptor set at slot %u\n", i);
+			}
+		}
+		if (m_pActiveDescSets[i] && !m_pActiveDescSets[i]->IsUptoDate())
+		{
+			WARNING("Out of date descriptor set at slot %u\n", i);
+		}
+	}
+#endif
+}
+
 void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 {
-#ifdef DEBUG_BUILD
+#if CONFIRM_GFX_CMD_VALIDITY
 	bool bValid = false;
 	for (int i = 0; i < MAX_VERTEX_BUFFERS; i++)
 	{
@@ -234,12 +287,26 @@ void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 	}
 	ASSERT(bValid);
 #endif
+	if (m_uDirtyDescSetFlags)
+	{
+#if CONFIRM_PIPELINE_VALIDITY
+		ValidateDescriptors();
+#endif
+		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
+	}
 	m_platform.DrawImmediate(uCount, uOffset);
 }
 
 
 void GFXContext::DrawIndexed(const IndexBuffer* pBuffer)
 {
+	if (m_uDirtyDescSetFlags)
+	{
+#if CONFIRM_PIPELINE_VALIDITY
+		ValidateDescriptors();
+#endif
+		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
+	}
 	m_platform.DrawIndexed(pBuffer, 0, pBuffer->GetIndexCount(), 1);
 }
 

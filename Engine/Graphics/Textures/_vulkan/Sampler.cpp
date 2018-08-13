@@ -3,6 +3,7 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Textures, Sampler.h)
 
 namespace usg {
@@ -62,15 +63,14 @@ Sampler::~Sampler()
 
 }
 
-void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl)
+void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 {
 	VkResult err;
 
 	VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
 	//const VkAllocationCallbacks* pAllocCB = pDevice->GetPlatform().GetVKAllocCB();
 
-	VkSamplerCreateInfo createInfo;
-
+	VkSamplerCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
     createInfo.pNext = NULL,
 	createInfo.magFilter = g_filterMap[decl.eFilterMag];
@@ -82,6 +82,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl)
 	createInfo.mipLodBias = decl.LodBias;
 	createInfo.anisotropyEnable = decl.eAnisoLevel != SamplerDecl::ANISO_LEVEL_1;
 	createInfo.maxAnisotropy = g_anisoLevel[decl.eAnisoLevel];
+	createInfo.compareEnable = decl.bEnableCmp;
 	createInfo.compareOp = decl.bEnableCmp ? g_cmpFuncMap[decl.eCmpFnc] : VK_COMPARE_OP_NEVER;
 	createInfo.minLod = (float)decl.LodMinLevel;
 	createInfo.maxLod = 0.0f;

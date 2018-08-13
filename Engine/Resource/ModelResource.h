@@ -31,7 +31,7 @@ public:
 	ModelResource();
 	virtual ~ModelResource();
 
-	bool Load( GFXDevice* pDevice, const char* szFileName, const vector<RenderPassHndl>& renderPasses, bool bInstance, bool bFastMem );
+	bool Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem );
 	void CleanUp(GFXDevice* pDevice);
 	uint32 GetMeshCount() const { return m_uMeshCount; }
 	const Mesh* GetMesh(uint32 uMesh) const;
@@ -45,7 +45,7 @@ public:
 	const SkeletonResource* GetDefaultSkeleton() const {  return &m_defaultSkeleton; }
 
 	static uint32 GetInstanceDecl();
-	static void GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
+	static uint32 GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
 	static uint32 GetBoneIndexCount(const usg::exchange::Shape* pShape);
 	static bool HasAttribute(const usg::exchange::VertexStreamInfo* pInfo, exchange::VertexAttribute attrib, uint32 uCount);
 	static void GetSingleAttributeDecl( usg::exchange::VertexAttribute attr, uint32 uCount, VertexElement element[2] );
@@ -55,10 +55,10 @@ public:
 	const usg::vector<uint32>& GetSmoothBoneIndices() const { return m_smoothBoneIndices; }
 private:
 
-	void SetupMeshes(const U8String & modelDir, GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, uint8* p, bool bFastMem );
-	void SetupMesh(const U8String & modelDir, GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );
+	void SetupMeshes(const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
+	void SetupMesh(const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );
 	void SetupSkeleton( uint8* p );
-	void CreateDepthPassMaterial(GFXDevice* pDevice, const vector<RenderPassHndl>& renderPasses, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
+	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
 
 	SkeletonResource		m_defaultSkeleton;

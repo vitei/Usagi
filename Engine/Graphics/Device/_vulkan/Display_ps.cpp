@@ -5,7 +5,11 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Core/_win/WinUtil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/GFX.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include "Engine/Core/stl/vector.h"
 
 extern bool	 g_bFullScreen;
@@ -24,21 +28,50 @@ Display_ps::Display_ps()
 	m_swapChain = VK_NULL_HANDLE;
 	m_uActiveImage = 0;
 	m_uSwapChainImageCount = 0;
+	m_bWindowResized = false;
+}
+
+
+void Display_ps::DestroySwapChain(GFXDevice* pDevice)
+{
+	if (m_swapChain != VK_NULL_HANDLE)
+	{
+		for (uint32 i = 0; i < m_uSwapChainImageCount; i++)
+		{
+			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffers[i], nullptr);
+			m_pFramebuffers[i] = VK_NULL_HANDLE;
+		}
+
+		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
+		{
+			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pSwapchainImageViews[i], nullptr);
+			m_pSwapchainImageViews[i] = VK_NULL_HANDLE;
+		}
+
+
+		vdelete[] m_pSwapchainImages;
+		vdelete[] m_pSwapchainImageViews;
+		vdelete[] m_pFramebuffers;
+
+		vkDestroySwapchainKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, nullptr);
+		m_swapChain = VK_NULL_HANDLE;
+
+		m_uSwapChainImageCount = 0;
+	}
 }
 
 void Display_ps::CleanUp(usg::GFXDevice* pDevice)
 {
 	if (m_swapChain != VK_NULL_HANDLE)
 	{
-		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
-		{
-			// FIXME: Move to cleanup function
-			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pSwapchainImageViews[i], pDevice->GetPlatform().GetAllocCallbacks());
-		}
-		vdelete[] m_pSwapchainImages;
-		vdelete[] m_pSwapchainImageViews;
+		DestroySwapChain(pDevice);
 	}
-	m_uSwapChainImageCount = 0;
+
+	if (m_surface != VK_NULL_HANDLE)
+	{
+		vkDestroySurfaceKHR(pDevice->GetPlatform().GetVKInstance(), m_surface, nullptr);
+		m_surface = VK_NULL_HANDLE;
+	}
 }
 
 Display_ps::~Display_ps()
@@ -59,10 +92,16 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	RECT dim;
 	GetClientRect(hndl, &dim);
+	m_uWidth = m_uHeight = 0;
 
-	m_uWidth = dim.right - dim.left;
-	m_uHeight = dim.bottom - dim.top;
-
+	// Sometimes the window is getting minimized AS I'm creating it
+	while (m_uWidth == 0 || m_uHeight == 0)
+	{
+		GetClientRect(m_hwnd, &dim);
+		m_uWidth = dim.right - dim.left;
+		m_uHeight = dim.bottom - dim.top;
+		::Sleep(8);
+	}
 
 	VkResult res;
 
@@ -72,17 +111,77 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	createInfo.pNext = NULL;
 	createInfo.hinstance = WINUTIL::GetInstanceHndl();
 	createInfo.hwnd = m_hwnd;
-	res = vkCreateWin32SurfaceKHR(devicePS.GetVKInstance(), &createInfo, devicePS.GetAllocCallbacks(), &m_surface);
+	res = vkCreateWin32SurfaceKHR(devicePS.GetVKInstance(), &createInfo, nullptr, &m_surface);
 	// END PC SPECIFIC CODE
 
 	ASSERT(res == VK_SUCCESS);
+
+	
+
+	CreateSwapChain(pDevice);
+	CreateSwapChainImageViews(pDevice);
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphoreCreateInfo.pNext = NULL;
+	semaphoreCreateInfo.flags = 0;
+
+	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_imageAcquired);
+	ASSERT(res == VK_SUCCESS);
+
+	usg::RenderPassDecl rpDecl;
+	usg::RenderPassDecl::Attachment attach;
+	usg::RenderPassDecl::SubPass subPass;
+	usg::RenderPassDecl::AttachmentReference ref;
+	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
+	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
+
+	usg::RenderPassDecl::Dependency Dependencies[2];
+	Dependencies[0].uSrcSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[0].uDstSubPass = 0;
+	Dependencies[0].uSrcStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[0].uDstStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[0].uSrcAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+	Dependencies[0].uDstAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+
+	Dependencies[1].uSrcSubPass = 0;
+	Dependencies[1].uDstSubPass = usg::RenderPassDecl::SUBPASS_EXTERNAL;
+	Dependencies[1].uSrcStageFlags = usg::RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT;
+	Dependencies[1].uDstStageFlags = usg::RenderPassDecl::SF_BOTTOM_OF_PIPE;
+	Dependencies[1].uSrcAccessFlags = usg::RenderPassDecl::AC_COLOR_ATTACHMENT_READ | usg::RenderPassDecl::AC_COLOR_ATTACHMENT_WRITE;
+	Dependencies[1].uDstAccessFlags = usg::RenderPassDecl::AC_MEMORY_READ;
+
+
+	subPass.uColorCount = 1;
+	subPass.pColorAttachments = &ref;
+	ref.uIndex = 0;
+
+	subPass.pColorAttachments = &ref;
+	subPass.uColorCount = 1;
+	rpDecl.pAttachments = &attach;
+	rpDecl.uAttachments = 1;
+	rpDecl.uSubPasses = 1;
+	rpDecl.pSubPasses = &subPass;
+	attach.format.eColor = CF_RGBA_8888;	// FIXME: Match the true format
+	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
+
+	InitFrameBuffers(pDevice);
+}
+
+void Display_ps::CreateSwapChain(GFXDevice* pDevice)
+{
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
 	// Iterate over each queue to learn whether it supports presenting:
 	vector<VkBool32> supportsPresent;
 	supportsPresent.resize(devicePS.GetQueueFamilyCount());
 	for (uint32_t i = 0; i < devicePS.GetQueueFamilyCount(); i++)
 	{
-		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface,	&supportsPresent[i]);
+		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface, &supportsPresent[i]);
 	}
 
 	// Search for a graphics queue and a present queue in the array of queue
@@ -111,7 +210,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	// Get the list of VkFormats that are supported:
 	uint32_t formatCount;
-	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
+	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
 	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, surfFormats);
@@ -136,7 +235,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	ASSERT(res == VK_SUCCESS);
 
 	uint32_t presentModeCount;
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface,	&presentModeCount, NULL);
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	vector<VkPresentModeKHR> presentModes;
 	presentModes.resize(presentModeCount);
@@ -164,6 +263,8 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	// and is fastest (though it tears).  If not, fall back to FIFO which is
 	// always available.
 	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
+#if 0
 	for (size_t i = 0; i < presentModeCount; i++)
 	{
 		if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -176,12 +277,13 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 			swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 		}
 	}
+#endif
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to
 	// own only 1 image at a time, besides the images being displayed and
 	// queued for display):
 	uint32_t desiredNumberOfSwapChainImages = surfCapabilities.minImageCount + 1;
-	if ((surfCapabilities.maxImageCount > 0) &&	(desiredNumberOfSwapChainImages > surfCapabilities.maxImageCount))
+	if ((surfCapabilities.maxImageCount > 0) && (desiredNumberOfSwapChainImages > surfCapabilities.maxImageCount))
 	{
 		// Application must settle for fewer images than desired:
 		desiredNumberOfSwapChainImages = surfCapabilities.maxImageCount;
@@ -212,12 +314,12 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	swap_chain.oldSwapchain = NULL;
 	swap_chain.clipped = true;
 	swap_chain.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	swap_chain.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swap_chain.queueFamilyIndexCount = 0;
 	swap_chain.pQueueFamilyIndices = NULL;
 
-	res = vkCreateSwapchainKHR(devicePS.GetVKDevice(), &swap_chain, devicePS.GetAllocCallbacks(), &m_swapChain);
+	res = vkCreateSwapchainKHR(devicePS.GetVKDevice(), &swap_chain, nullptr, &m_swapChain);
 	ASSERT(res == VK_SUCCESS);
 
 	// Get the 
@@ -225,17 +327,21 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	m_pSwapchainImages = vnew(ALLOC_GFX_RENDER_TARGET) VkImage[m_uSwapChainImageCount];
 	m_pSwapchainImageViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_uSwapChainImageCount];
-	ASSERT(m_pSwapchainImages!=NULL);
+	ASSERT(m_pSwapchainImages != NULL);
 	res = vkGetSwapchainImagesKHR(devicePS.GetVKDevice(), m_swapChain, &m_uSwapChainImageCount, m_pSwapchainImages);
 	ASSERT(res == VK_SUCCESS);
 
+	m_swapChainImageFormat = eFormat;
+}
 
+void Display_ps::CreateSwapChainImageViews(GFXDevice* pDevice)
+{
 	for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
 	{
 		VkImageViewCreateInfo color_image_view = {};
 		color_image_view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		color_image_view.pNext = NULL;
-		color_image_view.format = eFormat;
+		color_image_view.format = m_swapChainImageFormat;
 		color_image_view.components.r = VK_COMPONENT_SWIZZLE_R;
 		color_image_view.components.g = VK_COMPONENT_SWIZZLE_G;
 		color_image_view.components.b = VK_COMPONENT_SWIZZLE_B;
@@ -250,57 +356,119 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 		color_image_view.image = m_pSwapchainImages[i];
 
-		res = vkCreateImageView(devicePS.GetVKDevice(), &color_image_view, devicePS.GetAllocCallbacks(), &m_pSwapchainImageViews[i]);
+		VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &color_image_view, nullptr, &m_pSwapchainImageViews[i]);
 		ASSERT(res == VK_SUCCESS);
 	}
-
-	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	semaphoreCreateInfo.pNext = NULL;
-	semaphoreCreateInfo.flags = 0;
-
-	res = vkCreateSemaphore(devicePS.GetVKDevice(), &semaphoreCreateInfo, nullptr, &m_presentComplete);
-	ASSERT(res == VK_SUCCESS);
 }
 
-void Display_ps::Use(usg::GFXDevice* pDevice)
+void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 {
-	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_presentComplete, (VkFence)nullptr, &m_uActiveImage);
+	VkRenderPassBeginInfo rp_begin;
+	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	rp_begin.pNext = NULL;
+	rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
+	rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	rp_begin.renderArea.offset.x = 0;
+	rp_begin.renderArea.offset.y = 0;
+	rp_begin.renderArea.extent.width = m_uWidth;
+	rp_begin.renderArea.extent.height = m_uHeight;
+	rp_begin.clearValueCount = 0;
+	rp_begin.pClearValues = nullptr;
+
+	vkCmdBeginRenderPass(cmd, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+
+	
+	VkViewport viewport;
+	viewport.height = (float)m_uHeight;
+	viewport.width = (float)m_uWidth;
+	viewport.minDepth = (float)0.0f;
+	viewport.maxDepth = (float)1.0f;
+	viewport.x = 0;
+	viewport.y = 0;
+	vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+	VkRect2D scissor;
+	scissor.extent.width = m_uWidth;
+	scissor.extent.height = m_uHeight;
+	scissor.offset.x = 0;
+	scissor.offset.y = 0;
+	vkCmdSetScissor(cmd, 0, 1, &scissor);
+
 }
 
+void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
+{
+	VkResult res;
+	VkImageView attachments[2];
+
+	VkFramebufferCreateInfo fb_info = {};
+	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	fb_info.pNext = NULL;
+	fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
+	fb_info.attachmentCount = 1;
+	fb_info.pAttachments = attachments;
+	fb_info.width = m_uWidth;
+	fb_info.height = m_uHeight;
+	fb_info.layers = 1;
+
+	uint32_t i;
+
+	m_pFramebuffers = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
+	for (i = 0; i < m_uSwapChainImageCount; i++)
+	{
+		attachments[0] = m_pSwapchainImageViews[i];
+		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffers[i]);
+		ASSERT(res == VK_SUCCESS);
+	}
+}
 
 void Display_ps::Transfer(GFXContext* pContext, RenderTarget* pTarget)
 {
-	TransferRect(pContext, pTarget, 0, 0, m_uWidth, m_uHeight);
+	GFXBounds bounds = { 0, 0, (sint32)m_uWidth, (sint32)m_uHeight };
+	TransferRect(pContext, pTarget, bounds, bounds);
 }
 
-void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, uint32 uX, uint32 uY, uint32 uWidth, uint32 uHeight)
+void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds)
 {
-	VkImageCopy ic = {};
+	// Currently don't support different bounds
+	ASSERT(dstBounds.height == srcBounds.height);
+	ASSERT(dstBounds.width == srcBounds.width);
+
+	VkImageBlit ic = {};
 	ic.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.srcSubresource.mipLevel = 0;
 	ic.srcSubresource.baseArrayLayer = 0;
 	ic.srcSubresource.layerCount = 1;
-	ic.srcOffset.x = 0;
-	ic.srcOffset.y = 0;
-	ic.srcOffset.z = 0;
+	ic.srcOffsets[0].x = srcBounds.x;
+	ic.srcOffsets[0].y = srcBounds.y;
+	ic.srcOffsets[1].x = srcBounds.x + srcBounds.width;
+	ic.srcOffsets[1].y = srcBounds.y + srcBounds.height;
+	ic.srcOffsets[1].z = 1;
 	ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.dstSubresource.mipLevel = 0;
 	ic.dstSubresource.baseArrayLayer = 0;
 	ic.dstSubresource.layerCount = 1;
-	ic.dstOffset.x = 0;
-	ic.dstOffset.y = 0;
-	ic.dstOffset.z = 0;
-	ic.extent.width = m_uWidth;
-	ic.extent.height = m_uHeight;
-	ic.extent.depth = 1;
+	ic.dstOffsets[0].x = dstBounds.x;
+	ic.dstOffsets[0].y = dstBounds.y;
+	ic.dstOffsets[1].x = dstBounds.x + dstBounds.width;
+	ic.dstOffsets[1].y = dstBounds.y + dstBounds.height;
+	ic.dstOffsets[1].z = 1;
+
+	VkImageSubresourceRange subresourceRange{};
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+	subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
-	vkCmdCopyImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic);
+	VkFilter filter = srcBounds.width == dstBounds.width ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+	vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
-	pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
+	//pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	//pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 
@@ -328,25 +496,84 @@ void Display_ps::Present()
 
 void Display_ps::SwapBuffers(GFXDevice* pDevice)
 {
-
-	VkPresentInfoKHR presentInfo = {};
-	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.pNext = NULL;
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = &m_swapChain;
-	presentInfo.pImageIndices = &m_uActiveImage;
-	// Check if a wait semaphore has been specified to wait for before presenting the image
-	if (m_presentComplete != VK_NULL_HANDLE)
+	static bool bFirst = true;
+	if (!bFirst)
 	{
-		presentInfo.pWaitSemaphores = &m_presentComplete;
-		presentInfo.waitSemaphoreCount = 1;
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = NULL;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &m_swapChain;
+		presentInfo.pImageIndices = &m_uActiveImage;
+		// Check if a wait semaphore has been specified to wait for before presenting the image
+	/*	if (m_presentComplete != VK_NULL_HANDLE)
+		{
+			presentInfo.pWaitSemaphores = &m_presentComplete;
+			presentInfo.waitSemaphoreCount = 1;
+		}*/
+		VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
+		if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR || m_bWindowResized)
+		{
+			RecreateSwapChain(pDevice);
+		}
 	}
-	VkResult res = vkQueuePresentKHR(pDevice->GetPlatform().GetQueue(), &presentInfo);
-	ASSERT(res == VK_SUCCESS);
+	bFirst = false;
+
+	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_imageAcquired, (VkFence)nullptr, &m_uActiveImage);
 }
 
 void Display_ps::ScreenShot(const char* szFileName)
 {
+
+}
+
+
+void Display_ps::RecreateSwapChain(GFXDevice* pDevice)
+{
+	VkDevice device = pDevice->GetPlatform().GetVKDevice();
+	vkDeviceWaitIdle(device);
+
+	DestroySwapChain(pDevice);
+
+	CreateSwapChain(pDevice);
+	CreateSwapChainImageViews(pDevice);
+	InitFrameBuffers(pDevice);
+	m_bWindowResized = false;
+
+}
+
+void Display_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
+{
+	m_uWidth = uWidth;
+	m_uHeight = uHeight;
+
+	m_bWindowResized = true;
+}
+
+
+void Display_ps::Resize(usg::GFXDevice* pDevice)
+{
+	RECT dim;
+	GetClientRect(m_hwnd, &dim);
+
+	Resize(pDevice, dim.right - dim.left, m_uHeight = dim.bottom - dim.top);
+}
+
+void Display_ps::Minimized(usg::GFXDevice* pDevice)
+{
+	RECT dim;
+	int width = 0; int height = 0;
+	while (width == 0 || height == 0) {
+		GetClientRect(m_hwnd, &dim);
+		width = dim.right - dim.left;
+		height = dim.bottom - dim.top;
+		// Sleep for a frame at 120hz
+		::Sleep(8);
+		// Keep handling window message until we get the one that restores the window
+		GFX::PostUpdate();
+	}
+
+	vkDeviceWaitIdle(pDevice->GetPlatform().GetVKDevice());
 
 }
 

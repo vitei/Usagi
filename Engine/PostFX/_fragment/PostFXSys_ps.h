@@ -14,6 +14,7 @@
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Scene/SceneRenderPasses.h"
 
 namespace usg{
 
@@ -40,16 +41,17 @@ public:
 
 	const TextureHndl& GetLinearDepthTex() const;
 
-	const RenderPassHndl& GetRenderPass() const { return m_renderPass; }
+	const SceneRenderPasses& GetRenderPasses() const;
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
 	uint32 GetFinalTargetHeight(bool bOrient) { return m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
 	float GetFinalTargetAspect() { return  (float)m_colorBuffer[BUFFER_LDR_0].GetWidth() / (float)m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
+	void DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects);
 
 	// For setting up pipelines, will need the render pass in future
-	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice) const;
-	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice) const;
+	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
+	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
 	void SetupDownscale4x4(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight) const;
 	void SetupGaussBlur(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	float GaussianDistribution(float x, float y, float rho) const;
@@ -65,6 +67,9 @@ protected:
 	void SetupOffsets4x4(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight) const;
 	void SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	void ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
+
+	PostEffect* GetFinalEffect();
+	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
 
 	enum COLOR_BUFFERS
 	{
@@ -87,6 +92,9 @@ protected:
 		TARGET_LDR_LIN_DEPTH,
 		TARGET_LDR_0,
 		TARGET_LDR_1,
+		TARGET_LDR_0_POST_DEPTH,	// After depth, maintain load color without acting on it
+		TARGET_LDR_0_TRANSFER_SRC,	// Final target to be transfered to the screen
+		TARGET_LDR_1_TRANSFER_SRC,  // Final target to be transfered to the screen
 		TARGET_COUNT
 	};
 
@@ -106,13 +114,13 @@ protected:
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
 	
+	SceneRenderPasses		m_renderPasses;
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
 	RenderTarget			m_screenRT[TARGET_COUNT];
 	RenderTarget*			m_pFinalTarget;
 	RenderTarget*			m_pInitialTarget;
 
-	RenderPassHndl			m_renderPass;
 //	PipelineStateHndl		m_downscale4x4Effect;
 //	PipelineStateHndl		m_downscale2x2Effect;
 //	PipelineStateHndl		m_gaussBlur5x5Effect;

@@ -61,6 +61,11 @@ void Material::SetPipelineState(PipelineStateHndl pipelineState)
 	m_pipelineState = pipelineState;
 }
 
+void Material::UpdateRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass)
+{
+	pDevice->ChangePipelineStateRenderPass(pass, m_pipelineState);
+}
+
 void Material::SetDescriptorLayout(GFXDevice* pDevice, const DescriptorSetLayoutHndl& descriptorDecl)
 {
 	m_descriptorSet.Init(pDevice, descriptorDecl);

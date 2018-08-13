@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_PC_DEPTH_STENCIL_BUFFER_PS_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Resource/ResourceDecl.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -17,23 +18,29 @@ public:
 
 	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples, uint32 uFlags);
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, DepthFormat eFormat, SampleCount eSamples, uint32 uFlags);
+	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples, uint32 uFlags);
+	void CleanUp(GFXDevice* pDevice);
 	
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	uint32 GetWidth() const { return m_uWidth; }
 	uint32 GetHeight() const { return m_uHeight; }
-	const Texture* GetTexture() const { return &m_texture; }
+	const TextureHndl& GetTexture() const { return m_textureHndl; }
 	bool HasStencil() const { return m_bHasStencil; }
 
 	void SetActive(bool bActive) {}
 
-	const VkAttachmentDescription& GetDescription() { return m_attachDesc; }
+	VkImageView GetLayerView(uint32 uLayer) { return m_pLayerViews[uLayer]; }
 
 private:
-	VkAttachmentDescription m_attachDesc;
+	void InitLayerViews(GFXDevice* pDevice);
+	void FreeLayerViews(GFXDevice* pDevice);
+
+	TextureHndl				m_textureHndl;
 	Texture					m_texture;
 	uint32					m_uWidth;
 	uint32					m_uHeight;
 	bool					m_bHasStencil;
+	VkImageView*			m_pLayerViews;
 };
 
 }

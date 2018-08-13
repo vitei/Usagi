@@ -4,12 +4,12 @@
 #ifndef _USG_GRAPHICS_PC_VERTEXBUFFER_H
 #define _USG_GRAPHICS_PC_VERTEXBUFFER_H
 #include "Engine/Common/Common.h"
-#include "Engine/Graphics/Effects/EffectBinding.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
 
 class Effect;
+class GFXDevice;
 
 class VertexBuffer_ps
 {
@@ -17,8 +17,9 @@ public:
 	VertexBuffer_ps();
 	~VertexBuffer_ps();
 
-	void Init(GFXDevice* pDevice, void* pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation);
-	void SetContents(GFXDevice* pDevice, void *pData, uint32 uVertCount);
+	void Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation);
+	void CleanUp(GFXDevice* pDevice);
+	void SetContents(GFXDevice* pDevice, const void* const pData, uint32 uVertCount);
 
 	void*	LockData(GFXDevice* pDevice, uint32 uElements);
 	void	UnlockData(GFXDevice* pDevice, void* pData, uint32 uElements);

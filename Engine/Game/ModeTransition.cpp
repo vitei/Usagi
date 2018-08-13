@@ -36,7 +36,7 @@ namespace usg
 	void ModeTransition::Draw(usg::Display* pDisplay, usg::IHeadMountedDisplay* pHMD, usg::GFXContext* pImmContext)
 	{
 		// Draw directly to the screen, and clear it
-		pImmContext->RenderToDisplay(pDisplay, RenderTarget::CLEAR_FLAG_COLOR_0);
+		pImmContext->RenderToDisplay(pDisplay, RenderTarget::RT_FLAG_COLOR_0);
 	}
 
 	void ModeTransition::PostDraw(usg::GFXDevice* pDevice)

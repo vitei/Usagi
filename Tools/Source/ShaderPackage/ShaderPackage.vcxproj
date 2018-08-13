@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{C2A815D2-351E-4F7E-B71E-000E5B409F40}</ProjectGuid>
+    <RootNamespace>ShaderPackage</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Engine\CommonProps.props" />
+    <Import Project="..\..\..\Engine\ConditionalProps.props" />
+    <Import Project="ShaderPackage.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Engine\CommonProps.props" />
+    <Import Project="..\..\..\Engine\ConditionalProps.props" />
+    <Import Project="ShaderPackage.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Engine\CommonProps.props" />
+    <Import Project="..\..\..\Engine\ConditionalProps.props" />
+    <Import Project="ShaderPackage.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Engine\CommonProps.props" />
+    <Import Project="..\..\..\Engine\ConditionalProps.props" />
+    <Import Project="ShaderPackage.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;freetype28d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\msdfgen;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\include;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Engine\ThirdParty\msdfgen\Msdfgen.vcxproj">
+      <Project>{84be2d91-f071-4151-be12-61460464c494}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Core\Core.vcxproj">
+      <Project>{4f44a822-08d7-424a-8d40-72677d8346a4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Debug\Debug.vcxproj">
+      <Project>{505a7767-c568-4303-8979-116ff110c8ff}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Framework\Framework.vcxproj">
+      <Project>{1da383d2-7811-445a-aacc-ca255b994731}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Graphics\Graphics.vcxproj">
+      <Project>{a73a2dde-2075-496c-9770-21395924e08b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Layout\Layout.vcxproj">
+      <Project>{f9b13ed7-9cf4-4151-9cb4-3b7edbae1566}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Maths\Maths.vcxproj">
+      <Project>{258c9d89-38fb-4b1e-81e1-6d32ac81ff17}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Memory\Memory.vcxproj">
+      <Project>{1c319d5b-0060-4653-9000-2ed6c92acaef}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Resource\Resource.vcxproj">
+      <Project>{8e6b74e5-b0c4-4ac1-8e09-7c97747b3f2e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\ThirdParty\ThirdParty.vcxproj">
+      <Project>{491fe2ef-d449-4fdd-a3ce-9a1102aa2af4}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ResourcePak\ResourcePakExporter.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

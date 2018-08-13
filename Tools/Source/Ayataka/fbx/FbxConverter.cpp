@@ -60,7 +60,7 @@ FbxConverter::~FbxConverter()
 {
 }
 
-int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, DependencyTracker* pDependencies)
+int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSkeletonOnly, DependencyTracker* pDependencies)
 {
 	FbxManager*		sdkManager;
 	FbxScene*		scene;
@@ -74,7 +74,6 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, Dependen
 		// Unrecognizable file format. Try to fall back to FbxImporter::eFBX_BINARY
 		lFileFormat = sdkManager->GetIOPluginRegistry()->FindReaderIDByDescription("FBX binary (*.fbx)");;
 	}
-
 
 	if (!importer->Initialize(path.c_str(), lFileFormat) == true)
 	{
@@ -95,14 +94,18 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, Dependen
 	FbxSystemUnit::ConversionOptions options = FbxSystemUnit::DefaultConversionOptions;
 	// We don't use the FBX convert scene as it messes with scales rather than positions
 	//FbxSystemUnit::m.ConvertScene(scene);
-	bool bTriangulate = converter.Triangulate(scene, true);
-	bool bSplit = converter.SplitMeshesPerMaterial(scene, true);
+
+	if (!bSkeletonOnly)
+	{
+		converter.Triangulate(scene, true);
+		converter.SplitMeshesPerMaterial(scene, true);
+	}
 
 	FbxLoad fbxLoader;
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
 	fbxLoader.SetAppliedScale(scale);
-	fbxLoader.Load( mCmdl, scene, pDependencies );
+	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, pDependencies );
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
 	SetNameFromPath( path.c_str() );

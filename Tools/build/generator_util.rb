@@ -205,6 +205,9 @@ module GeneratorUtil
     n.rule('font', "#{config.font_converter} $in $out_stub",
            {:description => 'FONT $out_stub'})
 
+    n.rule('shaderpack', "#{config.shader_pack} $in $out #{config.effect_build_dir} $shader_dir $api",
+           {:dependencies => :gcc, :description => 'SHADERPACK $in $out $shader_dir $api'})    
+
   end
 
   #####################################################################

@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
 #include "Engine/Graphics/Device/RenderState.h"
+#include "Engine/Core/stl/vector.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -22,8 +23,11 @@ public:
 	~RenderTarget_ps();
 
 	void InitMRT(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
-	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetClearColor(const Color& col);
+	void RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass);
+
+	void CleanUp(GFXDevice* pDevice);
+	void Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
+	void SetClearColor(const Color& col, uint32 uTarget);
 
 	uint32 GetWidth() const { return m_uWidth; }
 	uint32 GetHeight() const { return m_uHeight; }
@@ -33,8 +37,27 @@ public:
 	void SetInUse(bool bInUse) {}
 
 	void EndDraw() { }
+	
+	// Platform specific
+	const VkClearValue* GetClearValues() const { return m_colorClearValues; }
+	const VkFramebuffer& GetFrameBuffer() const { return m_framebuffer; }
+	const VkFramebuffer& GetLayerFrameBuffer(uint32 uLayer) const { return m_layerInfo[uLayer].frameBuffer;	}
 
 private:
+
+	struct LayerInfo
+	{
+		VkFramebufferCreateInfo createInfo;
+		VkFramebuffer			frameBuffer;
+	};
+	// Color + depth for the clear
+	VkFramebufferCreateInfo m_fbCreateInfo;
+	vector<LayerInfo> m_layerInfo;
+	vector<VkImageView>	m_imageViews;
+	VkFramebuffer	m_framebuffer;
+	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS+1];
+	// For creating a render pass declaration used with sub passes
+	RenderPassHndl	m_renderPass;
 	Viewport		m_fullScreenVP;
 	uint32			m_uCurrentImage;
 	uint32			m_uWidth;

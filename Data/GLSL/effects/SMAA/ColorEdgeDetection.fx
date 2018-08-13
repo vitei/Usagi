@@ -1,2 +1,0 @@
-VS SMAA/SMAAEdgeDetect_vs
-PS SMAA/SMAAColorEdgeDetection_ps

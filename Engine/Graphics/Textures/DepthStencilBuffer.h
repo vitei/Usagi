@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_DEPTH_STENCIL_BUFFER_H
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Resource/ResourceDecl.h"
 #include API_HEADER(Engine/Graphics/Textures, DepthStencilBuffer_ps.h)
 
 namespace usg {
@@ -16,17 +17,9 @@ public:
 	DepthStencilBuffer();
 	~DepthStencilBuffer();
 
-	enum Flags
-	{
-		FLAG_NONE				= 0,
-		FLAG_USE_HI_Z			= (1<<0),
-		FLAG_FAST_MEM_LOCATION	= (1<<1),
-		FLAG_READ_AS_TEXTURE	= (1<<4)
-	};
-
-	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = FLAG_NONE);
-	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = FLAG_NONE);
-	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = FLAG_NONE);
+	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
+	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
+	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
 	void CleanUp(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);

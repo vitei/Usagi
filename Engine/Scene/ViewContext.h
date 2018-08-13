@@ -18,6 +18,8 @@
 
 namespace usg{
 
+class SceneRenderPasses;
+
 class ViewContext : public SceneContext
 {
 public:
@@ -30,7 +32,7 @@ public:
 
 	virtual void InitDeviceData(GFXDevice* pDevice) override;
 	virtual void Cleanup(GFXDevice* pDevice) override;
-	void Init(const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderNode::RENDER_MASK_ALL);
+	void Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderNode::RENDER_MASK_ALL);
 	virtual void Update(GFXDevice* pDevice);
 	virtual void ClearLists();
 	virtual const Camera* GetCamera() const override { return m_pCamera; }
@@ -46,7 +48,7 @@ public:
 	// have different draw distances
 	Fog& GetFog(uint32 uIndex=0) { ASSERT(uIndex<MAX_FOGS); return m_fog[uIndex]; }
 	PostFXSys* GetPostFXSys() { return m_pPostFXSys; }
-	const RenderPassHndl& GetRenderPass() const;
+	const SceneRenderPasses& GetRenderPasses() const;
 
 
 	void PreDraw(GFXContext* pContext, ViewType eViewType);
@@ -61,6 +63,7 @@ private:
 		MAX_FOGS = 1
 	};
 	DescriptorSet			m_globalDescriptors[VIEW_COUNT];
+	DescriptorSet			m_globalDescriptorsWithDepth[VIEW_COUNT];
 	ConstantSet				m_globalConstants[VIEW_COUNT];
 	
 	const Camera*			m_pCamera;

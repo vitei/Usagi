@@ -34,6 +34,7 @@ void ColorBuffer::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorF
 	m_eSampleCount = eSamples;
 	m_eFormat = eFormat;
 
+	ASSERT(uFlags&TU_FLAG_COLOR_ATTACHMENT);
 	m_platform.Init(pDevice, uWidth, uHeight, eFormat, eSamples, uFlags, uRTLoc, uMipCount);
 }
 
@@ -50,6 +51,7 @@ void ColorBuffer::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_eFormat = eFormat;
 
 	ASSERT(uSlices <= 6);
+	ASSERT(uFlags&TU_FLAG_COLOR_ATTACHMENT);
 	m_platform.InitArray(pDevice, 0, uWidth, uHeight, uSlices, eFormat, eSamples, uFlags);
 }
 

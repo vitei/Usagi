@@ -129,6 +129,12 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
 }
 
+const RenderPassHndl& Scene::GetShadowRenderPass() const
+{
+	return m_pImpl->lightMgr.GetShadowPassHndl();
+}
+
+
 void Scene::Cleanup(GFXDevice* pDevice)
 {
 	m_pImpl->debug3D.CleanUp(pDevice);
@@ -244,11 +250,11 @@ void Scene::DeleteRenderGroup(RenderGroup* pRemove)
 ViewContext* Scene::CreateViewContext(GFXDevice* pDevice)
 {
 	ViewContext* pContext = m_pImpl->viewContexts.Alloc();
+	pContext->SetScene(this);
 	if (!pContext->IsDeviceDataValid())
 	{
 		pContext->InitDeviceData(pDevice);
 	}
-	pContext->SetScene(this);
 	m_pImpl->sceneContexts.AddToEnd(pContext);
 	return pContext;
 }
@@ -266,9 +272,9 @@ ViewContext* Scene::GetViewContext(uint32 uId)
 	return m_pImpl->viewContexts.GetByIndex(uId);
 }
 
-const RenderPassHndl& Scene::GetRenderPass(uint32 uViewContext)
+const SceneRenderPasses& Scene::GetRenderPasses(uint32 uViewContext)
 {
-	return GetViewContext(uViewContext)->GetRenderPass();
+	return GetViewContext(uViewContext)->GetRenderPasses();
 }
 
 OmniShadowContext* Scene::CreateOmniShadowContext(GFXDevice* pDevice)

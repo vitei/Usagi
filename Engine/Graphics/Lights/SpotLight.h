@@ -53,8 +53,11 @@ public:
 	void ShadowRender(GFXContext* pContext) override;
 	
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
-	const DescriptorSet* GetDescriptorSet() const;
+	const DescriptorSet* GetDescriptorSet(bool bWidthShadow) const;
 	const ProjectionShadow* GetShadow() const { return m_pShadow; }
+
+	static const DescriptorDeclaration* GetDescriptorDecl();
+	static const DescriptorDeclaration* GetDescriptorDeclShadow();
 
 protected:
 	void UpdateSpherePosRadius();

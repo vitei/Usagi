@@ -1,46 +1,34 @@
 #ifndef SHADOW_PASS
 
-SAMPLER_LOC(1, 15) uniform sampler2DArrayShadow sampler15;	// Keep this sitting at sampler 7 where it's unlikely to get overwritten
-
  // By including this file we are stating that we want shadows baby
 //#ifdef PLATFORM_PC  // Not ready on switch yet
 #define USE_SHADOW_MAP 1
 //#endif
 
-BUFFER_LAYOUT(1, UBO_SHADOW_ID) uniform Shadow
-{
-	mat4		mCascadeMtx[4];
-    mat4        mCascadeMtxInvView[4];
-	vec4		vSplitDistance;
-    vec4        vFadeSplitDist;
-    vec4        vInvFadeLength;
-	vec4		vDepthBias;
-    vec4        vSampleRange;
-    vec2        vInvShadowDim;
-};
 
 
-float GetShadowValue(vec4 shadowPos, int index)
+
+float GetShadowValue(vec4 shadowPos, in int shadowIdx, int cascadeIndex)
 {
-    float bias = vDepthBias[index];
+    float bias = cascades[shadowIdx].vDepthBias[cascadeIndex];
     vec4 tc;
     tc.xyz = shadowPos.xyz / shadowPos.w;
     tc.z += bias;
-    tc.w = float(index);
+    tc.w = float( (CASCADE_COUNT*shadowIdx) + cascadeIndex);
 
     float d = texture(sampler15, tc.xywz);
 
     return d;
 }
 
-float GetShadowValueSoft(vec4 shadowPos, int index)
+float GetShadowValueSoft(vec4 shadowPos, in int shadowIdx, int index)
 {
-    float bias = vDepthBias[index];
+    float bias = cascades[shadowIdx].vDepthBias[index];
     vec4 tc;
-    tc.w = float(index);
+    tc.w = float( (CASCADE_COUNT*shadowIdx) + index );
 
     float d = 0.0;
-    vec2 vDiskRadius = vSampleRange[index] * vInvShadowDim.xy;
+    vec2 vDiskRadius = cascades[shadowIdx].vSampleRange[index] * cascades[shadowIdx].vInvShadowDim.xy;
     for(int i=0; i<12; i++)
     {
         tc.xyz = (shadowPos.xyz / shadowPos.w);
@@ -52,26 +40,28 @@ float GetShadowValueSoft(vec4 shadowPos, int index)
     return d / 12.0;
 }
 
-float SampleShadowmap(in float fViewDepth, in vec3 vPosition)
+float SampleShadowmap(in float fViewDepth, in vec3 vPosition, in int shadowIdx)
 {
     int index;
     float fadeStart = 100000000.0;
     float invFadeRange = 1.0;
-    if (fViewDepth < vSplitDistance.x)
+    if (fViewDepth < cascades[shadowIdx].vSplitDistance.x)
     {
         index = 0;
-        fadeStart = vFadeSplitDist.x;
-        invFadeRange = vInvFadeLength.x;
+        fadeStart = cascades[shadowIdx].vFadeSplitDist.x;
+        invFadeRange = cascades[shadowIdx].vInvFadeLength.x;
     }
-    else if(fViewDepth < vSplitDistance.y)
+    else if(fViewDepth < cascades[shadowIdx].vSplitDistance.y)
     {
         index = 1;
-        fadeStart = vFadeSplitDist.y;
-        invFadeRange = vInvFadeLength.y;
+        fadeStart = cascades[shadowIdx].vFadeSplitDist.y;
+        invFadeRange = cascades[shadowIdx].vInvFadeLength.y;
     }
-    else if(fViewDepth < vSplitDistance.z)
+    else if(fViewDepth < cascades[shadowIdx].vSplitDistance.z)
     {
         index = 2;
+        fadeStart = cascades[shadowIdx].vFadeSplitDist.z;
+        invFadeRange = cascades[shadowIdx].vInvFadeLength.z;
     }
     else
     {
@@ -79,8 +69,8 @@ float SampleShadowmap(in float fViewDepth, in vec3 vPosition)
     }
     
     // FIXME: Ideally want to be using view positions
-    // vec4 tc = vec4(vPosition.xyz, 1.0) * mCascadeMtxInvView[index];
-    vec4 shadowPos = vec4(vPosition.xyz, 1.0) * mCascadeMtx[index];
+    // vec4 tc = vec4(vPosition.xyz, 1.0) * cascades[shadowIdx].mCascadeMtxInvView[index];
+    vec4 shadowPos = vec4(vPosition.xyz, 1.0) * cascades[shadowIdx].mCascadeMtx[index];
 
     float d;
     if(fViewDepth > fadeStart)
@@ -88,17 +78,17 @@ float SampleShadowmap(in float fViewDepth, in vec3 vPosition)
         // I experimented with splitting the samples between the two shadow maps but that creates
         // a jarring effect with low sample counts
         float alpha = (fViewDepth - fadeStart) * invFadeRange;
-        vec4 shadowPosNext = vec4(vPosition.xyz, 1.0) * mCascadeMtx[index+1];
-        d = GetShadowValueSoft(shadowPos, index) * (1.0 - alpha);
-        d += GetShadowValueSoft(shadowPosNext, index+1) * (alpha);
+        vec4 shadowPosNext = vec4(vPosition.xyz, 1.0) * cascades[shadowIdx].mCascadeMtx[index+1];
+        d = GetShadowValueSoft(shadowPos, shadowIdx, index) * (1.0 - alpha);
+        d += GetShadowValueSoft(shadowPosNext, shadowIdx, index+1) * (alpha);
     }
     else
     {
-        d = GetShadowValueSoft(shadowPos, index);
+        d = GetShadowValueSoft(shadowPos, shadowIdx, index);
     }
 
     // Fall off the shadow if it's beyond our maximum distance
-    float decay = smoothstep(0.8 * vSplitDistance.w, vSplitDistance.w, fViewDepth);
+    float decay = smoothstep(0.8 * cascades[shadowIdx].vSplitDistance.w, cascades[shadowIdx].vSplitDistance.w, fViewDepth);
 
     return max(d, decay);
 }

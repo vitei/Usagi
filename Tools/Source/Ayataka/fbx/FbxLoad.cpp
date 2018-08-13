@@ -211,7 +211,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 		{
 			FbxLayeredTexture* layeredTexture = property.GetSrcObject<FbxLayeredTexture>(i);
 
-			ASSERT_MSG(layeredTexture == nullptr, "Layered texture not supported");
+			ASSERT_MSG((layeredTexture == nullptr), "Layered texture not supported");
 
 			FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(i);
 			if (pTexture)
@@ -244,7 +244,6 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					const char* szExt = strrchr(szTextName, '.');
 					int length = (int)(szExt != nullptr ? szExt - szTextName : strlen(szTextName));
 					length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
-					memset(pNewMaterial->pb().textures[uTexIndex].textureName, 0, sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
 					strncpy(pNewMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 					
 					tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
@@ -289,6 +288,19 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 	SetBoolBasedOnTexture(pMaterial, "SpecularColor", "bSpecMap");
 	SetBoolBasedOnTexture(pMaterial, "EmissiveFactor", "bEmissiveMap");
 	SetBoolBasedOnTexture(pMaterial, "Reflection", "bReflectionMap");
+
+	for (uint32 i = 0; i < pMaterial->GetCustomFX().GetTextureCount(); i++)
+	{
+		if (pMaterial->pb().textures[i].textureName[0] == '\0')
+		{
+			// Add a dummy texture
+			const char* szTextName = pMaterial->GetCustomFX().GetDefaultTexName(i);
+			int length = (int)(strlen(szTextName));
+			length = Math::Min(length, (int)sizeof(pMaterial->pb().textures[i].textureName));
+			memset(pMaterial->pb().textures[i].textureName, 0, sizeof(pMaterial->pb().textures[i].textureName));
+			strncpy(pMaterial->pb().textures[i].textureName, szTextName, length);
+		}
+	}
 
 	FbxDouble3 double3;
 	FbxDouble double1;
@@ -442,11 +454,16 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	const char* pMaterialName = "Dummy";
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
 
-	SetBoolBasedOnTexture(pNewMaterial, "DiffuseColor", "bDiffuseMap");
-	SetBoolBasedOnTexture(pNewMaterial, "NormalMap", "bBumpMap");
-	SetBoolBasedOnTexture(pNewMaterial, "SpecularColor", "bSpecMap");
-	SetBoolBasedOnTexture(pNewMaterial, "EmissiveFactor", "bEmissiveMap");
-	SetBoolBasedOnTexture(pNewMaterial, "Reflection", "bReflectionMap"); 
+	for (uint32 i = 0; i < pNewMaterial->GetCustomFX().GetTextureCount(); i++)
+	{
+		// Set up the default textures first
+		const char* szTextName = pNewMaterial->GetCustomFX().GetDefaultTexName(i);
+		int length = (int)(strlen(szTextName));
+		length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[i].textureName));
+		memset(pNewMaterial->pb().textures[i].textureName, 0, sizeof(pNewMaterial->pb().textures[i].textureName));
+		strncpy(pNewMaterial->pb().textures[i].textureName, szTextName, length);
+	}
+
 	pNewMaterial->SetVariable("ambient", Color::White);
 	pNewMaterial->SetVariable("diffuse", Color::White);
 	pNewMaterial->SetVariable("emission", Color::White);
@@ -490,7 +507,7 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, DependencyTracker* pDependencies)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies)
 {
 	m_pDependencies = pDependencies;
 
@@ -516,34 +533,43 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, DependencyTracker* pDepende
 			AddIdentityBone(pSkeleton);
 		}
 		cmdl.SetSkeleton(pSkeleton);
-		ReadAnimations(cmdl, modelScene);
-		ReadMeshRecursive(cmdl, pRootNode);
+		if (!bSkeletonOnly)
+		{
+			ReadAnimations(cmdl, modelScene);
+			ReadMeshRecursive(cmdl, pRootNode);
+		}
 	}
 
-	// Calculate the bounding sphere sizes
-	for (uint32 n = 0; n < cmdl.GetShapeNum(); n++)
+	if (!bSkeletonOnly)
 	{
-		// AABB
-		::exchange::Shape* pShape = cmdl.GetShapePtr(n);
-		Vector3 vMin, vMax;
-		LoaderUtil::setupShapeAABB(vMin, vMax, cmdl.GetStreamPtr(pShape->GetPositionStreamRefIndex()));
-		pShape->SetAABB(vMin, vMax);
+		// Calculate the bounding sphere sizes
+		for (uint32 n = 0; n < cmdl.GetShapeNum(); n++)
+		{
+			// AABB
+			::exchange::Shape* pShape = cmdl.GetShapePtr(n);
+			Vector3 vMin, vMax;
+			LoaderUtil::setupShapeAABB(vMin, vMax, cmdl.GetStreamPtr(pShape->GetPositionStreamRefIndex()));
+			pShape->SetAABB(vMin, vMax);
 
-		// AABB -> BoundingSphere
-		Vector3 center = (vMax + vMin) / 2.0f;
-		::usg::exchange::Sphere& sphere = pShape->pb().boundingSphere;
-		sphere.center.x = center.x;
-		sphere.center.y = center.y;
-		sphere.center.z = center.z;
-		Vector3 vRadius = vMax - center;
-		sphere.radius = vRadius.calcLength();
+			// AABB -> BoundingSphere
+			Vector3 center = (vMax + vMin) / 2.0f;
+			::usg::exchange::Sphere& sphere = pShape->pb().boundingSphere;
+			sphere.center.x = center.x;
+			sphere.center.y = center.y;
+			sphere.center.z = center.z;
+			Vector3 vRadius = vMax - center;
+			sphere.radius = vRadius.calcLength();
+		}
 	}
-
 	if (PostProcessSkeleton(cmdl))
 	{
 		//mError = -1;
 	}
-	PostProcessing(cmdl);
+
+	if (!bSkeletonOnly)
+	{
+		PostProcessing(cmdl);
+	}
 
 
 }

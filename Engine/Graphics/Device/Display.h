@@ -38,9 +38,11 @@ public:
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetDisplayDimensions(xOut, yOut, bOrient); }
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetActualDimensions(xOut, yOut, bOrient); }
 	void Present();
+	const RenderPassHndl& GetRenderPass() { return m_platform.GetRenderPass(); }
 	void ScreenShot(const char* szFileName) { m_platform.ScreenShot(szFileName); }
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) { m_platform.Resize(pDevice, uWidth, uHeight); }
     void Resize(usg::GFXDevice* pDevice) { m_platform.Resize(pDevice); }
+	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
 
 	Display_ps& GetPlatform() { return m_platform; }
 

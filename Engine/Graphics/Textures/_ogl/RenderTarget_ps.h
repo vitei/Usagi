@@ -23,9 +23,10 @@ public:
 
 	void InitMRT(usg::GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
 	void CleanUp(GFXDevice* pDevice);
-	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
+	void Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
+	void RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass) {}
 	GLuint GetTexture(uint32 uCount = 0) const;
-	void SetClearColor(const Color& col);
+	void SetClearColor(const Color& col, uint32 uTarget);
 
 	// For split screen rendering etc, fast copy to final rendertarget
 	void BlitMSToScreen(const Viewport* pViewport, int fOffsetX=0, int fOffsetY=0);
@@ -61,11 +62,11 @@ private:
 	GLuint		m_layerFBO[MAX_LAYERS];
 	uint32		m_uSlices;
 
-	ColorBuffer*	m_pColorBuffers[MAX_RENDER_TARGETS];
+	ColorBuffer*	m_pColorBuffers[MAX_COLOR_TARGETS];
 
 	// Multisampled render targets require a copy before they can be used as input
 	// textures (currently not supported)
-	GLenum	m_bindings[MAX_RENDER_TARGETS];
+	GLenum	m_bindings[MAX_COLOR_TARGETS];
 
 	static  GLuint s_activeFBO;
 };

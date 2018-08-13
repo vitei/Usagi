@@ -14,6 +14,7 @@
 
 namespace usg{
 
+
 enum E_RESOURCE_GROUP
 {
 	E_RESOURCE_INIT = 0,
@@ -28,9 +29,8 @@ class ResourceMgr
 public:
 	static void Cleanup(usg::GFXDevice* pDevice);
 
-	EffectHndl					GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName);
 	EffectHndl					GetEffect(GFXDevice* pDevice, const char* szEffectName);
-	TextureHndl					GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_STANDARD);
+	TextureHndl					GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex = true, GPULocation eLocation = GPU_LOCATION_STANDARD);
 	TextureHndl					GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_FASTMEM);
 	ModelResHndl				GetModel(GFXDevice* pDevice, const char* szModelName, bool bFastMem=true);
 	ModelResHndl				GetModelAsInstance(GFXDevice* pDevice, const char* szModelName);
@@ -52,7 +52,6 @@ public:
 	// We can't return this as const as we need to iterate through it
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);
 
-	void RegisterRenderPass(const RenderPassHndl& hndl);
 	void SetModelDir(const char* szModelDir) { m_modelDir = szModelDir; }
 	const U8String& GetModelDir() const { return m_modelDir; }
 	void SetTextureDir(const char* szTextureDir) { m_textureDir = szTextureDir; }

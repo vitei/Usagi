@@ -1,0 +1,16 @@
+Effects:
+  - { name: SMAABlendWeightCalc,    vert: SMAA/SMAABlendWeightCalc, frag: SMAA/SMAABlendWeightCalc }
+  - { name: SMAAColorEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAAColorEdgeDetection }
+  - { name: SMAADepthEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAADepthEdgeDetection }  
+  - { name: SMAALumaEdgeDetection,  vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAALumaEdgeDetection } 
+  - { name: SMAANeighborhoodBlend,  vert: SMAA/SMAANeighbourhoodBlend, frag: SMAA/SMAANeighbourhoodBlend } 
+  - { name: SMAAResolve,            vert: SMAA/SMAAPassThrough,     frag: SMAA/SMAAResolve } 
+  - { name: FXAA,                   vert: PostFX/fxaa,              frag: PostFX/fxaa } 
+  - { name: FogSphere,              vert: fogsphere,                frag: fogbox } 
+  - { name: FogSphereFar,           vert: fogspherefar,             frag: fogboxfar } 
+  - { name: BloomMain,              vert: PostFX/fullscreen,        frag: PostFX/bloom } 
+  - { name: BloomFinal,             vert: PostFX/fullscreen,        frag: PostFX/bloomfinal } 
+  - { name: BloomBrightPass,        vert: PostFX/fullscreen,        frag: PostFX/brightpass } 
+  - { name: Downscale2x2,           vert: PostFX/fullscreen,        frag: PostFX/downscale2x2 }
+  - { name: Gauss5x5,               vert: PostFX/fullscreen,        frag: PostFX/guass }
+  - { name: Fader,                  vert: PostFX/fader,             frag: PostFX/fader }

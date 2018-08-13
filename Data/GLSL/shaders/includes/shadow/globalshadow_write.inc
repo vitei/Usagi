@@ -12,7 +12,6 @@ BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
 BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance
 {
 	mat3x4	mModelMat;
-	int 	iVtxSkinCount;
 };
 
 

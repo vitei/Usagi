@@ -3,7 +3,7 @@
 *****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/PipelineState.h"
-#include "Engine/Graphics/Effects/EffectBinding.h"
+#include "Engine/Graphics/Effects/InputBinding.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include API_HEADER(Engine/Graphics/Device/, PipelineLayout.h)
@@ -11,6 +11,7 @@
 #include API_HEADER(Engine/Graphics/Device/, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device/, RasterizerState.h)
 #include API_HEADER(Engine/Graphics/Device/, DepthStencilState.h)
+#include API_HEADER(Engine/Graphics/Device/, GFXDevice_ps.h)
 
 namespace usg
 {
@@ -63,21 +64,28 @@ namespace usg
 		multisampleState.rasterizationSamples = g_sampleCounts[decl.eSampleCount];
 
 
-		const Effect* pEffect = decl.pBinding.GetContents()->GetEffect().get();
+		const Effect* pEffect = decl.pEffect.get();
 
 		// Dynamic states as we are aiming for the slightly more flexible directx 12 setup
 		VkDynamicState eDynamicStates[] =
 		{
 			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
+			VK_DYNAMIC_STATE_SCISSOR,
+			VK_DYNAMIC_STATE_BLEND_CONSTANTS
 		};
+
+		VkPipelineViewportStateCreateInfo vp = {};
+		vp.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		vp.pNext = NULL;
+		vp.viewportCount = 1;
+		vp.scissorCount = 1;
 
 
 		VkPipelineDynamicStateCreateInfo dynamic_info = {};
 
 		dynamic_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamic_info.pDynamicStates = eDynamicStates;
-		dynamic_info.dynamicStateCount = 2;
+		dynamic_info.dynamicStateCount = 3;
 
 		// FIXME: We need the render target to be passed in
 		pipelineCreateInfo.renderPass = decl.renderPass.GetContents()->GetPass();
@@ -88,7 +96,7 @@ namespace usg
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
 		pipelineCreateInfo.pRasterizationState = &decl.ras.GetContents()->GetCreateInfo();
 		pipelineCreateInfo.pColorBlendState = &decl.alpha.GetContents()->GetCreateInfo();
-		pipelineCreateInfo.pViewportState = NULL;	// Making this a dynamicall updated bit of info
+		pipelineCreateInfo.pViewportState = &vp;	// Making this a dynamicall updated bit of info
 		pipelineCreateInfo.pDepthStencilState = &decl.depth.GetContents()->GetCreateInfo();
 		pipelineCreateInfo.pDynamicState = &dynamic_info;
 		

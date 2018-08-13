@@ -45,13 +45,17 @@ public:
 	void GPUUpdate(GFXDevice* pDevice) override;
 
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
-	const DescriptorSet* GetDescriptorSet() const;
+	const DescriptorSet* GetDescriptorSet(bool bWithShadow) const;
 	const Matrix4x4& GetModelMatrix() { return m_modelMat; }
 
 	const Matrix4x4& GetProjMatrix() const { return m_projMat; }
 	const Matrix4x4& GetViewMatrix() const { return m_viewMat; }
 
 	void ShadowRender(GFXContext* pContext) override;
+
+	static const DescriptorDeclaration* GetDescriptorDecl();
+	static const DescriptorDeclaration* GetDescriptorDeclShadow();
+
 
 protected:
 	 void RegenerateInternals();

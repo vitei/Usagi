@@ -28,9 +28,7 @@ public:
 	void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
 	void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
 
-	const ConstantSet* GetConstantSet() const { return &m_constants; }
-	const DescriptorSet* GetDescriptorSet() const { return &m_descriptorSet; }
-	const DescriptorSet* GetShadowDescriptorSet();
+	const DescriptorSet* GetDescriptorSet(bool bWithShadow) const;
 
 	virtual void	SetPosition(const Vector4f &position);
 
@@ -49,10 +47,14 @@ public:
 	void GPUUpdate(GFXDevice* pDevice) override;
 	void ShadowRender(GFXContext* pContext) override;
 
+	static const DescriptorDeclaration* GetDescriptorDecl();
+	static const DescriptorDeclaration* GetDescriptorDeclShadow();
+
 protected:
 
 	ConstantSet		m_constants;
 	DescriptorSet	m_descriptorSet;
+	DescriptorSet	m_descriptorSetShadow;
 	OmniShadow*		m_pShadow;
 
 	Vector4f		m_position;

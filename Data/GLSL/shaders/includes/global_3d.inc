@@ -4,7 +4,19 @@
 // use binding ... to make use of that
 
 #define USE_SKYBOX_FOG
+#define CASCADE_COUNT 4
 
+struct Cascade
+{
+	mat4		mCascadeMtx[CASCADE_COUNT];
+    mat4        mCascadeMtxInvView[CASCADE_COUNT];
+	vec4		vSplitDistance;
+    vec4        vFadeSplitDist;
+    vec4        vInvFadeLength;
+	vec4		vDepthBias;
+    vec4        vSampleRange;
+    vec2        vInvShadowDim;
+};
 
 #ifndef SHADOW_PASS
 BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
@@ -27,14 +39,14 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 	vec4	vShadowColor;
 };
 #elif defined(OMNI_DEPTH)
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
+BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mMatrices[6];
 	vec4	lightPos;
 	float 	lightFarDist;
 };
 #else
-BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
+BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mProjMat;
 	mat4 	mViewMat;
@@ -43,10 +55,9 @@ BUFFER_LAYOUT(1, UBO_GLOBAL_ID) uniform Globals
 
 
 #ifndef OVERRIDE_TRANS
-BUFFER_LAYOUT(2, UBO_INSTANCE_ID) uniform Instance
+BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance
 {
 	mat3x4	mModelMat;
-	int 	iVtxSkinCount;
 };
 #endif
 

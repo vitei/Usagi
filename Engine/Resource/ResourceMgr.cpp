@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Graphics/Effects/Effect.h"
+#include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ResourceMgr.h"
@@ -17,14 +18,14 @@
 #include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Layout/Fonts/Font.h"
+#include "Engine/Core/stl/string.h"
 #include "Engine/Resource/ResourceData.h"
 #include "Engine/Resource/ResourceDictionary.h"
-#include "Engine/Resource/ResourcePak.pb.h"
-#include "Engine/Resource/ResourcePakLoader.h"
 #include "Engine/Resource/ResourcePakHdr.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Core/String/String_Util.h"
+#include "Engine/Resource/PakFile.h"
 #include <cstring>
 
 #ifdef DEBUG_BUILD
@@ -36,9 +37,11 @@
 
 namespace usg{
 
+
 	struct ResourceMgr::PIMPL
 	{
 		ResourceData<Texture>					textures;
+		ResourceData<Shader>					shaders;
 		ResourceData<Effect>					effects;
 		ResourceData<ModelResource>				models;
 		ResourceData<Font>						fonts;
@@ -51,9 +54,6 @@ namespace usg{
 		ResourceData<ResourcePakHdr>			resourcePaks;
 
 		List<ResourceDataBase>				resourceSets;
-		vector<RenderPassHndl>				renderPasses;
-
-		ResourcePakLoader					pakLoader;
 	};
 
 ResourceMgr* ResourceMgr::m_pResource = nullptr;
@@ -68,6 +68,7 @@ ResourceMgr::ResourceMgr(void)
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->skeletalAnims);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->textures);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->effects);
+	m_pImpl->resourceSets.AddToEnd(&m_pImpl->shaders);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->fonts);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->protocolBuffers);
 	m_pImpl->resourceSets.AddToEnd(&m_pImpl->collisionModel);
@@ -83,6 +84,8 @@ ResourceMgr::ResourceMgr(void)
 	m_fontDir = "Fonts/";
 
 	ResourceDictionary::init();
+
+
 }
 
 ResourceMgr::~ResourceMgr(void)
@@ -106,6 +109,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 {
 	U8String name = szPath;
 	name += szName;
+	name += ".pak";
 	SharedPointer<const ResourcePakHdr> hndl = m_pImpl->resourcePaks.GetResourceHndl(name.CStr());
 	// Only load if we don't already have one
 	if (!hndl)
@@ -116,30 +120,58 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			ProfilingTimer loadTimer;
 			loadTimer.Start();
 #endif
+			PakFile pakFile;
+			// TODO: We should be creating the resources on the main thread but then doing the loading on another thread
+			pakFile.Load(pDevice, name.CStr());
+			usg::map<uint32, ResourceBase*>& resources = pakFile.GetResources();
+			for (auto& itr : resources)
+			{
+				switch (itr.second->GetResourceType())
+				{
+				case ResourceType::EFFECT:
+					m_pImpl->effects.AddResource((Effect*)itr.second);
+					break;
+				case ResourceType::SHADER:
+					m_pImpl->shaders.AddResource((Shader*)itr.second);
+					break;
+				case ResourceType::TEXTURE:
+					m_pImpl->textures.AddResource((Texture*)itr.second);
+					break;
+				default:
+					ASSERT(false);
+				}
+			}
 
-			m_pImpl->pakLoader.StartLoad(szPath, szName);
-			ResourcePakHdr* pPakHdr = vnew(ALLOC_RESOURCE_MGR) ResourcePakHdr;
-			m_pImpl->resourcePaks.StartLoad();
-			pPakHdr->Init(m_pImpl->pakLoader);
-			m_pImpl->resourcePaks.AddResource(pPakHdr);
-			m_pImpl->pakLoader.Load<Texture, TexturePak>(pDevice, m_pImpl->textures);
-			m_pImpl->pakLoader.LoadEffects(pDevice, m_pImpl->effects);
-			m_pImpl->pakLoader.Load<ParticleEmitterResource, ParticleEmitterPak>(pDevice, m_pImpl->renderPasses, m_pImpl->particleEmitters, ".pem");
-			m_pImpl->pakLoader.Load<ParticleEffectResource, ParticleEffectPak>(pDevice, m_pImpl->particleEffects, ".pfx");
-			m_pImpl->pakLoader.FinishLoad();
-
+			ResourcePakHdr* pHdr = vnew(ALLOC_OBJECT)ResourcePakHdr;
+			pHdr->Init(pakFile);
+			m_pImpl->resourcePaks.AddResource(pHdr);
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			loadTimer.Stop();
-			DEBUG_PRINT("Loaded %s in %f seconds\n", name.CStr(), loadTimer.GetTotalSeconds());
+			DEBUG_PRINT("Loaded %s in %f milliseconds\n", name.CStr(), loadTimer.GetTotalMilliSeconds());
 #endif
 		}
 	}
 	// Nothing on PC yet so no assert
 }
 
-EffectHndl ResourceMgr::GetEffectAbsolutePath(GFXDevice* pDevice, const char* szEffectName)
+
+EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 {
 	U8String u8Name = szEffectName;
+	usg::string stringName = szEffectName;
+	if (stringName.find_first_of(".") != string::npos)
+	{
+		// New system
+		string packageName = stringName.substr(0, stringName.find_first_of("."));
+		LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
+		u8Name += ".fx";
+	}
+	else
+	{
+		// Old system
+		u8Name = m_effectDir + szEffectName;
+	}
+
 	EffectHndl pEffect = m_pImpl->effects.GetResourceHndl(u8Name);
 
 	// TODO: Remove from the final build, should load in blocks
@@ -152,12 +184,7 @@ EffectHndl ResourceMgr::GetEffectAbsolutePath(GFXDevice* pDevice, const char* sz
 	}
 
 	return pEffect;
-}
 
-EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
-{
-	U8String u8Name = m_effectDir + szEffectName;
-	return GetEffectAbsolutePath(pDevice, u8Name.CStr());
 
 }
 
@@ -218,7 +245,7 @@ ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 	return pFile;
 }
 
-TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, GPULocation eGPULocation)
+TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex, GPULocation eGPULocation)
 {
 	U8String u8Name = szTextureName;
 	TextureHndl	pTexture = m_pImpl->textures.GetResourceHndl(u8Name);
@@ -237,7 +264,7 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 		else
 		{
 			DEBUG_PRINT("Unable to load texture %s\n", szTextureName);
-			if(!str::Find(szTextureName, "missing_texture"))
+			if(!str::Find(szTextureName, "missing_texture") && bReplaceMissingTex)
 			{
 				return GetTextureAbsolutePath(pDevice, "Textures/missing_texture", eGPULocation);
 			}
@@ -267,7 +294,7 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation)
 {
 	U8String path = m_textureDir + szTextureName;
-	return GetTextureAbsolutePath(pDevice, path.CStr(), eLocation);
+	return GetTextureAbsolutePath(pDevice, path.CStr(), true, eLocation);
 }
 
 
@@ -319,7 +346,7 @@ ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const
 			m_pImpl->particleEmitters.StartLoad();
 			ParticleEmitterResource* pResPtr = vnew(ALLOC_RESOURCE_MGR) ParticleEmitterResource;
 
-			bool b = pResPtr->Load(pDevice, m_pImpl->renderPasses, path.CStr());
+			bool b = pResPtr->Load(pDevice, path.CStr());
 			ASSERT(b);
 			pEffect = m_pImpl->particleEmitters.AddResource(pResPtr);
 		}
@@ -413,25 +440,12 @@ ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName,
 	{
 		m_pImpl->models.StartLoad();
 		ModelResource* pNC = vnew(ALLOC_RESOURCE_MGR) ModelResource;
-		pNC->Load(pDevice, u8Name.CStr(), m_pImpl->renderPasses, bInstance, bFastMem);
+		pNC->Load(pDevice, u8Name.CStr(), bInstance, bFastMem);
 		pModel = m_pImpl->models.AddResource(pNC);
 	}
 	return pModel;
 }
 
-
-void ResourceMgr::RegisterRenderPass(const RenderPassHndl& hndl)
-{
-	for (size_t i = 0; i < m_pImpl->renderPasses.size(); i++)
-	{
-		if (m_pImpl->renderPasses[i] == hndl)
-		{
-			return;
-		}
-	}
-	
-	m_pImpl->renderPasses.push_back(hndl);
-}
 
 uint32 ResourceMgr::GetParticleEffectCount()
 {

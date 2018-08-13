@@ -69,7 +69,6 @@ namespace usg
 	void Fader::Init(usg::GFXDevice* pDevice, const usg::RenderPassHndl& renderPass)
 	{
 		usg::PipelineStateDecl pipeline;
-		pipeline.renderPass = renderPass;
 		pipeline.ePrimType = usg::PT_TRIANGLES;
 
 		pipeline.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
@@ -92,8 +91,8 @@ namespace usg
 		alpha.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 		alpha.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
-		pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Fader");
-		m_Material.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+		pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.Fader");
+		m_Material.Init(pDevice, pDevice->GetPipelineState(renderPass, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 
 		usg::PositionVertex verts[6];
@@ -183,6 +182,7 @@ namespace usg
 		pConst->fFade = sfAlpha;
 		m_constants.Unlock();
 		m_constants.UpdateData(pDevice);
+		m_Material.UpdateDescriptors(pDevice);
 	}
 
 

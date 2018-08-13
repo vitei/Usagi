@@ -1,2 +1,0 @@
-VS shadows/depthwrite_inst_vs
-PS shadows/depthwrite_ps

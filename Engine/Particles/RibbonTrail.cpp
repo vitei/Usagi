@@ -62,6 +62,10 @@ RibbonTrail::RibbonTrail()
 	m_fScale = 1.0f;
 	m_pCpuData = NULL;
 
+	// Effect layer information
+	SetLayer(LAYER_TRANSLUCENT);
+	SetPriority(11);
+
 }
 
 RibbonTrail::~RibbonTrail()
@@ -123,10 +127,9 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	usg::RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 	rasDecl.eCullFace	= usg::CULL_FACE_NONE;
 
-	pipeline.pEffect = pRes->GetEffect(pDevice, "RibbonTrail");
-	pipeline.renderPass = pMgr->GetScene()->GetRenderPass(0);
+	pipeline.pEffect = pRes->GetEffect(pDevice, "Particles.RibbonTrail");
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_material.Init(pDevice, pDevice->GetPipelineState(pMgr->GetScene()->GetRenderPasses(0).GetRenderPass(*this), pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 	m_constantSet.Init(pDevice, g_ribbonEffectDecl);
 
 	m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_constantSet);
@@ -159,10 +162,6 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	m_capVertex.vPos.Assign(0.0f, 0.0f, 0.0f);
 	m_capVertex.fEmissionTime = -1.0f;
 	m_capVertex.fEmissionLength = -1.0f;
-
-	// Effect layer information
-	SetLayer(LAYER_TRANSLUCENT);
-	SetPriority(11);
 }
 
 

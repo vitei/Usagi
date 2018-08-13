@@ -21,13 +21,13 @@ public:
 	void					InitDefaults(GFXDevice* pDevice);
 
 	// If NULL will return the default states
-	PipelineStateHndl		GetPipelineState(const PipelineStateDecl& decl, GFXDevice* pDevice);
+	PipelineStateHndl		GetPipelineState(const RenderPassHndl& hndl, const PipelineStateDecl& decl, GFXDevice* pDevice);
 	RenderPassHndl			GetRenderPass(const RenderPassDecl& decl, GFXDevice* pDevice);
 	SamplerHndl				GetSamplerState(const SamplerDecl& decl, GFXDevice* pDevice);
 	DescriptorSetLayoutHndl GetDescriptorSetLayout(const DescriptorDeclaration* pDecl, GFXDevice* pDevice);
 	bool					UsesBlendColor(AlphaStateHndl hndl);
 
-	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out);
+	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
 
 	void FinishedStaticLoad();
 	void ClearDynamicResources();

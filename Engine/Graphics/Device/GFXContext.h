@@ -40,10 +40,10 @@ public:
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport = NULL);
-	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer, uint32 uClearFlags);
+	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
-	void ClearRenderTarget(uint32 uFlags = RenderTarget::CLEAR_FLAG_COLOR);
+	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);
 
 	
 	PipelineStateHndl	GetActivePipeline() { return m_activeStateGroup; }
@@ -66,7 +66,9 @@ public:
 
 	RenderTarget* GetActiveRenderTarget() const{ return m_pActiveRT; }
 
+	void	InvalidatePipelineOnly();
 	void	InvalidateStates();
+	void	ValidateDescriptors();
 private:
 
 	PRIVATIZE_COPY(GFXContext);
@@ -93,6 +95,8 @@ private:
 
 	bool					m_bActive;
 	uint32					m_uRTMask;
+
+	uint32					m_uDirtyDescSetFlags;
 
 	// Need to be kept here as the PC needs to rebind these on changing effect
 	//const ConstantSet*		m_pStaticConstSets[SHADER_CONSTANT_COUNT];
@@ -133,6 +137,8 @@ inline void GFXContext::SetDescriptorSet(const DescriptorSet* pSet, uint32 uInde
 		// Apply the descriptor set
 		// TODO: Remove the internal function once we are passed the point of a platform independent test
 		m_platform.SetDescriptorSet(pSet, uIndex);
+		m_pActiveDescSets[uIndex] = pSet;
+		m_uDirtyDescSetFlags |= (1 << uIndex);
 	}
 }
 

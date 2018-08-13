@@ -49,28 +49,28 @@ static VkColorComponentFlags CalculateColorMask(uint8 uMask)
 }
 
 
-void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl)
+void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
-	memset(m_attState, 0, sizeof(VkPipelineColorBlendAttachmentState)*MAX_RENDER_TARGETS);
+	memset(m_attState, 0, sizeof(VkPipelineColorBlendAttachmentState)*MAX_COLOR_TARGETS);
 
 	// TODO: Re-implement per target blending
-	m_attState[0].blendEnable = decl.bBlendEnable;
-
-	m_attState[0].colorBlendOp = g_blendEqMap[decl.blendEq];
-	m_attState[0].alphaBlendOp = g_blendEqMap[decl.blendEqAlpha];
-	m_attState[0].srcColorBlendFactor = g_blendFactorMap[decl.srcBlend];
-	m_attState[0].dstColorBlendFactor = g_blendFactorMap[decl.dstBlend];
-	m_attState[0].srcAlphaBlendFactor = g_blendFactorMap[decl.srcBlendAlpha];
-	m_attState[0].dstAlphaBlendFactor = g_blendFactorMap[decl.dstBlendAlpha];
-
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
+		m_attState[i].blendEnable = decl.bBlendEnable;
+
+		m_attState[i].colorBlendOp = g_blendEqMap[decl.blendEq];
+		m_attState[i].alphaBlendOp = g_blendEqMap[decl.blendEqAlpha];
+		m_attState[i].srcColorBlendFactor = g_blendFactorMap[decl.srcBlend];
+		m_attState[i].dstColorBlendFactor = g_blendFactorMap[decl.dstBlend];
+		m_attState[i].srcAlphaBlendFactor = g_blendFactorMap[decl.srcBlendAlpha];
+		m_attState[i].dstAlphaBlendFactor = g_blendFactorMap[decl.dstBlendAlpha];
+
 		m_attState[i].colorWriteMask	= CalculateColorMask(decl.uColorMask[i]);
 	}
 
 	m_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	m_createInfo.attachmentCount = 1;	// FIXME: Set the number of targets to which this applies
+	m_createInfo.attachmentCount = decl.uColorTargets;
 	m_createInfo.pAttachments = m_attState;
 }
 

@@ -14,7 +14,7 @@ namespace usg {
 const int GFX_NUM_DYN_BUFF = 2;
 
 const int MAX_VERTEX_ATTRIBUTES = 16;
-const int MAX_DESCRIPTOR_SETS = 4;
+const int MAX_DESCRIPTOR_SETS = 6;
 
 class VertexDeclaration;
 
@@ -25,7 +25,7 @@ const uint8	STENCIL_MASK_GEOMETRY	= 0x80;
 const uint8	STENCIL_MASK_EFFECT		= 0x7F;
 
 
-static const int MAX_RENDER_TARGETS = 8;
+static const int MAX_COLOR_TARGETS = 8;
 static const int MAX_TEXTURES		= 8;
 static const int MAX_VERTEX_BUFFERS = 4;
 
@@ -68,15 +68,17 @@ enum DeferredTargets
 	//DT_VELOCITY,
 };
 
-enum ShaderType
+enum class ShaderType : uint32
 {
-	SHADER_TYPE_VS,
-	SHADER_TYPE_PS,
-	SHADER_TYPE_GS,
-	SHADER_TYPE_COUNT
+	VS,
+	PS,
+	GS,
+	COUNT
 };
 
 
+// Merging on Vulkan as otherwise bindings are a pain
+#define EFFECT_MERGED_BINDING (!(defined PLATFORM_PC || defined PLATFORM_OSX)) //|| (defined USE_VULKAN))
 
 enum ShaderConstantType
 {
@@ -84,20 +86,20 @@ enum ShaderConstantType
 	// them more frequently then you should make multiple buffers
 	SHADER_CONSTANT_GLOBAL = 0,
 	SHADER_CONSTANT_MATERIAL,
-#if (defined PLATFORM_PC || defined PLATFORM_OSX)
-	SHADER_CONSTANT_MATERIAL_1,	// You can't have the same buffer having different meanings on the PC so hacking with a second material buffer
+#if !EFFECT_MERGED_BINDING
+	SHADER_CONSTANT_MATERIAL_1,	// You can't have the same buffer having different meanings on opengl so hacking with a second material buffer
 #else
 	SHADER_CONSTANT_MATERIAL_1 = SHADER_CONSTANT_MATERIAL,
 #endif
 	SHADER_CONSTANT_INSTANCE,
-#if (defined PLATFORM_PC || defined PLATFORM_OSX)
+#if !EFFECT_MERGED_BINDING
 	SHADER_CONSTANT_INSTANCE_1,
 #else
 	SHADER_CONSTANT_INSTANCE_1 = SHADER_CONSTANT_INSTANCE,
 #endif
 	SHADER_CONSTANT_BONES,
 
-#if (defined PLATFORM_PC || defined PLATFORM_OSX)
+#if !EFFECT_MERGED_BINDING
 	SHADER_CONSTANT_CUSTOM,
 #else
 	SHADER_CONSTANT_CUSTOM = SHADER_CONSTANT_BONES,
@@ -112,12 +114,26 @@ enum ShaderConstantType
 
 enum ShaderTypeFlags
 {
-	SHADER_FLAG_VERTEX		= (1<<1),
-	SHADER_FLAG_GEOMETRY	= (1<<2),
-	SHADER_FLAG_PIXEL		= (1<<3),
+	SHADER_FLAG_VERTEX		= (1<<0),
+	SHADER_FLAG_GEOMETRY	= (1<<1),
+	SHADER_FLAG_PIXEL		= (1<<2),
 	SHADER_FLAG_VS_GS		= (SHADER_FLAG_VERTEX|SHADER_FLAG_GEOMETRY),
 	SHADER_FLAG_VS_PS		= (SHADER_FLAG_VERTEX|SHADER_FLAG_PIXEL),
 	SHADER_FLAG_ALL			= (SHADER_FLAG_VERTEX|SHADER_FLAG_GEOMETRY|SHADER_FLAG_PIXEL)
+};
+
+enum TextureUsageFlags
+{
+	TU_FLAG_NONE = 0,
+	TU_FLAG_TRANSFER_SRC = (1 << 0),
+	TU_FLAG_FAST_MEM = (1 << 1),
+	TU_FLAG_SHADER_READ = (1 << 2),
+	TU_FLAG_COLOR_ATTACHMENT = (1 << 3),
+	TU_FLAG_DEPTH_ATTACHMENT = (1 << 4),
+	TU_FLAG_USE_HI_Z = (1 << 5),	// Depth-stencil textures only
+	TU_FLAGS_OFFSCREEN_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM,
+	TU_FLAGS_FINAL_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_TRANSFER_SRC | TU_FLAG_FAST_MEM,
+	TU_FLAGS_DEPTH_BUFFER = TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_FAST_MEM | TU_FLAG_USE_HI_Z,
 };
 
 enum ColorFormat
@@ -138,6 +154,7 @@ enum ColorFormat
 	CF_R_8,
 	CF_NORMAL,
 	CF_SRGBA,
+	CF_UNDEFINED,
 	CF_COUNT,
 	CF_INVALID
 };
@@ -223,6 +240,7 @@ enum DescriptorType
 {
 	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 0,
 	DESCRIPTOR_TYPE_CONSTANT_BUFFER,
+	DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC,
 	DESCRIPTOR_TYPE_INVALID
 };
 

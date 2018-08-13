@@ -41,6 +41,7 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 	bool bAsInstance = false;
 	bool bAsCollision = false;
 	bool bFlipUV = false;
+	bool bSkeletonOnly = false;
 
 	int size = (int)argumentsVector.size();
 	for (int n = 1; n < size; ++n) {
@@ -67,6 +68,9 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 		else if (checkArgument(arg, "--flip-uv")) {
 			bFlipUV = true;
 		}
+		else if (checkArgument(arg, "--skeleton-only")) {
+			bSkeletonOnly = true;
+		}
 	}
 
 	ModelConverterBase* pConverter = NULL;
@@ -81,41 +85,45 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 		dependencies.StartRecord(settings.dependencyPath.c_str(), outputPath.c_str());
 	}
 
-	int ret = pConverter->Load( inputPath, bAsCollision, &dependencies);
+	int ret = pConverter->Load( inputPath, bAsCollision, bSkeletonOnly, &dependencies);
 	if( ret != 0 ) {
 		SAFE_DELETE( pConverter );
 		return ret;
 	} 
 
-	if (settings.bDependencies)
+
+	if (!bSkeletonOnly)
 	{
-		dependencies.ExportDependencies();
-	}
+		if (settings.bDependencies)
+		{
+			dependencies.ExportDependencies();
+		}
 
-	if( bAsCollision ) {
-		pConverter->CalculatePolygonNormal();
-	}
+		if (bAsCollision) {
+			pConverter->CalculatePolygonNormal();
+		}
 
-	if( settings.bLeftHand ) {
-		pConverter->ReverseCoordinate();
-	}
+		if (settings.bLeftHand) {
+			pConverter->ReverseCoordinate();
+		}
 
-	if( bFlipUV ) {
-		pConverter->FlipUV();
-	}
+		if (bFlipUV) {
+			pConverter->FlipUV();
+		}
 
-	pConverter->Process();
+		pConverter->Process();
 
-	if( bAsCollision ) {
-		pConverter->StoreCollisionBinary( settings.bBigEndian );
-	}
-	else {
-		pConverter->Store( settings.alignment, settings.bBigEndian );
-	}
+		if (bAsCollision) {
+			pConverter->StoreCollisionBinary(settings.bBigEndian);
+		}
+		else {
+			pConverter->Store(settings.alignment, settings.bBigEndian);
+		}
 
-	pConverter->ExportStoredBinary( outputPath );
+		pConverter->ExportStoredBinary(outputPath);
+		pConverter->ExportAnimations(settings.animPath);
+	}
 	pConverter->ExportBoneHierarchy( settings.skeletonPath );
-	pConverter->ExportAnimations(settings.animPath);
 
 	SAFE_DELETE( pConverter );
 

@@ -18,7 +18,6 @@ namespace usg
 		extern const DescriptorDeclaration g_shadowGlobalDescriptorDecl[];
 		extern const DescriptorDeclaration g_omniShadowGlobalDescriptorDecl[];
 		extern const DescriptorDeclaration g_boneDescriptorDecl[];
-		extern const DescriptorDeclaration g_shadowReadDescriptorDecl[];
 		extern const ShaderConstantDecl g_instanceCBDecl[];
 
 

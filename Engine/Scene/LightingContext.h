@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Lights/PointLight.h"
 #include "Engine/Graphics/Lights/SpotLight.h"
 #include "Engine/Graphics/Lights/ProjectionLight.h"
+#include "Engine/Core/stl/vector.h"
 
 namespace usg{
 

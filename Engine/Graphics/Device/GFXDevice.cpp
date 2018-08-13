@@ -113,9 +113,21 @@ const DisplaySettings* GFXDevice::GetDisplayInfo(uint32 uIndex)
 	return m_pImpl->platform.GetDisplayInfo(uIndex);
 }
 
-PipelineStateHndl GFXDevice::GetPipelineState(const PipelineStateDecl& decl)
+PipelineStateHndl GFXDevice::GetPipelineState(const RenderPassHndl& hndl, const PipelineStateDecl& decl)
 {
-	return m_pImpl->renderStates.GetPipelineState(decl, this);
+	return m_pImpl->renderStates.GetPipelineState(hndl, decl, this);
+}
+
+
+void GFXDevice::ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, PipelineStateHndl& hndlInOut)
+{
+	if (!renderPass.IsValid())
+		return;
+	PipelineStateDecl declOut;
+	RenderPassHndl oldRenderPass;
+	GetPipelineDeclaration(hndlInOut, declOut, oldRenderPass);
+
+	hndlInOut = GetPipelineState(renderPass, declOut);
 }
 
 RenderPassHndl GFXDevice::GetRenderPass(const RenderPassDecl& decl)
@@ -138,9 +150,14 @@ bool GFXDevice::Is3DEnabled() const
 	return m_pImpl->platform.Is3DEnabled();
 }
 
-void GFXDevice::GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out)
+void GFXDevice::WaitIdle() 
 {
-	m_pImpl->renderStates.GetPipelineStateDeclaration(pipeline, out);
+	m_pImpl->platform.WaitIdle(); 
+}
+
+void GFXDevice::GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut)
+{
+	m_pImpl->renderStates.GetPipelineStateDeclaration(pipeline, out, passOut);
 }
 
 

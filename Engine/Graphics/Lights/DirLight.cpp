@@ -24,7 +24,7 @@ void DirLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	if (bSupportsShadow)
 	{
 		m_pShadowCascade = vnew(ALLOC_OBJECT) ShadowCascade;
-		m_pShadowCascade->Init(pDevice, pScene, this, 2048, 2048);
+		m_pShadowCascade->Init(pDevice, pScene, this);
 	}
 
 	Light::Init(pDevice, pScene, bSupportsShadow);

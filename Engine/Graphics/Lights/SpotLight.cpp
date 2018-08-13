@@ -52,6 +52,16 @@ const DescriptorDeclaration g_spotLightShadowDescDecl[] =
 };
 
 
+const DescriptorDeclaration* SpotLight::GetDescriptorDecl()
+{
+	return g_spotLightDescDecl;
+}
+
+const DescriptorDeclaration* SpotLight::GetDescriptorDeclShadow()
+{
+	return g_spotLightShadowDescDecl;
+}
+
 SpotLight::SpotLight()
 :Light(LIGHT_TYPE_SPOT)
 {
@@ -202,10 +212,10 @@ Matrix4x4 SpotLight::MakeRotationDir(const Vector4f& vDirection)
 	return mTmp;
 }
 
-const DescriptorSet* SpotLight::GetDescriptorSet() const
+const DescriptorSet* SpotLight::GetDescriptorSet(bool bWithShadow) const
 {
 	// FIXME: If shadow is disabled we need to return the standard set
-	if (GetShadowEnabled())
+	if (GetShadowEnabled() && bWithShadow)
 	{
 		return &m_descriptorSetShadow;
 	}

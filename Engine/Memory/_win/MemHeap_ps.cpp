@@ -28,7 +28,7 @@ void MemHeap_ps::Init(memsize uSize)
 void MemHeap_ps::Init(void*, memsize uSize)
 {
 	m_uSize = uSize;
-	DEBUG_PRINT("Memheap_ps::Init Windows does not support memheaps based on raw memory, wasting memory by attempting to pass one in");
+	DEBUG_PRINT("Memheap_ps::Init Windows does not support memheaps based on raw memory, wasting memory by attempting to pass one in\n");
 }
 
 void* MemHeap_ps::Alloc(memsize uSize, memsize uAlign, bool bGPUUse)

@@ -48,17 +48,19 @@ namespace usg
 
 	void SimpleGameBase::Init(usg::GFXDevice* pDevice)
 	{
+		m_transitionRenderPass = pDevice->GetDisplay(0)->GetRenderPass();
+
 		m_pInternalData->m_pInitThread.reset(vnew(usg::ALLOC_OBJECT)usg::InitThread());
 		m_pInternalData->m_pInitThread->Init(pDevice, GetLoadFunc());
 		m_pInternalData->m_pUsagiInetCore.reset(vnew(usg::ALLOC_NETWORK)usg::UsagiInetCore());
 		usg::physics::init();
-		usg::Fader::Create()->Init(pDevice, usg::RenderPassHndl());
+		usg::Fader::Create()->Init(pDevice, m_transitionRenderPass);
 		usg::Audio::Create()->Init();
 		usg::MusicManager::Create();
 		m_modeTransition.Init(pDevice);
 		m_eState = STATE_LOADING;
 
-		m_debugRender.Init(pDevice, usg::RenderPassHndl());
+		m_debugRender.Init(pDevice, m_transitionRenderPass);
 		m_debugRender.SetDrawArea(0.0f, 0.0f, 1280.f, 720.f);
 		m_debug.Init(pDevice, &m_debugRender);
 		m_debug.RegisterCPUTimer(&m_cpuTimer);
@@ -73,6 +75,7 @@ namespace usg
 	{
 		if (m_pActiveMode)
 		{
+			pDevice->WaitIdle();
 			m_pActiveMode->CleanUp(pDevice);
 			vdelete m_pActiveMode;
 			m_pActiveMode = nullptr;
@@ -205,7 +208,10 @@ namespace usg
 		pRenderMode->PreDraw(pDevice, pImmContext);
 		m_debugRender.Updatebuffers(pDevice);
 		pRenderMode->Draw(pDisplay, pHMD, pImmContext);
-		pImmContext->RenderToDisplay(pDisplay);
+		if (!pRenderMode->FinalTargetIsDisplay())
+		{
+			pImmContext->RenderToDisplay(pDisplay);
+		}
 		m_debugRender.Draw(pImmContext);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
@@ -226,17 +232,31 @@ namespace usg
 		{
 			usg::Display* const pDisplay = pDevice->GetDisplay(0);
 			uint32 uWidth, uHeight;
+			uint32 uWidthOld, uHeightOld;
 
-
+			pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
 			pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
 			pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
-			if (m_pActiveMode)
+			// Could be an eroneous call if restoring from being minimized
+			if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
 			{
 				m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
 			}
 		}
 		break;
+		case 'WMIN':
+		{
+			usg::Display* const pDisplay = pDevice->GetDisplay(0);
 
+			pDisplay->Minimized(pDevice);
+
+		}
+		case 'ONSZ':
+		{
+			// About to resize
+			pDevice->WaitIdle();
+		}
+		break;
 		default:
 			// Does nothing
 			break;

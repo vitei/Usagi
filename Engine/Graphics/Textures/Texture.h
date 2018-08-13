@@ -20,7 +20,6 @@ public:
 	virtual ~Texture(void);
 
 	bool Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLocation = GPU_LOCATION_FASTMEM);
-	bool Load(GFXDevice* pDevice, const TexturePak& pak, const void* pData, const char* szPackPath);
 	void UpdateTextureID();
 
 	// TODO: Have create raw pass a texture format. For now we just assume RGBA8
@@ -40,6 +39,9 @@ public:
 #ifdef DEBUG_BUILD
 	uint32 GetSizeInMemory() const { return m_platform.GetSizeInMemory(); }
 #endif
+
+	// For keeping track of resizing/ recreation
+	uint32 GetUpdateIdx() const { return m_platform.GetUpdateIdx(); }
 
 	enum 
 	{

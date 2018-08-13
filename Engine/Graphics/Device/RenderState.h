@@ -24,12 +24,14 @@ public:
 
 	void SetDepthOnly();
 	void SetColor0Only();
+	void EnableMultipleTargets(uint32 uCount);
 	bool UsesBlendColor() const;
 
 	void InitFromDefinition(const AlphaStateGroup &def);
 
 	bool			bBlendEnable;
-	uint32			uColorMask[MAX_RENDER_TARGETS];
+	uint32			uColorTargets;
+	uint32			uColorMask[MAX_COLOR_TARGETS];
 	BlendFunc		srcBlend;
 	BlendFunc		dstBlend;
 	BlendEquation	blendEq;
@@ -65,15 +67,23 @@ public:
 	RenderPassDecl();
 	~RenderPassDecl();
 
-	enum
-	{
-		MAX_ATTACHMENTS = 10,
-		MAX_SUBPASSES = 5
-	};
-
 	enum AttachmentFlags
 	{
 		AF_MEMORY_REUSE = (1<<0),	// Sharing memory with another target		
+	};
+
+	enum StageFlags
+	{
+		SF_BOTTOM_OF_PIPE = (1 << 0),
+		SF_COLOR_ATTACHMENT_OUTPUT = (1 << 1)
+	};
+
+	enum AccessFlags
+	{
+		AC_MEMORY_READ = (1 << 0),
+		AC_COLOR_ATTACHMENT_READ = (1 << 1),
+		AC_COLOR_ATTACHMENT_WRITE = (1 << 2),
+		AC_SHADER_READ_BIT = (1<<3)
 	};
 
 	enum AttachmentLoadOp
@@ -99,11 +109,19 @@ public:
 	{
 		LAYOUT_UNDEFINED = 0,
 		LAYOUT_COLOR_ATTACHMENT,
-		LAYOUT_DEPTH_STENCIL_ATTACHMENT
+		LAYOUT_DEPTH_STENCIL_ATTACHMENT,
+		LAYOUT_SHADER_READ_ONLY,
+		LAYOUT_TRANSFER_SRC
+	};
+
+	enum Defines
+	{
+		SUBPASS_EXTERNAL = USG_INVALID_ID
 	};
 	
 	struct Attachment
 	{
+		Attachment();
 		AttachmentType		eAttachType;
 		union
 		{
@@ -129,24 +147,53 @@ public:
 	{
 		SubPass();
 
-		AttachmentReference*	pInputAttachments;	
-		AttachmentReference*	pColorAttachments;
-		AttachmentReference*	pDepthAttachment;
-		AttachmentReference*	pResolveAttachments;
-		uint32*					puPreserveIndices;
-		uint32  uInputCount;
-		uint32  uColorCount;
-		uint32  uResolveCount;
-		uint32  uPreserveCount;
+		// Attachements which can be read during this sub pass
+		const AttachmentReference*	pInputAttachments;	
+		uint32						uInputCount;
+		// Bound render target information
+		const AttachmentReference*	pColorAttachments;
+		uint32						uColorCount;
+		const AttachmentReference*	pDepthAttachment;
+		// Multi-sample resolves
+		const AttachmentReference*	pResolveAttachments;
+		// Attachments not used by this subpass but which must not be altered
+		uint32*						puPreserveIndices;
+		uint32						uPreserveCount;
 	};
 
-	// FIXME: Should probably have seperate pointers
-	Attachment* pAttachments;
-	SubPass* 	 pSubPasses;
-	uint32		 uAttachments;
-	uint32		 uSubPasses;
+	struct Dependency
+	{
+		Dependency();
+
+		// Set src or dst to SUBPASS_EXTERNAL if they are being referenced externally
+		uint32	uSrcSubPass;
+		uint32	uDstSubPass;
+		uint32  uSrcStageFlags;
+		uint32  uDstStageFlags;
+		uint32  uSrcAccessFlags;
+		uint32  uDstAccessFlags;
+	};
+
+	// All the attachments used by this render pass
+	const Attachment*	pAttachments;
+	uint32				uAttachments;
+	// List of passes
+	const SubPass* 		pSubPasses;
+	uint32				uSubPasses;
+	// Dependencies both internal and external. 
+	const Dependency*	pDependencies;
+	uint32				uDependencies;
 
 	bool operator==(const RenderPassDecl& rhs) const;
+
+
+	// Single subpass utility functions
+	// Dependency on another subpass for input
+	static const Dependency* ExternalColorDependencyIn();
+	// Another subpass is dependent on this pass
+	static const Dependency* ExternalColorDependencyOut();
+	// Array of the above two dependencies basically forcing each pass to execute in order
+	static const Dependency* ExternalColorDependenciesInAndOut();
 };
 
 class DepthStencilStateDecl
@@ -226,7 +273,6 @@ public:
 	};
 
 	EffectHndl				pEffect;
-	RenderPassHndl			renderPass;
 	InputBinding			inputBindings[MAX_VERTEX_BUFFERS];
 	uint32					uInputBindingCount;
 

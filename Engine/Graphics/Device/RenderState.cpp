@@ -17,7 +17,8 @@ namespace usg {
 AlphaStateDecl::AlphaStateDecl()
 {
 	bBlendEnable	= false;
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	uColorTargets = MAX_COLOR_TARGETS;
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_ALL;
 	}
@@ -46,7 +47,7 @@ void AlphaStateDecl::InitFromDefinition(const AlphaStateGroup &def)
 					def.alphaOp == BLEND_EQUATION_ADD &&
 					def.rgbOp == BLEND_EQUATION_ADD );
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_ALL;
 	}
@@ -64,17 +65,34 @@ void AlphaStateDecl::InitFromDefinition(const AlphaStateGroup &def)
 
 void AlphaStateDecl::SetColor0Only()
 {
+	uColorTargets = 1;
 	uColorMask[0]	= RT_MASK_ALL;
 
-	for(int i=1; i<MAX_RENDER_TARGETS; i++)
+	for(int i=1; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_NONE;
 	}
 }
 
+
+void AlphaStateDecl::EnableMultipleTargets(uint32 uCount)
+{
+	uColorTargets = uCount;
+
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		uColorMask[i] = RT_MASK_ALL;
+	}
+
+	for (int i = uCount; i < MAX_COLOR_TARGETS; i++)
+	{
+		uColorMask[i] = RT_MASK_NONE;
+	}
+}
+
 void AlphaStateDecl::SetDepthOnly()
 {
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		uColorMask[i]	= RT_MASK_NONE;
 	}
@@ -98,7 +116,10 @@ bool AlphaStateDecl::operator==(const AlphaStateDecl& rhs) const
 	if(rhs.bBlendEnable != bBlendEnable)
 		return false;
 
-	for(int i=0; i<MAX_RENDER_TARGETS; i++)
+	if (rhs.uColorTargets != uColorTargets)
+		return false;
+
+	for(uint32 i=0; i<uColorTargets; i++)
 	{
 		if(uColorMask[i] != rhs.uColorMask[i])
 			return false;
@@ -162,12 +183,26 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 		&& bWireframe == rhs.bWireframe );
 }
 
+RenderPassDecl::Attachment::Attachment()
+{
+	eAttachType = ATTACH_COLOR;
+	format.eColor = CF_RGBA_8888;
+	uAttachFlags = 0;
+	eLoadOp = LOAD_OP_DONT_CARE;
+	eStoreOp = STORE_OP_STORE;
+	eSamples = SAMPLE_COUNT_1_BIT;
+	eInitialLayout = LAYOUT_UNDEFINED;
+	eFinalLayout = LAYOUT_COLOR_ATTACHMENT;
+}
+
 RenderPassDecl::RenderPassDecl()
 {
-	pAttachments = NULL;
+	pAttachments = nullptr;
 	uAttachments = 0;
-	pSubPasses = NULL;
+	pSubPasses = nullptr;
 	uSubPasses = 0;
+	pDependencies = nullptr;
+	uDependencies = 0;
 }
 
 RenderPassDecl::~RenderPassDecl()
@@ -177,14 +212,26 @@ RenderPassDecl::~RenderPassDecl()
 
 RenderPassDecl::SubPass::SubPass()
 {
-	pInputAttachments = NULL;
-	pColorAttachments = NULL;
-	pResolveAttachments = NULL;
-	puPreserveIndices = NULL;
+	pInputAttachments = nullptr;
+	pColorAttachments = nullptr;
+	pResolveAttachments = nullptr;
+	puPreserveIndices = nullptr;
+	pDepthAttachment = nullptr;
+	
 	uInputCount = 0;
 	uColorCount = 0;
-	uResolveCount = 0;
 	uPreserveCount = 0;
+}
+
+
+RenderPassDecl::Dependency::Dependency()
+{
+	uSrcSubPass = 0;
+	uDstSubPass = 0;
+	uSrcStageFlags = 0;
+	uDstStageFlags = 0;
+	uSrcAccessFlags = 0;
+	uDstAccessFlags = 0;
 }
 
 
@@ -192,7 +239,8 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 {
 	// FIXME: Optimise this with a CRC - this will serve us for now
 	if (rhs.uAttachments != uAttachments
-		|| rhs.uSubPasses != uSubPasses)
+		|| rhs.uSubPasses != uSubPasses
+		|| rhs.uDependencies != uDependencies)
 	{
 		return false;
 	}
@@ -200,6 +248,14 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 	for (uint32 i = 0; i < uAttachments; i++)
 	{
 		if (memcmp(&rhs.pAttachments[i], &pAttachments[i], sizeof(RenderPassDecl::Attachment)) != 0)
+		{
+			return false;
+		}
+	}
+
+	for (uint32 i = 0; i < uDependencies; i++)
+	{
+		if (memcmp(&rhs.pDependencies[i], &pDependencies[i], sizeof(RenderPassDecl::Dependency)) != 0)
 		{
 			return false;
 		}
@@ -236,12 +292,15 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 			}
 		}
 
-		for (uint32 uResolve = 0; uResolve < pass.uResolveCount; uResolve++)
+		if (pass.pResolveAttachments)
 		{
-			if (pass.pResolveAttachments[uResolve].eLayout != passRH.pResolveAttachments[uResolve].eLayout
-				|| pass.pResolveAttachments[uResolve].uIndex != passRH.pResolveAttachments[uResolve].uIndex)
+			for (uint32 uResolve = 0; uResolve < pass.uColorCount; uResolve++)
 			{
-				return false;
+				if (pass.pResolveAttachments[uResolve].eLayout != passRH.pResolveAttachments[uResolve].eLayout
+					|| pass.pResolveAttachments[uResolve].uIndex != passRH.pResolveAttachments[uResolve].uIndex)
+				{
+					return false;
+				}
 			}
 		}
 
@@ -270,6 +329,41 @@ bool RenderPassDecl::operator==(const RenderPassDecl& rhs) const
 
 	// It all matched
 	return true;
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependencyIn()
+{
+	return &ExternalColorDependenciesInAndOut()[0];
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependencyOut()
+{
+	return &ExternalColorDependenciesInAndOut()[1];
+}
+
+const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependenciesInAndOut()
+{
+	static Dependency DefaultExternals[2];
+	static bool bHasInit = false;
+	if (!bHasInit)
+	{
+		DefaultExternals[0].uSrcSubPass = SUBPASS_EXTERNAL;
+		DefaultExternals[0].uDstSubPass = 0;
+		DefaultExternals[0].uSrcStageFlags = SF_BOTTOM_OF_PIPE;
+		DefaultExternals[0].uDstStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
+		DefaultExternals[0].uSrcAccessFlags = AC_MEMORY_READ;
+		DefaultExternals[0].uDstAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
+
+		DefaultExternals[1].uSrcSubPass = 0;
+		DefaultExternals[1].uDstSubPass = SUBPASS_EXTERNAL;
+		DefaultExternals[1].uSrcStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
+		DefaultExternals[1].uDstStageFlags = SF_BOTTOM_OF_PIPE;
+		DefaultExternals[1].uSrcAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
+		DefaultExternals[1].uDstAccessFlags = AC_MEMORY_READ;
+		bHasInit = true;
+	}
+
+	return DefaultExternals;
 }
 
 DepthStencilStateDecl::DepthStencilStateDecl()

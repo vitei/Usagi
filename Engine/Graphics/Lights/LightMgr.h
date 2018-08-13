@@ -7,6 +7,8 @@
 #define USG_LIGHT_MGR_H
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Textures/DepthStencilBuffer.h"
+#include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Core/stl/Vector.h"
 #include "Engine/Memory/FastPool.h"
@@ -33,11 +35,15 @@ public:
 
 	// TODO: Add names to these lights?
 	void			Init(GFXDevice* pDevice, Scene* pParent);
+	void			InitShadowCascade(GFXDevice* pDevice, uint32 uLayers);
+	void			SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution);
 	void			CleanUp(GFXDevice* pDevice);
 	void			Update(float fDelta, uint32 uFrame);
 	void			GPUUpdate(GFXDevice* pDevice);
 	void			GlobalShadowRender(GFXContext* pContext, Scene* pScene);
 	void			ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext* pView);
+
+	TextureHndl		GetShadowCascadeImage() const;
 
 	DirLight*		AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName = NULL);
 	void			RemoveDirLight(DirLight* pLight);
@@ -68,6 +74,7 @@ public:
 
 	uint32 GetShadowedDirLightCount() const { return m_uShadowedDirLights; }
 	uint32 GetShadowedDirLightIndex() const { return m_uShadowedDirLightIndex; }
+	const RenderPassHndl& GetShadowPassHndl() const { return m_cascadeTarget.GetRenderPass(); }
 
 
 private:	
@@ -148,6 +155,11 @@ private:
 	LightInstances<SpotLight>		m_spotLights;
 	LightInstances<ProjectionLight>	m_projLights;
 	Color							m_ambient;
+
+	// FIXME: These should be per ViewContext
+	DepthStencilBuffer		m_cascadeBuffer;
+	RenderTarget			m_cascadeTarget;
+	uint32					m_shadowMapRes;
 
 	Scene*					m_pParent;
 	Color					m_skyColor;

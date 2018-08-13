@@ -26,6 +26,7 @@ namespace usg
 		virtual void PreDraw(usg::GFXDevice* pDevice, usg::GFXContext* pImmContext) override;
 		virtual void Draw(usg::Display* pDisplay, usg::IHeadMountedDisplay* pHMD, usg::GFXContext* pImmContext) override;
 		virtual void PostDraw(usg::GFXDevice* pDevice) override;
+		virtual bool FinalTargetIsDisplay() const { return true; }
 
 	private:
 		uint32 m_uActiveFrames;
