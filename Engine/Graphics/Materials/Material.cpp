@@ -6,6 +6,7 @@
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
 #include "Material.h"
 
 namespace usg {

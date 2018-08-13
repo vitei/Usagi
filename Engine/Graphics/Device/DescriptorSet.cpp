@@ -6,6 +6,7 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Device/DescriptorData.h"

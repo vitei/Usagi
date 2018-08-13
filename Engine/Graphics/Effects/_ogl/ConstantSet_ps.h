@@ -23,7 +23,7 @@ public:
 	ConstantSet_ps();
 	~ConstantSet_ps();
 
-	void Init(GFXDevice* pDevice, const ConstantSet& owner);
+	void Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage);
 	void CleanUp(GFXDevice* pDevice);
 	void UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate);
 	void Bind(ShaderConstantType eConstType) const;

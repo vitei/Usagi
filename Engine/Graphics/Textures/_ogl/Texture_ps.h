@@ -47,6 +47,8 @@ public:
 #endif
 
 	void NotifyOfTextureID(uint32 uTexID) { }
+	// No descriptors on OGL so nothing to get out of date
+	uint32 GetUpdateIdx() const { return 0; }
 
 private:
 	void Reset();

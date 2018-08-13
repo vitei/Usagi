@@ -7,7 +7,6 @@
 #include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/String/String_Util.h"
-#include API_HEADER(Engine/Graphics/Device, GLSLShader.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 #include <stdlib.h>

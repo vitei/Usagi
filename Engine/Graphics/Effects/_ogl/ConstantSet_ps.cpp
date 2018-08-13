@@ -69,7 +69,7 @@ void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 	}
 }
 
-void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner)
+void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage)
 {
 	m_pOwner = &owner;	
 	m_bDynamic = false;

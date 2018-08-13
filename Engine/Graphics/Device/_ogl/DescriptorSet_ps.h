@@ -22,7 +22,7 @@ public:
 	void Init(GFXDevice* pDevice, const DescriptorSetLayout* pLayout) {}
 	void CleanUp(GFXDevice* pDevice, DescriptorSetLayout* pLayout) {}
 
-	void UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData) {}
+	void UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData, bool bDoubleUpdate) {}
 	void NotifyBufferChanged(uint32 uLayoutIndex, uint32 uSubIndex, const DescriptorData* pData) {}
 
 private:

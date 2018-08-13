@@ -6,7 +6,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
-#include API_HEADER(Engine/Graphics/Device, GLSLShader.h)
 #include OS_HEADER(Engine/Graphics/Device, OpenGLIncludes.h)
 
 namespace usg {
