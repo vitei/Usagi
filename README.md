@@ -79,6 +79,8 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
+The engine has been updated to Vulkan, if you have issues you can follow the instructions in [graphics](https://github.com/vitei/Usagi/wiki/Graphics) to revert to the legacy OpenGL support.  
+
 Current Version 0.15
 ----------------------
 

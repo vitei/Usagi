@@ -263,9 +263,9 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 		}
 		else
 		{
-			DEBUG_PRINT("Unable to load texture %s\n", szTextureName);
 			if(!str::Find(szTextureName, "missing_texture") && bReplaceMissingTex)
 			{
+				DEBUG_PRINT("Unable to load texture %s\n", szTextureName);
 				return GetTextureAbsolutePath(pDevice, "Textures/missing_texture", eGPULocation);
 			}
 			else
@@ -274,7 +274,6 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 			}
 			
 		}
-
 	}
 	else
 	{
