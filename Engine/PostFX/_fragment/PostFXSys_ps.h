@@ -42,6 +42,7 @@ public:
 	const TextureHndl& GetLinearDepthTex() const;
 
 	const SceneRenderPasses& GetRenderPasses() const;
+	SceneRenderPasses& GetRenderPasses();
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }

@@ -58,6 +58,7 @@ public:
 
 	// FIXME: Pass in the right value
 	const SceneRenderPasses& GetRenderPasses() const { return m_platform.GetRenderPasses(); }
+	SceneRenderPasses& GetRenderPasses() { return m_platform.GetRenderPasses(); }
 
 	void DrawFullScreenQuad(GFXContext* pCtxt) const;
 

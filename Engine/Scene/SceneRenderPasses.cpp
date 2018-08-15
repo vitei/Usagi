@@ -84,12 +84,12 @@ namespace usg {
 		m_prevEntries.clear();
 	}
 
-	void SceneRenderPasses::UpdateEnd()
+	void SceneRenderPasses::UpdateEnd(GFXDevice* pDevice)
 	{
 		eastl::sort(m_entries.begin(), m_entries.end());
 		for (auto itr = m_callbacks.begin(); itr != m_callbacks.end(); ++itr)
 		{
-			itr->fnCallback(*this, itr->pUserData);
+			itr->fnCallback(*this, pDevice, itr->pUserData);
 		}
 	}
 

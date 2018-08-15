@@ -16,7 +16,7 @@ namespace usg
 class SceneRenderPasses
 {
 public:
-	typedef void(*ChangeCallback) (SceneRenderPasses& passSet, void* pUserData);
+	typedef void(*ChangeCallback) (SceneRenderPasses& passSet, GFXDevice* pDevice, void* pUserData);
 
 	SceneRenderPasses();
 	~SceneRenderPasses();
@@ -27,7 +27,7 @@ public:
 	void RemovePass(RenderNode::Layer eLayer, uint32 uPriority);
 	void ClearAllPasses();
 	void ClearPrevPasses();
-	void UpdateEnd();
+	void UpdateEnd(GFXDevice* pDevice);
 	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet = false) const;
 	const RenderPassHndl GetRenderPass(const RenderNode& node, bool bPrevSet = false) const;
 	bool GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const;

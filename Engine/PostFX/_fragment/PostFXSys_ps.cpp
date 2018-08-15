@@ -391,6 +391,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pFinalEffect = m_pSMAA;
 	}
 
+	m_renderPasses.UpdateEnd(pDevice);
 	m_pFinalTarget = pDst;
 
 }
@@ -703,6 +704,12 @@ const SceneRenderPasses& PostFXSys_ps::GetRenderPasses() const
 {
 	return m_renderPasses;
 }
+
+SceneRenderPasses& PostFXSys_ps::GetRenderPasses()
+{
+	return m_renderPasses;
+}
+
 
 }
 
