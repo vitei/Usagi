@@ -47,9 +47,7 @@ public:
 
 	enum
 	{
-		// FIXME: Bump back up when he have them
-		MAX_LOD_GROUPS = 3,
-		MAX_NODES = 50	// TODO: Replace with a list?
+		MAX_LOD_GROUPS = 3
 	};
 
 	// Only call manually if you don't have a transform node
