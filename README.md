@@ -93,23 +93,19 @@ Issues
 
 **The current is a list of known issues with Usagi which need to be addressed.**
 
-There is no longer a system for linking projects and engine versions
+There is no longer a system other than submodules for linking projects and engine versions  
 
-A replacement model editor would be required to take advantage of the existing custom shader support
+A replacement model editor would be required to take advantage of the existing custom shader support  
 
-Resource loading is slow and single threaded
+Resource loading is slow and single threaded  
 
-Resources don't have an internal list of dependenices
+Resources don't have an internal list of dependenices  
 
-The Vulkan implementation is only half complete
+The running of systems is not yet multi-threaded  
 
-The running of systems is not yet multi-threaded
+Spot and projection lights are not properlly culled  
 
-Spot and projection lights are not properlly culled
-
-If the window loses focus at the wrong time creating the render targets will fail
-
-The AI would need updating to be able to control flying vehicles
+The AI would need updating to be able to control flying vehicles  
 
 
 License
