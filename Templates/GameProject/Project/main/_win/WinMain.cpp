@@ -108,10 +108,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		case WM_SIZE:
 		{
-		/*	if (!bIsSizing && wparam != SIZE_MINIMIZED)
+			if (wparam == SIZE_MINIMIZED)
+			{
+				GameMessage('WMIN', nullptr);
+			}
+			else if (!bIsSizing)
 			{
 				GameMessage('WSZE', nullptr);
-			}*/
+			}
 		}
 		break;
 
@@ -183,7 +187,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			break;
 
 		case WM_DESTROY:
-			PostQuitMessage(0);
 			GameExit();
 			break;
 
@@ -197,6 +200,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return (DefWindowProc(hwnd, msg, wparam, lparam));
 
 }
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdline, int ncmdshow)
 {
