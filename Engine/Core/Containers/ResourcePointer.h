@@ -1,25 +1,27 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
-//	Description: No C++ 11 on the 3DS so we can't use the shared pointer
+//	Description: Originally when we couldn't use C++ 11 this class started out
+//  as a shared pointer but has evolved into a resource pointer which could be
+//  invalidated even if there are dangling references.
 *****************************************************************************/
-#ifndef _USG_CORE_CONTAINERS_SHARED_POINTER_H_
-#define	_USG_CORE_CONTAINERS_SHARED_POINTER_H_
+#ifndef _USG_CORE_CONTAINERS_RESOURCE_POINTER_H_
+#define	_USG_CORE_CONTAINERS_RESOURCE_POINTER_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Memory/ArrayPool.h"
 
 
 template <class PointerType>
-class SharedPointer
+class ResourcePointer
 {
 public:
-	SharedPointer();
-	~SharedPointer();
+	ResourcePointer();
+	~ResourcePointer();
 
-	SharedPointer(PointerType* pData);
+	ResourcePointer(PointerType* pData);
 
 	// Copy constructors
-	SharedPointer(const SharedPointer &rhs) { init(NULL); copy(rhs); }
-	SharedPointer& operator=(const SharedPointer &rhs) { copy(rhs); return *this; }
+	ResourcePointer(const ResourcePointer &rhs) { init(NULL); copy(rhs); }
+	ResourcePointer& operator=(const ResourcePointer &rhs) { copy(rhs); return *this; }
 
 	// Operator overloads
 	PointerType* operator->() const { return m_pPointer; }
@@ -28,8 +30,8 @@ public:
 	operator bool() const { return m_pPointer != NULL; }
 
 	// Mimicking C++ 11'd shr_ptr which only has tests against null_ptr
-	bool operator==(const SharedPointer &rhs) const { return rhs.m_pPointer == m_pPointer; }
-	bool operator!=(const SharedPointer &rhs) const { return rhs.m_pPointer != m_pPointer; }
+	bool operator==(const ResourcePointer &rhs) const { return rhs.m_pPointer == m_pPointer; }
+	bool operator!=(const ResourcePointer &rhs) const { return rhs.m_pPointer != m_pPointer; }
 
 	void reset(PointerType* pType = NULL);	// Call with NULL when the data has been manually deleted
 	PointerType* get() const { return m_pPointer; }
@@ -40,7 +42,7 @@ public:
 
 private:
 	void init(PointerType* pType);
-	void copy(const SharedPointer<PointerType>& copyData);
+	void copy(const ResourcePointer<PointerType>& copyData);
 	void removeRef();
 	void destroy(PointerType* pType);
 	void replacePointer(PointerType* pType, bool bPrev, bool bNext);
@@ -48,42 +50,42 @@ private:
 
 	void messageDataInvalidate();
 
-	SharedPointer*	m_pNext;
-	SharedPointer*	m_pPrev;
+	ResourcePointer*	m_pNext;
+	ResourcePointer*	m_pPrev;
 
 	PointerType*	m_pPointer;
 };
 
 template <class PointerType>
-SharedPointer<PointerType> make_shared(PointerType* pPointer)
+ResourcePointer<PointerType> make_shared(PointerType* pPointer)
 {
 	// Non optimal, copy constructor, but just need to match the c++ 11 
-	SharedPointer<PointerType> shared(pPointer);
+	ResourcePointer<PointerType> shared(pPointer);
 	return shared;
 }
 
 
 template <class PointerType>
-NO_INLINE_TEMPL SharedPointer<PointerType>::SharedPointer()
+NO_INLINE_TEMPL ResourcePointer<PointerType>::ResourcePointer()
 {
 	init(NULL);
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL SharedPointer<PointerType>::SharedPointer(PointerType* pData)
+NO_INLINE_TEMPL ResourcePointer<PointerType>::ResourcePointer(PointerType* pData)
 {
 	init(pData);
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL SharedPointer<PointerType>::~SharedPointer()
+NO_INLINE_TEMPL ResourcePointer<PointerType>::~ResourcePointer()
 {
 	removeRef();
 }
 
 
 template <class PointerType>
-void SharedPointer<PointerType>::removeRef()
+void ResourcePointer<PointerType>::removeRef()
 {
 	// Shared pointers clean themselves up if there are no references to them
 	if (!m_pNext && !m_pPrev && m_pPointer)
@@ -108,12 +110,12 @@ void SharedPointer<PointerType>::removeRef()
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::messageDataInvalidate()
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
 {
-	SharedPointer<PointerType>* pPtr = m_pNext;
+	ResourcePointer<PointerType>* pPtr = m_pNext;
 	while (pPtr)
 	{
-		SharedPointer<PointerType>* pNext = pPtr->m_pNext;
+		ResourcePointer<PointerType>* pNext = pPtr->m_pNext;
 		pPtr->m_pPointer = nullptr;
 		pPtr->m_pNext = nullptr;
 		pPtr->m_pPrev = nullptr;
@@ -123,7 +125,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::messageDataInvalidate()
 	pPtr = m_pPrev;
 	while (pPtr)
 	{
-		SharedPointer<PointerType>* pPrev = pPtr->m_pPrev;
+		ResourcePointer<PointerType>* pPrev = pPtr->m_pPrev;
 		pPtr->m_pPointer = nullptr;
 		pPtr->m_pNext = nullptr;
 		pPtr->m_pPrev = nullptr;
@@ -134,7 +136,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::messageDataInvalidate()
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::copy(const SharedPointer<PointerType>& copyData)
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::copy(const ResourcePointer<PointerType>& copyData)
 {
 	if(&copyData == this)
 		return;
@@ -146,7 +148,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::copy(const SharedPointer<Pointe
 
 	removeRef();
 
-	SharedPointer<PointerType>& nonConstCopyData = *const_cast<SharedPointer<PointerType>*>(&copyData);
+	ResourcePointer<PointerType>& nonConstCopyData = *const_cast<ResourcePointer<PointerType>*>(&copyData);
 	
 	m_pNext = nonConstCopyData.m_pNext;
 	m_pPrev = &nonConstCopyData;
@@ -162,7 +164,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::copy(const SharedPointer<Pointe
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::reset(PointerType* pType)
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::reset(PointerType* pType)
 {
 	if (pType == NULL)
 	{
@@ -177,7 +179,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::reset(PointerType* pType)
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::init(PointerType* pPointerData)
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::init(PointerType* pPointerData)
 {
 	m_pPointer = pPointerData;
 	m_pNext = NULL;
@@ -185,7 +187,7 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::init(PointerType* pPointerData)
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::destroy(PointerType* pPointerData)
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::destroy(PointerType* pPointerData)
 {
 	ASSERT(m_pPointer!=NULL);
 	ASSERT(m_pPointer == pPointerData);
@@ -194,16 +196,25 @@ NO_INLINE_TEMPL void SharedPointer<PointerType>::destroy(PointerType* pPointerDa
 
 
 template <class PointerType>
-NO_INLINE_TEMPL void SharedPointer<PointerType>::replacePointer(PointerType* pType, bool bPrev, bool bNext)
+NO_INLINE_TEMPL void ResourcePointer<PointerType>::replacePointer(PointerType* pType, bool bPrev, bool bNext)
 {
-	if (bPrev && m_pPrev)
+	ResourcePointer<PointerType>* pPtr = m_pNext;
+	while (pPtr)
 	{
-		m_pPrev->replacePointer(pType, true, false);
+		ResourcePointer<PointerType>* pNext = pPtr->m_pNext;
+		pPtr->m_pPointer = pType;
+		pPtr = pNext;
 	}
-	if (bNext && m_pNext)
+
+	pPtr = m_pPrev;
+	while (pPtr)
 	{
-		m_pNext->replacePointer(pType, false, true);
+		ResourcePointer<PointerType>* pPrev = pPtr->m_pPrev;
+		pPtr->m_pPointer = pType;
+		pPtr = pPrev;
 	}
+
+	m_pPointer = pType;
 }
 
 #endif

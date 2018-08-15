@@ -5,7 +5,7 @@
 #ifndef _USG_RESOURCE_RESOURCE_DECL_H_
 #define _USG_RESOURCE_RESOURCE_DECL_H_
 #include "Engine/Common/Common.h"
-#include "Engine/Core/Containers/SharedPointer.h"
+#include "Engine/Core/Containers/ResourcePointer.h"
 
 
 namespace usg
@@ -26,16 +26,16 @@ class ProtocolBufferFile;
 class ConstantSet;
 class CustomEffectResource;
 
-typedef SharedPointer<const CollisionModelResource> CollisionModelResHndl;
-typedef SharedPointer<const ModelResource> ModelResHndl;
-typedef SharedPointer<const Effect> EffectHndl;
-typedef SharedPointer<const Texture> TextureHndl;
-typedef SharedPointer<const Font> FontHndl;
-typedef SharedPointer<const CustomEffectResource> CustomEffectResHndl;
-typedef SharedPointer<const LookupTable> LookupTableHndl;
-typedef SharedPointer<const SkeletalAnimationResource> SkeletalAnimationResHndl;
-typedef SharedPointer<const ParticleEffectResource> ParticleEffectResHndl;
-typedef SharedPointer<const ParticleEmitterResource> ParticleEmitterResHndl;
+typedef ResourcePointer<const CollisionModelResource> CollisionModelResHndl;
+typedef ResourcePointer<const ModelResource> ModelResHndl;
+typedef ResourcePointer<const Effect> EffectHndl;
+typedef ResourcePointer<const Texture> TextureHndl;
+typedef ResourcePointer<const Font> FontHndl;
+typedef ResourcePointer<const CustomEffectResource> CustomEffectResHndl;
+typedef ResourcePointer<const LookupTable> LookupTableHndl;
+typedef ResourcePointer<const SkeletalAnimationResource> SkeletalAnimationResHndl;
+typedef ResourcePointer<const ParticleEffectResource> ParticleEffectResHndl;
+typedef ResourcePointer<const ParticleEmitterResource> ParticleEmitterResHndl;
 
 
 }

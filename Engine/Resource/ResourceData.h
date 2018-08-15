@@ -66,7 +66,7 @@ class ResourceData : public ResourceDataBase
 private:
 	struct ResourceInfo
 	{
-		SharedPointer<const ResourceType>	resource;
+		ResourcePointer<const ResourceType>	resource;
 		uint32								uTag;
 		bool								bStatic;
 	};
@@ -123,8 +123,8 @@ public:
 		}
 	}
 	 
-	SharedPointer<const ResourceType> GetResourceHndl(const U8String& resName);
-	SharedPointer<const ResourceType> AddResource(const ResourceType* pResource);
+	ResourcePointer<const ResourceType> GetResourceHndl(const U8String& resName);
+	ResourcePointer<const ResourceType> AddResource(const ResourceType* pResource);
 
 
 	uint32 GetResourceCount() const { return m_resources.Size(); }
@@ -163,12 +163,12 @@ inline ResourceData<ResourceType>::~ResourceData()
 
 
 template <class ResourceType>
-inline SharedPointer<const ResourceType> ResourceData<ResourceType>::AddResource(const ResourceType* pResource)
+inline ResourcePointer<const ResourceType> ResourceData<ResourceType>::AddResource(const ResourceType* pResource)
 {
 #ifdef DEBUG_RESOURCE_MGR
 	m_loadTimer.Stop();
 #endif
-	SharedPointer<const ResourceType> ret;
+	ResourcePointer<const ResourceType> ret;
 	// TODO: Remove me from a final build
 	ResourceInfo* pInfo = m_resources.Alloc();
 	pInfo->resource = pResource;
@@ -180,7 +180,7 @@ inline SharedPointer<const ResourceType> ResourceData<ResourceType>::AddResource
 }
 
 template <class ResourceType>
-SharedPointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(const U8String& resName)
+ResourcePointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(const U8String& resName)
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
 	NameHash nameHash = ResourceDictionary::calcNameHash( resName.CStr() );
@@ -205,7 +205,7 @@ SharedPointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(co
 	m_findTimer.Stop();
 #endif
 
-	return SharedPointer<const ResourceType>(nullptr);
+	return ResourcePointer<const ResourceType>(nullptr);
 }
 
 template <class ResourceType>

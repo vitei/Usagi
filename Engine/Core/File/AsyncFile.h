@@ -5,7 +5,7 @@
 #ifndef _USG_ASYNC_FILE_H_
 #define _USG_ASYNC_FILE_H_
 #include "Engine/Common/Common.h"
-#include "Engine/Core/Containers/SharedPointer.h"
+#include "Engine/Core/Containers/ResourcePointer.h"
 #include "Engine/Core/File/File.h"
 
 namespace usg
@@ -14,8 +14,8 @@ namespace usg
 	class AsyncFileRequest;	// TODO: Make this more generic, not just for files
 
 	// FIXME: Rather than shared pointers these should be a new reference tracker type (but fortunately our sharedpointer implementation lets us treat it as such)
-	typedef SharedPointer<AsyncFile> 		AsyncFileHndl;
-	typedef SharedPointer<AsyncFileRequest>	AsyncRequestHndl;
+	typedef ResourcePointer<AsyncFile> 		AsyncFileHndl;
+	typedef ResourcePointer<AsyncFileRequest>	AsyncRequestHndl;
 
 	typedef void (*AsyncRequestCallback) (AsyncRequestHndl handle);
 
