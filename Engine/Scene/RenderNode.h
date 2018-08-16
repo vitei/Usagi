@@ -94,6 +94,8 @@ public:
 	bool operator>(const RenderNode &rhs) const;
 
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) { ASSERT(false); return false; }
+	// Should be overloaded, but not necessary for post process effects not ever assigned to a render group
+	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) {} // { ASSERT(false); }
 
 	bool GetPostEffect() { return m_bPostEffect; }
 	bool HasShadow() { return m_bHasShadow; }

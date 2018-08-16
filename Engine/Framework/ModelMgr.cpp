@@ -39,7 +39,7 @@ namespace usg
 		else
 		{
 			pModel->SetDynamic(m_pDevice, bDynamic);
-			pModel->SetFade(false);
+			pModel->SetFade(m_pDevice, false);
 			pModel->RemoveOverrides(m_pDevice);
 			pModel->SetInUse(true);
 		}

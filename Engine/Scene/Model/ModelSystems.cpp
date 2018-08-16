@@ -58,16 +58,16 @@ namespace usg
 			DECLARE_SYSTEM(SYSTEM_POST_TRANSFORM)
 		    static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
-				if(inputs.visibility.Exists() && inputs.model.GetRuntimeData().pModel->ShouldDraw() != inputs.visibility.Force()->bVisible)
-				{
-					outputs.model.GetRuntimeData().pModel->AddToScene(inputs.visibility.Force()->bVisible);
-				}
 				outputs.model.GetRuntimeData().pModel->SetTransform(inputs.matrix->matrix);
 				
 			}
 
 			static  void GPUUpdate(const Inputs& inputs, Outputs& outputs, GPUHandles* pGPUData)
 			{
+				if (inputs.visibility.Exists() && inputs.model.GetRuntimeData().pModel->ShouldDraw() != inputs.visibility.Force()->bVisible)
+				{
+					outputs.model.GetRuntimeData().pModel->AddToScene(pGPUData->pDevice, inputs.visibility.Force()->bVisible);
+				}
 				outputs.model.GetRuntimeData().pModel->GPUUpdate(pGPUData->pDevice);
 			}
 

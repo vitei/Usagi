@@ -63,7 +63,7 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	m_pRenderGroup = pScene->CreateRenderGroup(NULL);
 
 	RenderNode* pNode = this;
-	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
 
 	m_psRenderer = this;
 }

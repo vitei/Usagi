@@ -41,7 +41,7 @@ Model::Model()
 Model::~Model()
 {
 	SetInUse(false);
-	AddToScene(false);
+	AddToScene(nullptr, false);
 	if(m_pSkeleton)
 	{
 		vdelete m_pSkeleton;
@@ -154,7 +154,7 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 	SetRenderMask(uRenderMask);
 
 	SetInUse(true);
-	AddToScene(true);
+	AddToScene(pDevice, true);
 
 	return true;
 }
@@ -205,7 +205,7 @@ void Model::SetInUse(bool bInUse)
 
 void Model::RemoveOverrides(GFXDevice* pDevice)
 {
-	SetFade(false, 1.0f);
+	SetFade(pDevice, false, 1.0f);
 	for (uint32 i = 0; i < m_pResource->GetMeshCount(); i++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
@@ -255,7 +255,7 @@ void Model::UpdateRenderMaskInt()
 	}
 }
 
-void Model::EnableShadow(bool bEnable)
+void Model::EnableShadow(GFXDevice* pDevice, bool bEnable)
 {
 	if (bEnable)
 	{
@@ -266,7 +266,7 @@ void Model::EnableShadow(bool bEnable)
 		m_depthRenderMask &= ~RenderNode::RENDER_MASK_SHADOW_CAST;
 	}
 
-	AddToSceneInt();
+	AddToSceneInt(pDevice);
 	UpdateRenderMaskInt();
 }
 
@@ -339,7 +339,7 @@ bool Model::IsOnScreen()
 #endif
 }
 
-void Model::AddToSceneInt()
+void Model::AddToSceneInt(GFXDevice* pDevice)
 {
 	Skeleton& skeleton = GetSkeleton();
 	bool bVisible = m_fAlpha > Math::EPSILON && m_bShouldBeVisible;
@@ -383,11 +383,11 @@ void Model::AddToSceneInt()
 					if (m_bPerBoneCulling)
 					{
 						Bone* pBone = skeleton.GetBone(pMesh->primitive.uRootIndex);
-						pBone->AttachRenderNode(m_pScene, pNode, m_meshArray[i]->GetLod(), m_bDynamic);
+						pBone->AttachRenderNode(pDevice, m_pScene, pNode, m_meshArray[i]->GetLod(), m_bDynamic);
 					}
 					else
 					{
-						m_pRenderGroup->AddRenderNode(pNode, m_meshArray[i]->GetLod());
+						m_pRenderGroup->AddRenderNode(pDevice, pNode, m_meshArray[i]->GetLod());
 					}
 					uMaxLod = Math::Max(m_meshArray[i]->GetLod(), uMaxLod);
 				}
@@ -442,7 +442,7 @@ void Model::AddToSceneInt()
 		}
 	}
 
-	AddDepthMesh(bAddDepth);
+	AddDepthMesh(pDevice, bAddDepth);
 
 	if (!m_bPerBoneCulling && m_pRenderGroup && m_pRenderGroup->IsEmpty())
 	{
@@ -453,10 +453,10 @@ void Model::AddToSceneInt()
 	m_bVisible = bVisible;
 }
 
-void Model::AddToScene(bool bVisible)
+void Model::AddToScene(GFXDevice* pDevice, bool bVisible)
 {
 	m_bShouldBeVisible = bVisible;
-	AddToSceneInt();
+	AddToSceneInt(pDevice);
 }
 
 Model::RenderMesh* Model::GetRenderMesh(const char* szMaterialName)
@@ -725,7 +725,7 @@ void Model::SetPriority(uint8 uPriority)
 	}
 }
 
-void Model::AddDepthMesh(bool bAdd)
+void Model::AddDepthMesh(GFXDevice* pDevice, bool bAdd)
 {
 	if (bAdd == m_bDepthPassMeshEnabled)
 		return;
@@ -743,11 +743,11 @@ void Model::AddDepthMesh(bool bAdd)
 			{
 				if (m_bPerBoneCulling)
 				{
-					pBone->AttachRenderNode(m_pScene, pDepthNode, m_meshArray[i]->GetLod(), m_bDynamic);
+					pBone->AttachRenderNode(pDevice, m_pScene, pDepthNode, m_meshArray[i]->GetLod(), m_bDynamic);
 				}
 				else
 				{
-					m_pRenderGroup->AddRenderNode(pDepthNode, m_meshArray[i]->GetLod());
+					m_pRenderGroup->AddRenderNode(pDevice, pDepthNode, m_meshArray[i]->GetLod());
 				}
 			}
 			else if(m_bPerBoneCulling)
@@ -765,7 +765,7 @@ void Model::AddDepthMesh(bool bAdd)
 
 }
 
-void Model::SetFade(bool bFade, float fAlpha)
+void Model::SetFade(GFXDevice* pDevice, bool bFade, float fAlpha)
 {
 	m_fAlpha = bFade ? fAlpha : 1.0f;
 
@@ -793,7 +793,7 @@ void Model::SetFade(bool bFade, float fAlpha)
 		m_depthRenderMask &= ~(RenderNode::RENDER_MASK_ALL);
 	}
 	
-	AddToSceneInt();
+	AddToSceneInt(pDevice);
 	UpdateRenderMaskInt();
 
 
@@ -825,9 +825,8 @@ void Model::SetFade(bool bFade, float fAlpha)
 			m_meshArray[i]->SetLayer(pResMesh->layer);
 			m_meshArray[i]->SetPriority(pResMesh->priority);
 		}
-		ASSERT(false);
 		// Need to cache these pipelines
-//		m_meshArray[i]->SetPipelineState(bTranslucent ? pResMesh->GetPipeline(renderPass).translucentStateCmp : pResMesh->GetPipeline(renderPass).defaultPipeline);
+		//m_meshArray[i]->SetPipelineState(bTranslucent ? pResMesh->GetPipeline(renderPass).translucentStateCmp : pResMesh->GetPipeline(renderPass).defaultPipeline);
 		renderPass = m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]);
 	}
 

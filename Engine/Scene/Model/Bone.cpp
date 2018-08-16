@@ -71,14 +71,14 @@ void Bone::RemoveTransformNode(Scene* pScene)
 }
 
 
-void Bone::AttachRenderNode(Scene* pScene, RenderNode* pNode, uint8 uLod, bool bDynamic)
+void Bone::AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod, bool bDynamic)
 {
 	if(!m_pRenderGroup)
 	{
 		m_pRenderGroup = pScene->CreateRenderGroup(m_pTransformNode);
 		m_pRenderGroup->UseVisibilityUpdate(bDynamic);
 	}
-	m_pRenderGroup->AddRenderNode(pNode, uLod);
+	m_pRenderGroup->AddRenderNode(pDevice, pNode, uLod);
 }
 
 void Bone::RemoveRenderNode(Scene* pScene, RenderNode* pNode)

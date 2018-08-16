@@ -24,9 +24,11 @@ namespace usg
 		void Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32 uMaxTriangles = 30, float fDepthBias = -30.f);
 		void UpdateBuffers(GFXDevice* pDevice);
 		virtual bool Draw( GFXContext* pContext, PostFXSys* pPostFXSys );
+		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass);
 
 		// Be sure to call in the following order when creating a decal
-		void AddToScene(Scene* pScene, bool bAdd);
+		void AddToScene(GFXDevice* pDevice, Scene* pScene);
+		void RemoveFromScene(Scene* pScene);
 		void SetContents( GFXDevice* pDevice, const usg::Sphere* pBounds, const VertexBuffer* pBuffer, const uint16* pIndices, uint32 uIndices );
 		void SetMatrix(const Matrix4x4& mProj, const Matrix4x4 &mView);
 

@@ -27,8 +27,8 @@ public:
 
 	void Init(const TransformNode* pNode, Scene* pScene);	// To be called by scene only
 	void Cleanup();
-	void AddRenderNodes(RenderNode** pNode, uint32 uCount, uint32 uLod = 0);
-	void AddRenderNode(RenderNode* pNode, uint32 uLod = 0) { AddRenderNodes(&pNode, 1, uLod); }
+	void AddRenderNodes(GFXDevice* pDevice, RenderNode** pNode, uint32 uCount, uint32 uLod = 0);
+	void AddRenderNode(GFXDevice* pDevice, RenderNode* pNode, uint32 uLod = 0) { AddRenderNodes(pDevice, &pNode, 1, uLod); }
 	void RemoveRenderNode(RenderNode* pNode);
 	bool IsEmpty() const;
 	void SetLodMaxDistance(uint32 uLod, float fMaxDistance);
