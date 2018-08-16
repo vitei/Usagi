@@ -366,6 +366,11 @@ namespace usg {
 		return m_pPostFXSys->GetRenderPasses();
 	}
 
+	SceneRenderPasses& ViewContext::GetRenderPasses()
+	{
+		return m_pPostFXSys->GetRenderPasses();
+	}
+
 	void ViewContext::SetShadowColor(usg::Color& color)
 	{
 		color.FillV4(m_shadowColor);

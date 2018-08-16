@@ -51,7 +51,8 @@ public:
 	void			DeleteViewContext(ViewContext* pRemove);
 
 	ViewContext*	GetViewContext(uint32 uId);
-	const SceneRenderPasses& GetRenderPasses(uint32 uViewContext);
+	SceneRenderPasses& GetRenderPasses(uint32 uViewContext);
+
 	
 	ShadowContext*	CreateShadowContext(GFXDevice* pDevice);
 	void			DeleteShadowContext(ShadowContext* pRemove);

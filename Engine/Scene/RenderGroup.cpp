@@ -14,6 +14,13 @@ const float LOD_NO_CULLING = FLT_MAX;
 const float LOD_TOLERANCE = 1.02f;
 
 
+void RenderPassChangeCallback(SceneRenderPasses& passSet, GFXDevice* pDevice, void* pUserData)
+{
+	RenderGroup* pGroup = (RenderGroup*)pUserData;
+	pGroup->RenderPassChanged(passSet, pDevice);
+}
+
+
 RenderGroup::RenderGroup()
 {
 	m_uLODGroups = 0;
@@ -47,6 +54,9 @@ void RenderGroup::Init(const TransformNode* pTransform, Scene* pScene)
 		m_lodGroups[i].fMaxDistanceSq	= LOD_NO_CULLING;
 	}
 
+	// TODO: Multiple views
+	m_pScene->GetRenderPasses(0).AddCallback(RenderPassChangeCallback, this);
+
 	m_pTransform = pTransform;	
 	m_pScene = pScene;
 	m_bLODCulling = false;
@@ -69,13 +79,21 @@ void RenderGroup::Cleanup()
 	m_viewData.uPrevLOD = 0;
 	m_bSort = false;
 
+	if (m_pScene)
+	{
+		m_pScene->GetRenderPasses(0).RemoveCallback(RenderPassChangeCallback, this);
+	}
+
 	for(int i=0; i<MAX_LOD_GROUPS; i++)
 	{
 		m_lodGroups[i].nodes.clear();		
 	}
 }
 
+void RenderGroup::RenderPassChanged(SceneRenderPasses& passSet, GFXDevice* pDevice)
+{
 
+}
 
 void RenderGroup::AddRenderNodes(RenderNode** ppNodes, uint32 uCount, uint32 uLod)
 {

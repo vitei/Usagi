@@ -272,7 +272,7 @@ ViewContext* Scene::GetViewContext(uint32 uId)
 	return m_pImpl->viewContexts.GetByIndex(uId);
 }
 
-const SceneRenderPasses& Scene::GetRenderPasses(uint32 uViewContext)
+SceneRenderPasses& Scene::GetRenderPasses(uint32 uViewContext)
 {
 	return GetViewContext(uViewContext)->GetRenderPasses();
 }

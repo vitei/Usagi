@@ -54,6 +54,8 @@ public:
 	void SetSortPos(const Vector3f &vSortPos) { ASSERT(!m_pTransform); m_vSortPos = vSortPos; m_bSort = true; }
 	// TODO: Add one per context
 	float GetSortingDistance() const { return m_viewData.fSortDistance; }
+
+	void RenderPassChanged(class SceneRenderPasses& passSet, GFXDevice* pDevice);
 private:
 	bool GetLodInt(const Vector4f& cameraPos, uint32 &lodOut, float fLODBias=1.0f);
 	void VisibilityUpdate(GFXDevice* pDevice);

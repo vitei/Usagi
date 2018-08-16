@@ -49,6 +49,7 @@ public:
 	Fog& GetFog(uint32 uIndex=0) { ASSERT(uIndex<MAX_FOGS); return m_fog[uIndex]; }
 	PostFXSys* GetPostFXSys() { return m_pPostFXSys; }
 	const SceneRenderPasses& GetRenderPasses() const;
+	SceneRenderPasses& GetRenderPasses();
 
 
 	void PreDraw(GFXContext* pContext, ViewType eViewType);
