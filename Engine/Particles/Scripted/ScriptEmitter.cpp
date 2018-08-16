@@ -424,6 +424,12 @@ namespace usg
 		m_fScale = fScale;
 	}
 
+	void ScriptEmitter::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+	{
+		m_material.UpdateRenderPass(pDevice, renderPass);
+	}
+
+
 	bool ScriptEmitter::Update(float fElapsed)
 	{
 		m_fDelay -= fElapsed;

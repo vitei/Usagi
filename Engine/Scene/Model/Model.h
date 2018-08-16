@@ -33,8 +33,9 @@ public:
 	bool Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic = false, bool bFastMem = true, bool bAutoTransform = true, bool bPerBoneCulling = true );
 	void CleanUp(GFXDevice* pDevice);
 	void InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 uMesh);
-	// TODO: Should refactor to two seperate calls, only adding needs the device
-	void AddToScene(GFXDevice* pDevice, bool bAdd);
+	// Note that AddToScene is dependent on a GPU update, to remove a model from the systems use ForceRemoveFromScene
+	void AddToScene(bool bAdd);
+	void ForceRemoveFromScene();
 	const U8String& GetName() const;
 	void SetInUse(bool bInUse);
 
@@ -52,7 +53,7 @@ public:
 	TransformNode* GetTransform() { return m_pTransformNode; }
 	const ModelResHndl& GetResource() const { return m_pResource; }
 
-	void SetFade(GFXDevice* pDevice, bool bFade, float fAlpha = 1.0f);
+	void SetFade(bool bFade, float fAlpha = 1.0f);
 	void RemoveOverrides(GFXDevice* pDevice);
 	void SetRenderMask(uint32 uRenderMask);
 	void EnableShadow(GFXDevice* pDevice, bool bEnable);

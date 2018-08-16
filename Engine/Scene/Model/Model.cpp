@@ -41,7 +41,7 @@ Model::Model()
 Model::~Model()
 {
 	SetInUse(false);
-	AddToScene(nullptr, false);
+	AddToScene(false);
 	if(m_pSkeleton)
 	{
 		vdelete m_pSkeleton;
@@ -154,7 +154,7 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 	SetRenderMask(uRenderMask);
 
 	SetInUse(true);
-	AddToScene(pDevice, true);
+	AddToScene(true);
 
 	return true;
 }
@@ -205,7 +205,7 @@ void Model::SetInUse(bool bInUse)
 
 void Model::RemoveOverrides(GFXDevice* pDevice)
 {
-	SetFade(pDevice, false, 1.0f);
+	SetFade(false, 1.0f);
 	for (uint32 i = 0; i < m_pResource->GetMeshCount(); i++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
@@ -266,7 +266,6 @@ void Model::EnableShadow(GFXDevice* pDevice, bool bEnable)
 		m_depthRenderMask &= ~RenderNode::RENDER_MASK_SHADOW_CAST;
 	}
 
-	AddToSceneInt(pDevice);
 	UpdateRenderMaskInt();
 }
 
@@ -453,10 +452,15 @@ void Model::AddToSceneInt(GFXDevice* pDevice)
 	m_bVisible = bVisible;
 }
 
-void Model::AddToScene(GFXDevice* pDevice, bool bVisible)
+void Model::AddToScene(bool bVisible)
 {
 	m_bShouldBeVisible = bVisible;
-	AddToSceneInt(pDevice);
+}
+
+void Model::ForceRemoveFromScene()
+{
+	m_bShouldBeVisible = false;
+	AddToSceneInt(nullptr);
 }
 
 Model::RenderMesh* Model::GetRenderMesh(const char* szMaterialName)
@@ -651,6 +655,9 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 
 void Model::GPUUpdate(GFXDevice* pDevice, bool bVisible)
 {
+	// Should internally check for any relevant changes, drop out if nothing needs changing
+	AddToSceneInt(pDevice);
+
 	// Update the bone buffers
 	if (bVisible)
 	{
@@ -765,7 +772,7 @@ void Model::AddDepthMesh(GFXDevice* pDevice, bool bAdd)
 
 }
 
-void Model::SetFade(GFXDevice* pDevice, bool bFade, float fAlpha)
+void Model::SetFade(bool bFade, float fAlpha)
 {
 	m_fAlpha = bFade ? fAlpha : 1.0f;
 
@@ -793,7 +800,6 @@ void Model::SetFade(GFXDevice* pDevice, bool bFade, float fAlpha)
 		m_depthRenderMask &= ~(RenderNode::RENDER_MASK_ALL);
 	}
 	
-	AddToSceneInt(pDevice);
 	UpdateRenderMaskInt();
 
 

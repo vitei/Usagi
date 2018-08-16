@@ -5,6 +5,7 @@
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/ViewContext.h"
 #include "RenderGroup.h"
 #include <float.h>
 
@@ -106,7 +107,7 @@ void RenderGroup::RenderPassChanged(SceneRenderPasses& passSet, GFXDevice* pDevi
 		{
 			if (passSet.GetRenderPassChanged((*it), renderPass) )
 			{
-				it->RenderPassChanged(pDevice, 0, renderPass);
+				NotifyRenderPassChanged(pDevice, 0, it, renderPass);
 			}
 		}
 	}
@@ -132,7 +133,7 @@ void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint3
 		for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
 		{
 			RenderPassHndl hndl = m_pScene->GetRenderPasses(i).GetRenderPass(*ppNodes[i]);
-			ppNodes[i]->RenderPassChanged(pDevice, i, hndl);
+			NotifyRenderPassChanged(pDevice, i, ppNodes[i], hndl);
 		}
 	}
 
@@ -143,6 +144,15 @@ void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint3
 	}
 
 	UpdateMask();
+}
+
+void RenderGroup::NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, RenderNode* pNode, const RenderPassHndl& hndl)
+{
+	uint32 uDrawFlags = m_pScene->GetViewContext(uContext)->GetRenderMask();
+	if (pNode->GetRenderMask() & uDrawFlags)
+	{
+		pNode->RenderPassChanged(pDevice, uContext, hndl);
+	}
 }
 
 void RenderGroup::UpdateMask()

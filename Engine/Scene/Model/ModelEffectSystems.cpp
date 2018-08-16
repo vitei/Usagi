@@ -93,7 +93,6 @@ namespace usg
 
 			static void	Run(const Inputs& inputs, Outputs& outputs, float fElapsed)
 			{
-#if 0
 				const FadeComponent& fadeIn = *inputs.fade;
 				const float fPrevFade = inputs.fade->fCurrentAlpha * inputs.fade->fCurrentAlphaCameraMultip;
 				const bool bWasFaded = fPrevFade < 1.0f - Math::EPSILON;
@@ -137,7 +136,6 @@ namespace usg
 						bSomethingChanged = true;
 					}
 				}
-#endif
 			}
 
 			static void		OnEvent(const Inputs& inputs, Outputs& outputs, const SetFadeMultiplier& evt)
@@ -158,12 +156,10 @@ namespace usg
 		private:
 			static void UpdateFadeValue(const Inputs& inputs, Outputs& outputs, float fFogValue)
 			{
-#if 0
 				float fValue = inputs.fade->fCurrentAlpha * inputs.fade->fCurrentAlphaCameraMultip * fFogValue;
 
 				usg::Model* pModel = outputs.model.GetRuntimeData().pModel;
 				pModel->SetFade(fValue != 1.0f, fValue);
-#endif
 			}	
 		};
 

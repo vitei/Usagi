@@ -9,6 +9,7 @@
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Scene/TransformNode.h"
+#include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Core/stl/Vector.h"
 
 namespace usg{
@@ -57,6 +58,7 @@ public:
 
 	void RenderPassChanged(class SceneRenderPasses& passSet, GFXDevice* pDevice);
 private:
+	void NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, RenderNode* pNode, const RenderPassHndl& hndl);
 	bool GetLodInt(const Vector4f& cameraPos, uint32 &lodOut, float fLODBias=1.0f);
 	void VisibilityUpdate(GFXDevice* pDevice);
 

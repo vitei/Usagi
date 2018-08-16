@@ -210,6 +210,16 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 	return true;
 }
 
+void Debug3D::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+{
+	pDevice->ChangePipelineStateRenderPass(renderPass, m_spherePipeline);
+	if (m_cubePipeline.IsValid())
+	{
+		pDevice->ChangePipelineStateRenderPass(renderPass, m_cubePipeline);
+	}
+}
+
+
 static inline void sincosf( float angle, float* psin, float* pcos )
 {
     *psin = sinf( angle );

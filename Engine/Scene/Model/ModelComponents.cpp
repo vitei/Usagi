@@ -18,7 +18,7 @@ namespace usg
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);
-		p.GetRuntimeData().pModel->AddToScene(handles.pDevice, !visibility.Exists() || visibility.Force()->bVisible);
+		p.GetRuntimeData().pModel->AddToScene(!visibility.Exists() || visibility.Force()->bVisible);
 		if (p->bShadowCast)
 		{
 			p.GetRuntimeData().pModel->EnableShadow(handles.pDevice, true);
@@ -30,7 +30,7 @@ namespace usg
 	{
 		if (p.GetRuntimeData().pModel != NULL)
 		{
-			p.GetRuntimeData().pModel->AddToScene(handles.pDevice, false);
+			p.GetRuntimeData().pModel->ForceRemoveFromScene();
 			handles.pModelMgr->Free(p.GetRuntimeData().pModel);
 		}
 

@@ -165,6 +165,8 @@ bool SpriteEmitter::Draw(GFXContext* pContext, RenderContext& renderContext)
 	return true;
 }
 
+
+
 bool SpriteEmitter::Update(float fElapsed)
 {
 	// Update the lifetimes

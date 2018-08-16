@@ -31,6 +31,8 @@ public:
 	void AddLine(const Vector3f& vStart, const Vector3f& vEnd, const Color& color, float fWidth);
 	void Clear();
 	void UpdateBuffers(GFXDevice* pDevice);
+	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
+
 
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 

@@ -214,7 +214,7 @@ bool Decal::Draw( GFXContext* pContext, PostFXSys* pPostFXSys )
 
 void Decal::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
 {
-	
+	m_material.UpdateRenderPass(pDevice, renderPass);
 }
 
 void Decal::SetOpacity( float opacity )
