@@ -55,7 +55,7 @@ The build process has not been improved or significantly modified and currently 
    Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
-1. Clone a **Usagi Project**
+1. Clone an Usagi based Project  
    For example [UsagiTest](https://github.com/vitei/UsagiTest)  
    Always clone Usagi repos recursively as we make heavy use of submodules  
    **OR**  
