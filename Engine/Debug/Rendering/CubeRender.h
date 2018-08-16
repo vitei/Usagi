@@ -27,7 +27,7 @@ public:
 	bool    Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool bHideInside=false);
 	void	Remove();
 	void	FreeAllocation();
-	void	Create(bool bHideInside = false);
+	void	Create(GFXDevice* pDevice, bool bHideInside = false);
     
     void    Clear();
     void    AddCube(const Matrix4x4& mat, const Color& clr);

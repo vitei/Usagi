@@ -232,14 +232,14 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
     CreateFontsTexture(pDevice);
 }
 
-void IMGuiRenderer::AddToScene(Scene* pScene)
+void IMGuiRenderer::AddToScene(GFXDevice* pDevice, Scene* pScene)
 {
 	m_pScene = pScene;
 	m_pRenderGroup = pScene->CreateRenderGroup(NULL);
 
 
 	RenderNode* pNode = this;
-	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
 }
 
 

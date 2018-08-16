@@ -5,6 +5,7 @@
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/ViewContext.h"
 #include "RenderGroup.h"
 #include <float.h>
 
@@ -55,7 +56,10 @@ void RenderGroup::Init(const TransformNode* pTransform, Scene* pScene)
 	}
 
 	// TODO: Multiple views
-	m_pScene->GetRenderPasses(0).AddCallback(RenderPassChangeCallback, this);
+	if (pScene->GetViewContext(0))
+	{
+		pScene->GetRenderPasses(0).AddCallback(RenderPassChangeCallback, this);
+	}
 
 	m_pTransform = pTransform;	
 	m_pScene = pScene;
@@ -81,7 +85,10 @@ void RenderGroup::Cleanup()
 
 	if (m_pScene)
 	{
-		m_pScene->GetRenderPasses(0).RemoveCallback(RenderPassChangeCallback, this);
+		for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+		{
+			m_pScene->GetRenderPasses(i).RemoveCallback(RenderPassChangeCallback, this);
+		}
 	}
 
 	for(int i=0; i<MAX_LOD_GROUPS; i++)
@@ -92,10 +99,22 @@ void RenderGroup::Cleanup()
 
 void RenderGroup::RenderPassChanged(SceneRenderPasses& passSet, GFXDevice* pDevice)
 {
+	RenderPassHndl renderPass;
+	for (uint32 uLod = 0; uLod < m_uLODGroups; uLod++)
+	{
+		LODGroup &lodGroup = m_lodGroups[uLod];
+		for (auto it : lodGroup.nodes)
+		{
+			if (passSet.GetRenderPassChanged((*it), renderPass) )
+			{
+				NotifyRenderPassChanged(pDevice, 0, it, renderPass);
+			}
+		}
+	}
 
 }
 
-void RenderGroup::AddRenderNodes(RenderNode** ppNodes, uint32 uCount, uint32 uLod)
+void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint32 uCount, uint32 uLod)
 {
 	ASSERT(uLod < MAX_LOD_GROUPS);
 	LODGroup &lodGroup = m_lodGroups[uLod];
@@ -108,7 +127,14 @@ void RenderGroup::AddRenderNodes(RenderNode** ppNodes, uint32 uCount, uint32 uLo
 		{
 			m_bViewDistanceUpdate = true;
 		}
-		lodGroup.nodes.push_back(ppNodes[i]);
+
+		// We can't know if this was created with the correct render pass, so assume it wasn't
+		lodGroup.nodes.push_back(ppNodes[i]);	
+		for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+		{
+			RenderPassHndl hndl = m_pScene->GetRenderPasses(i).GetRenderPass(*ppNodes[i]);
+			NotifyRenderPassChanged(pDevice, i, ppNodes[i], hndl);
+		}
 	}
 
 	
@@ -118,6 +144,15 @@ void RenderGroup::AddRenderNodes(RenderNode** ppNodes, uint32 uCount, uint32 uLo
 	}
 
 	UpdateMask();
+}
+
+void RenderGroup::NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, RenderNode* pNode, const RenderPassHndl& hndl)
+{
+	uint32 uDrawFlags = m_pScene->GetViewContext(uContext)->GetRenderMask();
+	if (pNode->GetRenderMask() & uDrawFlags)
+	{
+		pNode->RenderPassChanged(pDevice, uContext, hndl);
+	}
 }
 
 void RenderGroup::UpdateMask()

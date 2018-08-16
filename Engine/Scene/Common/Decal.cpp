@@ -129,21 +129,26 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 }
 
 
-void Decal::AddToScene(Scene* pScene, bool bAdd)
+void Decal::AddToScene(GFXDevice* pDevice, Scene* pScene)
 {
-	if(bAdd && !m_pTransformNode)
+	if(!m_pTransformNode)
 	{
 		m_pTransformNode = pScene->CreateTransformNode();
 		m_pRenderGroup = pScene->CreateRenderGroup( m_pTransformNode );
 
 		RenderNode* pNode = (RenderNode*)this;
-		m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+		m_pRenderGroup->AddRenderNodes(pDevice, &pNode, 1, 0 );
 	}
-	else if(!bAdd && m_pTransformNode)
+
+}
+
+void Decal::RemoveFromScene(Scene* pScene)
+{
+	if (m_pTransformNode)
 	{
 		m_pRenderGroup->RemoveRenderNode(this);
 
-		if(m_pRenderGroup->IsEmpty())
+		if (m_pRenderGroup->IsEmpty())
 		{
 			pScene->DeleteRenderGroup(m_pRenderGroup);
 			pScene->DeleteTransformNode(m_pTransformNode);
@@ -152,7 +157,6 @@ void Decal::AddToScene(Scene* pScene, bool bAdd)
 		}
 	}
 }
-
 
 void Decal::SetTexture(usg::GFXDevice* pDevice, TextureHndl pTexture)
 {
@@ -205,6 +209,12 @@ bool Decal::Draw( GFXContext* pContext, PostFXSys* pPostFXSys )
 
 
 	return true;
+}
+
+
+void Decal::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+{
+	m_material.UpdateRenderPass(pDevice, renderPass);
 }
 
 void Decal::SetOpacity( float opacity )

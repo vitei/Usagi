@@ -21,7 +21,7 @@ namespace usg
 		p.GetRuntimeData().pModel->AddToScene(!visibility.Exists() || visibility.Force()->bVisible);
 		if (p->bShadowCast)
 		{
-			p.GetRuntimeData().pModel->EnableShadow(true);
+			p.GetRuntimeData().pModel->EnableShadow(handles.pDevice, true);
 		}
 	}
 
@@ -30,7 +30,7 @@ namespace usg
 	{
 		if (p.GetRuntimeData().pModel != NULL)
 		{
-			p.GetRuntimeData().pModel->AddToScene(false);
+			p.GetRuntimeData().pModel->ForceRemoveFromScene();
 			handles.pModelMgr->Free(p.GetRuntimeData().pModel);
 		}
 

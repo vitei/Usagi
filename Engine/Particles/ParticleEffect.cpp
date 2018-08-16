@@ -169,7 +169,7 @@ void ParticleEffect::AddEmitter(GFXDevice* pDevice, ParticleEmitter* pEmitter)
 {
 	m_emitters.AddToEnd(pEmitter);
 	RenderNode* pNode = (RenderNode*)pEmitter;
-	m_pRenderGroup->AddRenderNodes(&pNode, 1);
+	m_pRenderGroup->AddRenderNodes(pDevice, &pNode, 1);
 	pEmitter->SetScale(m_fScale);
 	pEmitter->Init(pDevice, this);
 	// Make sure it has the relevant data

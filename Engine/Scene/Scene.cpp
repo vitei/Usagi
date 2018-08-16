@@ -269,7 +269,16 @@ void Scene::DeleteViewContext(ViewContext* pRemove)
 ViewContext* Scene::GetViewContext(uint32 uId)
 {
 	// FIXME: Give an ID to these contexts, or ideally a hash
-	return m_pImpl->viewContexts.GetByIndex(uId);
+	if (m_pImpl->viewContexts.Size() > uId)
+	{
+		return m_pImpl->viewContexts.GetByIndex(uId);
+	}
+	return nullptr;
+}
+
+uint32 Scene::GetViewContextCount() const
+{
+	return m_pImpl->viewContexts.Size();
 }
 
 SceneRenderPasses& Scene::GetRenderPasses(uint32 uViewContext)

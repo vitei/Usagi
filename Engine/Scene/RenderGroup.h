@@ -9,6 +9,7 @@
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Scene/TransformNode.h"
+#include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Core/stl/Vector.h"
 
 namespace usg{
@@ -27,8 +28,8 @@ public:
 
 	void Init(const TransformNode* pNode, Scene* pScene);	// To be called by scene only
 	void Cleanup();
-	void AddRenderNodes(RenderNode** pNode, uint32 uCount, uint32 uLod = 0);
-	void AddRenderNode(RenderNode* pNode, uint32 uLod = 0) { AddRenderNodes(&pNode, 1, uLod); }
+	void AddRenderNodes(GFXDevice* pDevice, RenderNode** pNode, uint32 uCount, uint32 uLod = 0);
+	void AddRenderNode(GFXDevice* pDevice, RenderNode* pNode, uint32 uLod = 0) { AddRenderNodes(pDevice, &pNode, 1, uLod); }
 	void RemoveRenderNode(RenderNode* pNode);
 	bool IsEmpty() const;
 	void SetLodMaxDistance(uint32 uLod, float fMaxDistance);
@@ -57,6 +58,7 @@ public:
 
 	void RenderPassChanged(class SceneRenderPasses& passSet, GFXDevice* pDevice);
 private:
+	void NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, RenderNode* pNode, const RenderPassHndl& hndl);
 	bool GetLodInt(const Vector4f& cameraPos, uint32 &lodOut, float fLODBias=1.0f);
 	void VisibilityUpdate(GFXDevice* pDevice);
 

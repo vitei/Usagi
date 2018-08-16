@@ -78,14 +78,14 @@ void CubeRender::Remove()
 	}
 }
 
-void CubeRender::Create(bool bHideInside)
+void CubeRender::Create(GFXDevice* pDevice, bool bHideInside)
 {
 	if (m_pScene && !m_pRenderGroup)
 	{
 		m_pRenderGroup = m_pScene->CreateRenderGroup(NULL);
 
 		RenderNode* pNode = &m_mesh;
-		m_pRenderGroup->AddRenderNodes(&pNode, 1, 0);
+		m_pRenderGroup->AddRenderNodes(pDevice, &pNode, 1, 0);
 	}
 }
 

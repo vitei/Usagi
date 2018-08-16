@@ -165,7 +165,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 	m_pRenderGroup = pScene->CreateRenderGroup(m_pTransformNode);
 
 	RenderNode* pNode = &m_mesh;
-	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
 	pNode->SetLayer(RenderNode::LAYER_OPAQUE);
 	pNode->SetPriority(0);
 

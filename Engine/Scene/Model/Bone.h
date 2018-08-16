@@ -53,7 +53,7 @@ public:
 	const Matrix4x4& GetWorldMatrix() const { return m_pTransformNode->GetMatrix(); }
 	const Matrix4x4& GetInverseBindMatrix() const { return m_pResource->mInvBindMatrix;  }
 	const usg::Sphere& GetLocalColSphere() const { return m_pResource->cColSphere;  }
-	void AttachRenderNode(Scene* pScene, RenderNode* pNode, uint8 uLod = 0, bool bDynamic = false);
+	void AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod = 0, bool bDynamic = false);
 	void RemoveRenderNode(Scene* pScene, RenderNode* pNode);
 	void RemoveRenderNodes(Scene* pScene);
 

@@ -34,7 +34,8 @@ namespace usg
 			if (!pInstance)
 				return;
 
-			pInstance->AddToScene(false);
+			// Device not needed to remove
+			pInstance->ForceRemoveFromScene();
 			if (m_inUseList.Remove(pInstance))
 			{
 				m_freeList.AddToEnd(pInstance);

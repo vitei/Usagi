@@ -90,7 +90,7 @@ Decal* GroundDecals::GetShadowDecal(const char* szTexName)
 }
 void GroundDecals::FreeShadowDecal(Decal* pDecal)
 {
-	pDecal->AddToScene(m_pScene, false);
+	pDecal->RemoveFromScene(m_pScene);
 	m_shadowDecals.Free(pDecal);
 }
 
@@ -164,7 +164,7 @@ void GroundDecals::AddDecal( GFXDevice* pDevice, const CollisionMeshHitResult& h
 
 	
 	// Init the renderable decal
-	decal.AddToScene(m_pScene, true);
+	decal.AddToScene(pDevice, m_pScene);
 	decal.SetContents(pDevice, &boundingSphere, &m_vertexBuffer, indices, indicesNum);
 	decal.SetMatrix(projMatrix, viewMatrix);
 	decal.SetTexture(m_pDevice, pTexture);
@@ -228,7 +228,7 @@ void GroundDecals::UpdateDecal( DamageDecal& decal, float fDelta )
 
 	if(decal.fExisitingTime > TOTAL_LIFE)
 	{
-		decal.decal.AddToScene(m_pScene, false);
+		decal.decal.RemoveFromScene(m_pScene);
 	}
 	else
 	{

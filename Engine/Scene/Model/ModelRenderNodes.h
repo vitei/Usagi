@@ -33,6 +33,8 @@ namespace usg {
 		{
 			m_descriptorSet.CleanUp(pDevice);
 		}
+		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
+
 
 		void SetVertexBuffer( uint32 index, const VertexBuffer* pBuffer )
 		{

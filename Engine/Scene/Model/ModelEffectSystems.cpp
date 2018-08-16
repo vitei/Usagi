@@ -25,6 +25,7 @@ namespace usg
 	namespace Systems
 	{
 
+		// FIXME: Refactor so that visibility is cached and processed in the GPU update on models
 		class FadeSystem : public usg::System
 		{
 		public:
@@ -133,15 +134,6 @@ namespace usg
 					{
 						UpdateFadeValue(inputs, outputs, fFogValue);
 						bSomethingChanged = true;
-					}
-				}
-
-				if (bSomethingChanged)
-				{
-					usg::Model* pModel = outputs.model.GetRuntimeData().pModel;
-					if (!pModel->ShouldDraw() && (!outputs.visiblity.Exists() || outputs.visiblity.Force()->bVisible))
-					{
-						pModel->AddToScene(true);
 					}
 				}
 			}

@@ -33,7 +33,9 @@ public:
 	bool Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic = false, bool bFastMem = true, bool bAutoTransform = true, bool bPerBoneCulling = true );
 	void CleanUp(GFXDevice* pDevice);
 	void InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 uMesh);
+	// Note that AddToScene is dependent on a GPU update, to remove a model from the systems use ForceRemoveFromScene
 	void AddToScene(bool bAdd);
+	void ForceRemoveFromScene();
 	const U8String& GetName() const;
 	void SetInUse(bool bInUse);
 
@@ -54,7 +56,7 @@ public:
 	void SetFade(bool bFade, float fAlpha = 1.0f);
 	void RemoveOverrides(GFXDevice* pDevice);
 	void SetRenderMask(uint32 uRenderMask);
-	void EnableShadow(bool bEnable);
+	void EnableShadow(GFXDevice* pDevice, bool bEnable);
 
 	void SetTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType = IDENTIFIER_MATERIAL);
 	void AddTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType = IDENTIFIER_MATERIAL);
@@ -90,8 +92,8 @@ public:
 	const ConstantSet& GetRigidBones() const { return m_staticBones;  }
 
 private:
-	void AddToSceneInt();
-	void AddDepthMesh(bool bAdd);
+	void AddToSceneInt(GFXDevice* pDevice);
+	void AddDepthMesh(GFXDevice* pDevice, bool bAdd);
 	void UpdateRenderMaskInt();
 
 	struct MaterialInfo;

@@ -15,6 +15,13 @@
 
 namespace usg {
 
+
+void RenderNodeEx::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+{
+	// FIXME: Only need to change one or the others
+	pDevice->ChangePipelineStateRenderPass(renderPass, m_deferredPipelineState);
+	pDevice->ChangePipelineStateRenderPass(renderPass, m_pipelineState);
+}
 	
 Model::RenderMesh::RenderMesh() : RenderNodeEx()
 {
@@ -27,6 +34,7 @@ Model::RenderMesh::RenderMesh() : RenderNodeEx()
 	}
 	m_blendColor = usg::Color::White;
 }
+
 
 Model::RenderMesh::~RenderMesh()
 {

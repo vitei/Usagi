@@ -66,4 +66,9 @@ bool Mesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 	return false;
 }
 
+void Mesh::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+{
+	pDevice->ChangePipelineStateRenderPass(renderPass, m_pipeline);
+}
+
 }

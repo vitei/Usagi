@@ -51,6 +51,7 @@ public:
 	void			DeleteViewContext(ViewContext* pRemove);
 
 	ViewContext*	GetViewContext(uint32 uId);
+	uint32			GetViewContextCount() const;
 	SceneRenderPasses& GetRenderPasses(uint32 uViewContext);
 
 	

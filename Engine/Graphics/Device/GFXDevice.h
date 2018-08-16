@@ -49,7 +49,8 @@ public:
 	void End();
 
 	PipelineStateHndl		GetPipelineState(const RenderPassHndl& renderPass, const PipelineStateDecl& decl);
-	void					ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, PipelineStateHndl& hndlInOut);
+	// Returns true if changed, if render pass was equal to the old one or invalid returns false
+	bool					ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, PipelineStateHndl& hndlInOut);
 	RenderPassHndl			GetRenderPass(const RenderPassDecl& decl);
 	SamplerHndl				GetSampler(const SamplerDecl& decl);
 	DescriptorSetLayoutHndl GetDescriptorSetLayout(const DescriptorDeclaration* pDecl);
