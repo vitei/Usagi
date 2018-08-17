@@ -248,7 +248,7 @@ def create_bone_hierarchy(model_component)
     warn message
     # The build system apparently allows us to fail silently the first time, and there is every chance
     # the model hasn't been processed yet
-    exit
+    exit 1
   end
 
   return hierarchy
