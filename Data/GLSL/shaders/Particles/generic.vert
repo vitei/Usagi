@@ -31,9 +31,9 @@ ATTRIB_LOC(5) in vec4 ao_uvRange;     // Select a sub-section of the image
 
 out VertexData
 {
-    ATTRIB_LOC(0) vec4    vo_vColor;
-    ATTRIB_LOC(1) vec2    vo_vRotSize;
-    ATTRIB_LOC(2) vec4    vo_vUVRange;
+    INT_LOC(0) vec4    vo_vColor;
+    INT_LOC(1) vec2    vo_vRotSize;
+    INT_LOC(2) vec4    vo_vUVRange;
 
 } vertexData;
 

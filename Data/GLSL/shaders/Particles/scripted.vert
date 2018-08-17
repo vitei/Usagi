@@ -55,11 +55,11 @@ ATTRIB_LOC(6) in vec3 ao_rotation;    // Particle rotation (x: start, y: speed, 
 
 out VertexData
 {
-    ATTRIB_LOC(0) vec4    vo_vColor;
-    ATTRIB_LOC(1) vec2    vo_vSize;
-    ATTRIB_LOC(2) float   vo_fRot;
-    ATTRIB_LOC(3) vec4    vo_vUVRange[2];
-    ATTRIB_LOC(5) vec3    vo_velocity;
+    INT_LOC(0) vec4    vo_vColor;
+    INT_LOC(1) vec2    vo_vSize;
+    INT_LOC(2) float   vo_fRot;
+    INT_LOC(3) vec4    vo_vUVRange[2];
+    INT_LOC(5) vec3    vo_velocity;
 
 } vertexData;
 

@@ -16,9 +16,9 @@ ATTRIB_LOC(2) in float 	ao_fLength;	// The length of the line at the point this 
 
 out VertexData
 {
-    ATTRIB_LOC(0) vec3  vo_viewPos;
-    ATTRIB_LOC(1) float vo_fCreateTime;
-    ATTRIB_LOC(2) float vo_fLength;
+    INT_LOC(0) vec3  vo_viewPos;
+    INT_LOC(1) float vo_fCreateTime;
+    INT_LOC(2) float vo_fLength;
 };
 
 

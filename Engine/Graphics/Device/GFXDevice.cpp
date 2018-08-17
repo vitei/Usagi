@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Core/Containers/List.h"
+#include "Engine/Graphics/Device/PipelineState.h"
 #include "Engine/Graphics/Device/RenderStateMgr.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)

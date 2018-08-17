@@ -13,10 +13,10 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
 
 in GeometryData
 {
-	ATTRIB_LOC(0) vec4    vo_vColor;
-    ATTRIB_LOC(1) vec2    vo_vTexcoord[2];
-    ATTRIB_LOC(3) vec2    vo_vScreenTex;
-    ATTRIB_LOC(4) float   vo_fEyeDepth;
+	INT_LOC(0) vec4    vo_vColor;
+    INT_LOC(1) vec2    vo_vTexcoord[2];
+    INT_LOC(3) vec2    vo_vScreenTex;
+    INT_LOC(4) float   vo_fEyeDepth;
 
 } geometryData;
 
