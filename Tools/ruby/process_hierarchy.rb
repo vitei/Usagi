@@ -246,6 +246,9 @@ def create_bone_hierarchy(model_component)
   else
     message = "WARNING! Model '#{modelDepPath.to_path}' not found!\n"
     warn message
+    # The build system apparently allows us to fail silently the first time, and there is every chance
+    # the model hasn't been processed yet
+    exit
   end
 
   return hierarchy
