@@ -1,4 +1,8 @@
 - ~Merge:
   PhysicsScene:
     vGravity: {x: 0, y: 0, z: 0}
-  ModelMgrComponent:    
+  ModelMgrComponent:  
+  # FIXME: We have a dummy child because there is a bug that means without
+  # atleast one child the systems don't get run on the root entity  
+  Children:
+    - TransformComponent:
