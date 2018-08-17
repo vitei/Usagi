@@ -83,17 +83,17 @@ The build process has not been improved or significantly modified and currently 
 
 The engine has been updated to Vulkan, if you have issues you can follow the instructions in [graphics](https://github.com/vitei/Usagi/wiki/Graphics) to revert to the legacy OpenGL support.  
 
-Current Version 0.15
+Current Version 0.2
 ----------------------
 
-GetComponent is now hidden and can't be accidentally called in inappropriate places  
-There is now a rake file for building an empty project with a default mode  
-API/ platform specific code place in Usagi/Platform/<<api_name>> will be picked up by the build allowing code which requires an NDA to be maintained in a seperate repository  
+Engine has been switched from OpenGL to Vulkan
 
 Issues
 ----------------------
 
 **The current is a list of known issues with Usagi which need to be addressed.**
+
+If there is not at least one child entity systems on the root entity will not be run  
 
 There is no longer a system other than submodules for linking projects and engine versions  
 
