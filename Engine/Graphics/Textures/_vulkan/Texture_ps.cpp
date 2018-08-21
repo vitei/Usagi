@@ -121,124 +121,6 @@ VkImageUsageFlags GetImageUsage(uint32 uUsage)
 }
 
 
-void setImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange)
-{
-	// Create an image barrier object
-	VkImageMemoryBarrier imageMemoryBarrier = {};
-	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	imageMemoryBarrier.pNext = NULL;
-	// Some default values
-	imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-
-	imageMemoryBarrier.oldLayout = oldImageLayout;
-	imageMemoryBarrier.newLayout = newImageLayout;
-	imageMemoryBarrier.image = image;
-	imageMemoryBarrier.subresourceRange = subresourceRange;
-
-	// Only sets masks for layouts used in this example
-	// For a more complete version that can be used with other layouts see vkTools::setImageLayout
-
-	// Source layouts (old)
-	switch (oldImageLayout)
-	{
-	case VK_IMAGE_LAYOUT_UNDEFINED:
-		// Image layout is undefined (or does not matter)
-		// Only valid as initial layout
-		// No flags required, listed only for completeness
-		imageMemoryBarrier.srcAccessMask = 0;
-		break;
-
-	case VK_IMAGE_LAYOUT_PREINITIALIZED:
-		// Image is preinitialized
-		// Only valid as initial layout for linear images, preserves memory contents
-		// Make sure host writes have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-		// Image is a color attachment
-		// Make sure any writes to the color buffer have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-		// Image is a depth/stencil attachment
-		// Make sure any writes to the depth/stencil buffer have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-		// Image is a transfer source 
-		// Make sure any reads from the image have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-		// Image is a transfer destination
-		// Make sure any writes to the image have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		// Image is read by a shader
-		// Make sure any shader reads from the image have been finished
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		break;
-	default:
-		// Other source layouts aren't handled (yet)
-		break;
-	}
-
-	// Target layouts (new)
-	// Destination access mask controls the dependency for the new image layout
-	switch (newImageLayout)
-	{
-	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-		// Image will be used as a transfer destination
-		// Make sure any writes to the image have been finished
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-		// Image will be used as a transfer source
-		// Make sure any reads from the image have been finished
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-		// Image will be used as a color attachment
-		// Make sure any writes to the color buffer have been finished
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-		// Image layout will be used as a depth/stencil attachment
-		// Make sure any writes to depth/stencil buffer have been finished
-		imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		break;
-
-	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		// Image will be read in a shader (sampler, input attachment)
-		// Make sure any writes to the image have been finished
-		if (imageMemoryBarrier.srcAccessMask == 0)
-		{
-			imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-		}
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		break;
-	default:
-		// Other source layouts aren't handled (yet)
-		break;
-	}
-	// Put barrier on top of pipeline
-	VkPipelineStageFlags srcStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-	VkPipelineStageFlags destStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-	// Put barrier inside setup command buffer
-	vkCmdPipelineBarrier(cmdBuffer, srcStageFlags, destStageFlags, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-}
-
 Texture_ps::Texture_ps() :
 	  m_memory(VK_NULL_HANDLE)
 	, m_image(VK_NULL_HANDLE)
@@ -590,8 +472,7 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 	return false;
 }
 
-// Based on texture loading code from https://github.com/SaschaWillems/Vulkan
-// That project uses an old version of GLI however. Still need to support more than 2D textures
+
 bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 {
 	bool bReturn = true;
@@ -674,20 +555,20 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		memcpy(data, Texture.data(), Texture.size());
 		vkUnmapMemory(device, stagingMemory);
 
-		// Setup copy regions for each mip
+		// Regions of the buffer to copy for each mip level
 		std::vector<VkBufferImageCopy> bufferCopyRegions;
 		uint32_t offset = 0;
 
-		for (uint32_t face = 0; face < m_uFaces; face++)
+		for (uint32_t uFace = 0; uFace < m_uFaces; uFace++)
 		{
-			for (uint32_t i = 0; i < Texture.levels(); i++)
+			for (uint32_t uLevel = 0; uLevel < Texture.levels(); uLevel++)
 			{
 				VkBufferImageCopy bufferCopyRegion = {};
 				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-				bufferCopyRegion.imageSubresource.mipLevel = i;
-				bufferCopyRegion.imageSubresource.baseArrayLayer = face;
+				bufferCopyRegion.imageSubresource.mipLevel = uLevel;
+				bufferCopyRegion.imageSubresource.baseArrayLayer = uFace;
 				bufferCopyRegion.imageSubresource.layerCount = 1;
-				glm::tvec3<uint32> LevelExtent(Texture.extent(i));
+				glm::tvec3<uint32> LevelExtent(Texture.extent(uLevel));
 				bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
 				bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
 				bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
@@ -695,7 +576,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 
 				bufferCopyRegions.push_back(bufferCopyRegion);
 
-				offset += static_cast<uint32_t>(Texture.size(i));
+				offset += static_cast<uint32_t>(Texture.size(uLevel));
 			}
 		}
 
@@ -732,15 +613,15 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		subresourceRange.levelCount = (uint32)Texture.levels();
 		subresourceRange.layerCount = m_uFaces;
 
-		// Transfer from initial undefined image layout to the transfer destination layout
-		setImageLayout(copyCmd,	m_image, VK_IMAGE_ASPECT_COLOR_BIT,	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+		// Set the image layout to transfer destination before copying the image
+		SetImageLayout(copyCmd,	m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
-		// Copy staging buffer
+		// Copy the image
 		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
 
 		// All mip levels have been copied so change to read only
 		m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		setImageLayout(copyCmd,	m_image, VK_IMAGE_ASPECT_COLOR_BIT,	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
+		SetImageLayout(copyCmd,	m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
 
 		devicePS.FlushCommandBuffer(copyCmd, true);
 
@@ -748,6 +629,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		vkFreeMemory(device, stagingMemory, nullptr);
 		vkDestroyBuffer(device, stagingBuffer, nullptr);
 
+		// The image view
 		VkImageViewCreateInfo view = {};
 		view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		view.viewType = eVKImageViewType;
@@ -910,16 +792,14 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 		subresourceRange.levelCount = pHeader->numberOfMipmapLevels;
 		subresourceRange.layerCount = 1;
 
-		// Optimal image will be used as destination for the copy, so we must transfer from our
-		// initial undefined image layout to the transfer destination layout
-		setImageLayout(copyCmd, m_image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+		SetImageLayout(copyCmd, m_image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 		// Copy mip levels from staging buffer
 		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,	static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
 
 		// Change texture image layout to shader read after all mip levels have been copied
 		m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		setImageLayout(copyCmd, m_image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
+		SetImageLayout(copyCmd, m_image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
 
 		pDevice->GetPlatform().FlushCommandBuffer(copyCmd, true);
 

@@ -91,8 +91,3 @@ Website: https://github.com/g-truc/gli
 Source Location: Engine\ThirdParty\gli  
 Licensed under: [Happy Bunny license](https://github.com/g-truc/gli/blob/master/manual.md#section0)
 
-**Vulkan Samples**  
-Original Authors: Sascha Willems  
-Website: https://github.com/SaschaWillems/Vulkan  
-Source Location: _vulkan platform specific files (during development)
-Licensed under: MIT License  
