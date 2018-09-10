@@ -146,6 +146,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FileFactory.cpp" />
+    <ClCompile Include="FileFactoryWin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -186,6 +188,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ResourcePak\ResourcePakExporter.h" />
+    <ClInclude Include="FileFactory.h" />
+    <ClInclude Include="FileFactoryWin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

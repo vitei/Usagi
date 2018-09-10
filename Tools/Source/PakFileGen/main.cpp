@@ -1,20 +1,19 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Core/String/U8String.h"
+#include "FileFactory.h"
+#include "FileFactoryWin.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
-#include "gli/gli.hpp"
-#include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
-#include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "../ResourcePak/ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
-#include <algorithm>
 #include <fstream>
 #include <ShaderLang.h>
 #include <pb.h>
 
+FileFactory* g_pFileFactory = nullptr;
 
 bool CheckArgument(std::string& target, const std::string& argument)
 {
@@ -113,22 +112,27 @@ int main(int argc, char *argv[])
 		dependencyFile = outputFile + ".d";
 	}
 
+	if (platform == "win")
+	{
+		g_pFileFactory = (FileFactory*)(new FileFactoryWin);
+	}
+	if (!g_pFileFactory)
+	{
+		printf("Failed to create file factory");
+		return -1;
+	}
+
 
 	if (!ProcessFiles(inputDir))
 		return -1;
 	
 
 	// Write out the file
-	std::stringstream dependencies;
-	std::vector<ResourceEntry*> resources;
-	ResourcePakExporter::Export(outputFile.c_str(), resources);
+	g_pFileFactory->ExportResources(outputFile.c_str());
+	g_pFileFactory->WriteDependencies(dependencyFile.c_str());
 
 
-	// Spit out the dependencies
-	std::ofstream depFile(dependencyFile.c_str(), std::ofstream::binary);
-	depFile.clear();
-	depFile << dependencies.str();
-
+	delete g_pFileFactory;
 
 	return 0;
 }
