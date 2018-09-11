@@ -14,3 +14,8 @@ FileFactoryWin::~FileFactoryWin()
 {
 
 }
+
+bool FileFactoryWin::LoadFile(const char* szFileName)
+{
+	return FileFactory::LoadFile(szFileName);
+}

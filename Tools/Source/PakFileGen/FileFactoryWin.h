@@ -9,6 +9,7 @@ public:
 	FileFactoryWin();
 	virtual ~FileFactoryWin();
 
+	virtual bool LoadFile(const char* szFileName) override;
 
 protected:
 };

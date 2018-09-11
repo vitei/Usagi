@@ -198,7 +198,7 @@ module GeneratorUtil
            {:description => 'VS BUILD $out'})
 
     n.rule('cmdl',
-           "#{config.cmdl_converter} -a16 -o$out -h$skel -sk$skanimdir -lh #{config.cmdl_converter_dep_opts} -h$skel $in",
+           "#{config.cmdl_converter} -a16 -o$out -sk$skanimdir -lh #{config.cmdl_converter_dep_opts} -h$skel $in",
            {:dependencies => :gcc, :description => 'CMDL $out $shdir $fxdir $vshbase $pshbase'})
 
 

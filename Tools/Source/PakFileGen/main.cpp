@@ -31,7 +31,7 @@ bool CheckArgument(std::string& target, const std::string& argument)
 
 bool ProcessFile(const std::string& fileName)
 {
-	return true;
+	return g_pFileFactory->LoadFile(fileName.c_str());
 }
 
 bool ProcessFiles(const std::string& inputDir)
@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 	std::string inputDir;
 	std::string outputFile;
 	std::string dependencyFile;
+	std::string tempDir;
 	std::string arg;
 
 	for (int i = 1; i < argc; i++)
@@ -99,12 +100,21 @@ int main(int argc, char *argv[])
 		{
 			dependencyFile = arg;
 		}
+		else if (CheckArgument(arg, "-t"))
+		{
+			tempDir = arg;
+		}
 	}
 
 	if (inputDir.empty() || outputFile.empty())
 	{
 		printf("Invalid arguments\nProper usage PakFileGen <<inputdir>> -o<<outputfile>>");
 		return -1;
+	}
+
+	if (tempDir.empty())
+	{
+		tempDir = "_build/";
 	}
 
 	if (dependencyFile.empty())
@@ -121,6 +131,8 @@ int main(int argc, char *argv[])
 		printf("Failed to create file factory");
 		return -1;
 	}
+
+	g_pFileFactory->Init(inputDir.c_str(), tempDir.c_str());
 
 
 	if (!ProcessFiles(inputDir))
