@@ -8,7 +8,11 @@
 struct ResourceEntry
 {
 	std::string name;
+	std::string srcName;	// There may be multiple files with the same srcName (e.g. model + animations from a single fbx)
 	std::vector<std::string> dependencies;
+
+	ResourceEntry() {}
+	virtual ~ResourceEntry() {}
 
 	virtual void* GetData() = 0;
 	virtual uint32 GetDataSize() = 0;

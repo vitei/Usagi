@@ -27,11 +27,25 @@ bool FileFactory::LoadFile(const char* szFileName)
 	{
 		// Process the fbx file
 		LoadModel(szFileName);
-		return true;
+	}
+	else
+	{
+		return false;
 	}
 
-	
-	return false;
+
+	AddDependency(szFileName);
+	return true;
+}
+
+
+void FileFactory::AddDependency(const char* szFileName)
+{
+	std::string intermediateDep = szFileName;
+	if (std::find(m_referencedFiles.begin(), m_referencedFiles.end(), intermediateDep) == m_referencedFiles.end())
+	{
+		m_referencedFiles.push_back(intermediateDep);
+	}
 }
 
 bool FileFactory::LoadModel(const char* szFileName)
@@ -43,14 +57,72 @@ bool FileFactory::LoadModel(const char* szFileName)
 	std::string tempFileName = m_tempDir + "pakgen/" + relativeNameNoExt + ".vmdl";
 	std::string skeletonName = m_tempDir + "skel/" + relativeNameNoExt + ".xml";
 	std::string animDir = m_tempDir + "pakgen/" + relativePath;
+	std::string depFileName = tempFileName + ".d";
 	std::replace(tempFileName.begin(), tempFileName.end(), '/', '\\');
-	command << "ayataka.exe -a16 -o" << tempFileName.c_str() << " -h" << skeletonName << " -sk" << animDir.c_str() << " " << szFileName;
+	command << "Usagi\\Tools\\bin\\ayataka.exe -a16 -o" << tempFileName.c_str() << " -d" << depFileName.c_str() << " -h" << skeletonName << " -sk" << animDir.c_str() << " " << szFileName;
 	system( (std::string("mkdir ") + RemoveFileName(tempFileName)).c_str());
 
 	system(command.str().c_str());
 
+	ModelEntry* pModel = new ModelEntry;
+	pModel->srcName = szFileName;
+	pModel->name = relativeNameNoExt + ".vmdl";
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, tempFileName.c_str(), "rb");
+	if (!pFileOut)
+	{
+		delete pModel;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pModel->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pModel->binary = new uint8[pModel->binarySize];
+	fread(pModel->binary, 1, pModel->binarySize, pFileOut);
+
+	AddDependenciesFromDepFile(depFileName.c_str(), pModel);
+
 	DeleteFile(tempFileName.c_str());
+	DeleteFile(depFileName.c_str());
+
+	m_resources.push_back(pModel);
 	return true;
+}
+
+void FileFactory::AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry)
+{
+	std::ifstream depFile(szDepFileName);
+	char szCurrentDir[256];
+	GetCurrentDirectory(256, szCurrentDir);
+	std::string dirLower = szCurrentDir + std::string("/");
+	std::replace(dirLower.begin(), dirLower.end(), '\\', '/');
+	std::transform(dirLower.begin(), dirLower.end(), dirLower.begin(), ::tolower);
+	std::string intermediateDep;
+	std::getline(depFile, intermediateDep, ':');
+	while (depFile >> intermediateDep)
+	{
+		if (intermediateDep == "\\")
+			continue;
+		std::string depLower;
+		std::replace(intermediateDep.begin(), intermediateDep.end(), '\\', '/');
+		if (pEntry)
+		{
+			// Full path version for the build system
+			pEntry->dependencies.push_back(intermediateDep);
+		}
+		
+		// Simplified case correct version relative directory for the builds purposes (need to map src to dest later)
+		depLower.resize(intermediateDep.size());
+		std::transform(intermediateDep.begin(), intermediateDep.end(), depLower.begin(), ::tolower);
+		if (depLower.find(dirLower) == 0)
+		{
+			intermediateDep = intermediateDep.substr(dirLower.size());
+		}
+		AddDependency(intermediateDep.c_str());
+	}
 }
 
 void FileFactory::ExportResources(const char* szFileName)
@@ -60,10 +132,21 @@ void FileFactory::ExportResources(const char* szFileName)
 
 void FileFactory::WriteDependencies(const char* szFileName)
 {
+	std::stringstream dependencies;
+	
+	// FIXME: Probably going to want an input file dictating what goes into the pak file and that will be the root dependency
+	std::string formatted;	// m_inputFile;
+	std::replace(formatted.begin(), formatted.end(), '\\', '/');
+	dependencies << formatted << ": ";
+
+	for (uint32 i = 0; i < m_referencedFiles.size(); i++)
+	{
+		dependencies << m_referencedFiles[i] << " ";
+	}
 	// Spit out the dependencies
 	std::ofstream depFile(szFileName, std::ofstream::binary);
 	depFile.clear();
-	depFile << m_dependencies.str();
+	depFile << dependencies.str();
 }
 
 const char* FileFactory::GetExtension(const char* szFileName)
