@@ -1,7 +1,57 @@
 usagi
 =====
 
-Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/). The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
+Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/).  
+
+In Usagi the entire world is grouped into a hierarchy of entities. These entities are very fine grained, every bone on every character is an entity, with optional additional logical entities where required.  
+
+Only components have data, and only systems have code. Entities are a concept to tie together a collection of components and the systems to be run on them; they have neither data nor code.  
+
+The systems to be run are determined by the components attatched to an entity.
+Systems can only act on components from one entity, but they can read from components belonging to parent entities.  
+
+For example, the update UpdateSoundActor system will act on any entity with a SoundActorComponent which also has a MatrixComponent in its self or one of its parents. If a RigidBody component exists it will also use that to set a velocity on the SoundActorComponent.
+```cpp
+class UpdateSoundActor : public System
+{
+public:
+
+   struct Inputs
+   {
+      Required<MatrixComponent, FromSelfOrParents>	mtx;
+      Required<SoundActorComponent>					actor;
+      Optional<RigidBody, FromSelfOrParents>			rigidBody;
+   };
+
+   struct Outputs
+   {
+      Required<SoundActorComponent>	actor;
+   };
+
+   DECLARE_SYSTEM(usg::SYSTEM_POST_TRANSFORM)
+
+   static  void	 LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
+   {
+      SoundActorHandle& actor = outputs.actor.GetRuntimeData().hndl;
+      actor.SetPosition(inputs.mtx->matrix.vPos().v3());
+      if (inputs.rigidBody.Exists())
+      {
+         actor.SetVelocity(physics::GetLinearVelocity(inputs.rigidBody));
+      }
+   }
+};
+```
+
+Components of other entities are never directly written to, events are used to communicate between entities
+
+```cpp
+static void OnEvent(const Inputs& inputs, Outputs& outputs, const KillEntityEvent& killEntity)
+{
+	outputs.state.Modify().current = STATUS_DEAD;
+}
+```
+
+The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
 
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine.  
 
