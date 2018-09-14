@@ -5,6 +5,20 @@
 #include "FileFactory.h"
 
 
+FileFactory::PureBinaryEntry::PureBinaryEntry()
+{
+	binary = nullptr;
+	binarySize = 0;
+}
+FileFactory::PureBinaryEntry::~PureBinaryEntry()
+{
+	if (binary)
+	{
+		delete binary;
+		binary = nullptr;
+	}
+}
+
 FileFactory::FileFactory()
 {
 	
@@ -64,7 +78,7 @@ bool FileFactory::LoadModel(const char* szFileName)
 
 	system(command.str().c_str());
 
-	ModelEntry* pModel = new ModelEntry;
+	PureBinaryEntry* pModel = new PureBinaryEntry;
 	pModel->srcName = szFileName;
 	pModel->name = relativeNameNoExt + ".vmdl";
 
@@ -82,13 +96,59 @@ bool FileFactory::LoadModel(const char* szFileName)
 	fseek(pFileOut, 0, SEEK_SET);
 	pModel->binary = new uint8[pModel->binarySize];
 	fread(pModel->binary, 1, pModel->binarySize, pFileOut);
-
+	fclose(pFileOut);
 	AddDependenciesFromDepFile(depFileName.c_str(), pModel);
 
+	std::replace(tempFileName.begin(), tempFileName.end(), '\\', '/');
 	DeleteFile(tempFileName.c_str());
 	DeleteFile(depFileName.c_str());
 
 	m_resources.push_back(pModel);
+
+	std::string pathName = animDir + "/*";
+	WIN32_FIND_DATA findFileData;
+	HANDLE hFind;
+	hFind = FindFirstFile(pathName.c_str(), &findFileData);
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				continue;
+			}
+			else
+			{
+				// Load the animations which were located in the model
+				std::string baseName = m_tempDir + "pakgen/" + relativeNameNoExt;
+				if (HasExtension(findFileData.cFileName, ".vskla") && strncmp(findFileData.cFileName, baseName.c_str(), baseName.size()) == 0)
+				{
+					PureBinaryEntry* pAnim = new PureBinaryEntry;
+					pModel->name = relativePath + findFileData.cFileName;
+
+					fopen_s(&pFileOut, tempFileName.c_str(), "rb");
+					if (!pFileOut)
+					{
+						delete pAnim;
+						return false;
+					}
+
+					fseek(pFileOut, 0, SEEK_END);
+					pAnim->binarySize = ftell(pFileOut);
+					fseek(pFileOut, 0, SEEK_SET);
+					pAnim->binary = new uint8[pModel->binarySize];
+					fread(pAnim->binary, 1, pAnim->binarySize, pFileOut);
+					fclose(pFileOut);
+					DeleteFile(tempFileName.c_str());
+
+				}
+			}
+
+		} while (FindNextFile(hFind, &findFileData) != 0);
+	}
+
+
 	return true;
 }
 

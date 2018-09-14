@@ -18,8 +18,11 @@ public:
 
 protected:
 
-	struct ModelEntry : public ResourceEntry
+	struct PureBinaryEntry : public ResourceEntry
 	{
+		PureBinaryEntry();
+		virtual ~PureBinaryEntry();
+
 		virtual void* GetData() override { return binary; }
 		virtual uint32 GetDataSize() override { return binarySize; };
 		virtual void* GetCustomHeader() { return nullptr; }
