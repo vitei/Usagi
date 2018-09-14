@@ -141,6 +141,8 @@ bool FileFactory::LoadModel(const char* szFileName)
 					fread(pAnim->binary, 1, pAnim->binarySize, pFileOut);
 					fclose(pFileOut);
 					DeleteFile(tempFileName.c_str());
+					m_resources.push_back(pAnim);
+
 
 				}
 			}
