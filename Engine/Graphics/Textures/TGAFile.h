@@ -25,7 +25,6 @@ namespace usg
 		void SetFlipImage(bool bFlipImage) { m_bFlipImage = bFlipImage; }
 
 		memsize GetFileSize() { return m_uFileSize;  }
-
 		enum TGA_TYPE
 		{
 			NO_IMAGE = 0x0000,
@@ -53,6 +52,9 @@ namespace usg
 			uint8    uBitsPerPixel;
 			uint8    uImageDescriptor;
 		});
+
+		Header& GetHeader() { return m_header; }
+		uint8* GetData() { return m_pData; }
 
 	private:
 		uint8*	m_pData;

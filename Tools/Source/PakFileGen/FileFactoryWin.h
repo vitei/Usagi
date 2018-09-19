@@ -1,5 +1,7 @@
 #pragma once
 #include "FileFactory.h"
+#include "Engine/Graphics/Textures/TGAFile.h"
+#include <gli/gli.hpp>
 #include <sstream>
 
 
@@ -24,5 +26,7 @@ protected:
 	};
 
 	bool LoadTGA(const char* szFileName);
+	bool LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
+	bool LoadCompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
 	bool LoadDDS(const char* szFileName);
 };

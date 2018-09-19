@@ -251,3 +251,6 @@ std::string FileFactory::RemoveFileName(const std::string& fileName)
 	std::string out = fileName.substr(0, fileName.find_last_of("\\/"));
 	return out;
 }
+
+
+
