@@ -142,10 +142,12 @@ GFXDevice_ps::~GFXDevice_ps()
 	PFN_vkDestroyDebugReportCallbackEXT DestroyReportCallback = VK_NULL_HANDLE;
 	DestroyReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkDestroyDebugReportCallbackEXT");
 
+#ifdef USE_VK_DEBUG_EXTENSIONS
 	for (uint32 i = 0; i < CALLBACK_COUNT; i++)
 	{
 		DestroyReportCallback(m_instance, m_callbacks[i], nullptr);
 	}
+#endif
 
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
@@ -297,7 +299,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	};
 #else
 	int validationLayerCount = 0;
-	const char *validationLayerNames[];
+	const char *validationLayerNames[1] = {};
 #endif
 
 
