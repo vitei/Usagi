@@ -220,12 +220,23 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 				FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(pTexture);
 				if (GetTextureIndex(*pTexture, property.GetNameAsCStr(), pNewMaterial, uTexIndex))
 				{
-					const char* szTextName = fileTexture->GetRelativeFileName();
-					if (str::StringLength(szTextName) > sizeof(pNewMaterial->pb().textures[uTexIndex].textureName))
+					std::string textName = fileTexture->GetRelativeFileName();
+					const char* szExt = strrchr(textName.c_str(), '.');
+					int length = (int)(szExt != nullptr ? szExt - textName.c_str() : strlen(textName.c_str()));
+					textName = textName.substr(0, length);
+					const char* drive = strrchr(textName.c_str(), ':');
+
+					if (drive != nullptr)
 					{
-						DEBUG_PRINT("Skipping texture %s due to path length", szTextName);
-						continue;
+						size_t pos = textName.find_last_of("\\/");
+						// Relative path is absolute :(
+						if (pos != std::string::npos)
+						{
+							textName = textName.substr(pos+1);
+						}
 					}
+					strncpy_s(pNewMaterial->pb().textures[uTexIndex].textureName, textName.c_str(), sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
+					
 					uint32 uCoordinatorIndex = pNewMaterial->pb().textureCoordinators_count;
 					std::string textureType = property.GetNameAsCStr();
 
@@ -240,11 +251,6 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					tex.anisoLevel = usg::exchange::Texture_Aniso_aniso_8;
 					strcpy_s(tex.textureHint, sizeof(tex.textureHint), property.GetNameAsCStr());
 
-
-					const char* szExt = strrchr(szTextName, '.');
-					int length = (int)(szExt != nullptr ? szExt - szTextName : strlen(szTextName));
-					length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
-					strncpy(pNewMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 					
 					tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
 
