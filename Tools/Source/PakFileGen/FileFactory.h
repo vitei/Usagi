@@ -38,6 +38,7 @@ protected:
 	bool LoadModel(const char* szFileName);
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
+	bool LoadRawFile(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);

@@ -26,7 +26,13 @@ FileFactory::FileFactory()
 
 FileFactory::~FileFactory()
 {
-
+	for (auto itr : m_resources)
+	{
+		if (itr)
+		{
+			delete itr;
+		}
+	}
 }
 
 void FileFactory::Init(const char* rootPath, const char* tempDir)
@@ -42,6 +48,10 @@ bool FileFactory::LoadFile(const char* szFileName)
 		// Process the fbx file
 		LoadModel(szFileName);
 	}
+	else if (HasExtension(szFileName, "vpb"))
+	{
+		LoadRawFile(szFileName);
+	}
 	else
 	{
 		return false;
@@ -49,6 +59,35 @@ bool FileFactory::LoadFile(const char* szFileName)
 
 
 	AddDependency(szFileName);
+	return true;
+}
+
+
+bool FileFactory::LoadRawFile(const char* szFileName)
+{
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->name = relativePath.c_str();
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	m_resources.push_back(pFileEntry);
 	return true;
 }
 

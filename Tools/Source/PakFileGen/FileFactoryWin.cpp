@@ -27,6 +27,10 @@ bool FileFactoryWin::LoadFile(const char* szFileName)
 		// Process the fbx file
 		LoadDDS(szFileName);
 	}
+	else if (HasExtension(szFileName, "wav"))
+	{
+		LoadRawFile(szFileName);
+	}
 	else
 	{
 		return FileFactory::LoadFile(szFileName);
