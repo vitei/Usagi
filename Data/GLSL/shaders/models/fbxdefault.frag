@@ -97,8 +97,11 @@ void main(void)
 	{
     	vSpecRead = texture( sampler3, vo_vTexCoord01.zw ); 
 	}
+	else
+	{
+		vSpecular.rgb *= uMaterial.specular.rgb;
+	}
 	vSpecular.rgb *= vSpecRead.rgb; 
-	vSpecular.rgb *= uMaterial.specular.rgb;
 	vSpecular *= vo_vColor;
 
 	if(uMaterial.bReflectionMap)
