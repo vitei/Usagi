@@ -250,6 +250,14 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.pNext = NULL;
     image_create_info.imageType = VK_IMAGE_TYPE_2D;
     image_create_info.format = gColorFormatMap[eFormat];
+	{
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), image_create_info.format, &props);
+		if ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == 0)
+		{
+			DEBUG_PRINT("Not supported");
+		}
+	}
     image_create_info.extent.width = uWidth;
     image_create_info.extent.height = uHeight;
     image_create_info.extent.depth = 1;
