@@ -110,7 +110,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		switch (in.eAttachType)
 		{
 		case RenderPassDecl::ATTACH_COLOR:
-			attachmentDescriptions[i].format = gColorFormatMap[in.format.eColor];
+			attachmentDescriptions[i].format = pDevice->GetPlatform().GetColorFormat(in.format.eColor);
 			break;
 		case RenderPassDecl::ATTACH_DEPTH:
 			attachmentDescriptions[i].format = gDepthFormatViewMap[in.format.eDepth];

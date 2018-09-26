@@ -67,8 +67,11 @@ public:
 	VkQueue GetQueue() { return m_queue; }
 	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
+	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
+
 private:
 	void EnumerateDisplays();
+	bool ColorFormatSupported(VkFormat eFormat);
 	enum
 	{
 		MAX_GPU_COUNT = 2,
@@ -83,6 +86,8 @@ private:
 		VkMemoryPropertyFlags	shaderType;
 		VkShaderModule			module;
 	};
+
+	VkFormat							m_colorFormats[CF_COUNT];
 
 	GFXDevice*							m_pParent;
 	VkFence								m_drawFence;

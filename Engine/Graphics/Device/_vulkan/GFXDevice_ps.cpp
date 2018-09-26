@@ -14,6 +14,52 @@
 
 namespace usg {
 
+static const VkFormat gColorFormatMap[]=
+{
+	VK_FORMAT_R8G8B8A8_UNORM,					// TF_RGBA_8888
+	VK_FORMAT_A1R5G5B5_UNORM_PACK16,			// TG_RGBA_5551
+	VK_FORMAT_R5G6B5_UNORM_PACK16,				// CF_RGB_565,
+	VK_FORMAT_B4G4R4A4_UNORM_PACK16,			// CF_RGBA_4444,
+	VK_FORMAT_R8G8B8_UNORM,						// CF_RGB_888,
+	VK_FORMAT_R32_SFLOAT,						// CF_SHADOW,
+	VK_FORMAT_R16_SFLOAT,						// CF_RGBA_16F
+	VK_FORMAT_B10G11R11_UFLOAT_PACK32,			// CF_RGB_HDR,
+	VK_FORMAT_R32_SFLOAT,						// CF_R_32F,
+	VK_FORMAT_R32_UINT,							// CF_R_32,
+	VK_FORMAT_R32G32_SFLOAT,					// CF_RG_32F,
+	VK_FORMAT_R16_SFLOAT,						// CF_R_16F,
+	VK_FORMAT_R16G16_SFLOAT,					// CF_RG_16F,
+	VK_FORMAT_R8_UNORM,							// CF_R_8
+	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
+	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA
+	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
+};
+
+static const uint32 gMaxColorFormatFallbacks = 3;
+
+static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
+{
+	{ VK_FORMAT_B8G8R8A8_UNORM },																			// TF_RGBA_8888
+	{ VK_FORMAT_A1R5G5B5_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// TG_RGBA_5551
+	{ VK_FORMAT_B5G6R5_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },					// CF_RGB_565,
+	{ VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// CF_RGBA_4444,
+	{ VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },							// CF_RGB_888,
+	{ VK_FORMAT_R32_UINT },																					// CF_SHADOW,
+	{ VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },						// CF_RGBA_16F
+	{ VK_FORMAT_B10G11R11_UFLOAT_PACK32, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },	// CF_RGB_HDR,
+	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_SFLOAT },									// CF_R_32F,
+	{ VK_FORMAT_R32_SFLOAT },																				// CF_R_32,
+	{ VK_FORMAT_R32G32B32_SFLOAT },																			// CF_RG_32F,
+	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT },															// CF_R_16F,
+	{ VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },												// CF_RG_16F,
+	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
+	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
+	{ },																									// CF_SRGBA
+	{ },
+};
+
+
+
 #ifdef USE_VK_DEBUG_EXTENSIONS
 static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugString(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
 {
@@ -165,7 +211,7 @@ GFXDevice_ps::~GFXDevice_ps()
 
 
 void GFXDevice_ps::Init(GFXDevice* pParent)
-{  
+{
 	m_pParent = pParent;
 
 	m_allocCallbacks.pfnAllocation = VkAllocation;
@@ -178,12 +224,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	// This is application specific, not unique to a single device
 	// We are assuming just one device for our purposes
 	VkApplicationInfo app_info = {};
-    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pNext = NULL;
-    app_info.pApplicationName = "UsagiEngine";
-    app_info.applicationVersion = 1;
-    app_info.pEngineName = "Usagi_Engine";
-    app_info.engineVersion = 1;
+	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	app_info.pNext = NULL;
+	app_info.pApplicationName = "UsagiEngine";
+	app_info.applicationVersion = 1;
+	app_info.pEngineName = "Usagi_Engine";
+	app_info.engineVersion = 1;
 	app_info.apiVersion = VK_API_VERSION_1_0;
 
 	vector<const char*> extensions;
@@ -192,30 +238,30 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 
 
-    // initialize the VkInstanceCreateInfo structure
-    VkInstanceCreateInfo inst_info = {};
-    inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    inst_info.pNext = NULL;
-    inst_info.flags = 0;
-    inst_info.pApplicationInfo = &app_info;
-    inst_info.enabledExtensionCount = (uint32)extensions.size();
-    inst_info.ppEnabledExtensionNames = extensions.data();
-    inst_info.enabledLayerCount = 0;
-    inst_info.ppEnabledLayerNames = NULL;
+	// initialize the VkInstanceCreateInfo structure
+	VkInstanceCreateInfo inst_info = {};
+	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	inst_info.pNext = NULL;
+	inst_info.flags = 0;
+	inst_info.pApplicationInfo = &app_info;
+	inst_info.enabledExtensionCount = (uint32)extensions.size();
+	inst_info.ppEnabledExtensionNames = extensions.data();
+	inst_info.enabledLayerCount = 0;
+	inst_info.ppEnabledLayerNames = NULL;
 
-    VkResult res;
+	VkResult res;
 
-    res = vkCreateInstance(&inst_info, NULL, &m_instance);
-    if (res == VK_ERROR_INCOMPATIBLE_DRIVER)
-    {
-        ASSERT_MSG(false, "cannot find a compatible Vulkan ICD\n");
-        return;
-    }
-    else if (res)
-    {
-        ASSERT_MSG(false, "unknown error\n");
-        return;
-    }
+	res = vkCreateInstance(&inst_info, NULL, &m_instance);
+	if (res == VK_ERROR_INCOMPATIBLE_DRIVER)
+	{
+		ASSERT_MSG(false, "cannot find a compatible Vulkan ICD\n");
+		return;
+	}
+	else if (res)
+	{
+		ASSERT_MSG(false, "unknown error\n");
+		return;
+	}
 
 	PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallback = VK_NULL_HANDLE;
 	CreateDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugReportCallbackEXT");
@@ -225,61 +271,61 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkDebugReportCallbackCreateInfoEXT callback = {
 		VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
 		NULL,                                                       // pNext
-		VK_DEBUG_REPORT_WARNING_BIT_EXT| VK_DEBUG_REPORT_INFORMATION_BIT_EXT|VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT|VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+		VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT,
 		VkDebugString,                                        // pfnCallback
 		NULL                                                        // pUserData
 	};
 	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[0]);
-	
+
 	callback.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT;
 	callback.pfnCallback = VkDebugBreak;
 	callback.pUserData = NULL;
 	res = CreateDebugReportCallback(m_instance, &callback, nullptr, &m_callbacks[1]);
 #endif
 
-    // Enumerate the available GPUs
-    uint32 gpu_count = 1;
-    res = vkEnumeratePhysicalDevices(m_instance, &gpu_count, NULL);
-    ASSERT(gpu_count>0);
+	// Enumerate the available GPUs
+	uint32 gpu_count = 1;
+	res = vkEnumeratePhysicalDevices(m_instance, &gpu_count, NULL);
+	ASSERT(gpu_count > 0);
 	m_uGPUCount = Math::Min((uint32)gpu_count, (uint32)MAX_GPU_COUNT);
-    res = vkEnumeratePhysicalDevices(m_instance, &m_uGPUCount, m_gpus);
-    ASSERT(!res && m_uGPUCount >= 1);
+	res = vkEnumeratePhysicalDevices(m_instance, &m_uGPUCount, m_gpus);
+	ASSERT(!res && m_uGPUCount >= 1);
 
 	for (uint32 i = 0; i < m_uGPUCount; i++)
-	{ 
+	{
 		vkGetPhysicalDeviceMemoryProperties(m_gpus[i], &m_memoryProperites[i]);
 		vkGetPhysicalDeviceProperties(m_gpus[i], &m_deviceProperties[i]);
 	}
-    
-    // Init the device
-    VkDeviceQueueCreateInfo queue_info = {};
 
-    vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, NULL);
-    ASSERT(m_uQueueFamilyCount >= 1);
+	// Init the device
+	VkDeviceQueueCreateInfo queue_info = {};
+
+	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, NULL);
+	ASSERT(m_uQueueFamilyCount >= 1);
 
 	m_pQueueProps = (VkQueueFamilyProperties*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, sizeof(VkQueueFamilyProperties)*m_uQueueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, m_pQueueProps);
+	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, m_pQueueProps);
 
 	//vkGetPhysicalDeviceFeatures 
 
-    bool bFound = false;
-    for (unsigned int i = 0; i < m_uQueueFamilyCount; i++)
-    {
-        if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-        {
-            queue_info.queueFamilyIndex = i;
-            bFound = true;
-            break;
-        }
-    }
-    
-    ASSERT(bFound);
+	bool bFound = false;
+	for (unsigned int i = 0; i < m_uQueueFamilyCount; i++)
+	{
+		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			queue_info.queueFamilyIndex = i;
+			bFound = true;
+			break;
+		}
+	}
 
-    float queue_priorities[1] = {0.0};	// The relative priority of work submitted to each of the queues
-    queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue_info.pNext = NULL;
-    queue_info.queueCount = 1;
-    queue_info.pQueuePriorities = queue_priorities;
+	ASSERT(bFound);
+
+	float queue_priorities[1] = { 0.0 };	// The relative priority of work submitted to each of the queues
+	queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queue_info.pNext = NULL;
+	queue_info.queueCount = 1;
+	queue_info.pQueuePriorities = queue_priorities;
 
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
@@ -290,7 +336,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.geometryShader = VK_TRUE;
 	enabledFeatures.tessellationShader = VK_TRUE;
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
-	
+
 #ifdef DEBUG_BUILD
 	int validationLayerCount = 1;
 	const char *validationLayerNames[] =
@@ -306,38 +352,38 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
 
-    VkDeviceCreateInfo device_info = {};
-    device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    device_info.pNext = NULL;
-    device_info.queueCreateInfoCount = 1;
-    device_info.pQueueCreateInfos = &queue_info;
-    device_info.enabledExtensionCount = (uint32)extensions.size();
-    device_info.ppEnabledExtensionNames = extensions.data();
-    device_info.enabledLayerCount = validationLayerCount;
-    device_info.ppEnabledLayerNames = validationLayerNames;
-    device_info.pEnabledFeatures = &enabledFeatures;
+	VkDeviceCreateInfo device_info = {};
+	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	device_info.pNext = NULL;
+	device_info.queueCreateInfoCount = 1;
+	device_info.pQueueCreateInfos = &queue_info;
+	device_info.enabledExtensionCount = (uint32)extensions.size();
+	device_info.ppEnabledExtensionNames = extensions.data();
+	device_info.enabledLayerCount = validationLayerCount;
+	device_info.ppEnabledLayerNames = validationLayerNames;
+	device_info.pEnabledFeatures = &enabledFeatures;
 
 	// Issue with the allocators atm so disabling for now
-    res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
-    ASSERT(res == VK_SUCCESS);
+	res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
+	ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from
-    VkCommandPoolCreateInfo cmd_pool_info = {};
-    cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    cmd_pool_info.pNext = NULL;
-    cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
+	VkCommandPoolCreateInfo cmd_pool_info = {};
+	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmd_pool_info.pNext = NULL;
+	cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
 	// We will have short lived cmd buffers (for file loading), and reuse them
 	// TODO: Perhaps we want multiple command pools?
-    cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;	
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
-    res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
-    ASSERT(res == VK_SUCCESS);
+	res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
+	ASSERT(res == VK_SUCCESS);
 
 	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 	res = vkCreatePipelineCache(m_vkDevice, &pipelineCacheCreateInfo, nullptr, &m_pipelineCache);
 	ASSERT(res == VK_SUCCESS);
-	
+
 	EnumerateDisplays();
 
 	vkGetDeviceQueue(m_vkDevice, queue_info.queueFamilyIndex, 0, &m_queue);
@@ -349,8 +395,45 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
 
 	//ASSERT(false);	// Need to set up the copy command buffer
+
+	for (uint32 i = 0; i < CF_COUNT; i++)
+	{
+		if (gColorFormatMap[i] == VK_FORMAT_UNDEFINED || ColorFormatSupported(gColorFormatMap[i]))
+		{
+			m_colorFormats[i] = gColorFormatMap[i];
+		}
+		else
+		{
+			m_colorFormats[i] = VK_FORMAT_UNDEFINED;
+			for (int j = 0; j < gMaxColorFormatFallbacks; j++)
+			{
+				if (gFallbackColorFormatMap[i][j] == VK_FORMAT_UNDEFINED)
+				{
+					break;
+				}
+
+				if (ColorFormatSupported(gFallbackColorFormatMap[i][j]))
+				{
+					m_colorFormats[i] = gFallbackColorFormatMap[i][j];
+					break;
+				}
+			}
+			if (m_colorFormats[i] == VK_FORMAT_UNDEFINED)
+			{
+				DEBUG_PRINT("Unsupported color format and all fallbacks failed\n");
+				m_colorFormats[i] = VK_FORMAT_R8G8B8A8_UNORM;
+			}
+		}
+	}
 }
 
+
+bool GFXDevice_ps::ColorFormatSupported(VkFormat eFormat)
+{
+	VkFormatProperties props;
+	vkGetPhysicalDeviceFormatProperties(m_gpus[0], eFormat, &props);
+	return ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) != 0);
+}
 
 void GFXDevice_ps::EnumerateDisplays()
 {

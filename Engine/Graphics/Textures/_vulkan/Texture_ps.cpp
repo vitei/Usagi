@@ -226,7 +226,7 @@ VkImageView Texture_ps::CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) 
 void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_COLOR_ATTACHMENT| TU_FLAG_SHADER_READ);
-	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gColorFormatMap[eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, pDevice->GetPlatform().GetColorFormat(eFormat), imageUsage);
 }
 
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
@@ -249,15 +249,8 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_create_info.pNext = NULL;
     image_create_info.imageType = VK_IMAGE_TYPE_2D;
-    image_create_info.format = gColorFormatMap[eFormat];
-	{
-		VkFormatProperties props;
-		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), image_create_info.format, &props);
-		if ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) == 0)
-		{
-			DEBUG_PRINT("Not supported");
-		}
-	}
+    image_create_info.format = pDevice->GetPlatform().GetColorFormat(eFormat);
+
     image_create_info.extent.width = uWidth;
     image_create_info.extent.height = uHeight;
     image_create_info.extent.depth = 1;
