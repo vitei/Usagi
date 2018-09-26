@@ -23,10 +23,10 @@ struct MouseMapping
 
 static const KeyboardMapping g_buttonMapping[] =
 {
-	{ GAMEPAD_BUTTON_A, 'D' },
-	{ GAMEPAD_BUTTON_B, 'X' },
-	{ GAMEPAD_BUTTON_X, 'S' },
-	{ GAMEPAD_BUTTON_Y, 'Z' },
+	{ GAMEPAD_BUTTON_A, 'L' },
+	{ GAMEPAD_BUTTON_B, 'K' },
+	{ GAMEPAD_BUTTON_X, 'I' },
+	{ GAMEPAD_BUTTON_Y, 'O' },
 
 	{ GAMEPAD_BUTTON_L, VK_NUMPAD4 },
 	{ GAMEPAD_BUTTON_R, VK_NUMPAD5 },
@@ -121,13 +121,21 @@ void VirtualGamepad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateO
 	{
 		deviceStateOut.fAxisValues[GAMEPAD_AXIS_LEFT_Y] -= 1.0f;
 	}
-	if( m_pKeyboard->GetKey('T') )
+	if( m_pKeyboard->GetKey('F') )
 	{
 		deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_X] -= 1.0f;
 	}
-	if( m_pKeyboard->GetKey('Y') )
+	if( m_pKeyboard->GetKey('H') )
 	{
 		deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_X] += 1.0f;
+	}
+	if (m_pKeyboard->GetKey('T'))
+	{
+		deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_Y] += 1.0f;
+	}
+	if (m_pKeyboard->GetKey('G'))
+	{
+		deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_Y] -= 1.0f;
 	}
 
 }
