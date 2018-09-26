@@ -214,7 +214,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
 		descSet.UpdateDescriptors(pDevice);
-		for (uint32 uTex = 0; uTex < 4; uTex++)
+		for (uint32 uTex = 0; uTex < ModelResource::Mesh::MAX_UV_STAGES; uTex++)
 		{
 			TextureHndl pOrigTex = pMesh->pTextures[uTex];
 			SamplerHndl origSamp = pMesh->samplers[uTex];
@@ -633,7 +633,7 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 	{
 		const ModelResource::Mesh* pSrcMesh = m_pResource->GetMesh(uMesh);
 		DescriptorSet* pMaterial = &m_meshArray[uMesh]->GetDescriptorSet();
-		for(uint32 uTex = 0; uTex < 4; uTex++)
+		for(uint32 uTex = 0; uTex < ModelResource::Mesh::MAX_UV_STAGES; uTex++)
 		{
 			TextureHndl pOrigTex = pSrcMesh->pTextures[uTex];
 			if(pOrigTex.get() != NULL)
