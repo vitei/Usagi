@@ -72,6 +72,8 @@ void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUU
 	else
 	{
 		m_pCPUData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_SHADER_CONSTANTS, m_uSize, 4);
+		// Avoid uploading duff data to the GPU
+		usg::MemClear(m_pCPUData, m_uSize);
 	}
 
 	m_platform.Init(pDevice, *this, eUsage);
