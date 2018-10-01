@@ -1,6 +1,6 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
-//	Description: A gamepad interface which actually uses the mouse and keyboard
+//	Description: Gamepads and joysticks which do not support xinput
 *****************************************************************************/
 #ifndef __USG_HID_PC_DIRECTINPUT_JOYSTICK_H__
 #define __USG_HID_PC_DIRECTINPUT_JOYSTICK_H__
@@ -26,9 +26,21 @@ public:
 	void TryReconnect(DirectInput* pInput);
 
 private:
-	
-	uint32			m_uInputId;
-	bool			m_bConnected;
+	void SetDeadzone(float fDeadZone);
+	float GetAxis(DIJOYSTATE2& js, int iAxis);
+	struct Range
+	{
+		long min;
+		long max;
+	};
+
+	Range					m_axisRanges[GAMEPAD_AXIS_NONE];
+	LPDIRECTINPUTDEVICE8	m_pDevice;
+	uint32					m_uInputId;
+	uint32					m_uNumButtons;
+	uint32					m_uNumAxes;
+	uint32					m_uCaps;
+	bool					m_bConnected;
 
 };
  

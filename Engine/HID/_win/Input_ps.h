@@ -69,6 +69,7 @@ private:
 
 	XInputPad		m_xboxPad;
 	DirectInput*	m_pDirectInput;
+	DirectInputJoystick*	m_pJoystick;
 	IGamepad*		m_pExternalPads[MAX_EXTERNAL_PADS];
 	uint32			m_uExternalPads;
 

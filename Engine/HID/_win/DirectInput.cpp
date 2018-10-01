@@ -37,6 +37,7 @@ namespace usg
 
 	bool DirectInput::Init()
 	{
+		m_window = WINUTIL::GetWindow();
 		if ( DirectInput8Create(WINUTIL::GetInstanceHndl(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_pDI, NULL ) )
 		{
 			return false;
@@ -70,6 +71,14 @@ namespace usg
 		return false;
 	}
 
+	GUID DirectInput::GetGUIDForDevice(uint32 uIdx) const
+	{
+		if (uIdx < m_joysticks.size())
+		{
+			return m_joysticks[uIdx].guid;
+		}
+		return GUID();
+	}
 
 	DirectInput::DeviceInfo* DirectInput::GetDevice(const char* szName)
 	{
@@ -209,21 +218,16 @@ namespace usg
 			return DIENUM_CONTINUE;
 		if (!pInfo)
 		{
-			//if (SUCCEEDED(TryCreateDevice(IT_JOYSTICK, pInst->guidInstance, &c_dfDIJoystick2)))
+			if (!pInfo)
 			{
-				if (!pInfo)
-				{
-					pInfo = &m_joysticks.push_back();
-					pInfo->productName = pInst->tszProductName;
-					pInfo->instanceName = pInst->tszInstanceName;
-				}
-				pInfo->bConnected = true;
+				pInfo = &m_joysticks.push_back();
+				pInfo->productName = pInst->tszProductName;
+				pInfo->instanceName = pInst->tszInstanceName;
+				pInfo->guid = pInst->guidInstance;
 			}
-		}
-		else
-		{
 			pInfo->bConnected = true;
 		}
+
 		return DIENUM_CONTINUE;
 	}
 

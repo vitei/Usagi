@@ -10,13 +10,13 @@ namespace usg{
 
 const SHORT g_sDeadZone = 6000;
 
-struct ControlMapping
+struct AxisMapping
 {
 	uint32	uAbstractID;
 	uint32	uXInputID;
 };
 
-static const ControlMapping g_controlMapping[] =
+static const AxisMapping g_axisMapping[] =
 {
 	{ GAMEPAD_BUTTON_A,			XINPUT_GAMEPAD_B },
 	{ GAMEPAD_BUTTON_B,			XINPUT_GAMEPAD_A },
@@ -87,7 +87,7 @@ void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 	deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_X] = GetAxisWithDeadZone(m_controllerState.Gamepad.sThumbRX, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 	deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_Y] = GetAxisWithDeadZone(m_controllerState.Gamepad.sThumbRY, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 
-	const ControlMapping *pMapping = g_controlMapping;
+	const AxisMapping *pMapping = g_axisMapping;
 	while(pMapping->uAbstractID != GAMEPAD_BUTTON_NONE)
 	{
 		if(pMapping->uXInputID & m_controllerState.Gamepad.wButtons)

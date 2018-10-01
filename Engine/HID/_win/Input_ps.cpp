@@ -38,6 +38,9 @@ void Input_ps::GetActiveGamepads(usg::vector<IGamepad*>& gamepads)
 	if (m_xboxPad.IsConnected())
 		gamepads.push_back(&m_xboxPad);
 
+	if (m_pJoystick->IsConnected())
+		gamepads.push_back(m_pJoystick);
+
 	if (m_virtualGamepad.IsConnected())
 		gamepads.push_back(&m_virtualGamepad);
 }
@@ -46,7 +49,12 @@ void Input_ps::GetActiveGamepads(usg::vector<IGamepad*>& gamepads)
 void Input_ps::Init()
 {
 	m_pDirectInput = vnew(ALLOC_OBJECT)DirectInput;
+	m_pJoystick = vnew(ALLOC_OBJECT)DirectInputJoystick;
 	m_pDirectInput->Init();
+	if (m_pDirectInput->GetJoystickCount() > 0)
+	{
+		m_pJoystick->Init(m_pDirectInput, 0);
+	}
 	m_keyboard.Init(this);
 	m_mouse.Init(this);
 	m_virtualGamepad.Init(&m_keyboard);
@@ -59,6 +67,11 @@ void Input_ps::Cleanup()
 	{
 		vdelete m_pDirectInput;
 		m_pDirectInput = nullptr;
+	}
+	if (m_pJoystick)
+	{
+		vdelete m_pJoystick;
+		m_pJoystick = nullptr;
 	}
 }
 

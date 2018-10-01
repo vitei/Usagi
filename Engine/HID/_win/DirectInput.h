@@ -26,15 +26,18 @@ public:
 
 	bool HasDevice(const char* szName);
 	bool IsDeviceConnected(uint32 uIdx) const;
+	GUID GetGUIDForDevice(uint32 uIdx) const;
 	void UpdateConnectedDevices();
 	uint32 GetJoystickCount() const { return (uint32)m_joysticks.size(); }
+	LPDIRECTINPUT8 GetDirectInput() { return m_pDI; }
+	HWND GetWindow() { return m_window; }
 private:
 
 	struct DeviceInfo
 	{
 		usg::string				instanceName;
 		usg::string				productName;
-		LPDIRECTINPUTDEVICE8	pDevice;
+		GUID					guid;
 		bool					bConnected;
 	};
 
