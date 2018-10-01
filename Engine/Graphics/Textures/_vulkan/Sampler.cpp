@@ -85,7 +85,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	createInfo.compareEnable = decl.bEnableCmp;
 	createInfo.compareOp = decl.bEnableCmp ? g_cmpFuncMap[decl.eCmpFnc] : VK_COMPARE_OP_NEVER;
 	createInfo.minLod = (float)decl.LodMinLevel;
-	createInfo.maxLod = 0.0f;
+	createInfo.maxLod = 1000.0f;
 	createInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	createInfo.unnormalizedCoordinates = VK_FALSE;
 

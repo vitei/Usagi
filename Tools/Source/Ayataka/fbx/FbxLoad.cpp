@@ -360,13 +360,14 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					tex.wrapT = GetWrap(pTexture->WrapModeV);
 					tex.magFilter = usg::exchange::Texture_Filter_linear;
 					tex.mipFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
+					tex.minFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
 					tex.lodBias = 0.0f;
 					tex.lodMinLevel = 0;
-					tex.anisoLevel = usg::exchange::Texture_Aniso_aniso_8;
+					tex.anisoLevel = usg::exchange::Texture_Aniso_aniso_16;	// Assume max as nothing has been asked for
 					strcpy_s(tex.textureHint, sizeof(tex.textureHint), property.GetNameAsCStr());
 
 					
-					tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
+					//tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
 
 					usg::exchange::TextureCoordinator& texCo = pNewMaterial->pb().textureCoordinators[uCoordinatorIndex];
 					texCo.sourceCoordinate = 0; // FIXME: More than one UV set
