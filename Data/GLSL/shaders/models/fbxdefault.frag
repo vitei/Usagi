@@ -66,7 +66,7 @@ void main(void)
         // FIXME: Use 2 component dxt5 at some point
         vec3 nrm_l = texture(sampler1, vo_vTexCoord01.zw).xyz;
         nrm_l.xyz = normalize((nrm_l * 2.0) - 1.0);
-        vec3 tan_v = -normalize(vo_vTangent);
+        vec3 tan_v = normalize(vo_vTangent);
         vec3 binrm_v = normalize(vo_vBinormal);
         vNormal = normalize(nrm_l.x * tan_v + nrm_l.y * binrm_v + nrm_l.z * vNormal);
     }
