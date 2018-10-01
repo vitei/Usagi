@@ -66,6 +66,7 @@ enum MouseButton
     MOUSE_BUTTON_LEFT = 0;
     MOUSE_BUTTON_RIGHT = 1;
     MOUSE_BUTTON_MIDDLE = 2;
+	MOUSE_BUTTON_NONE = 3;
 };
 
 enum MouseAxis
@@ -87,7 +88,10 @@ enum InputType
     INPUT_TYPE_AXIS = 0;
     INPUT_TYPE_BUTTON = 1;
     INPUT_TYPE_SCREEN_TOUCH = 2;
-    INPUT_TYPE_NONE = 3;
+	INPUT_TYPE_KEY = 3;
+	INPUT_TYPE_MOUSE_AXIS = 4;
+	INPUT_TYPE_MOUSE_BUTTON = 5;
+    INPUT_TYPE_NONE = 6;
 };
 
 enum ButtonState

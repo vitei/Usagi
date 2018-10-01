@@ -6,6 +6,8 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Maths/MathUtil.h"
+#include "Engine/HID/Keyboard.h"
+#include "Engine/HID/Mouse.h"
 #include "Controller.h"
 #include "Input.h"
 
@@ -56,6 +58,8 @@ m_uGamepadId(uGamepadId),
 m_boolDeadZone(0.15f)
 {
 	m_pGamepad = Input::GetGamepad(uGamepadId);
+	m_pKeyboard = Input::GetKeyboard();
+	m_pMouse = Input::GetMouse();
 	m_uDetails = 0;
 }
 
@@ -143,6 +147,10 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 		break;
 	case INPUT_TYPE_BUTTON:
 		return m_pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState);
+	case INPUT_TYPE_KEY:
+		return m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState);
+	case INPUT_TYPE_MOUSE_BUTTON:
+		return m_pMouse->GetButton((MouseButton)detail.uInputIdA, detail.eInputState);
 	case INPUT_TYPE_SCREEN_TOUCH:
 		ASSERT(false); // Not yet supported
 		return false;
@@ -205,6 +213,44 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 			}
 			return fOutput;
 		}
+	case INPUT_TYPE_KEY:
+	{
+		switch (detail.axisType)
+		{
+		case AXIS_TYPE_ABSOLUTE:
+		{
+			float fOutput = m_pKeyboard->GetKey((uint8)detail.uInputIdB, BUTTON_STATE_HELD) ? fValue : 0.0f;
+			fOutput += m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? -fValue : 0.0f;
+			return fOutput;
+		}
+		case AXIS_TYPE_POSITIVE:
+			return m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+		case AXIS_TYPE_NEGATIVE:
+			return m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
+		default:
+			ASSERT(false);
+			break;
+		}
+	}
+	case INPUT_TYPE_MOUSE_BUTTON:
+	{
+		switch (detail.axisType)
+		{
+		case AXIS_TYPE_ABSOLUTE:
+		{
+			float fOutput = m_pMouse->GetButton((MouseButton)detail.uInputIdB, BUTTON_STATE_HELD) ? fValue : 0.0f;
+			fOutput += m_pMouse->GetButton((MouseButton)detail.uInputIdA, BUTTON_STATE_HELD) ? -fValue : 0.0f;
+			return fOutput;
+		}
+		case AXIS_TYPE_POSITIVE:
+			return m_pMouse->GetButton((MouseButton)detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+		case AXIS_TYPE_NEGATIVE:
+			return m_pMouse->GetButton((MouseButton)detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
+		default:
+			ASSERT(false);
+			break;
+		}
+	}
 	default:
 		//ASSERT(false);
 		return 0.0f;
@@ -222,6 +268,37 @@ bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& output, Butt
 	detail.uInputIdA	= uButton;
 	detail.uInputIdB	= GAMEPAD_BUTTON_NONE;
 	detail.eInputState  = eInputState;
+
+	return true;
+}
+
+bool Controller::CreateKeyMapping(uint8 uKey, MappingOutput& output, ButtonState eInputState)
+{
+	ControllerDetail& detail = GetControllerDetail();
+	detail.pResult = &output;
+	output.eOutput = OUTPUT_TYPE_BOOL;
+	output.Clear();
+	detail.deviceType = INPUT_TYPE_KEY;
+	detail.axisType = AXIS_TYPE_POSITIVE;
+	detail.uInputIdA = (uint32)uKey;
+	detail.uInputIdB = 0;
+	detail.eInputState = eInputState;
+
+	return true;
+}
+
+
+bool Controller::CreateMouseButtonMapping(MouseButton eButton, MappingOutput& output, ButtonState eInputState)
+{
+	ControllerDetail& detail = GetControllerDetail();
+	detail.pResult = &output;
+	output.eOutput = OUTPUT_TYPE_BOOL;
+	output.Clear();
+	detail.deviceType = INPUT_TYPE_MOUSE_BUTTON;
+	detail.axisType = AXIS_TYPE_POSITIVE;
+	detail.uInputIdA = (uint32)eButton;
+	detail.uInputIdB = (uint32)MOUSE_BUTTON_NONE;
+	detail.eInputState = eInputState;
 
 	return true;
 }

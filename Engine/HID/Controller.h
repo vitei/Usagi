@@ -65,6 +65,8 @@ protected:
 	float	GetValueAsFloat( ControllerDetail &detail );
 
 	bool CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
+	bool CreateKeyMapping(uint8 uKey, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
+	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	bool CreateButtonFromAxis(GamepadAxis uAxis,  AxisType eType, MappingOutput& detailOut);
 	bool CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
@@ -84,6 +86,8 @@ private:
 	ControllerDetail	m_details[MAX_CONTROL_DETAILS];
 	uint32				m_uDetails;
 	Gamepad*			m_pGamepad;
+	Keyboard*			m_pKeyboard;
+	Mouse*				m_pMouse;
 	uint32				m_uGamepadId;
 	float32				m_boolDeadZone;
 	float32				m_sinceLastFrame;
