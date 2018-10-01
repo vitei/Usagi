@@ -83,7 +83,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundationDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDKDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundationDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDKDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX64</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -120,7 +120,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Common_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Vehicle.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Cooking_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundation_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Extensions.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDK_x64.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Common_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Vehicle.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Cooking_x64.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxFoundation_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Extensions.lib;$(USAGI_PHYSICS)\..\PxShared\lib\vc15win64\PxPvdSDK_x64.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

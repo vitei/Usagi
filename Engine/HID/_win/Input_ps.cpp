@@ -16,6 +16,7 @@ Input_ps::Input_ps()
 	m_mouseWheel = 0;
 	m_uInputChars = 0;
 	m_uExternalPads = 0;
+	m_pDirectInput = nullptr;
 }
 
 Input_ps::~Input_ps()
@@ -44,10 +45,21 @@ void Input_ps::GetActiveGamepads(usg::vector<IGamepad*>& gamepads)
 
 void Input_ps::Init()
 {
+	m_pDirectInput = vnew(ALLOC_OBJECT)DirectInput;
+	m_pDirectInput->Init();
 	m_keyboard.Init(this);
 	m_mouse.Init(this);
 	m_virtualGamepad.Init(&m_keyboard);
 	m_xboxPad.Init(0);
+}
+
+void Input_ps::Cleanup()
+{
+	if (m_pDirectInput)
+	{
+		vdelete m_pDirectInput;
+		m_pDirectInput = nullptr;
+	}
 }
 
 void Input_ps::RegisterDeviceChange()

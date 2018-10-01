@@ -187,6 +187,7 @@ bool InitEngine()
 void EngineCleanup()
 { 
 	//physics::deinit();
+	Input::Cleanup();
 	File::FinalizeFileSystem();
 	GFX::Reset();
 	U8String::CleanupPool();

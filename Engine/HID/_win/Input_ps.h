@@ -12,6 +12,8 @@
 #include OS_HEADER(Engine/HID, VirtualGamepad.h)
 #include OS_HEADER(Engine/HID, Keyboard_ps.h)
 #include OS_HEADER(Engine/HID, Mouse_ps.h)
+#include OS_HEADER(Engine/HID, DirectInput.h)
+#include OS_HEADER(Engine/HID, DirectInputJoystick.h)
 
 namespace usg{
 
@@ -25,6 +27,7 @@ public:
 	~Input_ps();
 	
 	void Init();
+	void Cleanup();
 	void Update(GFXDevice* pDevice);
 
 	void		GetActiveGamepads(usg::vector<IGamepad*>& gamepads);
@@ -65,6 +68,7 @@ private:
 	Mouse_ps		m_mouse;
 
 	XInputPad		m_xboxPad;
+	DirectInput*	m_pDirectInput;
 	IGamepad*		m_pExternalPads[MAX_EXTERNAL_PADS];
 	uint32			m_uExternalPads;
 

@@ -20,6 +20,7 @@ class Input
 {
 public:	
 	static void Init();
+	static void Cleanup();
 	static void RenumberGamepads();
 	static void Update(usg::GFXDevice* pDevice);
 	static void RegisterGamepad(IGamepad* pGamepad);

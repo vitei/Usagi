@@ -85,4 +85,6 @@ typedef HWND               WindHndl;
 //#define DEPRECATED(msg, func) __declspec(deprecated(msg)) func
 #define DEPRECATED(msg, func) func
 
+#define DIRECTINPUT_VERSION 0x0800
+
 #endif

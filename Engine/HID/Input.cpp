@@ -22,6 +22,11 @@ void Input::Init()
 	RenumberGamepads();
 }
 
+void Input::Cleanup()
+{
+	g_platform.Cleanup();
+}
+
 void Input::RenumberGamepads()
 {
 	g_platform.RegisterDeviceChange();
