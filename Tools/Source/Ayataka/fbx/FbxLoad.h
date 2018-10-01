@@ -113,6 +113,7 @@ private:
 	// Skeleton
 	void ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode);
 	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	void ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode);
 	void ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	
 	// Mesh data
@@ -147,6 +148,7 @@ private:
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
 	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	void AddLight(Cmdl& cmdl, FbxNode* pNode);
 	uint32 FindBone(Cmdl& cmdl, const char* szName);
 	void AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* pCurrMesh);
 	bool SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pMaterial);

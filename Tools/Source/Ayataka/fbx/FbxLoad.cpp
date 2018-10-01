@@ -42,6 +42,120 @@ void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 	pSkeleton->Bones().push_back(bone);
 }
 
+void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
+{
+	FbxLight* pFBXLight = pNode->GetLight();
+
+
+	Cmdl::Light* pLight = vnew(ALLOC_OBJECT) Cmdl::Light();
+
+	usg::LightSpec_init(&pLight->spec);
+
+	if (pNode->GetParent())
+	{
+		const char* pBoneName = pNode->GetParent()->GetName();
+		pLight->parentBone = pBoneName;
+	}
+	else
+	{
+		pLight->parentBone = cmdl.GetSkeleton()->pb().rootBoneName;
+	}
+
+	FbxAMatrix mGeometry;
+	Matrix4x4 mMatUsg;
+	mGeometry.SetT(pNode->GetGeometricTranslation(FbxNode::eSourcePivot));
+	mGeometry.SetR(pNode->GetGeometricRotation(FbxNode::eSourcePivot));
+	mGeometry.SetS(pNode->GetGeometricScaling(FbxNode::eSourcePivot));
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			mMatUsg.M[j][i] = (float)mGeometry.Get(i, j);
+		}
+	}
+	
+	pLight->name = pFBXLight->GetName();
+
+	switch (pFBXLight->LightType.Get())
+	{
+	case FbxLight::eSpot:
+		pLight->spec.base.kind = usg::LightKind_SPOT;
+		pLight->spec.spot.fInnerAngle = (float)pFBXLight->InnerAngle.Get();
+		pLight->spec.spot.fOuterAngle = (float)pFBXLight->OuterAngle.Get();
+		pLight->spec.direction = mMatUsg.vFace().v3();
+		pLight->position = mMatUsg.vPos().v3();
+		break;
+	case FbxLight::eDirectional:
+		pLight->spec.base.kind = usg::LightKind_DIRECTIONAL;
+		pLight->spec.direction = mMatUsg.vFace().v3();
+		break;
+	case FbxLight::ePoint:
+		pLight->spec.base.kind = usg::LightKind_POINT;
+		pLight->position = mMatUsg.vPos().v3();
+		break;
+	default:
+		// Unhandled
+		delete pLight;
+		return;
+	}
+
+	float fIntensity = pFBXLight->Intensity.Get() / 100.0f;
+	usg::Color color((float)pFBXLight->Color.Get().mData[0], (float)pFBXLight->Color.Get().mData[1],
+		(float)pFBXLight->Color.Get().mData[2]);
+	pLight->spec.base.ambient = color * fIntensity * 0.2f;
+	pLight->spec.base.diffuse = color * fIntensity * 1.0f;
+	pLight->spec.base.specular = color * fIntensity * 1.0f;
+	pLight->spec.base.bShadow = pFBXLight->CastShadows;
+
+
+	// Matching our simplified settings
+	// TODO: We should really should support these falloff settings in the engine
+	float fFarEnd = 100.f;
+	float fAttenuationStart = 0.0f;
+	if (pFBXLight->EnableNearAttenuation.Get())
+	{
+		fAttenuationStart = (float)pFBXLight->NearAttenuationStart;
+	}
+	if (pFBXLight->EnableFarAttenuation.Get()) 
+	{
+		fFarEnd = (float)pFBXLight->FarAttenuationEnd.Get();
+	}
+	else
+	{
+		// Calculate the point where the light drops to near zero
+
+		fAttenuationStart = usg::Math::Max((float)pFBXLight->DecayStart.Get(), fAttenuationStart);
+
+		// Light will be culled after it should drop to 1/fFarIntensityFrac
+		const float fFarIntensityFrac = 100.f;	
+		switch (pFBXLight->DecayType.Get()) {
+		case FbxLight::eLinear:
+			fFarEnd = fFarIntensityFrac *fIntensity;
+			break;
+		case FbxLight::eQuadratic:
+			fFarEnd = fFarIntensityFrac *sqrtf(fIntensity);
+			break;
+		case FbxLight::eCubic:
+			fFarEnd = pow(fFarIntensityFrac*fIntensity, 1.0f / 3.0f);
+			break;
+		case FbxLight::eNone:
+			// We don't support no attenuation; set range to 1.0f by default
+			fFarEnd = 1000.0f;
+			break;
+		}
+
+		fFarEnd += fAttenuationStart;
+	}
+
+	pLight->spec.atten.bEnabled = pFBXLight->LightType.Get() != FbxLight::eDirectional;
+	pLight->spec.atten.fNear = fAttenuationStart;
+	pLight->spec.atten.fFar = fFarEnd;	
+
+	cmdl.AddLight(pLight);
+
+}
+
+
 void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
 {
 	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
@@ -539,6 +653,7 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 			AddIdentityBone(pSkeleton);
 		}
 		cmdl.SetSkeleton(pSkeleton);
+		ReadLightsRecursive(cmdl, pRootNode);
 		if (!bSkeletonOnly)
 		{
 			ReadAnimations(cmdl, modelScene);
@@ -865,6 +980,21 @@ void FbxLoad::ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* p
 	}
 }
 
+
+void FbxLoad::ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode)
+{
+	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType())
+	{
+		if (pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eLight)
+		{
+			AddLight(cmdl, pNode);
+		}
+	}
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		ReadLightsRecursive(cmdl, pNode->GetChild(i));
+	}
+}
 
 void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
 {

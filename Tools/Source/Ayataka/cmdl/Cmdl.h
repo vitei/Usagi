@@ -2,6 +2,7 @@
 #define CMDL_H
 
 #include "OwnSTLDecl.h"
+#include "Engine/Graphics/Lights/LightSpec.pb.h"
 #include <float.h>
 #include <stdint.h>
 
@@ -20,11 +21,20 @@ public:
 	Cmdl( void );
 	virtual ~Cmdl();
 
+	struct Light
+	{
+		aya::string parentBone;
+		aya::string name;
+		usg::Vector3f position;
+		usg::LightSpec spec;
+	};
+
 	void AddShape( ::exchange::Shape* p );
 	void AddMaterial( ::exchange::Material* p );
 	void AddMesh( ::exchange::Mesh* p );
 	void AddAnimation(::exchange::Animation* p);
 	void AddStream( ::exchange::Stream* p );
+	void AddLight(Light* p);
 	void SetSkeleton( ::exchange::Skeleton* p );
 
 	uint32_t GetShapeNum( void ) const { return (uint32_t)m_vectorShape.size(); }
@@ -32,6 +42,7 @@ public:
 	uint32_t GetMeshNum( void ) const { return (uint32_t)m_vectorMesh.size(); }
 	uint32_t GetStreamNum( void ) const { return (uint32_t)m_vectorStream.size(); }
 	uint32_t GetAnimationNum(void) const { return (uint32_t)m_vectorAnimation.size(); }
+	uint32_t GetLightNum(void) const { return (uint32_t)m_lightStream.size(); }
 
 	uint32_t GetBoneIndexCount(int materialNum);
 	std::vector< uint8 >& GetRigidIndices() { return m_rigidBones; }
@@ -45,6 +56,7 @@ public:
 	::exchange::Animation*	GetAnimation(int i) const { return m_vectorAnimation.at(i); }
 	::exchange::Stream*		GetStreamPtr( int i ) const { return m_vectorStream.at( i ); }
 	::exchange::Skeleton*	GetSkeleton( void ) const { return m_pSkeleton; }
+	Light*					GetLight(int i) { return m_lightStream[i]; }
 
 	void ReverseCoordinate( void );
 	void CalculatePolygonNormal( void );
@@ -58,15 +70,19 @@ private:
 	void ReverseCoordinateInt( ::exchange::Stream& stream );
 	void CalculatePolygonNormal( ::exchange::Shape* pShape );
 
+
+
 	aya::string m_stringName;
 
-	std::vector< ::exchange::Shape*, aya::Allocator< ::exchange::Shape*> >						m_vectorShape;
-	std::vector< ::exchange::Material*, aya::Allocator< ::exchange::Material*> >				m_vectorMaterial;
-	std::vector< ::exchange::Mesh*, aya::Allocator< ::exchange::Mesh* > >						m_vectorMesh;
-	std::vector< ::exchange::Animation*, aya::Allocator< ::exchange::Animation* > >				m_vectorAnimation;
-	std::vector< ::exchange::Stream*, aya::Allocator< ::exchange::Stream* > >					m_vectorStream;
-	std::vector< uint8 >																		m_rigidBones;
-	std::vector< uint8 >																		m_smoothSkinBones;
+	std::vector< ::exchange::Shape*, aya::Allocator< ::exchange::Shape*> >			m_vectorShape;
+	std::vector< ::exchange::Material*, aya::Allocator< ::exchange::Material*> >	m_vectorMaterial;
+	std::vector< ::exchange::Mesh*, aya::Allocator< ::exchange::Mesh* > >			m_vectorMesh;
+	std::vector< ::exchange::Animation*, aya::Allocator< ::exchange::Animation* > >	m_vectorAnimation;
+	std::vector< ::exchange::Stream*, aya::Allocator< ::exchange::Stream* > >		m_vectorStream;
+	std::vector< Light*, aya::Allocator< Light* > >									m_lightStream;
+
+	std::vector< uint8 >															m_rigidBones;
+	std::vector< uint8 >															m_smoothSkinBones;
 
 	::exchange::Skeleton* m_pSkeleton;
 

@@ -32,6 +32,7 @@ Cmdl::~Cmdl()
 	DeleteAll( m_vectorMaterial );
 	DeleteAll( m_vectorMesh );
 	DeleteAll( m_vectorStream );
+	DeleteAll(m_lightStream);
 
 	SAFE_DELETE( m_pSkeleton );
 }
@@ -59,6 +60,11 @@ void Cmdl::AddMesh(::exchange::Mesh* p)
 void Cmdl::AddStream( ::exchange::Stream* p )
 {
 	m_vectorStream.push_back( p );
+}
+
+void Cmdl::AddLight(Light* p)
+{
+	m_lightStream.push_back(p);
 }
 
 void Cmdl::SetSkeleton( ::exchange::Skeleton* p )
