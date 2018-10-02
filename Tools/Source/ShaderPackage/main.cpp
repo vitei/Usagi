@@ -87,12 +87,13 @@ bool CompileOGLShader(const std::string& inputFileName, const std::string& setDe
 	return false;
 }
 
-bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
 {
 	// Get the input file name
 	std::string outputFileName = tempFileName;
 
 	std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
+	// TODO: Handle multiple include directories
 	std::string defineList = setDefines;
 	size_t nextDefine = std::string::npos;
 	while (!defineList.empty())
@@ -119,10 +120,10 @@ bool CompileVulkanShader(const std::string& inputFileName, const std::string& se
 	std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
 	CreateDirectory(outputDir.c_str(), NULL);
 
-	command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines;
+	command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines << " " << includes;
 	//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
 	// FIXME: code for glslang natively, but for now it is cleaner to use the command line
-	system(command.str().c_str());
+	system(command.str().c_str()); 
 
 	FILE* pFileOut = nullptr;
 	fopen_s(&pFileOut, outputFileName.c_str(), "rb");
@@ -156,6 +157,20 @@ bool CompileVulkanShader(const std::string& inputFileName, const std::string& se
 	return true;
 }
 
+
+bool CheckArgument(std::string& target, const std::string& argument)
+{
+	if (strncmp(target.c_str(), argument.c_str(), argument.length()) == 0)
+	{
+		target.erase(0, argument.length());
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	std::string inputFile; 
@@ -166,18 +181,40 @@ int main(int argc, char *argv[])
 	std::string api;
 	std::string intFileName;
 	std::string packageName;
+	std::string includeDirs;
+	std::string arg;
 
-	if (argc != 6)
+	for (int i = 1; i < argc; i++)
 	{
-		printf("Format should be ShaderPackage <input.yml> <output> <temporary_dir> <shader_dir> <api>");
-		return -1;
-	}
+		arg = argv[i];
 
-	inputFile = argv[1];
-	outBinary = argv[2];
-	tempDir = argv[3];
-	shaderDir = argv[4];
-	api = argv[5];
+		if (arg.at(0) != '-')
+		{
+			inputFile = arg;
+		}
+		else if (CheckArgument(arg, "-a"))
+		{
+			api = arg;
+		}
+		else if (CheckArgument(arg, "-o"))
+		{
+			outBinary = arg;
+		}
+		else if (CheckArgument(arg, "-t"))
+		{
+			tempDir = arg;
+		}
+		else if (CheckArgument(arg, "-s"))
+		{
+			shaderDir = arg;
+		}
+		else if (CheckArgument(arg, "-i"))
+		{
+			if (!includeDirs.empty())
+				includeDirs += " ";
+			includeDirs += "-I" + arg;
+		}
+	}
 
 	//dependencyFile = argv[6];
 	dependencyFile = outBinary + ".d";
@@ -302,7 +339,7 @@ int main(int argc, char *argv[])
 						{
 							std::string tempFileName = intFileName + ".SPV";
 							tempFileName = tempDir + "/" + tempFileName;
-							bSuccess = CompileVulkanShader(inputFileName, def.sets[i].defines, tempFileName, shader, referencedFiles);
+							bSuccess = CompileVulkanShader(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, referencedFiles);
 						}
 						else if (api == "ogl")
 						{
