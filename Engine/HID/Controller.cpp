@@ -130,8 +130,17 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 	switch( detail.deviceType )
 	{
 	case INPUT_TYPE_AXIS:
+	case INPUT_TYPE_MOUSE_AXIS:
 		{
-			float fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+			float fOutput = 0.0f;
+			if (detail.deviceType == INPUT_TYPE_MOUSE_AXIS)
+			{
+				fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+			}
+			else
+			{
+				fOutput = m_pMouse->GetAxis((MouseAxis)detail.uInputIdA);
+			}
 			switch( detail.axisType )
 			{
 			case AXIS_TYPE_ABSOLUTE:
@@ -148,9 +157,9 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 	case INPUT_TYPE_BUTTON:
 		return m_pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState);
 	case INPUT_TYPE_KEY:
-		return m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState);
+		return m_pKeyboard ? m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_MOUSE_BUTTON:
-		return m_pMouse->GetButton((MouseButton)detail.uInputIdA, detail.eInputState);
+		return m_pMouse ? m_pMouse->GetButton((MouseButton)detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_SCREEN_TOUCH:
 		ASSERT(false); // Not yet supported
 		return false;
@@ -194,8 +203,17 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 			}
 		}
 	case INPUT_TYPE_AXIS:
+	case INPUT_TYPE_MOUSE_AXIS:
 		{
-			float fOutput = m_pGamepad->GetAxisValue( detail.uInputIdA);
+			float fOutput = 0.0f;
+			if (detail.deviceType == INPUT_TYPE_AXIS)
+			{
+				fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+			}
+			else
+			{
+				fOutput = m_pMouse->GetAxis((MouseAxis)detail.uInputIdA);
+			}
 
 			switch( detail.axisType )
 			{
@@ -215,6 +233,9 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 		}
 	case INPUT_TYPE_KEY:
 	{
+		if (!m_pKeyboard)
+			return false;
+
 		switch (detail.axisType)
 		{
 		case AXIS_TYPE_ABSOLUTE:
@@ -234,6 +255,9 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 	}
 	case INPUT_TYPE_MOUSE_BUTTON:
 	{
+		if (!m_pMouse)
+			return 0.0f;
+
 		switch (detail.axisType)
 		{
 		case AXIS_TYPE_ABSOLUTE:
@@ -320,6 +344,24 @@ bool Controller::CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOut
 	return true;
 }
 
+bool Controller::CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &output, float fStickyRate, bool bReverse)
+{
+	ControllerDetail& detail = GetControllerDetail();
+	detail.pResult = &output;
+	detail.pResult->fStickyRate = fStickyRate;
+	output.eOutput = OUTPUT_TYPE_FLOAT;
+	output.Clear();
+	output.data.fValue = 0.0f;
+	detail.deviceType = INPUT_TYPE_MOUSE_AXIS;
+	detail.axisType = eType;
+	detail.bReverse = bReverse;
+	detail.uInputIdA = uAxis;
+	detail.uInputIdB = MOUSE_BUTTON_NONE;
+
+	return true;
+}
+
+
 bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, MappingOutput& output )
 {
 	ControllerDetail& detail = GetControllerDetail();
@@ -349,6 +391,24 @@ bool Controller::CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton 
 	detail.bReverse		= bReverse;
 	detail.uInputIdA	= uButtonA;
 	detail.uInputIdB	= uButtonB;
+
+	return true;
+}
+
+bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& output, float fStickyRate, bool bReverse)
+{
+	ControllerDetail& detail = GetControllerDetail();
+	detail.pResult = &output;
+	detail.pResult->fStickyRate = fStickyRate;
+	output.eOutput = OUTPUT_TYPE_FLOAT;
+	output.Clear();
+	output.data.fValue = 0.0f;
+
+	detail.deviceType = INPUT_TYPE_KEY;
+	detail.axisType = AXIS_TYPE_ABSOLUTE;
+	detail.bReverse = bReverse;
+	detail.uInputIdA = (uint32)uKeyA;
+	detail.uInputIdB = (uint32)uKeyB;
 
 	return true;
 }

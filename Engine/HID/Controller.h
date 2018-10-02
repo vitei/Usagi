@@ -68,8 +68,10 @@ protected:
 	bool CreateKeyMapping(uint8 uKey, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
+	bool CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	bool CreateButtonFromAxis(GamepadAxis uAxis,  AxisType eType, MappingOutput& detailOut);
 	bool CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
+	bool CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
 
