@@ -26,6 +26,7 @@ public:
 
 	bool HasDevice(const char* szName);
 	bool IsDeviceConnected(uint32 uIdx) const;
+	bool IsGamepad(uint32 uIdx) const;
 	GUID GetGUIDForDevice(uint32 uIdx) const;
 	void UpdateConnectedDevices();
 	uint32 GetJoystickCount() const { return (uint32)m_joysticks.size(); }
@@ -38,6 +39,7 @@ private:
 		usg::string				instanceName;
 		usg::string				productName;
 		GUID					guid;
+		bool					bIsGamepad;
 		bool					bConnected;
 	};
 

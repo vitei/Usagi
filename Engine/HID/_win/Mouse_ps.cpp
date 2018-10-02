@@ -9,7 +9,7 @@ namespace usg
 {
 	void Mouse_ps::Update()
 	{
-		for(uint32 i=0; i<_MouseButton_count; i++)
+		for(uint32 i=0; i<MOUSE_BUTTON_NONE; i++)
 		{
 			m_prevButtons[i] = m_buttons[i];
 			m_buttons[i] = m_pOwner->GetMouseButtonDown(i);

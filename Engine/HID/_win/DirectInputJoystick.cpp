@@ -17,15 +17,37 @@ namespace usg{
 		float	fSign;
 	};
 
+	struct ControlMapping
+	{
+		uint32	uAbstractID;
+		uint32	uDirectInputId;
+	};
+
 	static const AxisMapping g_axisMapping[] =
 	{
 		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
 		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
-		{ GAMEPAD_AXIS_LEFT_Z,			DIJOFS_Z, 1.0f },
-		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_RX, 1.0f },
-		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_RY, -1.0f },
-		{ GAMEPAD_AXIS_RIGHT_Z,			DIJOFS_RZ, 1.0f },
+		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_Z, 1.0f },
+		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_RZ, -1.0f },
 		{ GAMEPAD_AXIS_NONE,		0 }
+	};
+
+	static const ControlMapping g_controlMappingPad[] =
+	{
+		{ GAMEPAD_BUTTON_X,			3 },
+		{ GAMEPAD_BUTTON_Y,			0 },
+		{ GAMEPAD_BUTTON_A,			2 },
+		{ GAMEPAD_BUTTON_B,			1 },
+		{ GAMEPAD_BUTTON_L,			4 },
+		{ GAMEPAD_BUTTON_R,			5 },
+		{ GAMEPAD_BUTTON_START,		9 },
+		{ GAMEPAD_BUTTON_SELECT,	8 },
+		{ GAMEPAD_BUTTON_THUMB_L,	10 },
+		{ GAMEPAD_BUTTON_THUMB_R,	11 },
+		{ GAMEPAD_BUTTON_ZL,		6 },
+		{ GAMEPAD_BUTTON_ZR,		7 },
+		{ GAMEPAD_BUTTON_HOME,		12 },
+		{ GAMEPAD_BUTTON_NONE,	0 }
 	};
 
 DirectInputJoystick::DirectInputJoystick()
@@ -34,6 +56,7 @@ DirectInputJoystick::DirectInputJoystick()
 	m_uCaps = 0;
 	m_uNumButtons = 0;
 	m_uNumAxes = 0;
+	m_bIsGamepad = false;
 	m_bConnected = false;
 	m_pDevice = nullptr;
 }
@@ -60,6 +83,8 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 	if (m_bConnected != pInput->IsDeviceConnected(m_uInputId))
 	{
 		m_bConnected = false;
+		m_bIsGamepad = pInput->IsGamepad(m_uInputId);
+
 
 		if (m_pDevice)
 		{
@@ -110,7 +135,7 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 	DIpdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
 	DIpdw.diph.dwHow = DIPH_BYOFFSET;
 
-	DIpdw.dwData = (long)(10000 / fDeadZone);
+	DIpdw.dwData = (long)(10000 * fDeadZone);
 
 	DIpdw.diph.dwObj = DIJOFS_X;
 	m_pDevice->SetProperty(DIPROP_DEADZONE, &DIpdw.diph);
@@ -196,13 +221,29 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 		return;
 	}
 
-	for (uint32 i = 0; i < m_uNumButtons; i++)
+	if (m_bIsGamepad)
 	{
-		if (js.rgbButtons[i] & 0x80)
+		const ControlMapping* pMapping = g_controlMappingPad;
+		while(pMapping->uAbstractID != GAMEPAD_BUTTON_NONE)
 		{
-			deviceStateOut.uButtonsDown |= (1 << i);
+			if (js.rgbButtons[pMapping->uDirectInputId] & 0x80)
+			{
+				deviceStateOut.uButtonsDown |= (1 << (pMapping->uAbstractID -1));
+			}
+			pMapping++;
 		}
 	}
+	else
+	{
+		for (uint32 i = 0; i < m_uNumButtons; i++)
+		{
+			if (js.rgbButtons[i] & 0x80)
+			{
+				deviceStateOut.uButtonsDown |= (1 << i);
+			}
+		}
+	}
+	
 
 	for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
 	{

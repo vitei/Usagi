@@ -41,6 +41,7 @@ private:
 	uint32					m_uNumAxes;
 	uint32					m_uCaps;
 	bool					m_bConnected;
+	bool					m_bIsGamepad;
 
 };
  

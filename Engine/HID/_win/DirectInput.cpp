@@ -211,6 +211,15 @@ namespace usg
 		return bIsXinputDevice;
 	}
 
+	bool DirectInput::IsGamepad(uint32 uIdx) const
+	{
+		if (uIdx < m_joysticks.size())
+		{
+			return m_joysticks[uIdx].bIsGamepad;
+		}
+		return false;
+	}
+
 	BOOL DirectInput::DeviceEnumCallback(const DIDEVICEINSTANCE* pInst)
 	{
 		DeviceInfo* pInfo = GetDevice(pInst->tszInstanceName);
@@ -224,6 +233,7 @@ namespace usg
 				pInfo->productName = pInst->tszProductName;
 				pInfo->instanceName = pInst->tszInstanceName;
 				pInfo->guid = pInst->guidInstance;
+				pInfo->bIsGamepad = pInst->guidProduct.Data1 == 0x05C4054C;
 			}
 			pInfo->bConnected = true;
 		}
