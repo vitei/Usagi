@@ -81,6 +81,7 @@ private:
 
 	RenderNode*				m_pVisibleNodes[RenderNode::LAYER_COUNT][MAX_NODES_PER_LAYER];
 	uint32					m_uVisibleNodes[RenderNode::LAYER_COUNT];
+	bool					m_bFirstFrame;
 
 };
 

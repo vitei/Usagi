@@ -23,6 +23,7 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mProjMat;
 	mat4 	mViewMat;
+	mat4 	mPrevViewMat;
 	mat4 	mInvViewMat;
 	mat4 	mViewProjMat;
 	vec4	vFogVars;

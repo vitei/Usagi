@@ -24,6 +24,7 @@ namespace usg {
 	{
 		Matrix4x4	mProjMat;
 		Matrix4x4	mViewMat;
+		Matrix4x4	mPrevViewMat;
 		Matrix4x4	mInvViewMat;
 		Matrix4x4	mViewProjMat;
 		Vector4f	vFogVars;
@@ -43,6 +44,7 @@ namespace usg {
 	{
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, mProjMat,			CT_MATRIX_44, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, mViewMat,			CT_MATRIX_44, 1),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, mPrevViewMat,		CT_MATRIX_44, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, mInvViewMat,		CT_MATRIX_44, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, mViewProjMat,		CT_MATRIX_44, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vFogVars,			CT_VECTOR_4, 1),
@@ -66,6 +68,7 @@ namespace usg {
 		m_fLODBias = 1.0f;
 		m_pPostFXSys = NULL;
 		m_pCamera = nullptr;
+		m_bFirstFrame = true;
 		m_shadowColor.Assign(0.05f, 0.05f, 0.1f, 1.0f);
 
 		for (int i = 0; i < RenderNode::LAYER_COUNT; i++)
@@ -206,6 +209,14 @@ namespace usg {
 			mViewMat._41 += vOffset.x;
 			mViewMat._42 += vOffset.y;
 			mViewMat._43 += vOffset.z;
+			if (m_bFirstFrame)
+			{
+				globalData->mPrevViewMat = mViewMat;
+			}
+			else
+			{
+				globalData->mPrevViewMat = globalData->mViewMat;
+			}
 			globalData->mViewMat = mViewMat;//pCamera->GetViewMatrix((ViewType)i); 
 
 			// FIXME: This is all hardcoded to the first fog, if we go back to using vertex shader based fog this needs
@@ -312,6 +323,8 @@ namespace usg {
 				qsort(m_pVisibleNodes[uLayer], m_uVisibleNodes[uLayer], sizeof(RenderNode*), CompareNodes);
 			}
 		}
+
+		m_bFirstFrame = false;
 
 	}
 
