@@ -23,7 +23,7 @@ namespace usg{
 		uint32	uDirectInputId;
 	};
 
-	static const AxisMapping g_axisMapping[] =
+	static const AxisMapping g_axisMappingPad[] =
 	{
 		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
 		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
@@ -31,6 +31,16 @@ namespace usg{
 		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_RZ, -1.0f },
 		{ GAMEPAD_AXIS_NONE,		0 }
 	};
+
+	static const AxisMapping g_axisMappingJoy[] =
+	{
+		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
+		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
+		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_RZ, 1.0f },
+		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_Z, -1.0f },
+		{ GAMEPAD_AXIS_NONE,		0 }
+	};
+
 
 	static const ControlMapping g_controlMappingPad[] =
 	{
@@ -163,10 +173,20 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 
 	for (int i=0; i< GAMEPAD_AXIS_NONE; i++)
 	{
-		if (g_axisMapping[i].uAbstractID == GAMEPAD_AXIS_NONE)
-			break;
+		if (m_bIsGamepad)
+		{
+			if (g_axisMappingPad[i].uAbstractID == GAMEPAD_AXIS_NONE)
+				break;
 
-		range.diph.dwObj = g_axisMapping[i].uDirectInputId;
+			range.diph.dwObj = g_axisMappingPad[i].uDirectInputId;
+		}
+		else
+		{
+			if (g_axisMappingJoy[i].uAbstractID == GAMEPAD_AXIS_NONE)
+				break;
+
+			range.diph.dwObj = g_axisMappingJoy[i].uDirectInputId;
+		}
 		range.lMin = -(1 << 7);
 		range.lMax = (1 << 7);
 		if (m_pDevice->GetProperty(DIPROP_RANGE, &range.diph) == DI_OK)
@@ -245,23 +265,38 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 	}
 	
 
-	for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
+	if (m_bIsGamepad)
 	{
-		if (g_axisMapping[i].uAbstractID == GAMEPAD_AXIS_NONE)
-			break;
+		for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
+		{
+			if (g_axisMappingPad[i].uAbstractID == GAMEPAD_AXIS_NONE)
+				break;
 
-		deviceStateOut.fAxisValues[g_axisMapping[i].uAbstractID] = GetAxis(js, i);
+			deviceStateOut.fAxisValues[g_axisMappingPad[i].uAbstractID] = GetAxis(js, i);
 
+		}
+	}
+	else
+	{
+		for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
+		{
+			if (g_axisMappingJoy[i].uAbstractID == GAMEPAD_AXIS_NONE)
+				break;
+
+			deviceStateOut.fAxisValues[g_axisMappingJoy[i].uAbstractID] = GetAxis(js, i);
+
+		}
 	}
 }
 
 float DirectInputJoystick::GetAxis(DIJOYSTATE2& js, int iAxis)
 {
-	long value = *((long*)((uint8*)(&js) + g_axisMapping[iAxis].uDirectInputId));
+	const AxisMapping* pMapping = m_bIsGamepad ? &g_axisMappingPad[iAxis] : &g_axisMappingJoy[iAxis];
+	long value = *((long*)((uint8*)(&js) + pMapping->uDirectInputId));
 	float range = (float)m_axisRanges[iAxis].max - (float)m_axisRanges[iAxis].min;
 
 	float fNormalised = ((float)value - (float)m_axisRanges[iAxis].min) / range;
-	return (fNormalised - 0.5f) * 2.f * g_axisMapping[iAxis].fSign;
+	return (fNormalised - 0.5f) * 2.f * pMapping->fSign;
 }
 
 uint32 DirectInputJoystick::GetCaps() const

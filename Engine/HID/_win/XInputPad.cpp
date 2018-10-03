@@ -16,7 +16,7 @@ struct AxisMapping
 	uint32	uXInputID;
 };
 
-static const AxisMapping g_axisMapping[] =
+static const AxisMapping g_axisMappingPad[] =
 {
 	{ GAMEPAD_BUTTON_A,			XINPUT_GAMEPAD_B },
 	{ GAMEPAD_BUTTON_B,			XINPUT_GAMEPAD_A },
@@ -87,7 +87,7 @@ void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 	deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_X] = GetAxisWithDeadZone(m_controllerState.Gamepad.sThumbRX, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 	deviceStateOut.fAxisValues[GAMEPAD_AXIS_RIGHT_Y] = GetAxisWithDeadZone(m_controllerState.Gamepad.sThumbRY, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 
-	const AxisMapping *pMapping = g_axisMapping;
+	const AxisMapping *pMapping = g_axisMappingPad;
 	while(pMapping->uAbstractID != GAMEPAD_BUTTON_NONE)
 	{
 		if(pMapping->uXInputID & m_controllerState.Gamepad.wButtons)
