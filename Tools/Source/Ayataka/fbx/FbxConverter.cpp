@@ -67,16 +67,14 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	FbxImporter*	importer;
 
 	InitializeSdkObjects(sdkManager, scene);
-	int lFileFormat = -1;
 	importer = FbxImporter::Create(sdkManager, "");
-	if (!sdkManager->GetIOPluginRegistry()->DetectReaderFileFormat(path.c_str(), lFileFormat))
-	{
-		// Unrecognizable file format. Try to fall back to FbxImporter::eFBX_BINARY
-		lFileFormat = sdkManager->GetIOPluginRegistry()->FindReaderIDByDescription("FBX binary (*.fbx)");;
-	}
+	bool bStatus = importer->Initialize(path.c_str());
 
-	if (!importer->Initialize(path.c_str(), lFileFormat) == true)
+	if (!bStatus)
 	{
+		fbxsdk::FbxStatus::EStatusCode eCode = importer->GetStatus().GetCode();
+		DEBUG_PRINT("Call to FbxImporter::Initialize() failed.\n");
+		DEBUG_PRINT("Error returned: %s\n\n", importer->GetStatus().GetErrorString());
 		// open failed
 		return -1;
 	}
