@@ -28,7 +28,7 @@ int main(int argc, const char* argv[])
 			"MSBuild\\15.0\\Bin"
 		},
 		{
-			"SOFTWARE\\WOW6432Node\\Autodesk FBX SDK 2018.1.1",
+			"SOFTWARE\\WOW6432Node\\Autodesk FBX SDK 2019.0",
 			"Install_Dir",
 			"FBXSDK_DIR",
 			""
