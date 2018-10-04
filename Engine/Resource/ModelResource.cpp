@@ -504,7 +504,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	fxRunTime.SetVariable("vScaling1", Vector4f(1.f, 1.f, 1.f, pShape->vertexAlphaScale));
 
 	// Texture Coordinator
-	m_meshArray[m_uMeshCount].uUVCount = pMaterial->textureCoordinators_count;
+	m_meshArray[m_uMeshCount].uUVCount = usg::Math::Min(pMaterial->textureCoordinators_count, fxRunTime.GetVariableCount("mTexMatrix"));
 	uint32 uTexMatCount = fxRunTime.GetVariableCount("mTexMatrix");
 	for( size_t i = 0; i < uTexMatCount; ++i )
 	{
