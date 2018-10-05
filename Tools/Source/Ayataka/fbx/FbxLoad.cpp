@@ -349,6 +349,13 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 							textName = textName.substr(pos+1);
 						}
 					}
+
+					if (textName.size() >= sizeof(pNewMaterial->pb().textures[uTexIndex].textureName))
+					{
+						printf("Texture name %s too long\n", textName.c_str());
+						continue;
+					}
+
 					strncpy_s(pNewMaterial->pb().textures[uTexIndex].textureName, textName.c_str(), sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
 					
 					uint32 uCoordinatorIndex = pNewMaterial->pb().textureCoordinators_count;
