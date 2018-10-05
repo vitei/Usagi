@@ -58,6 +58,7 @@ void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUU
 	// We should pass in a flag saying whether or not to copy this data
 	m_pDecl		= pDecl;
 	m_uVarCount	= 0;
+	m_eUsage = eUsage;
 
 	AppendDeclaration(pDecl);
 	
