@@ -80,6 +80,11 @@ void Cmdl::ReverseCoordinate()
 		ReverseCoordinateInt( m_vectorShape.at( i ) );
 	}
 
+	size = m_lightStream.size();
+	for (size_t i = 0; i < size; ++i) {
+		ReverseCoordinateInt(m_lightStream.at(i));
+	}
+
 	if( m_pSkeleton ) {
 		m_pSkeleton->ReverseCoordinate();
 	}
@@ -136,6 +141,13 @@ uint32_t Cmdl::GetBoneIndexCount(int materialNum)
 	ASSERT(count != (-1));
 
 	return count;
+}
+
+
+void Cmdl::ReverseCoordinateInt(Light* pLight)
+{
+	pLight->position.z *= -1.0f;
+	pLight->spec.direction.z *= -1.0f;
 }
 
 void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)

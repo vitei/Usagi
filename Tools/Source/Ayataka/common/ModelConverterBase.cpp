@@ -157,7 +157,7 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 	}
 
 	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
-	pugi::xml_node lightSet = skeletonNode.append_child("light_array");
+	pugi::xml_node lightSet = lightNode.append_child("light_array");
 
 	pugi::xml_attribute lightArrayLength = lightSet.append_attribute("length");
 	lightArrayLength.set_value((unsigned int)mCmdl.GetLightNum());

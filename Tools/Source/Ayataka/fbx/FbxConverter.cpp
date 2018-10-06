@@ -69,7 +69,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	InitializeSdkObjects(sdkManager, scene);
 	importer = FbxImporter::Create(sdkManager, "");
 	bool bStatus = importer->Initialize(path.c_str());
-
+	 
 	if (!bStatus)
 	{
 		fbxsdk::FbxStatus::EStatusCode eCode = importer->GetStatus().GetCode();

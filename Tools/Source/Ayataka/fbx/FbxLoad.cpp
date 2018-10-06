@@ -46,14 +46,19 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 {
 	FbxLight* pFBXLight = pNode->GetLight();
 
-
 	Cmdl::Light* pLight = vnew(ALLOC_OBJECT) Cmdl::Light();
 
 	usg::LightSpec_init(&pLight->spec);
 
-	if (pNode->GetParent())
+	FbxNode* pParentBone = pNode->GetParent();
+	while (pParentBone && pParentBone->GetNodeAttribute() && (pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
 	{
-		const char* pBoneName = pNode->GetParent()->GetName();
+		pParentBone = pParentBone->GetParent();
+	}
+
+	if (pParentBone)
+	{
+		const char* pBoneName = pParentBone->GetName();
 		pLight->parentBone = pBoneName;
 	}
 	else
@@ -63,14 +68,12 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 
 	FbxAMatrix mGeometry;
 	Matrix4x4 mMatUsg;
-	mGeometry.SetT(pNode->GetGeometricTranslation(FbxNode::eSourcePivot));
-	mGeometry.SetR(pNode->GetGeometricRotation(FbxNode::eSourcePivot));
-	mGeometry.SetS(pNode->GetGeometricScaling(FbxNode::eSourcePivot));
+	mGeometry = GetCombinedMatrixForNode(pNode);//pNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);//GetCombinedMatrixForNode(pNode);
 	for (uint32 i = 0; i < 4; i++)
 	{
 		for (uint32 j = 0; j < 4; j++)
 		{
-			mMatUsg.M[j][i] = (float)mGeometry.Get(i, j);
+			mMatUsg.M[i][j] = (float)mGeometry.Get(i, j);
 		}
 	}
 	
@@ -82,12 +85,12 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		pLight->spec.base.kind = usg::LightKind_SPOT;
 		pLight->spec.spot.fInnerAngle = (float)pFBXLight->InnerAngle.Get();
 		pLight->spec.spot.fOuterAngle = (float)pFBXLight->OuterAngle.Get();
-		pLight->spec.direction = mMatUsg.vFace().v3();
+		pLight->spec.direction = mMatUsg.vFace().v3().GetNormalised();
 		pLight->position = mMatUsg.vPos().v3();
 		break;
 	case FbxLight::eDirectional:
 		pLight->spec.base.kind = usg::LightKind_DIRECTIONAL;
-		pLight->spec.direction = mMatUsg.vFace().v3();
+		pLight->spec.direction = mMatUsg.vFace().v3().GetNormalised();
 		break;
 	case FbxLight::ePoint:
 		pLight->spec.base.kind = usg::LightKind_POINT;
@@ -99,7 +102,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		return;
 	}
 
-	float fIntensity = pFBXLight->Intensity.Get() / 100.0f;
+	float fIntensity = 1.0f;// pFBXLight->Intensity.Get() / 100.0f;
 	usg::Color color((float)pFBXLight->Color.Get().mData[0], (float)pFBXLight->Color.Get().mData[1],
 		(float)pFBXLight->Color.Get().mData[2]);
 	pLight->spec.base.ambient = color * fIntensity * 0.2f;
