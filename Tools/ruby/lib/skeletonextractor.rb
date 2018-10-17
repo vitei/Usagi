@@ -73,10 +73,18 @@ module SkeletonExtractor
         object['StateComponent'] = {'current' => Usg::STATUS::ACTIVE} 
       end
 
-      if @children.length > 0
+      if @children.length > 0 or @light_children.length > 0
         object['Children'] = []
+      end
 
+      if @children.length > 0 
         @children.each do |c|
+          object['Children'] << c.to_object
+        end
+      end
+
+      if @light_children.length > 0 
+        @light_children.each do |c|
           object['Children'] << c.to_object
         end
       end
@@ -166,6 +174,6 @@ module SkeletonExtractor
       end
     end
 
-    return rootBone.to_object
+    return rootBone
   end
 end

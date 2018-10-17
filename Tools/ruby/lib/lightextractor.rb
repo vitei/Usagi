@@ -40,17 +40,9 @@ module LightExtractor
       spot = { 'fInnerAngle' => @inner_angle, 'fOuterAngle' => @outer_angle }
       spec = {'direction' => @direction, 'base' => base, 'atten' => atten, 'spot' => spot}
       # Projection lights not available in models
-      object = {'Identifier'=>{'name' => @name},
+      object = {'Identifier'=>{'name' => @name}, 'TransformComponent'=>{'position' => @position},
         'LightComponent' => {'spec' => spec} 
       }
-
-      if @children.length > 0
-        object['Children'] = []
-
-        @children.each do |c|
-          object['Children'] << c.to_object
-        end
-      end
 
       return object
     end
@@ -59,18 +51,66 @@ module LightExtractor
   ##################
   # constants      #
   ##################
-  TRANSFORM_FIELDS = ['Scale', 'Rotate', 'Translate']
-  COMPONENTS = ['X', 'Y', 'Z']
+  VECTOR_FIELDS = ['position', 'direction']
+  COLOR_FIELDS = ['ambient', 'diffuse', 'specular']
+  VEC_COMPONENTS = ['x', 'y', 'x']
+  CLR_COMPONENTS = ['m_fR', 'm_fG', 'm_fB']
 
   def self.extract(model_filename, rootBone)
     doc = Nokogiri::XML(File.read(model_filename))
 
-    queries = {:lighting => 'lighting', :lights => 'light_array > light', :name => 'name',
-      :parent => 'parent_name', :type => 'type' }
-
+    queries = {:lighting => 'lighting', :light_array => 'light_array', :lights => 'light_array > light', :name => 'name',
+      :parent => 'parent_name', :type => 'type', :has_shadow => 'has_shadow',
+      :inner_angle => 'inner_angle', :outer_angle => 'outer_angle', 
+      :atten_enabled => 'atten_enabled', :atten_start => 'atten_start', :atten_end => 'atten_end'
+      }
 
     lighting = doc.at_css(queries[:lighting])
 
+    if lighting and lighting.css(queries[:light_array])
+      lighting.css(queries[:lights]).each do |b|
+
+        lightName = b[queries[:name]]
+        parentBoneName = b[queries[:parent]]
+
+        if parentBoneName.length > 1
+          node = LightNode.new(boneName)
+          parentNode = rootBone.find(parentBoneName, 1)
+
+          if parentNode[0] == nil
+            raise "couldn't find parent bone '#{parentBoneName}' in input file '#{model_filename}'"
+          end
+
+          parentNode[0].light_children << node
+        end
+
+        LightExtractor::VECTOR_FIELDS.map{|f| f}.each do |field_name|
+          values = b[field_name].split(' ').slice(0, 3)
+
+          LightExtractor::VEC_COMPONENTS.each_with_index do |c, index|
+            node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
+          end
+        end
+
+        LightExtractor::COLOR_FIELDS.map{|f| f}.each do |field_name|
+          values = b[field_name].split(' ').slice(0, 3)
+
+          LightExtractor::CLR_COMPONENTS.each_with_index do |c, index|
+            node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
+          end        
+        end
+
+        # Dangling values
+        type = b[queries[:type]]
+        has_shadow = b[queries[:has_shadow]]
+        inner_angle = b[queries[:inner_angle]]
+        outer_angle = b[queries[:outer_angle]]
+        atten_enabled = b[queries[:atten_enabled]]
+        atten_start = b[queries[:atten_start]]
+        atten_end = b[queries[:atten_end]]
+
+      end
+    end
 
     return rootBone.to_object
   end

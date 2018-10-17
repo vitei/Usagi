@@ -56,7 +56,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		pParentBone = pParentBone->GetParent();
 	}
 
-	if (pParentBone)
+	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
 	{
 		const char* pBoneName = pParentBone->GetName();
 		pLight->parentBone = pBoneName;
