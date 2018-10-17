@@ -23,6 +23,7 @@ module SkeletonExtractor
     def initialize(name, is_root=false)
       @name = name
       @children = []
+      @light_children = []
       @scale = {}
       @rotate = {}
       @translate = {}

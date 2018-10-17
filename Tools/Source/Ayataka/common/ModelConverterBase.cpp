@@ -211,6 +211,14 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.specular.r(), pLight->spec.base.specular.g(), pLight->spec.base.specular.b());
 		specular.set_value(buff);
 
+
+		pugi::xml_attribute attenEnabled = light.append_attribute("atten_enabled");
+		pugi::xml_attribute attenStart = light.append_attribute("atten_start");
+		pugi::xml_attribute attenEnd = light.append_attribute("atten_end");
+		attenEnabled.set_value(pLight->spec.atten.bEnabled);
+		attenStart.set_value(pLight->spec.atten.fNear);
+		attenEnd.set_value(pLight->spec.atten.fFar);
+
 		pugi::xml_attribute inner_angle = light.append_attribute("inner_angle");
 		inner_angle.set_value(pLight->spec.spot.fInnerAngle);
 

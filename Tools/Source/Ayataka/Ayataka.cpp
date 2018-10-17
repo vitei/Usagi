@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 		timer.Start();
 		ret = convertModelData( outputPath, inputPath, argumentsVector, settings );
 		timer.Stop();
-		printf("%f\n", timer.GetTotalMilliSeconds());
+		printf("%f\n", timer.GetTotalMilliSeconds()); 
 	}
 	else if (ext == "yml")
 	{
