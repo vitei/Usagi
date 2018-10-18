@@ -36,7 +36,7 @@ module LightExtractor
 
       base = { 'kind' => @type, 'ambient' => @ambient,
         'diffuse' => @diffuse, 'specular' => @specular, 'bShadow' => @has_shadow }
-      atten = { 'bEnabled' => @atten_enabled, 'fNear' => @atten_start, 'fEnd' => atten_end }
+      atten = { 'bEnabled' => @atten_enabled, 'fNear' => @atten_start, 'fEnd' => @atten_end }
       spot = { 'fInnerAngle' => @inner_angle, 'fOuterAngle' => @outer_angle }
       spec = {'direction' => @direction, 'base' => base, 'atten' => atten, 'spot' => spot}
       # Projection lights not available in models
@@ -102,13 +102,14 @@ module LightExtractor
       end
 
       # Dangling values
-      type = b[queries[:type]]
-      has_shadow = b[queries[:has_shadow]]
-      inner_angle = b[queries[:inner_angle]]
-      outer_angle = b[queries[:outer_angle]]
-      atten_enabled = b[queries[:atten_enabled]]
-      atten_start = b[queries[:atten_start]]
-      atten_end = b[queries[:atten_end]]
+      node.type = Usg::LightKind::const_get(b[queries[:type]].upcase)
+      STDERR.puts "Type: " + b[queries[:type]].upcase
+      node.has_shadow = b[queries[:has_shadow]].upcase == 'TRUE' ? true : false
+      node.inner_angle = b[queries[:inner_angle]].to_f
+      node.outer_angle = b[queries[:outer_angle]].to_f
+      node.atten_enabled = b[queries[:atten_enabled]].upcase == 'TRUE' ? true : false
+      node.atten_start = b[queries[:atten_start]].to_f
+      node.atten_end = b[queries[:atten_end]].to_f
 
     end
 
