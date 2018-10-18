@@ -18,7 +18,7 @@ module LightExtractor
 
     def initialize(name)
       @name = name
-      @type = LightKind::DIRECTIONAL
+      @type = Usg::LightKind::DIRECTIONAL
       @position = {}
       @direction = {}
       @has_shadow = false
@@ -59,57 +59,57 @@ module LightExtractor
   def self.extract(model_filename, rootBone)
     doc = Nokogiri::XML(File.read(model_filename))
 
-    queries = {:lighting => 'lighting', :light_array => 'light_array', :lights => 'light_array > light', :name => 'name',
+    queries = {:skeleton => 'hierarchy', :light_array => 'light_array', :lights => 'light_array > light', :name => 'name',
       :parent => 'parent_name', :type => 'type', :has_shadow => 'has_shadow',
       :inner_angle => 'inner_angle', :outer_angle => 'outer_angle', 
       :atten_enabled => 'atten_enabled', :atten_start => 'atten_start', :atten_end => 'atten_end'
       }
 
-    lighting = doc.at_css(queries[:lighting])
+    lighting = doc.at_css(queries[:skeleton])
 
-    if lighting and lighting.css(queries[:light_array])
-      lighting.css(queries[:lights]).each do |b|
 
-        lightName = b[queries[:name]]
-        parentBoneName = b[queries[:parent]]
+    lighting.css(queries[:lights]).sort.each do |b|
 
-        if parentBoneName.length > 1
-          node = LightNode.new(boneName)
-          parentNode = rootBone.find(parentBoneName, 1)
+      lightName = b[queries[:name]]
+      parentBoneName = b[queries[:parent]]
 
-          if parentNode[0] == nil
-            raise "couldn't find parent bone '#{parentBoneName}' in input file '#{model_filename}'"
-          end
+      if parentBoneName.length > 1
+        node = LightNode.new(lightName)
+        parentNode = rootBone.find(parentBoneName, 0)
 
-          parentNode[0].light_children << node
+        if parentNode[0] == nil
+          raise "couldn't find parent bone '#{parentBoneName}' in input file '#{model_filename}'"
+          STDERR.puts "Not found"
         end
 
-        LightExtractor::VECTOR_FIELDS.map{|f| f}.each do |field_name|
-          values = b[field_name].split(' ').slice(0, 3)
-
-          LightExtractor::VEC_COMPONENTS.each_with_index do |c, index|
-            node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
-          end
-        end
-
-        LightExtractor::COLOR_FIELDS.map{|f| f}.each do |field_name|
-          values = b[field_name].split(' ').slice(0, 3)
-
-          LightExtractor::CLR_COMPONENTS.each_with_index do |c, index|
-            node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
-          end        
-        end
-
-        # Dangling values
-        type = b[queries[:type]]
-        has_shadow = b[queries[:has_shadow]]
-        inner_angle = b[queries[:inner_angle]]
-        outer_angle = b[queries[:outer_angle]]
-        atten_enabled = b[queries[:atten_enabled]]
-        atten_start = b[queries[:atten_start]]
-        atten_end = b[queries[:atten_end]]
-
+        parentNode[0].add_light(node)
       end
+
+      LightExtractor::VECTOR_FIELDS.map{|f| f}.each do |field_name|
+        values = b[field_name].split(' ').slice(0, 3)
+
+        LightExtractor::VEC_COMPONENTS.each_with_index do |c, index|
+          node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
+        end
+      end
+
+      LightExtractor::COLOR_FIELDS.map{|f| f}.each do |field_name|
+        values = b[field_name].split(' ').slice(0, 3)
+
+        LightExtractor::CLR_COMPONENTS.each_with_index do |c, index|
+          node.instance_eval("#{field_name}['#{c}'] = #{values[index].to_f}")
+        end        
+      end
+
+      # Dangling values
+      type = b[queries[:type]]
+      has_shadow = b[queries[:has_shadow]]
+      inner_angle = b[queries[:inner_angle]]
+      outer_angle = b[queries[:outer_angle]]
+      atten_enabled = b[queries[:atten_enabled]]
+      atten_start = b[queries[:atten_start]]
+      atten_end = b[queries[:atten_end]]
+
     end
 
     return rootBone.to_object

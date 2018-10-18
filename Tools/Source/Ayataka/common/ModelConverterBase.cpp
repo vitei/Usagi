@@ -102,9 +102,9 @@ void ModelConverterBase::ExportStoredBinary(const aya::string& path)
 void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 {
 	pugi::xml_document skeletonDocument;
-	pugi::xml_node skeletonNode = skeletonDocument.append_child("skeleton");
+	pugi::xml_node hierarchyNode = skeletonDocument.append_child("hierarchy");
 	::exchange::Skeleton* pSkeleton = mCmdl.GetSkeleton();
-	pugi::xml_node boneSet = skeletonNode.append_child("bone_array");
+	pugi::xml_node boneSet = hierarchyNode.append_child("bone_array");
 	pugi::xml_attribute arrayLength = boneSet.append_attribute("length");
 	arrayLength.set_value((unsigned int)pSkeleton->Bones().size());
 	
@@ -156,74 +156,77 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 
 	}
 
-	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
-	pugi::xml_node lightSet = lightNode.append_child("light_array");
-
-	pugi::xml_attribute lightArrayLength = lightSet.append_attribute("length");
-	lightArrayLength.set_value((unsigned int)mCmdl.GetLightNum());
-
-	for (uint32 i = 0; i < mCmdl.GetLightNum(); i++)
+	if(mCmdl.GetLightNum() > 0)
 	{
-		pugi::xml_node light = lightSet.append_child("light");
-		const Cmdl::Light* pLight = mCmdl.GetLight(i);
+	//	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
+		pugi::xml_node lightSet = hierarchyNode.append_child("light_array");
 
-		pugi::xml_attribute name = light.append_attribute("name");
-		name.set_value(pLight->name.c_str());
-		pugi::xml_attribute parentName = light.append_attribute("parent_name");
-		parentName.set_value(pLight->parentBone.c_str());
+		pugi::xml_attribute lightArrayLength = lightSet.append_attribute("length");
+		lightArrayLength.set_value((unsigned int)mCmdl.GetLightNum());
 
-		pugi::xml_attribute type = light.append_attribute("type");
-		switch (pLight->spec.base.kind)
+		for (uint32 i = 0; i < mCmdl.GetLightNum(); i++)
 		{
-		case LightKind_DIRECTIONAL:
-			type.set_value("directional");
-			break;
-		case LightKind_SPOT:
-			type.set_value("spot");
-			break;
-		case LightKind_POINT:
-			type.set_value("point");
-			break;
-		case LightKind_PROJECTION:
-			type.set_value("projection");
-			break;
+			pugi::xml_node light = lightSet.append_child("light");
+			const Cmdl::Light* pLight = mCmdl.GetLight(i);
+
+			pugi::xml_attribute name = light.append_attribute("name");
+			name.set_value(pLight->name.c_str());
+			pugi::xml_attribute parentName = light.append_attribute("parent_name");
+			parentName.set_value(pLight->parentBone.c_str());
+
+			pugi::xml_attribute type = light.append_attribute("type");
+			switch (pLight->spec.base.kind)
+			{
+			case LightKind_DIRECTIONAL:
+				type.set_value("directional");
+				break;
+			case LightKind_SPOT:
+				type.set_value("spot");
+				break;
+			case LightKind_POINT:
+				type.set_value("point");
+				break;
+			case LightKind_PROJECTION:
+				type.set_value("projection");
+				break;
+			}
+
+			char buff[100];
+			snprintf(buff, sizeof(buff), "%f %f %f", pLight->position.x, pLight->position.y, pLight->position.z);
+			pugi::xml_attribute position = light.append_attribute("position");
+			position.set_value(buff);
+
+			snprintf(buff, sizeof(buff), "%f %f %f", pLight->spec.direction.x, pLight->spec.direction.y, pLight->spec.direction.z);
+			pugi::xml_attribute direction = light.append_attribute("direction");
+			direction.set_value(buff);
+
+			pugi::xml_attribute shadow = light.append_attribute("has_shadow");
+			shadow.set_value(pLight->spec.base.bShadow);
+
+			pugi::xml_attribute ambient = light.append_attribute("ambient");
+			pugi::xml_attribute diffuse = light.append_attribute("diffuse");
+			pugi::xml_attribute specular = light.append_attribute("specular");
+			snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.ambient.r(), pLight->spec.base.ambient.g(), pLight->spec.base.ambient.b());
+			ambient.set_value(buff);
+			snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.diffuse.r(), pLight->spec.base.diffuse.g(), pLight->spec.base.diffuse.b());
+			diffuse.set_value(buff);
+			snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.specular.r(), pLight->spec.base.specular.g(), pLight->spec.base.specular.b());
+			specular.set_value(buff);
+
+
+			pugi::xml_attribute attenEnabled = light.append_attribute("atten_enabled");
+			pugi::xml_attribute attenStart = light.append_attribute("atten_start");
+			pugi::xml_attribute attenEnd = light.append_attribute("atten_end");
+			attenEnabled.set_value(pLight->spec.atten.bEnabled);
+			attenStart.set_value(pLight->spec.atten.fNear);
+			attenEnd.set_value(pLight->spec.atten.fFar);
+
+			pugi::xml_attribute inner_angle = light.append_attribute("inner_angle");
+			inner_angle.set_value(pLight->spec.spot.fInnerAngle);
+
+			pugi::xml_attribute outer_angle = light.append_attribute("outer_angle");
+			outer_angle.set_value(pLight->spec.spot.fOuterAngle);
 		}
-
-		char buff[100];
-		snprintf(buff, sizeof(buff), "%f %f %f", pLight->position.x, pLight->position.y, pLight->position.z);
-		pugi::xml_attribute position = light.append_attribute("position");
-		position.set_value(buff);
-
-		snprintf(buff, sizeof(buff), "%f %f %f", pLight->spec.direction.x, pLight->spec.direction.y, pLight->spec.direction.z);
-		pugi::xml_attribute direction = light.append_attribute("direction");
-		direction.set_value(buff);
-
-		pugi::xml_attribute shadow = light.append_attribute("has_shadow");
-		shadow.set_value(pLight->spec.base.bShadow);
-
-		pugi::xml_attribute ambient = light.append_attribute("ambient");
-		pugi::xml_attribute diffuse = light.append_attribute("diffuse");
-		pugi::xml_attribute specular = light.append_attribute("specular");
-		snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.ambient.r(), pLight->spec.base.ambient.g(), pLight->spec.base.ambient.b());
-		ambient.set_value(buff);
-		snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.diffuse.r(), pLight->spec.base.diffuse.g(), pLight->spec.base.diffuse.b());
-		diffuse.set_value(buff);
-		snprintf(buff, sizeof(buff), "%.2f %.2f %.2f", pLight->spec.base.specular.r(), pLight->spec.base.specular.g(), pLight->spec.base.specular.b());
-		specular.set_value(buff);
-
-
-		pugi::xml_attribute attenEnabled = light.append_attribute("atten_enabled");
-		pugi::xml_attribute attenStart = light.append_attribute("atten_start");
-		pugi::xml_attribute attenEnd = light.append_attribute("atten_end");
-		attenEnabled.set_value(pLight->spec.atten.bEnabled);
-		attenStart.set_value(pLight->spec.atten.fNear);
-		attenEnd.set_value(pLight->spec.atten.fFar);
-
-		pugi::xml_attribute inner_angle = light.append_attribute("inner_angle");
-		inner_angle.set_value(pLight->spec.spot.fInnerAngle);
-
-		pugi::xml_attribute outer_angle = light.append_attribute("outer_angle");
-		outer_angle.set_value(pLight->spec.spot.fOuterAngle);
 	}
 
 

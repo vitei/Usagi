@@ -32,6 +32,10 @@ module SkeletonExtractor
       @billboard_mode = Usg::Exchange::BoneBillboardMode::OFF
     end
 
+    def add_light(light)
+      @light_children << light
+    end
+
     def find(name, depth)
       if name == @name
         return [self, depth]
@@ -102,7 +106,7 @@ module SkeletonExtractor
   def self.extract(model_filename)
     doc = Nokogiri::XML(File.read(model_filename))
 
-    queries = {:skeleton => 'skeleton', :bones => 'bone_array > bone', :name => 'name',
+    queries = {:skeleton => 'hierarchy', :bones => 'bone_array > bone', :name => 'name',
       :parent => 'parent_name', :billboard => 'billboard',
     :billboard_disabled => 'none'}
 
@@ -125,7 +129,7 @@ module SkeletonExtractor
       rootBone.scale['y'] = 1.0
       rootBone.scale['z'] = 1.0
 
-      return rootBone.to_object
+      return rootBone
     end
 
     rootName = ''
