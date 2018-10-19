@@ -102,7 +102,7 @@ The build process has not been improved or significantly modified and currently 
    Use the project located in Source\compiler\vc15win64  
    Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
 
-1. **Optional** Install the **FBX SDK 2018.1.1 VS2015**.  
+1. **Optional** Install the **FBX SDK 2019.0 VS2015**.  
    Not necessary to run, but required to build the model converter (Ayataka)
    https://www.autodesk.com/products/fbx/overview
 
