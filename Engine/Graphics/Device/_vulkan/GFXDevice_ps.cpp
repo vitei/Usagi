@@ -35,12 +35,15 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
 };
 
+
+static_assert(ARRAY_SIZE(gColorFormatMap) == usg::CF_COUNT, "Mismatch on color format mapping size");
+
 static const uint32 gMaxColorFormatFallbacks = 3;
 
 static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 {
 	{ VK_FORMAT_B8G8R8A8_UNORM },																			// TF_RGBA_8888
-	{ VK_FORMAT_A1R5G5B5_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// TG_RGBA_5551
+	{ VK_FORMAT_B5G5R5A1_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// TG_RGBA_5551
 	{ VK_FORMAT_B5G6R5_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },					// CF_RGB_565,
 	{ VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// CF_RGBA_4444,
 	{ VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },							// CF_RGB_888,
@@ -55,7 +58,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
 	{ },																									// CF_SRGBA
-	{ },
+	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
 
