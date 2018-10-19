@@ -141,7 +141,13 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 	if (m_pShadow)
 	{
 		m_pShadow->GPUUpdate(pDevice, this);
+		m_descriptorSetShadow.UpdateDescriptors(pDevice);
 	}
+	else
+	{
+		m_descriptorSet.UpdateDescriptors(pDevice);
+	}
+
 }
 
 
