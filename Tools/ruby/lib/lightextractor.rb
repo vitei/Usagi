@@ -41,7 +41,7 @@ module LightExtractor
       spec = {'direction' => @direction, 'base' => base, 'atten' => atten, 'spot' => spot}
       # Projection lights not available in models
       object = {'Identifier'=>{'name' => @name}, 'TransformComponent'=>{'position' => @position},
-        'LightComponent' => {'spec' => spec} 
+        'MatrixComponent'=>{}, 'LightComponent' => {'spec' => spec} 
       }
 
       return object
@@ -53,7 +53,7 @@ module LightExtractor
   ##################
   VECTOR_FIELDS = ['position', 'direction']
   COLOR_FIELDS = ['ambient', 'diffuse', 'specular']
-  VEC_COMPONENTS = ['x', 'y', 'x']
+  VEC_COMPONENTS = ['x', 'y', 'z']
   CLR_COMPONENTS = ['m_fR', 'm_fG', 'm_fB']
 
   def self.extract(model_filename, rootBone)
