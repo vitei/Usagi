@@ -34,7 +34,7 @@ namespace usg
 		void RegisterCPUTimer(const ProfilingTimer* pTimer) { m_pCpuTimer = pTimer; }
 
 	private:
-		void DrawMainPage(DebugRender* pRender);
+		void DrawTimingPage(DebugRender* pRender);
 		void DrawThreadsPage(DebugRender* pRender);
 		void DrawMemoryPage(DebugRender* pRender, const MemHeap* pHeap, const char* szName);
 		float DrawMemoryStat(DebugRender* pRenderer, const MemHeap* pHeap, MemAllocType eType, float fPos, float fMaxSize);
@@ -44,6 +44,7 @@ namespace usg
 		enum GLOBAL_PAGES
 		{
 			PAGE_MAIN = 0,
+			PAGE_TIMING,
 			PAGE_MEMORY,
 		//	PAGE_THREADS,
 			PAGE_COUNT

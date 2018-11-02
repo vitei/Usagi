@@ -77,11 +77,14 @@ namespace usg {
 	{
 		switch (m_uActivePage)
 		{
-		case PAGE_MAIN:
-			DrawMainPage(pRender);
+		case PAGE_TIMING:
+			DrawTimingPage(pRender);
 			break;
 		case PAGE_MEMORY:
 			DrawMemoryPage(pRender, mem::GetMainHeap(), "Main Mem");
+			break;
+		case PAGE_MAIN:
+			// Do nothing, we want the main page to be empty
 			break;
 		//case PAGE_THREADS:
 //			break;
@@ -148,7 +151,7 @@ namespace usg {
 	}
 
 
-	void GlobalDebugStats::DrawMainPage(DebugRender* pRender)
+	void GlobalDebugStats::DrawTimingPage(DebugRender* pRender)
 	{
 		usg::Color cCol;
 		if (m_uFrameRate >= 59)
