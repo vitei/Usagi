@@ -115,7 +115,7 @@ The build process has not been improved or significantly modified and currently 
    For example [UsagiTest](https://github.com/vitei/UsagiTest)  
    Always clone Usagi repos recursively as we make heavy use of submodules  
    **OR**  
-   [Create a new one](Creating-a-New-Project)  
+   [Create a new one](https://github.com/vitei/Usagi/wiki/Creating-a-New-Project)  
 
 1. From a command window run **Setup.bat**  
    If gems fail to install confirm your ruby version  
