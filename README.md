@@ -18,9 +18,9 @@ public:
 
    struct Inputs
    {
-      Required<MatrixComponent, FromSelfOrParents>	mtx;
-      Required<SoundActorComponent>					actor;
-      Optional<RigidBody, FromSelfOrParents>			rigidBody;
+      Required<MatrixComponent, FromSelfOrParents>  mtx;
+      Required<SoundActorComponent>                 actor;
+      Optional<RigidBody, FromSelfOrParents>	    rigidBody;
    };
 
    struct Outputs
