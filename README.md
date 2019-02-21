@@ -120,8 +120,8 @@ The build process has not been improved or significantly modified and currently 
 1. From a command window run **Setup.bat**  
    If gems fail to install confirm your ruby version  
    If python packages fail to install confirm your python version  
-   Pay attention to which environemt variables EnvironmentSetup.exe failed to set  
-   Note you must run environemnt setup whenever you switch to running a different Usagi project in order to set the correct USAGI_DIR env variable  
+   Pay attention to which environmet variables EnvironmentSetup.exe failed to set  
+   Note you must run environment setup whenever you switch to running a different Usagi project in order to set the correct USAGI_DIR env variable  
 
 1. Add the following environment variables either manually or by running EnvironmentSetup.exe  
    MSBUILD_DIR -> [**Visual Studio Install Dir**]\MSBuild\15.0\Bin  
