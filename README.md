@@ -125,7 +125,7 @@ The build process has not been improved or significantly modified and currently 
 
 1. Add the following environment variables either manually or by running EnvironmentSetup.exe  
    MSBUILD_DIR -> [**Visual Studio Install Dir**]\MSBuild\15.0\Bin  
-   FBXSDK_DIR -> [**FBX SDK Install Dir**]\2019.0 
+   FBXSDK_DIR -> [**FBX SDK Install Dir**]\2019.0  
    USAGI_DIR -> [**This checkout**]  
 
 1. Manually add the following environment variables  
