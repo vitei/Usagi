@@ -66,9 +66,7 @@ The main difficulty with Usagi is that it requires a different way of thinking. 
 The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Games/Nintendo-3DS-download-software/Tank-Troopers-1136173.html) as well as several internal demos on numerous platforms and APIs.  
 
 ![](Documents/Images/PreviewImage1.jpg)
-![](Documents/Images/PreviewImage2.jpg)
-![](Documents/Images/PreviewImage3.jpg)
-![](Documents/Images/PreviewImage.jpg)
+![](Documents/Images/PreviewImage2.jpg)  
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
