@@ -69,6 +69,21 @@ private:
 	bool				m_bWindowResized;
 };
 
+inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
+{
+	xOut = m_uWidth;
+	yOut = m_uHeight;
+
+	return true;
+}
+
+inline bool Display_ps::GetDisplayDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
+{
+	xOut = m_uWidth;
+	yOut = m_uHeight;
+	return true;
+}
+
 }
 
 #endif

@@ -473,22 +473,6 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 
 
 
-bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
-{
-    xOut = m_uWidth;
-    yOut = m_uHeight;
-    
-	return true;
-}
-
-bool Display_ps::GetDisplayDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
-{
-    xOut = m_uWidth;
-    yOut = m_uHeight;
-	return true;
-}
-
-
 void Display_ps::Present()
 {
 
