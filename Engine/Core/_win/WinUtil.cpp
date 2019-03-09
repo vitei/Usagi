@@ -7,8 +7,6 @@
 #include "Engine/HID/Input.h"
 #include "Engine/HID/_win/Input_ps.h"
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-
 namespace WINUTIL
 {
 	static HINSTANCE g_hInst;
@@ -32,13 +30,18 @@ namespace WINUTIL
 	}
 
 
-	WindHndl CreateDisplayWindow(const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden)
+	void SetWindow(WindHndl hndl)
+	{
+		g_wndHndl = hndl;
+	}
+
+	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden)
 	{
 		WindHndl hndl;
 		WNDCLASS		winclass;	// this will hold the class we create
 
 		winclass.style = CS_HREDRAW | CS_VREDRAW;
-		winclass.lpfnWndProc = WindowProc;
+		winclass.lpfnWndProc = wndProc;
 		winclass.cbClsExtra = 0;
 		winclass.cbWndExtra = 0;
 		winclass.hInstance = WINUTIL::GetInstanceHndl();
@@ -149,9 +152,7 @@ namespace WINUTIL
 		}
 
 		// We should really be caching all windows we own
-		ASSERT(g_wndHndl == NULL);
-		g_wndHndl = hndl;
-		usg::Input::GetPlatform().RegisterHwnd(0, hndl);
+		SetWindow(g_wndHndl);
 		return hndl;
 	}
 
