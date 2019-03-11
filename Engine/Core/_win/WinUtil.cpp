@@ -152,7 +152,7 @@ namespace WINUTIL
 		}
 
 		// We should really be caching all windows we own
-		SetWindow(g_wndHndl);
+		SetWindow(hndl);
 		return hndl;
 	}
 
