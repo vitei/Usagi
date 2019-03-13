@@ -65,10 +65,10 @@ struct EffectDefinition
 
 };
 
-bool ParseManually(const char* szFileName, const char* szDefines, std::string& fileOut, std::vector<std::string>& referencedFiles);
+bool ParseManually(const char* szFileName, const char* szDefines, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles);
 
 
-bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
 {
 	std::string shaderCode;
 	std::string defines = setDefines;
@@ -77,7 +77,7 @@ bool CompileOGLShader(const std::string& inputFileName, const std::string& setDe
 	defines += "PLATFORM_PC ";
 	defines += "API_OGL";
 	
-	if (ParseManually(inputFileName.c_str(), defines.c_str(), shaderCode, referencedFiles))
+	if (ParseManually(inputFileName.c_str(), defines.c_str(), includes, shaderCode, referencedFiles))
 	{
 		shader.binary = new uint8[shaderCode.size()+1];
 		memcpy(shader.binary, shaderCode.data(), shaderCode.size()+1);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 	intFileName = inputFile.substr(inputFile.find_last_of("\\/") + 1, inputFile.size());
 	intFileName = intFileName.substr(0, intFileName.find_last_of("."));
 
-	printf("Converting %s", inputFile.c_str());
+	printf("Converting %s\n", inputFile.c_str());
 
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 						}
 						else if (api == "ogl")
 						{
-							bSuccess = CompileOGLShader(inputFileName, def.sets[i].defines, shader, referencedFiles);
+							bSuccess = CompileOGLShader(inputFileName, def.sets[i].defines, includeDirs, shader, referencedFiles);
 						}
 						else
 						{

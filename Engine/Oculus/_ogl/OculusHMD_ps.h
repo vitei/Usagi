@@ -16,11 +16,9 @@ namespace usg
 
 	class OculusHMD_ps : public OculusHMD
 	{
-	protected:
-		// Can't instantiate, need the PS version
+	public:
 		OculusHMD_ps(ovrSession session);
 		~OculusHMD_ps();
-	public:
 		virtual bool Init(GFXDevice* pDevice) final;
 		virtual void Cleanup(GFXDevice* pDevice) final;
 
@@ -32,13 +30,12 @@ namespace usg
 	private:	
 		// TODO: OpenGL specific stuff should be moved to the device
 		GLuint				m_mirrorFBO;
-		struct EyeTarget
+		struct EyeTarget_ps
 		{
-			ovrTextureSwapChain	swapChain;
 			GLuint fbo;
-			uint32 uWidth;
-			uint32 uHeight;
 		};
+
+		EyeTarget_ps	m_targets_ps[2];
 	};
 
 }

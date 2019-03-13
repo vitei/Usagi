@@ -14,7 +14,7 @@
 
 // Suppress the definition of min/max of minwindef.h
 #define NOMINMAX
-#define USE_VULKAN
+//#define USE_VULKAN
 
 //#include <winext/cafe.h>
 #include <windows.h>

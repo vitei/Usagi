@@ -56,14 +56,8 @@ namespace usg
 
 	void OculusHMD_ps::Cleanup(GFXDevice* pDevice)
 	{
-		if (m_mirrorTexture)
-		{
-			ovr_DestroyMirrorTexture(m_session, m_mirrorTexture);
-		}
-
 		OculusHMD::Cleanup(pDevice);
 	}
-
 
 	void OculusHMD_ps::Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget)
 	{

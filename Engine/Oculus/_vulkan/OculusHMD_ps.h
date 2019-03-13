@@ -23,7 +23,6 @@ namespace usg
 		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
 
 	private:	
-    	ovrMirrorTexture            m_mirrorTexture;
     	VkImage                     m_mirrorImage;
 		
 		struct EyeTarget_ps

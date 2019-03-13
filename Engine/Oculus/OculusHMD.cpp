@@ -209,6 +209,14 @@ namespace usg
 
 	void OculusHMD::Cleanup(GFXDevice* pDevice)
 	{
+		for (uint32 i = 0; i < 2; i++)
+		{
+			if (m_targets[i].swapChain)
+			{
+				ovr_DestroyTextureSwapChain(m_session, m_targets[i].swapChain);
+			}
+		}
+
 		if (m_mirrorTexture)
 		{
 			ovr_DestroyMirrorTexture(m_session, m_mirrorTexture);

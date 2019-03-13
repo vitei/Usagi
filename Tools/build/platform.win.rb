@@ -10,6 +10,6 @@ class PlatformWin < Platform
   #####################################################################
 
   def underscore_dirs_whitelist
-    ['_win', '_vulkan', '_fragment', '_xaudio2']
+    ['_win', '_ogl', '_fragment', '_xaudio2']
   end
 end

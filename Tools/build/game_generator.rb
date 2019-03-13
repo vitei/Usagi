@@ -177,19 +177,6 @@ def build_pc_shaders(config, n, platform)
   game_shaders + engine_shaders
 end
 
-
-def build_vulkan_shaders_for_dir(config, n, shader_dir)
-  targets = FileList["#{shader_dir}/**/*.vert", "#{shader_dir}/**/*.frag", "#{shader_dir}/**/*.geom"].exclude{|f| File.directory?(f)}.map do |input|
-    output = "#{config.shader_out_dir}/" + input.sub(/#{shader_dir}\//, '') + ".spv"
-    defines = ""
-    n.build('vulkanshader', {output => [input]},
-        :variables => {'out' => to_windows_path(output),
-        'in' => input})
-
-    output
-  end
-end
-
 def build_shader_pak_for_dir(config, n, effect_dir, shader_dir, api, includes)
   targets = FileList["#{effect_dir}/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
     output = ("#{config.effects_out_dir}/" + input.sub(/#{effect_dir}\//, '')).sub(".yml", ".pak")
