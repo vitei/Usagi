@@ -77,7 +77,7 @@ private:
 	Fog						m_fog[MAX_FOGS];
 	Vector4f				m_shadowColor;
 	LightingContext			m_LightingContext;
-
+	ViewType				m_eActiveViewType;
 
 	RenderNode*				m_pVisibleNodes[RenderNode::LAYER_COUNT][MAX_NODES_PER_LAYER];
 	uint32					m_uVisibleNodes[RenderNode::LAYER_COUNT];

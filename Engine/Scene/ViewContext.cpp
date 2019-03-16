@@ -70,6 +70,7 @@ namespace usg {
 		m_pCamera = nullptr;
 		m_bFirstFrame = true;
 		m_shadowColor.Assign(0.05f, 0.05f, 0.1f, 1.0f);
+		m_eActiveViewType = VIEW_CENTRAL;
 
 		for (int i = 0; i < RenderNode::LAYER_COUNT; i++)
 		{
@@ -333,6 +334,7 @@ namespace usg {
 	{
 		//pContext->SetConstantBuffer( SHADER_CONSTANT_GLOBAL, &m_globalConstants[eViewType], SHADER_FLAG_VS_GS );
 		pContext->SetDescriptorSet(&m_globalDescriptors[eViewType], 0);
+		m_eActiveViewType = eViewType;
 	}
 
 
@@ -346,7 +348,7 @@ namespace usg {
 		RenderNode::RenderContext renderContext;
 		renderContext.eRenderPass = m_pPostFXSys->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING) ? RenderNode::RENDER_PASS_DEFERRED : RenderNode::RENDER_PASS_FORWARD;
 		// FIXME: Handle multiple views
-		renderContext.pGlobalDescriptors = &m_globalDescriptors[0];
+		renderContext.pGlobalDescriptors = &m_globalDescriptors[m_eActiveViewType];
 		renderContext.pPostFX = m_pPostFXSys;
 
 		for (uint32 uLayer = 0; uLayer < RenderNode::LAYER_COUNT; uLayer++)
@@ -365,9 +367,8 @@ namespace usg {
 				{
 					m_pPostFXSys->SetPostDepthDescriptors(pContext);
 				}
-				// FIXME: Handle multiple views
-				pContext->SetDescriptorSet(&m_globalDescriptorsWithDepth[0], 0);
-				renderContext.pGlobalDescriptors = &m_globalDescriptorsWithDepth[0];
+				pContext->SetDescriptorSet(&m_globalDescriptorsWithDepth[m_eActiveViewType], 0);
+				renderContext.pGlobalDescriptors = &m_globalDescriptorsWithDepth[m_eActiveViewType];
 			}
 			// TODO: Probably are going to want callbacks at the end of certain layers, for grabbing
 			// the linear depth information etc
