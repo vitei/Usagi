@@ -11,8 +11,8 @@
 namespace usg
 {
 
-	OculusHMD_ps::OculusHMD_ps(ovrSession session) :
-		OculusHMD(session)
+	OculusHMD_ps::OculusHMD_ps(ovrSession session, ovrGraphicsLuid luid) :
+		OculusHMD(session, luid)
 	{
 		m_mirrorFBO = 0;
 	}

@@ -130,12 +130,13 @@ namespace usg
 		}
 
 		// We have an oculus available, so return one!
-		return vnew(ALLOC_OBJECT) OculusHMD_ps(session);
+		return vnew(ALLOC_OBJECT) OculusHMD_ps(session, luid);
 	}
 
-	OculusHMD::OculusHMD(ovrSession session)
+	OculusHMD::OculusHMD(ovrSession session, ovrGraphicsLuid luid)
 	{
 		m_session = session;
+		m_luid = luid;
 		m_mirrorTexture = nullptr;
 		m_uFrameIndex = 0;
 

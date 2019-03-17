@@ -7,6 +7,8 @@
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
+#include "Engine/Graphics/Device/IHeadMountedDisplay.h" 
+#include "Engine/Core/Modules/ModuleManager.h"
 #include "Engine/Graphics/Device/GFXContext.h" 
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
@@ -213,6 +215,8 @@ GFXDevice_ps::~GFXDevice_ps()
 }
 
 
+
+
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {
 	m_pParent = pParent;
@@ -239,6 +243,38 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+	
+	// Check to see if an HMD has been loaded and grab the extensions
+	{
+		uint32 uHMDId = IHeadMountedDisplay::GetModuleTypeNameStatic();
+		uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(uHMDId);
+
+		for (uint32 i = 0; i < uHMDCount; i++)
+		{
+			ModuleInterface* pInterface = ModuleManager::Inst()->GetInterfaceOfType(uHMDId, i);
+			IHeadMountedDisplay* pDisplay = (IHeadMountedDisplay*)pInterface;
+			if (pDisplay)
+			{
+				for (uint32 i = 0; i < pDisplay->GetRequiredAPIExtensionCount(); i++)
+				{
+					bool bFound = false;
+					const char* szExtension = pDisplay->GetRequiredAPIExtension(i);
+					for (int j = 0; j < extensions.size(); j++)
+					{
+						if (strcmp(extensions[j], szExtension) == 0)
+						{
+							bFound = true;
+							break;
+						}
+					}
+					if (!bFound)
+					{
+						extensions.push_back(szExtension);
+					}
+				}
+			}
+		}
+	}
 
 
 	// initialize the VkInstanceCreateInfo structure

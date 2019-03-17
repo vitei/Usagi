@@ -7,21 +7,42 @@
 
 namespace usg {
 
-	ModuleManager::ModuleManager()
+	ModuleManager::ModuleManager():
+		m_bInitCalled(false)
 	{
+
 	}
 
 
 	ModuleManager::~ModuleManager()
 	{
+		
 	}
 
 
-	void ModuleManager::Init(GFXDevice* pDevice)
+	void ModuleManager::PreInit()
 	{
+		m_loadData.allocators.pAllocators[MEMTYPE_STANDARD] = mem::GetAllocator(MEMTYPE_STANDARD);
+		ASSERT(m_loadData.allocators.pAllocators[MEMTYPE_STANDARD] != nullptr);
+	}
+
+
+	void ModuleManager::PostInit(GFXDevice* pDevice)
+	{
+		ASSERT(m_loadData.allocators.pAllocators[MEMTYPE_STANDARD] != nullptr);
 		MemClear(&m_initData.allocators, sizeof(m_initData.allocators));
-		m_initData.allocators.pAllocators[MEMTYPE_STANDARD] = mem::GetAllocator(MEMTYPE_STANDARD);
+		for (int i = 0; i < MEMTYPE_COUNT; i++)
+		{
+			m_initData.allocators.pAllocators[MEMTYPE_STANDARD] = mem::GetAllocator(MEMTYPE_STANDARD);
+		}
 		m_initData.pDevice = pDevice;
+		ASSERT(!m_bInitCalled);
+		for (Module& module : m_modules)
+		{
+			ASSERT(module.interfaceSet != nullptr);
+			module.initFunction(m_initData, module.interfaceSet);
+		}
+		m_bInitCalled = true;
 	}
 
 	bool ModuleManager::LoadModule(const char* szModuleName)
@@ -33,15 +54,29 @@ namespace usg {
 			return false;
 		}
 
+		module.moduleName = szModuleName;
+		module.loadFunction = (usg::OnModuleLoad)GetProcAddress(module.dllHandle, "OnModuleLoad");
 		module.initFunction = (InitModule)GetProcAddress(module.dllHandle, "InitModule");
 		module.destroyFunction = (DestroyModule)GetProcAddress(module.dllHandle, "DestroyModule");
 
-		if (!module.initFunction || !module.destroyFunction)
+		if (!module.initFunction || !module.destroyFunction || !module.loadFunction)
 		{
 			return false;
 		}
 
-		module.interfaceSet = module.initFunction(m_initData);
+		module.interfaceSet = module.loadFunction(m_loadData);
+		if (!module.interfaceSet)
+		{
+			return false;
+		}
+
+		if (m_bInitCalled)
+		{
+			if (!module.initFunction(m_initData, module.interfaceSet))
+			{
+				return false;
+			}
+		}
 
 		if (module.interfaceSet)
 		{
@@ -49,6 +84,19 @@ namespace usg {
 		}
 
 		return true;
+	}
+
+	HMODULE ModuleManager::GetModule(usg::string moduleName)
+	{
+		for (Module& module : m_modules)
+		{
+			if (module.moduleName == moduleName)
+			{
+				return module.dllHandle;
+			}
+		}
+
+		return nullptr;
 	}
 
 	void ModuleManager::Shutdown(GFXDevice* pDevice)

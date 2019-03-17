@@ -18,7 +18,7 @@ namespace usg
 	{
 	protected:
 		// Can't instantiate, need the PS version
-		OculusHMD(ovrSession session);
+		OculusHMD(ovrSession session, ovrGraphicsLuid luid);
 	public:
 		~OculusHMD();
 
@@ -64,6 +64,7 @@ namespace usg
 		ovrHmdDesc			m_hmdDesc;
 		ovrTrackingState	m_trackingState;
 		ovrMirrorTexture	m_mirrorTexture;
+		ovrGraphicsLuid		m_luid;
 		uint32				m_uFrameIndex;	// Update as we render each scene
 
 		// Usagi native format

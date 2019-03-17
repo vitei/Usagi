@@ -31,7 +31,16 @@ namespace usg
 		GFXDevice* pDevice;
 	};
 
-	typedef ModuleInterfaceSet* (far *InitModule)(ModuleInitData& pInitData);
+	struct ModuleLoadData
+	{
+		mem::AllocatorData allocators;
+	};
+
+	// Called when the module is loaded, may not be valid if dependent on core initialization (e.g. graphics)
+	typedef ModuleInterfaceSet* (far *OnModuleLoad)(ModuleLoadData& pInitData);
+	// The function called once the engine has been properly initialized
+	typedef bool (far *InitModule)(ModuleInitData& pInitData, ModuleInterfaceSet* interfaceSet);
+	// Called to clean up the data
 	typedef void				(far *DestroyModule)(ModuleInitData& pInitData, ModuleInterfaceSet* Set);
 	
 }

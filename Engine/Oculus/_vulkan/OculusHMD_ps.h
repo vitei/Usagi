@@ -13,7 +13,7 @@ namespace usg
 	class OculusHMD_ps : public OculusHMD
 	{
 	public:
-		OculusHMD_ps(ovrSession session);
+		OculusHMD_ps(ovrSession session, ovrGraphicsLuid luid);
 		~OculusHMD_ps();
 
 		virtual bool Init(GFXDevice* pDevice) final;
@@ -22,7 +22,15 @@ namespace usg
 		virtual void Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget) final;
 		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
 
+		virtual const uint32 GetRequiredAPIExtensionCount() const { return m_uExtensions; }
+		virtual const char* GetRequiredAPIExtension(uint32 uIndex) const { return m_extensionNamePtrs[uIndex]; }
+
 	private:	
+		void ParseExtensionString(char* names);
+
+		char						m_extensionNames[4096];
+		const char*					m_extensionNamePtrs[100];
+		uint32						m_uExtensions;
     	VkImage                     m_mirrorImage;
 		
 		struct EyeTarget_ps

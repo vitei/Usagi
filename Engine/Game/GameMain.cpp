@@ -23,7 +23,7 @@
 
 namespace usg {
 
-bool		InitEngine();
+bool		InitEngine(const char** dllModules, uint32 uModuleCount);
 void		EngineCleanup();
 
 static GFXDevice*	g_pGFXDevice = nullptr;
@@ -50,12 +50,6 @@ static GameInterface* game;
 
 bool GameInit()
 {
-	if (!InitEngine())
-	{
-		FATAL_RELEASE(false ,"Hardware setup failed");
-		return false;
-	}
-
 	game = CreateGame();
 
 	Math::SeedRand();
@@ -92,11 +86,17 @@ void GameCleanup()
 	EngineCleanup();
 }
 
-bool GameMain()
+bool GameMain(const char** dllModules, uint32 uModuleCount)
 {
 	if (OS::ShouldQuit())
 	{
 		return true;
+	}
+
+	if (!InitEngine(dllModules, uModuleCount))
+	{
+		FATAL_RELEASE(false, "Hardware setup failed");
+		return false;
 	}
 
 	if(!GameInit())
@@ -147,15 +147,20 @@ bool InitInput()
 	return true;
 }
 
-bool InitEngine()
+bool InitEngine(const char** dllModules, uint32 uModuleCount)
 {
 	mem::InitialiseDefault();
 	U8String::InitPool();
 	InitListMemory();
 	File::InitFileSystem();
 
-    // Init input before gfx because in the case of OVR
-    // the input device tells us the screen resolution.
+	usg::ModuleManager::Inst()->Create();
+	usg::ModuleManager::Inst()->PreInit();
+	for (uint32 i = 0; i < uModuleCount; i++) 
+	{
+		// We pre-load as some of these may need to be known about when initing gfx and input
+		usg::ModuleManager::Inst()->LoadModule(dllModules[i]);
+	}
     
     if(!InitInput())
 	{
@@ -163,8 +168,6 @@ bool InitEngine()
 	}
 
 	g_pGFXDevice = GFX::Initialise();
-	usg::ModuleManager::Inst()->Create();
-	usg::ModuleManager::Inst()->Init(g_pGFXDevice);
 
 	if(!g_pGFXDevice)
 	{
@@ -180,6 +183,10 @@ bool InitEngine()
 	//Audio::Create()->Init();
 
 	//physics::init();
+
+	// Everything should be set up now, time to finalize any early load modules
+	usg::ModuleManager::Inst()->PostInit(g_pGFXDevice);
+
 	return true;
 }
 
