@@ -8,11 +8,23 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/Display.h"
 #include "Extras/OVR_Math.h"
+#include "OculusVKExport.h"
 #include <SetupAPI.h>
 #include "OVR_CAPI_Vk.h"
 #include "OculusHMD_ps.h"
 
+static usg::OculusHMD_ps* g_pOculusHMD = nullptr;
 
+bool GetHMDPhysicalDeviceVK(VkInstance instance, VkPhysicalDevice* deviceOut)
+{
+	if (g_pOculusHMD)
+	{
+		return g_pOculusHMD->GetPhysicalDevice(instance, deviceOut);
+	}
+
+	return false;
+
+}
 
 namespace usg
 {
@@ -20,10 +32,15 @@ namespace usg
 	OculusHMD_ps::OculusHMD_ps(ovrSession session, ovrGraphicsLuid luid) :
 		OculusHMD(session, luid)
 	{
-		uint32_t extensionNamesSize = sizeof(m_extensionNames);
-		ovr_GetInstanceExtensionsVk(luid, m_extensionNames, &extensionNamesSize);
+		uint32_t extensionNamesSize = sizeof(m_extensionNames[(size_t)ExtensionType::Instance]);
+		ovr_GetInstanceExtensionsVk(luid, m_extensionNames[(size_t)ExtensionType::Instance], &extensionNamesSize);
 
-		ParseExtensionString(m_extensionNames);
+		ParseExtensionString(ExtensionType::Instance);
+
+		ovr_GetDeviceExtensionsVk(luid, m_extensionNames[(size_t)ExtensionType::Device], &extensionNamesSize);
+
+		ParseExtensionString(ExtensionType::Device);
+		g_pOculusHMD = this;
 	}
 
 	OculusHMD_ps::~OculusHMD_ps()
@@ -31,14 +48,25 @@ namespace usg
 
 	}
 
-	void OculusHMD_ps::ParseExtensionString(char* names)
+	bool OculusHMD_ps::GetPhysicalDevice(VkInstance instance, VkPhysicalDevice* deviceOut)
+	{
+		return false;
+		ovrResult result = ovr_GetSessionPhysicalDeviceVk(m_session, m_luid, instance, deviceOut);
+		if (!OVR_SUCCESS(result))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	void OculusHMD_ps::ParseExtensionString(ExtensionType eType)
 	{
 		uint32_t extensionCount = 0;
-		char* nextExtensionName = names;
+		char* nextExtensionName = m_extensionNames[(size_t)eType];
 		static const uint32_t arraySize = ARRAY_SIZE(m_extensionNamePtrs);
 		while (*nextExtensionName && (extensionCount < arraySize))
 		{
-			m_extensionNamePtrs[extensionCount++] = nextExtensionName;
+			m_extensionNamePtrs[(size_t)eType][extensionCount++] = nextExtensionName;
 			// Skip to a space or null
 			while (*(++nextExtensionName))
 			{
@@ -51,7 +79,7 @@ namespace usg
 			}
 		}
 
-		m_uExtensions = extensionCount;
+		m_uExtensions[(size_t)eType] = extensionCount;
 	}
 
 	bool OculusHMD_ps::Init(GFXDevice* pDevice)

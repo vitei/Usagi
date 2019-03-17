@@ -25,6 +25,13 @@ namespace usg
 			Right,
 			Count
 		};
+		
+		enum class ExtensionType
+		{
+			Instance,
+			Device,
+			Count
+		};
 
 		IHeadMountedDisplay() {}
 		virtual ~IHeadMountedDisplay() {}
@@ -53,8 +60,8 @@ namespace usg
 		virtual void GetHMDTransform(usg::Matrix4x4& matOut) const = 0;
 		virtual void GetEyeTransform(Eye eye, usg::Matrix4x4& mMatOut) const = 0;
 
-		virtual const uint32 GetRequiredAPIExtensionCount() const { return 0; }
-		virtual const char* GetRequiredAPIExtension(uint32 uIndex) const { return nullptr; }
+		virtual const uint32 GetRequiredAPIExtensionCount(ExtensionType extType) const { return 0; }
+		virtual const char* GetRequiredAPIExtension(ExtensionType extType, uint32 uIndex) const { return nullptr; }
 
 	private:
 		

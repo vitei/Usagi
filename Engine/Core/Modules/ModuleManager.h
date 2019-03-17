@@ -25,6 +25,7 @@ namespace usg
 		void Shutdown(GFXDevice* pDevice);
 		bool LoadModule(const char* szModuleName);
 		HMODULE GetModule(usg::string moduleName);
+		HMODULE GetModule(const ModuleInterface* pInterface);
 		uint32 GetNumberOfInterfacesForType(uint32 uTypeId);
 		ModuleInterface* GetInterfaceOfType(uint32 uTypeId, uint32 uIndex);
 

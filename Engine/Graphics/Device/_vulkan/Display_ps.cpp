@@ -181,7 +181,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	supportsPresent.resize(devicePS.GetQueueFamilyCount());
 	for (uint32_t i = 0; i < devicePS.GetQueueFamilyCount(); i++)
 	{
-		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface, &supportsPresent[i]);
+		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetPrimaryGPU(), i, m_surface, &supportsPresent[i]);
 	}
 
 	// Search for a graphics queue and a present queue in the array of queue
@@ -210,10 +210,10 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 	// Get the list of VkFormats that are supported:
 	uint32_t formatCount;
-	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
+	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, surfFormats);
+	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, surfFormats);
 	ASSERT(res == VK_SUCCESS);
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
@@ -231,16 +231,16 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 	VkSurfaceCapabilitiesKHR surfCapabilities;
 
-	res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(devicePS.GetGPU(0), m_surface, &surfCapabilities);
+	res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(devicePS.GetPrimaryGPU(), m_surface, &surfCapabilities);
 	ASSERT(res == VK_SUCCESS);
 
 	uint32_t presentModeCount;
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, NULL);
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetPrimaryGPU(), m_surface, &presentModeCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	vector<VkPresentModeKHR> presentModes;
 	presentModes.resize(presentModeCount);
 
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, presentModes.data());
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetPrimaryGPU(), m_surface, &presentModeCount, presentModes.data());
 	ASSERT(res == VK_SUCCESS);
 
 	VkExtent2D swapChainExtent;

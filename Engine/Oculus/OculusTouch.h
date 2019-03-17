@@ -21,7 +21,7 @@ public:
 	virtual uint32 GetCaps() const override;
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& state) override;
 	virtual bool IsConnected() const override { return m_bConnected; }
-
+	virtual const char* GetModuleName() const { return "OculusTouch"; }
 private:
 	OculusHMD* m_pHMD;
 	bool m_bConnected;

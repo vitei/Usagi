@@ -148,7 +148,7 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	VkFormatProperties props;
 	if (eUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
 	{
-		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormat, &props);
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormat, &props);
 		if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
 		{
 			image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -302,7 +302,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};
-    vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), depth_format, &props);
+    vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), depth_format, &props);
     if (props.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
     {
 		image_create_info.tiling = VK_IMAGE_TILING_LINEAR;
@@ -496,7 +496,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		m_uDepth = Extent.z;
 		m_uFaces = FaceTotal;
 
-		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetGPU(0), eFormatVK, &formatProperties);
+		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormatVK, &formatProperties);
 		GFXDevice_ps& devicePS = pDevice->GetPlatform();
 		VkDevice device = devicePS.GetVKDevice();
 

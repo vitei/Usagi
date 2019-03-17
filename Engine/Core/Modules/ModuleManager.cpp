@@ -99,6 +99,22 @@ namespace usg {
 		return nullptr;
 	}
 
+	HMODULE ModuleManager::GetModule(const ModuleInterface* pInterface)
+	{
+		for (Module& module : m_modules)
+		{
+			for(uint32 i=0; i<module.interfaceSet->GetInterfaceCount(); i++)
+			{
+				if (module.interfaceSet->GetInterface(i) == pInterface)
+				{
+					return module.dllHandle;
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
 	void ModuleManager::Shutdown(GFXDevice* pDevice)
 	{
 		for (usg::vector<Module>::iterator it = m_modules.begin(); it!= m_modules.end(); ++it)

@@ -6,6 +6,7 @@
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Oculus, OculusVKExport.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h" 
 #include "Engine/Core/Modules/ModuleManager.h"
@@ -214,7 +215,29 @@ GFXDevice_ps::~GFXDevice_ps()
 	
 }
 
-
+void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::ExtensionType eType, vector<const char*>& extensions)
+{
+	if (pHmd)
+	{
+		for (uint32 i = 0; i < pHmd->GetRequiredAPIExtensionCount(IHeadMountedDisplay::ExtensionType::Instance); i++)
+		{
+			bool bFound = false;
+			const char* szExtension = pHmd->GetRequiredAPIExtension(IHeadMountedDisplay::ExtensionType::Instance, i);
+			for (int j = 0; j < extensions.size(); j++)
+			{
+				if (strcmp(extensions[j], szExtension) == 0)
+				{
+					bFound = true;
+					break;
+				}
+			}
+			if (!bFound)
+			{
+				extensions.push_back(szExtension);
+			}
+		}
+	}
+}
 
 
 void GFXDevice_ps::Init(GFXDevice* pParent)
@@ -245,37 +268,32 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 	
 	// Check to see if an HMD has been loaded and grab the extensions
-	{
-		uint32 uHMDId = IHeadMountedDisplay::GetModuleTypeNameStatic();
-		uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(uHMDId);
+	uint32 uHMDId = IHeadMountedDisplay::GetModuleTypeNameStatic();
+	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(uHMDId);
 
-		for (uint32 i = 0; i < uHMDCount; i++)
+	// FIXME: Confirm of type oculus
+	IHeadMountedDisplay* pHmd = nullptr;
+	for (uint32 i = 0; i < uHMDCount; i++)
+	{
+		ModuleInterface* pInterface = ModuleManager::Inst()->GetInterfaceOfType(uHMDId, i);
+		IHeadMountedDisplay* pThisHMD = (IHeadMountedDisplay*)pInterface;
+		if (pThisHMD)
 		{
-			ModuleInterface* pInterface = ModuleManager::Inst()->GetInterfaceOfType(uHMDId, i);
-			IHeadMountedDisplay* pDisplay = (IHeadMountedDisplay*)pInterface;
-			if (pDisplay)
-			{
-				for (uint32 i = 0; i < pDisplay->GetRequiredAPIExtensionCount(); i++)
-				{
-					bool bFound = false;
-					const char* szExtension = pDisplay->GetRequiredAPIExtension(i);
-					for (int j = 0; j < extensions.size(); j++)
-					{
-						if (strcmp(extensions[j], szExtension) == 0)
-						{
-							bFound = true;
-							break;
-						}
-					}
-					if (!bFound)
-					{
-						extensions.push_back(szExtension);
-					}
-				}
-			}
+			pHmd = pThisHMD;
+			break;
 		}
 	}
 
+	// TODO: Should come from HMD
+	typedef bool (far *GetHMDPhysicalDeviceVK)(VkInstance instance, VkPhysicalDevice* deviceOut);
+	GetHMDPhysicalDeviceVK GetHMDPhysicalDeviceVKFn = nullptr;
+	if (pHmd)
+	{
+		HMODULE oculusModule = ModuleManager::Inst()->GetModule(pHmd);
+		GetHMDPhysicalDeviceVKFn = (GetHMDPhysicalDeviceVK)GetProcAddress(oculusModule, "GetHMDPhysicalDeviceVK");
+	}
+
+	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
 	// initialize the VkInstanceCreateInfo structure
 	VkInstanceCreateInfo inst_info = {};
@@ -339,11 +357,20 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	// Init the device
 	VkDeviceQueueCreateInfo queue_info = {};
 
-	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, NULL);
+	if (GetHMDPhysicalDeviceVKFn)
+	{
+		GetHMDPhysicalDeviceVKFn(m_instance, &m_primaryPhysicalDevice);
+	}
+	else
+	{
+		m_primaryPhysicalDevice = m_gpus[0];
+	}
+
+	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, NULL);
 	ASSERT(m_uQueueFamilyCount >= 1);
 
 	m_pQueueProps = (VkQueueFamilyProperties*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, sizeof(VkQueueFamilyProperties)*m_uQueueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, m_pQueueProps);
+	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, m_pQueueProps);
 
 	//vkGetPhysicalDeviceFeatures 
 
@@ -369,7 +396,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
 
-	vkGetPhysicalDeviceFeatures(m_gpus[0], &supportedFeatures);
+	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
 
 	// FIXME: Set up additional enabled features
 	enabledFeatures.geometryShader = VK_TRUE;
@@ -403,7 +430,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	device_info.pEnabledFeatures = &enabledFeatures;
 
 	// Issue with the allocators atm so disabling for now
-	res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
+	res = vkCreateDevice(m_primaryPhysicalDevice, &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
 	ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from
@@ -470,7 +497,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 bool GFXDevice_ps::ColorFormatSupported(VkFormat eFormat)
 {
 	VkFormatProperties props;
-	vkGetPhysicalDeviceFormatProperties(m_gpus[0], eFormat, &props);
+	vkGetPhysicalDeviceFormatProperties(m_primaryPhysicalDevice, eFormat, &props);
 	return ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) != 0);
 }
 

@@ -22,15 +22,18 @@ namespace usg
 		virtual void Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget) final;
 		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
 
-		virtual const uint32 GetRequiredAPIExtensionCount() const { return m_uExtensions; }
-		virtual const char* GetRequiredAPIExtension(uint32 uIndex) const { return m_extensionNamePtrs[uIndex]; }
+		virtual const uint32 GetRequiredAPIExtensionCount(ExtensionType extType) const { return m_uExtensions[(size_t)extType]; }
+		virtual const char* GetRequiredAPIExtension(ExtensionType extType, uint32 uIndex) const { return m_extensionNamePtrs[(size_t)extType][uIndex]; }
 
+		// Try as we might it's impossible to avoid this call which doesn't fit within the interface
+		virtual const char* GetModuleName() const { return "OculusHMD"; }
+		bool GetPhysicalDevice(VkInstance instance, VkPhysicalDevice* deviceOut);
 	private:	
-		void ParseExtensionString(char* names);
+		void ParseExtensionString(ExtensionType eType);
 
-		char						m_extensionNames[4096];
-		const char*					m_extensionNamePtrs[100];
-		uint32						m_uExtensions;
+		char						m_extensionNames[(size_t)ExtensionType::Count][4096];
+		const char*					m_extensionNamePtrs[(size_t)ExtensionType::Count][100];
+		uint32						m_uExtensions[(size_t)ExtensionType::Count];
     	VkImage                     m_mirrorImage;
 		
 		struct EyeTarget_ps

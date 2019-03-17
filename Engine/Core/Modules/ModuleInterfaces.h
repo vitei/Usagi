@@ -15,6 +15,7 @@ namespace usg
 	{
 	public:
 		virtual const uint32 GetModuleTypeName() const = 0;
+		virtual const char* GetModuleName() const = 0;
 	};
 
 
