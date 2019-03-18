@@ -50,7 +50,6 @@ namespace usg
 
 	bool OculusHMD_ps::GetPhysicalDevice(VkInstance instance, VkPhysicalDevice* deviceOut)
 	{
-		return false;
 		ovrResult result = ovr_GetSessionPhysicalDeviceVk(m_session, m_luid, instance, deviceOut);
 		if (!OVR_SUCCESS(result))
 		{
@@ -63,7 +62,7 @@ namespace usg
 	{
 		uint32_t extensionCount = 0;
 		char* nextExtensionName = m_extensionNames[(size_t)eType];
-		static const uint32_t arraySize = ARRAY_SIZE(m_extensionNamePtrs);
+		static const uint32_t arraySize = ARRAY_SIZE(m_extensionNamePtrs[(size_t)eType]);
 		while (*nextExtensionName && (extensionCount < arraySize))
 		{
 			m_extensionNamePtrs[(size_t)eType][extensionCount++] = nextExtensionName;
@@ -92,15 +91,6 @@ namespace usg
 		mirrorDesc.Format = OVR_FORMAT_B8G8R8A8_UNORM_SRGB;
 		mirrorDesc.Width = uWidth;
 		mirrorDesc.Height = uHeight;
-		
-#if 0
-		ovrResult result = ovr_GetSessionPhysicalDeviceVk(m_session, m_luid , instance, &physicalDevice));
-
-		if (!OVR_SUCCESS(result))
-		{
-			return false;
-		}
-#endif
 
 		ovrResult result = ovr_CreateMirrorTextureWithOptionsVk(m_session, pDevice->GetPlatform().GetVKDevice(), &mirrorDesc, &m_mirrorTexture);
 		if (!OVR_SUCCESS(result))
