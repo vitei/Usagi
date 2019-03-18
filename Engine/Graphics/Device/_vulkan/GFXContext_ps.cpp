@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Device/PipelineState.h"
+#include "Engine/Graphics/Device/IHeadmountedDisplay.h"
 #include API_HEADER(Engine/Graphics/Device, PipelineLayout.h)
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
@@ -96,7 +97,7 @@ namespace usg {
 
 	void GFXContext_ps::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay)
 	{
-		ASSERT(false);
+		pHMD->TransferSpectatorDisplay(m_pParent, pDisplay);
 	}
 
 	void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)

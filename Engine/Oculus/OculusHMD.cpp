@@ -148,6 +148,9 @@ namespace usg
 		{
 			m_targets[i].swapChain = nullptr;
 		}
+
+		m_hmdDesc = ovr_GetHmdDesc(m_session);
+
 	}
 
 	OculusHMD::~OculusHMD()

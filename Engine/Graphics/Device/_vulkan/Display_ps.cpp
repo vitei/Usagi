@@ -6,7 +6,9 @@
 #include "Engine/Core/_win/WinUtil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Graphics/GFX.h"
+#include "Engine/Core/Modules/ModuleManager.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
@@ -258,26 +260,26 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		swapChainExtent = surfCapabilities.currentExtent;
 	}
 
-	// If mailbox mode is available, use it, as is the lowest-latency non-
-	// tearing mode.  If not, try IMMEDIATE which will usually be available,
-	// and is fastest (though it tears).  If not, fall back to FIFO which is
-	// always available.
-	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(IHeadMountedDisplay::GetModuleTypeNameStatic());
+	
 	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
-#if 0
-	for (size_t i = 0; i < presentModeCount; i++)
+	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+	// If we have an HMD select a non blocking mode
+	if (uHMDCount > 0)
 	{
-		if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+		swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+		// When using an HMD immediate is preferable, however according to the oculus SDK nvidia doesn't support it so may have to use mailbox 
+		for (size_t i = 0; i < presentModeCount; i++)
 		{
-			swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-			break;
-		}
-		if ((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) && (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR))
-		{
-			swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+			if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
+			{
+				swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+				break;
+			}
 		}
 	}
-#endif
+
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to
 	// own only 1 image at a time, besides the images being displayed and

@@ -69,8 +69,6 @@ namespace usg
 			wglSwapIntervalEXT(0);
 		}
 
-		m_hmdDesc = ovr_GetHmdDesc(m_session);
-
 		for (uint32 eye = 0; eye < 2; eye++)
 		{
 

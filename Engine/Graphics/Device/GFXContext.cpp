@@ -258,7 +258,7 @@ void GFXContext::ValidateDescriptors()
 		{
 			if (m_pActiveDescSets[i] && m_pActiveDescSets[i]->GetValid())
 			{
-				WARNING("Incompatailable descriptor set bound at slot %u\n", i);
+				WARNING("Incompatible descriptor set bound at slot %u\n", i);
 			}
 			else
 			{

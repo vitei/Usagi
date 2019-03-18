@@ -36,9 +36,17 @@ namespace usg
 		uint32						m_uExtensions[(size_t)ExtensionType::Count];
     	VkImage                     m_mirrorImage;
 		
+		struct SwapChainTarget
+		{
+			VkFramebuffer		framebuffer;
+			VkImage				swapchainImage;
+			VkImageView			swapchainImageView;
+		};
+
 		struct EyeTarget_ps
 		{
-			VkExtent2D       size;
+			VkExtent2D			size;
+			SwapChainTarget*	targets;
 		};
 
 		EyeTarget_ps		m_targets_ps[2];
