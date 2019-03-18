@@ -219,10 +219,10 @@ void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::Ext
 {
 	if (pHmd)
 	{
-		for (uint32 i = 0; i < pHmd->GetRequiredAPIExtensionCount(IHeadMountedDisplay::ExtensionType::Instance); i++)
+		for (uint32 i = 0; i < pHmd->GetRequiredAPIExtensionCount(eType); i++)
 		{
 			bool bFound = false;
-			const char* szExtension = pHmd->GetRequiredAPIExtension(IHeadMountedDisplay::ExtensionType::Instance, i);
+			const char* szExtension = pHmd->GetRequiredAPIExtension(eType, i);
 			for (int j = 0; j < extensions.size(); j++)
 			{
 				if (strcmp(extensions[j], szExtension) == 0)
@@ -417,6 +417,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
+
+	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
 	VkDeviceCreateInfo device_info = {};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
