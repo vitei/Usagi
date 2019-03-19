@@ -289,6 +289,12 @@ namespace usg
 	{
 		// Do distortion rendering, Present and flush/sync
 
+		// Now commit the swap chain for this eye
+		for (int eye = 0; eye < 2; ++eye)
+		{
+			ovr_CommitTextureSwapChain(m_session, m_targets[(uint32)eye].swapChain);
+		}
+
 		ovrLayerEyeFov ld;
 		ld.Header = m_layerHeader;
 

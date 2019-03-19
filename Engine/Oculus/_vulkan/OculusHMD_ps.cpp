@@ -168,7 +168,11 @@ namespace usg
 				viewInfo.subresourceRange.levelCount = 1;
 				viewInfo.subresourceRange.baseArrayLayer = 0;
 				viewInfo.subresourceRange.layerCount = 1;
-				vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &viewInfo, nullptr, &m_targets_ps[eye].targets->swapchainImageView);
+				VkResult vkRes = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &viewInfo, nullptr, &m_targets_ps[eye].targets->swapchainImageView);
+				ASSERT(vkRes == VK_SUCCESS);
+
+				// Framebuffer isn't needed yet as we don't let allow direct rendering
+				m_targets_ps[eye].targets->framebuffer = nullptr;
 			}
 		}
 
@@ -184,7 +188,10 @@ namespace usg
 			if (m_targets_ps[i].targets)
 			{
 				vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_targets_ps[i].targets->swapchainImageView, nullptr);
-				vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_targets_ps[i].targets->framebuffer, nullptr);
+				if (m_targets_ps[i].targets->framebuffer)
+				{
+					vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_targets_ps[i].targets->framebuffer, nullptr);
+				}
 
 				// Note we don't own image, it will get destroyed when ovr_DestroyTextureSwapChain is called
 				m_targets_ps[i].targets->swapchainImage = VK_NULL_HANDLE;
@@ -234,8 +241,6 @@ namespace usg
 
 		pContext->GetPlatform().SetImageLayout(m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
 		
-		// Now commit the swap chain for this eye
-		ovr_CommitTextureSwapChain(m_session, m_targets[(uint32)eye].swapChain);
 	}
 
 	void OculusHMD_ps::TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay)

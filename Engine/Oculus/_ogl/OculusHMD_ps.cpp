@@ -164,10 +164,6 @@ namespace usg
 		glBindFramebuffer(GL_FRAMEBUFFER, m_targets_ps[(uint32)eye].fbo);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 
-
-		// Now commit the swap chain for this eye
-		ovr_CommitTextureSwapChain(m_session, m_targets[(uint32)eye].swapChain);
-
 	}
 
 	void OculusHMD_ps::TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay)
