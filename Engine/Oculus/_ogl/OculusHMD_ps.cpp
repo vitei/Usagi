@@ -15,6 +15,8 @@ namespace usg
 		OculusHMD(session, luid)
 	{
 		m_mirrorFBO = 0;
+		m_layerHeader.Type = ovrLayerType_EyeFov;
+		m_layerHeader.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;   // Because OpenGL.
 	}
 
 	OculusHMD_ps::~OculusHMD_ps()

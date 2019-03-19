@@ -56,6 +56,7 @@ namespace usg
 			uint32 uHeight;
 		};
 
+		ovrLayerHeader		m_layerHeader;
 		WCHAR				m_deviceOutStrBuffer[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
 		double				m_sensorSampleTime;
 		EyeTarget			m_targets[2];

@@ -5,6 +5,7 @@
 #pragma once
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Device/GFXContext.h"
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Graphics/Device/Display.h"
 #include "Extras/OVR_Math.h"
@@ -41,6 +42,9 @@ namespace usg
 
 		ParseExtensionString(ExtensionType::Device);
 		g_pOculusHMD = this;
+
+		m_layerHeader.Type = ovrLayerType_EyeFov;
+		m_layerHeader.Flags = 0;
 
 		for (uint32 i = 0; i < 2; i++)
 		{
@@ -193,12 +197,105 @@ namespace usg
 
 	void OculusHMD_ps::Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget)
 	{
+		VkImageBlit ic = {};
+		ic.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		ic.srcSubresource.mipLevel = 0;
+		ic.srcSubresource.baseArrayLayer = 0;
+		ic.srcSubresource.layerCount = 1;
+		ic.srcOffsets[0].x = 0;
+		ic.srcOffsets[0].y = 0;
+		ic.srcOffsets[1].x = m_targets[(int)eye].uWidth;
+		ic.srcOffsets[1].y = m_targets[(int)eye].uHeight;
+		ic.srcOffsets[1].z = 1;
+		ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		ic.dstSubresource.mipLevel = 0;
+		ic.dstSubresource.baseArrayLayer = 0;
+		ic.dstSubresource.layerCount = 1;
+		ic.dstOffsets[0].x = 0;
+		ic.dstOffsets[0].y = 0;
+		ic.dstOffsets[1].x = m_targets[(int)eye].uWidth;
+		ic.dstOffsets[1].y = m_targets[(int)eye].uHeight;
+		ic.dstOffsets[1].z = 1;
+
+		VkImageSubresourceRange subresourceRange{};
+		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+		subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+
+		int index;
+		ovr_GetTextureSwapChainCurrentIndex(m_session, m_targets[(int)eye].swapChain, &index);
+
+		pContext->GetPlatform().SetImageLayout(m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+
+		const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
+		VkImage srcImage = tex.GetImage();
+		VkFilter filter = VK_FILTER_NEAREST;
+		vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
+
+		pContext->GetPlatform().SetImageLayout(m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
 		
+		// Now commit the swap chain for this eye
+		ovr_CommitTextureSwapChain(m_session, m_targets[(uint32)eye].swapChain);
 	}
 
 	void OculusHMD_ps::TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay)
 	{
+		// PRESENT_SRC_KHR -> TRANSFER_DST_OPTIMAL
+		VkImageMemoryBarrier presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		presentBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		presentBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		presentBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		presentBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.image = pDisplay->GetPlatform().GetActiveImage();
+		presentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		presentBarrier.subresourceRange.baseMipLevel = 0;
+		presentBarrier.subresourceRange.levelCount = 1;
+		presentBarrier.subresourceRange.baseArrayLayer = 0;
+		presentBarrier.subresourceRange.layerCount = 1;
+		vkCmdPipelineBarrier(pContext->GetPlatform().GetVkCmdBuffer(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+			0, nullptr,
+			0, nullptr,
+			1, &presentBarrier);
 
+		VkImageCopy region = {};
+		region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.srcSubresource.mipLevel = 0;
+		region.srcSubresource.baseArrayLayer = 0;
+		region.srcSubresource.layerCount = 1;
+		region.srcOffset = { 0, 0, 0 };
+		region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.dstSubresource.mipLevel = 0;
+		region.dstSubresource.baseArrayLayer = 0;
+		region.dstSubresource.layerCount = 1;
+		region.dstOffset = { 0, 0, 0 };
+		uint32 uWidth, uHeight;
+		pDisplay->GetActualDimensions(uWidth, uHeight, false);
+		region.extent = { uWidth, uHeight, 1 };
+		vkCmdCopyImage(pContext->GetPlatform().GetVkCmdBuffer(),
+			m_mirrorImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			pDisplay->GetPlatform().GetActiveImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &region);
+
+
+		presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		presentBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		presentBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		presentBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		presentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.image = pDisplay->GetPlatform().GetActiveImage();
+		presentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		presentBarrier.subresourceRange.baseMipLevel = 0;
+		presentBarrier.subresourceRange.levelCount = 1;
+		presentBarrier.subresourceRange.baseArrayLayer = 0;
+		presentBarrier.subresourceRange.layerCount = 1;
+		vkCmdPipelineBarrier(pContext->GetPlatform().GetVkCmdBuffer(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0,
+			0, nullptr,
+			0, nullptr,
+			1, &presentBarrier);
 	}
 
 }

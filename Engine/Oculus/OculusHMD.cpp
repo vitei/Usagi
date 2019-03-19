@@ -290,8 +290,7 @@ namespace usg
 		// Do distortion rendering, Present and flush/sync
 
 		ovrLayerEyeFov ld;
-		ld.Header.Type = ovrLayerType_EyeFov;
-		ld.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;   // Because OpenGL.
+		ld.Header = m_layerHeader;
 
 		for (int eye = 0; eye < 2; ++eye)
 		{

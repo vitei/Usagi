@@ -36,6 +36,7 @@ public:
 	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void SwapBuffers(GFXDevice* pDevice);
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
+	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
