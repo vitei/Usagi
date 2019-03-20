@@ -81,6 +81,7 @@ void SkyFog::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 
 	alphaDecl.bBlendEnable = true;
+	alphaDecl.uColorTargets = 1;
 	if(m_bUseDepthTex)
 	{
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;

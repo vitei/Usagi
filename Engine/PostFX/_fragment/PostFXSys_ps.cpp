@@ -555,6 +555,7 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, cons
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
+	pipelineDecl.alphaState.SetColor0Only();
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
