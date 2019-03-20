@@ -82,6 +82,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
+	alphaDecl.SetColor0Only();
 	// Make these spheres transparent
 	alphaDecl.bBlendEnable = true;
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
