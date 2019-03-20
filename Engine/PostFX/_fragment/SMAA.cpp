@@ -112,6 +112,7 @@ namespace usg {
 		pipelineDecl.uInputBindingCount = 1;
 		pipelineDecl.ePrimType = PT_TRIANGLES;
 		pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
+		pipelineDecl.alphaState.SetColor0Only();
 
 		usg::DescriptorSetLayoutHndl colorLumaEdgeDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorColorLumaEdgeDecl);
 		usg::DescriptorSetLayoutHndl depthEdgeDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDepthEdgeDecl);

@@ -19,7 +19,7 @@ namespace usg {
 
 static const VkFormat gColorFormatMap[]=
 {
-	VK_FORMAT_R8G8B8A8_UNORM,					// TF_RGBA_8888
+	VK_FORMAT_B8G8R8A8_UNORM,					// TF_RGBA_8888
 	VK_FORMAT_A1R5G5B5_UNORM_PACK16,			// TG_RGBA_5551
 	VK_FORMAT_R5G6B5_UNORM_PACK16,				// CF_RGB_565,
 	VK_FORMAT_B4G4R4A4_UNORM_PACK16,			// CF_RGBA_4444,
@@ -295,6 +295,17 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
+#ifdef DEBUG_BUILD
+	int validationLayerCount = 1;
+	const char *validationLayerNames[] =
+	{
+		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
+	};
+#else
+	int validationLayerCount = 0;
+	const char *validationLayerNames[1] = {};
+#endif
+
 	// initialize the VkInstanceCreateInfo structure
 	VkInstanceCreateInfo inst_info = {};
 	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -303,8 +314,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	inst_info.pApplicationInfo = &app_info;
 	inst_info.enabledExtensionCount = (uint32)extensions.size();
 	inst_info.ppEnabledExtensionNames = extensions.data();
-	inst_info.enabledLayerCount = 0;
-	inst_info.ppEnabledLayerNames = NULL;
+	inst_info.enabledLayerCount = validationLayerCount;
+	inst_info.ppEnabledLayerNames = validationLayerNames;
 
 	VkResult res;
 
@@ -399,20 +410,13 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
 
 	// FIXME: Set up additional enabled features
+	enabledFeatures.samplerAnisotropy = VK_TRUE;
 	enabledFeatures.geometryShader = VK_TRUE;
 	enabledFeatures.tessellationShader = VK_TRUE;
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
+	enabledFeatures.shaderStorageImageMultisample = VK_TRUE;
+	enabledFeatures.textureCompressionBC = VK_TRUE;
 
-#ifdef DEBUG_BUILD
-	int validationLayerCount = 1;
-	const char *validationLayerNames[] =
-	{
-		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
-	};
-#else
-	int validationLayerCount = 0;
-	const char *validationLayerNames[1] = {};
-#endif
 
 
 	extensions.clear();

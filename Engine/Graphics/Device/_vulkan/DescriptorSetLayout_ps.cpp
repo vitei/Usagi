@@ -111,8 +111,8 @@ namespace usg {
 		VkDescriptorSetLayoutBinding* pBindings;
 		ScratchObj<VkDescriptorSetLayoutBinding> layoutScratch(pBindings, parent.GetDeclarationCount());
 
-		vector<VkDescriptorPoolSize> poolSize;
-		poolSize.resize(parent.GetDeclarationCount());
+		m_poolSize.resize(parent.GetDeclarationCount());
+
 
 		for(uint32 i=0; i<parent.GetDeclarationCount(); i++)		
 		{
@@ -126,8 +126,8 @@ namespace usg {
 				pBindings[i].binding += SAMPLER_OFFSET;
 			}
 			pBindings[i].descriptorCount = pDecl->uCount;
-			poolSize[i].type = pBindings[i].descriptorType;
-			poolSize[i].descriptorCount = pDecl->uCount;
+			m_poolSize[i].type = pBindings[i].descriptorType;
+			m_poolSize[i].descriptorCount = pDecl->uCount;
 		}
 
 		VkDescriptorSetLayoutCreateInfo create_info = {};

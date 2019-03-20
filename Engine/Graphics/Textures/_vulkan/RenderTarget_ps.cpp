@@ -64,6 +64,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 		m_uHeight = ppColorBuffers[0]->GetHeight();
 	}
 
+	usg::MemSet(&m_fbCreateInfo, 0, sizeof(m_fbCreateInfo));
 	m_fbCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	m_fbCreateInfo.pNext = NULL;
 	m_fbCreateInfo.attachmentCount = uViewsPerFB;

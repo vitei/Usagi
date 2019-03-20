@@ -138,7 +138,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
 	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
 	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
-	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 
