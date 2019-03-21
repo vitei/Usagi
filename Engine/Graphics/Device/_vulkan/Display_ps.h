@@ -53,7 +53,9 @@ private:
 	};
 
 	usg::RenderPassHndl	m_directRenderPass;
+	usg::RenderPassHndl	m_postCopyRenderPass;
 	VkFramebuffer*		m_pFramebuffers;
+	VkFramebuffer*		m_pFramebuffersNoCopy;
 	HWND				m_hwnd;
 	HDC					m_hdc;
 	VkImage*			m_pSwapchainImages;
@@ -68,6 +70,7 @@ private:
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
 	bool				m_bWindowResized;
+	bool				m_bRTShouldLoad;
 };
 
 inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)

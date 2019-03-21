@@ -32,6 +32,7 @@ void GFXContext::Init(GFXDevice* pDevice, bool bDeferred, uint32 uSizeMul)
 {
 	m_pActiveBinding	= NULL;
 	m_pActiveRT			= NULL;
+	m_bRenderToDisplay = false;
 
 	m_platform.Init(pDevice, this, bDeferred, uSizeMul);
 }
@@ -59,6 +60,7 @@ void GFXContext::DisableScissor()
 void GFXContext::Begin(bool bApplyDefaults)
 {
 	m_pActiveRT = NULL;
+	m_bRenderToDisplay = false;
 	InvalidateStates();
 	m_platform.Begin(bApplyDefaults);
 }
@@ -74,6 +76,7 @@ void GFXContext::ApplyDefaults()
 void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport)
 {
 	bool bHadDS = false;
+	m_bRenderToDisplay = false;
 	if(m_pActiveRT)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
@@ -115,6 +118,7 @@ void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 	}
+	m_bRenderToDisplay = true;
 	m_platform.RenderToDisplay(pDisplay, uClearFlags);
 	m_pActiveRT = nullptr;
 }
@@ -153,10 +157,12 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 
 void GFXContext::End()
 {
-	if(m_pActiveRT)
+	if (m_pActiveRT || m_bRenderToDisplay)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 	}
+	m_bRenderToDisplay = false;
+	m_pActiveRT = nullptr;
 	m_platform.End();
 }
 

@@ -64,6 +64,7 @@ namespace usg {
 			poolCreateInfo.poolSizeCount = (uint32)m_poolSize.size();
 			poolCreateInfo.pPoolSizes = m_poolSize.data();
 			poolCreateInfo.maxSets = g_allocGroupSize;
+			poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 			Allocator alloc;
 			alloc.uAllocations = 0;

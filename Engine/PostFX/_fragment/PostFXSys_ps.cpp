@@ -89,8 +89,8 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	m_colorBuffer[BUFFER_LIN_DEPTH].Init(pDevice, uWidth, uHeight,  CF_R_16F, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 1);
 
 	// We don't have enough memory for 1080p if we put this in fast memory too
-	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
-	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAG_TRANSFER_SRC|TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAG_TRANSFER_SRC|TU_FLAGS_OFFSCREEN_COLOR);
 
 
 	m_depthStencil.Init(pDevice, uWidth, uHeight, DF_DEPTH_24_S8, eSamples, TU_FLAGS_DEPTH_BUFFER | ((uInitFlags&PostFXSys::EFFECT_SMAA) ? TU_FLAG_SHADER_READ : 0));

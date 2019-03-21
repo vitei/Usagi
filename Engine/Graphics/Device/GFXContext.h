@@ -94,6 +94,7 @@ private:
 	const DescriptorSet*	m_pActiveDescSets[MAX_DESCRIPTOR_SETS];
 
 	bool					m_bActive;
+	bool					m_bRenderToDisplay;
 	uint32					m_uRTMask;
 
 	uint32					m_uDirtyDescSetFlags;

@@ -47,7 +47,9 @@ ATTRIB_LOC(6) in vec3 vo_vWorldPos;
 ATTRIB_LOC(7) in vec3 vo_vViewDir;
 
 #ifndef DEFERRED_SHADING
+#ifndef SHADOW_PASS
 layout(location = 0) out vec4 colorOut;
+#endif
 #endif
 
 
@@ -146,6 +148,6 @@ void main(void)
 
 #else
 	// Shadow pass
-	colorOut = vec4(1.0, 0.0, 0.0, 0.0);
+	// colorOut = vec4(1.0, 0.0, 0.0, 0.0);
 #endif
 }

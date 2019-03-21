@@ -446,7 +446,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
 	// We will have short lived cmd buffers (for file loading), and reuse them
 	// TODO: Perhaps we want multiple command pools?
-	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
 	ASSERT(res == VK_SUCCESS);
@@ -581,8 +581,8 @@ void GFXDevice_ps::Begin()
 		do {
 			res = vkWaitForFences(m_vkDevice, 1, &m_drawFence, VK_TRUE, 100000);
 		} while (res == VK_TIMEOUT);
-		vkResetFences(m_vkDevice, 1, &m_drawFence);
 	}
+	vkResetFences(m_vkDevice, 1, &m_drawFence);
 	bFirst = false;
 	for (uint32 i = 0; i < m_pParent->GetValidDisplayCount(); i++)
 	{

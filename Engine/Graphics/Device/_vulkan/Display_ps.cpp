@@ -31,6 +31,7 @@ Display_ps::Display_ps()
 	m_uActiveImage = 0;
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
+	m_bRTShouldLoad = false;
 }
 
 
@@ -41,7 +42,9 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 		for (uint32 i = 0; i < m_uSwapChainImageCount; i++)
 		{
 			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffers[i], nullptr);
+			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffersNoCopy[i], nullptr);
 			m_pFramebuffers[i] = VK_NULL_HANDLE;
+			m_pFramebuffersNoCopy[i] = VK_NULL_HANDLE;
 		}
 
 		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
@@ -54,6 +57,7 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 		vdelete[] m_pSwapchainImages;
 		vdelete[] m_pSwapchainImageViews;
 		vdelete[] m_pFramebuffers;
+		vdelete[] m_pFramebuffersNoCopy;
 
 		vkDestroySwapchainKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, nullptr);
 		m_swapChain = VK_NULL_HANDLE;
@@ -136,10 +140,10 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	usg::RenderPassDecl::SubPass subPass;
 	usg::RenderPassDecl::AttachmentReference ref;
 	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
-	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_DONT_CARE;
 	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
-	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
-	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
+	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_PRESENT_SRC;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 
 	usg::RenderPassDecl::Dependency Dependencies[2];
@@ -170,6 +174,10 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	rpDecl.pSubPasses = &subPass;
 	attach.format.eColor = CF_RGBA_8888;	// FIXME: Match the true format
 	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
+
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_PRESENT_SRC;
+	m_postCopyRenderPass = pDevice->GetRenderPass(rpDecl);
 
 	InitFrameBuffers(pDevice);
 }
@@ -368,8 +376,16 @@ void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 	VkRenderPassBeginInfo rp_begin;
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
-	rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
-	rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	if (m_bRTShouldLoad)
+	{
+		rp_begin.renderPass = m_postCopyRenderPass.GetContents()->GetPass();
+		rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	}
+	else
+	{
+		rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
+		rp_begin.framebuffer = m_pFramebuffersNoCopy[m_uActiveImage];
+	}
 	rp_begin.renderArea.offset.x = 0;
 	rp_begin.renderArea.offset.y = 0;
 	rp_begin.renderArea.extent.width = m_uWidth;
@@ -406,7 +422,6 @@ void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
 	VkFramebufferCreateInfo fb_info = {};
 	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	fb_info.pNext = NULL;
-	fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
 	fb_info.attachmentCount = 1;
 	fb_info.pAttachments = attachments;
 	fb_info.width = m_uWidth;
@@ -416,10 +431,15 @@ void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
 	uint32_t i;
 
 	m_pFramebuffers = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
+	m_pFramebuffersNoCopy = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
 	for (i = 0; i < m_uSwapChainImageCount; i++)
 	{
 		attachments[0] = m_pSwapchainImageViews[i];
+		fb_info.renderPass = m_postCopyRenderPass.GetContents()->GetPass();
 		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffers[i]);
+		fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
+		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffersNoCopy[i]);
+
 		ASSERT(res == VK_SUCCESS);
 	}
 }
@@ -461,23 +481,25 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
 	subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 
-	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
+	pContext->GetPlatform().SetImageLayout(srcImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange);
 	VkFilter filter = srcBounds.width == dstBounds.width ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
 	vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
 	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
 	//pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	//pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	m_bRTShouldLoad = true;
 }
 
 
 
 void Display_ps::Present()
 {
-
+	m_bRTShouldLoad = false;
 }
 
 void Display_ps::SwapBuffers(GFXDevice* pDevice)
