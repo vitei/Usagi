@@ -6,7 +6,10 @@
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Oculus, OculusVKExport.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
+#include "Engine/Graphics/Device/IHeadMountedDisplay.h" 
+#include "Engine/Core/Modules/ModuleManager.h"
 #include "Engine/Graphics/Device/GFXContext.h" 
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
@@ -16,7 +19,7 @@ namespace usg {
 
 static const VkFormat gColorFormatMap[]=
 {
-	VK_FORMAT_R8G8B8A8_UNORM,					// TF_RGBA_8888
+	VK_FORMAT_B8G8R8A8_UNORM,					// TF_RGBA_8888
 	VK_FORMAT_A1R5G5B5_UNORM_PACK16,			// TG_RGBA_5551
 	VK_FORMAT_R5G6B5_UNORM_PACK16,				// CF_RGB_565,
 	VK_FORMAT_B4G4R4A4_UNORM_PACK16,			// CF_RGBA_4444,
@@ -212,6 +215,30 @@ GFXDevice_ps::~GFXDevice_ps()
 	
 }
 
+void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::ExtensionType eType, vector<const char*>& extensions)
+{
+	if (pHmd)
+	{
+		for (uint32 i = 0; i < pHmd->GetRequiredAPIExtensionCount(eType); i++)
+		{
+			bool bFound = false;
+			const char* szExtension = pHmd->GetRequiredAPIExtension(eType, i);
+			for (int j = 0; j < extensions.size(); j++)
+			{
+				if (strcmp(extensions[j], szExtension) == 0)
+				{
+					bFound = true;
+					break;
+				}
+			}
+			if (!bFound)
+			{
+				extensions.push_back(szExtension);
+			}
+		}
+	}
+}
+
 
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {
@@ -239,7 +266,45 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+	
+	// Check to see if an HMD has been loaded and grab the extensions
+	uint32 uHMDId = IHeadMountedDisplay::GetModuleTypeNameStatic();
+	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(uHMDId);
 
+	// FIXME: Confirm of type oculus
+	IHeadMountedDisplay* pHmd = nullptr;
+	for (uint32 i = 0; i < uHMDCount; i++)
+	{
+		ModuleInterface* pInterface = ModuleManager::Inst()->GetInterfaceOfType(uHMDId, i);
+		IHeadMountedDisplay* pThisHMD = (IHeadMountedDisplay*)pInterface;
+		if (pThisHMD)
+		{
+			pHmd = pThisHMD;
+			break;
+		}
+	}
+
+	// TODO: Should come from HMD
+	typedef bool (far *GetHMDPhysicalDeviceVK)(VkInstance instance, VkPhysicalDevice* deviceOut);
+	GetHMDPhysicalDeviceVK GetHMDPhysicalDeviceVKFn = nullptr;
+	if (pHmd)
+	{
+		HMODULE oculusModule = ModuleManager::Inst()->GetModule(pHmd);
+		GetHMDPhysicalDeviceVKFn = (GetHMDPhysicalDeviceVK)GetProcAddress(oculusModule, "GetHMDPhysicalDeviceVK");
+	}
+
+	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
+
+#ifdef DEBUG_BUILD
+	int validationLayerCount = 1;
+	const char *validationLayerNames[] =
+	{
+		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
+	};
+#else
+	int validationLayerCount = 0;
+	const char *validationLayerNames[1] = {};
+#endif
 
 	// initialize the VkInstanceCreateInfo structure
 	VkInstanceCreateInfo inst_info = {};
@@ -249,8 +314,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	inst_info.pApplicationInfo = &app_info;
 	inst_info.enabledExtensionCount = (uint32)extensions.size();
 	inst_info.ppEnabledExtensionNames = extensions.data();
-	inst_info.enabledLayerCount = 0;
-	inst_info.ppEnabledLayerNames = NULL;
+	inst_info.enabledLayerCount = validationLayerCount;
+	inst_info.ppEnabledLayerNames = validationLayerNames;
 
 	VkResult res;
 
@@ -303,11 +368,20 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	// Init the device
 	VkDeviceQueueCreateInfo queue_info = {};
 
-	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, NULL);
+	if (GetHMDPhysicalDeviceVKFn)
+	{
+		GetHMDPhysicalDeviceVKFn(m_instance, &m_primaryPhysicalDevice);
+	}
+	else
+	{
+		m_primaryPhysicalDevice = m_gpus[0];
+	}
+
+	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, NULL);
 	ASSERT(m_uQueueFamilyCount >= 1);
 
 	m_pQueueProps = (VkQueueFamilyProperties*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, sizeof(VkQueueFamilyProperties)*m_uQueueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(m_gpus[0], &m_uQueueFamilyCount, m_pQueueProps);
+	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, m_pQueueProps);
 
 	//vkGetPhysicalDeviceFeatures 
 
@@ -333,27 +407,22 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
 
-	vkGetPhysicalDeviceFeatures(m_gpus[0], &supportedFeatures);
+	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
 
 	// FIXME: Set up additional enabled features
+	enabledFeatures.samplerAnisotropy = VK_TRUE;
 	enabledFeatures.geometryShader = VK_TRUE;
 	enabledFeatures.tessellationShader = VK_TRUE;
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
+	enabledFeatures.shaderStorageImageMultisample = VK_TRUE;
+	enabledFeatures.textureCompressionBC = VK_TRUE;
 
-#ifdef DEBUG_BUILD
-	int validationLayerCount = 1;
-	const char *validationLayerNames[] =
-	{
-		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
-	};
-#else
-	int validationLayerCount = 0;
-	const char *validationLayerNames[1] = {};
-#endif
 
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
+
+	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
 	VkDeviceCreateInfo device_info = {};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -367,7 +436,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	device_info.pEnabledFeatures = &enabledFeatures;
 
 	// Issue with the allocators atm so disabling for now
-	res = vkCreateDevice(m_gpus[0], &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
+	res = vkCreateDevice(m_primaryPhysicalDevice, &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
 	ASSERT(res == VK_SUCCESS);
 
 	// Create a command pool to allocate our command buffer from
@@ -377,7 +446,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
 	// We will have short lived cmd buffers (for file loading), and reuse them
 	// TODO: Perhaps we want multiple command pools?
-	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
 	ASSERT(res == VK_SUCCESS);
@@ -434,7 +503,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 bool GFXDevice_ps::ColorFormatSupported(VkFormat eFormat)
 {
 	VkFormatProperties props;
-	vkGetPhysicalDeviceFormatProperties(m_gpus[0], eFormat, &props);
+	vkGetPhysicalDeviceFormatProperties(m_primaryPhysicalDevice, eFormat, &props);
 	return ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) != 0);
 }
 
@@ -512,8 +581,8 @@ void GFXDevice_ps::Begin()
 		do {
 			res = vkWaitForFences(m_vkDevice, 1, &m_drawFence, VK_TRUE, 100000);
 		} while (res == VK_TIMEOUT);
-		vkResetFences(m_vkDevice, 1, &m_drawFence);
 	}
+	vkResetFences(m_vkDevice, 1, &m_drawFence);
 	bFirst = false;
 	for (uint32 i = 0; i < m_pParent->GetValidDisplayCount(); i++)
 	{

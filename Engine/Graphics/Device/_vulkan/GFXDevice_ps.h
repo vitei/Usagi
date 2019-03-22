@@ -50,6 +50,7 @@ public:
 	uint32 GetQueueFamilyCount() const { return m_uQueueFamilyCount; }
 
 	const VkQueueFamilyProperties* GetQueueProperties(uint32 uIndex);
+	const VkPhysicalDevice GetPrimaryGPU() const { return m_primaryPhysicalDevice; }
 	const VkPhysicalDevice GetGPU(uint32 uIndex) const;
 	uint32 GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags properties, VkMemoryPropertyFlags prefferedProps = 0) const;
 	VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
@@ -101,6 +102,7 @@ private:
 	VkDevice							m_vkDevice;
 	VkInstance							m_instance;
 
+	VkPhysicalDevice					m_primaryPhysicalDevice;
 	VkPhysicalDevice					m_gpus[MAX_GPU_COUNT];
 	uint32								m_uGPUCount;
 	VkQueueFamilyProperties*			m_pQueueProps;

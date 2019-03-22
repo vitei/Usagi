@@ -13,9 +13,8 @@ namespace WINUTIL
 	HINSTANCE	GetInstanceHndl();
 	// FIXME: Not ideal
 	WindHndl		GetWindow();
+	void			SetWindow(WindHndl hndl);
 
-	// Call the following on the returned handle when
-	// Input::GetPlatform().RegisterHwnd(0, hndl);
-	WindHndl	CreateDisplayWindow(const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden);
+	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden);
 
 };

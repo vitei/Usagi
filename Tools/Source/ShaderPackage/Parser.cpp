@@ -41,7 +41,7 @@ bool LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
 	return true;
 }
 
-bool ParseManually(const char* szFileName, const char* szDefines, std::string& fileOut, std::vector<std::string>& referencedFiles)
+bool ParseManually(const char* szFileName, const char* szDefines, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles)
 {
 	const int MAX_STRING_ARRAY = 30;
 	FILE* pShaderFile;
@@ -146,14 +146,34 @@ bool ParseManually(const char* szFileName, const char* szDefines, std::string& f
 		includeName = includeName.substr(0, includeName.find_last_of("\\/"));
 		includeName += "/";
 		includeName += szPragma;
-		_fullpath(fullPath, includeName.c_str(), 256);
-		referencedFiles.push_back(fullPath);
+		std::string fullIncludeName = includeName;
 		fopen_s(&pIncludeFile, includeName.c_str(), "rb");
-		ASSERT(pIncludeFile);
 		if (!pIncludeFile)
 		{
+			std::string nextInclude = includes;
+			while (nextInclude.find_first_of("-I") != std::string::npos)
+			{
+				nextInclude = nextInclude.substr(nextInclude.find_first_of("-I") + 2);
+				std::string includePath = nextInclude;
+				if (includePath.find_first_of(" ") != std::string::npos)
+				{
+					includePath = includePath.substr(0, includePath.find_first_of(" "));
+				}
+				// Check in the include paths
+				fullIncludeName = includePath + "/" + szPragma;
+				fopen_s(&pIncludeFile, fullIncludeName.c_str(), "rb");
+			}
+		}
+
+		if (!pIncludeFile)
+		{
+			printf("Could not find include file %s in %s\n", includeName.c_str(), szFileName);
 			return false;
 		}
+
+		_fullpath(fullPath, fullIncludeName.c_str(), 256);
+		referencedFiles.push_back(fullPath);
+
 		fseek(pIncludeFile, 0, SEEK_END);
 		memsize uFileSize = ftell(pIncludeFile);
 		fseek(pIncludeFile, 0, SEEK_SET);

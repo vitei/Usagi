@@ -23,6 +23,7 @@ public:
 	virtual bool IsConnected() const { return m_bConnected; }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 	void TryReconnect();
+	virtual const char* GetModuleName() const { return "XInputPad"; }
 
 private:
 	float GetAxisWithDeadZone(SHORT value, SHORT deadzone);

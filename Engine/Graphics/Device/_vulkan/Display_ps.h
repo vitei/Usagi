@@ -36,6 +36,7 @@ public:
 	void TransferRect(GFXContext* pContext, RenderTarget* pTarget, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void SwapBuffers(GFXDevice* pDevice);
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
+	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -52,7 +53,9 @@ private:
 	};
 
 	usg::RenderPassHndl	m_directRenderPass;
+	usg::RenderPassHndl	m_postCopyRenderPass;
 	VkFramebuffer*		m_pFramebuffers;
+	VkFramebuffer*		m_pFramebuffersNoCopy;
 	HWND				m_hwnd;
 	HDC					m_hdc;
 	VkImage*			m_pSwapchainImages;
@@ -67,7 +70,23 @@ private:
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
 	bool				m_bWindowResized;
+	bool				m_bRTShouldLoad;
 };
+
+inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
+{
+	xOut = m_uWidth;
+	yOut = m_uHeight;
+
+	return true;
+}
+
+inline bool Display_ps::GetDisplayDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
+{
+	xOut = m_uWidth;
+	yOut = m_uHeight;
+	return true;
+}
 
 }
 

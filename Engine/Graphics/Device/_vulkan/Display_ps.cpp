@@ -6,7 +6,9 @@
 #include "Engine/Core/_win/WinUtil.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Graphics/GFX.h"
+#include "Engine/Core/Modules/ModuleManager.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
@@ -29,6 +31,7 @@ Display_ps::Display_ps()
 	m_uActiveImage = 0;
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
+	m_bRTShouldLoad = false;
 }
 
 
@@ -39,7 +42,9 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 		for (uint32 i = 0; i < m_uSwapChainImageCount; i++)
 		{
 			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffers[i], nullptr);
+			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_pFramebuffersNoCopy[i], nullptr);
 			m_pFramebuffers[i] = VK_NULL_HANDLE;
+			m_pFramebuffersNoCopy[i] = VK_NULL_HANDLE;
 		}
 
 		for (uint32_t i = 0; i < m_uSwapChainImageCount; i++)
@@ -52,6 +57,7 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 		vdelete[] m_pSwapchainImages;
 		vdelete[] m_pSwapchainImageViews;
 		vdelete[] m_pFramebuffers;
+		vdelete[] m_pFramebuffersNoCopy;
 
 		vkDestroySwapchainKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, nullptr);
 		m_swapChain = VK_NULL_HANDLE;
@@ -134,10 +140,10 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	usg::RenderPassDecl::SubPass subPass;
 	usg::RenderPassDecl::AttachmentReference ref;
 	// Loading as 9 times out of 10 we won't render to the backbuffer before doing a transfer from another target
-	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_DONT_CARE;
 	attach.eStoreOp = usg::RenderPassDecl::STORE_OP_STORE;
 	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_UNDEFINED;
-	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_TRANSFER_SRC;
+	attach.eFinalLayout = usg::RenderPassDecl::LAYOUT_PRESENT_SRC;
 	ref.eLayout = usg::RenderPassDecl::LAYOUT_COLOR_ATTACHMENT;
 
 	usg::RenderPassDecl::Dependency Dependencies[2];
@@ -169,6 +175,10 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	attach.format.eColor = CF_RGBA_8888;	// FIXME: Match the true format
 	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
 
+	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
+	attach.eInitialLayout = usg::RenderPassDecl::LAYOUT_PRESENT_SRC;
+	m_postCopyRenderPass = pDevice->GetRenderPass(rpDecl);
+
 	InitFrameBuffers(pDevice);
 }
 
@@ -181,7 +191,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	supportsPresent.resize(devicePS.GetQueueFamilyCount());
 	for (uint32_t i = 0; i < devicePS.GetQueueFamilyCount(); i++)
 	{
-		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetGPU(0), i, m_surface, &supportsPresent[i]);
+		vkGetPhysicalDeviceSurfaceSupportKHR(devicePS.GetPrimaryGPU(), i, m_surface, &supportsPresent[i]);
 	}
 
 	// Search for a graphics queue and a present queue in the array of queue
@@ -210,10 +220,10 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 	// Get the list of VkFormats that are supported:
 	uint32_t formatCount;
-	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, NULL);
+	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetGPU(0), m_surface, &formatCount, surfFormats);
+	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, surfFormats);
 	ASSERT(res == VK_SUCCESS);
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
@@ -231,16 +241,16 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 	VkSurfaceCapabilitiesKHR surfCapabilities;
 
-	res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(devicePS.GetGPU(0), m_surface, &surfCapabilities);
+	res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(devicePS.GetPrimaryGPU(), m_surface, &surfCapabilities);
 	ASSERT(res == VK_SUCCESS);
 
 	uint32_t presentModeCount;
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, NULL);
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetPrimaryGPU(), m_surface, &presentModeCount, NULL);
 	ASSERT(res == VK_SUCCESS);
 	vector<VkPresentModeKHR> presentModes;
 	presentModes.resize(presentModeCount);
 
-	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetGPU(0), m_surface, &presentModeCount, presentModes.data());
+	res = vkGetPhysicalDeviceSurfacePresentModesKHR(devicePS.GetPrimaryGPU(), m_surface, &presentModeCount, presentModes.data());
 	ASSERT(res == VK_SUCCESS);
 
 	VkExtent2D swapChainExtent;
@@ -258,26 +268,26 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		swapChainExtent = surfCapabilities.currentExtent;
 	}
 
-	// If mailbox mode is available, use it, as is the lowest-latency non-
-	// tearing mode.  If not, try IMMEDIATE which will usually be available,
-	// and is fastest (though it tears).  If not, fall back to FIFO which is
-	// always available.
-	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(IHeadMountedDisplay::GetModuleTypeNameStatic());
+	
 	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
-#if 0
-	for (size_t i = 0; i < presentModeCount; i++)
+	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+	// If we have an HMD select a non blocking mode
+	if (uHMDCount > 0)
 	{
-		if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+		swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+		// When using an HMD immediate is preferable, however according to the oculus SDK nvidia doesn't support it so may have to use mailbox 
+		for (size_t i = 0; i < presentModeCount; i++)
 		{
-			swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-			break;
-		}
-		if ((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) && (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR))
-		{
-			swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+			if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
+			{
+				swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+				break;
+			}
 		}
 	}
-#endif
+
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to
 	// own only 1 image at a time, besides the images being displayed and
@@ -366,8 +376,16 @@ void Display_ps::SetAsTarget(VkCommandBuffer& cmd)
 	VkRenderPassBeginInfo rp_begin;
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
-	rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
-	rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	if (m_bRTShouldLoad)
+	{
+		rp_begin.renderPass = m_postCopyRenderPass.GetContents()->GetPass();
+		rp_begin.framebuffer = m_pFramebuffers[m_uActiveImage];
+	}
+	else
+	{
+		rp_begin.renderPass = m_directRenderPass.GetContents()->GetPass();
+		rp_begin.framebuffer = m_pFramebuffersNoCopy[m_uActiveImage];
+	}
 	rp_begin.renderArea.offset.x = 0;
 	rp_begin.renderArea.offset.y = 0;
 	rp_begin.renderArea.extent.width = m_uWidth;
@@ -404,7 +422,6 @@ void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
 	VkFramebufferCreateInfo fb_info = {};
 	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	fb_info.pNext = NULL;
-	fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
 	fb_info.attachmentCount = 1;
 	fb_info.pAttachments = attachments;
 	fb_info.width = m_uWidth;
@@ -414,10 +431,15 @@ void Display_ps::InitFrameBuffers(GFXDevice* pDevice)
 	uint32_t i;
 
 	m_pFramebuffers = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
+	m_pFramebuffersNoCopy = vnew(ALLOC_GFX_RENDER_TARGET) VkFramebuffer[m_uSwapChainImageCount];
 	for (i = 0; i < m_uSwapChainImageCount; i++)
 	{
 		attachments[0] = m_pSwapchainImageViews[i];
+		fb_info.renderPass = m_postCopyRenderPass.GetContents()->GetPass();
 		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffers[i]);
+		fb_info.renderPass = m_directRenderPass.GetContents()->GetPass();
+		res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &fb_info, NULL, &m_pFramebuffersNoCopy[i]);
+
 		ASSERT(res == VK_SUCCESS);
 	}
 }
@@ -459,39 +481,25 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
 	subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 
-	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 	const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 	VkImage srcImage = tex.GetImage();
+	pContext->GetPlatform().SetImageLayout(srcImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange);
 	VkFilter filter = srcBounds.width == dstBounds.width ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
 	vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
 	pContext->GetPlatform().SetImageLayout(m_pSwapchainImages[m_uActiveImage], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, subresourceRange);
 	//pContext->GetPlatform().ImageBarrier(m_pSwapchainImages[m_uActiveImage], VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	//pContext->GetPlatform().ImageBarrier(srcImage, VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	m_bRTShouldLoad = true;
 }
 
-
-
-bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
-{
-    xOut = m_uWidth;
-    yOut = m_uHeight;
-    
-	return true;
-}
-
-bool Display_ps::GetDisplayDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)
-{
-    xOut = m_uWidth;
-    yOut = m_uHeight;
-	return true;
-}
 
 
 void Display_ps::Present()
 {
-
+	m_bRTShouldLoad = false;
 }
 
 void Display_ps::SwapBuffers(GFXDevice* pDevice)

@@ -139,6 +139,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	m_fChrScale = 1.0f;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
+	alphaDecl.SetColor0Only();
 	alphaDecl.bBlendEnable = false;
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;

@@ -66,22 +66,26 @@ public:
 	usg::OculusTouch m_oculusTouch;
 };
 
-usg::ModuleInterfaceSet* InitModule(usg::ModuleInitData& initData)
+
+bool InitModule(usg::ModuleInitData& initData, class ModuleInterfaceSet* interfaceSet)
 {
-	usg::mem::InitialiseAllocators(&initData.allocators);
+	OculusModuleSet* pSet = (OculusModuleSet*)interfaceSet;
+	if (pSet)
+	{
+		return pSet->m_pOculusHMD->Init(initData.pDevice);
+	}
+	return false;
+}
+
+usg::ModuleInterfaceSet* OnModuleLoad(usg::ModuleLoadData& loadData)
+{
+	usg::mem::InitialiseAllocators(&loadData.allocators);
 	usg::OculusHMD* pOculusHMD = usg::OculusHMD::TryCreate();
 	OculusModuleSet* pSet = nullptr;
 	if (pOculusHMD)
 	{
-		if (pOculusHMD->Init(initData.pDevice))
-		{
-			pSet = vnew(usg::ALLOC_OBJECT)OculusModuleSet;
-			pSet->Init(pOculusHMD);
-		}
-		else
-		{
-			vdelete pOculusHMD;
-		}
+		pSet = vnew(usg::ALLOC_OBJECT)OculusModuleSet;
+		pSet->Init(pOculusHMD);
 	}
 	return pSet;
 }

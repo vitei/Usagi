@@ -128,6 +128,7 @@ namespace usg {
 			uint32 uFlag = (1 << i);
 			attach.eAttachType = RenderPassDecl::ATTACH_COLOR;
 			attach.eLoadOp = GetLoadOp(uFlag, flags.uLoadFlags, flags.uClearFlags);
+			attach.eInitialLayout = attach.eLoadOp == RenderPassDecl::LOAD_OP_LOAD_MEMORY ? RenderPassDecl::LAYOUT_COLOR_ATTACHMENT : RenderPassDecl::LAYOUT_UNDEFINED;
 			attach.eStoreOp = flags.uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
 			attach.format.eColor = m_pColorBuffer[i]->GetFormat();
 			if (flags.uShaderReadFlags & uFlag)
@@ -154,6 +155,7 @@ namespace usg {
 			attach.eAttachType = RenderPassDecl::ATTACH_DEPTH;
 			attach.eLoadOp = GetLoadOp(uFlag, flags.uLoadFlags, flags.uClearFlags);
 			attach.eStoreOp = flags.uStoreFlags & uFlag ? RenderPassDecl::STORE_OP_STORE : RenderPassDecl::STORE_OP_DONT_CARE;
+			attach.eInitialLayout = attach.eLoadOp == RenderPassDecl::LOAD_OP_LOAD_MEMORY ? RenderPassDecl::LAYOUT_DEPTH_STENCIL_ATTACHMENT : RenderPassDecl::LAYOUT_UNDEFINED;
 			attach.format.eDepth = m_pDepth->GetFormat();
 			if (flags.uShaderReadFlags & uFlag)
 			{

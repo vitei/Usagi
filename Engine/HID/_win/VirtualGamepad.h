@@ -26,6 +26,7 @@ public:
 	virtual bool IsConnected() const { return true; }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 
+	virtual const char* GetModuleName() const { return "VirtualGamepad"; }
 private:
 	const Keyboard*	m_pKeyboard;
 };

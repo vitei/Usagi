@@ -18,8 +18,7 @@ namespace usg {
 
 void RenderNodeEx::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
 {
-	// FIXME: Only need to change one or the others
-	pDevice->ChangePipelineStateRenderPass(renderPass, m_deferredPipelineState);
+	// FIXME: Only need to change one or the others. Need to change if we enable/disable deferred on the fly
 	pDevice->ChangePipelineStateRenderPass(renderPass, m_pipelineState);
 }
 	
@@ -71,13 +70,19 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	{
 		// FIXME: This is only valid for shadow render passes, need another pipeline for scene pre depth passes
 		renderPass = pScene->GetShadowRenderPass();
-		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
+
 		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
 	}
 	else
 	{
-		m_deferredPipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
-		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
+		if (pScene->GetRenderPasses(0).IsRenderPassDeferred(*this))
+		{
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
+		}
+		else
+		{
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
+		}
 	}
 	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->pipelines.omniDepthPassPipeline);
 
@@ -110,7 +115,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		}
 	}
 
-	SetMaterialCmpVal(pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline), pMesh->pTextures[0].get());
+	SetMaterialCmpVal(m_pipelineState, pMesh->pTextures[0].get());
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 
@@ -143,8 +148,6 @@ bool Model::RenderMesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 	switch (renderContext.eRenderPass)
 	{
 	case RenderNode::RENDER_PASS_DEFERRED:
-		pContext->SetPipelineState(m_deferredPipelineState);
-		break;
 	case RenderNode::RENDER_PASS_DEPTH:
 	case RenderNode::RENDER_PASS_FORWARD:
 		pContext->SetPipelineState(m_pipelineState);

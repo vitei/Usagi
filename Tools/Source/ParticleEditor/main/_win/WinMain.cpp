@@ -126,7 +126,8 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdlin
 	settings.bWindowed = !g_bFullScreen; settings.hardwareHndl = NULL;
 	const char * const p_string = "Virtual Screen";
 	str::Copy(settings.name, p_string, sizeof(settings.name));
-	WindHndl hndl = WINUTIL::CreateDisplayWindow("Usagi", &settings, false);
+	WindHndl hndl = WINUTIL::CreateDisplayWindow(WindowProc, "Usagi", &settings, false);
+	usg::Input::GetPlatform().RegisterHwnd(0, hndl);
 
 #ifndef USE_VULKAN
 	GFXDevice_ps::InitOGLContext(hndl, 1);

@@ -32,6 +32,7 @@ void GFXContext::Init(GFXDevice* pDevice, bool bDeferred, uint32 uSizeMul)
 {
 	m_pActiveBinding	= NULL;
 	m_pActiveRT			= NULL;
+	m_bRenderToDisplay = false;
 
 	m_platform.Init(pDevice, this, bDeferred, uSizeMul);
 }
@@ -59,6 +60,7 @@ void GFXContext::DisableScissor()
 void GFXContext::Begin(bool bApplyDefaults)
 {
 	m_pActiveRT = NULL;
+	m_bRenderToDisplay = false;
 	InvalidateStates();
 	m_platform.Begin(bApplyDefaults);
 }
@@ -74,6 +76,7 @@ void GFXContext::ApplyDefaults()
 void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport)
 {
 	bool bHadDS = false;
+	m_bRenderToDisplay = false;
 	if(m_pActiveRT)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
@@ -115,6 +118,7 @@ void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 	}
+	m_bRenderToDisplay = true;
 	m_platform.RenderToDisplay(pDisplay, uClearFlags);
 	m_pActiveRT = nullptr;
 }
@@ -153,10 +157,12 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 
 void GFXContext::End()
 {
-	if(m_pActiveRT)
+	if (m_pActiveRT || m_bRenderToDisplay)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 	}
+	m_bRenderToDisplay = false;
+	m_pActiveRT = nullptr;
 	m_platform.End();
 }
 
@@ -190,6 +196,17 @@ void GFXContext::InvalidateStates()
 	m_platform.InvalidateStates();
 }
 
+void GFXContext::TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisplay, bool bLeftEye)
+{
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+		m_pActiveRT = nullptr;
+	}
+	BeginGPUTag("Transfer");
+	m_platform.TransferToHMD(pTarget, pDisplay, bLeftEye);
+	EndGPUTag();
+}
 
 
 void GFXContext::Transfer(RenderTarget* pTarget, Display* pDisplay)
@@ -258,7 +275,7 @@ void GFXContext::ValidateDescriptors()
 		{
 			if (m_pActiveDescSets[i] && m_pActiveDescSets[i]->GetValid())
 			{
-				WARNING("Incompatailable descriptor set bound at slot %u\n", i);
+				WARNING("Incompatible descriptor set bound at slot %u\n", i);
 			}
 			else
 			{
@@ -293,6 +310,7 @@ void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 		ValidateDescriptors();
 #endif
 		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
+		m_uDirtyDescSetFlags = 0;
 	}
 	m_platform.DrawImmediate(uCount, uOffset);
 }
@@ -306,12 +324,21 @@ void GFXContext::DrawIndexed(const IndexBuffer* pBuffer)
 		ValidateDescriptors();
 #endif
 		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
+		m_uDirtyDescSetFlags = 0;
 	}
 	m_platform.DrawIndexed(pBuffer, 0, pBuffer->GetIndexCount(), 1);
 }
 
 void GFXContext::DrawIndexedEx(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstanceCount)
 {
+	if (m_uDirtyDescSetFlags)
+	{
+#if CONFIRM_PIPELINE_VALIDITY
+		ValidateDescriptors();
+#endif
+		m_platform.UpdateDescriptors(m_activeStateGroup, m_pActiveDescSets, m_uDirtyDescSetFlags);
+		m_uDirtyDescSetFlags = 0;
+	}
 	ASSERT(uStartIndex + uIndexCount <= pBuffer->GetIndexCount());
 	m_platform.DrawIndexed(pBuffer, uStartIndex, uIndexCount, uInstanceCount);
 }

@@ -95,6 +95,7 @@ void Bloom::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
+	pipelineDecl.alphaState.SetColor0Only();
 
 	RasterizerStateDecl& rasDecl = pipelineDecl.rasterizerState;
 	rasDecl.eCullFace = CULL_FACE_NONE;

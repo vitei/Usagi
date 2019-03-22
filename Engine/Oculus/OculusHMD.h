@@ -16,12 +16,14 @@ namespace usg
 
 	class OculusHMD : public IHeadMountedDisplay
 	{
+	protected:
+		// Can't instantiate, need the PS version
+		OculusHMD(ovrSession session, ovrGraphicsLuid luid);
 	public:
-		OculusHMD(ovrSession session);
 		~OculusHMD();
 
-		virtual bool Init(GFXDevice* pDevice) final;
-		virtual void Cleanup(GFXDevice* pDevice) final;
+		virtual bool Init(GFXDevice* pDevice) override;
+		virtual void Cleanup(GFXDevice* pDevice) override;
 
 		virtual void Update() final;
 		
@@ -31,16 +33,11 @@ namespace usg
 
 		virtual Matrix4x4 GetProjectionMatrix(Eye eye, float fNear, float fFar) const final;
 
-		virtual void Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget) final;
-		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
-
 		virtual void SubmitFrame() final;
 		virtual char16* GetAudioDeviceName() final { return m_deviceOutStrBuffer; }
 
 		virtual void GetHMDTransform(usg::Matrix4x4& matOut) const;
 		virtual void GetEyeTransform(Eye eye, usg::Matrix4x4& mMatOut) const;
-
-		GLuint GetSpectatorFBO() const { return m_mirrorFBO; }
 
 		ovrSession GetSession() { return m_session; }
 
@@ -51,17 +48,15 @@ namespace usg
 
 		Matrix4x4 ConvertPose(const ovrPosef &pose) const;
 
-	private:	
-		// TODO: OpenGL specific stuff should be moved to the device
-		GLuint				m_mirrorFBO;
+	protected:	
 		struct EyeTarget
 		{
 			ovrTextureSwapChain	swapChain;
-			GLuint fbo;
 			uint32 uWidth;
 			uint32 uHeight;
 		};
 
+		ovrLayerHeader		m_layerHeader;
 		WCHAR				m_deviceOutStrBuffer[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
 		double				m_sensorSampleTime;
 		EyeTarget			m_targets[2];
@@ -70,6 +65,7 @@ namespace usg
 		ovrHmdDesc			m_hmdDesc;
 		ovrTrackingState	m_trackingState;
 		ovrMirrorTexture	m_mirrorTexture;
+		ovrGraphicsLuid		m_luid;
 		uint32				m_uFrameIndex;	// Update as we render each scene
 
 		// Usagi native format

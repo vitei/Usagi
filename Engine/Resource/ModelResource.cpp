@@ -480,11 +480,11 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	pipelineState.pEffect = pEffect;
 	m_meshArray[m_uMeshCount].matName = pMaterial->materialName;
 
-
+	pipelineState.alphaState.uColorTargets = 1;
 	m_meshArray[m_uMeshCount].pipelines.defaultPipeline = pipelineState;
 
 	pipelineState.pEffect = pDeferredEffect;
-
+	pipelineState.alphaState.uColorTargets = 5;
 	m_meshArray[m_uMeshCount].pipelines.deferredPipeline = pipelineState;
 
 	

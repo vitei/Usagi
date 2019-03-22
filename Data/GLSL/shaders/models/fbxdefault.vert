@@ -6,8 +6,10 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec3 ao_normal;
 ATTRIB_LOC(2) in vec3 ao_tangent;
+#ifdef HAS_SKELETON
 ATTRIB_LOC(3) in ivec4 ao_boneIndex;
 ATTRIB_LOC(4) in vec4 ao_boneWeight;
+#endif
 ATTRIB_LOC(5) in vec4 ao_color;
 ATTRIB_LOC(6) in vec2 ao_texCoord[4];
 ATTRIB_LOC(10) in vec3 ao_binormal;

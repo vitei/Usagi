@@ -52,7 +52,6 @@ public:
 	char16		GetInputChar(uint32 uIndex) const { return m_inputChars[uIndex]; }
 
 	void		RegisterHwnd(uint32 uDisplay, HWND hwnd);
-
 private:
 	PRIVATIZE_COPY(Input_ps);
 	

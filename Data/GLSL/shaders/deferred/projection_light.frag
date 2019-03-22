@@ -12,12 +12,11 @@ BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
 };
 
 // The projection texture (0-4 are take up by the deferred shading)
-SAMPLER_LOC(1, 5) uniform sampler2D sampler5;
+SAMPLER_LOC(2, 5) uniform sampler2D sampler5;
 
 ATTRIB_LOC(0) in vec4 vo_vTexCoord;
-ATTRIB_LOC(1) in vec4 vo_vProjCoord;
-ATTRIB_LOC(2) in vec3 vo_vViewRay;
-ATTRIB_LOC(3) in vec3 vo_vLightPosEye;
+ATTRIB_LOC(1) in vec3 vo_vViewRay;
+ATTRIB_LOC(2) in vec3 vo_vLightPosEye;
 
 layout (location=0) out vec4 vColorOut0;
 

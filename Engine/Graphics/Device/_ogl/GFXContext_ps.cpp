@@ -194,6 +194,12 @@ void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	RestorePipelineState();
 }
 
+void GFXContext_ps::TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisplay, bool bLeftEye)
+{
+	usg::IHeadMountedDisplay::Eye eye = bLeftEye ? usg::IHeadMountedDisplay::Eye::Left : usg::IHeadMountedDisplay::Eye::Right;
+	pDisplay->Transfer(m_pParent, eye, pTarget);
+}
+
 void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 {
 	pTarget->GetPlatform().EndDraw();

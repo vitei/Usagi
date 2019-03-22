@@ -24,6 +24,7 @@ public:
 	virtual bool IsConnected() const { return m_bConnected; }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 	void TryReconnect(DirectInput* pInput);
+	virtual const char* GetModuleName() const { return "DirectInputJoystick"; }
 
 private:
 	void SetDeadzone(float fDeadZone);

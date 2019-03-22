@@ -82,7 +82,8 @@
       <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
     </Lib>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Debug\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Debug\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,7 +96,8 @@
       <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
     </Lib>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2015\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
     </Link>
   </ItemDefinitionGroup>
 
@@ -161,6 +163,9 @@
     <ProjectReference Include="..\Maths\Maths.vcxproj">
       <Project>{258c9d89-38fb-4b1e-81e1-6d32ac81ff17}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Graphics\Graphics.vcxproj">
+      <Project>{a73a2dde-2075-496c-9770-21395924e08b}</Project>
+    </ProjectReference>    
     <ProjectReference Include="$(USAGI_DIR)\_build\projects\Engine\Core\Core.vcxproj">
       <Project>{4f44a822-08d7-424a-8d40-72677d8346a4}</Project>
     </ProjectReference>

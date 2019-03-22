@@ -75,8 +75,9 @@ namespace usg
 		pipeline.uInputBindingCount = 1;
 
 		usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-		pipeline.layout.descriptorSets[0] = matDescriptors;
-		pipeline.layout.uDescriptorSetCount = 1;
+		pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+		pipeline.layout.descriptorSets[1] = matDescriptors;
+		pipeline.layout.uDescriptorSetCount = 2;
 
 		usg::DepthStencilStateDecl& depth = pipeline.depthState;
 		depth.bDepthEnable = false;
@@ -88,6 +89,7 @@ namespace usg
 
 		usg::AlphaStateDecl& alpha = pipeline.alphaState;
 		alpha.bBlendEnable = true;
+		alpha.SetColor0Only();
 		alpha.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 		alpha.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 

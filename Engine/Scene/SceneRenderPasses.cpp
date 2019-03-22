@@ -12,7 +12,7 @@ namespace usg {
 
 	SceneRenderPasses::SceneRenderPasses()
 	{
-
+		m_bDeferredEnabled = false;
 	}
 
 	SceneRenderPasses::~SceneRenderPasses()
@@ -93,6 +93,7 @@ namespace usg {
 		}
 	}
 
+
 	const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet) const
 	{
 		auto& set = bPrevSet ? m_prevEntries : m_entries;
@@ -115,6 +116,31 @@ namespace usg {
 	const RenderPassHndl SceneRenderPasses::GetRenderPass(const RenderNode& node, bool bPrevSet) const
 	{
 		return GetRenderPass(node.GetLayer(), node.GetPriority(), bPrevSet);
+	}
+
+	bool SceneRenderPasses::IsRenderPassDeferred(RenderNode::Layer eLayer, uint32 uPriority) const
+	{
+		if (!m_bDeferredEnabled)
+		{
+			return false;
+		}
+		if (eLayer < RenderNode::LAYER_DEFERRED_SHADING)
+		{
+			return true;
+		}
+
+		if (uPriority < 127)
+		{
+			return true;
+		}
+
+		return false;
+
+	}
+
+	bool SceneRenderPasses::IsRenderPassDeferred(const RenderNode& node) const
+	{
+		return IsRenderPassDeferred(node.GetLayer(), node.GetPriority());
 	}
 
 

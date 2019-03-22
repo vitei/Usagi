@@ -77,7 +77,6 @@ namespace usg {
 		bool					m_bEnableFog;
 		DescriptorSet			m_descriptorSet;
 		PipelineStateHndl		m_pipelineState;
-		PipelineStateHndl		m_deferredPipelineState;
 		PipelineStateHndl		m_omniDepthPipelineState;
 		usg::Color				m_blendColor;
 		const IndexBuffer*		m_pIndexBuffer;
