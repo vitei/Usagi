@@ -100,6 +100,12 @@ namespace usg {
 		pHMD->TransferSpectatorDisplay(m_pParent, pDisplay);
 	}
 
+	void GFXContext_ps::TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisplay, bool bLeftEye)
+	{
+		usg::IHeadMountedDisplay::Eye eye = bLeftEye ? usg::IHeadMountedDisplay::Eye::Left : usg::IHeadMountedDisplay::Eye::Right;
+		pDisplay->Transfer(m_pParent, eye, pTarget);
+	}
+
 	void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 	{
 		if (pTarget)

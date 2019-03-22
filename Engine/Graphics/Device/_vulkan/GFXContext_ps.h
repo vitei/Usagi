@@ -33,6 +33,7 @@ public:
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);
 	void TransferRect(RenderTarget* pTarget, Display* pDisplay, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
 	void TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay);
+	void TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisplay, bool bLeftEye);
 
 	void End();
 	void ForceFinishDraw() { }
