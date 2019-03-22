@@ -133,6 +133,8 @@ namespace usg
 		return vnew(ALLOC_OBJECT) OculusHMD_ps(session, luid);
 	}
 
+#include <initguid.h>
+#include <mmdeviceapi.h>
 	OculusHMD::OculusHMD(ovrSession session, ovrGraphicsLuid luid)
 	{
 		m_session = session;
@@ -151,30 +153,10 @@ namespace usg
 
 		m_hmdDesc = ovr_GetHmdDesc(m_session);
 
-	}
-
-	OculusHMD::~OculusHMD()
-	{
-
-	}
-
-	Matrix4x4 OculusHMD::ConvertPose(const ovrPosef &pose) const
-	{
-		ovrPosef poseTmp;
-		FlipHandedness(&pose, &poseTmp);
-		return Convert(pose);
-	}
-
-#include <initguid.h>
-#include <mmdeviceapi.h>
-
-
-	bool OculusHMD::Init(GFXDevice* pDevice)
-	{
 		GUID guid;
 		ovrResult result = ovr_GetAudioDeviceOutGuidStr(m_deviceOutStrBuffer);
 		result = ovr_GetAudioDeviceOutGuid(&guid);
-		
+
 		usg::wstring deviceIdStr;
 		deviceIdStr.reserve(112);
 		deviceIdStr.append(L"\\\\?\\SWD#MMDEVAPI#");
@@ -195,6 +177,23 @@ namespace usg
 			DEBUG_PRINT("%s", info.ErrorString);
 		}
 
+	}
+
+	OculusHMD::~OculusHMD()
+	{
+
+	}
+
+	Matrix4x4 OculusHMD::ConvertPose(const ovrPosef &pose) const
+	{
+		ovrPosef poseTmp;
+		FlipHandedness(&pose, &poseTmp);
+		return Convert(pose);
+	}
+
+
+	bool OculusHMD::Init(GFXDevice* pDevice)
+	{
 		// Call an update frame
 		Update();
 
