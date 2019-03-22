@@ -350,7 +350,10 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	if (uEffectFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
-		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ?  &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
+		if ((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
+		{
+			pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
+		}
 		m_pSkyFog->SetDestTarget(pDevice, pDst);
 		m_renderPasses.SetRenderPass(m_pSkyFog->GetLayer(), m_pSkyFog->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pSkyFog;
