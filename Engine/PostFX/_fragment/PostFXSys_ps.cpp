@@ -319,6 +319,8 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if(m_pSMAA)
 		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
 
+	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
+
 	// Find
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)

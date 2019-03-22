@@ -21,6 +21,7 @@ public:
 	SceneRenderPasses();
 	~SceneRenderPasses();
 
+	void SetDeferredEnabled(bool bEnabled) { m_bDeferredEnabled = bEnabled; }
 	void AddCallback(ChangeCallback callback, void* pUserData);
 	void RemoveCallback(ChangeCallback callback, void* pUserData);
 	void SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl);
@@ -28,6 +29,8 @@ public:
 	void ClearAllPasses();
 	void ClearPrevPasses();
 	void UpdateEnd(GFXDevice* pDevice);
+	bool IsRenderPassDeferred(RenderNode::Layer eLayer, uint32 uPriority) const;
+	bool IsRenderPassDeferred(const RenderNode& node) const;
 	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet = false) const;
 	const RenderPassHndl GetRenderPass(const RenderNode& node, bool bPrevSet = false) const;
 	bool GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const;
@@ -61,6 +64,7 @@ private:
 		void*			pUserData;
 	};
 
+	bool					m_bDeferredEnabled;
 	vector<RenderPassEntry>	m_entries;
 	vector<RenderPassEntry>	m_prevEntries;
 	vector<CallbackData>	m_callbacks;
