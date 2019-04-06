@@ -137,7 +137,7 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
-The engine has just been updated to Vulkan, it is in a first functional state, if you have issues you can follow the instructions in [graphics](https://github.com/vitei/Usagi/wiki/Graphics) to revert to the legacy OpenGL support.  
+The engine has just been updated to Vulkan, it is in a first functional state (and it has been pointed out that if validation is enabled will result in errors with untextured models, such as the UsagiTest - this will be adressed shortly), if you have issues you can follow the instructions in [graphics](https://github.com/vitei/Usagi/wiki/Graphics) to revert to the legacy OpenGL support.  
 
 Current Version 0.2
 ----------------------
