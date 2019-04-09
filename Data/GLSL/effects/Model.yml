@@ -11,6 +11,10 @@ Effects:
     global_sets:  # A variant of all the above with these sets will be automatically added
       - name: skel
         defines: HAS_SKELETON
+      - name: bump
+        defines: HAS_BUMP
+      - name: skel.bump
+        defines: HAS_SKELETON HAS_BUMP
   - name: FBXDefault
     vert: models/fbxdefault
     geom: shadows/depthwriteomni

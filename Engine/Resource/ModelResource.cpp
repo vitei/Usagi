@@ -431,6 +431,11 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		effectPath += ".skel";
 		deferredEffectPath += ".skel";
 	}
+	if (HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count))
+	{
+		effectPath += ".bump";
+		deferredEffectPath += ".";
+	}
 	
 	if (pShape->singleAttributes_count != 0)
 	{

@@ -36,6 +36,7 @@ namespace usg
 		{
 			char	hint[32];
 			uint32 	uIndex;
+			uint32	eConstantType;
 		};
 
 		struct Constant

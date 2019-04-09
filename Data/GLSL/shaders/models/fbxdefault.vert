@@ -5,14 +5,17 @@
 // Input attributes
 ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec3 ao_normal;
-ATTRIB_LOC(2) in vec3 ao_tangent;
 #ifdef HAS_SKELETON
 ATTRIB_LOC(3) in ivec4 ao_boneIndex;
 ATTRIB_LOC(4) in vec4 ao_boneWeight;
 #endif
 ATTRIB_LOC(5) in vec4 ao_color;
 ATTRIB_LOC(6) in vec2 ao_texCoord[4];
+
+#ifdef HAS_BUMP
+ATTRIB_LOC(2) in vec3 ao_tangent;
 ATTRIB_LOC(10) in vec3 ao_binormal;
+#endif
 
 #include "../includes/model_transform.inc"
 
@@ -32,8 +35,10 @@ ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
 ATTRIB_LOC(1) out vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) out vec4 vo_vColor;
 ATTRIB_LOC(3) out vec3 vo_vNormal;
+#ifdef HAS_BUMP
 ATTRIB_LOC(4) out vec3 vo_vTangent;
 ATTRIB_LOC(5) out vec3 vo_vBinormal;
+#endif
 ATTRIB_LOC(6) out vec3 vo_vWorldPos;
 ATTRIB_LOC(7) out vec3 vo_vViewDir;
 
@@ -69,7 +74,7 @@ void main(void)
 	vec3 vNormal		= ApplyWorldTransform(vec4( ao_normal, 0.0 ), uVSMaterial.iBoneCount).xyz;
 	vec3 vViewNormal	= (vec4( vNormal, 0.0 ) * mViewMat).xyz;
 
-	
+#ifdef HAS_BUMP
 	if(uVSMaterial.bBumpMap)
 	{
 		vec3 vTangent		= ApplyWorldTransform(vec4( ao_tangent, 0.0 ), uVSMaterial.iBoneCount).xyz;
@@ -85,6 +90,7 @@ void main(void)
 			vo_vBinormal = cross(vTangent, vViewNormal);
 		}*/
 	}
+#endif
 
 	vo_vColor = ao_color;
 	vo_vNormal = vViewNormal;

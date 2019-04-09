@@ -17,6 +17,7 @@ static const Mapping g_constantMappings[]
 	{ "mat4x4", usg::CT_MATRIX_44 },
 	{ "mat3x4", usg::CT_MATRIX_43 },
 	{ "vec4",	usg::CT_VECTOR_4 },
+	{ "vec3",	usg::CT_VECTOR_3 },
 	{ "vec2",	usg::CT_VECTOR_2 },
 	{ "float",	usg::CT_FLOAT },
 	{ "int",	usg::CT_INT },
@@ -87,6 +88,16 @@ void SetDefaultData(usg::CustomEffectDecl::Constant& constant, const YAML::Node&
 				pD8 += sizeof(float);
 			}
 			break;
+        case usg::CT_VECTOR_3:
+            ASSERT(node.size() == 3);
+            for (uint32 i = 0; i < 3; i++)
+            {
+                float value = node[i].as<float>();
+                memcpy(pD8, &value, sizeof(float));
+                pD8 += sizeof(float);
+            }
+            break;
+			
 		case usg::CT_VECTOR_2:
 			ASSERT(node.size() == 2);
 			for (uint32 i = 0; i < 2; i++)
@@ -161,6 +172,7 @@ int MaterialDefinitionExporter::Load(const char* path)
 		usg::CustomEffectDecl::Attribute attrib;
 		strcpy_s(attrib.hint,  sizeof(attrib.hint), (*it)["hint"].as<std::string>().c_str());
 		attrib.uIndex = (*it)["index"].as<uint32>();
+		attrib.eConstantType = GetConstantType((*it)["type"].as<std::string>().c_str());
 		m_attributes.push_back(attrib);
 	}
 
