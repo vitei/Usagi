@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include "Engine/Graphics/Device/Display.h"
 #include "EffectGroup.h"
 #include "EmitterInstance.h"
 #include "ParticleEditor.h"
@@ -163,7 +164,7 @@ void EmitterInstance::UpdateInstanceMatrix()
 void EmitterInstance::UpdateEmitter(usg::GFXDevice* pDevice, usg::Scene& scene, const usg::particles::EmitterEmission& emitterData, const usg::particles::EmitterShapeDetails& shapeData)
 {
 	m_emitter.SetDefinition(pDevice, emitterData);
-	m_emitter.InitMaterial(pDevice, scene.GetRenderPass(0));
+	m_emitter.InitMaterial(pDevice, pDevice->GetDisplay(0)->GetRenderPass());
 	m_emitter.CreateEmitterShape(emitterData.eShape, shapeData);
 }
 

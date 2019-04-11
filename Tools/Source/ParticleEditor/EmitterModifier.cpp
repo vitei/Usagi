@@ -59,8 +59,8 @@ bool EmitterModifier::CompareUnitVector(usg::Vector3f &vInOut, const usg::Vector
 		}
 
 		vInOut.m_xyz[diffIndex] = newValue.m_xyz[diffIndex];
-		vInOut.m_xyz[uIndexA] = sqrt(fRemainder) * fFracA; 
-		vInOut.m_xyz[uIndexB] = sqrt(fRemainder) * fFracB;
+		vInOut.m_xyz[uIndexA] = sqrtf(fRemainder) * fFracA; 
+		vInOut.m_xyz[uIndexB] = sqrtf(fRemainder) * fFracB;
 
 		vInOut.GetNormalisedIfNZero(vSafetyValue);
 

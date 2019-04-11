@@ -51,9 +51,10 @@ namespace usg{
 		{
 			m_emissionDef = def;
 			PipelineStateDecl decl;
-			pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl);
+			RenderPassHndl hndl;
+			pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl, hndl);
 			decl.pEffect = ParticleEmitterResource::GetEffect(pDevice, m_emissionDef.eParticleType);
-			m_material.SetPipelineState(pDevice->GetPipelineState(decl));
+			m_material.SetPipelineState(pDevice->GetPipelineState(hndl, decl));
 			FillOutConstantBuffer(pDevice, true);
 		}
 #endif

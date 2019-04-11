@@ -48,7 +48,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 	alphaDecl.bBlendEnable = false;
-
+	alphaDecl.SetColor0Only();
 
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
 	depthDecl.bDepthWrite		= false;
@@ -63,12 +63,11 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	rasDecl.eCullFace = usg::CULL_FACE_NONE;
 	rasDecl.bUseDepthBias = false;
 
-	pipeline.renderPass = pScene->GetRenderPass(0);
-
+	usg::RenderPassHndl renderPassHndl = pDevice->GetDisplay(0)->GetRenderPass();
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
-	m_objectMat.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_objectMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
-	m_gridMat.Init(pDevice, pDevice->GetPipelineState(pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_gridMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 	m_objectConstants.Init(pDevice, g_transformConstantDef);
 	m_gridConstants.Init(pDevice, g_transformConstantDef);
@@ -93,7 +92,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 
 	RenderNode* pNode = this;
-	m_pRenderGroup->AddRenderNodes( &pNode, 1, 0 );
+	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
 	SetLayer(LAYER_OPAQUE);
 	SetPriority(0);	// After the opaque, very last
 

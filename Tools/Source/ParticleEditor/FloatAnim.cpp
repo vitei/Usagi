@@ -62,7 +62,7 @@ bool FloatAnim::Update(usg::particles::FloatAnim &src)
 		src.frames_count = frameCount;
 	}
 
-	uint32 iFrameIndex = 0;
+	int iFrameIndex = 0;
 	for(iFrameIndex = 0; iFrameIndex < frameCount; iFrameIndex++)
 	{
 		if(m_frameInfo[iFrameIndex].GetValue(0) != src.frames[iFrameIndex].fTimeIndex 

@@ -175,14 +175,8 @@ namespace usg
 			pipelineDecl.ePrimType = PT_POINTS;
 
 			DescriptorSetLayoutHndl matDescriptors;
-			if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
-			{
-				matDescriptors = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDeclLocal);
-			}
-			else
-			{
-				matDescriptors = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDecl);
-			}
+			matDescriptors = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDecl);
+
 			pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 			pipelineDecl.layout.descriptorSets[1] = matDescriptors;
 			pipelineDecl.layout.uDescriptorSetCount = 2;
@@ -399,7 +393,8 @@ namespace usg
 		m_vVelocityOffset = V3F_ZERO;
 		m_baseScale.SetMultiplier(m_fScale);
 
-		if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
+		// Always on to silence warnings
+		//if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
 		{
 			m_material.SetConstantSet(SHADER_CONSTANT_INSTANCE, GetParent()->GetConstantSet());
 		}

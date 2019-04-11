@@ -47,14 +47,7 @@ namespace usg{
 		m_stateDecl.uInputBindingCount = 1;
 		m_stateDecl.ePrimType = PT_POINTS;
 
-		if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
-		{
-			m_descriptorLayout = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDeclLocal);
-		}
-		else
-		{
-			m_descriptorLayout = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDecl);
-		}
+		m_descriptorLayout = pDevice->GetDescriptorSetLayout(Particle::g_scriptedDescriptorDecl);
 		
 		m_stateDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		m_stateDecl.layout.descriptorSets[1] = m_descriptorLayout;
@@ -63,6 +56,7 @@ namespace usg{
 
 		AlphaStateDecl& alphaDecl = m_stateDecl.alphaState;
 		alphaDecl.InitFromDefinition(m_emissionDef.blend);
+		alphaDecl.SetColor0Only();
 
 		DepthStencilStateDecl& depthDecl = m_stateDecl.depthState;
 		depthDecl.bDepthWrite = m_emissionDef.sortSettings.bWriteDepth;

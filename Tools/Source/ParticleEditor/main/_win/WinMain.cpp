@@ -21,7 +21,7 @@ using namespace usg;
 // Declare the games main function
 namespace usg
 {
-bool GameMain();
+bool GameMain(const char** dllModules, uint32 uModuleCount);
 bool GameExit();
 Input* GameGetInput();
 }
@@ -133,7 +133,7 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdlin
 	GFXDevice_ps::InitOGLContext(hndl, 1);
 #endif
 
-	GameMain();
+	GameMain(nullptr, 0);
 
 	return 0;
 }

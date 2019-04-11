@@ -7,6 +7,7 @@
 #include "Engine/HID/Keyboard.h"
 #include "Engine/HID/Mouse.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Layout/Global2D.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Scene/RenderGroup.h"
 #include "Engine/Resource/ResourceMgr.h"
@@ -193,6 +194,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 	pipeline.ePrimType = PT_TRIANGLES;
     {
 		AlphaStateDecl& desc = pipeline.alphaState;
+		desc.SetColor0Only();
         desc.bBlendEnable = true;
         desc.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		desc.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
@@ -220,8 +222,10 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipeline.uInputBindingCount = 1;
 
-	pipeline.layout.uDescriptorSetCount = 1;
-	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(decl);
+	pipeline.layout.uDescriptorSetCount = 2;
+	DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D);
+	pipeline.layout.descriptorSets[0] = globalDesc;
+	pipeline.layout.descriptorSets[1] = pDevice->GetDescriptorSetLayout(decl);
 
 	m_pipelineState = pDevice->GetPipelineState(scene.GetRenderPasses(0).GetRenderPass(*this), pipeline);
 

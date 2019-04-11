@@ -3,6 +3,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Graphics/Device/Display.h"
+#include "Engine/Layout/Global2D.h"
 #include "Engine/HID/Mouse.h"
 #include "Engine/HID/Input.h"
 #include "Engine/Graphics/Color.h"
@@ -10,6 +11,7 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Scene/ViewContext.h"
+#include "Engine/Layout/Global2D.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Scene/Scene.h"
 #include "ColorSelection.h"
@@ -197,19 +199,21 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	usg::DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
 	usg::DescriptorSetLayoutHndl satDesc = pDevice->GetDescriptorSetLayout(g_saturationDecl);
-	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(usg::SceneConsts::g_globalDescriptorDecl);
-	pipeline.layout.descriptorSets[1] = matDescriptors;
 	pipeline.layout.uDescriptorSetCount = 2;
+	usg::DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(usg::g_sGlobalDescriptors2D);
+	pipeline.layout.descriptorSets[0] = solidDescriptors;
+	pipeline.layout.descriptorSets[1] = globalDesc;
 
 	pipeline.alphaState.bBlendEnable = true;
 	pipeline.alphaState.blendEq = usg::BLEND_EQUATION_ADD;
 	pipeline.alphaState.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 	pipeline.alphaState.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
-	pipeline.renderPass = scene.GetRenderPass(0);
-	m_cursors[CURSOR_POINTER].material.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
-	m_cursors[CURSOR_HUE].material.Init(pDevice, pDevice->GetPipelineState(pipeline), matDescriptors);
-	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(pipeline), satDesc);
+	
+	usg::RenderPassHndl renderPassHndl = pDevice->GetDisplay(0)->GetRenderPass();
+	m_cursors[CURSOR_POINTER].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl,pipeline), matDescriptors);
+	m_cursors[CURSOR_HUE].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
+	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), satDesc);
 
 	m_cursors[CURSOR_POINTER].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "colorpointer_white"), m_sampler);
 	m_cursors[CURSOR_HUE].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "color_handle"), m_sampler);
@@ -304,7 +308,7 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(usg::VT_POSITION_DIFFUSE));
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pipeline), solidDescriptors);
+	m_material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), solidDescriptors);
 	m_constants.Init(pDevice, g_solidConstantDef);
 	m_material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
 

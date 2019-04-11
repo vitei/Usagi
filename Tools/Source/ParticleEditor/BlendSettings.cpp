@@ -120,11 +120,12 @@ bool BlendSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	if(bAltered || m_bForceUpdate)
 	{
 		usg::Material& material = pEffect->GetMaterial();
-		usg::PipelineStateDecl decl;		
-		pDevice->GetPipelineDeclaration(material.GetPipelineStateHndl(), decl);
+		usg::PipelineStateDecl decl;	
+		usg::RenderPassHndl passHndl;
+		pDevice->GetPipelineDeclaration(material.GetPipelineStateHndl(), decl, passHndl);
 		decl.alphaState.InitFromDefinition(structData.blend);
 		
-		material.SetPipelineState(pDevice->GetPipelineState(decl));
+		material.SetPipelineState(pDevice->GetPipelineState(passHndl, decl));
 		m_bForceUpdate = false;
 	}
 

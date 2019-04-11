@@ -50,7 +50,7 @@ void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptE
 	{
 		pEmitter->SetDefinition(pDevice, variables);
 		//pEmitter->FillOutConstantBuffer();
-		pEmitter->InitMaterial(pDevice, m_scene.GetRenderPass(0));
+		pEmitter->InitMaterial(pDevice, pDevice->GetDisplay(0)->GetRenderPass());
 
 		usg::particles::EmitterShapeDetails shapeDef;
 		bReadSucceeded = file.Read(&shapeDef);
@@ -82,7 +82,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	
 	m_postFX.Init(pDevice, uWidth, uHeight, 0);
 
-	usg::ResourceMgr::Inst()->RegisterRenderPass(m_postFX.GetRenderPass());
 	// Use the raw textures directly so artists can just place new ones in without having to rake
 	// Disabling for now as the directory structure has changed
 	//usg::ResourceMgr::Inst()->SetTextureDir("../../Data/Textures/");
@@ -91,7 +90,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_scene.Init(pDevice, worldBounds, NULL);
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(fAspect);
-	m_pSceneCtxt->Init(&m_camera.GetCamera(), &m_postFX, 0, usg::RenderNode::RENDER_MASK_ALL);
+	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderNode::RENDER_MASK_ALL);
 	
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
