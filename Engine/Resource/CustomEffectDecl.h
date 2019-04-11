@@ -35,6 +35,7 @@ namespace usg
 		struct Attribute
 		{
 			char	hint[32];
+			uint8	defaultData[64];
 			uint32 	uIndex;
 			uint32	eConstantType;
 		};

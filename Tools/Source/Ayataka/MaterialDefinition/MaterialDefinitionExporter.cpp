@@ -54,12 +54,11 @@ uint32 GetSize(uint32 uConstantType, uint32 uArraySize)
 	return usg::g_uConstantSize[uConstantType] * uArraySize;
 }
 
-void SetDefaultData(usg::CustomEffectDecl::Constant& constant, const YAML::Node& node, void* pData)
+void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Node& node, uint8* pD8)
 {
-	uint8* pD8 = ((uint8*)pData) + constant.uiOffset;;
 	if (node)
 	{
-		switch (constant.eConstantType)
+		switch (uConstantType)
 		{
 		case usg::CT_MATRIX_44:
 			ASSERT(node.size() == 16);
@@ -88,16 +87,25 @@ void SetDefaultData(usg::CustomEffectDecl::Constant& constant, const YAML::Node&
 				pD8 += sizeof(float);
 			}
 			break;
-        case usg::CT_VECTOR_3:
-            ASSERT(node.size() == 3);
-            for (uint32 i = 0; i < 3; i++)
-            {
-                float value = node[i].as<float>();
-                memcpy(pD8, &value, sizeof(float));
-                pD8 += sizeof(float);
-            }
-            break;
-			
+		case usg::CT_VECTOR_3:
+			ASSERT(node.size() == 3);
+			for (uint32 i = 0; i < 3; i++)
+			{
+				float value = node[i].as<float>();
+				memcpy(pD8, &value, sizeof(float));
+				pD8 += sizeof(float);
+			}
+			break;
+		case usg::CT_VECTOR4I:
+			ASSERT(node.size() == 4);
+			for (uint32 i = 0; i < 4; i++)
+			{
+				int value = node[i].as<int>();
+				memcpy(pD8, &value, sizeof(int));
+				pD8 += sizeof(int);
+			}
+			break;
+
 		case usg::CT_VECTOR_2:
 			ASSERT(node.size() == 2);
 			for (uint32 i = 0; i < 2; i++)
@@ -131,8 +139,20 @@ void SetDefaultData(usg::CustomEffectDecl::Constant& constant, const YAML::Node&
 	}
 	else
 	{
-		memset(pD8, 0, usg::g_uConstantSize[constant.eConstantType] * constant.uiCount);
+		memset(pD8, 0, usg::g_uConstantSize[uConstantType] * uConstantCount);
 	}
+}
+
+void SetDefaultData(usg::CustomEffectDecl::Constant& constant, const YAML::Node& node, void* pData)
+{
+	uint8* pD8 = ((uint8*)pData) + constant.uiOffset;
+	SetDefaultData(constant.eConstantType, constant.uiCount, node, pD8);
+}
+
+void SetDefaultData(usg::CustomEffectDecl::Attribute& attrib, const YAML::Node& node)
+{
+	uint8* pData8 = (uint8*)attrib.defaultData;
+	SetDefaultData(attrib.eConstantType, 1, node, pData8);
 }
 
 MaterialDefinitionExporter::~MaterialDefinitionExporter()
@@ -173,6 +193,7 @@ int MaterialDefinitionExporter::Load(const char* path)
 		strcpy_s(attrib.hint,  sizeof(attrib.hint), (*it)["hint"].as<std::string>().c_str());
 		attrib.uIndex = (*it)["index"].as<uint32>();
 		attrib.eConstantType = GetConstantType((*it)["type"].as<std::string>().c_str());
+		SetDefaultData(attrib, (*it)["default"]);
 		m_attributes.push_back(attrib);
 	}
 

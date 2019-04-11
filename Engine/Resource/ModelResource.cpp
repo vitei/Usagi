@@ -434,26 +434,70 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	if (HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count))
 	{
 		effectPath += ".bump";
-		deferredEffectPath += ".";
+		deferredEffectPath += ".bump";
 	}
 	
-	if (pShape->singleAttributes_count != 0)
+	// Missing attributes
 	{
-		// Single attributes
-		uint32 uSlot = 0;
-		for (size_t i = 0; i < pShape->singleAttributes_count; ++i)
-		{
-			if (!GetSingleAttributeDeclNamed(fxRunTime, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, pElement))
-				continue;
-		
-			bindings[uSlot + 1].Init(pElement, (uint32)uSlot + 1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
-			pipelineState.uInputBindingCount++;
-			pElement += 2;
+		uint32 uMissingItems = fxRunTime.GetResource()->GetAttribCount() - pipelineState.uInputBindingCount;
+		usg::ScratchRaw singleAttribScratch(uMissingItems * 16, 4);
+		uint8* pSingleAttribData = (uint8*)singleAttribScratch.GetRawData();
+		usg::VertexElement* pStaticElements = pElement;
+		uint32 uDataSize = 0;
 
-			const Vector4f& value = pShape->singleAttributes[i].value;
-			m_meshArray[m_uMeshCount].vertexBuffer[1 + uSlot].Init(pDevice, (void*)&value, sizeof(float)*pShape->singleAttributes[i].columns, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
-			uSlot++;
+		if (pShape->singleAttributes_count != 0)
+		{
+			// Single attributes
+			for (size_t i = 0; i < pShape->singleAttributes_count; ++i)
+			{
+				if (!GetSingleAttributeDeclNamed(fxRunTime, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, pElement))
+					continue;
+
+				pElement++;
+
+				uint32 uElementSize = sizeof(float)*pShape->singleAttributes[i].columns;
+				memcpy(pSingleAttribData, &pShape->singleAttributes[i].value, uElementSize);
+				pSingleAttribData += uElementSize;
+				uDataSize += uElementSize;
+			}
 		}
+
+		// Effect defaults
+		for (uint32 i = 0; i < fxRunTime.GetResource()->GetAttribCount(); i++)
+		{
+			// Set up the vertex buffer for attributes without any vertex streams
+			const CustomEffectDecl::Attribute* attrib = fxRunTime.GetResource()->GetAttribute(i);
+			bool bFound = false;
+			// If we already have it we don't want another copy
+			for (const VertexElement* pCmpElement = m_meshArray[m_uMeshCount].vertexElements; pCmpElement < pElement; pCmpElement++)
+			{
+				if (pCmpElement->uAttribId == attrib->uIndex)
+				{
+					bFound = true;
+					break;
+				}
+			}
+
+			if (bFound)
+			{
+				continue;
+			}
+
+			GetSingleAttributeDeclDefault(attrib, uDataSize, pElement);
+			pElement++;
+
+			// We didn't have that attribute from the model, so hook it up
+			uint32 uElementSize = g_uConstantSize[attrib->eConstantType];
+			memcpy(pSingleAttribData, attrib->defaultData, uElementSize);
+			pSingleAttribData += uElementSize;
+			uDataSize += uElementSize;
+		}
+
+		*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
+		bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
+		m_meshArray[m_uMeshCount].vertexBuffer[1].Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
+		pipelineState.uInputBindingCount++;
+
 	}
 
 	pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
@@ -796,19 +840,59 @@ void ModelResource::GetSingleAttributeDecl( exchange::VertexAttribute attr, uint
 	element[1] = VERTEX_ELEMENT_CAP;
 } 
 
+bool ModelResource::GetSingleAttributeDeclDefault(const CustomEffectDecl::Attribute* pAttrib, uint32 uOffset, VertexElement* pElement)
+{
+	pElement->bNormalised = false;
+	pElement->bIntegerReg = false;
+	pElement->uAttribId = pAttrib->uIndex;
 
-bool ModelResource::GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime, const char* szName, uint32 uCount, VertexElement element[2])
+	switch (pAttrib->eConstantType)
+	{
+	case CT_VECTOR_4:
+		pElement->eType = VE_FLOAT;
+		pElement->uCount = 4;
+		break;
+	case CT_VECTOR_3:
+		pElement->eType = VE_FLOAT;
+		pElement->uCount = 3;
+		break;
+	case CT_VECTOR_2:
+		pElement->eType = VE_FLOAT;
+		pElement->uCount = 2;
+		break;
+	case CT_FLOAT:
+		pElement->eType = VE_FLOAT;
+		pElement->uCount = 1;
+		break;
+	case CT_INT:
+		pElement->bIntegerReg = true;
+		pElement->eType = VE_INT;
+		pElement->uCount = 1;
+		break;
+	case CT_VECTOR4I:
+		pElement->bIntegerReg = true;
+		pElement->eType = VE_INT;
+		pElement->uCount = 4;
+		break;
+	default:
+		ASSERT(false);
+		return false;
+	}
+	pElement->uOffset = uOffset;
+	return true;
+}
+
+bool ModelResource::GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime, const char* szName, uint32 uCount, VertexElement* pElement)
 {
 	uint32 uBinding = runTime.GetResource()->GetAttribBinding(szName);
 	if (uBinding != USG_INVALID_ID)
 	{
-		element[0].bNormalised = false;
-		element[0].bIntegerReg = false;
-		element[0].eType = VE_FLOAT;
-		element[0].uAttribId = uBinding;
-		element[0].uCount = uCount;
-		element[0].uOffset = 0;
-		element[1] = VERTEX_ELEMENT_CAP;
+		pElement->bNormalised = false;
+		pElement->bIntegerReg = false;
+		pElement->eType = VE_FLOAT;
+		pElement->uAttribId = uBinding;
+		pElement->uCount = uCount;
+		pElement->uOffset = 0;
 		return true;
 	}
 	return false;

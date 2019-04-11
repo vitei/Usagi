@@ -130,6 +130,20 @@ namespace usg
 		return USG_INVALID_ID;
 	}
 
+	uint32 CustomEffectResource::GetAttribCount() const
+	{
+		return m_pHeader->uAttributeCount;
+	}
+
+	const CustomEffectDecl::Attribute* CustomEffectResource::GetAttribute(uint32 uIndex) const
+	{
+		if (uIndex >= m_pHeader->uAttributeCount)
+		{
+			return nullptr;
+		}
+		return &m_pAttributes[uIndex];
+	}
+
 	uint32 CustomEffectResource::GetSamplerBinding(const char* szSampler) const
 	{
 		for(uint32 i=0; i<m_pHeader->uSamplerCount; i++)

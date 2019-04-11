@@ -264,7 +264,7 @@ const uint32 g_uConstantSize[CT_COUNT] =
 	sizeof(float)*16,	// CT_MATRIX_44 = 0,
 	sizeof(float)*12,	// CT_MATRIX_43
 	sizeof(float)*4,	// CT_VECTOR_4,
-	sizeof(float)*3,	// CT_VECTOR_4,
+	sizeof(float)*3,	// CT_VECTOR_3,
 	sizeof(float)*2,	// CT_VECTOR_2,
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
@@ -279,7 +279,7 @@ const uint32 g_uConstantCPUAllignment[CT_COUNT] =
 	sizeof(float),		// CT_MATRIX_44
 	sizeof(float),		// CT_MATRIX_43
 	sizeof(float),		// CT_VECTOR_4
-	sizeof(float),		// CT_VECTOR_4
+	sizeof(float),		// CT_VECTOR_3
 	sizeof(float),		// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT

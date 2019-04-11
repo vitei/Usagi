@@ -18,6 +18,10 @@ namespace usg{
 
 class GFXContext;
 class CustomEffectRuntime;
+namespace CustomEffectDecl
+{
+	struct Attribute;
+}
 
 class ModelResource : public ResourceBase
 {
@@ -49,7 +53,8 @@ public:
 	static uint32 GetBoneIndexCount(const usg::exchange::Shape* pShape);
 	static bool HasAttribute(const usg::exchange::VertexStreamInfo* pInfo, exchange::VertexAttribute attrib, uint32 uCount);
 	static void GetSingleAttributeDecl( usg::exchange::VertexAttribute attr, uint32 uCount, VertexElement element[2] );
-	static bool GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime,const char* szName, uint32 uCount, VertexElement element[2]);
+	static bool GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime,const char* szName, uint32 uCount, VertexElement* pElement);
+	static bool GetSingleAttributeDeclDefault(const CustomEffectDecl::Attribute* pAttib, uint32 uOffset, VertexElement* pElement);
 
 	const usg::vector<uint32>& GetRigidBoneIndices() const { return m_rigidBoneIndices; }
 	const usg::vector<uint32>& GetSmoothBoneIndices() const { return m_smoothBoneIndices; }

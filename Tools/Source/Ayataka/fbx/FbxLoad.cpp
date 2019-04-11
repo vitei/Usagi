@@ -786,6 +786,8 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 
 	}
 
+	// We now handle default streams in the custom effect definition
+#if 0
 	// Single attribute, for now always add colour data if we don't have it
 	if (pShape->SearchStream(usg::exchange::VertexAttribute_COLOR) == UINT32_MAX)
 	{
@@ -800,6 +802,7 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 		ASSERT_MSG(count + 1 <= usg::exchange::Shape::singleAttributes_max_count, "Single attribute over flow");
 		rShape.singleAttributes_count = (pb_size_t)(count + 1);
 	}
+#endif
 
 	// Add the index stream
 	::exchange::Stream* pNewStream = vnew(ALLOC_OBJECT) ::exchange::Stream();

@@ -31,6 +31,8 @@ namespace usg
 		void Init(GFXDevice* pDevice, const char* szFileName);
 
 		uint32 GetAttribBinding(const char* szAttrib) const;
+		uint32 GetAttribCount() const;
+		const CustomEffectDecl::Attribute* GetAttribute(uint32 uIndex) const;
 		uint32 GetSamplerBinding(const char* szSampler) const;
 
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
