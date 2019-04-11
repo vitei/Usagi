@@ -177,7 +177,7 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	image_create_info.queueFamilyIndexCount = 0;
 	image_create_info.pQueueFamilyIndices = NULL;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	image_create_info.flags = 0;
+	image_create_info.flags = eViewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	m_imageCreateInfo = image_create_info;
 
 	Init(pDevice, image_create_info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
