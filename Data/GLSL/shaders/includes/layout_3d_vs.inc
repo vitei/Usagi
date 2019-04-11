@@ -3,7 +3,7 @@
 
 
 // The VS material data is used for placing the pane in the world
-BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
+BUFFER_LAYOUT(2, UBO_MATERIAL_ID) uniform Material
 {
 	vec4 position3D;
 	vec4 depthRange;

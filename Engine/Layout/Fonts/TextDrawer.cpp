@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Layout/Fonts/TextDrawer.h"
+#include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Layout/Global2D.h"
 
 
@@ -69,6 +70,7 @@ namespace usg
 		
 		AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 		alphaDecl.bBlendEnable = true;
+		alphaDecl.SetColor0Only();
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
@@ -78,7 +80,9 @@ namespace usg
 		dsDecl.bDepthEnable = true;
 		dsDecl.eDepthFunc = DEPTH_TEST_LESS;
 		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.Text3D");
-		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
+		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
+		pipelineState.layout.uDescriptorSetCount = 3;
 		m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
 		
 		m_bufferValid = true;
