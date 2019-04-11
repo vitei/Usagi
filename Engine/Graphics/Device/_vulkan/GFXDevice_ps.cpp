@@ -416,6 +416,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.multiDrawIndirect = VK_TRUE;
 	enabledFeatures.shaderStorageImageMultisample = VK_TRUE;
 	enabledFeatures.textureCompressionBC = VK_TRUE;
+	enabledFeatures.fillModeNonSolid = VK_TRUE;
 
 
 
