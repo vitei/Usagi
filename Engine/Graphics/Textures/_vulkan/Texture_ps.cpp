@@ -244,7 +244,9 @@ void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWi
 
 void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim, uint32 uTextureFlags)
 {
-	ASSERT(uTextureFlags & TU_FLAG_COLOR_ATTACHMENT);
+	// It should either be a color attachment or have data in it
+	ASSERT( ((uTextureFlags & TU_FLAG_COLOR_ATTACHMENT)!=0) != (pPixels!=nullptr));
+	ASSERT(eTexDim == TD_TEXTURE2D);	// Doesn't support anything but 2D textures atm
     VkImageCreateInfo image_create_info = {};
     image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_create_info.pNext = NULL;
@@ -260,6 +262,10 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     image_create_info.usage = GetImageUsage(uTextureFlags);
+	if (pPixels)
+	{
+		image_create_info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	}
     image_create_info.queueFamilyIndexCount = 0;
     image_create_info.pQueueFamilyIndices = NULL;
     image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -291,6 +297,78 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	m_uHeight = uHeight;
 	m_uDepth = 1;
 	m_uFaces = 1;
+
+	if (pPixels)
+	{
+		VkDevice& devicePS = pDevice->GetPlatform().GetVKDevice();
+		VkCommandBuffer copyCmd = pDevice->GetPlatform().CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+		// Only supporting 32bit images atm
+		ASSERT(eFormat == CF_RGBA_8888);
+		uint32 uBpp = 4;
+		uint32 uImageSize = uWidth * uHeight*uBpp;
+
+		// Image barrier for optimal image
+		VkImageSubresourceRange subresourceRange = {};
+		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subresourceRange.baseMipLevel = 0;
+		subresourceRange.levelCount = 1;
+		subresourceRange.layerCount = m_uFaces;
+
+		VkBufferImageCopy bufferCopyRegion = {};
+		bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		bufferCopyRegion.imageSubresource.mipLevel = 0;
+		bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+		bufferCopyRegion.imageSubresource.layerCount = 1;
+
+		bufferCopyRegion.imageExtent.width = uWidth;
+		bufferCopyRegion.imageExtent.height = uHeight;
+		bufferCopyRegion.imageExtent.depth = 1;
+		bufferCopyRegion.bufferOffset = 0;
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingMemory;
+
+		VkBufferCreateInfo bufferCreateInfo = {};
+		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCreateInfo.size = uImageSize;
+		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		res = vkCreateBuffer(devicePS, &bufferCreateInfo, nullptr, &stagingBuffer);
+
+		VkMemoryRequirements memReqs = {};
+		vkGetBufferMemoryRequirements(devicePS, stagingBuffer, &memReqs);
+
+		VkMemoryAllocateInfo memAllocInfo = {};
+		memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memAllocInfo.allocationSize = memReqs.size;
+		memAllocInfo.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		res = vkAllocateMemory(devicePS, &memAllocInfo, nullptr, &stagingMemory);
+		res = vkBindBufferMemory(devicePS, stagingBuffer, stagingMemory, 0);
+
+		// Copy texture data into staging buffer
+		uint8_t *data;
+		res = vkMapMemory(devicePS, stagingMemory, 0, memReqs.size, 0, (void **)&data);
+		memcpy(data, pPixels, uImageSize);
+		vkUnmapMemory(devicePS, stagingMemory);
+
+		SetImageLayout(copyCmd, m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+
+
+		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferCopyRegion);
+		
+		m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		SetImageLayout(copyCmd, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
+
+		pDevice->GetPlatform().FlushCommandBuffer(copyCmd, true);
+
+		// Clean up staging resources
+		vkFreeMemory(devicePS, stagingMemory, nullptr);
+		vkDestroyBuffer(devicePS, stagingBuffer, nullptr);
+
+	}
 }
 
 
