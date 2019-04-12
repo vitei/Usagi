@@ -346,7 +346,14 @@ namespace usg {
 		// FIXME: Should be split out into volume and directional, only the directional lights need rendering per view context
 		// Iterate through the list of visible objects, drawing them
 		RenderNode::RenderContext renderContext;
-		renderContext.eRenderPass = m_pPostFXSys->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING) ? RenderNode::RENDER_PASS_DEFERRED : RenderNode::RENDER_PASS_FORWARD;
+		if (m_pPostFXSys)
+		{
+			renderContext.eRenderPass = m_pPostFXSys->IsEffectEnabled(PostFXSys::EFFECT_DEFERRED_SHADING) ? RenderNode::RENDER_PASS_DEFERRED : RenderNode::RENDER_PASS_FORWARD;
+		}
+		else
+		{
+			renderContext.eRenderPass = RenderNode::RENDER_PASS_FORWARD;
+		}
 		// FIXME: Handle multiple views
 		renderContext.pGlobalDescriptors = &m_globalDescriptors[m_eActiveViewType];
 		renderContext.pPostFX = m_pPostFXSys;
