@@ -109,6 +109,7 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	pipeline.layout.uDescriptorSetCount = 2;
 
 	usg::AlphaStateDecl& alphaDecl = pipeline.alphaState;
+	alphaDecl.SetColor0Only();
 	alphaDecl.uColorMask[0]		= usg::RT_MASK_ALL;
 	alphaDecl.bBlendEnable		= true;
 	alphaDecl.blendEq			= usg::BLEND_EQUATION_ADD;
