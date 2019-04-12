@@ -52,7 +52,7 @@ static const usg::ShaderConstantDecl g_solidConstantDef[] =
 static const usg::DescriptorDeclaration g_descriptorDecl[] =
 {
 	DESCRIPTOR_ELEMENT(0,						 usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, usg::SHADER_FLAG_PIXEL),
-	//DESCRIPTOR_ELEMENT(usg::SHADER_CONSTANT_MATERIAL, usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, usg::SHADER_FLAG_VS_GS),
+	DESCRIPTOR_ELEMENT(usg::SHADER_CONSTANT_MATERIAL, usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, usg::SHADER_FLAG_VS_GS),
 	DESCRIPTOR_END()
 };
 
@@ -62,10 +62,6 @@ static const usg::DescriptorDeclaration g_solidDescriptorDecl[] =
 	DESCRIPTOR_END()
 };
 
-static const usg::DescriptorDeclaration g_saturationDecl[] =
-{
-	DESCRIPTOR_END()
-};
 
 ColorSelection::ColorSelection()
 {
@@ -103,8 +99,8 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	
 	{
 		uint32 uIndexCount = 6*(HUE_RGB_STACKS-1);
-		uint8* puIndices;
-		usg::ScratchObj<uint8> scratchIndices(puIndices, uIndexCount);
+		uint16* puIndices;
+		usg::ScratchObj<uint16> scratchIndices(puIndices, uIndexCount);
 		// Bar 1
 		for(uint32 i=0; i<(HUE_RGB_STACKS-1); i++)
 		{
@@ -122,8 +118,8 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 
 	{
 		uint32 uIndexCount = INDEX_COUNT;
-		uint8* puIndices;
-		usg::ScratchObj<uint8> scratchIndices(puIndices, uIndexCount);
+		uint16* puIndices;
+		usg::ScratchObj<uint16> scratchIndices(puIndices, uIndexCount);
 		// Bar 1
 		for(uint32 i=0; i<INDEX_COUNT/6; i++)
 		{
@@ -143,8 +139,8 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	{
 		// A single image
 		uint32 uIndexCount = 6;
-		uint8* puIndices;
-		usg::ScratchObj<uint8> scratchIndices(puIndices, uIndexCount);
+		uint16* puIndices;
+		usg::ScratchObj<uint16> scratchIndices(puIndices, uIndexCount);
 	
 		puIndices[0] = 2;
 		puIndices[1] = 1;
@@ -198,12 +194,12 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	usg::DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
-	usg::DescriptorSetLayoutHndl satDesc = pDevice->GetDescriptorSetLayout(g_saturationDecl);
 	pipeline.layout.uDescriptorSetCount = 2;
 	usg::DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(usg::g_sGlobalDescriptors2D);
-	pipeline.layout.descriptorSets[0] = solidDescriptors;
-	pipeline.layout.descriptorSets[1] = globalDesc;
+	pipeline.layout.descriptorSets[0] = globalDesc;
+	pipeline.layout.descriptorSets[1] = matDescriptors;
 
+	pipeline.alphaState.SetColor0Only();
 	pipeline.alphaState.bBlendEnable = true;
 	pipeline.alphaState.blendEq = usg::BLEND_EQUATION_ADD;
 	pipeline.alphaState.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
@@ -213,7 +209,8 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	usg::RenderPassHndl renderPassHndl = pDevice->GetDisplay(0)->GetRenderPass();
 	m_cursors[CURSOR_POINTER].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl,pipeline), matDescriptors);
 	m_cursors[CURSOR_HUE].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
-	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), satDesc);
+	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
+	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), solidDescriptors);
 
 	m_cursors[CURSOR_POINTER].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "colorpointer_white"), m_sampler);
 	m_cursors[CURSOR_HUE].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "color_handle"), m_sampler);
@@ -317,6 +314,10 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	m_constants.Unlock();
 	m_constants.UpdateData(pDevice);
 	m_material.UpdateDescriptors(pDevice);
+
+	m_cursors[CURSOR_POINTER].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
+	m_cursors[CURSOR_HUE].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
+	m_cursors[CURSOR_SATURATION].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
 
 	m_cursors[CURSOR_POINTER].material.UpdateDescriptors(pDevice);
 	m_cursors[CURSOR_HUE].material.UpdateDescriptors(pDevice);
