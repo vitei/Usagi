@@ -225,7 +225,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		}
 		usg::Color white(1.0f, 1.0f, 1.0f, 1.0f);
 		m_meshArray[i]->SetBlendColor(white);
-		m_meshArray[i]->SetPipelineState(pDevice->GetPipelineState(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]), pMesh->pipelines.defaultPipeline));
+		//m_meshArray[i]->SetPipelineState(pDevice->GetPipelineState(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]), pMesh->pipelines.defaultPipeline));
 		m_fScale = 1.0f;
 		m_meshArray[i]->ResetOverrides();
 		m_meshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);

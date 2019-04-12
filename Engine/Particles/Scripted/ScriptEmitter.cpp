@@ -18,7 +18,7 @@ namespace usg
 
 	static RenderNode::Layer layerMapping[] =
 	{
-		RenderNode::LAYER_OPAQUE,
+		RenderNode::LAYER_OPAQUE_UNLIT,
 		RenderNode::LAYER_TRANSLUCENT,
 		RenderNode::LAYER_SUBTRACTIVE,
 		RenderNode::LAYER_ADDITIVE

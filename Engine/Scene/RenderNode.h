@@ -30,6 +30,7 @@ public:
 		LAYER_PRE_WORLD,
 		LAYER_OPAQUE,
 		LAYER_DEFERRED_SHADING,
+		LAYER_OPAQUE_UNLIT,
 		LAYER_SKY,	// Not lit, no point running it through the deferred shading
 		LAYER_TRANSLUCENT,
 		LAYER_SUBTRACTIVE,
