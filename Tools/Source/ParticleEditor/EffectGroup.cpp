@@ -55,6 +55,20 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_pScene = pScene;
 }
 
+void EffectGroup::CleanUp(usg::GFXDevice* pDevice)
+{
+	for (uint32 i = 0; i < MAX_RIBBONS; i++)
+	{
+		m_ribbons[i].CleanUp(pDevice);
+	}
+
+	for (uint32 i = 0; i < MAX_INSTANCES; i++)
+	{
+		m_instances[i].CleanUp(pDevice);
+	}
+	m_effect.CleanUp(pDevice);
+}
+
 bool EffectGroup::LoadEmitterRequested(usg::U8String& name)
 {
 	for (uint32 i = 0; i < MAX_INSTANCES; i++)

@@ -39,11 +39,10 @@ void GFXContext::Init(GFXDevice* pDevice, bool bDeferred, uint32 uSizeMul)
 
 void GFXContext::ApplyViewport(const Viewport& viewport)
 {
-	ASSERT(m_pActiveRT!=NULL);
-	m_activeViewport.uBottom = viewport.GetBottom();
-	m_activeViewport.uLeft = viewport.GetLeft();
-	m_activeViewport.uWidth = viewport.GetWidth();
-	m_activeViewport.uHeight = viewport.GetHeight();
+	m_activeViewport.x = viewport.GetBottom();
+	m_activeViewport.y = viewport.GetLeft();
+	m_activeViewport.width = viewport.GetWidth();
+	m_activeViewport.height = viewport.GetHeight();
 	m_platform.ApplyViewport(m_pActiveRT, viewport);
 }
 
@@ -54,7 +53,7 @@ void GFXContext::SetScissorRect(uint32 uLeft, uint32 uBottom, uint32 uWidth, uin
 
 void GFXContext::DisableScissor()
 {
-	m_platform.DisableScissor(m_pActiveRT, m_activeViewport.uLeft, m_activeViewport.uBottom, m_activeViewport.uWidth, m_activeViewport.uHeight);
+	m_platform.DisableScissor(m_pActiveRT, m_activeViewport.x, m_activeViewport.y, m_activeViewport.width, m_activeViewport.height);
 }
 
 void GFXContext::Begin(bool bApplyDefaults)
@@ -120,6 +119,12 @@ void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	}
 	m_bRenderToDisplay = true;
 	m_platform.RenderToDisplay(pDisplay, uClearFlags);
+	m_activeViewport.x = 0;
+	m_activeViewport.y = 0;
+	uint32 uWidth, uHeight;
+	pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+	m_activeViewport.width = (int)uWidth;
+	m_activeViewport.height = (int)uHeight;
 	m_pActiveRT = nullptr;
 }
 

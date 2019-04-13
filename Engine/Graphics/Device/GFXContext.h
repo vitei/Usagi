@@ -66,6 +66,7 @@ public:
 	void EnableProfiling(bool bProfile) { m_platform.EnableProfiling(bProfile); }
 
 	RenderTarget* GetActiveRenderTarget() const{ return m_pActiveRT; }
+	const GFXBounds& GetActiveViewport() const { return m_activeViewport; }
 
 	void	InvalidatePipelineOnly();
 	void	InvalidateStates();
@@ -74,14 +75,6 @@ private:
 
 	PRIVATIZE_COPY(GFXContext);
 
-	struct ViewportCache
-	{
-		uint32 uBottom;
-		uint32 uLeft;
-		uint32 uWidth;
-		uint32 uHeight;
-	};
-
 	
 	GFXContext_ps			m_platform;
 
@@ -89,7 +82,7 @@ private:
 	RenderTarget*			m_pActiveRT;
 
 	PipelineStateHndl		m_activeStateGroup;
-	ViewportCache			m_activeViewport;
+	GFXBounds				m_activeViewport;
 	
 	const VertexBuffer*		m_pActiveVBOs[MAX_VERTEX_BUFFERS];
 	const DescriptorSet*	m_pActiveDescSets[MAX_DESCRIPTOR_SETS];

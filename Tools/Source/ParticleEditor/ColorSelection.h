@@ -24,6 +24,7 @@ public:
 	~ColorSelection();
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene& scene);
+	void CleanUp(usg::GFXDevice* pDevice);
 	void SetPosition(float fX, float fY);
 	void SetSize(float fX, float fY);
 	void Update(usg::GFXDevice* pDevice, float fElapsed);
@@ -76,6 +77,7 @@ private:
 	Image				m_cursors[CURSOR_COUNT];
 	usg::Color			m_hueColors[HUE_RGB_STACKS];
 	usg::PositionDiffuseVertex	m_hueSatCPUVerts[VERTEX_COUNT];
+	usg::DescriptorSet	m_globalDescriptor;
 	usg::VertexBuffer	m_hueSatVertices;
 	usg::VertexBuffer	m_rgbVertices;
 	usg::IndexBuffer	m_indices;

@@ -52,13 +52,11 @@ static const usg::ShaderConstantDecl g_solidConstantDef[] =
 static const usg::DescriptorDeclaration g_descriptorDecl[] =
 {
 	DESCRIPTOR_ELEMENT(0,						 usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, usg::SHADER_FLAG_PIXEL),
-	DESCRIPTOR_ELEMENT(usg::SHADER_CONSTANT_MATERIAL, usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, usg::SHADER_FLAG_VS_GS),
 	DESCRIPTOR_END()
 };
 
 static const usg::DescriptorDeclaration g_solidDescriptorDecl[] =
 {
-	DESCRIPTOR_ELEMENT(usg::SHADER_CONSTANT_MATERIAL, usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, usg::SHADER_FLAG_VS_GS),
 	DESCRIPTOR_END()
 };
 
@@ -86,6 +84,24 @@ void FillOutVert(float fX, float fY, float fR, float fG, float fB, usg::Position
 	pVertOut->g = fG;
 	pVertOut->b = fB;
 	pVertOut->a = 1.0f;
+}
+
+void ColorSelection::CleanUp(usg::GFXDevice* pDevice)
+{
+	m_globalDescriptor.CleanUp(pDevice);
+	m_hueSatVertices.CleanUp(pDevice);
+	m_rgbVertices.CleanUp(pDevice);
+	m_indices.CleanUp(pDevice);
+	m_hueSatIndices.CleanUp(pDevice);
+	m_imageIndices.CleanUp(pDevice);
+	m_material.Cleanup(pDevice);
+	m_constants.CleanUp(pDevice);
+
+	for (uint32 i = 0; i < CURSOR_COUNT; i++)
+	{
+		m_cursors[i].material.Cleanup(pDevice);
+		m_cursors[i].vertices.CleanUp(pDevice);
+	}
 }
 
 void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
@@ -193,7 +209,6 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	pipeline.uInputBindingCount = 1;
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-	usg::DescriptorSetLayoutHndl solidDescriptors = pDevice->GetDescriptorSetLayout(g_solidDescriptorDecl);
 	pipeline.layout.uDescriptorSetCount = 2;
 	usg::DescriptorSetLayoutHndl globalDesc = pDevice->GetDescriptorSetLayout(usg::g_sGlobalDescriptors2D);
 	pipeline.layout.descriptorSets[0] = globalDesc;
@@ -210,7 +225,8 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	m_cursors[CURSOR_POINTER].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl,pipeline), matDescriptors);
 	m_cursors[CURSOR_HUE].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
-	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), solidDescriptors);
+	pipeline.layout.uDescriptorSetCount = 1;
+	m_cursors[CURSOR_SATURATION].material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), usg::DescriptorSetLayoutHndl());
 
 	m_cursors[CURSOR_POINTER].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "colorpointer_white"), m_sampler);
 	m_cursors[CURSOR_HUE].material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, "color_handle"), m_sampler);
@@ -305,23 +321,19 @@ void ColorSelection::Init(usg::GFXDevice* pDevice, usg::Scene& scene)
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(usg::VT_POSITION_DIFFUSE));
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosCol");
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), solidDescriptors);
+	m_material.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), usg::DescriptorSetLayoutHndl());
 	m_constants.Init(pDevice, g_solidConstantDef);
-	m_material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
 
+	m_globalDescriptor.Init(pDevice, globalDesc);
 	SolidConstants* pConsts = m_constants.Lock<SolidConstants>();
 	pConsts->mProj.Orthographic( 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 10.0f ); 
 	m_constants.Unlock();
 	m_constants.UpdateData(pDevice);
-	m_material.UpdateDescriptors(pDevice);
-
-	m_cursors[CURSOR_POINTER].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
-	m_cursors[CURSOR_HUE].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
-	m_cursors[CURSOR_SATURATION].material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
+	m_globalDescriptor.SetConstantSet(0, &m_constants);
+	m_globalDescriptor.UpdateDescriptors(pDevice);
 
 	m_cursors[CURSOR_POINTER].material.UpdateDescriptors(pDevice);
 	m_cursors[CURSOR_HUE].material.UpdateDescriptors(pDevice);
-	m_cursors[CURSOR_SATURATION].material.UpdateDescriptors(pDevice);
 
 	m_viewport.InitViewport(0.0, 0.0, 100, 120);
 }
@@ -495,6 +507,7 @@ void ColorSelection::SetPreviewColor(const usg::Color& color)
 
 bool ColorSelection::Draw(usg::GFXContext* pContext, usg::PostFXSys* pPostFXSys)
 {
+	pContext->SetDescriptorSet(&m_globalDescriptor, 0);
 	m_material.Apply(pContext);
 	pContext->ApplyViewport(m_viewport);
 	pContext->SetVertexBuffer(&m_hueSatVertices);

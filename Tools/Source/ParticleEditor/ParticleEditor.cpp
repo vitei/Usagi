@@ -245,12 +245,16 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 
 void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 {
-
+	pDevice->WaitIdle();
+	m_effectGroup.CleanUp(pDevice);
+	m_emitter.CleanUp(pDevice);
+	m_effect.CleanUp(pDevice);
+	m_colorSelection.CleanUp(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()
 {
-
+	
 }
 
 
@@ -463,10 +467,11 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	context.pPostFX = &m_postFX;
 	context.eRenderPass = usg::RenderNode::RENDER_PASS_FORWARD;
 
+	pGFXCtxt->Transfer(m_postFX.GetInitialRT(), pDisplay);
+	pGFXCtxt->RenderToDisplay(pDisplay);
+
 	m_guiRend.Draw(pGFXCtxt, context);
 	m_colorSelection.Draw(pGFXCtxt, &m_postFX);
-	pGFXCtxt->SetRenderTarget(NULL);
-	pGFXCtxt->Transfer(m_postFX.GetInitialRT(), pDisplay);
 
 
 	if(pDisplayDRC)

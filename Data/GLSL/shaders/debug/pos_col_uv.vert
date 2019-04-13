@@ -1,9 +1,5 @@
 #include "../includes/platformdefines.inc"
-
-BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
-{
-	mat4	mProj;
-};
+#include "../includes/global_2d.inc"
 
 // Input attributes
 ATTRIB_LOC(0) in vec3 ao_position;
@@ -17,7 +13,7 @@ ATTRIB_LOC(1) out vec2 vo_vTexCoord;
 
 void main(void)
 {
- 	vec4 vPosition = vec4( ao_position.xyz, 1.0) * mProj;
+ 	vec4 vPosition = vec4( ao_position.xyz, 1.0) * proj;
  	
  	gl_Position		= vPosition;	
 

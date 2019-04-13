@@ -1,5 +1,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Device/Display.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Scene/ViewContext.h"
 #include "EffectGroup.h"
 #include "EmitterInstance.h"
 #include "ParticleEditor.h"
@@ -59,6 +61,11 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_emitter.SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM << 1);
 
 	Add(false);
+}
+
+void EmitterInstance::CleanUp(usg::GFXDevice* pDevice)
+{
+	m_emitter.CleanUp(pDevice);
 }
 
 
@@ -164,7 +171,7 @@ void EmitterInstance::UpdateInstanceMatrix()
 void EmitterInstance::UpdateEmitter(usg::GFXDevice* pDevice, usg::Scene& scene, const usg::particles::EmitterEmission& emitterData, const usg::particles::EmitterShapeDetails& shapeData)
 {
 	m_emitter.SetDefinition(pDevice, emitterData);
-	m_emitter.InitMaterial(pDevice, pDevice->GetDisplay(0)->GetRenderPass());
+	m_emitter.InitMaterial(pDevice, scene.GetViewContext(0)->GetRenderPasses().GetRenderPass(usg::RenderNode::LAYER_OPAQUE, 128));
 	m_emitter.CreateEmitterShape(emitterData.eShape, shapeData);
 }
 

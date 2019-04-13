@@ -65,9 +65,6 @@ private:
 	Color					m_blendColor;
 
 	PipelineStateHndl		m_pipelineState;
-	// Not yet implemented, will describe the expected combination of
-	// descriptor sets
-	PipelineLayoutHndl		m_pipelineLayout;
 
 	U8String				m_name;
 };

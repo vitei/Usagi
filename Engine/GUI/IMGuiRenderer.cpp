@@ -21,7 +21,6 @@ namespace usg
 static const DescriptorDeclaration decl[] =
 {
 	DESCRIPTOR_ELEMENT(0, DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
-	DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_VERTEX),
 	DESCRIPTOR_END()
 };
 
@@ -98,7 +97,7 @@ void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
 	pContext->SetVertexBuffer(&m_vertexBuffer);
 
 	// Render command lists
-	uint32 uScreenHeight = pContext->GetActiveRenderTarget()->GetHeight();
+	uint32 uScreenHeight = (uint32)pContext->GetActiveViewport().height;
 	int vtx_offset = 0;
 	for (int n = 0; n < cmd_lists_count; n++)
 	{
@@ -115,7 +114,8 @@ void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
 				// TODO: Add support for scissor rects so we don't end up drawing outside of the window
 				//const D3D11_RECT r = { (LONG)pcmd->clip_rect.x, (LONG)pcmd->clip_rect.y, (LONG)pcmd->clip_rect.z, (LONG)pcmd->clip_rect.w };
 				//pContext->BindTexture(0, (Texture*)pcmd->texture_id, m_sampler);
-				pContext->SetDescriptorSet((DescriptorSet*)pcmd->texture_id, 0);
+				pContext->SetDescriptorSet(&m_globalDescriptor, 0);
+				pContext->SetDescriptorSet((DescriptorSet*)pcmd->texture_id, 1);
 				pContext->SetScissorRect((uint32)pcmd->clip_rect.x, (uint32)(uScreenHeight - pcmd->clip_rect.w), (uint32)(pcmd->clip_rect.z - pcmd->clip_rect.x), (uint32)(pcmd->clip_rect.w - pcmd->clip_rect.y));
 				//g_pd3dDeviceContext->RSSetScissorRects(1, &r); 
 				pContext->DrawImmediate(pcmd->vtx_count, vtx_offset );
@@ -138,7 +138,6 @@ void IMGuiRenderer::BufferUpdate(GFXDevice* pDevice)
 {
 	m_constantSet.UpdateData(pDevice);
 	g_pDevice = pDevice;
-	g_pDevice = NULL;
 } 
 
 bool IMGuiRenderer::Draw(GFXContext* pContext, RenderContext& renderContext)
@@ -163,8 +162,12 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
     // Create DX11 texture
+	DescriptorSetLayoutHndl global = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D);
 	DescriptorSetLayoutHndl layout = pDevice->GetDescriptorSetLayout(decl);
 	m_texDescriptor.Init(pDevice, layout);
+	m_globalDescriptor.Init(pDevice, global);
+	m_globalDescriptor.SetConstantSet(0, &m_constantSet);
+	m_globalDescriptor.UpdateDescriptors(pDevice);
 	m_texture.CreateRaw(pDevice, CF_RGBA_8888, width, height, pixels);
 
 
@@ -172,7 +175,6 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
 	SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
     m_sampler = pDevice->GetSampler(samplerDecl);
 	m_texDescriptor.SetImageSamplerPair(0, &m_texture, m_sampler, 0);
-	m_texDescriptor.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constantSet);
 	m_texDescriptor.UpdateDescriptors(pDevice);
 
 	// Store our identifier  
@@ -227,7 +229,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 	pipeline.layout.descriptorSets[0] = globalDesc;
 	pipeline.layout.descriptorSets[1] = pDevice->GetDescriptorSetLayout(decl);
 
-	m_pipelineState = pDevice->GetPipelineState(scene.GetRenderPasses(0).GetRenderPass(*this), pipeline);
+	m_pipelineState = pDevice->GetPipelineState(pDevice->GetDisplay(0)->GetRenderPass(), pipeline);
 
     // Create the vertex buffer
 	m_vertexBuffer.Init(pDevice, NULL, sizeof(PositionUVColVertex), uMaxVerts, "IMGuiRenderer", GPU_USAGE_DYNAMIC, GPU_LOCATION_STANDARD);

@@ -17,6 +17,7 @@ public:
 	~RibbonInstance() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pGroup, uint32 uIndex, ColorSelection* pSelection);
+	void CleanUp(usg::GFXDevice* pDevice);
 	bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	void AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonData* pInstance = NULL);
 	void RemoveFromScene();
@@ -50,7 +51,7 @@ private:
 	ColorSelection*				m_pColorSelection;
 	// TODO: Add the ribbon trail visualiser
 
-	usg::RibbonTrail			m_trail;;
+	usg::RibbonTrail			m_trail;
 	usg::particles::RibbonData m_emitterData;
 	bool						m_bActive;
 	class EffectGroup*			m_pParent;

@@ -52,6 +52,7 @@ namespace usg
 
 		PipelineStateHndl		m_pipelineState;
 		ConstantSet				m_constantSet;
+		DescriptorSet			m_globalDescriptor;
 		DescriptorSet			m_texDescriptor;
 		Texture					m_texture;
 		SamplerHndl				m_sampler;

@@ -15,6 +15,7 @@ public:
 	~EmitterInstance() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene& scene, class EffectGroup* pGroup, uint32 uIndex);
+	void CleanUp(usg::GFXDevice* pDevice);
 	bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	void AddToScene(usg::GFXDevice* pDevice, usg::particles::EmitterData* pInstance = NULL);
 	void RemoveFromScene();

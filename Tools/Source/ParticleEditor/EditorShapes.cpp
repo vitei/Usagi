@@ -3,6 +3,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Scene/ViewContext.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -49,6 +50,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 	alphaDecl.bBlendEnable = false;
 	alphaDecl.SetColor0Only();
+	alphaDecl.uColorTargets = 2;
 
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
 	depthDecl.bDepthWrite		= false;
@@ -63,7 +65,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	rasDecl.eCullFace = usg::CULL_FACE_NONE;
 	rasDecl.bUseDepthBias = false;
 
-	usg::RenderPassHndl renderPassHndl = pDevice->GetDisplay(0)->GetRenderPass();
+	usg::RenderPassHndl renderPassHndl = pScene->GetViewContext(0)->GetRenderPasses().GetRenderPass(*this);
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
 	m_objectMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");

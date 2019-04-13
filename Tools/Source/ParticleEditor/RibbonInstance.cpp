@@ -19,6 +19,12 @@ inline bool Compare(VariableType& inOut, const ComparisonType newValue)
 	}
 }
 
+void RibbonInstance::CleanUp(usg::GFXDevice* pDevice)
+{
+	m_trail.CleanUp(pDevice);
+}
+
+
 void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pParent, uint32 uIndex, ColorSelection* pColorSelection)
 {
 	usg::Vector2f vPos(0.0f, 0.0f);

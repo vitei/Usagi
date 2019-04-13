@@ -32,7 +32,10 @@ bool Material::Init(GFXDevice* pDevice, PipelineStateHndl pipelineState, const D
 
 	SamplerDecl samplerDecl(SF_LINEAR, SC_CLAMP);
 
-	m_descriptorSet.Init(pDevice, descriptorDecl);
+	if (descriptorDecl.IsValid())
+	{
+		m_descriptorSet.Init(pDevice, descriptorDecl);
+	}
 
 
 	return true;
@@ -76,7 +79,10 @@ void Material::Apply(GFXContext* pContext) const
 {
 	pContext->SetPipelineState(m_pipelineState);
 	pContext->SetBlendColor(m_blendColor);
-	pContext->SetDescriptorSet(&m_descriptorSet, 1);	// For now hard-coding material descriptor sets to slot 1
+	if (m_descriptorSet.GetValid())
+	{
+		pContext->SetDescriptorSet(&m_descriptorSet, 1);	// For now hard-coding material descriptor sets to slot 1
+	}
 }
 
 //void Material::SetAlpha(AlphaStateHndl alphaHndl)

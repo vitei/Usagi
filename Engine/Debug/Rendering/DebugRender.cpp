@@ -161,9 +161,7 @@ void DebugRender::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	pipelineState.layout.descriptorSets[1] = solidDescriptors;
 
 	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), solidDescriptors);
-	m_posColConstants.Init(pDevice, g_solidConstantDef);
-	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_posColConstants);
-
+	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 
 	ASSERT(m_psRenderer==NULL);
 
@@ -203,10 +201,6 @@ void DebugRender::SetDrawArea(float fLeft, float fTop, float fWidth, float fHeig
 	m_fCharHeight = fChrHeight/fHeight;//m_fLineHeight * 0.8f;
 	m_fCharOffset = (m_fLineHeight - m_fCharHeight) / 2.0f;
 	
-	SolidConstants* pConsts = m_posColConstants.Lock<SolidConstants>();
-	pConsts->mProj.Orthographic( 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 10.0f ); 
-	m_posColConstants.Unlock();
-
 	TextConstants* pTxtConsts = m_textConstants.Lock<TextConstants>();
 	pTxtConsts->mProj.Orthographic( 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 10.0f ); 
 	// FIXME: Remove hardcoding, based on the nsub debugfx
@@ -334,14 +328,14 @@ void DebugRender::Updatebuffers(GFXDevice* pDevice)
 		m_charVerts.SetContents(pDevice, m_textBufferTmp, m_uCharCount);
 	}
 
-	bool bUpdated = m_posColConstants.UpdateData(pDevice);
-	bUpdated |= m_textConstants.UpdateData(pDevice);
+	
+	bool bUpdated = m_textConstants.UpdateData(pDevice);
 	if (bUpdated)
 	{
 		m_textMaterial.UpdateDescriptors(pDevice);
 		m_posColMaterial.UpdateDescriptors(pDevice);
 	}
-}
+ }
 
 void DebugRender::Draw(GFXContext* pContext)
 {
