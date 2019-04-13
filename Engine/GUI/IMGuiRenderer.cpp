@@ -41,6 +41,7 @@ IMGuiRenderer::~IMGuiRenderer()
 {
 	ImGui::Shutdown();
 	g_spGUIRenderer = NULL;
+	m_texHndl.reset();
 }
 
 
@@ -174,7 +175,8 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     // Create texture sampler   
 	SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
     m_sampler = pDevice->GetSampler(samplerDecl);
-	m_texDescriptor.SetImageSamplerPair(0, &m_texture, m_sampler, 0);
+	m_texHndl = &m_texture;
+	m_texDescriptor.SetImageSamplerPair(0, m_texHndl, m_sampler, 0);
 	m_texDescriptor.UpdateDescriptors(pDevice);
 
 	// Store our identifier  
@@ -284,6 +286,15 @@ void IMGuiRenderer::Init()
 #endif
     
     io.RenderDrawListsFn = RenderFunction;
+}
+
+void IMGuiRenderer::CleanUp(GFXDevice* pDevice)
+{
+	m_texture.CleanUp(pDevice);
+	m_globalDescriptor.CleanUp(pDevice);
+	m_texDescriptor.CleanUp(pDevice);
+	m_vertexBuffer.CleanUp(pDevice);
+	m_constantSet.CleanUp(pDevice);
 }
 
 

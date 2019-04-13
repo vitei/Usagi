@@ -15,6 +15,7 @@ public:
 	~EditorShapes() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene);
+	void CleanUp(usg::GFXDevice* pDevice);
 	void Update(usg::GFXDevice* pDEvice, usg::particles::EmitterShape eShape, const usg::particles::EmitterShapeDetails* pShape, float fElapsed);
 	bool Draw(usg::GFXContext* pContext, RenderContext& renderContext) override;
 	

@@ -88,6 +88,14 @@ namespace usg
 		InitBase(szName);
 	}
 
+	void GUIButton::CleanUp(GFXDevice* pDevice)
+	{
+		if (m_bTexDescValid)
+		{
+			m_descriptor.CleanUp(pDevice);
+		}
+	}
+
 	bool GUIButton::UpdateAndAddToDrawList()
 	{
 		bool bResult = false;
@@ -423,6 +431,11 @@ namespace usg
 		InitBase(szName);
 		m_pTexture = pTex;
 		m_vScale = vSize;
+	}
+
+	void GUITexture::CleanUp(GFXDevice* pDevice)
+	{
+		m_descriptor.CleanUp(pDevice);
 	}
 
 	void GUITexture::SetUVs(Vector2f vUVMin, Vector2f vUVMax)

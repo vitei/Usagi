@@ -26,6 +26,7 @@ namespace usg
 
 		// TODO: Generate additional vertex buffers as needed
 		void Init();
+		void CleanUp(GFXDevice* device);
 		void InitResources(GFXDevice* device, usg::Scene& scene, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts = 12000);
 		void AddWindow(GUIWindow* pWindow) { m_windows.AddToEnd(pWindow); }
 		// Can do this or simply call directly
@@ -55,6 +56,7 @@ namespace usg
 		DescriptorSet			m_globalDescriptor;
 		DescriptorSet			m_texDescriptor;
 		Texture					m_texture;
+		TextureHndl				m_texHndl;
 		SamplerHndl				m_sampler;
 		Vector2f				m_vOffset;
 		uint32					m_uMaxVerts;

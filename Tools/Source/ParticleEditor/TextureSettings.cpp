@@ -94,6 +94,16 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	//pRenderer->AddWindow(&m_window);
 }
 
+void TextureSettings::CleanUp(usg::GFXDevice* pDevice)
+{
+	m_previewButton.CleanUp(pDevice);
+	for (uint32 i = 0; i < MAX_ANIM_FRAMES; i++)
+	{
+		m_animTextures[i].CleanUp(pDevice);
+	}
+	m_texture.CleanUp(pDevice);
+}
+
 void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData)
 {
 	usg::particles::TextureData& textureVars = structData.textureData[0];

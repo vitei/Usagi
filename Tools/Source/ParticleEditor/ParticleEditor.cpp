@@ -64,6 +64,7 @@ ParticleEditor::ParticleEditor()
 {
 	m_bPaused = false;
 	g_spParticleEditor = this;
+	m_pDirLight = nullptr;
 }
 
 
@@ -239,6 +240,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	pDirLight->SetDiffuse(diffuse);
 	pDirLight->SetDirection(vDirection);
 	pDirLight->SwitchOn(true);
+	m_pDirLight = pDirLight;
 
 	m_bIsRunning = true;
 } 
@@ -250,6 +252,15 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	m_emitter.CleanUp(pDevice);
 	m_effect.CleanUp(pDevice);
 	m_colorSelection.CleanUp(pDevice);
+	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
+	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
+	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
+	m_editorShapes.CleanUp(pDevice);
+	m_textureSettings.CleanUp(pDevice);
+	m_guiRend.CleanUp(pDevice);
+	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
+	m_scene.DeleteViewContext(m_pSceneCtxt);
+	m_scene.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()

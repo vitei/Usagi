@@ -8,6 +8,7 @@
 #include "Engine/GUI/IMGuiRenderer.h"
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/Debug/DebugStats.h"
+#include "Engine/Graphics/Lights/DirLight.h"
 #include "PreviewModel.h"
 #include "MayaCamera.h"
 #include "BlendSettings.h"
@@ -75,6 +76,7 @@ private:
 	EditorShapes			m_editorShapes;
 	usg::DebugStats			m_debug;
 	PreviewModel			m_previewModel;
+	usg::DirLight*			m_pDirLight;
 
 	usg::GUIWindow			m_emitterWindow;
 	usg::GUIWindow			m_lifeMotionWindow;

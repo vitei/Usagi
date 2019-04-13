@@ -100,6 +100,25 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 }
 
+void EditorShapes::CleanUp(usg::GFXDevice* pDevice)
+{
+	m_objectConstants.CleanUp(pDevice);
+	m_objectMat.Cleanup(pDevice);
+	m_gridMat.Cleanup(pDevice);
+	m_gridConstants.CleanUp(pDevice);
+	m_grid.vb.CleanUp(pDevice);
+	m_sphere.vb.CleanUp(pDevice);
+	m_box.vb.CleanUp(pDevice);
+	m_cylinder.vb.CleanUp(pDevice);
+	m_line.vb.CleanUp(pDevice);
+	m_grid.ib.CleanUp(pDevice);
+	m_sphere.ib.CleanUp(pDevice);
+	m_box.ib.CleanUp(pDevice);
+	m_cylinder.ib.CleanUp(pDevice);
+	m_line.ib.CleanUp(pDevice);
+
+}
+
 bool EditorShapes::Draw(usg::GFXContext* pContext, RenderContext& renderContext)
 {
 	m_gridMat.Apply(pContext);
