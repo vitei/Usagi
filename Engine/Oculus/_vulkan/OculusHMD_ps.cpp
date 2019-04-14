@@ -236,6 +236,7 @@ namespace usg
 
 		const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 		VkImage srcImage = tex.GetImage();
+		pContext->GetPlatform().SetImageLayout(srcImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange);
 		VkFilter filter = VK_FILTER_NEAREST;
 		vkCmdBlitImage(pContext->GetPlatform().GetVkCmdBuffer(), srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &ic, filter);
 
