@@ -53,16 +53,10 @@ static void OnEvent(const Inputs& inputs, Outputs& outputs, const KillEntityEven
 
 By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
-The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine.  
 
-Whilst perhaps not the quickest way to prototype; it was designed to deal with the issues that projects encounter further down the line, performance and maintainability.    
+The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine; as other studios were increasingly switching to third party engines, ignoring performance considerations due to the power offered by modern hardware, Vitei was developing for Nintendo platforms, creating games with games with limited scope but high technical demands; so we set about creating our own engine.  
 
-The main difficulty with Usagi is that it requires a different way of thinking. There is a stronger emphasis on design philosophy than with other engines which, whilst requiring some time to adjust to, leads to faster, cleaner, and more maintainable code in the long run. 
-
-As other studios were increasingly switching to third party engines, ignoring performance considerations due to the power offered by modern hardware, Vitei was developing for Nintendo platforms.  
-
-Technical limitations were the biggest threat to what we were able to accomplish, and so, despite our small team size, we set about creating our own engine. Every aspect of Usagi's design was driven by performance considerations. The type of games we were making meant that the required feature sets were small enough to be manageable.
-
+Technical limitations were the biggest threat to what we were able to accomplish, and so,  Every aspect of Usagi's design was driven by these considerations.  
 
 The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
 
