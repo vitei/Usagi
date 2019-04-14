@@ -73,6 +73,8 @@ The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Ga
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
+Unforutnately the engine is not currently being applied to any in development projects and is currently more of a hobby project; contributions to help meet the goals of the roadmap from those with relevant experience would be welcomed.
+
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
 
@@ -137,12 +139,11 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
-The engine has just been updated to Vulkan, it is in a first functional state (and it has been pointed out that if validation is enabled will result in errors with untextured models, such as the UsagiTest - this will be adressed shortly), if you have issues you can follow the instructions in [graphics](https://github.com/vitei/Usagi/wiki/Graphics) to revert to the legacy OpenGL support.  
-
-Current Version 0.2
+Current Version 0.2.1
 ----------------------
 
-Engine has been switched from OpenGL to Vulkan  
+With v0.2 the engine was switched from OpenGL to Vulkan  
+v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.
 
 
 Issues
