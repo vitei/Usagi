@@ -82,7 +82,9 @@ private:
 	RenderTarget*			m_pActiveRT;
 
 	PipelineStateHndl		m_activeStateGroup;
+	// TODO: When OpenGL is removed we should have to cache these anymore
 	GFXBounds				m_activeViewport;
+	GFXBounds				m_activeTargetBounds;
 	
 	const VertexBuffer*		m_pActiveVBOs[MAX_VERTEX_BUFFERS];
 	const DescriptorSet*	m_pActiveDescSets[MAX_DESCRIPTOR_SETS];

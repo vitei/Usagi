@@ -77,6 +77,7 @@ private:
 	usg::DebugStats			m_debug;
 	PreviewModel			m_previewModel;
 	usg::DirLight*			m_pDirLight;
+	class ViewportHack*		m_pViewportHack;
 
 	usg::GUIWindow			m_emitterWindow;
 	usg::GUIWindow			m_lifeMotionWindow;

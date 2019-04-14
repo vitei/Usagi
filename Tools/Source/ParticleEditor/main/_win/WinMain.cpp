@@ -23,7 +23,7 @@ namespace usg
 {
 bool GameMain(const char** dllModules, uint32 uModuleCount);
 bool GameExit();
-Input* GameGetInput();
+void GameMessage(const uint32 messageID, const void* const pParameters);
 }
 
 
@@ -31,6 +31,7 @@ Input* GameGetInput();
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+	static bool bIsSizing = false;
 	switch(msg)
 	{	
 	case WM_CREATE: 
@@ -42,6 +43,35 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			EndPaint(hwnd,&ps);
 			break;
 		}
+
+	case WM_SIZE:
+	{
+		if (wparam == SIZE_MINIMIZED)
+		{
+			GameMessage('WMIN', nullptr);
+		}
+		else if (!bIsSizing)
+		{
+			GameMessage('WSZE', nullptr);
+		}
+	}
+	break;
+
+	case WM_ENTERSIZEMOVE:
+	{
+		bIsSizing = true;
+	}
+	break;
+	case WM_EXITSIZEMOVE:
+	{
+		if (wparam != SIZE_MINIMIZED)
+		{
+			GameMessage('WSZE', nullptr);
+		}
+
+		bIsSizing = false;
+	}
+	break;
 	case WM_KEYDOWN:  // keyboard key
 	{
 		Input::GetPlatform().RegisterKeyStateChange((uint8)wparam, true);

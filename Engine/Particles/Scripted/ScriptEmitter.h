@@ -43,7 +43,7 @@ namespace usg{
 
 		const usg::particles::EmitterShapeDetails& GetShapeDetails() const;
 
-		void InitMaterial(GFXDevice* pDevice, const RenderPassHndl& renderPass, ParticleEmitterResHndl pResource = NULL, bool bFirst = false);
+		void InitMaterial(GFXDevice* pDevice, ParticleEmitterResHndl pResource = NULL, bool bFirst = false);
 #ifdef PARTICLE_EDITOR
 		Material& GetMaterial() { return m_material; }
 		particles::EmitterEmission& GetDefinition() { return m_emissionDef; }

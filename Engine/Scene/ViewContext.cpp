@@ -367,7 +367,7 @@ namespace usg {
 				node->Draw(pContext, renderContext);
 			}
 
-			if (uLayer == RenderNode::LAYER_DEFERRED_SHADING)
+			if (uLayer == RenderNode::LAYER_OPAQUE_UNLIT)
 			{
 				renderContext.eRenderPass = RenderNode::RENDER_PASS_FORWARD;
 				if (m_pPostFXSys)

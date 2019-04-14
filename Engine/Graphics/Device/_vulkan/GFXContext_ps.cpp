@@ -199,12 +199,12 @@ namespace usg {
 
 	}
 
-	void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport)
+	void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport, const GFXBounds& targetBounds)
 	{
 		VkViewport vkViewport;
 		memset(&vkViewport, 0, sizeof(vkViewport));
 		vkViewport.x = (float)viewport.GetLeft();
-		vkViewport.y = (float)viewport.GetBottom();
+		vkViewport.y = (float)(targetBounds.height - viewport.GetBottom() - viewport.GetHeight());//(float)viewport.GetBottom();
 		vkViewport.height = (float)viewport.GetHeight();
 		vkViewport.width = (float)viewport.GetWidth();
 		vkViewport.minDepth = 0.0f;
@@ -215,7 +215,7 @@ namespace usg {
 		scissor.extent.width = viewport.GetWidth();
 		scissor.extent.height = viewport.GetHeight();
 		scissor.offset.x = viewport.GetLeft();
-		scissor.offset.y = viewport.GetBottom();
+		scissor.offset.y = Math::Clamp(targetBounds.height - viewport.GetBottom() - viewport.GetHeight(), 0, 10000);
 		vkCmdSetScissor(m_cmdBuff, 0, 1, &scissor);
 	}
 
@@ -224,25 +224,25 @@ namespace usg {
 		vkCmdSetBlendConstants(m_cmdBuff, blendColor.m_rgba);
 	}
 
-	void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight)
+	void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)
 	{
 		VkRect2D scissor;
 		memset(&scissor, 0, sizeof(scissor));
 		scissor.extent.width = uWidth;
 		scissor.extent.height = uHeight;
-		scissor.offset.x = 0;
-		scissor.offset.y = 0;
+		scissor.offset.x = uLeft;
+		scissor.offset.y = targetBounds.height - uBottom - uHeight;
 		vkCmdSetScissor(m_cmdBuff, 0, 1, &scissor);
 	}
 
-	void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight)
+	void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)
 	{
 		VkRect2D scissor;
 		memset(&scissor, 0, sizeof(scissor));
 		scissor.extent.width = uWidth;
 		scissor.extent.height = uHeight;
-		scissor.offset.x = 0;
-		scissor.offset.y = 0;
+		scissor.offset.x = uLeft;
+		scissor.offset.y = targetBounds.height - uBottom - uHeight;
 		vkCmdSetScissor(m_cmdBuff, 0, 1, &scissor);
 	}
 

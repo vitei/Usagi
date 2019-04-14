@@ -171,7 +171,7 @@ void EmitterInstance::UpdateInstanceMatrix()
 void EmitterInstance::UpdateEmitter(usg::GFXDevice* pDevice, usg::Scene& scene, const usg::particles::EmitterEmission& emitterData, const usg::particles::EmitterShapeDetails& shapeData)
 {
 	m_emitter.SetDefinition(pDevice, emitterData);
-	m_emitter.InitMaterial(pDevice, scene.GetViewContext(0)->GetRenderPasses().GetRenderPass(usg::RenderNode::LAYER_OPAQUE, 128));
+	m_emitter.InitMaterial(pDevice);
 	m_emitter.CreateEmitterShape(emitterData.eShape, shapeData);
 }
 

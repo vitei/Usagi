@@ -193,7 +193,7 @@ void Decal::SetContents( GFXDevice* pDevice, const Sphere* pBounds, const Vertex
 	m_pTransformNode->SetMatrix( Matrix4x4::Identity() );
 }
 
-bool Decal::Draw( GFXContext* pContext, PostFXSys* pPostFXSys )
+bool Decal::Draw( GFXContext* pContext, RenderContext& renderContext)
 {
 	if(m_indicesNum)
 	{

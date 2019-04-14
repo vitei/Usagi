@@ -15,6 +15,36 @@ static ParticleEditor* g_spParticleEditor = NULL;
 
 bool g_bEnableTestAIPlayer = false;
 
+class ViewportHack : public usg::RenderNode
+{
+public:
+	ViewportHack()
+	{
+		SetLayer(RenderNode::LAYER_SKY);
+		SetPriority(0);
+		m_pRenderGroup = nullptr;
+	}
+
+	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene, const usg::Viewport& viewport)
+	{
+		m_pRenderGroup = pScene->CreateRenderGroup(nullptr);
+
+		RenderNode* pNode = (RenderNode*)this;
+		m_pRenderGroup->AddRenderNodes(pDevice, &pNode, 1, 0);
+		m_viewport = viewport;
+	}
+
+	virtual bool Draw(usg::GFXContext* pContext, RenderContext& renderContext)
+	{
+		pContext->ApplyViewport(m_viewport);
+		return true;
+	}
+private:
+	usg::Viewport			m_viewport;
+	usg::RenderGroup*		m_pRenderGroup;
+
+};
+
 static const char* g_szPreviewType[] =
 {
 	"Emitter",
@@ -50,7 +80,7 @@ void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptE
 	{
 		pEmitter->SetDefinition(pDevice, variables);
 		//pEmitter->FillOutConstantBuffer();
-		pEmitter->InitMaterial(pDevice, pDevice->GetDisplay(0)->GetRenderPass());
+		pEmitter->InitMaterial(pDevice);
 
 		usg::particles::EmitterShapeDetails shapeDef;
 		bReadSucceeded = file.Read(&shapeDef);
@@ -65,6 +95,7 @@ ParticleEditor::ParticleEditor()
 	m_bPaused = false;
 	g_spParticleEditor = this;
 	m_pDirLight = nullptr;
+	m_pViewportHack = nullptr;
 }
 
 
@@ -92,6 +123,9 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(fAspect);
 	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderNode::RENDER_MASK_ALL);
+
+	m_pViewportHack = vnew(usg::ALLOC_OBJECT)ViewportHack;
+	m_pViewportHack->Init(pDevice, &m_scene, m_previewViewport);
 	
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
@@ -468,7 +502,7 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	pGFXCtxt->ApplyViewport(m_previewViewport);
 	pGFXCtxt->ClearRenderTarget();
 
-	m_pSceneCtxt->PreDraw(pGFXCtxt, usg::VIEW_LEFT_EYE);
+	m_pSceneCtxt->PreDraw(pGFXCtxt, usg::VIEW_CENTRAL);
 	m_pSceneCtxt->DrawScene(pGFXCtxt);
 
 	pGFXCtxt->ApplyViewport(m_postFX.GetInitialRT()->GetViewport());
@@ -500,5 +534,34 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 
 void ParticleEditor::OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters)
 {
+	switch (messageID)
+	{
+	case 'WSZE':
+	{
+		usg::Display* const pDisplay = pDevice->GetDisplay(0);
+		uint32 uWidth, uHeight;
+		uint32 uWidthOld, uHeightOld;
 
+		pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
+		pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
+		pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+	}
+	break;
+	case 'WMIN':
+	{
+		usg::Display* const pDisplay = pDevice->GetDisplay(0);
+
+		pDisplay->Minimized(pDevice);
+
+	}
+	case 'ONSZ':
+	{
+		// About to resize
+		pDevice->WaitIdle();
+	}
+	break;
+	default:
+		// Does nothing
+		break;
+	}
 }

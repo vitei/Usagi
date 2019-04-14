@@ -43,17 +43,17 @@ void GFXContext::ApplyViewport(const Viewport& viewport)
 	m_activeViewport.y = viewport.GetLeft();
 	m_activeViewport.width = viewport.GetWidth();
 	m_activeViewport.height = viewport.GetHeight();
-	m_platform.ApplyViewport(m_pActiveRT, viewport);
+	m_platform.ApplyViewport(m_pActiveRT, viewport, m_activeTargetBounds);
 }
 
 void GFXContext::SetScissorRect(uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight)
 {
-	m_platform.SetScissorRect(m_pActiveRT, uLeft, uBottom, uWidth, uHeight);
+	m_platform.SetScissorRect(m_pActiveRT, uLeft, uBottom, uWidth, uHeight, m_activeTargetBounds);
 }
 
 void GFXContext::DisableScissor()
 {
-	m_platform.DisableScissor(m_pActiveRT, m_activeViewport.x, m_activeViewport.y, m_activeViewport.width, m_activeViewport.height);
+	m_platform.DisableScissor(m_pActiveRT, m_activeViewport.x, m_activeViewport.y, m_activeViewport.width, m_activeViewport.height, m_activeTargetBounds);
 }
 
 void GFXContext::Begin(bool bApplyDefaults)
@@ -85,6 +85,11 @@ void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewpor
 
 	if(pTarget)
 	{
+		m_activeTargetBounds.x = 0;
+		m_activeTargetBounds.y = 0;
+		m_activeTargetBounds.width = pTarget->GetWidth();
+		m_activeTargetBounds.height = pTarget->GetHeight();
+
 		if(pTarget != m_pActiveRT)
 		{
 			bool bHasDS = pTarget->GetDepthStencilBuffer()!=NULL;
@@ -125,6 +130,7 @@ void GFXContext::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
 	m_activeViewport.width = (int)uWidth;
 	m_activeViewport.height = (int)uHeight;
+	m_activeTargetBounds = m_activeViewport;
 	m_pActiveRT = nullptr;
 }
 
@@ -140,6 +146,10 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 
 	if(pTarget)
 	{
+		m_activeTargetBounds.x = 0;
+		m_activeTargetBounds.y = 0;
+		m_activeTargetBounds.width = pTarget->GetWidth();
+		m_activeTargetBounds.height = pTarget->GetHeight();
 
 		if(pTarget != m_pActiveRT)
 		{

@@ -456,24 +456,28 @@ void Display_ps::TransferRect(GFXContext* pContext, RenderTarget* pTarget, const
 	ASSERT(dstBounds.height == srcBounds.height);
 	ASSERT(dstBounds.width == srcBounds.width);
 
+	// FIXME: Remove the naff OpenGL inverted bounds
+	uint32 uDstY = (m_uHeight - dstBounds.y - dstBounds.height);
+	uint32 uSrcY = (pTarget->GetHeight() - srcBounds.y - srcBounds.height);
+
 	VkImageBlit ic = {};
 	ic.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.srcSubresource.mipLevel = 0;
 	ic.srcSubresource.baseArrayLayer = 0;
 	ic.srcSubresource.layerCount = 1;
 	ic.srcOffsets[0].x = srcBounds.x;
-	ic.srcOffsets[0].y = srcBounds.y;
+	ic.srcOffsets[0].y = Math::Clamp(uSrcY, 0U, pTarget->GetHeight());
 	ic.srcOffsets[1].x = srcBounds.x + srcBounds.width;
-	ic.srcOffsets[1].y = srcBounds.y + srcBounds.height;
+	ic.srcOffsets[1].y = Math::Clamp(uSrcY + srcBounds.height, 0U, pTarget->GetHeight());
 	ic.srcOffsets[1].z = 1;
 	ic.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	ic.dstSubresource.mipLevel = 0;
 	ic.dstSubresource.baseArrayLayer = 0;
 	ic.dstSubresource.layerCount = 1;
 	ic.dstOffsets[0].x = dstBounds.x;
-	ic.dstOffsets[0].y = dstBounds.y;
+	ic.dstOffsets[0].y = Math::Clamp(uDstY, 0U, m_uHeight);
 	ic.dstOffsets[1].x = dstBounds.x + dstBounds.width;
-	ic.dstOffsets[1].y = dstBounds.y + dstBounds.height;
+	ic.dstOffsets[1].y = Math::Clamp(uDstY + dstBounds.height, 0U, m_uHeight);
 	ic.dstOffsets[1].z = 1;
 
 	VkImageSubresourceRange subresourceRange{};

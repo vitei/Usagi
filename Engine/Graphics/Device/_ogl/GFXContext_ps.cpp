@@ -206,7 +206,7 @@ void GFXContext_ps::EndRTDraw(const RenderTarget* pTarget)
 	ERROR_CHECK
 }
 
-void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport)
+void GFXContext_ps::ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport, const GFXBounds& targetBounds)
 {
 	ASSERT(pActiveRT!=NULL);
 	glViewport(viewport.GetLeft(), viewport.GetBottom(), viewport.GetWidth(), viewport.GetHeight());
@@ -330,14 +330,14 @@ void GFXContext_ps::SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex)
 }
 
 
-void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight)
+void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)
 {
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(uLeft, uBottom, uWidth, uHeight);
 	ERROR_CHECK
 }
 
-void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight)
+void GFXContext_ps::DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)
 {
 	glDisable(GL_SCISSOR_TEST);
 	ERROR_CHECK

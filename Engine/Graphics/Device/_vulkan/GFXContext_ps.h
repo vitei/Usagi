@@ -40,9 +40,9 @@ public:
 	void ApplyDefaults() {}
 	void InvalidateStates() {}
 	
-	void ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport);
-	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
-	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
+	void ApplyViewport(const RenderTarget* pActiveRT, const Viewport &viewport, const GFXBounds& targetBounds);
+	void SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds);
+	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds);
 	void SetRenderTarget(const RenderTarget* pTarget);
 	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayers);
 	void EndRTDraw(const RenderTarget* pTarget);

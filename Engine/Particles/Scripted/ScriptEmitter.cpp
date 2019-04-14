@@ -18,7 +18,8 @@ namespace usg
 
 	static RenderNode::Layer layerMapping[] =
 	{
-		RenderNode::LAYER_OPAQUE_UNLIT,
+		// FIXME: Update the shader to handle opaque
+		RenderNode::LAYER_TRANSLUCENT, //RenderNode::LAYER_OPAQUE_UNLIT,
 		RenderNode::LAYER_TRANSLUCENT,
 		RenderNode::LAYER_SUBTRACTIVE,
 		RenderNode::LAYER_ADDITIVE
@@ -137,7 +138,7 @@ namespace usg
 
 		CreateEmitterShape(m_emissionDef.eShape, shapedef);
 		
-		InitMaterial(pDevice, pMgr->GetScene()->GetRenderPasses(0).GetRenderPass(*this), pResource, true);
+		InitMaterial(pDevice, pResource, true);
 		
 		m_materialConsts.Init(pDevice, Particle::g_scriptedParticlePerEffectDecl);
 		m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
@@ -160,8 +161,12 @@ namespace usg
 		m_mWorldMatrix.LoadIdentity();
 	}
 
-	void ScriptEmitter::InitMaterial(GFXDevice* pDevice, const RenderPassHndl& renderPass, ParticleEmitterResHndl pResource, bool bFirst)
+	void ScriptEmitter::InitMaterial(GFXDevice* pDevice, ParticleEmitterResHndl pResource, bool bFirst)
 	{
+		SetLayer(layerMapping[m_emissionDef.sortSettings.eRenderLayer]);
+		SetPriority(m_emissionDef.sortSettings.uPriority);
+
+		RenderPassHndl renderPass = m_pOwner->GetScene()->GetRenderPasses(0).GetRenderPass(*this);
 		if (pResource)
 		{
 			m_material.Init(pDevice, pResource->GetPipeline(pDevice, renderPass), pResource->GetDescriptorLayout());
@@ -184,6 +189,7 @@ namespace usg
 
 			AlphaStateDecl& alphaDecl = pipelineDecl.alphaState;
 			alphaDecl.InitFromDefinition(m_emissionDef.blend);
+			alphaDecl.SetColor0Only();
 
 			DepthStencilStateDecl& depthDecl = pipelineDecl.depthState;
 			depthDecl.bDepthWrite = m_emissionDef.sortSettings.bWriteDepth;
@@ -234,10 +240,6 @@ namespace usg
 		{
 			m_fParticleAspect = 1.0f;
 		}
-
-
-		SetLayer(layerMapping[m_emissionDef.sortSettings.eRenderLayer]);
-		SetPriority(m_emissionDef.sortSettings.uPriority);
 
 	}
 

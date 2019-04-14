@@ -310,7 +310,7 @@ void EffectGroup::Reset(usg::GFXDevice* pDevice)
 	{
 		if(m_instances[i].GetActive())
 		{
-			m_instances[i].GetEmitter().InitMaterial(pDevice, usg::RenderPassHndl());
+			m_instances[i].GetEmitter().InitMaterial(pDevice);
 			m_effect.AddEmitter(pDevice, &m_instances[i].GetEmitter());
 		}
 	}
