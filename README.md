@@ -56,8 +56,6 @@ By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Compon
 
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine. Vitei was developing  games limited in scope but with high technical demands for Nintendo platforms, so we set about creating an engine suited to those titles.  
 
-Technical limitations were the biggest threat to what we were able to accomplish, and so,  Every aspect of Usagi's design was driven by these considerations.  
-
 The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
 
 The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Games/Nintendo-3DS-download-software/Tank-Troopers-1136173.html) as well as several internal demos on numerous platforms and APIs.  
