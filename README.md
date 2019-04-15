@@ -54,7 +54,7 @@ static void OnEvent(const Inputs& inputs, Outputs& outputs, const KillEntityEven
 By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
 
 
-The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine; as other studios were increasingly switching to third party engines, ignoring performance considerations due to the power offered by modern hardware, Vitei was developing for Nintendo platforms, creating games with games with limited scope but high technical demands; so we set about creating our own engine.  
+The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine. Vitei was developing  games limited in scope but with high technical demands for Nintendo platforms, so we set about creating an engine suited to those titles.  
 
 Technical limitations were the biggest threat to what we were able to accomplish, and so,  Every aspect of Usagi's design was driven by these considerations.  
 
@@ -67,7 +67,8 @@ The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Ga
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
-Unforutnately the engine is not currently being applied to any in development projects and is currently more of a hobby project; contributions to help meet the goals of the roadmap from those with relevant experience would be welcomed.
+The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features never reached a commerical title and the engine is not currently being applied to any in development projects.  
+However developement is continuing as a hobby project and proof of concept of the design; contributions to help meet the goals of the roadmap from those with relevant experience would be welcomed.
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
