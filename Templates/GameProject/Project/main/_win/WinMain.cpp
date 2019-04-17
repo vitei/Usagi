@@ -24,7 +24,7 @@ using namespace usg;
 // Declare the games main function
 namespace usg
 {
-	bool GameMain();
+	bool GameMain(const char** dllModules, uint32 uModuleCount);
 	bool GameExit();
 	void GameMessage(const uint32 messageID, const void* const pParameters);
 
@@ -217,7 +217,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdline
 #endif
 
 	usg::OS::Initialize();
-	GameMain();
+	GameMain(nullptr, 0);
 	usg::OS::ShutDown();
 
 	return 0;
