@@ -153,7 +153,7 @@ namespace usg
 				VkImage image;
 				result = ovr_GetTextureSwapChainBufferVk(m_session, m_targets[eye].swapChain, i, &image);
 
-				m_targets_ps[eye].targets->swapchainImage = image;
+				m_targets_ps[eye].targets[i].swapchainImage = image;
 				// Create image view
 				VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 				viewInfo.image = image;
