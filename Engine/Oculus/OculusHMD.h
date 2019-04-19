@@ -64,9 +64,11 @@ namespace usg
     	ovrSession			m_session;
 		ovrHmdDesc			m_hmdDesc;
 		ovrTrackingState	m_trackingState;
+		ovrSessionStatus	m_sessionStatus;
 		ovrMirrorTexture	m_mirrorTexture;
 		ovrGraphicsLuid		m_luid;
 		uint32				m_uFrameIndex;	// Update as we render each scene
+		bool				m_bVisible;
 
 		// Usagi native format
 		Quaternionf			m_qRotation;

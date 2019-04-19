@@ -141,6 +141,7 @@ namespace usg
 		m_luid = luid;
 		m_mirrorTexture = nullptr;
 		m_uFrameIndex = 0;
+		m_bVisible = true;
 
 		m_hmdTransformMatrix = Matrix4x4::Identity();
 		m_eyeTransformMatrix[(uint32)Eye::Left] = Matrix4x4::Identity();
@@ -195,6 +196,7 @@ namespace usg
 	bool OculusHMD::Init(GFXDevice* pDevice)
 	{
 		// Call an update frame
+		m_hmdDesc = ovr_GetHmdDesc(m_session);
 		Update();
 
 
@@ -232,7 +234,12 @@ namespace usg
 
 	void OculusHMD::Update()
 	{
-		m_hmdDesc = ovr_GetHmdDesc(m_session);
+		ovr_GetSessionStatus(m_session, &m_sessionStatus);
+
+		if (!m_sessionStatus.HasInputFocus)
+		{
+			// TODO: Send a message to pause the application
+		}
 
 		ovrEyeRenderDesc eyeRenderDesc[2];
 		eyeRenderDesc[0] = ovr_GetRenderDesc(m_session, ovrEye_Left, m_hmdDesc.DefaultEyeFov[0]);
@@ -310,7 +317,22 @@ namespace usg
 
 		ovrLayerHeader* layers = &ld.Header;
 		ovrResult result = ovr_SubmitFrame(m_session, m_uFrameIndex, nullptr, &layers, 1);
+
+		if (!OVR_SUCCESS(result))
+		{
+			// TODO: We can't render to the headset, we should shut down the application or unload the HMD dll
+		}
 		
+		m_bVisible = result == ovrSuccess;
+
+		if (m_sessionStatus.ShouldQuit)
+		{
+			// TODO: Message to shut down the application
+		}
+		if (m_sessionStatus.ShouldRecenter)
+		{
+			ovr_RecenterTrackingOrigin(m_session);
+		}
 
 		m_uFrameIndex++;
 	}

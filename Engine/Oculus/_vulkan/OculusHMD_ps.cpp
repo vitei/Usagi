@@ -176,6 +176,9 @@ namespace usg
 			}
 		}
 
+		// Let the compositor know which queue to synchronize with
+		ovr_SetSynchronizationQueueVk(m_session, pDevice->GetPlatform().GetQueue());
+
 
 		return OculusHMD::Init(pDevice);
 	}
