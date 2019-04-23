@@ -65,8 +65,7 @@ The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Ga
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
-The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features never reached a commerical title and the engine is not currently being applied to any in development projects.  
-However developement is continuing as a hobby project and proof of concept of the design when time presents it's self (it rarely does). Contributions to help meet the goals of the roadmap from those with relevant experience would be welcomed.
+The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title, but work is progressing to demonstrate that potential. Contributions to help meet the goals of the roadmap from those with relevant experience would be considered.
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
