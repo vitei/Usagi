@@ -24,6 +24,7 @@ namespace usg
 
 		virtual void Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget) final;
 		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
+		virtual Matrix4x4 GetProjectionMatrix(Eye eye, float fNear, float fFar) const final;
 
 		GLuint GetSpectatorFBO() const { return m_mirrorFBO; }
 

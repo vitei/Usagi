@@ -179,4 +179,14 @@ namespace usg
 		pDisplay->GetPlatform().SetDirty();
 	}
 
+	Matrix4x4 OculusHMD_ps::GetProjectionMatrix(Eye eye, float fNear, float fFar) const
+	{
+		uint32 uEye = eye == Eye::Left ? 0 : 1;
+		unsigned int projectionFlags = ovrProjection_LeftHanded;
+		projectionFlags |= ovrProjection_ClipRangeOpenGL;
+		OVR::Matrix4f proj = ovrMatrix4f_Projection(m_hmdDesc.DefaultEyeFov[uEye], fNear, fFar, projectionFlags);
+		Matrix4x4 mUsgProj = Convert(proj);
+		return mUsgProj;
+	}
+
 }

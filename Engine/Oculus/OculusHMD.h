@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
+#include "Extras/OVR_Math.h"
 #include "OVR_CAPI_GL.h"
 #include "OVR_CAPI_Audio.h"
 
@@ -31,8 +32,6 @@ namespace usg
 		
 		virtual void GetRenderTargetDim(Eye eye, float pixelDensity, uint32 &uWidthOut, uint32 &uHeightOut ) const final;
 
-		virtual Matrix4x4 GetProjectionMatrix(Eye eye, float fNear, float fFar) const final;
-
 		virtual void SubmitFrame() final;
 		virtual char16* GetAudioDeviceName() final { return m_deviceOutStrBuffer; }
 
@@ -55,6 +54,11 @@ namespace usg
 			uint32 uWidth;
 			uint32 uHeight;
 		};
+
+		Matrix4x4 Convert(const OVR::Matrix4f &in) const;
+		Quaternionf Convert(const ovrQuatf &in) const;
+		Vector3f Convert(const ovrVector3f& in) const;
+		Matrix4x4 Convert(const ovrPosef& in) const;
 
 		ovrLayerHeader		m_layerHeader;
 		WCHAR				m_deviceOutStrBuffer[OVR_AUDIO_MAX_DEVICE_STR_SIZE];

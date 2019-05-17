@@ -21,6 +21,7 @@ namespace usg
 
 		virtual void Transfer(GFXContext* pContext, Eye eye, RenderTarget* pTarget) final;
 		virtual void TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay) final;
+		virtual Matrix4x4 GetProjectionMatrix(Eye eye, float fNear, float fFar) const final;
 
 		virtual const uint32 GetRequiredAPIExtensionCount(ExtensionType extType) const { return m_uExtensions[(size_t)extType]; }
 		virtual const char* GetRequiredAPIExtension(ExtensionType extType, uint32 uIndex) const { return m_extensionNamePtrs[(size_t)extType][uIndex]; }

@@ -57,7 +57,7 @@ namespace usg
 		return luid;
 	}
 
-	Matrix4x4 Convert(const OVR::Matrix4f &in)
+	Matrix4x4 OculusHMD::Convert(const OVR::Matrix4f &in) const
 	{
 		Matrix4x4 out;
 
@@ -68,18 +68,18 @@ namespace usg
 		return out;
 	}
 
-	Quaternionf Convert(const ovrQuatf &in)
+	Quaternionf OculusHMD::Convert(const ovrQuatf &in) const
 	{
 		return Quaternionf(in.x, in.y, in.z, in.w);
 	}
 
-	Vector3f Convert(const ovrVector3f& in)
+	Vector3f OculusHMD::Convert(const ovrVector3f& in) const
 	{
 		return Vector3f(in.x, in.y, in.z);
 	}
 
 
-	Matrix4x4 Convert(const ovrPosef& in)
+	Matrix4x4 OculusHMD::Convert(const ovrPosef& in) const
 	{
 		Quaternionf qRot = Convert(in.Orientation);
 		Vector3f vPos = Convert(in.Position);
@@ -269,19 +269,6 @@ namespace usg
 		m_eyeTransformMatrix[(uint32)Eye::Left] = Convert(EyeRenderPose[0]);
 		m_eyeTransformMatrix[(uint32)Eye::Right] = Convert(EyeRenderPose[1]);
 
-	}
-
-	Matrix4x4 OculusHMD::GetProjectionMatrix(Eye eye, float fNear, float fFar) const
-	{
-		uint32 uEye = eye == Eye::Left ? 0 : 1;
-		unsigned int projectionFlags = ovrProjection_LeftHanded;
-		#if !Z_RANGE_0_TO_1
-			projectionFlags |= ovrProjection_ClipRangeOpenGL;
-		#endif
-		OVR::Matrix4f proj = ovrMatrix4f_Projection(m_hmdDesc.DefaultEyeFov[uEye], fNear, fFar, projectionFlags);
-		Matrix4x4 mUsgProj = Convert(proj);
-
-		return mUsgProj;
 	}
 	
 	void OculusHMD::ResetTracking(bool bPos, bool bOri)
