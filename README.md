@@ -145,8 +145,6 @@ Issues
 
 If there is not at least one child entity systems on the root entity will not be run  
 
-Oculus support has not yet been added to the Vulkan implementation
-
 There is no longer a system other than submodules for linking projects and engine versions  
 
 A replacement model editor would be required to take advantage of the existing custom shader support  
