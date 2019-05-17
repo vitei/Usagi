@@ -235,7 +235,7 @@ namespace usg
 		int index;
 		ovr_GetTextureSwapChainCurrentIndex(m_session, m_targets[(int)eye].swapChain, &index);
 
-		pContext->GetPlatform().SetImageLayout(m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+		pContext->GetPlatform().SetImageLayout(m_targets_ps[(uint32)eye].targets[index].swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 		const Texture_ps& tex = pTarget->GetColorTexture(0)->GetPlatform();
 		VkImage srcImage = tex.GetImage();
@@ -249,11 +249,18 @@ namespace usg
 
 	void OculusHMD_ps::TransferSpectatorDisplay(GFXContext* pContext, Display* pDisplay)
 	{
+		VkImageSubresourceRange subresourceRange{};
+		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+		subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+		pContext->GetPlatform().SetImageLayout(m_mirrorImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange);
+
+
 		// PRESENT_SRC_KHR -> TRANSFER_DST_OPTIMAL
 		VkImageMemoryBarrier presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
 		presentBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 		presentBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		presentBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		presentBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		presentBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -287,7 +294,7 @@ namespace usg
 			pDisplay->GetPlatform().GetActiveImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &region);
 
-
+		
 		presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
 		presentBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		presentBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
