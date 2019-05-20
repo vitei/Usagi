@@ -57,9 +57,9 @@ void OmniShadowContext::Cleanup(GFXDevice* pDevice)
 
 void OmniShadowContext::Init(const Sphere* sphere)
 {
-	SetRenderMask(RenderNode::RENDER_MASK_SHADOW_CAST);
+	SetRenderMask(RenderMask::RENDER_MASK_SHADOW_CAST);
 	m_pSphere = sphere;
-	m_searchObject.Init(GetScene(), this, *m_pSphere, RenderNode::RENDER_MASK_SHADOW_CAST);
+	m_searchObject.Init(GetScene(), this, *m_pSphere, RenderMask::RENDER_MASK_SHADOW_CAST);
 }
 
 void OmniShadowContext::ClearLists()
@@ -124,7 +124,7 @@ void OmniShadowContext::Update(GFXDevice* pDevice)
 		for(uint32 i=0; i < uNodeCount; i++ )
 		{
 			RenderNode* pNode = pGroup->GetLODRenderNode(0, i);
-			if( (pNode->GetRenderMask() & RenderNode::RENDER_MASK_SHADOW_CAST)!=0 )
+			if( (pNode->GetRenderMask() & RenderMask::RENDER_MASK_SHADOW_CAST)!=0 )
 			{
 				m_drawList.AddToEnd(pNode);
 			}

@@ -31,6 +31,8 @@ public:
 	void UpdateEnd(GFXDevice* pDevice);
 	bool IsRenderPassDeferred(RenderNode::Layer eLayer, uint32 uPriority) const;
 	bool IsRenderPassDeferred(const RenderNode& node) const;
+	bool IsRenderPassTranslucent(RenderNode::Layer eLayer, uint32 uPriority) const;
+	bool IsRenderPassTranslucent(const RenderNode& node) const;
 	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet = false) const;
 	const RenderPassHndl GetRenderPass(const RenderNode& node, bool bPrevSet = false) const;
 	bool GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const;

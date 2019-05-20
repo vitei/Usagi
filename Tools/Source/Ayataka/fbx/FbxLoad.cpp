@@ -731,6 +731,7 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 		{
 		case usg::VE_FLOAT:
 		case usg::VE_INT:
+		case usg::VE_UINT:
 		{
 			pNewStream->allocate<float>((uint32_t)m_activeVerts.size()*uColumnNum, uColumnNum);
 			float* pData = (float*)pNewStream->GetStreamArrayPtr();

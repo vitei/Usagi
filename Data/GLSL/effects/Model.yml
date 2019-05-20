@@ -8,6 +8,8 @@ Effects:
         defines: DEFERRED_SHADING
       - name: depth
         defines: SHADOW_PASS
+      - name: translucent
+        defines: TRANSLUCENT_PASS
     global_sets:  # A variant of all the above with these sets will be automatically added
       - name: skel
         defines: HAS_SKELETON

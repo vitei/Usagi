@@ -34,7 +34,7 @@ Model::Model()
 	m_bFade				= false;
 	m_fAlpha			= 1.0f;
 	m_bShouldBeVisible	= true;
-	m_depthRenderMask	= RenderNode::RENDER_MASK_NONE;
+	m_depthRenderMask	= RenderMask::RENDER_MASK_NONE;
 }
 
 
@@ -76,7 +76,7 @@ Model::Model(GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDy
 
 bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic, bool bFastMem, bool bAutoTransform, bool bPerBoneCulling)
 {
-	uint32 uRenderMask = RenderNode::RENDER_MASK_ALL;
+	uint32 uRenderMask = RenderMask::RENDER_MASK_ALL;
 	// TODO: Support cleanup or reuse?
 	ASSERT(m_pScene == NULL);
 
@@ -113,16 +113,6 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 	{
 		m_pOverrideMaterials = vnew(ALLOC_GEOMETRY_DATA) MaterialInfo[m_pResource->GetMeshCount()];
 	}
-	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
-	{
-		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
-		m_meshArray[i]->Init(pDevice, pScene, pMesh, this, false);
-
-		m_depthMeshArray[i]->Init(pDevice, pScene, pMesh, this, true);
-
-		InitDynamics(pDevice, pScene, i);
-
-	}
 
 	// Set up the constant sets for the bones
 	if (!m_pResource->GetRigidBoneIndices().empty())
@@ -134,7 +124,7 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 			{ "mBones", CT_MATRIX_43, (uint32)m_pResource->GetRigidBoneIndices().size(), 0, 0, NULL },
 			SHADER_CONSTANT_END()
 		};
-		
+
 		m_staticBones.Init(pDevice, boneDecl);
 	}
 
@@ -149,6 +139,17 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 		};
 
 		m_skinnedBones.Init(pDevice, boneDecl);
+	}
+
+	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
+	{
+		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
+		m_meshArray[i]->Init(pDevice, pScene, pMesh, this, false);
+
+		m_depthMeshArray[i]->Init(pDevice, pScene, pMesh, this, true);
+
+		InitDynamics(pDevice, pScene, i);
+
 	}
 
 	SetRenderMask(uRenderMask);
@@ -242,7 +243,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 void Model::SetRenderMask(uint32 uMask)
 {
 	m_uRenderMask = uMask;
-	m_depthRenderMask &= (uMask|RenderNode::RENDER_MASK_SHADOW_CAST);
+	m_depthRenderMask &= (uMask|RenderMask::RENDER_MASK_SHADOW_CAST);
 	UpdateRenderMaskInt();
 }
 
@@ -259,11 +260,11 @@ void Model::EnableShadow(GFXDevice* pDevice, bool bEnable)
 {
 	if (bEnable)
 	{
-		m_depthRenderMask |= RenderNode::RENDER_MASK_SHADOW_CAST;
+		m_depthRenderMask |= RenderMask::RENDER_MASK_SHADOW_CAST;
 	}
 	else
 	{
-		m_depthRenderMask &= ~RenderNode::RENDER_MASK_SHADOW_CAST;
+		m_depthRenderMask &= ~RenderMask::RENDER_MASK_SHADOW_CAST;
 	}
 
 	UpdateRenderMaskInt();
@@ -342,7 +343,7 @@ void Model::AddToSceneInt(GFXDevice* pDevice)
 {
 	Skeleton& skeleton = GetSkeleton();
 	bool bVisible = m_fAlpha > Math::EPSILON && m_bShouldBeVisible;
-	bool bAddDepth = m_bShouldBeVisible && (m_depthRenderMask != RenderNode::RENDER_MASK_NONE);
+	bool bAddDepth = m_bShouldBeVisible && (m_depthRenderMask != RenderMask::RENDER_MASK_NONE);
 
 	if ((bVisible || bAddDepth) && !m_bPerBoneCulling && !m_pRenderGroup)
 	{
@@ -797,7 +798,7 @@ void Model::SetFade(bool bFade, float fAlpha)
 	else
 	{
 		// Remove from the main render but not the shadow pass
-		m_depthRenderMask &= ~(RenderNode::RENDER_MASK_ALL);
+		m_depthRenderMask &= ~(RenderMask::RENDER_MASK_ALL);
 	}
 	
 	UpdateRenderMaskInt();

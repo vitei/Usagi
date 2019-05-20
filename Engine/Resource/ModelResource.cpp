@@ -423,18 +423,22 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	EffectHndl pEffect;
 	EffectHndl pDeferredEffect;
+	EffectHndl pTransparentEffect;
 
 	U8String effectPath = fxRunTime.GetResource()->GetEffectName();
+	U8String transparentPath = fxRunTime.GetResource()->GetTransparentEffectName();
 	U8String deferredEffectPath = fxRunTime.GetResource()->GetDeferredEffectName();
 	if (bAnimated)
 	{
 		effectPath += ".skel";
 		deferredEffectPath += ".skel";
+		transparentPath += ".skel";
 	}
 	if (HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count))
 	{
 		effectPath += ".bump";
 		deferredEffectPath += ".bump";
+		transparentPath += ".bump";
 	}
 	
 	// Missing attributes
@@ -502,6 +506,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
 	pDeferredEffect = ResourceMgr::Inst()->GetEffect(pDevice, deferredEffectPath.CStr());
+	pTransparentEffect = ResourceMgr::Inst()->GetEffect(pDevice, transparentPath.CStr());
 
 
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
@@ -531,6 +536,9 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	pipelineState.alphaState.uColorTargets = 1;
 	m_meshArray[m_uMeshCount].pipelines.defaultPipeline = pipelineState;
+
+	pipelineState.pEffect = pTransparentEffect;
+	m_meshArray[m_uMeshCount].pipelines.transparentPipeline = pipelineState;
 
 	pipelineState.pEffect = pDeferredEffect;
 	pipelineState.alphaState.uColorTargets = 5;
@@ -874,6 +882,11 @@ bool ModelResource::GetSingleAttributeDeclDefault(const CustomEffectDecl::Attrib
 		pElement->eType = VE_INT;
 		pElement->uCount = 4;
 		break;
+	case CT_VECTOR4U:
+		pElement->bIntegerReg = true;
+		pElement->eType = VE_UINT;
+		pElement->uCount = 4;
+		break;		
 	default:
 		ASSERT(false);
 		return false;

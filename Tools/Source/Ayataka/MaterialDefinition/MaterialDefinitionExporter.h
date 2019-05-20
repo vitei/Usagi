@@ -50,6 +50,7 @@ private:
 
 	std::string m_effectName;
 	std::string m_deferredEffectName;
+	std::string m_transparentEffectName;
 	std::string m_shadowEffectName;
 	std::string m_omniShadowEffectName;
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;

@@ -6,7 +6,7 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec3 ao_normal;
 #ifdef HAS_SKELETON
-ATTRIB_LOC(3) in ivec4 ao_boneIndex;
+ATTRIB_LOC(3) in uvec4 ao_boneIndex;
 ATTRIB_LOC(4) in vec4 ao_boneWeight;
 #endif
 ATTRIB_LOC(5) in vec4 ao_color;

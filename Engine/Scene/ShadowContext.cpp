@@ -55,10 +55,10 @@ void ShadowContext::Cleanup(GFXDevice* pDevice)
 
 void ShadowContext::Init(const Camera* pCamera)
 {
-	SetRenderMask(RenderNode::RENDER_MASK_SHADOW_CAST);
+	SetRenderMask(RenderMask::RENDER_MASK_SHADOW_CAST);
 
 	m_pCamera = pCamera;
-	m_searchObject.Init(GetScene(), this, m_pCamera->GetFrustum(), RenderNode::RENDER_MASK_SHADOW_CAST);
+	m_searchObject.Init(GetScene(), this, m_pCamera->GetFrustum(), RenderMask::RENDER_MASK_SHADOW_CAST);
 }
 
 void ShadowContext::ClearLists()
@@ -88,7 +88,7 @@ void ShadowContext::Update(GFXDevice* pDevice)
 		for(uint32 i=0; i < uNodeCount; i++ )
 		{
 			RenderNode* pNode = pGroup->GetLODRenderNode(0, i);
-			if( (pNode->GetRenderMask() & RenderNode::RENDER_MASK_SHADOW_CAST)!=0 )
+			if( (pNode->GetRenderMask() & RenderMask::RENDER_MASK_SHADOW_CAST)!=0 )
 			{
 				m_drawList.AddToEnd(pNode);
 			}

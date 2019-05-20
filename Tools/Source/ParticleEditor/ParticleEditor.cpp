@@ -122,7 +122,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_scene.Init(pDevice, worldBounds, NULL);
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(fAspect);
-	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderNode::RENDER_MASK_ALL);
+	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
 
 	m_pViewportHack = vnew(usg::ALLOC_OBJECT)ViewportHack;
 	m_pViewportHack->Init(pDevice, &m_scene, m_previewViewport);
@@ -139,8 +139,8 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_variables = m_emitter.GetDefinition();
 	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
 	m_effect.AddEmitter(pDevice, &m_emitter);
-	m_emitter.SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM);
-	m_pSceneCtxt->SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM);
+	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
+	m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
 
 	/*m_testWindow.Init("Test Window", usg::Vector2f(0.0f, 0.0f), usg::Vector2f(400.f, 200.f), 10);
 	m_testButton.Init("Test Button");
@@ -325,7 +325,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 	if(m_previewType.GetSelected() == 0)
 	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM);
+		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
 		if (m_variables.has_cBackgroundColor && m_previewType.GetSelected() == 0)
 		{
 			m_clearColor.SetValue(m_variables.cBackgroundColor);
@@ -333,7 +333,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	}
 	else
 	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM<<1);
+		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM<<1);
 		m_clearColor.SetValue(m_effectGroup.GetBackgroundColor());
 	}
 

@@ -66,7 +66,7 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 	m_emitterData.fLineWidth = 0.15f;
 
 	m_trail.Alloc(pDevice, &scene.GetParticleMgr(), &m_emitterData, true);
-	m_trail.SetRenderMask(usg::RenderNode::RENDER_MASK_CUSTOM << 1);
+	m_trail.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM << 1);
 
 	Add(false);
 }

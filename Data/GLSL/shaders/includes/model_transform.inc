@@ -37,11 +37,14 @@ vec4 ApplyWorldTransformSkinning(in vec4 vVertex, in int iBoneCount)
 
 vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
 {
+// Bone count should never be 0 in this path
+#if 0
 	if(iBoneCount == 0)
 	{
 		return vec4( vVertex * mModelMat, vVertex.w);
 	}
 	else
+#endif
 	{
 		return ApplyWorldTransformSkinning( vVertex, iBoneCount );
 	}

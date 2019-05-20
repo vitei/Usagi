@@ -312,6 +312,9 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 		case VE_INT:
 			CopyVertexStream<int>(pOutputVertexStream, vertexStreamStep, pStreamArray, itemSize, vertexNum);
 			break;
+		case VE_UINT:
+			CopyVertexStream<uint32>(pOutputVertexStream, vertexStreamStep, pStreamArray, itemSize, vertexNum);
+			break;			
 		case VE_BYTE:
 			CopyVertexStream<sint8>(pOutputVertexStream, vertexStreamStep, pStreamArray, itemSize, vertexNum);
 			break;
