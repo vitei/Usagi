@@ -100,6 +100,11 @@ namespace usg
 			{
 				outputs.model.GetRuntimeData().pModel->OverrideVariable("color", event.color, event.uColStage);
 			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::UpdateModelRenderMask& event)
+			{
+				outputs.model.GetRuntimeData().pModel->SetRenderMask(event.uRenderMask);
+			}
 		};
 		
 		class TranslateModelUVs : public System
