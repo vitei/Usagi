@@ -79,6 +79,10 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		{
 			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
 		}
+		else if (pScene->GetRenderPasses(0).IsRenderPassTranslucent(*this))
+		{
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.transparentPipeline);
+		}
 		else
 		{
 			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);

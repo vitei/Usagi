@@ -42,6 +42,7 @@ namespace usg{
 		{
 			PipelineStateDecl		defaultPipeline;
 			PipelineStateDecl		deferredPipeline;
+			PipelineStateDecl		transparentPipeline;
 			PipelineStateDecl		depthPassPipeline;
 			PipelineStateDecl		omniDepthPassPipeline;
 			PipelineStateDecl		translucentStateCmp;

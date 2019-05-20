@@ -423,18 +423,22 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	EffectHndl pEffect;
 	EffectHndl pDeferredEffect;
+	EffectHndl pTransparentEffect;
 
 	U8String effectPath = fxRunTime.GetResource()->GetEffectName();
+	U8String transparentPath = fxRunTime.GetResource()->GetTransparentEffectName();
 	U8String deferredEffectPath = fxRunTime.GetResource()->GetDeferredEffectName();
 	if (bAnimated)
 	{
 		effectPath += ".skel";
 		deferredEffectPath += ".skel";
+		transparentPath += ".skel";
 	}
 	if (HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count))
 	{
 		effectPath += ".bump";
 		deferredEffectPath += ".bump";
+		transparentPath += ".bump";
 	}
 	
 	// Missing attributes
@@ -531,6 +535,9 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	pipelineState.alphaState.uColorTargets = 1;
 	m_meshArray[m_uMeshCount].pipelines.defaultPipeline = pipelineState;
+
+	pipelineState.pEffect = pTransparentEffect;
+	m_meshArray[m_uMeshCount].pipelines.transparentPipeline = pipelineState;
 
 	pipelineState.pEffect = pDeferredEffect;
 	pipelineState.alphaState.uColorTargets = 5;

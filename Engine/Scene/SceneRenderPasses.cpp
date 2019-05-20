@@ -129,7 +129,7 @@ namespace usg {
 			return true;
 		}
 
-		if (uPriority < 127)
+		if (eLayer == RenderNode::LAYER_DEFERRED_SHADING && uPriority < 127)
 		{
 			return true;
 		}
@@ -138,9 +138,23 @@ namespace usg {
 
 	}
 
+	bool SceneRenderPasses::IsRenderPassTranslucent(RenderNode::Layer eLayer, uint32 uPriority) const
+	{
+		return eLayer >= RenderNode::LAYER_TRANSLUCENT;
+
+		return false;
+
+	}
+
+
 	bool SceneRenderPasses::IsRenderPassDeferred(const RenderNode& node) const
 	{
 		return IsRenderPassDeferred(node.GetLayer(), node.GetPriority());
+	}
+
+	bool SceneRenderPasses::IsRenderPassTranslucent(const RenderNode& node) const
+	{
+		return IsRenderPassTranslucent(node.GetLayer(), node.GetPriority());
 	}
 
 
