@@ -16,7 +16,7 @@ namespace usg {
 SceneContext::SceneContext():
 m_visibleGroups(256)
 {
-	m_uRenderMask		= RenderNode::RENDER_MASK_ALL;
+	m_uRenderMask		= RenderMask::RENDER_MASK_ALL;
 	m_pScene			= nullptr;
 	m_bActive			= true;
 	m_bDeviceDataValid = false;

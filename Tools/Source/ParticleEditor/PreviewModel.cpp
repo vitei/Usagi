@@ -43,7 +43,7 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiR
 	m_pScene = pScene;
 
 	//m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-	//m_pModel->Load(pDevice, m_pScene, "particle_editor/Grandmaster.vmdc", false, usg::RenderNode::RENDER_MASK_ALL, true, true, NULL, NULL, false);
+	//m_pModel->Load(pDevice, m_pScene, "particle_editor/Grandmaster.vmdc", false, usg::RenderMask::RENDER_MASK_ALL, true, true, NULL, NULL, false);
 }
 
 
@@ -60,7 +60,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 		}
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-		m_pModel->Load(pDevice, m_pScene, modelName.CStr(), false, usg::RenderNode::RENDER_MASK_ALL, true, false);
+		m_pModel->Load(pDevice, m_pScene, modelName.CStr(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
 	}
 	if (m_pModel)
 	{

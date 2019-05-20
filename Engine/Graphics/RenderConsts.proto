@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 import 'nanopb.proto';
+import 'Engine/Core/usagipb.proto';
 
 package usg;
 
@@ -41,3 +42,22 @@ enum GPULocation
 
 	GPU_LOCATION_FORCE_SIZE = 0x7FFFFFFF;  // Force enum size to sizeof(int32_t)
 };
+
+enum RenderMask {
+	option (nanopb_enumopt).long_names = false;
+	option (usagipb_enumopt).is_bitmask = true;
+
+	RENDER_MASK_NONE			= 0x00000000;
+	RENDER_MASK_WORLD			= 0x00000001;
+	RENDER_MASK_LIGHTING		= 0x00000002;
+	RENDER_MASK_WATER			= 0x00000004;
+	RENDER_MASK_WORLD_EFFECT	= 0x00000008;
+	RENDER_MASK_POST_EFFECT		= 0x00000010;
+	RENDER_MASK_INSIDE			= 0x00000020;
+	RENDER_MASK_OUTSIDE			= 0x00000040;
+	RENDER_MASK_SHADOW_CAST		= 0x00000080;
+	RENDER_MASK_CUSTOM			= 0x00000100;
+
+	// Have all be everything except the shadow casting geometry
+	RENDER_MASK_ALL				= 0x0FFFFF7F;
+}

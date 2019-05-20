@@ -135,7 +135,7 @@ void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)
 {
 	if (!m_bCanHaveShadow)
 	{
-		uMask &= ~RenderNode::RENDER_MASK_SHADOW_CAST;
+		uMask &= ~RenderMask::RENDER_MASK_SHADOW_CAST;
 	}
 	SetRenderMaskIncShadow(uMask);
 }

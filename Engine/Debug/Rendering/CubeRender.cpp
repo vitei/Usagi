@@ -168,9 +168,9 @@ bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool 
 	
 	
 	if (bHideInside)
-		pNode->SetRenderMask(RenderNode::RENDER_MASK_OUTSIDE);
+		pNode->SetRenderMask(RenderMask::RENDER_MASK_OUTSIDE);
 	else
-		pNode->SetRenderMask(RenderNode::RENDER_MASK_INSIDE | RenderNode::RENDER_MASK_OUTSIDE);
+		pNode->SetRenderMask(RenderMask::RENDER_MASK_INSIDE | RenderMask::RENDER_MASK_OUTSIDE);
 	
     Clear();
     

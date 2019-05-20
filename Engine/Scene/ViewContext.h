@@ -32,7 +32,7 @@ public:
 
 	virtual void InitDeviceData(GFXDevice* pDevice) override;
 	virtual void Cleanup(GFXDevice* pDevice) override;
-	void Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderNode::RENDER_MASK_ALL);
+	void Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderMask::RENDER_MASK_ALL);
 	virtual void Update(GFXDevice* pDevice);
 	virtual void ClearLists();
 	virtual const Camera* GetCamera() const override { return m_pCamera; }

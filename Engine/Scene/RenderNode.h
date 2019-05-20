@@ -7,6 +7,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Device/PipelineState.h"
+#include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Scene/RenderGroup.h"
 
 namespace usg{
@@ -38,23 +39,6 @@ public:
 		LAYER_POST_PROCESS,
 		LAYER_OVERLAY,
 		LAYER_COUNT
-	};
-
-	enum RenderMask
-	{
-		RENDER_MASK_WORLD			= (1<<0),
-		RENDER_MASK_LIGHTING		= (1<<1),
-		RENDER_MASK_WATER			= (1<<2),
-		RENDER_MASK_WORLD_EFFECT	= (1<<3),
-		RENDER_MASK_POST_EFFECT		= (1<<4),
-		RENDER_MASK_INSIDE			= (1<<5),
-		RENDER_MASK_OUTSIDE			= (1<<6),
-		RENDER_MASK_SHADOW_CAST		= (1<<7),
-		RENDER_MASK_CUSTOM			= (1<<8),
-
-		// Have all be everything except the shadow casting geometry
-		RENDER_MASK_ALL				= (0xFFFFFFFF&(~RENDER_MASK_SHADOW_CAST)),
-		RENDER_MASK_NONE			= 0
 	};
 
 	enum ComparisonShift
