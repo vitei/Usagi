@@ -113,16 +113,6 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 	{
 		m_pOverrideMaterials = vnew(ALLOC_GEOMETRY_DATA) MaterialInfo[m_pResource->GetMeshCount()];
 	}
-	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
-	{
-		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
-		m_meshArray[i]->Init(pDevice, pScene, pMesh, this, false);
-
-		m_depthMeshArray[i]->Init(pDevice, pScene, pMesh, this, true);
-
-		InitDynamics(pDevice, pScene, i);
-
-	}
 
 	// Set up the constant sets for the bones
 	if (!m_pResource->GetRigidBoneIndices().empty())
@@ -134,7 +124,7 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 			{ "mBones", CT_MATRIX_43, (uint32)m_pResource->GetRigidBoneIndices().size(), 0, 0, NULL },
 			SHADER_CONSTANT_END()
 		};
-		
+
 		m_staticBones.Init(pDevice, boneDecl);
 	}
 
@@ -149,6 +139,17 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 		};
 
 		m_skinnedBones.Init(pDevice, boneDecl);
+	}
+
+	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
+	{
+		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
+		m_meshArray[i]->Init(pDevice, pScene, pMesh, this, false);
+
+		m_depthMeshArray[i]->Init(pDevice, pScene, pMesh, this, true);
+
+		InitDynamics(pDevice, pScene, i);
+
 	}
 
 	SetRenderMask(uRenderMask);
