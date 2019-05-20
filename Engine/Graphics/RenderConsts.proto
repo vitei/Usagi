@@ -17,7 +17,8 @@ enum VertexElementType
 	VE_USHORT = 3;
 	VE_FLOAT = 4;
 	VE_INT = 5;
-	VE_INVALID = 6;
+	VE_UINT = 6;
+	VE_INVALID = 7;
 };
 
 enum TextureDimensions

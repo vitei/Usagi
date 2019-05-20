@@ -506,6 +506,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 	pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
 	pDeferredEffect = ResourceMgr::Inst()->GetEffect(pDevice, deferredEffectPath.CStr());
+	pTransparentEffect = ResourceMgr::Inst()->GetEffect(pDevice, transparentPath.CStr());
 
 
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
@@ -881,6 +882,11 @@ bool ModelResource::GetSingleAttributeDeclDefault(const CustomEffectDecl::Attrib
 		pElement->eType = VE_INT;
 		pElement->uCount = 4;
 		break;
+	case CT_VECTOR4U:
+		pElement->bIntegerReg = true;
+		pElement->eType = VE_UINT;
+		pElement->uCount = 4;
+		break;		
 	default:
 		ASSERT(false);
 		return false;

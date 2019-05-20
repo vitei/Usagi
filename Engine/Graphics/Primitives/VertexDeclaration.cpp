@@ -85,6 +85,7 @@ uint32 VertexDeclaration::GetByteCount(VertexElementType eType)
 	case VE_USHORT:
 		return 2;
 	case VE_INT:
+	case VE_UINT:
 		return 4;
 	case VE_FLOAT:
 		return 4;

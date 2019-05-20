@@ -215,6 +215,7 @@ enum ConstantType
 	CT_FLOAT,
 	CT_INT,
 	CT_VECTOR4I,
+	CT_VECTOR4U,
 	CT_BOOL,
 	CT_STRUCT,		// Used for arrays of objects
 	CT_COUNT,
@@ -269,6 +270,7 @@ const uint32 g_uConstantSize[CT_COUNT] =
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
 	sizeof(int)*4,		// CT_VECTOR4I
+	sizeof(uint32)*4,	// CT_VECTOR4U
 	sizeof(bool),		// CT_BOOL
 	(uint32)(-1),		// CT_STRUCT <- Size is invalid
 	// CT_COUNT,
@@ -284,6 +286,7 @@ const uint32 g_uConstantCPUAllignment[CT_COUNT] =
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
 	sizeof(int),		// CT_VECTOR4I
+	sizeof(uint32),		// CT_VECTOR4U
 	1,					// CT_BOOL
 	sizeof(float) * 4	// CT_STRUCT (Not a valid size on it's own)
 };

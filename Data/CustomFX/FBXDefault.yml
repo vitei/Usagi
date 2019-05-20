@@ -10,7 +10,7 @@ Attributes:
   - { index: 1, hint: "normal",   type: vec3 }
   - { index: 2, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ] }
   - { index: 10, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ] }
-  - { index: 3, hint: "blendindex", type: ivec4, default: [ 0, 0, 0, 0 ] }
+  - { index: 3, hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ] }
   - { index: 4, hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ] }
   - { index: 5, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
   - { index: 6, hint: "uv0", type: vec2, default: [0.0, 0.0] }

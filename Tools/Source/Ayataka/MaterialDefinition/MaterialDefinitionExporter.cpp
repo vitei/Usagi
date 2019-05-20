@@ -22,6 +22,7 @@ static const Mapping g_constantMappings[]
 	{ "float",	usg::CT_FLOAT },
 	{ "int",	usg::CT_INT },
 	{ "ivec4",	usg::CT_VECTOR4I },
+	{ "uvec4",	usg::CT_VECTOR4U },
 	{ "bool",	usg::CT_BOOL },
 	{ "invalid", usg::CT_STRUCT }
 };
@@ -103,6 +104,15 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 				int value = node[i].as<int>();
 				memcpy(pD8, &value, sizeof(int));
 				pD8 += sizeof(int);
+			}
+			break;
+		case usg::CT_VECTOR4U:
+			ASSERT(node.size() == 4);
+			for (uint32 i = 0; i < 4; i++)
+			{
+				uint32 value = node[i].as<uint32>();
+				memcpy(pD8, &value, sizeof(uint32));
+				pD8 += sizeof(uint32);
 			}
 			break;
 

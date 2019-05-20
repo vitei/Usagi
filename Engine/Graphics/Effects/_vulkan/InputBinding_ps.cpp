@@ -90,6 +90,25 @@ namespace usg {
 		switch (uCount)
 		{
 		case 1:
+			return VK_FORMAT_R32_SINT;
+		case 2:
+			return VK_FORMAT_R32G32_SINT;
+		case 3:
+			return VK_FORMAT_R32G32B32_SINT;
+		case 4:
+			return  VK_FORMAT_R32G32B32A32_SINT;
+		default:
+			ASSERT(false);
+		}
+
+		return VK_FORMAT_R32G32B32A32_SINT;
+	}
+
+	VkFormat GetAttribFormatUInt(uint32 uCount)
+	{
+		switch (uCount)
+		{
+		case 1:
 			return VK_FORMAT_R32_UINT;
 		case 2:
 			return VK_FORMAT_R32G32_UINT;
@@ -102,7 +121,7 @@ namespace usg {
 		}
 
 		return VK_FORMAT_R32G32B32A32_UINT;
-	}
+	}	
 
 
 	VkFormat GetAttribFormat(VertexElementType eType, uint32 uCount, bool bNormalised)
@@ -120,6 +139,9 @@ namespace usg {
 		case VE_INT:
 			ASSERT(!bNormalised);
 			return GetAttribFormatInt(uCount);
+		case VE_UINT:
+			ASSERT(!bNormalised);
+			return GetAttribFormatUInt(uCount);			
 		default:
 			ASSERT(false);
 		}
