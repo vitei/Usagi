@@ -4,7 +4,9 @@
 #include "../includes/lighting_buffer.inc"
 #include "../includes/shadow/globalshadow_read.inc"
 #include "../includes/model_common_ps.inc"
+#ifndef TRANSLUCENT_PASS
 #include "../includes/depth_write.inc"
+#endif
 #ifdef DEFERRED_SHADING
 #include "../includes/deferred.inc"
 #else
@@ -142,7 +144,9 @@ void main(void)
 	vOut.rgb = (vDiffuse.rgb * vFragPrimaryColor.rgb) + (vSpecular.rgb * vFragSecondaryColor.rgb);
 	vOut.a = vDiffuse.a;
 	vOut.xyz += vEmissive;
+#ifndef TRANSLUCENT_PASS
 	OutputLinearDepth(-vo_vViewDir.z);
+#endif
 	vOut.a *= uMaterial.alpha;
 	//vOut.a = 1.0;
 	colorOut = vOut;

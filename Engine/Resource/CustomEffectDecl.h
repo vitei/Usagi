@@ -23,6 +23,7 @@ namespace usg
 			char   shadowEffectName[64];
 			char   omniShadowEffectName[64];
 			char   deferredEffectName[64];
+			char   transparentEffectName[64];
 		};
 
 		struct Sampler

@@ -47,6 +47,7 @@ namespace usg
 
 		const char* GetEffectName() const;
 		const char* GetDeferredEffectName() const;
+		const char* GetTransparentEffectName() const;
 		const char* GetDepthEffectName() const;
 		const char* GetOmniDepthEffectName() const;
 

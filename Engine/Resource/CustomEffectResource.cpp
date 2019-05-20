@@ -210,6 +210,11 @@ namespace usg
 		return m_pHeader->deferredEffectName;
 	}
 
+	const char* CustomEffectResource::GetTransparentEffectName() const
+	{
+		return m_pHeader->transparentEffectName;
+	}
+
 	const char* CustomEffectResource::GetOmniDepthEffectName() const
 	{
 		return m_pHeader->omniShadowEffectName;

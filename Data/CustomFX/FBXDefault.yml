@@ -1,6 +1,7 @@
 Shader:
   name: "Model.FBXDefault"
   deferred: "Model.FBXDefault.deferred"
+  transparent: "Model.FBXDefault.translucent"
   shadow: "Model.FBXDefault.depth"
   omniShadow: "Model.FBXDefault.omni_depth"
 

@@ -185,6 +185,7 @@ int MaterialDefinitionExporter::Load(const char* path)
 	m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
 	m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
 	m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
+	m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
 
 	YAML::Node attributes = mainNode["Attributes"];
 	for (YAML::const_iterator it = attributes.begin(); it != attributes.end(); ++it)
@@ -380,6 +381,7 @@ void MaterialDefinitionExporter::ExportFile( const char* path )
 
 	strcpy_s(header.effectName, m_effectName.c_str());
 	strcpy_s(header.shadowEffectName, m_shadowEffectName.c_str());
+	strcpy_s(header.transparentEffectName, m_transparentEffectName.c_str());
 	strcpy_s(header.omniShadowEffectName, m_omniShadowEffectName.c_str());
 	strcpy_s(header.deferredEffectName, m_deferredEffectName.c_str());
 
