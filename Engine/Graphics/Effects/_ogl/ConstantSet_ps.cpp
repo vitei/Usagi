@@ -20,7 +20,8 @@ const uint32 g_uGPUFormatSize[CT_COUNT] =
 	sizeof(Vector2f),	// CT_VECTOR_2,
 	sizeof(float32),	// CT_FLOAT,
 	sizeof(sint32),		// CT_INT
-	sizeof(sint32)*4,	// CT_INT_4
+	sizeof(sint32)*4,	// CT_VECTOR4I
+	sizeof(uint32)*4,	// CT_VECTOR4U
 	4,					// CT_BOOL
 	0,					// CT_STRUCT	(Not a valid size)
 };
@@ -37,7 +38,8 @@ const uint32 g_uGPUAlignments[CT_COUNT] =
 	sizeof(float)*2,	// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
-	sizeof(int)*4,		// CT_INT_4
+	sizeof(int)*4,		// CT_VECTOR4I
+	sizeof(int)*4,		// CT_VECTOR4U
 	4,					// CT_BOOL
 	sizeof(float)*4		// CT_STRUCT (Not a valid size on it's own)
 };
