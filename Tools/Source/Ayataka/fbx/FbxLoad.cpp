@@ -480,14 +480,22 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 		double3 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->Specular;
 		usg::Color specular((float)double3.mData[0], (float)double3.mData[1], (float)double3.mData[2], 1.0f);
 
-		// Specular Factor
-		double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->SpecularFactor;
-//		specular *= double1;
-		pMaterial->SetVariableArray("specular", specular.rgba(), 4);
-
 		// Shininess
 		double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->Shininess;
-		pMaterial->SetVariable("specularpow", (float)double1);
+		pMaterial->SetVariable("specularpow", (float)Math::Max(double1, 0.01));
+
+		if (double1 > 0.01)
+		{
+			// Specular Factor
+			double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->SpecularFactor;
+			//		specular *= double1;
+			pMaterial->SetVariableArray("specular", specular.rgba(), 4);
+		}
+		else
+		{
+			pMaterial->SetVariableArray("specular", usg::Color::Black.rgba(), 4);
+		}
+
 
 		// Reflection
 		double3 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->Reflection;
