@@ -215,9 +215,11 @@ void Model::RenderMesh::VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTr
 			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, m_pOverridesConstants[1], 0, SHADER_FLAG_PIXEL);
 		}
 		
-		m_descriptorSet.UpdateDescriptors(pDevice);
 		m_uOverrides |= m_uReqOverrides;
 	}
+
+	m_descriptorSet.UpdateDescriptors(pDevice);
+
 
 	if (m_uOverrides)
 	{
