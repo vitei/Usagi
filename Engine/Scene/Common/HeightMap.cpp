@@ -147,7 +147,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 	pipeline.layout.descriptorSets[1] = matDescriptors;
 	pipeline.layout.uDescriptorSetCount = 2;
 
-	m_mesh.SetPipeline(pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(RenderNode::LAYER_OPAQUE, 0), pipeline));
+	m_mesh.SetPipeline(pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(RenderLayer::LAYER_OPAQUE, 0), pipeline));
 	m_mesh.GetDescriptorSet().Init(pDevice, matDescriptors);
 
     
@@ -166,7 +166,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 
 	RenderNode* pNode = &m_mesh;
 	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
-	pNode->SetLayer(RenderNode::LAYER_OPAQUE);
+	pNode->SetLayer(RenderLayer::LAYER_OPAQUE);
 	pNode->SetPriority(0);
 
 	m_mesh.GetDescriptorSet().UpdateDescriptors(pDevice);

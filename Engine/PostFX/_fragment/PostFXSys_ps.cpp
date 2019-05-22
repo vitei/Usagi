@@ -337,7 +337,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 
 	m_pInitialTarget = pDst;
-	m_renderPasses.SetRenderPass(RenderNode::LAYER_BACKGROUND, 0, m_pInitialTarget->GetRenderPass());
+	m_renderPasses.SetRenderPass(RenderLayer::LAYER_BACKGROUND, 0, m_pInitialTarget->GetRenderPass());
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
@@ -364,12 +364,12 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if (pDst == &m_screenRT[TARGET_HDR_LIN_DEPTH])
 	{
 		pDst = &m_screenRT[TARGET_HDR];
-		m_renderPasses.SetRenderPass(RenderNode::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
+		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 	if (pDst == &m_screenRT[TARGET_LDR_LIN_DEPTH])
 	{
 		pDst = &m_screenRT[TARGET_LDR_0];
-		m_renderPasses.SetRenderPass(RenderNode::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
+		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
@@ -409,7 +409,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 PostEffect* PostFXSys_ps::GetFinalEffect()
 {
 	uint64 uMaxCmpValue = 0;
-	RenderNode::Layer eMaxLayer = RenderNode::LAYER_BACKGROUND;
+	RenderLayer eMaxLayer = RenderLayer::LAYER_BACKGROUND;
 	PostEffect* pEffectOut = nullptr;
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{

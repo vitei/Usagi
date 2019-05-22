@@ -22,7 +22,7 @@ public:
 	virtual ~Mesh();
     
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) override;
-	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
+	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes) override;
     
 	void SetPipeline(const PipelineStateHndl& hndl) { m_pipeline = hndl; }
 	DescriptorSet& GetDescriptorSet() { return m_descriptors;  }

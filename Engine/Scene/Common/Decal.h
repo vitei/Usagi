@@ -24,7 +24,7 @@ namespace usg
 		void Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32 uMaxTriangles = 30, float fDepthBias = -30.f);
 		void UpdateBuffers(GFXDevice* pDevice);
 		virtual bool Draw( GFXContext* pContext, RenderContext& renderContext) override;
-		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
+		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& renderPasses) override;
 
 		// Be sure to call in the following order when creating a decal
 		void AddToScene(GFXDevice* pDevice, Scene* pScene);

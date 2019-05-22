@@ -35,6 +35,7 @@ RenderGroup::RenderGroup()
 	m_viewData.uPrevLOD = 0;
 	m_pScene = NULL;
 	m_bSort = false;
+	m_bRenderPassDirty = false;
 }
 
 
@@ -123,7 +124,7 @@ void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint3
 	{
 		ppNodes[i]->SetParent(this);
 		// FIXME: Needs a callback if the layer changes too
-		if (ppNodes[i]->GetLayer() == RenderNode::LAYER_TRANSLUCENT)
+		if (ppNodes[i]->GetLayer() == RenderLayer::LAYER_TRANSLUCENT)
 		{
 			m_bViewDistanceUpdate = true;
 		}
@@ -151,7 +152,18 @@ void RenderGroup::NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, R
 	uint32 uDrawFlags = m_pScene->GetViewContext(uContext)->GetRenderMask();
 	if (pNode->GetRenderMask() & uDrawFlags)
 	{
-		pNode->RenderPassChanged(pDevice, uContext, hndl);
+		pNode->RenderPassChanged(pDevice, uContext, hndl, m_pScene->GetRenderPasses(0));
+	}
+}
+
+void RenderGroup::UpdateRenderPasses(GFXDevice* pDevice)
+{
+	if (!m_pScene)
+		return;
+
+	for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+	{
+		RenderPassChanged(m_pScene->GetRenderPasses(i), pDevice);
 	}
 }
 

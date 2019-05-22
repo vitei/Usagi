@@ -9,6 +9,7 @@
 #include "Engine/Scene/Model/ModelAnimPlayer.h"
 #include "Engine/Scene/Model/Bone.h"
 #include "Engine/Scene/Model/Model.h"
+#include "Engine/Scene/Model/ModelRenderNodes.h"
 #include "Engine/Scene/Model/UVMapper.h"
 #include "Engine/Scene/Model/ModelEvents.pb.h"
 #include "Engine/Scene/Scene.h"
@@ -104,6 +105,15 @@ namespace usg
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::UpdateModelRenderMask& event)
 			{
 				outputs.model.GetRuntimeData().pModel->SetRenderMask(event.uRenderMask);
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetMeshRenderLayer& event)
+			{
+				Model::RenderMesh* Mesh = outputs.model.GetRuntimeData().pModel->GetRenderMesh(event.meshName);
+				if (Mesh)
+				{
+					Mesh->SetLayer(event.eLayer);
+				}
 			}
 		};
 		

@@ -1,6 +1,7 @@
 import 'nanopb.proto';
 import "Engine/Maths/Maths.proto";
 import "Engine/Graphics/Color.proto";
+import "Engine/Graphics/RenderConsts.proto";
 
 package usg.Events;
 
@@ -42,4 +43,10 @@ message ModifyAnimationConditionEvent
 message UpdateModelRenderMask
 {
 	required uint32 uRenderMask = 1;
+}
+
+message SetMeshRenderLayer
+{
+	required string meshName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required RenderLayer eLayer = 2;
 }

@@ -1147,7 +1147,7 @@ void CollisionQuadTree::SetupVisibleModel( GFXDevice* pDevice, Scene* pScene )
 
 	RenderNode* pNode = &m_VisibleMesh;
 	m_pVisibleRenderGroup->AddRenderNodes( &pNode, 1, 0 );
-	//pNode->SetLayer( RenderNode::LAYER_MODELS_OPAQUE );
+	//pNode->SetLayer( RenderLayer::LAYER_MODELS_OPAQUE );
 	pNode->SetPriority(0);
 
 	Matrix4x4 matTmp;

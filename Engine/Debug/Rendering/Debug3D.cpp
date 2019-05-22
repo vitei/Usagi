@@ -29,7 +29,7 @@ Debug3D::Debug3D()
 {
 	m_uSpheres = 0;
 	m_uCubes = 0;
-	SetLayer(RenderNode::LAYER_TRANSLUCENT);
+	SetLayer(RenderLayer::LAYER_TRANSLUCENT);
 	SetPriority(0);
 }
 
@@ -211,7 +211,7 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 	return true;
 }
 
-void Debug3D::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+void Debug3D::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes)
 {
 	pDevice->ChangePipelineStateRenderPass(renderPass, m_spherePipeline);
 	if (m_cubePipeline.IsValid())

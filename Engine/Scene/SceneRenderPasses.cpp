@@ -40,7 +40,7 @@ namespace usg {
 	}
 
 
-	void SceneRenderPasses::SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl)
+	void SceneRenderPasses::SetRenderPass(RenderLayer eLayer, uint32 uPriority, const RenderPassHndl& hndl)
 	{
 
 		for (auto itr = m_entries.begin(); itr != m_entries.end(); ++itr)
@@ -61,7 +61,7 @@ namespace usg {
 		m_entries.push_back(entry);
 	}
 
-	void SceneRenderPasses::RemovePass(RenderNode::Layer eLayer, uint32 uPriority)
+	void SceneRenderPasses::RemovePass(RenderLayer eLayer, uint32 uPriority)
 	{
 		for (auto itr = m_entries.begin(); itr != m_entries.end(); ++itr)
 		{
@@ -94,7 +94,7 @@ namespace usg {
 	}
 
 
-	const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet) const
+	const RenderPassHndl SceneRenderPasses::GetRenderPass(RenderLayer eLayer, uint32 uPriority, bool bPrevSet) const
 	{
 		auto& set = bPrevSet ? m_prevEntries : m_entries;
 		for (auto itr = set.rbegin(); itr != set.rend(); ++itr)
@@ -118,18 +118,18 @@ namespace usg {
 		return GetRenderPass(node.GetLayer(), node.GetPriority(), bPrevSet);
 	}
 
-	bool SceneRenderPasses::IsRenderPassDeferred(RenderNode::Layer eLayer, uint32 uPriority) const
+	bool SceneRenderPasses::IsRenderPassDeferred(RenderLayer eLayer, uint32 uPriority) const
 	{
 		if (!m_bDeferredEnabled)
 		{
 			return false;
 		}
-		if (eLayer < RenderNode::LAYER_DEFERRED_SHADING)
+		if (eLayer < RenderLayer::LAYER_DEFERRED_SHADING)
 		{
 			return true;
 		}
 
-		if (eLayer == RenderNode::LAYER_DEFERRED_SHADING && uPriority < 127)
+		if (eLayer == RenderLayer::LAYER_DEFERRED_SHADING && uPriority < 127)
 		{
 			return true;
 		}
@@ -138,9 +138,9 @@ namespace usg {
 
 	}
 
-	bool SceneRenderPasses::IsRenderPassTranslucent(RenderNode::Layer eLayer, uint32 uPriority) const
+	bool SceneRenderPasses::IsRenderPassTranslucent(RenderLayer eLayer, uint32 uPriority) const
 	{
-		return eLayer >= RenderNode::LAYER_TRANSLUCENT;
+		return eLayer >= RenderLayer::LAYER_TRANSLUCENT;
 
 		return false;
 

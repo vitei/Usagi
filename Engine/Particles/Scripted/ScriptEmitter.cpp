@@ -16,13 +16,13 @@
 namespace usg
 {
 
-	static RenderNode::Layer layerMapping[] =
+	static RenderLayer layerMapping[] =
 	{
 		// FIXME: Update the shader to handle opaque
-		RenderNode::LAYER_TRANSLUCENT, //RenderNode::LAYER_OPAQUE_UNLIT,
-		RenderNode::LAYER_TRANSLUCENT,
-		RenderNode::LAYER_SUBTRACTIVE,
-		RenderNode::LAYER_ADDITIVE
+		RenderLayer::LAYER_TRANSLUCENT, //RenderLayer::LAYER_OPAQUE_UNLIT,
+		RenderLayer::LAYER_TRANSLUCENT,
+		RenderLayer::LAYER_SUBTRACTIVE,
+		RenderLayer::LAYER_ADDITIVE
 	};
 
 	ScriptEmitter::FloatAnimation::FloatAnimation()
@@ -421,7 +421,7 @@ namespace usg
 		m_fScale = fScale;
 	}
 
-	void ScriptEmitter::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+	void ScriptEmitter::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& scenePasses)
 	{
 		m_material.UpdateRenderPass(pDevice, renderPass);
 	}

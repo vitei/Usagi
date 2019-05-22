@@ -20,7 +20,7 @@ class ViewportHack : public usg::RenderNode
 public:
 	ViewportHack()
 	{
-		SetLayer(RenderNode::LAYER_SKY);
+		SetLayer(usg::RenderLayer::LAYER_SKY);
 		SetPriority(0);
 		m_pRenderGroup = nullptr;
 	}

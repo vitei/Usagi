@@ -68,7 +68,7 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 
 	// Render just before the sky
 	SetPriority(127);
-	SetLayer(RenderNode::LAYER_OPAQUE);
+	SetLayer(RenderLayer::LAYER_OPAQUE);
 	
 
 	PipelineStateDecl pipeline;
@@ -212,7 +212,7 @@ bool Decal::Draw( GFXContext* pContext, RenderContext& renderContext)
 }
 
 
-void Decal::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+void Decal::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes)
 {
 	m_material.UpdateRenderPass(pDevice, renderPass);
 }

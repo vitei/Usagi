@@ -42,6 +42,23 @@ enum GPULocation
 	GPU_LOCATION_FASTMEM = 1;
 
 	GPU_LOCATION_FORCE_SIZE = 0x7FFFFFFF;  // Force enum size to sizeof(int32_t)
+}; 
+
+enum RenderLayer
+{
+	option (nanopb_enumopt).long_names = false;
+	LAYER_BACKGROUND = 0;
+	LAYER_PRE_WORLD = 1;
+	LAYER_OPAQUE = 2;
+	LAYER_DEFERRED_SHADING = 3;
+	LAYER_OPAQUE_UNLIT = 4;
+	LAYER_SKY = 5;
+	LAYER_TRANSLUCENT = 6;
+	LAYER_SUBTRACTIVE = 7;
+	LAYER_ADDITIVE = 8;
+	LAYER_POST_PROCESS = 9;
+	LAYER_OVERLAY = 10;
+	LAYER_COUNT = 11;
 };
 
 enum RenderMask {

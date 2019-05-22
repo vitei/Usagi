@@ -45,7 +45,6 @@ namespace usg{
 			PipelineStateDecl		transparentPipeline;
 			PipelineStateDecl		depthPassPipeline;
 			PipelineStateDecl		omniDepthPassPipeline;
-			PipelineStateDecl		translucentStateCmp;
 		} pipelines;
 
 		VertexElement vertexElements[MAX_VERTEX_ATTRIBUTES+1+(2*exchange::Shape::singleAttributes_max_count)];	// +1 for cap
@@ -78,7 +77,7 @@ namespace usg{
 		uint32					singleAttributesNum;
 		Vector4f				singleAttributeValues[exchange::Shape::singleAttributes_max_count];
 
-		RenderNode::Layer		layer;
+		RenderLayer				layer;
 		uint8					priority;
 		uint8					uLodIndex;
 	};

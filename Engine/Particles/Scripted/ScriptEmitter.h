@@ -30,7 +30,7 @@ namespace usg{
 		virtual void CalculateMaxBoundingArea(usg::Sphere& sphereOut);
 		virtual bool RequiresCPUUpdate() const { return m_bRequiredCPUUpdate; }
 		virtual void SetScale(float fScale);
-		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
+		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& scenePasses) override;
 
 		// Script specific functions
 		void SetInstanceData(const Matrix4x4& mLocalMatrix, float fParticleScale, float fTriggerTime);

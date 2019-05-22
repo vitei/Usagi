@@ -9,7 +9,7 @@ import 'Engine/Graphics/Materials/Material.proto';
 
 package usg.particles;
 
-enum RenderLayer
+enum TransparencyLayer
 {
 	option (nanopb_enumopt).long_names = false;
 	LAYER_OPAQUE = 0;
@@ -163,7 +163,7 @@ message EmissionVariables
 
 message SortSettings
 {
-	required RenderLayer	eRenderLayer = 1;
+	required TransparencyLayer	eRenderLayer = 1;
 	required uint32			uPriority = 2;
 	required bool			bWriteDepth = 3;
 	optional float 			fDepthOffset = 4;

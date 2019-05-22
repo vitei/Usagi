@@ -16,10 +16,20 @@
 namespace usg {
 
 
-void RenderNodeEx::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass)
+void Model::RenderMesh::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes)
 {
-	// FIXME: Only need to change one or the others. Need to change if we enable/disable deferred on the fly
-	pDevice->ChangePipelineStateRenderPass(renderPass, m_pipelineState);
+	if (passes.IsRenderPassDeferred(*this))
+	{
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.deferredPipeline);
+	}
+	else if (passes.IsRenderPassTranslucent(*this))
+	{
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.transparentPipeline);
+	}
+	else
+	{
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.defaultPipeline);
+	}
 }
 	
 Model::RenderMesh::RenderMesh() : RenderNodeEx()
@@ -27,6 +37,7 @@ Model::RenderMesh::RenderMesh() : RenderNodeEx()
 	m_uOverrides = 0;
 	m_uReqOverrides = 0;
 	m_bCanHaveShadow = false;
+	m_pMeshResource = nullptr;
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
 	{
 		m_pOverridesConstants[i] = NULL;
@@ -42,6 +53,7 @@ Model::RenderMesh::~RenderMesh()
 
 void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
 {
+	m_pMeshResource = pMesh;
 	const char* pszName = pModel->GetResource()->GetName().CStr();
 	for (uint32 i = 0; i < ARRAY_SIZE(pMesh->vertexBuffer); ++i) {
 		SetVertexBuffer(i, &pMesh->vertexBuffer[i]);
@@ -51,11 +63,11 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	//	SetMaterial(&pMesh->material);
 	m_pszName = pszName;
 	m_uLod = pMesh->uLodIndex;
-	m_bCanHaveShadow = pMesh->layer < RenderNode::LAYER_TRANSLUCENT;
+	m_bCanHaveShadow = pMesh->layer < RenderLayer::LAYER_TRANSLUCENT;
 
 	if (bDepth)
 	{
-		SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
+		SetLayer(usg::RenderLayer::LAYER_TRANSLUCENT);
 		SetPriority(0);
 	}
 	else

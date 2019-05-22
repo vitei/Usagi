@@ -717,7 +717,7 @@ void Model::RestoreDefaultLayer()
 	}
 }
 
-void Model::SetLayer(usg::RenderNode::Layer uLayer)
+void Model::SetLayer(usg::RenderLayer uLayer)
 {
 	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
 	{
@@ -818,12 +818,12 @@ void Model::SetFade(bool bFade, float fAlpha)
 			if (pResMesh->bCanFade)
 			{
 				bTranslucent = true;
-				m_meshArray[i]->SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
+				m_meshArray[i]->SetLayer(usg::RenderLayer::LAYER_TRANSLUCENT);
 				m_meshArray[i]->SetPriority(1);
 			}
 			else
 			{
-				m_meshArray[i]->SetLayer(usg::RenderNode::LAYER_TRANSLUCENT);
+				m_meshArray[i]->SetLayer(usg::RenderLayer::LAYER_TRANSLUCENT);
 				m_meshArray[i]->SetPriority(2);
 			}		
 		}
@@ -833,7 +833,6 @@ void Model::SetFade(bool bFade, float fAlpha)
 			m_meshArray[i]->SetPriority(pResMesh->priority);
 		}
 		// Need to cache these pipelines
-		//m_meshArray[i]->SetPipelineState(bTranslucent ? pResMesh->GetPipeline(renderPass).translucentStateCmp : pResMesh->GetPipeline(renderPass).defaultPipeline);
 		renderPass = m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]);
 	}
 

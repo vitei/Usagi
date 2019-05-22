@@ -72,7 +72,7 @@ namespace usg {
 		m_shadowColor.Assign(0.05f, 0.05f, 0.1f, 1.0f);
 		m_eActiveViewType = VIEW_CENTRAL;
 
-		for (int i = 0; i < RenderNode::LAYER_COUNT; i++)
+		for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 		{
 			m_uVisibleNodes[i] = 0;
 		}
@@ -154,7 +154,7 @@ namespace usg {
 
 	void ViewContext::ClearLists()
 	{
-		for (int i = 0; i < RenderNode::LAYER_COUNT; i++)
+		for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 		{
 			//m_drawLists[i].Clear();
 			m_uVisibleNodes[i] = 0;
@@ -313,9 +313,9 @@ namespace usg {
 
 		// Sort by layer, id, possibly material, and by distance is transparent
 		// FIXME: This needs to be more intelligent, an insertion sort when adding/ removing a node
-		for (int uLayer = 0; uLayer < RenderNode::LAYER_COUNT; uLayer++)
+		for (int uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
-			if (uLayer == RenderNode::LAYER_TRANSLUCENT)
+			if (uLayer == RenderLayer::LAYER_TRANSLUCENT)
 			{
 				qsort(m_pVisibleNodes[uLayer], m_uVisibleNodes[uLayer], sizeof(RenderNode*), CompareSortedNodes);
 			}
@@ -358,7 +358,7 @@ namespace usg {
 		renderContext.pGlobalDescriptors = &m_globalDescriptors[m_eActiveViewType];
 		renderContext.pPostFX = m_pPostFXSys;
 
-		for (uint32 uLayer = 0; uLayer < RenderNode::LAYER_COUNT; uLayer++)
+		for (uint32 uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
 			//for(List<RenderNode>::Iterator it = m_drawLists[uLayer].Begin(); !it.IsEnd(); ++it)
 			for (uint32 i = 0; i < m_uVisibleNodes[uLayer]; i++)
@@ -367,7 +367,7 @@ namespace usg {
 				node->Draw(pContext, renderContext);
 			}
 
-			if (uLayer == RenderNode::LAYER_OPAQUE_UNLIT)
+			if (uLayer == RenderLayer::LAYER_OPAQUE_UNLIT)
 			{
 				renderContext.eRenderPass = RenderNode::RENDER_PASS_FORWARD;
 				if (m_pPostFXSys)

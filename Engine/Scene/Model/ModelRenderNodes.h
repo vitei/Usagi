@@ -33,7 +33,6 @@ namespace usg {
 		{
 			m_descriptorSet.CleanUp(pDevice);
 		}
-		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) override;
 
 
 		void SetVertexBuffer( uint32 index, const VertexBuffer* pBuffer )
@@ -78,6 +77,13 @@ namespace usg {
 		DescriptorSet			m_descriptorSet;
 		PipelineStateHndl		m_pipelineState;
 		PipelineStateHndl		m_omniDepthPipelineState;
+
+		PipelineStateDecl		defaultPipeline;
+		PipelineStateDecl		deferredPipeline;
+		PipelineStateDecl		transparentPipeline;
+		PipelineStateDecl		depthPassPipeline;
+		PipelineStateDecl		omniDepthPassPipeline;
+
 		usg::Color				m_blendColor;
 		const IndexBuffer*		m_pIndexBuffer;
 		VertexBufferSet			m_vertexBuffer[ModelResource::Mesh::VERTEX_BUFFER_NUM];
@@ -108,6 +114,9 @@ namespace usg {
 		uint8 GetLod() { return m_uLod; }
 		void SetRenderMaskWithShadowCheck(uint32 uMask);
 
+		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes) override;
+
+
 	protected:
 		enum 
 		{
@@ -116,6 +125,7 @@ namespace usg {
 			OVERRIDE_COUNT = 2
 		};
 
+		const ModelResource::Mesh*	m_pMeshResource;
 		UVMapper					m_uVMapper[ModelResource::Mesh::MAX_UV_STAGES];
 		ConstantSet*				m_pOverridesConstants[OVERRIDE_COUNT];
 		const char*					m_pszName;

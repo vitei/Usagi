@@ -33,7 +33,7 @@ IMGuiRenderer::IMGuiRenderer() :
 	g_spGUIRenderer = this;
 	m_vOffset.Assign(0.0f, 0.0f);
 	m_bActive = false;
-	SetLayer(RenderNode::LAYER_OVERLAY);
+	SetLayer(RenderLayer::LAYER_OVERLAY);
 	SetPriority(128);	// After the opaque, very last
 }
 

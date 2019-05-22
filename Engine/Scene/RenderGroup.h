@@ -45,6 +45,7 @@ public:
 	bool DrawnLastFrame() const;
 	uint32 GetLastUpdateFrame() const { return m_uLastUpdate; }
 	void VisibilityFunc(GFXDevice* pDevice, const Matrix4x4& mViewMat);
+	void MarkRenderPassDirty() { m_bRenderPassDirty = true; }
 
 	enum
 	{
@@ -58,6 +59,7 @@ public:
 
 	void RenderPassChanged(class SceneRenderPasses& passSet, GFXDevice* pDevice);
 private:
+	void UpdateRenderPasses(GFXDevice* pDevice);
 	void NotifyRenderPassChanged(GFXDevice* pDevice, uint32 uContext, RenderNode* pNode, const RenderPassHndl& hndl);
 	bool GetLodInt(const Vector4f& cameraPos, uint32 &lodOut, float fLODBias=1.0f);
 	void VisibilityUpdate(GFXDevice* pDevice);
@@ -86,6 +88,7 @@ private:
 	bool					m_bVisiblityUpdate;
 	bool					m_bViewDistanceUpdate;
 	bool					m_bSort;
+	bool					m_bRenderPassDirty;
 	LODGroup				m_lodGroups[MAX_LOD_GROUPS];
 	uint32					m_uLODGroups;
 	uint32					m_uRenderMask;
@@ -119,6 +122,10 @@ inline bool RenderGroup::GetLod(const Vector4f &cameraPos, uint32& lodOut, float
 
 inline void RenderGroup::VisibilityFunc(GFXDevice* pDevice, const Matrix4x4& mViewMat)
 {
+	if (m_bRenderPassDirty)
+	{
+		UpdateRenderPasses(pDevice);
+	}
 	if (m_bVisiblityUpdate)
 	{
 		VisibilityUpdate(pDevice);

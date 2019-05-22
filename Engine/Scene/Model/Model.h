@@ -71,7 +71,7 @@ public:
 	RenderMesh* GetRenderMesh(uint32 uMeshId);
 	const RenderMesh* GetRenderMesh(uint32 uMeshId) const;
 
-	void SetLayer(usg::RenderNode::Layer uLayer);
+	void SetLayer(usg::RenderLayer uLayer);
 	void SetPriority(uint8 uPriority);
 	void RestoreDefaultLayer();
 	bool IsOnScreen();

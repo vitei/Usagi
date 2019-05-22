@@ -33,7 +33,7 @@ static const usg::DescriptorDeclaration g_descriptorDeclFade[] =
 SkyFog::SkyFog(void)
 {
 	m_bValid = false;
-	SetLayer(RenderNode::LAYER_SKY);
+	SetLayer(RenderLayer::LAYER_SKY);
 }
 
 SkyFog::~SkyFog(void)

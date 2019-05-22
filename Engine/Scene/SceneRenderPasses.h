@@ -24,16 +24,16 @@ public:
 	void SetDeferredEnabled(bool bEnabled) { m_bDeferredEnabled = bEnabled; }
 	void AddCallback(ChangeCallback callback, void* pUserData);
 	void RemoveCallback(ChangeCallback callback, void* pUserData);
-	void SetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, const RenderPassHndl& hndl);
-	void RemovePass(RenderNode::Layer eLayer, uint32 uPriority);
+	void SetRenderPass(RenderLayer eLayer, uint32 uPriority, const RenderPassHndl& hndl);
+	void RemovePass(RenderLayer eLayer, uint32 uPriority);
 	void ClearAllPasses();
 	void ClearPrevPasses();
 	void UpdateEnd(GFXDevice* pDevice);
-	bool IsRenderPassDeferred(RenderNode::Layer eLayer, uint32 uPriority) const;
+	bool IsRenderPassDeferred(RenderLayer eLayer, uint32 uPriority) const;
 	bool IsRenderPassDeferred(const RenderNode& node) const;
-	bool IsRenderPassTranslucent(RenderNode::Layer eLayer, uint32 uPriority) const;
+	bool IsRenderPassTranslucent(RenderLayer eLayer, uint32 uPriority) const;
 	bool IsRenderPassTranslucent(const RenderNode& node) const;
-	const RenderPassHndl GetRenderPass(RenderNode::Layer eLayer, uint32 uPriority, bool bPrevSet = false) const;
+	const RenderPassHndl GetRenderPass(RenderLayer eLayer, uint32 uPriority, bool bPrevSet = false) const;
 	const RenderPassHndl GetRenderPass(const RenderNode& node, bool bPrevSet = false) const;
 	bool GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const;
 	bool RenderPassesUpdated() const { return !m_prevEntries.empty(); }
@@ -43,7 +43,7 @@ private:
 
 	struct RenderPassEntry
 	{
-		RenderNode::Layer	eLayer;
+		RenderLayer	eLayer;
 		uint32				uPriority;
 		RenderPassHndl		hndl;
 

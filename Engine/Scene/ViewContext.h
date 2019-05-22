@@ -79,8 +79,8 @@ private:
 	LightingContext			m_LightingContext;
 	ViewType				m_eActiveViewType;
 
-	RenderNode*				m_pVisibleNodes[RenderNode::LAYER_COUNT][MAX_NODES_PER_LAYER];
-	uint32					m_uVisibleNodes[RenderNode::LAYER_COUNT];
+	RenderNode*				m_pVisibleNodes[RenderLayer::LAYER_COUNT][MAX_NODES_PER_LAYER];
+	uint32					m_uVisibleNodes[RenderLayer::LAYER_COUNT];
 	bool					m_bFirstFrame;
 
 };

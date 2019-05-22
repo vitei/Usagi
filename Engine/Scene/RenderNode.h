@@ -25,22 +25,6 @@ public:
 	RenderNode();
 	virtual ~RenderNode();
 
-	enum Layer
-	{
-		LAYER_BACKGROUND = 0,	// Planets, suns, etc
-		LAYER_PRE_WORLD,
-		LAYER_OPAQUE,
-		LAYER_DEFERRED_SHADING,
-		LAYER_OPAQUE_UNLIT,
-		LAYER_SKY,	// Not lit, no point running it through the deferred shading
-		LAYER_TRANSLUCENT,
-		LAYER_SUBTRACTIVE,
-		LAYER_ADDITIVE,
-		LAYER_POST_PROCESS,
-		LAYER_OVERLAY,
-		LAYER_COUNT
-	};
-
 	enum ComparisonShift
 	{
 		COMPARISON_SHIFT_PRIORITY = 52,
@@ -65,13 +49,13 @@ public:
 	};
 
 	void SetParent(RenderGroup* pParent);
-	void SetLayer(Layer eLayer) { ASSERT(eLayer < LAYER_COUNT); m_eLayer = eLayer; }
+	void SetLayer(RenderLayer eLayer);
 	void SetPriority(uint8 uPriority) { m_uPriority = uPriority; SetPriorityCmpValue(); }
 	void SetRenderMask(uint32 uMask);
 	void SetRenderMaskIncShadow(uint32 uMask);
 	uint32 GetRenderMask() const { return m_uRenderMask; }
 
-	Layer	GetLayer() const { return m_eLayer; }
+	RenderLayer	GetLayer() const { return m_eLayer; }
 	uint8	GetPriority() const { return m_uPriority; }
 
 
@@ -80,7 +64,7 @@ public:
 
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) { ASSERT(false); return false; }
 	// Should be overloaded, but not necessary for post process effects not ever assigned to a render group
-	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass) {} // { ASSERT(false); }
+	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes) {} // { ASSERT(false); }
 
 	bool GetPostEffect() { return m_bPostEffect; }
 	bool HasShadow() { return m_bHasShadow; }
@@ -101,7 +85,7 @@ protected:
 private:
 	PRIVATIZE_COPY(RenderNode);
 	RenderGroup*			m_pParent;
-	Layer					m_eLayer;
+	RenderLayer				m_eLayer;
 	uint8					m_uPriority;
 	uint32					m_uRenderMask;
 	bool					m_bPostEffect;

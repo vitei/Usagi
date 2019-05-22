@@ -39,6 +39,16 @@ void RenderNode::SetParent(RenderGroup* pParent)
 }
 
 
+void RenderNode::SetLayer(RenderLayer eLayer)
+{
+	ASSERT(eLayer < LAYER_COUNT); 
+	m_eLayer = eLayer; 
+	if (m_pParent)
+	{
+		m_pParent->MarkRenderPassDirty();
+	}
+}
+
 void RenderNode::SetMaterialCmpVal(const PipelineStateHndl& hndl , const Texture* pTexture0)
 {
 	uint64 uMask = (COMPARISON_SHIFT_TEXTURE|COMPARISON_MASK_EFFECT);

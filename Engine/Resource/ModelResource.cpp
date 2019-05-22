@@ -49,12 +49,12 @@ static const VertexElement g_instanceElements[]  =
 
 
 
-static RenderNode::Layer layerMapping[] = 
+static RenderLayer layerMapping[] = 
 {
-	RenderNode::LAYER_OPAQUE,
-	RenderNode::LAYER_TRANSLUCENT,
-	RenderNode::LAYER_SUBTRACTIVE,
-	RenderNode::LAYER_ADDITIVE
+	RenderLayer::LAYER_OPAQUE,
+	RenderLayer::LAYER_TRANSLUCENT,
+	RenderLayer::LAYER_SUBTRACTIVE,
+	RenderLayer::LAYER_ADDITIVE
 };
 
 
@@ -537,12 +537,25 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	pipelineState.alphaState.uColorTargets = 1;
 	m_meshArray[m_uMeshCount].pipelines.defaultPipeline = pipelineState;
 
-	pipelineState.pEffect = pTransparentEffect;
-	m_meshArray[m_uMeshCount].pipelines.transparentPipeline = pipelineState;
-
 	pipelineState.pEffect = pDeferredEffect;
 	pipelineState.alphaState.uColorTargets = 5;
 	m_meshArray[m_uMeshCount].pipelines.deferredPipeline = pipelineState;
+
+	pipelineState.alphaState.uColorTargets = 1;
+	pipelineState.pEffect = pTransparentEffect;
+	if (m_meshArray[m_uMeshCount].layer < RenderLayer::LAYER_TRANSLUCENT)
+	{
+		// FIXME: Default blend settings for now, just here to handle our issues with default imported blender materials
+		alphaDecl.bBlendEnable = true;
+		alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
+		alphaDecl.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
+		alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
+
+		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_ADD;
+		alphaDecl.srcBlendAlpha = usg::BLEND_FUNC_ZERO;
+		alphaDecl.dstBlendAlpha = usg::BLEND_FUNC_ONE;
+	}
+	m_meshArray[m_uMeshCount].pipelines.transparentPipeline = pipelineState;
 
 	
 	for (uint32 i = 0; i < pMaterial->constants_count; i++)
@@ -697,8 +710,6 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 
 	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
 	depthPassP.eDepthFunc = usg::DEPTH_TEST_EQUAL;
-
-	m_meshArray[m_uMeshCount].pipelines.translucentStateCmp = pipelineState;
 }
 
 uint32 ModelResource::GetInstanceDecl()

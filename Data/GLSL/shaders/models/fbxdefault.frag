@@ -126,7 +126,7 @@ void main(void)
 	{
 		vec4 vRead = texture(sampler0, vo_vTexCoord01.xy);
 		vDiffuse.rgb *= vRead.rgb;
-		vDiffuse.a = 1.0-vRead.a;
+		vDiffuse.a = vRead.a;
 	}
 	vDiffuse *= vo_vColor;
 	vDiffuse *= uMaterial.diffuse;
