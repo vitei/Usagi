@@ -165,6 +165,7 @@ void RenderGroup::UpdateRenderPasses(GFXDevice* pDevice)
 	{
 		RenderPassChanged(m_pScene->GetRenderPasses(i), pDevice);
 	}
+	m_bRenderPassDirty = false;
 }
 
 void RenderGroup::UpdateMask()
