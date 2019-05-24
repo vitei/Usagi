@@ -28,7 +28,7 @@ RenderGroup::RenderGroup()
 	m_pTransform = NULL;
 	m_uRenderMask = 0;
 	m_bPrevValid = false;
-	m_uLastUpdate = 0;
+	m_uLastUpdate = USG_INVALID_ID;
 	m_bVisiblityUpdate = false;
 	m_bViewDistanceUpdate = false;
 	m_viewData.fSortDistance = 0.0f;
@@ -46,7 +46,7 @@ RenderGroup::~RenderGroup()
 
 void RenderGroup::Init(const TransformNode* pTransform, Scene* pScene)
 {
-	m_uLastUpdate = pScene->GetFrame();
+	m_uLastUpdate = pScene->GetFrame()-1;
 	for(uint32 i=0; i<MAX_LOD_GROUPS; i++)
 	{
 		for (int i = 0; i < MAX_LOD_GROUPS; i++)

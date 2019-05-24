@@ -76,7 +76,7 @@ void Bone::AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode
 	if(!m_pRenderGroup)
 	{
 		m_pRenderGroup = pScene->CreateRenderGroup(m_pTransformNode);
-		m_pRenderGroup->UseVisibilityUpdate(bDynamic);
+		m_pRenderGroup->UseVisibilityUpdate(true);
 	}
 	m_pRenderGroup->AddRenderNode(pDevice, pNode, uLod);
 }

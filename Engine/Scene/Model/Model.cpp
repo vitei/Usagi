@@ -348,7 +348,7 @@ void Model::AddToSceneInt(GFXDevice* pDevice)
 	if ((bVisible || bAddDepth) && !m_bPerBoneCulling && !m_pRenderGroup)
 	{
 		m_pRenderGroup = m_pScene->CreateRenderGroup(m_pTransformNode);
-		m_pRenderGroup->UseVisibilityUpdate(m_bDynamic);
+		m_pRenderGroup->UseVisibilityUpdate(true);
 	}
 
 	if (bVisible != m_bVisible)
