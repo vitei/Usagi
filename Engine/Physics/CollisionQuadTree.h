@@ -89,7 +89,7 @@ public:
 	void initVertexBuffer( GFXDevice* pDevice, VertexBuffer& vertexBuffer ) const;
 
 #ifdef DRAW_VISIBLE_MODEL
-	void SetupVisibleModel( GFXDevice* pDevice, Scene* pScene );
+	void SetupVisibleModel( GFXDevice* pDevice, ResourceMgr* pResMgr, Scene* pScene );
 #endif	
 
 	class Node

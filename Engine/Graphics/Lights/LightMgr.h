@@ -25,6 +25,7 @@ class ProjectionLight;
 class GFXDevice;
 class Scene;
 class ViewContext;
+class ResourceMgr;
 
 
 class LightMgr 
@@ -57,7 +58,7 @@ public:
 
 	void			RemoveLight(const Light* pLight);
 
-	Light*			CreateLight(GFXDevice* pDevice, const struct _LightSpec &spec);
+	Light*			CreateLight(GFXDevice* pDevice, ResourceMgr* pResMgr, const struct _LightSpec &spec);
 	
 	void			GetActiveDirLights(List<DirLight>& lightsOut) const; 
 	void			GetPointLightsInView(const Camera* pCamera, List<PointLight>& lightsOut) const;

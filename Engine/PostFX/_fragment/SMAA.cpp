@@ -96,7 +96,7 @@ namespace usg {
 
 	}
 
-	void SMAA::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
+	void SMAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
 	{
 		m_pSys = pSys;
 		m_pDestTarget = pDst;
@@ -138,33 +138,33 @@ namespace usg {
 		pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		pipelineDecl.layout.descriptorSets[1] = depthEdgeDescriptors;
 		pipelineDecl.layout.uDescriptorSetCount = 2;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAADepthEdgeDetection");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAADepthEdgeDetection");
 		m_depthEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Luma Edge detection
 		pipelineDecl.layout.descriptorSets[1] = colorLumaEdgeDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAALumaEdgeDetection");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAALumaEdgeDetection");
 		m_lumaEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 		// Color edge detection
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAAColorEdgeDetection");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAAColorEdgeDetection");
 		m_colorEdgeDetectEffect = pDevice->GetPipelineState(m_renderTargets[RT_EDGES].GetRenderPass(), pipelineDecl);
 
 
 		// Blend weight calculation
 		pipelineDecl.layout.descriptorSets[1] = blendWeightDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAABlendWeightCalc");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAABlendWeightCalc");
 		m_blendWeightEffect = pDevice->GetPipelineState(m_renderTargets[RT_BLEND_WEIGHT].GetRenderPass(), pipelineDecl);
 
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[1] = neighborHoodBlendDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
 		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
 #if SMAA_REPROJECTION
 		// Resolve
 		pipelineDecl.layout.descriptorSets[0] = resolveDescriptors;
-		pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.SMAAResolve");
+		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAAResolve");
 		m_resolveEffect = pDevice->GetPipelineState(pipelineDecl);
 #endif
 
@@ -189,8 +189,8 @@ namespace usg {
 #endif
 
 		m_blendWeightDescriptorSet.SetImageSamplerPair(1, m_colorBuffers[RT_EDGES].GetTexture(), m_linearSampler);
-		m_blendWeightDescriptorSet.SetImageSamplerPair(2, ResourceMgr::Inst()->GetTexture(pDevice, "SMAA_AreaTex"), m_linearSampler);
-		m_blendWeightDescriptorSet.SetImageSamplerPair(3, ResourceMgr::Inst()->GetTexture(pDevice, "SMAA_SearchTex"), m_pointSampler);
+		m_blendWeightDescriptorSet.SetImageSamplerPair(2, pResource->GetTexture(pDevice, "SMAA_AreaTex"), m_linearSampler);
+		m_blendWeightDescriptorSet.SetImageSamplerPair(3, pResource->GetTexture(pDevice, "SMAA_SearchTex"), m_pointSampler);
 
 		m_neighbourBlendDescriptorSet.SetImageSamplerPair(2, m_colorBuffers[RT_BLEND_WEIGHT].GetTexture(), m_linearSampler);
 	}

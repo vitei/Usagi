@@ -31,7 +31,7 @@ LinearDepth::~LinearDepth()
 
 }
 
-void LinearDepth::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pResult)
+void LinearDepth::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pResult)
 {
 	ASSERT(false);
 #if 0
@@ -43,7 +43,7 @@ void LinearDepth::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pResul
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.ePrimType = PT_TRIANGLES;
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "lineardepth");
+	pipelineDecl.pEffect = pResource->GetEffect(pDevice, "lineardepth");
 
 
 	m_material.Init(pDevice, pDevice->GetPipelineState(pipelineDecl), pDevice->GetDescriptorSetLayout(g_descriptorDecl));

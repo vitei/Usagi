@@ -20,7 +20,7 @@ public:
 	LinearDepth();
 	~LinearDepth();
 
-	virtual void Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pResult);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pResult);
 	virtual void CleanUp(GFXDevice* pDevice);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	const TextureHndl& GetTexture() { return m_depthRT.GetColorTexture(); }

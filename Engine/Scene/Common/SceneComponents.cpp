@@ -55,7 +55,7 @@ namespace usg
 
 		if (bLightNull)
 		{
-			p.GetRuntimeData().pLight = handles.pScene->GetLightMgr().CreateLight(handles.pDevice, p.GetData().spec);
+			p.GetRuntimeData().pLight = handles.pScene->GetLightMgr().CreateLight(handles.pDevice, handles.pResourceMgr, p.GetData().spec);
 			// We've just initialised to the default values
 			p.GetRuntimeData().pLight->SwitchOn(false);	// Position may not be valid yet
 			p.GetData().bFullIntensity = true;

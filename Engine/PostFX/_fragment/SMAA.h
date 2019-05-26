@@ -20,7 +20,7 @@ public:
 	SMAA();
 	~SMAA();
 
-	virtual void Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
 	virtual void CleanUp(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);

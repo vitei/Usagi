@@ -62,7 +62,7 @@ namespace usg
 			Entity bodyBone = vehicle.GetEntity()->GetChildEntityByName(handles, "locatorBody");
 			ASSERT(bodyBone != nullptr);
 			auto& sceneRtd = *handles.pPhysicsScene;
-			r.first = sceneRtd.pMeshCache->GetConvexMesh(vehicle->szCollisionModel,"locatorBody");
+			r.first = sceneRtd.pMeshCache->GetConvexMesh(handles, vehicle->szCollisionModel,"locatorBody");
 			r.second = ToPhysXTransform(TransformTool::GetRelativeTransform(vehicle.GetEntity(), bodyBone, handles));
 		}
 		else
@@ -298,7 +298,7 @@ namespace usg
 	static uint32 FindWheels(Required<VehicleCollider> vehicle, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelWidths, usg::array<float, PhysicsConstants::VehicleMaxNumWheels>& wheelRadii, usg::array<Vector3f, PhysicsConstants::VehicleMaxNumWheels>& wheelPositions, usg::array<WheelHelper, PhysicsConstants::VehicleMaxNumWheels>& wheelHelpers, ComponentLoadHandles& handles)
 	{
 		ASSERT(vehicle->szCollisionModel[0] != 0);
-		CollisionModelResHndl collisionModelHandle = ResourceMgr::Inst()->GetCollisionModel(vehicle->szCollisionModel);
+		CollisionModelResHndl collisionModelHandle = handles.pResourceMgr->GetCollisionModel(vehicle->szCollisionModel);
 
 		auto getWheelDataFromBone = [](CollisionModelResHndl& res, const char* szBoneName, float& fWheelRadius, float& fWheelWidth) {
 			const auto boneData = res->GetBoneData(utl::CRC32(szBoneName));

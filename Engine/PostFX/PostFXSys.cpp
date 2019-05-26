@@ -37,7 +37,7 @@ const GFXBounds PostFXSys::GetBounds() const
 	return r;
 }
 
-void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uInitFlags)
+void PostFXSys::Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uInitFlags)
 {
 	// TODO: Support various render targets
 	
@@ -64,9 +64,9 @@ void PostFXSys::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 u
 	m_fullScreenVB.Init(pDevice, verts, sizeof(PositionVertex), 4, "FullScreenVB");
 	m_fullScreenIB.Init(pDevice, iIndices, 6, PT_TRIANGLES);
 
-	m_dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
+	m_dummyDepth = pResource->GetTexture(pDevice, "white_default");
 
-	m_platform.Init(this, pDevice, uInitFlags, uWidth, uHeight);
+	m_platform.Init(this, pResource, pDevice, uInitFlags, uWidth, uHeight);
 }
 
 void PostFXSys::CleanUp(GFXDevice* pDevice)

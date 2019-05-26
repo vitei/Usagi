@@ -21,9 +21,9 @@ namespace usg
 	}
 
 
-	Model* ModelMgr::GetModel(const char* szModelName, bool bDynamic, bool bPerBoneCulling)
+	Model* ModelMgr::GetModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling)
 	{
-		U8String cmpName = ResourceMgr::Inst()->GetModelDir() + szModelName;
+		U8String cmpName = pResMgr->GetModelDir() + szModelName;
 		Model* pModel = GetFreeInstance(cmpName);
 
 		if(!pModel)	// Handle creating a new instance
@@ -54,13 +54,13 @@ namespace usg
 			pModel->SetInUse(false);
 	}
 
-	void ModelMgr::PreloadModel(const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount)
+	void ModelMgr::PreloadModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount)
 	{
 		List<Model> model;
 		// First load the models
 		for(uint32 i=0; i<uCount; i++)
 		{
-			model.AddToEnd( GetModel(szModelName, bDynamic, bPerBoneCulling) );
+			model.AddToEnd( GetModel(pResMgr, szModelName, bDynamic, bPerBoneCulling) );
 		}
 
 		// Now add them to the free list

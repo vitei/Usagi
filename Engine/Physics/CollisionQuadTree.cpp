@@ -1104,7 +1104,7 @@ void CollisionQuadTree::initVertexBuffer( GFXDevice* pDevice, VertexBuffer& vert
 }
 
 #ifdef DRAW_VISIBLE_MODEL
-void CollisionQuadTree::SetupVisibleModel( GFXDevice* pDevice, Scene* pScene )
+void CollisionQuadTree::SetupVisibleModel( GFXDevice* pDevice, ResourceMgr* pResMgr, Scene* pScene )
 {
 	ASSERT( pDevice != NULL && pScene != NULL );
 
@@ -1115,7 +1115,7 @@ void CollisionQuadTree::SetupVisibleModel( GFXDevice* pDevice, Scene* pScene )
 	m_VisibleMesh.GetVertexBuffer().Init(pDevice, GetStandardDeclarationId(VT_POSITION), pVertexStream, m_uVertices, "CollisionQuadTree_visualize" );
 	uint32* pIndexStream = reinterpret_cast<uint32*>( const_cast<TriangleIndices*>( m_pTriangles ) );
 	m_VisibleMesh.GetIndexBuffer().Init(pDevice, pIndexStream, m_uTriangles * 3, PT_TRIANGLES, true);
-	m_pVisibleEffect = ResourceMgr::Inst()->GetEffectBinding(pDevice, "solid", GetStandardDeclarationId( VT_POSITION ));
+	m_pVisibleEffect = pResMgr->GetEffectBinding(pDevice, "solid", GetStandardDeclarationId( VT_POSITION ));
 
 
 	DepthStencilStateDecl depthDecl;

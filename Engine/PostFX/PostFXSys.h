@@ -43,7 +43,7 @@ public:
 	PostFXSys();
 	~PostFXSys();
 
-	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
+	void Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
 	void CleanUp(GFXDevice* pDevice);
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);

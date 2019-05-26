@@ -374,7 +374,7 @@ Light* LightMgr::FindLight(const char* szName)
 
 
 
-Light* LightMgr::CreateLight(GFXDevice* pDevice, const LightSpec &light)
+Light* LightMgr::CreateLight(GFXDevice* pDevice, ResourceMgr* pResMgr, const LightSpec &light)
 {
 	Light* newLight = NULL;
 	switch (light.base.kind)
@@ -430,7 +430,7 @@ Light* LightMgr::CreateLight(GFXDevice* pDevice, const LightSpec &light)
 		Matrix4x4 mProj;
 		mProj.Perspective(Math::DegToRad(light.proj.fFov), light.proj.fAspect, 0.1f, light.atten.fFar);
 		pProj->SetProjectionMtx(mProj);
-		pProj->SetTexture(pDevice, ResourceMgr::Inst()->GetTexture(pDevice, light.proj.texName));
+		pProj->SetTexture(pDevice, pResMgr->GetTexture(pDevice, light.proj.texName));
 		pProj->SetRange(light.atten.fNear, light.atten.fFar);
 
 		// TODO: Set the texture

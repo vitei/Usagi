@@ -23,6 +23,7 @@ class PostEffect;
 class PostFXSys;
 class LinearDepth;
 class RenderTarget;
+class ResourceMgr;
 class Display;
 class SMAA;
 
@@ -32,7 +33,7 @@ public:
 	PostFXSys_ps();
 	~PostFXSys_ps();
 
-	void Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
+	void Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
 	void CleanUp(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -51,8 +52,8 @@ public:
 	void DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects);
 
 	// For setting up pipelines, will need the render pass in future
-	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
-	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const;
+	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& renderPass) const;
+	PipelineStateHndl GetGaussBlurPipeline(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& renderPass) const;
 	void SetupDownscale4x4(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight) const;
 	void SetupGaussBlur(GFXDevice* pDevice, ConstantSet& cb, DescriptorSet& des, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	float GaussianDistribution(float x, float y, float rho) const;

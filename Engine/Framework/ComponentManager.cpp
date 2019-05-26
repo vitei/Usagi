@@ -193,7 +193,7 @@ namespace usg
 	Entity ComponentManager::SpawnEntityFromTemplate(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams)
 	{
 		ASSERT(szFilename != NULL);
-		ProtocolBufferFile* pFile = usg::ResourceMgr::Inst()->GetBufferedFile(szFilename);
+		ProtocolBufferFile* pFile = ResourceMgr::Inst()->GetBufferedFile(szFilename);
 		HierarchyHeader fileHeader;
 		ASSERT(pFile != NULL);
 		bool bReadSucceeded = pFile->Read(&fileHeader);
@@ -214,7 +214,7 @@ namespace usg
 	void ComponentManager::ApplyTemplateToEntity(const char* szFilename, Entity root)
 	{
 		ASSERT(szFilename != NULL);
-		ProtocolBufferFile* pFile = usg::ResourceMgr::Inst()->GetBufferedFile(szFilename);
+		ProtocolBufferFile* pFile = m_componentLoadHandles.pResourceMgr->GetBufferedFile(szFilename);
 		ASSERT(pFile != NULL);
 		HierarchyHeader fileHeader;
 		bool bReadSucceeded = pFile->Read(&fileHeader);
@@ -229,7 +229,7 @@ namespace usg
 	void ComponentManager::PreloadAssetsFromTemplate(const char* szFilename, ComponentLoadHandles& handles)
 	{
 		ASSERT(szFilename != NULL);
-		ProtocolBufferFile* pFile = usg::ResourceMgr::Inst()->GetBufferedFile(szFilename);
+		ProtocolBufferFile* pFile = m_componentLoadHandles.pResourceMgr->GetBufferedFile(szFilename);
 		HierarchyHeader fileHeader;
 		ASSERT(pFile != NULL);
 		bool bReadSucceeded = pFile->Read(&fileHeader);
@@ -591,6 +591,7 @@ namespace usg
 		handlesOut.pDevice = m_componentLoadHandles.pDevice;
 		handlesOut.pScene = m_componentLoadHandles.pScene;
 		handlesOut.pModelMgr = m_componentLoadHandles.pModelMgr ;
+		handlesOut.pResourceMgr = m_componentLoadHandles.pResourceMgr;
 
 		if (parent)
 		{

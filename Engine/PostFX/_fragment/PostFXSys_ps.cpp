@@ -78,7 +78,7 @@ PostFXSys_ps::~PostFXSys_ps()
 	}
 }
 
-void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlags, uint32 uWidth, uint32 uHeight)
+void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uInitFlags, uint32 uWidth, uint32 uHeight)
 {
 	m_pParent = pParent;
 
@@ -206,8 +206,6 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
 	SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
 
-	ResourceMgr* pResMgr = ResourceMgr::Inst();
-
 #if 0
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
@@ -238,33 +236,33 @@ void PostFXSys_ps::Init(PostFXSys* pParent, GFXDevice* pDevice, uint32 uInitFlag
 	{
 		ASSERT((uInitFlags & PostFXSys::EFFECT_SMAA) == 0);
 		m_pFXAA = vnew(ALLOC_OBJECT) FXAA();
-		m_pFXAA->Init(pDevice, pParent, &m_screenRT[TARGET_LDR_1]);
+		m_pFXAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pFXAA;
 	}
 	if (uInitFlags & PostFXSys::EFFECT_SMAA)
 	{
 		ASSERT((uInitFlags & PostFXSys::EFFECT_FXAA) == 0);
 		m_pSMAA = vnew(ALLOC_OBJECT) SMAA();
-		m_pSMAA->Init(pDevice, pParent, &m_screenRT[TARGET_LDR_1]);
+		m_pSMAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSMAA;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_BLOOM)
 	{
 		m_pBloom = vnew(ALLOC_OBJECT) Bloom();
-		m_pBloom->Init(pDevice, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pBloom->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pBloom;
 	}
 	if (uInitFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
 		m_pSkyFog = vnew(ALLOC_OBJECT) SkyFog();
-		m_pSkyFog->Init(pDevice, pParent, uInitFlags&PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0]);
+		m_pSkyFog->Init(pDevice, pResMgr, pParent, uInitFlags&PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSkyFog;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
 		m_pDeferredShading = vnew(ALLOC_OBJECT) DeferredShading();
 		RenderTarget* pDst = uInitFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
-		m_pDeferredShading->Init(pDevice, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDeferredShading->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
 	}
 
@@ -557,9 +555,8 @@ void PostFXSys_ps::DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects)
 }
 
 
-PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
+PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass) const
 {
-	ResourceMgr* pResMgr = ResourceMgr::Inst();
 
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
@@ -575,10 +572,8 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, cons
 	return pDevice->GetPipelineState(renderPass, pipelineDecl);
 }
 
-PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, const RenderPassHndl& renderPass) const
+PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass) const
 {
-	ResourceMgr* pResMgr = ResourceMgr::Inst();
-
 	PipelineStateDecl pipelineDecl;
 
 

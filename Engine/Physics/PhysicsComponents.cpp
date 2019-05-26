@@ -859,7 +859,7 @@ namespace usg
 		PhysXMeshCache* pMeshCache = handles.pPhysicsScene->pMeshCache;
 		if (c->bConvex)
 		{
-			physx::PxConvexMesh* pConvexMesh = pMeshCache->GetConvexMesh(c->szCollisionModel, c->szMeshName);
+			physx::PxConvexMesh* pConvexMesh = pMeshCache->GetConvexMesh(handles, c->szCollisionModel, c->szMeshName);
 			rtd.pConvexMesh = pConvexMesh;
 			OnShapeLoaded(c, physx::PxConvexMeshGeometry(pConvexMesh, physx::PxMeshScale(c->fMeshScale)), handles);
 			rtd.pShape->setName(c->szCollisionModel);
@@ -870,7 +870,7 @@ namespace usg
 			if (c->szCollisionModel[0])
 			{
 				ASSERT(rtd.pTriangleMesh == nullptr);
-				rtd.pTriangleMesh = pMeshCache->GetTriangleMesh(c->szCollisionModel, c->bFlipNormals);
+				rtd.pTriangleMesh = pMeshCache->GetTriangleMesh(handles, c->szCollisionModel, c->bFlipNormals);
 			}
 			else
 			{

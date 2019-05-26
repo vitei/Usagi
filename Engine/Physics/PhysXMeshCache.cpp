@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Framework/GameComponents.h"
 #include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "PhysXMeshCache.h"
@@ -22,13 +23,13 @@ namespace usg
 
 	}
 
-	physx::PxTriangleMesh* PhysXMeshCache::GetTriangleMesh(const char* szCollisionModelResource, bool bFlipNormals)
+	physx::PxTriangleMesh* PhysXMeshCache::GetTriangleMesh(ComponentLoadHandles& handles, const char* szCollisionModelResource, bool bFlipNormals)
 	{
 		const uint32 uHash = utl::CRC32(szCollisionModelResource) ^ (const uint32)bFlipNormals;
 		auto it = m_triangleMeshCache.find(uHash);
 		if (it == m_triangleMeshCache.end())
 		{
-			CollisionModelResHndl handle = ResourceMgr::Inst()->GetCollisionModel(szCollisionModelResource);
+			CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
 			ASSERT(handle != nullptr);
 			const Vector3f* pVerts = handle->GetVertices();
 			const uint32 uVertexCount = handle->GetVertexCount();
@@ -65,27 +66,27 @@ namespace usg
 		return it->second;
 	}
 
-	void PhysXMeshCache::preloadConvexMesh(const char* szCollisionModelResource)
+	void PhysXMeshCache::preloadConvexMesh(ComponentLoadHandles& handles, const char* szCollisionModelResource)
 	{
-		CollisionModelResHndl handle = ResourceMgr::Inst()->GetCollisionModel(szCollisionModelResource);
+		CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
 		ASSERT(handle != nullptr);
 		if (handle != nullptr)
 		{
 			for (auto& bd : handle->GetSubmeshData())
 			{
-				GetConvexMesh(szCollisionModelResource, bd.uNameHash);
+				GetConvexMesh(handles, szCollisionModelResource, bd.uNameHash);
 			}
 		}
 	}
 
-	physx::PxConvexMesh* PhysXMeshCache::GetConvexMesh(const char* szCollisionModelResource, uint32 uBoneNameHash)
+	physx::PxConvexMesh* PhysXMeshCache::GetConvexMesh(ComponentLoadHandles& handles, const char* szCollisionModelResource, uint32 uBoneNameHash)
 	{
 		const bool bFetchSubmesh = uBoneNameHash != EmptyHash;
 		const uint32 uNameHash = utl::CRC32(szCollisionModelResource) ^ uBoneNameHash;
 		auto it = m_convexMeshCache.find(uNameHash);
 		if (it == m_convexMeshCache.end())
 		{
-			CollisionModelResHndl handle = ResourceMgr::Inst()->GetCollisionModel(szCollisionModelResource);
+			CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
 			ASSERT(handle != nullptr);
 
 			unique_ptr<vector<Vector3f>> boneVertices;
@@ -160,9 +161,9 @@ namespace usg
 		return it->second;
 	}
 
-	physx::PxConvexMesh* PhysXMeshCache::GetConvexMesh(const char* szCollisionModelResource, const char* szMeshName)
+	physx::PxConvexMesh* PhysXMeshCache::GetConvexMesh(ComponentLoadHandles& handles, const char* szCollisionModelResource, const char* szMeshName)
 	{
-		return GetConvexMesh(szCollisionModelResource, utl::CRC32(szMeshName));
+		return GetConvexMesh(handles, szCollisionModelResource, utl::CRC32(szMeshName));
 	}
 
 	static uint32 GetCylinderHash(const Vector3f& vCenter, const Vector3f& vDir, float fRadius, float fHeight, uint32 uCircleVertices)

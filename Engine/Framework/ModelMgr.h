@@ -14,6 +14,7 @@ namespace usg
 
 	class Model;
 	class Scene;
+	class ResourceMgr;
 
 	class ModelMgr : public InstanceMgr<Model>
 	{
@@ -22,10 +23,10 @@ namespace usg
 		ModelMgr();
 		~ModelMgr();
 
-		Model* GetModel(const char* szName, bool bDynamic, bool bPerBoneCulling);
+		Model* GetModel(ResourceMgr* pResMgr, const char* szName, bool bDynamic, bool bPerBoneCulling);
 		// Set to false for component systems where you are manually managing bone hierarchies
 		void SetAutoTransform(bool bAuto) { m_bAutoTransform = bAuto; }
-		void PreloadModel(const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount);
+		void PreloadModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount);
 
 		virtual void Free(Model* pInstance);
 	private:

@@ -15,7 +15,7 @@ namespace usg
 	void InitModel(Component<ModelComponent>& p, ComponentLoadHandles& handles)
 	{
 		auto pModelMgr = handles.pModelMgr;
-		p.GetRuntimeData().pModel = pModelMgr->GetModel(p->name, p->bDynamic, p->bPerBoneCulling);
+		p.GetRuntimeData().pModel = pModelMgr->GetModel(handles.pResourceMgr, p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);
 		p.GetRuntimeData().pModel->AddToScene(!visibility.Exists() || visibility.Force()->bVisible);
@@ -79,7 +79,7 @@ namespace usg
 		bool readSuccess = file.Read(&component);
 		ASSERT(readSuccess);
 
-		handles.pModelMgr->PreloadModel(component.name, component.bDynamic, component.bPerBoneCulling, component.uPreloadCount);
+		handles.pModelMgr->PreloadModel(handles.pResourceMgr, component.name, component.bDynamic, component.bPerBoneCulling, component.uPreloadCount);
 	}
 
 	template<>

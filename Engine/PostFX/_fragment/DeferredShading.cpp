@@ -53,13 +53,11 @@ DeferredShading::~DeferredShading()
 }
 
 
-void DeferredShading::Init(GFXDevice* pDevice, PostFXSys* pSys, RenderTarget* pDst)
+void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
 {
 	m_pSys = pSys;
 
 	U8String name;
-
-	ResourceMgr* pRes = ResourceMgr::Inst();
 
 	// Directional lighting, test against the terrain stencil value of 2
 	PipelineStateDecl pipelineDecl;
