@@ -565,13 +565,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		fxRunTime.SetSetData(i, pData, pMaterial->constants[i].uSize);
 	}
 	// The w is scaling of the vertex color, if 0 the vertex color is ignored
-	Vector4f vTmpVec(1.f, (float)GetBoneIndexCount(pShape), HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count) ? 1.0f : 0.0f, GetStreamScaling(pShape->streamInfo, pShape->streamInfo_count, usg::exchange::VertexAttribute_BONE_WEIGHT));
-	fxRunTime.SetVariable("vScaling0", &vTmpVec);
 	fxRunTime.SetVariable("iBoneCount", GetBoneIndexCount(pShape));
-	fxRunTime.SetVariable("bAlwaysTrue", true);
-
-	// TODO: Load these from file
-	fxRunTime.SetVariable("vScaling1", Vector4f(1.f, 1.f, 1.f, pShape->vertexAlphaScale));
 
 	// Texture Coordinator
 	m_meshArray[m_uMeshCount].uUVCount = usg::Math::Min(pMaterial->textureCoordinators_count, fxRunTime.GetVariableCount("mTexMatrix"));
