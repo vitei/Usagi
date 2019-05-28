@@ -56,7 +56,7 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 
 
 #ifndef OVERRIDE_TRANS
-BUFFER_LAYOUT(1, UBO_INSTANCE_ID) uniform Instance
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
 {
 	mat3x4	mModelMat;
 };

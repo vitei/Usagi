@@ -37,7 +37,7 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
     bool    bLocalEffect;
 };
 
-BUFFER_LAYOUT(1,  UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(1,  UBO_CUSTOM_3_ID) uniform Custom0
 {
     float   fEffectTime;
 };

@@ -302,7 +302,7 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC;
 		decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
 		decl[uIndex].uCount = 1;
-		decl[uIndex].uBinding = SHADER_CONSTANT_INSTANCE;
+		decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_0;
 		uIndex++;
 	}
 	else
@@ -311,7 +311,7 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER;
 		decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
 		decl[uIndex].uCount = 1;
-		decl[uIndex].uBinding = SHADER_CONSTANT_BONES;
+		decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_2;
 		uIndex++;
 	}
 

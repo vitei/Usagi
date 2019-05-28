@@ -1,6 +1,6 @@
 #include "../includes/platformdefines.inc"
 
-BUFFER_LAYOUT(1, UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(1, UBO_CUSTOM_3_ID) uniform Custom0
 {
   mat4  mTransform;
   vec4  vColour;

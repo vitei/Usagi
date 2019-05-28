@@ -26,8 +26,7 @@ namespace usg
 	{
 		{ "Material", usg::SHADER_CONSTANT_MATERIAL },
 		{ "Material1", usg::SHADER_CONSTANT_MATERIAL_1 },
-		{ "Colors",	usg::SHADER_CONSTANT_COLORS },
-		{ "Custom", usg::SHADER_CONSTANT_CUSTOM }
+		{ "Custom", usg::SHADER_CONSTANT_CUSTOM_3 }
 	};
 
 

@@ -77,51 +77,6 @@ enum class ShaderType : uint32
 };
 
 
-// Merging on Vulkan as otherwise bindings are a pain
-#define EFFECT_MERGED_BINDING (!(defined PLATFORM_PC || defined PLATFORM_OSX)) //|| (defined USE_VULKAN))
-
-enum ShaderConstantType
-{
-	// These buffers should only be updated once, if you need to update
-	// them more frequently then you should make multiple buffers
-	SHADER_CONSTANT_GLOBAL = 0,
-	SHADER_CONSTANT_MATERIAL,
-#if !EFFECT_MERGED_BINDING
-	SHADER_CONSTANT_MATERIAL_1,	// You can't have the same buffer having different meanings on opengl so hacking with a second material buffer
-#else
-	SHADER_CONSTANT_MATERIAL_1 = SHADER_CONSTANT_MATERIAL,
-#endif
-	SHADER_CONSTANT_INSTANCE,
-#if !EFFECT_MERGED_BINDING
-	SHADER_CONSTANT_INSTANCE_1,
-#else
-	SHADER_CONSTANT_INSTANCE_1 = SHADER_CONSTANT_INSTANCE,
-#endif
-	SHADER_CONSTANT_BONES,
-
-#if !EFFECT_MERGED_BINDING
-	SHADER_CONSTANT_CUSTOM,
-#else
-	SHADER_CONSTANT_CUSTOM = SHADER_CONSTANT_BONES,
-#endif
-	SHADER_CONSTANT_LIGHTING,
-	SHADER_CONSTANT_SHADOW,
-	SHADER_CONSTANT_COLORS,
-
-	SHADER_CONSTANT_COUNT
-};
-
-
-enum ShaderTypeFlags
-{
-	SHADER_FLAG_VERTEX		= (1<<0),
-	SHADER_FLAG_GEOMETRY	= (1<<1),
-	SHADER_FLAG_PIXEL		= (1<<2),
-	SHADER_FLAG_VS_GS		= (SHADER_FLAG_VERTEX|SHADER_FLAG_GEOMETRY),
-	SHADER_FLAG_VS_PS		= (SHADER_FLAG_VERTEX|SHADER_FLAG_PIXEL),
-	SHADER_FLAG_ALL			= (SHADER_FLAG_VERTEX|SHADER_FLAG_GEOMETRY|SHADER_FLAG_PIXEL)
-};
-
 enum TextureUsageFlags
 {
 	TU_FLAG_NONE = 0,

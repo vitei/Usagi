@@ -79,3 +79,30 @@ enum RenderMask {
 	// Have all be everything except the shadow casting geometry
 	RENDER_MASK_ALL				= 0x0FFFFF7F;
 }
+
+enum ShaderTypeFlags {
+	option (nanopb_enumopt).long_names = false;
+	option (usagipb_enumopt).is_bitmask = true;
+
+	SHADER_FLAG_VERTEX		= 0x00000001;
+	SHADER_FLAG_GEOMETRY 	= 0x00000002;
+	SHADER_FLAG_PIXEL 		= 0x00000004;
+	SHADER_FLAG_VS_GS 		= 0x00000003;
+	SHADER_FLAG_VS_PS 		= 0x00000005;
+	SHADER_FLAG_ALL 		= 0x00000007;
+}
+
+enum ShaderConstantType {
+	option (nanopb_enumopt).long_names = false;
+
+	SHADER_CONSTANT_GLOBAL = 0;
+	SHADER_CONSTANT_MATERIAL = 1;
+	SHADER_CONSTANT_MATERIAL_1 = 2;
+	SHADER_CONSTANT_CUSTOM_0 = 3;
+	SHADER_CONSTANT_CUSTOM_1 = 4;
+	SHADER_CONSTANT_CUSTOM_2 = 5;
+	SHADER_CONSTANT_CUSTOM_3 = 6;
+	SHADER_CONSTANT_LIGHTING = 7;
+	SHADER_CONSTANT_SHADOW = 8;
+	SHADER_CONSTANT_COUNT = 9;
+}

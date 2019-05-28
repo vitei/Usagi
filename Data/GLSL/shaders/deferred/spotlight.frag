@@ -7,7 +7,7 @@
 
 #define USE_SPECULAR
 
-BUFFER_LAYOUT(2, UBO_CUSTOM0_ID) uniform Custom0
+BUFFER_LAYOUT(2, UBO_CUSTOM_3_ID) uniform Custom0
 {
 	SpotLight	light;
 };

@@ -7,7 +7,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 
-BUFFER_LAYOUT(1, UBO_INSTANCE_1_ID) uniform Instance1
+BUFFER_LAYOUT(1, UBO_CUSTOM_1_ID) uniform Instance1
 {
     mat3x4  mUserMat;
     bool    bCustomMatrix;

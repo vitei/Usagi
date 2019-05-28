@@ -142,8 +142,8 @@ namespace usg
 		
 		m_materialConsts.Init(pDevice, Particle::g_scriptedParticlePerEffectDecl);
 		m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
-		m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM, &m_customConstants);
-		m_material.SetConstantSet(SHADER_CONSTANT_INSTANCE_1, &m_gsTransform);
+		m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM_3, &m_customConstants);
+		m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM_1, &m_gsTransform);
 		m_fragConsts.Init(pDevice, Particle::g_scriptedFragmentDecl);
 		m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL_1, &m_fragConsts, SHADER_FLAG_PIXEL);
 
@@ -216,8 +216,8 @@ namespace usg
 				m_material.SetPipelineState(pDevice->GetPipelineState(renderPass, pipelineDecl));
 				m_material.SetDescriptorLayout(pDevice, pipelineDecl.layout.descriptorSets[1]);
 				m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_materialConsts, SHADER_FLAG_VS_GS);
-				m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM, &m_customConstants);
-				m_material.SetConstantSet(SHADER_CONSTANT_INSTANCE_1, &m_gsTransform);
+				m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM_3, &m_customConstants);
+				m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM_1, &m_gsTransform);
 				m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL_1, &m_fragConsts, SHADER_FLAG_PIXEL);
 			}
 		}
@@ -398,7 +398,7 @@ namespace usg
 		// Always on to silence warnings
 		//if (m_emissionDef.has_bLocalEffect && m_emissionDef.bLocalEffect)
 		{
-			m_material.SetConstantSet(SHADER_CONSTANT_INSTANCE, GetParent()->GetConstantSet());
+			m_material.SetConstantSet(SHADER_CONSTANT_CUSTOM_0, GetParent()->GetConstantSet());
 		}
 
 		m_material.UpdateDescriptors(pDevice);

@@ -2,7 +2,7 @@
 #define _MODEL_TRANSFORM_VS_INC
 
 #ifdef HAS_SKELETON
-BUFFER_LAYOUT(1,  UBO_BONE_ID) uniform Bones
+BUFFER_LAYOUT(1,  UBO_CUSTOM_2_ID) uniform Bones
 {
 	mat3x4 	mBonePalette[255];
 };

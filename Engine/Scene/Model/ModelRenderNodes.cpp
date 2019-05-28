@@ -111,13 +111,13 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	switch (pMesh->primitive.eSkinningMode)
 	{
 	case usg::exchange::SkinningType_NO_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_INSTANCE, pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex)->GetConstantSet(), 0, SHADER_FLAG_VERTEX);
+		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_0, pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex)->GetConstantSet(), 0, SHADER_FLAG_VERTEX);
 		break;
 	case usg::exchange::SkinningType_RIGID_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_BONES, &pModel->GetRigidBones(), 0, SHADER_FLAG_VERTEX);
+		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetRigidBones(), 0, SHADER_FLAG_VERTEX);
 		break;
 	case usg::exchange::SkinningType_SMOOTH_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_BONES, &pModel->GetSkinnedBones(), 0, SHADER_FLAG_VERTEX);
+		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetSkinnedBones(), 0, SHADER_FLAG_VERTEX);
 		break;
 	default:
 		ASSERT(false);
