@@ -109,4 +109,6 @@ vec4 GetUV(in vec4 texCoord)
 
 #endif
 
-
+// Do not remove this comment, it is used as an insertion point for 
+// code obtained from the effect definition file
+// <<GENERATED_CODE>>
