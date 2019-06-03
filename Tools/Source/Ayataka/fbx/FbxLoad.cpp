@@ -1790,11 +1790,6 @@ void FbxLoad::SetupAdjacencyStream(Cmdl& cmdl)
 		::exchange::Stream* pIndexStream = cmdl.GetStreamPtr(primInfo.indexStreamRefIndex);
 		pAdjacencyStream->allocate<uint32_t>(pIndexStream->GetLength(), pIndexStream->GetColumnNum());
 
-		//!!!
-		// The place where the adajacency stream is made has been moved to CollisionStore::_merge
-		// It's just allocated here.
-		//!!!
-
 		// set adjacency stream reference index
 		primInfo.adjacencyStreamRefIndex = cmdl.GetStreamNum();
 		cmdl.AddStream(pAdjacencyStream);

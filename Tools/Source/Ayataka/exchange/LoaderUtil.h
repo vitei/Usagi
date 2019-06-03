@@ -108,7 +108,7 @@ inline usg::Vector3f getVector3NodeAttribute( const pugi::xpath_node& node, cons
 inline void setupTransformMatrix( usg::Matrix4x4& out, const usg::Vector3f& scale, const usg::Vector3f& rotate, const usg::Vector3f& translate )
 {
 	usg::Matrix4x4 scaleMtx = usg::Matrix4x4::Identity();
-	//scaleMtx.MakeScale( scale );
+	scaleMtx.MakeScale( scale );
 
 	usg::Matrix4x4 rotateMtx = usg::Matrix4x4::Identity();
 	rotateMtx.MakeRotate( rotate.x, rotate.y, rotate.z );

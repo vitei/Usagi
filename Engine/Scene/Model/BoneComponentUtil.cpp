@@ -283,7 +283,26 @@ void AddScaleToEntity(Entity e, ComponentLoadHandles& handles)
 	RootInputs rootInput;
 	bool bHasRootScale = handles.GetComponent(e, rootInput.scale) && rootInput.scale.Exists();
 
-	if (!bHasRootScale) { return; }
+	if (!bHasRootScale)
+	{ 
+		Required<BoneComponent> bone;
+
+		// Even if scale hasn't been requested if the model has scale we need to obey it
+		if(handles.GetComponent(e, bone))
+		{
+			if( !Math::IsEqual(bone->m_scale.x, 1.0f) || 
+				!Math::IsEqual(bone->m_scale.y, 1.0f) || 
+				!Math::IsEqual(bone->m_scale.z, 1.0f)  )
+			{
+				bHasRootScale = true;
+			}
+		}
+	}
+
+	if (!bHasRootScale)
+	{ 
+		return; 
+	}
 
 	struct Inputs
 	{
