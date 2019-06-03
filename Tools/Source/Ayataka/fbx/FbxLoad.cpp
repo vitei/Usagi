@@ -1895,6 +1895,7 @@ bool FbxLoad::PostProcessSkeleton(Cmdl& cmdl)
 		::usg::exchange::Sphere tempSphere = pShape->pb().boundingSphere;
 		if (bone.boundingSphere.center.Magnitude() == 0.0f && bone.boundingSphere.radius == 0.0f)
 		{
+			// Note this is currently wrong for animated bones (needs the inv bind pose applied)
 			bone.boundingSphere.center = tempSphere.center;
 			bone.boundingSphere.radius = tempSphere.radius;
 		}

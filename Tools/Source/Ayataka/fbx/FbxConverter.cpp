@@ -82,6 +82,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	importer->Import(scene);
 
 	FbxGeometryConverter converter(sdkManager);
+	scene->GetGlobalSettings().SetOriginalSystemUnit(FbxSystemUnit::m);
 	double scale = scene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
 	FbxAxisSystem axisSystem = scene->GetGlobalSettings().GetAxisSystem();
 	// To reduce complication I worked with the co-ordinate system from DefinaceIndustries exported models, any model not
