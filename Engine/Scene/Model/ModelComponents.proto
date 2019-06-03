@@ -18,7 +18,8 @@ message ModelComponent
 
 	required string name = 1 [(nanopb).max_size = 64];
 	required bool bDynamic = 2 [default = true];
-	required bool bPerBoneCulling = 3 [default = true];
+	// Set to true for bones with static geometry on them which might break view culling
+	required bool bPerBoneCulling = 3 [default = false];
 	required uint32 uPreloadCount = 4 [default = 1];
 	required bool bShadowCast = 5 [default = true];
 }
