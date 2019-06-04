@@ -150,6 +150,18 @@ namespace Math
 	{
 		return Min( x < y ? x : y, z );
 	}	
+
+	inline float GetLerpValue(float fMin, float fMax, float fValue)
+	{
+		float fDiff = fMax - fMin;
+		return (fDiff - fMin) / fDiff;
+	}
+
+	inline float RemapRange(float fMinInput, float fMaxInput, float fMinOutput, float fMaxOutput, float fInputValue)
+	{
+		float fLerp = GetLerpValue(fMinInput, fMaxInput, fInputValue);
+		return Lerp(fMinOutput, fMaxOutput, fLerp);
+	}
 	
 	inline float AccelerateToValue(const float currentValue, const float desiredValue, const float maxChange)
 	{
