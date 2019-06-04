@@ -123,6 +123,12 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 		pConverter->ExportStoredBinary(outputPath);
 		pConverter->ExportAnimations(settings.animPath);
 	}
+	else
+	{
+		if (settings.bLeftHand) {
+			pConverter->ReverseCoordinate();
+		}
+	}
 	pConverter->ExportBoneHierarchy( settings.skeletonPath );
 
 	SAFE_DELETE( pConverter );

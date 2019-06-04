@@ -147,9 +147,10 @@ private:
 	::exchange::Skeleton* NewSkeleton();
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
-	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering);
 	void AddLight(Cmdl& cmdl, FbxNode* pNode);
 	uint32 FindBone(Cmdl& cmdl, const char* szName);
+	uint32 FindBoneRenderingId(Cmdl& cmdl, const char* szName);
 	void AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* pCurrMesh);
 	bool SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pMaterial);
 	void SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName);

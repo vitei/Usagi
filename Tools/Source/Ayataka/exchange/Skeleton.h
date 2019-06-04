@@ -65,11 +65,11 @@ public:
 
 private:
 	void ReverseCoordinateInt( usg::exchange::Bone& bone ) {
-		bone.translate.z *= -1.0f;
-		bone.rotate.x *= -1.0f;
+		bone.translate.x *= -1.0f;
 		bone.rotate.y *= -1.0f;
+		bone.rotate.z *= -1.0f;
 		LoaderUtil::setupTransformMatrix( bone.transform, bone.scale, bone.rotate, bone.translate );
-		bone.boundingSphere.center.z *= -1.0f;
+		bone.boundingSphere.center.x *= -1.0f;
 	}
 
 	Matrix4x4 GetParentMatrix(usg::exchange::Bone& bone)

@@ -146,8 +146,8 @@ uint32_t Cmdl::GetBoneIndexCount(int materialNum)
 
 void Cmdl::ReverseCoordinateInt(Light* pLight)
 {
-	pLight->position.z *= -1.0f;
-	pLight->spec.direction.z *= -1.0f;
+	pLight->position.x *= -1.0f;
+	pLight->spec.direction.x *= -1.0f;
 }
 
 void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)
@@ -205,7 +205,7 @@ void Cmdl::ReverseCoordinateInt(::exchange::Stream& stream)
 		length /= step;
 
 		for( size_t i = 0; i < length; ++i ) {
-			p[(i * step) + 2] *= -1.0f;
+			p[(i * step) + 0] *= -1.0f;
 		}
 	}
 }

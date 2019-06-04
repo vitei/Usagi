@@ -88,8 +88,9 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	// To reduce complication I worked with the co-ordinate system from DefinaceIndustries exported models, any model not
 	// matching that system I convert. Ayataka always expected RH input which is manually turned to left-handed, the complexity
 	// could be reduced further by converting directly with the fbx sdk
-	AxisOverride axisOverride;
-	axisOverride.ConvertScene(scene);
+	//AxisOverride axisOverride;
+	//axisOverride.ConvertScene(scene);
+	FbxAxisSystem::OpenGL.ConvertScene(scene);
 	FbxSystemUnit::ConversionOptions options = FbxSystemUnit::DefaultConversionOptions;
 	// We don't use the FBX convert scene as it messes with scales rather than positions
 	//FbxSystemUnit::m.ConvertScene(scene);

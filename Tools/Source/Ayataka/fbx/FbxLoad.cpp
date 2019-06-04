@@ -27,6 +27,7 @@ void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 
 	usg::exchange::Bone bone;
 	usg::exchange::Bone_init(&bone);
+	bone.isNeededRendering = false;
 
 	// Transform
 	bone.scale.Assign(1.0f, 1.0f, 1.0f);
@@ -159,7 +160,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 }
 
 
-void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
+void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering)
 {
 	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
 	const char* pBoneName = pNode->GetName();
@@ -171,6 +172,7 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 
 	usg::exchange::Bone bone;
 	usg::exchange::Bone_init(&bone);
+	bone.isNeededRendering = bIsNeededRendering;
 	
 	// First try and find a bind pose matrix for the bone
 	bool bFoundBindMatrix = false;
@@ -697,7 +699,7 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 			sphere.center.x = center.x;
 			sphere.center.y = center.y;
 			sphere.center.z = center.z;
-			Vector3 vRadius = vMax - center;
+			Vector3 vRadius = vMax - center;			
 			sphere.radius = vRadius.calcLength();
 		}
 	}
@@ -712,6 +714,24 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 	}
 
 
+}
+
+uint32 FbxLoad::FindBoneRenderingId(Cmdl& cmdl, const char* szName)
+{
+	uint32 index = 0;
+	for (uint32 i = 0; i < cmdl.GetSkeleton()->Bones().size(); i++)
+	{
+		if (cmdl.GetSkeleton()->Bones()[i].isNeededRendering)
+		{
+			if (strcmp(cmdl.GetSkeleton()->Bones()[i].name, szName) == 0)
+			{
+				return index;
+			}
+			index++;
+		}
+	}
+	ASSERT(false);
+	return 0;
 }
 
 uint32 FbxLoad::FindBone(Cmdl& cmdl, const char* szName)
@@ -904,7 +924,7 @@ void FbxLoad::RegisterBoneUsage(Cmdl& cmdl, const char* szBoneName, usg::exchang
 	vector<BoneInfo>& searchSet = eSkinType == usg::exchange::SkinningType_SMOOTH_SKINNING ? m_skinnedBoneIndices : m_rigidBoneIndices;
 
 
-	uint32 uIdInSkeleton = FindBone(cmdl, szBoneName);
+	uint32 uIdInSkeleton = FindBoneRenderingId(cmdl, szBoneName);
 
 	for (auto itr = searchSet.begin(); itr != searchSet.end(); ++itr)
 	{
@@ -1023,9 +1043,10 @@ void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode
 {
 	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType())
 	{
-		if (pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		FbxNodeAttribute::EType attribType = pNode->GetNodeAttribute()->GetAttributeType();
+		if ( attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)
 		{
-			AddBone(pSkeleton, pNode, iParentIdx);
+			AddBone(pSkeleton, pNode, iParentIdx, attribType == FbxNodeAttribute::eSkeleton);
 		}
 	}
 	iParentIdx = (int)pSkeleton->Bones().size() - 1;	// If we were a bone we will have incremented this value
@@ -1066,7 +1087,7 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 		{
 			FbxCluster* currCluster = pSkinDeformer->GetCluster(uClusterIndex);
 			const char* currJointName = currCluster->GetLink()->GetName();
-			uint32 uJointIndex = FindBone(cmdl, currJointName);
+			uint32 uJointIndex = FindBoneRenderingId(cmdl, currJointName);
 
 			uint32 uNumOfIndices = currCluster->GetControlPointIndicesCount();
 			uint32 uVertexCount = (uint32)m_activeVerts.size();
@@ -1893,9 +1914,9 @@ bool FbxLoad::PostProcessSkeleton(Cmdl& cmdl)
 		usg::exchange::Bone& bone = pSkeleton->Bones().at(boneIndex);
 
 		::usg::exchange::Sphere tempSphere = pShape->pb().boundingSphere;
+
 		if (bone.boundingSphere.center.Magnitude() == 0.0f && bone.boundingSphere.radius == 0.0f)
 		{
-			// Note this is currently wrong for animated bones (needs the inv bind pose applied)
 			bone.boundingSphere.center = tempSphere.center;
 			bone.boundingSphere.radius = tempSphere.radius;
 		}
