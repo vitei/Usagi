@@ -154,7 +154,7 @@ namespace Math
 	inline float GetLerpValue(float fMin, float fMax, float fValue)
 	{
 		float fDiff = fMax - fMin;
-		return (fDiff - fMin) / fDiff;
+		return (fValue - fMin) / fDiff;
 	}
 
 	inline float RemapRange(float fMinInput, float fMaxInput, float fMinOutput, float fMaxOutput, float fInputValue)
