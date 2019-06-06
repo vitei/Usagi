@@ -375,6 +375,10 @@ int main(int argc, char *argv[])
 			EffectEntry effect;
 			effect.name = setItr.name;
 			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
+			// TODO: Add attribute
+			effect.entry.uSamplerCount = 0;
+			effect.entry.uAttributeCount = 0;
+			effect.entry.uConstantSetCount = 0;
 			effectEntries.push_back(effect);
 		} 
 	} 

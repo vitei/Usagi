@@ -19,8 +19,8 @@ class GFXDevice;
 class Effect : public ResourceBase
 {
 public:
-	Effect() { m_resourceType = ResourceType::EFFECT; }
-	virtual ~Effect() {}
+	Effect();
+	virtual ~Effect();
 
 	void Init(GFXDevice* pDevice, const char* szEffectName);
 	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
@@ -36,26 +36,15 @@ private:
 
 	U8String	m_name;
 	Effect_ps	m_platform;
+
+	CustomEffectDecl::Sampler* m_pSamplers;
+	CustomEffectDecl::Attribute* m_pAttributes;
+	CustomEffectDecl::ConstantSet* m_pConstantSets;
+	PakFileDecl::EffectEntry* m_pHeader;
+
+	void*	m_pBinary;
 };
 
-
-inline void Effect::Init(GFXDevice* pDevice, const char* szEffectName)
-{
-	m_name = szEffectName;
-	SetupHash( m_name.CStr() );
-	m_platform.Init( pDevice, szEffectName );
-	SetReady(true);
-}
-
-inline bool Effect::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
-{
-	m_name = pFileHeader->szName;
-	SetupHash(m_name.CStr());
-	bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
-	// FIXME: This should be done internally
-	SetReady(true);
-	return bLoaded;
-}
 
 }
  

@@ -19,7 +19,6 @@ public:
 	Effect_ps();
 	~Effect_ps();
 
-	void Init(GFXDevice* pDevice, const char* szEffectName);
 	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice);
 

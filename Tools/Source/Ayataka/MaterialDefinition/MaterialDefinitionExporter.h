@@ -2,6 +2,7 @@
 #define MaterialDefinitionExporter_h__
 #include "Engine/Resource/CustomEffectDecl.h"
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 class MaterialDefinitionExporter
 {
@@ -10,6 +11,9 @@ public:
 	virtual ~MaterialDefinitionExporter();
 
 	int Load(const char* path);
+	bool LoadAttributes(YAML::Node& attributeNode);
+	bool LoadSamplers(YAML::Node& attributeNode);
+	bool LoadConstantSets(YAML::Node& attributeNode);
 	void ExportFile( const char* path );
 
 	struct ConstantSetData

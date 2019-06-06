@@ -159,29 +159,12 @@ EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 {
 	U8String u8Name = szEffectName;
 	usg::string stringName = szEffectName;
-	if (stringName.find_first_of(".") != string::npos)
-	{
-		// New system
-		string packageName = stringName.substr(0, stringName.find_first_of("."));
-		LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
-		u8Name += ".fx";
-	}
-	else
-	{
-		// Old system
-		u8Name = m_effectDir + szEffectName;
-	}
+
+	string packageName = stringName.substr(0, stringName.find_first_of("."));
+	LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
+	u8Name += ".fx";
 
 	EffectHndl pEffect = m_pImpl->effects.GetResourceHndl(u8Name);
-
-	// TODO: Remove from the final build, should load in blocks
-	if (!pEffect)
-	{
-		Effect* pNC = vnew(ALLOC_RESOURCE_MGR) Effect;
-		m_pImpl->effects.StartLoad();
-		pNC->Init(pDevice, u8Name.CStr());
-		pEffect = m_pImpl->effects.AddResource(pNC);
-	}
 
 	return pEffect;
 

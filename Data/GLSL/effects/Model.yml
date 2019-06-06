@@ -1,17 +1,14 @@
 AttributeSets:
   - name: model_attributes
     attributes:
-      - { index: 0, hint: "position", type: vec3 }
-      - { index: 1, hint: "normal",   type: vec3 }
-      - { index: 2, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ] }
-      - { index: 10, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ] }
-      - { index: 3, hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ] }
-      - { index: 4, hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ]  }
-      - { index: 5, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
-      - { index: 6, hint: "uv0", type: vec2, default: [0.0, 0.0] }
-      - { index: 7, hint: "uv1", type: vec2, default: [0.0, 0.0] }
-      - { index: 8, hint: "uv2", type: vec2, default: [0.0, 0.0] }
-      - { index: 9, hint: "uv3", type: vec2, default: [0.0, 0.0] }
+      - { index: 0, name: ao_position, hint: "position", type: vec3 }
+      - { index: 1, name: ao_normal, hint: "normal",   type: vec3 }
+      - { index: 2, name: ao_tangent, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ]}
+      - { index: 10, name: ao_binormal, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ]  }
+      - { index: 3, name: ao_boneIndex,  hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ] }
+      - { index: 4, name: ao_boneWeight,  hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ]  }
+      - { index: 5, name: ao_color, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
+      - { index: 6, hint: ao_texCoord, hint: "uv", type: vec2, count: 4, default: [0.0, 0.0] }
 DescriptorSets:
   - name: model_descriptors
     Samplers:

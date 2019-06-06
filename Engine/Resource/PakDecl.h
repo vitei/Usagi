@@ -41,6 +41,12 @@ namespace usg
 		struct EffectEntry
 		{
 			uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
+			uint32		uAttributeOffset;
+			uint32		uAttributeCount;
+			uint32		uSamplerOffset;
+			uint32		uSamplerCount;
+			uint32		uConstantSetDeclOffset;
+			uint32		uConstantSetCount;
 		};
 
 		struct ShaderEntry

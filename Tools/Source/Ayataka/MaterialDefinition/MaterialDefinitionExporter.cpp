@@ -187,29 +187,24 @@ static memsize AlignSize(memsize uSize, memsize uAlign)
 	return uSize + uAdjustment;
 }
 
-int MaterialDefinitionExporter::Load(const char* path)
+bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 {
-	YAML::Node mainNode = YAML::LoadFile(path);
-
-	m_effectName = mainNode["Shader"]["name"].as<std::string>();
-	m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
-	m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
-	m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
-	m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
-
-	YAML::Node attributes = mainNode["Attributes"];
 	for (YAML::const_iterator it = attributes.begin(); it != attributes.end(); ++it)
 	{
 		usg::CustomEffectDecl::Attribute attrib;
-		strcpy_s(attrib.hint,  sizeof(attrib.hint), (*it)["hint"].as<std::string>().c_str());
+		strcpy_s(attrib.hint, sizeof(attrib.hint), (*it)["hint"].as<std::string>().c_str());
 		attrib.uIndex = (*it)["index"].as<uint32>();
 		attrib.eConstantType = GetConstantType((*it)["type"].as<std::string>().c_str());
+		attrib.uCount = (*it)["count"] ? (*it)["count"].as<uint32>() : 1;
 		SetDefaultData(attrib, (*it)["default"]);
 		m_attributes.push_back(attrib);
 	}
 
+	return true;
+}
 
-	YAML::Node samplers = mainNode["Samplers"];
+bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
+{
 	for (YAML::const_iterator it = samplers.begin(); it != samplers.end(); ++it)
 	{
 		usg::CustomEffectDecl::Sampler sampler;
@@ -226,7 +221,11 @@ int MaterialDefinitionExporter::Load(const char* path)
 		m_samplers.push_back(sampler);
 	}
 
-	YAML::Node constantDefs = mainNode["ConstantDefs"];
+	return true;
+}
+
+bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
+{
 	for (YAML::const_iterator setIt = constantDefs.begin(); setIt != constantDefs.end(); ++setIt)
 	{
 		ConstantSetData setData;
@@ -254,7 +253,7 @@ int MaterialDefinitionExporter::Load(const char* path)
 			uOffset += GetSize(constant.eConstantType, constant.uiCount);
 			setData.constants.push_back(constant);
 		}
-		
+
 		// Keep aligned to 4 bytes, helps us export and read
 		setData.uRawDataSize = (uint32_t)AlignSize(uOffset, 4);
 		setData.set.uDataSize = setData.uRawDataSize;
@@ -269,6 +268,27 @@ int MaterialDefinitionExporter::Load(const char* path)
 
 		m_constantSets.push_back(setData);
 	}
+	return true;
+}
+
+int MaterialDefinitionExporter::Load(const char* path)
+{
+	YAML::Node mainNode = YAML::LoadFile(path);
+
+	m_effectName = mainNode["Shader"]["name"].as<std::string>();
+	m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
+	m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
+	m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
+	m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
+
+	YAML::Node attributes = mainNode["Attributes"];
+	LoadAttributes(attributes);
+
+	YAML::Node samplers = mainNode["Samplers"];
+	LoadSamplers(samplers);
+
+	YAML::Node constantDefs = mainNode["ConstantDefs"];
+	LoadConstantSets(constantDefs);
 
 
 

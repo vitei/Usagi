@@ -85,12 +85,6 @@ namespace usg {
 	}
 
 
-	void Effect_ps::Init(GFXDevice* pDevice, const char* szEffectName)
-	{
-		ASSERT(false);
-	}
-
-
 	bool Effect_ps::Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize)
 	{
 		const PakFileDecl::EffectEntry* pEffectHdr = PakFileDecl::GetCustomHeader<PakFileDecl::EffectEntry>(pFileHeader);
