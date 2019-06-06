@@ -22,7 +22,6 @@ public:
 	Effect();
 	virtual ~Effect();
 
-	void Init(GFXDevice* pDevice, const char* szEffectName);
 	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 	//void Apply() const;

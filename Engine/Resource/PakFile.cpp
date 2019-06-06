@@ -63,17 +63,24 @@ namespace usg
 
 		void* pData = pFileInfo->uDataOffset == USG_INVALID_ID ? nullptr : ((uint8*)pFileScratch) + pFileInfo->uDataOffset;
 
-		if (name.HasExtension("spv"))
+		switch ((usg::ResourceType)pFileInfo->uResourceType)
 		{
-			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
-			pShader->Init(pDevice, this, pFileInfo, pData);
-			m_resources[pFileInfo->CRC] = pShader;
-		}
-		else if (name.HasExtension("fx"))
+		case usg::ResourceType::EFFECT:
 		{
 			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
 			pEffect->Init(pDevice, this, pFileInfo, pData);
 			m_resources[pFileInfo->CRC] = pEffect;
+			break;
+		}
+		case usg::ResourceType::SHADER:
+		{
+			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
+			pShader->Init(pDevice, this, pFileInfo, pData);
+			m_resources[pFileInfo->CRC] = pShader;
+			break;
+		}
+		default:
+			ASSERT(false);
 		}
 	}
 

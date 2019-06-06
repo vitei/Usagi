@@ -6,7 +6,7 @@
 #define _USG_RESOURCE_PAK_FILE_DECL_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
-
+	
 namespace usg
 {
 	namespace PakFileDecl
@@ -29,13 +29,14 @@ namespace usg
 			uint32			uDependenciesCount;	// After custom header
 			uint32			uDataOffset;
 			uint32			uDataSize;
+			uint32			uResourceType;	// See ResourceBase
 		};
 
 		struct Dependency
 		{
-			char   szName[128];
 			uint32 FileCRC;
 			uint32 PakIndex;	// USG_INVALID_ID if not present in this pak file
+			uint32 UsageCRC;	// Hint to the resource how this is to be used
 		};
 
 		struct EffectEntry

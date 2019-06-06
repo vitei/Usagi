@@ -23,6 +23,13 @@ const char* g_szExtensions[] =
 	".geom"
 };
 
+const char* g_szUsageStrings[] =
+{
+	"vertex_shader",
+	"fragment_shader",
+	"geometry_shader"
+};
+
 struct EffectEntry : public ResourceEntry
 {
 	virtual void* GetData() override { return nullptr; }
@@ -332,7 +339,7 @@ int main(int argc, char *argv[])
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
 						inputFileName = shaderDir + "/" + inputFileName;
 						ShaderEntry shader;
-						shader.name = progName;
+						shader.SetName(progName, usg::ResourceType::SHADER);
 						shader.entry.eShaderType = (usg::ShaderType)(j);
 						bool bSuccess = false;
 						if (api == "vulkan")
@@ -373,8 +380,20 @@ int main(int argc, char *argv[])
 		for (auto& setItr : effectItr.sets)
 		{
 			EffectEntry effect;
-			effect.name = setItr.name;
+			effect.SetName(setItr.name, usg::ResourceType::EFFECT);
 			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
+			for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+			{
+				if (effect.entry.CRC[i] != 0)
+				{
+					auto shaderEntry = requiredShaders[i].find(effect.entry.CRC[i]);
+					if (shaderEntry != requiredShaders[i].end())
+					{
+						effect.AddDependency((*shaderEntry).second.GetName(), g_szUsageStrings[i]);
+						break;
+					}
+				}
+			}
 			// TODO: Add attribute
 			effect.entry.uSamplerCount = 0;
 			effect.entry.uAttributeCount = 0;

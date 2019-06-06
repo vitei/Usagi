@@ -26,8 +26,6 @@ public:
 	const VkPipelineShaderStageCreateInfo* GetShaderStageCreateInfo() const { return m_stageCreateInfo; }
 
 private:
-	void GetShaderNames(const char* effectName, U8String &vsOut, U8String &psOut, U8String &gsOut);
-
 	VkPipelineShaderStageCreateInfo m_stageCreateInfo[ShaderType::COUNT];
 	uint32							m_uStageCount;
 
