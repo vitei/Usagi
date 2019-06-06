@@ -87,7 +87,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		pLight->spec.spot.fInnerAngle = (float)pFBXLight->InnerAngle.Get();
 		pLight->spec.spot.fOuterAngle = (float)pFBXLight->OuterAngle.Get();
 		pLight->spec.direction = mMatUsg.vFace().v3().GetNormalised();
-		pLight->position = mMatUsg.vPos().v3() * m_appliedScale;
+		pLight->position = mMatUsg.vPos().v3() * (float)m_appliedScale;
 		break;
 	//case FbxLight::eDirectional:
 //		pLight->spec.base.kind = usg::LightKind_DIRECTIONAL;
