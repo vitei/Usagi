@@ -15,7 +15,7 @@ namespace usg {
 class ResourcePakHdr : public ResourceBase
 {
 public:
-	ResourcePakHdr() { }
+	ResourcePakHdr() : ResourceBase(StaticResType){ }
 	virtual ~ResourcePakHdr() {}
 
 	bool Init(const PakFile& loader)
@@ -23,6 +23,8 @@ public:
 		m_nameHash = loader.GetNameHash();
 		return true;
 	}
+
+	const static ResourceType StaticResType = ResourceType::PAK_HEADER;
 
 private:
 

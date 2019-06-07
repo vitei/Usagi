@@ -44,6 +44,8 @@ namespace usg
 
 		float GetBaseOffset() const { return m_fontDefinition.LowerOffset; }
 		float GetDrawScale() const { return m_fontDefinition.DrawScale; }	// There is padding and the lower part of the character to take into account
+
+		const static ResourceType StaticResType = ResourceType::FONT;
 	private:
 		TextureHndl		m_pTexture;
 		DescriptorSet	m_descriptor;

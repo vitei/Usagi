@@ -98,6 +98,9 @@ public:
 
 	BoneDataSource GetBoneData(const char* szBoneName) const;
 	BoneDataSource GetBoneData(const uint32 uBoneNameHash) const;
+
+	const static ResourceType StaticResType = ResourceType::COLLISION;
+
 private:
 	const SubmeshData* GetSubmeshData(const char* szName) const;
 	const SubmeshData* GetSubmeshData(const uint32 uMeshNameHash) const;

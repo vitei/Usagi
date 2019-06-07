@@ -58,6 +58,9 @@ public:
 
 	const usg::vector<uint32>& GetRigidBoneIndices() const { return m_rigidBoneIndices; }
 	const usg::vector<uint32>& GetSmoothBoneIndices() const { return m_smoothBoneIndices; }
+
+	const static ResourceType StaticResType = ResourceType::MODEL;
+
 private:
 
 	void SetupMeshes(const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );

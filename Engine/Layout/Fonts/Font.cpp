@@ -20,7 +20,9 @@ namespace usg
 		DESCRIPTOR_END()
 	};
 
-	Font::Font() : m_pTexture(NULL)
+	Font::Font() : 
+		ResourceBase(StaticResType),
+		m_pTexture(NULL)
 	{
 	}
 

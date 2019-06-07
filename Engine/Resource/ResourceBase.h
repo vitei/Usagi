@@ -9,6 +9,9 @@
 namespace usg
 {
 
+	#define PRIVATIZE_RES_COPY(NameOfClass) 	NameOfClass(NameOfClass &rhs) : ResourceBase(ResourceType::UNDEFINED) { ASSERT(false); } \
+												NameOfClass& operator=(NameOfClass &rhs) { ASSERT(false); return *this; }
+
 	class GFXDevice;
 
 	enum class ResourceType : uint32
@@ -16,19 +19,29 @@ namespace usg
 		UNDEFINED = 0,
 		TEXTURE,
 		SHADER,
-		EFFECT
+		EFFECT,
+		COLLISION,
+		MODEL,
+		FONT,
+		CUSTOM_EFFECT,
+		SKEL_ANIM,
+		PARTICLE_EFFECT,
+		PARTICLE_EMITTER,
+		PROTOCOL_BUFFER,
+		PAK_HEADER
 	};
 
 	class ResourceBase
 	{
-	public:
-		ResourceBase()
+	protected:
+		ResourceBase(ResourceType eType)
 		{
 			m_nameHash = 0;
 			m_dataHash = 0;
-			m_resourceType = ResourceType::UNDEFINED;
+			m_resourceType = eType;
 			m_bReady = false;
 		}
+	public:
 		virtual ~ResourceBase() {}
 		NameHash GetNameHash() const { return m_nameHash; }
 		DataHash GetDataHash() const { return m_dataHash; }
@@ -39,6 +52,8 @@ namespace usg
 		void SetReady(bool bReady) { m_bReady = bReady; }
 		ResourceType GetResourceType() const { return m_resourceType; }
 
+
+
 	protected:
 		void SetupHash( const char* name )
 		{
@@ -47,9 +62,11 @@ namespace usg
 		}
 		NameHash		m_nameHash;
 		DataHash		m_dataHash;
-		ResourceType	m_resourceType;
 
 		bool		m_bReady;
+
+	private:
+		ResourceType	m_resourceType;
 	};
 	
 }

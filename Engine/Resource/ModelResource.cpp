@@ -157,7 +157,8 @@ MipFilter chooseMipFilter( exchange::Texture_Filter filter )
 	}
 }
 
-ModelResource::ModelResource()
+ModelResource::ModelResource() :
+	ResourceBase(StaticResType)
 {
 	m_bInstance = false;
 	m_meshArray = NULL;

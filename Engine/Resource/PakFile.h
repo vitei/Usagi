@@ -28,6 +28,8 @@ namespace usg
 		usg::map<uint32, ResourceBase*>& GetResources() { return m_resources; }
 		ResourceBase* GetResource(uint32 uCRC);
 
+		const static ResourceType StaticResType = ResourceType::PAK_HEADER;
+
 	private:
 		void LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFielInfo, void* pFileScratch);
 

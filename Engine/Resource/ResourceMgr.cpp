@@ -110,7 +110,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 	U8String name = szPath;
 	name += szName;
 	name += ".pak";
-	ResourcePointer<const ResourcePakHdr> hndl = m_pImpl->resourcePaks.GetResourceHndl(name.CStr());
+	ResourcePakHndl hndl = m_pImpl->resourcePaks.GetResourceHndl(name.CStr());
 	// Only load if we don't already have one
 	if (!hndl)
 	{

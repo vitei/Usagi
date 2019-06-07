@@ -15,7 +15,7 @@ class ResourcePointer
 {
 public:
 	ResourcePointer();
-	~ResourcePointer();
+	virtual ~ResourcePointer();
 
 	ResourcePointer(PointerType* pData);
 
@@ -41,8 +41,6 @@ public:
 	uint32 use_count() const;
 
 private:
-	void init(PointerType* pType);
-	void copy(const ResourcePointer<PointerType>& copyData);
 	void removeRef();
 	void destroy(PointerType* pType);
 	void replacePointer(PointerType* pType, bool bPrev, bool bNext);
@@ -52,6 +50,10 @@ private:
 
 	ResourcePointer*	m_pNext;
 	ResourcePointer*	m_pPrev;
+
+protected:
+	void init(PointerType* pType);
+	void copy(const ResourcePointer<PointerType>& copyData);
 
 	PointerType*	m_pPointer;
 };

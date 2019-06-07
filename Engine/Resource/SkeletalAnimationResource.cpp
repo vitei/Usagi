@@ -9,7 +9,8 @@
 
 namespace usg
 {
-	SkeletalAnimationResource::SkeletalAnimationResource()
+	SkeletalAnimationResource::SkeletalAnimationResource() :
+		ResourceBase(StaticResType)
 	{
 
 	}

@@ -31,6 +31,8 @@ public:
 
 	static EffectHndl GetEffect(GFXDevice* pDevice, ::usg::particles::ParticleType eParticleType);
 
+	const static ResourceType StaticResType = ResourceType::PARTICLE_EMITTER;
+
 private:
 	void Load(GFXDevice* pDevice);
 

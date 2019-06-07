@@ -30,8 +30,10 @@ public:
 	const Effect_ps& GetPlatform() const { return m_platform; }
 	const U8String& GetName() const { return m_name; }
 
+	const static ResourceType StaticResType = ResourceType::EFFECT;
+
 private:
-	PRIVATIZE_COPY(Effect)
+	PRIVATIZE_RES_COPY(Effect)
 
 	U8String	m_name;
 	Effect_ps	m_platform;

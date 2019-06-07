@@ -9,13 +9,13 @@ namespace usg {
 
 
 	Effect::Effect() :
+		ResourceBase(StaticResType),
 		m_pSamplers(nullptr),
 		m_pAttributes(nullptr),
 		m_pConstantSets(nullptr),
 		m_pHeader(nullptr),
 		m_pBinary(nullptr)
 	{
-		m_resourceType = ResourceType::EFFECT;
 	}
 
 	Effect::~Effect()

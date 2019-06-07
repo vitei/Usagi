@@ -398,7 +398,7 @@ namespace usg
 	}
 	GUITexture::GUITexture()
 	{
-		m_pTexture = NULL;
+		m_pTexture = nullptr;
 		m_bDescValid = false;
 		m_vUVMin.Assign(0.0f, 0.0f);
 		m_vUVMax.Assign(1.0f, 1.0f);

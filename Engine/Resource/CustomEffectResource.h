@@ -51,6 +51,8 @@ namespace usg
 		const char* GetDepthEffectName() const;
 		const char* GetOmniDepthEffectName() const;
 
+		const static ResourceType StaticResType = ResourceType::CUSTOM_EFFECT;
+
 	private:
 		enum
 		{

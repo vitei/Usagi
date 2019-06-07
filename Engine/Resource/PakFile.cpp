@@ -20,7 +20,8 @@
 namespace usg
 {
 
-	PakFile::PakFile()
+	PakFile::PakFile() :
+		ResourceBase(StaticResType)
 	{
 		
 	}

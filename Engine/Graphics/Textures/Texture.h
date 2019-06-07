@@ -43,12 +43,16 @@ public:
 	// For keeping track of resizing/ recreation
 	uint32 GetUpdateIdx() const { return m_platform.GetUpdateIdx(); }
 
+	const static ResourceType StaticResType = ResourceType::TEXTURE;
+
 	enum 
 	{
 		MAX_TEXTUTRE_IDS = 4096
 	};
+
 private:
-	PRIVATIZE_COPY(Texture)
+	PRIVATIZE_RES_COPY(Texture)
+
 	static bool m_sbTexIds[MAX_TEXTUTRE_IDS];
 	Texture_ps m_platform;
 	U8String   m_name;

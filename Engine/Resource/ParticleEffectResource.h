@@ -27,6 +27,10 @@ public:
 	uint32 GetEmitterCount() const { return m_definition.emitters_count; }
 	uint32 GetRibbonCount() const { return m_definition.ribbons_count; }
 	const U8String& GetName() const { return m_name; }
+
+	const static ResourceType StaticResType = ResourceType::PARTICLE_EFFECT;
+
+
 protected:
 
 	U8String					m_name;

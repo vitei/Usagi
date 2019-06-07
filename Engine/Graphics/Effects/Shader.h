@@ -18,7 +18,7 @@ class GFXDevice;
 class Shader : public ResourceBase
 {
 public:
-	Shader() { m_resourceType = ResourceType::SHADER; }
+	Shader() : ResourceBase(StaticResType) {}
 	virtual ~Shader() {}
 
 	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
@@ -28,8 +28,10 @@ public:
 	const Shader_ps& GetPlatform() const { return m_platform; }
 	const U8String& GetName() const { return m_name; }
 
+	const static ResourceType StaticResType = ResourceType::SHADER;
+
 private:
-	PRIVATIZE_COPY(Shader)
+	PRIVATIZE_RES_COPY(Shader)
 
 	U8String	m_name;
 	Shader_ps	m_platform;

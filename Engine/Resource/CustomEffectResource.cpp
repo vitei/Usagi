@@ -30,7 +30,8 @@ namespace usg
 	};
 
 
-	CustomEffectResource::CustomEffectResource()
+	CustomEffectResource::CustomEffectResource() :
+		ResourceBase(StaticResType)
 	{
 		m_pHeader = NULL;
 		m_pConstantSets = NULL;
