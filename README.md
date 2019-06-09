@@ -56,7 +56,7 @@ By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Compon
 
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine. Vitei was developing  games limited in scope but with high technical demands for Nintendo platforms, so we set about creating an engine suited to those titles.  
 
-The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
+The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.  
 
 The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Games/Nintendo-3DS-download-software/Tank-Troopers-1136173.html) as well as several internal demos on numerous platforms and APIs.  
 
@@ -135,8 +135,9 @@ Current Version 0.2.1
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
-v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.
+v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  
 
+Since the code base is in a very early state the assumption is no one outside of the original developers are using the code base for anything other than reference; if you do attempt to make a project in Usagi be aware that you may periodically have to delete your build files (directories that begin with an underscore (such as _build) may periodically have to be deleted as the build system is altered.
 
 Issues
 ----------------------
