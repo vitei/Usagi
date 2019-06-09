@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_EMITTER_INSTANCE_H_
 #define _USG_PARTICLE_EDITOR_EMITTER_INSTANCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Particles/Scripted/ScriptEmitter.h"
 #include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Engine/GUI/GuiItems.h"

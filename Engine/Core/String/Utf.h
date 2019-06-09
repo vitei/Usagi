@@ -92,7 +92,7 @@
 
 #ifndef UTF_H__
 #define UTF_H__
-#include "Engine/Common/Common.h"
+
 
 typedef unsigned long	UTF32;	/* at least 32 bits */
 typedef char16			UTF16;	/* at least 16 bits */

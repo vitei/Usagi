@@ -1,7 +1,7 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Thread/CriticalSection.h"
 
 namespace usg{

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_TARGET_CONTEXT__
 #define __USG_AI_BEHAVIOR_TREE_TARGET_CONTEXT__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 #include "Engine/AI/Targetting/TargetListUtil.h"
 #include "Engine/AI/Targetting/Target.pb.h"

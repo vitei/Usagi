@@ -1,6 +1,6 @@
 #ifndef __ENGINE_SCENE_MODEL_MODEL_COMPONENTS_H__
 #define __ENGINE_SCENE_MODEL_MODEL_COMPONENTS_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/Component.h"
 #include "Engine/Resource/ResourceDecl.h"
 

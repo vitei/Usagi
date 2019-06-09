@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDOBJECT_PS_H__
 #define __USG_AUDIO_SOUNDOBJECT_PS_H__
-#include "Engine/Common/Common.h"
+
 #include "WaveFile.h"
 #include <xaudio2.h>
 

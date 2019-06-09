@@ -6,7 +6,7 @@
 #ifndef __USG_AI_WAYPOINT__
 #define __USG_AI_WAYPOINT__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Maths/Vector2f.h"

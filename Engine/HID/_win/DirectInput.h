@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_PC_DIRECT_INPUT_H__
 #define __USG_HID_PC_DIRECT_INPUT_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/IGamepad.h"
 #include "Engine/Core/stl/string.h"
 #include "Engine/Core/stl/vector.h"

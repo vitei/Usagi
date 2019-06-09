@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_COLOR_H_
 #define _USG_GRAPHICS_COLOR_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector4f.h"
 
 namespace usg {

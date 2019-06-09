@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_STRING_H
 #define _USG_STRING_H
-#include "Engine/Common/Common.h"
+
 
 const int STRING_CHUNK_SIZE = 32;
 const int STRING_CMP_SIZE = STRING_CHUNK_SIZE/8;

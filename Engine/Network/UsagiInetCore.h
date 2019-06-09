@@ -5,7 +5,7 @@
 #ifndef USAGI_INET_CORE_H
 #define USAGI_INET_CORE_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Network/NetCommon.h"
 #include <string>
 #include <Engine/Memory/StdAllocator.h>

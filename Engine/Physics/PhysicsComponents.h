@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_PHYSICS_PHYSICS_COMPONENTS_H_
 #define _USG_PHYSICS_PHYSICS_COMPONENTS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Physics/PhysX.h"
 #include "Engine/Framework/ComponentEntity.h"

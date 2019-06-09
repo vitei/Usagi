@@ -4,7 +4,7 @@
 #ifndef __usg_graphics_text__
 #define __usg_graphics_text__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Layout/Fonts/TextDrawer.h"
 #include "Engine/Layout/Fonts/Font.h"

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_WAVEFILEREADER_H__
 #define __USG_AUDIO_WAVEFILEREADER_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/File/File.h"
 
 class WaveFileReader

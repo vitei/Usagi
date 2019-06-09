@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _COMPONENT_ENTITY_H
 #define _COMPONENT_ENTITY_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFields.h"
 #include "Engine/Core/String/StringCRC.h"
 #include "Engine/Core/Containers/StringPointerHash.h"

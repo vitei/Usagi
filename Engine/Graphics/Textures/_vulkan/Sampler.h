@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_SAMPLER_H
 #define _USG_GRAPHICS_PC_SAMPLER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/RenderState.h"
 #include <vulkan/vulkan.h>
 

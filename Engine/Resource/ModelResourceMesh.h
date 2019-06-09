@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_MODEL_RESOURCE_MESH_H_
 #define _USG_GRAPHICS_SCENE_MODEL_RESOURCE_MESH_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Resource/SkeletonResource.h"
 #include "Engine/Resource/ResourceBase.h"

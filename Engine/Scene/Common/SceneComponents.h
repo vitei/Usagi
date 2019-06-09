@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USAGI_SCENE_COMMON_SCENE_COMPONENTS_H_
 #define _USAGI_SCENE_COMMON_SCENE_COMPONENTS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/Component.h"
 #include "Engine/Physics/CollisionMeshHitResult.h"
 

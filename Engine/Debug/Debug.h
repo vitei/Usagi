@@ -7,7 +7,7 @@
 #ifndef __USG_DEBUG_H__
 #define __USG_DEBUG_H__
 
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Debug, Debug_ps.h)
 #include "DebugMsgType.h"
 

@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef USAGI_MODE_TRANSITION_H__
 #define USAGI_MODE_TRANSITION_H__
-#include "Engine/Common/Common.h"
+
 #include "Mode.h"
 
 namespace usg

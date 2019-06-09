@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_OCTREE_H_
 #define _USG_GRAPHICS_SCENE_OCTREE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/AABB.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Memory/FastPool.h"

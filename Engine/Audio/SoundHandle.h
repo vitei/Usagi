@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDHANDLE_H__
 #define __USG_AUDIO_SOUNDHANDLE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/SafePointer.h"
 #include "SoundObject.h"
 

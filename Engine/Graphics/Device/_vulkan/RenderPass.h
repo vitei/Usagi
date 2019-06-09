@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_PC_RENDERPASS_H_
 #define _USG_GRAPHICS_DEVICE_PC_RENDERPASS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Core/stl/vector.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)

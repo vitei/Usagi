@@ -7,6 +7,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Graphics/Lights/DirLight.h"
 #include "Engine/Scene/ShadowContext.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include <limits>

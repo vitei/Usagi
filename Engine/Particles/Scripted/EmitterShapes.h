@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLES_SCRIPT_EMITTER_SHAPES_H_
 #define _USG_PARTICLES_SCRIPT_EMITTER_SHAPES_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Particles/ParticleEmitter.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Maths/MathUtil.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"

@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_EFFECT_PS_
 #define _USG_GRAPHICS_PC_EFFECT_PS_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include "Engine/Resource/PakDecl.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)

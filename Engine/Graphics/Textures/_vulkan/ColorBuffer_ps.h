@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_COLORBUFFER_H
 #define _USG_GRAPHICS_PC_COLORBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include <vulkan/vulkan.h>
 

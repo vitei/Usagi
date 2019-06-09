@@ -6,7 +6,7 @@
 
 #ifndef USG_GRAPHICS_SCENE_BONE_H
 #define USG_GRAPHICS_SCENE_BONE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"

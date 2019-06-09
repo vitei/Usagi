@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDFADE_H__
 #define __USG_AUDIO_SOUNDFADE_H__
-#include "Engine/Common/Common.h"
+
 #include "AudioDefs.h"
 
 namespace usg{

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_PC_MICROPHONE_PS__
 #define __USG_HID_PC_MICROPHONE_PS__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 
 namespace usg{

@@ -5,7 +5,7 @@
 
 #ifndef USG_GRAPHICS_VERTEXBUFFER_H
 #define USG_GRAPHICS_VERTEXBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include API_HEADER(Engine/Graphics/Primitives, VertexBuffer_ps.h)
 

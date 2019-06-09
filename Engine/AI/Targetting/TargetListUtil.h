@@ -4,7 +4,7 @@
 ****************************************************************************/
 #ifndef __USG_AI_TARGET_SYSTEM_TARGET_LIST_UTIL__
 #define __USG_AI_TARGET_SYSTEM_TARGET_LIST_UTIL__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/Targetting/TargetComponents.pb.h"
 #include "Engine/AI/Targetting/Target.pb.h"
 #include "Engine/AI/Targetting/TargetUtil.h"

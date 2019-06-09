@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _CLR_DEBUG_DEBUGCAMERA_H_
 #define _CLR_DEBUG_DEBUGCAMERA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/HID/InputEnums.pb.h"

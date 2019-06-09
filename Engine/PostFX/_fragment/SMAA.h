@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_SMAA_H_
 #define _USG_POSTFX_SMAA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/PostFX/PostEffect.h"

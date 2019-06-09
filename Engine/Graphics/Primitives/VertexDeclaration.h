@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_VERTEXDECLARATION_H
 #define _USG_GRAPHICS_VERTEXDECLARATION_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Memory/MemUtil.h"
 

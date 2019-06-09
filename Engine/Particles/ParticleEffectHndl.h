@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_EFFECT_HNDL_H_
 #define _USG_PARTICLE_EFFECT_HNDL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/SafePointer.h"
 #include "ParticleEffect.h"
 

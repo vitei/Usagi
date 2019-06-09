@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USAGI_GAMECOMPONENTS_H_
 #define _USAGI_GAMECOMPONENTS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/SystemKey.h"
 #include "Engine/Framework/Component.pb.h"
 #include "Engine/Core/String/StringCRC.h"

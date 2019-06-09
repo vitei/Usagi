@@ -4,7 +4,7 @@
 #pragma once
 #ifndef USG_DEBUG_STAT_GROUP_H
 #define USG_DEBUG_STAT_GROUP_H
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

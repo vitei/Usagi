@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_GFXDEVICE_H_
 #define _USG_GRAPHICS_GFXDEVICE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXHandles.h"
 
 

@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Lights/PointLight.h"
 #include "Engine/Graphics/Lights/SpotLight.h"
 #include "Engine/Graphics/Lights/ProjectionLight.h"
+#include "Engine/Scene/LightingContext.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/Device/GFXDevice.h"

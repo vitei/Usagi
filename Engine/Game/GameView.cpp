@@ -3,6 +3,7 @@
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/PostFX/PostFXSys.h"
+#include "Engine/Graphics/Fog.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "GameView.h"

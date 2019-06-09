@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_MESH_UTILITY
 #define _USG_MESH_UTILITY
-#include "Engine/Common/Common.h"
+
 #include "RenderConsts.h"
 
 namespace usg {

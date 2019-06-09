@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_INPUT_BINDING_H
 #define _USG_GRAPHICS_INPUT_BINDING_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Core/String/U8String.h"

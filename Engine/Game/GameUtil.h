@@ -3,7 +3,7 @@
 //	Description: Utility functions for games
 *****************************************************************************/
 #pragma once
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

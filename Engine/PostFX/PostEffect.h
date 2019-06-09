@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_POSTEFFECT_H_
 #define _USG_POSTFX_POSTEFFECT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/RenderNode.h"
 
 namespace usg {

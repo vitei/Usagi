@@ -3,7 +3,7 @@
 #ifndef COMPONENT_MANAGER_H
 #define COMPONENT_MANAGER_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Framework/CatchupEntities.h"

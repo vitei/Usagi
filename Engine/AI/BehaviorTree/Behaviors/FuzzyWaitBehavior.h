@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_FUZZY_WAIT_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_FUZZY_WAIT_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behaviors/WaitBehavior.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"
 namespace usg

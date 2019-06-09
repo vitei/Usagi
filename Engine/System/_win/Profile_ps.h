@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_SYSTEM_PROFILE_PS_H_
 #define _USG_SYSTEM_PROFILE_PS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 
 namespace usg {

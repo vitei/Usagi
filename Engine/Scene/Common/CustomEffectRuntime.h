@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_CUSTOM_EFFECT_RUNTIME_H_
 #define _USG_GRAPHICS_SCENE_CUSTOM_EFFECT_RUNTIME_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceDecl.h"
 
 namespace usg{

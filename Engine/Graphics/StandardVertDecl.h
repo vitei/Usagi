@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_STANDARD_VERT_DECL_
 #define _USG_STANDARD_VERT_DECL_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 
 namespace usg {

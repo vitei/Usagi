@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_EDITOR_SHAPES_H_
 #define _USG_PARTICLE_EDITOR_EDITOR_SHAPES_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_RENDER_PASSES_H_
 #define _USG_GRAPHICS_SCENE_RENDER_PASSES_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Device/PipelineState.h"
 #include "RenderNode.h"

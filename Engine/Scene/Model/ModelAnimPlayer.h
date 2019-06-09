@@ -6,7 +6,7 @@
 #ifndef _USG_SCENE_MODEL_MODEL_ANIM_PLAYER_H_
 #define _USG_SCENE_MODEL_MODEL_ANIM_PLAYER_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"

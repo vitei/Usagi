@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_RENDERTARGET_H
 #define _USG_GRAPHICS_PC_RENDERTARGET_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
 #include "Engine/Graphics/Device/RenderState.h"

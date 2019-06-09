@@ -7,7 +7,7 @@
 #ifndef USG_GAME_INTERFACE_H
 #define USG_GAME_INTERFACE_H
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

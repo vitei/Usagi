@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_AUDIO_LISTENER_H__
 #define __USG_AUDIO_AUDIO_LISTENER_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include AUDIO_HEADER(Engine/Audio/,AudioListener_ps.h)
 

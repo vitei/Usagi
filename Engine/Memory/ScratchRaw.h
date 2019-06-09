@@ -5,7 +5,7 @@
 #pragma once
 #ifndef USG_MEMORY_SCRATCH_RAW_H
 #define USG_MEMORY_SCRATCH_RAW_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/Mem.h"
 
 namespace usg{

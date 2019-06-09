@@ -181,6 +181,11 @@ namespace usg {
 		return m_pImpl->searchObject;
 	}
 
+	LightingContext& ViewContext::GetLightingContext()
+	{
+		return m_pImpl->lightingContext;
+	}
+
 	void ViewContext::SetCamera(const Camera* pCamera)
 	{
 		m_pImpl->pCamera = pCamera;

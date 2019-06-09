@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_SPRITE_EMITTER_H_
 #define _USG_SPRITE_EMITTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"

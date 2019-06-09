@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_IS_TARGET_ALIVE_BEHAVIOR__
 #define __USG_AI_IS_TARGET_ALIVE_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 
 namespace usg

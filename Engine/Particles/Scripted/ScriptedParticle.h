@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLES_SCRIPT_SCRIPTED_PARTICLE_H
 #define _USG_PARTICLES_SCRIPT_SCRIPTED_PARTICLE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"

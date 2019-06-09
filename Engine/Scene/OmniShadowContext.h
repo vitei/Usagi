@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_OMNISHADOWCONTEXT_H_
 #define _USG_GRAPHICS_SCENE_OMNISHADOWCONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"

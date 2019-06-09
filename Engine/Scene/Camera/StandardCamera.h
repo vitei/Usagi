@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_STANDARD_CAMERA_H_
 #define _USG_STANDARD_CAMERA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/Camera/Camera.h"
 
 namespace usg

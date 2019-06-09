@@ -6,7 +6,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "Engine/Common/Common.h"
+
 #include "ComponentEntity.h"
 #include "ComponentGetter.h"
 #include "SystemCategories.h"

@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USAGI_SYSTEMS_MODE_H_
 #define _USAGI_SYSTEMS_MODE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 #include "Mode.h"
 

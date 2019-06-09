@@ -4,6 +4,6 @@
 *****************************************************************************/
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 
 DLL_EXPORT 	bool GetHMDPhysicalDeviceVK(VkInstance instance, VkPhysicalDevice* deviceOut);

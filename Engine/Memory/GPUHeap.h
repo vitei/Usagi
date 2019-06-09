@@ -7,7 +7,7 @@
 *****************************************************************************/
 #ifndef _USG_ENGINE_MEMORY_GPU_HEAP_H_
 #define _USG_ENGINE_MEMORY_GPU_HEAP_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Memory/MemAllocator.h"
 

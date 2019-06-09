@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_SKY_H_
 #define _USG_GRAPHICS_SCENE_SKY_H_
-#include "Engine/common/common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Textures/Texture.h"

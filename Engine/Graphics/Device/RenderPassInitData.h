@@ -3,7 +3,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_RENDER_PASS_INIT_DATA_H_
 #define _USG_GRAPHICS_DEVICE_RENDER_PASS_INIT_DATA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/StateEnums.h"

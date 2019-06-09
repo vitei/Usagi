@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDOBJECT_H__
 #define __USG_AUDIO_SOUNDOBJECT_H__
-#include "Engine/Common/Common.h"
+
 #include "SoundActorHandle.h"
 #include "SoundFile.h"
 #include "AudioDefs.h"

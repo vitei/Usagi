@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_DEBUG_RENDER_H__
 #define __USG_DEBUG_RENDER_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"

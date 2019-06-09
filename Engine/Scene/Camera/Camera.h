@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_CAMERA_H_
 #define _USG_CAMERA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Graphics/RenderConsts.h"

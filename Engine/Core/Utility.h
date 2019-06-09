@@ -5,7 +5,7 @@
 
 #ifndef _USG_UTILITY
 #define	_USG_UTILITY
-#include "Engine/Common/Common.h"
+
 #include <string.h>
 
 namespace utl

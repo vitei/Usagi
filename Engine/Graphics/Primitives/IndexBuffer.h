@@ -5,7 +5,7 @@
 
 #ifndef USG_GRAPHICS_INDEXBUFFER_H
 #define USG_GRAPHICS_INDEXBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include API_HEADER(Engine/Graphics/Primitives, IndexBuffer_ps.h)
 
 namespace usg {

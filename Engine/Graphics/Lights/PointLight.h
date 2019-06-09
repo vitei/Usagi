@@ -6,7 +6,7 @@
 
 #ifndef USG_GRAPHICS_LIGHT_POINT_LIGHT_H
 #define USG_GRAPHICS_LIGHT_POINT_LIGHT_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Sphere.h"
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"

@@ -5,7 +5,7 @@
 
 #ifndef USG_GRAPHICS_DEVICE_DESCRIPTOR_SET_H
 #define USG_GRAPHICS_DEVICE_DESCRIPTOR_SET_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include API_HEADER(Engine/Graphics/Device, DescriptorSet_ps.h)

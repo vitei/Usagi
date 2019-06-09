@@ -5,7 +5,7 @@
 
 #ifndef USG_LIGHT_MGR_H
 #define USG_LIGHT_MGR_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_PC_INPUT_PS_H__
 #define __USG_HID_PC_INPUT_PS_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/HID/Microphone.h"

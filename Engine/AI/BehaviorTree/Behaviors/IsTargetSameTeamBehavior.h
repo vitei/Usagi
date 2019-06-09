@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_IS_TARGET_SAME_TEAM_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_IS_TARGET_SAME_TEAM_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #include "Engine/AI/Targetting/Target.pb.h"
 namespace usg

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_PC_XINPUT_PAD_H__
 #define __USG_HID_PC_XINPUT_PAD_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/IGamepad.h"
 #include <XInput.h>
 

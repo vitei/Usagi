@@ -9,7 +9,7 @@
 
 #ifndef _USG_MATERIAL_H_
 #define _USG_MATERIAL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Color.h"

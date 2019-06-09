@@ -5,7 +5,7 @@
 #pragma once
 #ifndef USG_DEBUG_SCENE_DEBUG_STATS_H
 #define USG_DEBUG_SCENE_DEBUG_STATS_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 #include "Engine/Core/String/FixedString.h"
 #include "Engine/Graphics/Color.h"

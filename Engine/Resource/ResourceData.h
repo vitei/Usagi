@@ -6,7 +6,7 @@
 
 #ifndef USG_RESOURCE_RESOURCE_DATA_H
 #define USG_RESOURCE_RESOURCE_DATA_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 
 

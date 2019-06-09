@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_TEXTURE_H
 #define _USG_GRAPHICS_PC_TEXTURE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include <vulkan/vulkan.h>
 

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_DUMMY_AUDIO_PS_H__
 #define __USG_AUDIO_DUMMY_AUDIO_PS_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Audio/SoundActorHandle.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Audio/AudioBank.pb.h"

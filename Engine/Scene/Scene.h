@@ -5,7 +5,7 @@
 #pragma once
 #ifndef USG_GRAPHICS_SCENE_SCENE_H
 #define USG_GRAPHICS_SCENE_SCENE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Maths/Matrix4x4.h"

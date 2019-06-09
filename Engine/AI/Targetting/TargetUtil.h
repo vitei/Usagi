@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_TARGET_UTIL__
 #define __USG_AI_TARGET_UTIL__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/AI/Targetting/Target.pb.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"

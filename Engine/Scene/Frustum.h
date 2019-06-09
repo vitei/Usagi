@@ -6,7 +6,7 @@
 
 #ifndef USG_FRUSTUM_H
 #define USG_FRUSTUM_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Maths/Plane.h"
 

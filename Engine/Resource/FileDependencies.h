@@ -4,7 +4,7 @@
 *****************************************************************************/
 #pragma once
 HEADER_GUARD_OPEN(RESOURCE_FILE_DEPENDENCIES)
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/stl/vector.h"
 #include "ResourceDecl.h"
 #include "PakDecl.h"

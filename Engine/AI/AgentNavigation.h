@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_AGENT_NAVIGATION__
 #define __USG_AI_AGENT_NAVIGATION__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/System.h"
 #include "Engine/Framework/SystemCategories.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"

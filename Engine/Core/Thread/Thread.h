@@ -4,7 +4,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_THREAD_THREAD_H_
 #define	_USG_ENGINE_THREAD_THREAD_H_
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Core/Thread, Thread_ps.h)
 
 namespace usg

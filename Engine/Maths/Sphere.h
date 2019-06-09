@@ -6,7 +6,7 @@
 #ifndef USG_MATH_SPHERE_H
 #define USG_MATH_SPHERE_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 
 namespace usg{

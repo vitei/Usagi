@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_XAUDIO2_WAVEFILE_H__
 #define __USG_AUDIO_XAUDIO2_WAVEFILE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Audio/SoundFile.h"
 #include "Engine/Audio/Shared/WaveFileReader.h"
 #include <xaudio2.h>

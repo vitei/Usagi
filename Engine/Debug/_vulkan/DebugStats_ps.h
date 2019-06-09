@@ -6,7 +6,7 @@
 
 #ifndef USG_DEBUG_STATS_VULKAN_H
 #define USG_DEBUG_STATS_VULKAN_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 
 namespace usg {

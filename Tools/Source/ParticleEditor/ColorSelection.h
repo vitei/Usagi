@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_COLOR_SELECTION_H_
 #define _USG_PARTICLE_EDITOR_COLOR_SELECTION_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/Graphics/StandardVertDecl.h"

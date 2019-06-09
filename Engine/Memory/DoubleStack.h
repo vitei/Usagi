@@ -7,7 +7,7 @@
 *****************************************************************************/
 #ifndef _USG_MEMORY_DOUBLE_STACK_H_
 #define _USG_MEMORY_DOUBLE_STACK_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/Mem.h"
 #include OS_HEADER(Engine/Memory, MemBlock_ps.h)
 

@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_SYSTEM_H_
 #define _USG_PARTICLE_SYSTEM_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemHeap.h"
 #include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Scripted/ScriptEmitter.h"

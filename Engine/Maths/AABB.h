@@ -6,7 +6,7 @@
 #ifndef USG_MATHS_AABB_H
 #define USG_MATHS_AABB_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Sphere.h"
 

@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_PAK_HEADER_H_
 #define _USG_RESOURCE_PAK_HEADER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Resource/PakFile.h"
 

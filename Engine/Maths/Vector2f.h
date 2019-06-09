@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_VECTOR2F_H_
 #define _USG_VECTOR2F_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 
 namespace usg{

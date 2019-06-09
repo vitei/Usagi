@@ -4,7 +4,7 @@
  *****************************************************************************/
 #ifndef __USG_AUDIO_CTR_SOUND_FILE__
 #define __USG_AUDIO_CTR_SOUND_FILE__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Audio/AudioBank.pb.h"
 #include "Engine/Core/String/U8String.h"

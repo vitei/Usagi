@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_BEHAVIOR_TREE_COMPOSITES__
 #define __USG_AI_BEHAVIOR_TREE_COMPOSITES__
-#include "Engine/Common/Common.h"
+
 #include "Sequence.h"
 #include "Selector.h"
 #include "Parallel.h"

@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_QUATERNION_H_
 #define	_USG_QUATERNION_H_
-#include "engine/common/common.h"
+
 #include "Vector3f.h"
 #include "Matrix4x4.h"
 

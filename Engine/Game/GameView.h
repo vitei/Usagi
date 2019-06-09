@@ -1,4 +1,4 @@
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Scene/Camera/StandardCamera.h"
 #include "Engine/Scene/Camera/HMDCamera.h"

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_GFX_H_
 #define _USG_GRAPHICS_GFX_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/Display.h"
 
 namespace usg {

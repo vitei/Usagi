@@ -4,7 +4,7 @@
 #ifndef NET_MESSAGE_H
 #define NET_MESSAGE_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Maths/Quaternionf.h"

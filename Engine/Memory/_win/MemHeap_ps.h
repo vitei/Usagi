@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_MEMORY_MEMTYPE_WIN_PS_H_
 #define _USG_ENGINE_MEMORY_MEMTYPE_WIN_PS_H_
-#include "Engine/Common/Common.h"
+
 
 // FIXME: Just a wrapper for new and delete at the moment
 

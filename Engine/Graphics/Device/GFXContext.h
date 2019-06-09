@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_GFXCONTEXT_H_
 #define _USG_GRAPHICS_GFXCONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include API_HEADER(Engine/Graphics/Device, GFXContext_ps.h)
 

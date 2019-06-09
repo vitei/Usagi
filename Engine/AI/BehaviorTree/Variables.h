@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIOR_VARS_TREE__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIOR_VARS_TREE__
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

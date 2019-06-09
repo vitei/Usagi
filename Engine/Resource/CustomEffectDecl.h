@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_CUSTOM_EFFECT_DECL_H_
 #define _USG_RESOURCE_CUSTOM_EFFECT_DECL_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

@@ -6,7 +6,7 @@
 
 #ifndef USG_HEAP_H
 #define USG_HEAP_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/Mem.h"
 #include "Engine/Core/Thread/CriticalSection.h"
 #include OS_HEADER(Engine/Memory, MemHeap_ps.h)

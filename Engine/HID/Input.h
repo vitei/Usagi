@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_HID_H__
 #define __USG_HID_HID_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 #include "Gamepad.h"
 #include "Microphone.h"

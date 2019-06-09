@@ -4,7 +4,7 @@
 #ifndef _USG_GRAPHICS_FONTS_FONT_H_
 #define _USG_GRAPHICS_FONTS_FONT_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"

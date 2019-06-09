@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_COMPOSITE__
 #define __USG_AI_COMPOSITE__
-#include "Engine/Common/Common.h"
+
 #include "Behavior.h"
 
 namespace usg

@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_MATRIX4X4_H_
 #define	_USG_MATRIX4X4_H_
-#include "Engine/Common/Common.h"
+
 #include "Vector3f.h"
 #include "Vector4f.h"
 

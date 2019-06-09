@@ -6,7 +6,7 @@
 // ***************************************************************
 #ifndef _USG_GUI_GUI_BUTTON_H
 #define _USG_GUI_GUI_BUTTON_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Graphics/Materials/Material.h"

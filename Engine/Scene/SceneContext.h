@@ -7,7 +7,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_SCENECONTEXT_H_
 #define _USG_GRAPHICS_SCENE_SCENECONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Scene/Octree.h"
 #include "Engine/Scene/RenderGroup.h"

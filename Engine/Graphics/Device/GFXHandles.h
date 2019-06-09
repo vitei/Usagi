@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_GFX_HANDLES_H_
 #define _USG_GRAPHICS_DEVICE_GFX_HANDLES_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

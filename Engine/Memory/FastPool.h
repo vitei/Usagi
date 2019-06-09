@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_MEMORY_FAST_POOL_H_
 #define _USG_MEMORY_FAST_POOL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 
 

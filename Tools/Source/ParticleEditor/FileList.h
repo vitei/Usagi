@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_FILE_LIST_H_
 #define _USG_PARTICLE_EDITOR_FILE_LIST_H_
-#include "Engine/Common/Common.h"
+
 #include <filesystem>
 #include <fstream>
 

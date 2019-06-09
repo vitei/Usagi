@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_VECTOR3F_H_
 #define	_USG_VECTOR3F_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Maths/Vector2f.h"
 

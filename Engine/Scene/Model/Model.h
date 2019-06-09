@@ -5,7 +5,7 @@
 #ifndef _USG_GRAPHICS_SCENE_MODEL_H_
 #define _USG_GRAPHICS_SCENE_MODEL_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Scene/Model/Skeleton.h"

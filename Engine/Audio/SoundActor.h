@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDACTOR_H__
 #define __USG_AUDIO_SOUNDACTOR_H__
-#include "Engine/Common/Common.h"
+
 #include AUDIO_HEADER(Engine/Audio, SoundActor_ps.h)
 #include "Engine/Core/Containers/SafePointer.h"
 

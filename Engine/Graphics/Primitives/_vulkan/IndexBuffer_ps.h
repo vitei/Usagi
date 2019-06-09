@@ -4,7 +4,7 @@
 #ifndef _USG_GRAPHICS_PC_INDEXBUFFER_H
 #define _USG_GRAPHICS_PC_INDEXBUFFER_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 

@@ -8,7 +8,7 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFields.h"
 
 namespace usg {

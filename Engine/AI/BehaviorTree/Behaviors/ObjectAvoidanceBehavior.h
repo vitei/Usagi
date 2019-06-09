@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_OBJECT_AVOIDANCE_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_OBJECT_AVOIDANCE_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behaviors/AvoidanceBehavior.h"
 #include "Engine/AI/Pathfinding/NavigationGrid.h"
 #include "Engine/Memory/MemUtil.h"

@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_FONT_TEXT_DRAWER_H_
 #define _USG_GRAPHICS_FONT_TEXT_DRAWER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Layout/Fonts/Font.h"
 #include "Engine/Layout/Fonts/TextEnums.h"
 #include "Engine/Graphics/Materials/Material.h"

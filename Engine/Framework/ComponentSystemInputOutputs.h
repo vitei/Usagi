@@ -4,7 +4,7 @@
 #ifndef _COMPONENT_SYSTEM_INPUT_OUTPUTS_H
 #define _COMPONENT_SYSTEM_INPUT_OUTPUTS_H
 
-#include "Engine/Common/Common.h"
+
 #include "ComponentEntity.h"
 #include "Engine/Framework/SystemId.h"
 

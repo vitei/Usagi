@@ -2,7 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 //	Description: Checks if health is less than a specific value
 *****************************************************************************/
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_IS_HEALTH_BELOW_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_IS_HEALTH_BELOW_BEHAVIOR__

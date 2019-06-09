@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __AI_BEHAVIORS_ISANIMCONDITIONTRUE_BEHAVIOR__
 #define __AI_BEHAVIORS_ISANIMCONDITIONTRUE_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/Model/ModelAnimPlayer.h"
 #include "Engine/AI/BehaviorTree/Behaviors/Behaviors.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"

@@ -1,7 +1,7 @@
 #pragma once
 #ifndef GAME_SIMPLE_GAME_BASE_H
 #define GAME_SIMPLE_GAME_BASE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Game/GameInterface.h"
 #include "Engine/Core/Timer/Timer.h"
 #include "Engine/Debug/DebugStats.h"

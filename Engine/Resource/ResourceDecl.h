@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_RESOURCE_DECL_H_
 #define _USG_RESOURCE_RESOURCE_DECL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/ResourcePointer.h"
 #include "Engine/Resource/ResourceBase.h"
 

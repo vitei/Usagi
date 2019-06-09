@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_FUZZY_APPROACH_TARGET_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_FUZZY_APPROACH_TARGET_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/Pathfinding/Path.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 

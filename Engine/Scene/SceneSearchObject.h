@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_SCENESEARCHNODE_H_
 #define _USG_GRAPHICS_SCENE_SCENESEARCHNODE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/Octree.h"
 
 namespace usg{

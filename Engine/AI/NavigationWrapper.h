@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_NAVIGATION_WRAPPER__
 #define __USG_AI_NAVIGATION_WRAPPER__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/AgentNavigationUtil.h"
 #include "Engine/AI/Pathfinding/NavigationGrid.h"
 namespace usg

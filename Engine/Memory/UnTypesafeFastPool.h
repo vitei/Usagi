@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_MEMORY_FAST_POOL_NON_TYPE_SAFEH_
 #define _USG_MEMORY_FAST_POOL_NON_TYPE_SAFEH_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 
 namespace usg {

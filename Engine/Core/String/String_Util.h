@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_STRING_UTIL_H
 #define _USG_STRING_UTIL_H
-#include "Engine/Common/Common.h"
+
 
 namespace str
 {

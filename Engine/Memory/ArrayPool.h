@@ -11,7 +11,7 @@
 
 #ifndef USG_ARRAY_POOL_H
 #define USG_ARRAY_POOL_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 #include "Engine/Memory/MemUtil.h"
 #include "FastPool.h"

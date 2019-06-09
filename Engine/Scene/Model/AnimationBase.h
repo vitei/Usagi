@@ -5,7 +5,7 @@
 #ifndef _USG_SCENE_MODEL_ANIMATION_BASE_H_
 #define _USG_SCENE_MODEL_ANIMATION_BASE_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceDecl.h"
 
 namespace usg {

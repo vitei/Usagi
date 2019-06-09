@@ -4,7 +4,7 @@
 #pragma once
 #ifndef USG_GRAPHICS_PC_OPENGLCONTEXT
 #define	USG_GRAPHICS_PC_OPENGLCONTEXT
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

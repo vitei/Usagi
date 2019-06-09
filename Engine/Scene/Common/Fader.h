@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _FADER_H
 #define _FADER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"

@@ -6,7 +6,7 @@
 
 #ifndef __USG_AI_SEQUENCE__
 #define __USG_AI_SEQUENCE__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Composite.h"
 
 namespace usg

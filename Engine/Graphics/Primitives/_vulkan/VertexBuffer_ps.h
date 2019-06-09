@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_VERTEXBUFFER_H
 #define _USG_GRAPHICS_PC_VERTEXBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {

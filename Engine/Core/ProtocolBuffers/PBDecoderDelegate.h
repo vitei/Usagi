@@ -5,7 +5,7 @@
 #ifndef _USG_CORE_PB_DECODER_DELEGATE_H_
 #define _USG_CORE_PB_DECODER_DELEGATE_H_
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

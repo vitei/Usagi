@@ -6,7 +6,7 @@
 
 #ifndef USG_MATHS_MATH_UTIL_H
 #define USG_MATHS_MATH_UTIL_H
-#include "Engine/Common/Common.h"
+
 #include API_HEADER(Engine/Maths, MathUtil_ps.h)
 
 namespace usg{

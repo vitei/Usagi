@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_AGENT_CONTEXT__
 #define __USG_AI_BEHAVIOR_TREE_AGENT_CONTEXT__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/INavigationContext.h"
 #include "Engine/AI/ITargetContext.h"
 namespace usg

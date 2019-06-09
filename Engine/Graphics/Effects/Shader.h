@@ -5,7 +5,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_SHADER_
 #define _USG_GRAPHICS_SHADER_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include API_HEADER(Engine/Graphics/Effects, Shader_ps.h)
 #include "Engine/Resource/ResourceBase.h"

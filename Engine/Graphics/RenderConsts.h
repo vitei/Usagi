@@ -6,7 +6,7 @@
 
 #ifndef USG_RENDERING_CONSTS
 #define USG_RENDERING_CONSTS
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.pb.h"
 
 namespace usg {

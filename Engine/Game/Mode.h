@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __CLR_USAGI_MODE_H__
 #define __CLR_USAGI_MODE_H__
-#include "Engine/Common/Common.h"
+
 
 
 namespace usg

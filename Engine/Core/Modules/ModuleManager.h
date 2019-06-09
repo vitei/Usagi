@@ -6,7 +6,7 @@
 //	some of the code is platform dependent and would also need to be moved out
 *****************************************************************************/
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Core/stl/string.h"
 #include "Engine/Core/Singleton.h"

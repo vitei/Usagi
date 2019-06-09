@@ -6,7 +6,7 @@
 
 #ifndef USG_PROFILE_TIMER_H
 #define USG_PROFILE_TIMER_H
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_VECTOR4F
 #define	_USG_VECTOR4F
-#include "Engine/Common/Common.h"
+
 #include "Vector3f.h"
 #include "Vector2f.h"
 

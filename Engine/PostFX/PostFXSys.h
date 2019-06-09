@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_POSTFXSYS_H_
 #define _USG_POSTFX_POSTFXSYS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"

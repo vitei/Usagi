@@ -6,7 +6,7 @@
 #ifndef _USG_TIMER_H_
 #define _USG_TIMER_H_
 
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Core/Timer, TimeTracker.h)
 
 namespace usg {

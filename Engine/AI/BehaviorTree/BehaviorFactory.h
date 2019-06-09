@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIOR_FACTORY__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIOR_FACTORY__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/BehaviorTree.h"
 #include "Engine/AI/BehaviorTree/Behaviors/Behaviors.h"
 #include "Engine/AI/BehaviorTree/Decorators/Decorators.h"

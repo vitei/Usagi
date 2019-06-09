@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_TGAFILE_H
 #define _USG_GRAPHICS_TGAFILE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 
 // TODO: Add loading as a texture?

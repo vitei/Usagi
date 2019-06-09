@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_CORE_OS_
 #define	_USG_CORE_OS_
-#include "Engine/Common/Common.h"
+
 
 #include OS_HEADER(Engine/Core, os_ps.h)
 

@@ -7,7 +7,7 @@
 
 #ifndef _USG_BUFFERED_FILE_H_
 #define _USG_BUFFERED_FILE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/ScratchRaw.h"
 #include "Engine/Memory/MemUtil.h"
 #include "File.h"

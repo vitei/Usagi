@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_DEST_MIN_DISTANCE_DECORATOR__
 #define __USG_AI_DEST_MIN_DISTANCE_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"
 #include "Engine/AI/BehaviorTree/Behaviors/DestinationMinDistanceBehavior.h"

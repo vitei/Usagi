@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_PAK_FILE_H_
 #define _USG_RESOURCE_PAK_FILE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Resource/ResourceBase.h"

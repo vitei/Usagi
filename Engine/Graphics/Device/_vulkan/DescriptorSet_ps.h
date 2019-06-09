@@ -3,7 +3,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_VULKAN_DESCRIPTOR_SET_PS_H_
 #define _USG_GRAPHICS_DEVICE_VULKAN_DESCRIPTOR_SET_PS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/DescriptorSetLayout.h"
 #include "Engine/Core/stl/vector.h"

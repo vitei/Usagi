@@ -7,7 +7,7 @@
 
 #ifndef USG_MATHS_PLANE_H
 #define USG_MATHS_PLANE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Maths/Sphere.h"

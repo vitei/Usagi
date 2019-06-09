@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 #include "../ResourcePak/ResourcePakExporter.h"
 #include <sstream>

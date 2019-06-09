@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_VIEWPORT_H
 #define _USG_VIEWPORT_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/RenderConsts.h"
 

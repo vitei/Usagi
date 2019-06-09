@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_SET_H_
 #define _USG_PARTICLE_SET_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemHeap.h"
 
 namespace usg

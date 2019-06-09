@@ -4,7 +4,7 @@
 #ifndef NET_DATA_COMPRESSOR_H
 #define NET_DATA_COMPRESSOR_H
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

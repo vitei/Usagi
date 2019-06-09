@@ -6,7 +6,7 @@
 #ifndef __USG_AI_SHAPE__
 #define __USG_AI_SHAPE__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Maths/Vector2f.h"
 #include "AABB.h"

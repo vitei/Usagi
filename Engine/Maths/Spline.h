@@ -5,7 +5,7 @@
 #define Spline_h__
 
 #include "Engine/Maths/Vector3f.h"
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 
 namespace usg

@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_PREVIEW_MODEL_H_
 #define _USG_PARTICLE_EDITOR_PREVIEW_MODEL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/GUI/GuiWindow.h"
 #include "Engine/GUI/IMGuiRenderer.h"

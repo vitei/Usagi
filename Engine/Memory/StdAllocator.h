@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_STDALLOCATOR_H_
 #define _USG_ENGINE_STDALLOCATOR_H_
-#include "Engine/Common/Common.h"
+
 #include <memory>
 
 namespace usg {

@@ -4,7 +4,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_THREAD_THREAD_PS_H_
 #define	_USG_ENGINE_THREAD_THREAD_PS_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

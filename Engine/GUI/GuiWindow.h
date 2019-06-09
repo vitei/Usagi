@@ -7,7 +7,7 @@
 // ***************************************************************
 #ifndef _USG_GUI_GUI_WINDOW_H
 #define _USG_GUI_GUI_WINDOW_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Maths/Vector2f.h"
 #include "GuiItems.h"

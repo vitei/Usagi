@@ -6,7 +6,7 @@
 
 #ifndef USG_GRAPHICS_DISPLAY_H
 #define USG_GRAPHICS_DISPLAY_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include API_HEADER(Engine/Graphics/Device, Display_ps.h)
 

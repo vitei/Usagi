@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_DEPTH_STENCIL_BUFFER_PS_H_
 #define _USG_GRAPHICS_PC_DEPTH_STENCIL_BUFFER_PS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)

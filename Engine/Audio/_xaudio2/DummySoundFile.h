@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_DUMMYSOUNDFILE_H__
 #define __USG_AUDIO_DUMMYSOUNDFILE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Audio/SoundFile.h"
 
 namespace usg{
