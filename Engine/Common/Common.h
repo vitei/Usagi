@@ -73,5 +73,9 @@ typedef sint32 pb_ssize_t;
 #include "Engine/Memory/Mem.h"
 #include "Engine/Core/stl/memory.h"
 #include "GameHandle.h"
+#include <pb.h>
+#include <Engine/Core/ProtocolBuffers.h>
+#include <Engine/Framework/ComponentProperties.h>
+#include <Engine/Framework/GameComponents.h>
 
 #endif // USG_COMMON

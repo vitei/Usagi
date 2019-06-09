@@ -4,6 +4,8 @@
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Scene/Common/Decal.h"
 #include "Engine/Scene/Common/GroundDecals.h"
+#include "Engine/Graphics/Lights/Light.h"
+#include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"

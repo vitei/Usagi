@@ -4,7 +4,6 @@
 #ifndef _USG_ENGINE_SCENE_GROUND_DECALS_
 #define _USG_ENGINE_SCENE_GROUND_DECALS_
 #include "Engine/Common/Common.h"
-#include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"
 #include "Engine/Scene/RenderNode.h"

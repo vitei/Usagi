@@ -15,6 +15,7 @@ namespace usg
 class ShadowContext;
 class GFXContext;
 class DirLight;
+class RenderTarget;
 
 #define RENDER_TO_LAYER 1
 

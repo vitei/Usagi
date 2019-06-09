@@ -7,6 +7,8 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Scene/SceneContext.h"
+#include "Engine/Scene/SceneSearchObject.h"
+#include "Engine/Graphics/Device/DescriptorSet.h"
 
 namespace usg{
 

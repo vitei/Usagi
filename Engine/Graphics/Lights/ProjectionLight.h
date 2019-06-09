@@ -17,7 +17,7 @@ namespace usg {
 class Camera;
 class LightMgr;
 class Texture;
-class ProjetionShadow;
+class ProjectionShadow;
 
 class ProjectionLight : public Light
 {

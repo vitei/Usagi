@@ -9,13 +9,7 @@
 #define _USG_GRAPHICS_SCENE_SCENECONTEXT_H_
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Containers/List.h"
-#include "Engine/Scene/RenderGroup.h"
-#include "Engine/Scene/RenderNode.h"
-#include "Engine/Scene/LightingContext.h"
-#include "Engine/Scene/SceneSearchObject.h"
-#include "Engine/Graphics/Lights/LightMgr.h"
-#include "Engine/Graphics/Fog.h"
-#include "Engine/Scene/Camera/Camera.h"
+#include "Engine/Scene/Octree.h"
 #include "Engine/Scene/RenderGroup.h"
 
 namespace usg{
@@ -24,6 +18,8 @@ class Scene;
 class Camera;
 class PostFXSys;
 class SceneSearchObject;
+class RenderGroup;
+
 
 class SceneContext
 {

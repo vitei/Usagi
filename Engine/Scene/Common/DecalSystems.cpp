@@ -2,16 +2,10 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
-#include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
-#include "Engine/Scene/Model/ModelComponents.pb.h"
-#include "Engine/Physics/PhysicsComponents.pb.h"
 #include "Engine/Graphics/GPUUpdate.h"
-#include "Engine/Scene/Model/Model.h"
-#include "Engine/Physics/CollisionQuadTree.pb.h"
 #include "Engine/Scene/Common/GroundDecals.h"
-#include "Engine/Physics/CollisionQuadTreeHandle.h"
 
 namespace usg {
 
