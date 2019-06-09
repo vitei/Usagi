@@ -48,7 +48,7 @@ public:
 	ResourceHandle() : ResourcePointer() {}
 	~ResourceHandle() {}
 
-	ResourceHandle(HighLevelType* pData) : ResourcePointer((ResourceBase*)pData) {}
+	ResourceHandle(HighLevelType* pData) : ResourcePointer((ResourceBase*)pData) { ASSERT(!pData || ((ResourceBase*)(pData))->GetResourceType() == CmpType); }
 	ResourceHandle(const BaseResHandle &rhs) : BaseResHandle(rhs)
 	{
 		ASSERT(!rhs.get() || rhs->GetResourceType() == CmpType);

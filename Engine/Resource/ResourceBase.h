@@ -5,6 +5,7 @@
 #define ResourceBase_h__
 
 #include "Engine/Resource/ResourceDictionary.h"
+#include "Engine/Core/stl/string.h"
 
 namespace usg
 {
@@ -52,21 +53,29 @@ namespace usg
 		void SetReady(bool bReady) { m_bReady = bReady; }
 		ResourceType GetResourceType() const { return m_resourceType; }
 
-
+#ifdef DEBUG_BUILD
+		virtual uint32 GetSizeInMemory() const { return 0; }
+		const usg::string& GetName() const { return m_name; }
+#endif
 
 	protected:
 		void SetupHash( const char* name )
 		{
 			m_nameHash = ResourceDictionary::calcNameHash( name );
 			m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
+			m_name = name;
 		}
-		NameHash		m_nameHash;
-		DataHash		m_dataHash;
 
 		bool		m_bReady;
 
 	private:
 		ResourceType	m_resourceType;
+		NameHash		m_nameHash;
+		DataHash		m_dataHash;
+#ifdef DEBUG_BUILD
+		usg::string		m_name;
+#endif
+
 	};
 	
 }

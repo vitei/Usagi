@@ -34,8 +34,7 @@ namespace usg {
 		MemCpy(m_pBinary, pEffectHdr, pFileHeader->uCustomHeaderSize);
 		m_pHeader = (PakFileDecl::EffectEntry*)m_pBinary;
 
-		m_name = pFileHeader->szName;
-		SetupHash(m_name.CStr());
+		SetupHash(pFileHeader->szName);
 		bool bLoaded = m_platform.Init(pDevice, pFileHeader, pDependencies, pData, pFileHeader->uDataSize);
 		// FIXME: This should be done internally
 		SetReady(true);

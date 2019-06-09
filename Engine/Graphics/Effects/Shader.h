@@ -26,22 +26,19 @@ public:
 
 	Shader_ps& GetPlatform() { return m_platform; }
 	const Shader_ps& GetPlatform() const { return m_platform; }
-	const U8String& GetName() const { return m_name; }
 
 	const static ResourceType StaticResType = ResourceType::SHADER;
 
 private:
 	PRIVATIZE_RES_COPY(Shader)
 
-	U8String	m_name;
 	Shader_ps	m_platform;
 };
 
 
 inline bool Shader::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
 {
-	m_name = pFileHeader->szName;
-	SetupHash(m_name.CStr());
+	SetupHash(pFileHeader->szName);
 	bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
 	// FIXME: This should be done internally
 	SetReady(true);

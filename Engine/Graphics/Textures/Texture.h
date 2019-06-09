@@ -37,7 +37,7 @@ public:
 	uint32 GetHeight() const;
 
 #ifdef DEBUG_BUILD
-	uint32 GetSizeInMemory() const { return m_platform.GetSizeInMemory(); }
+	uint32 GetSizeInMemory() const override { return m_platform.GetSizeInMemory(); }
 #endif
 
 	// For keeping track of resizing/ recreation

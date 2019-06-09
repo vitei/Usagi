@@ -18,9 +18,9 @@ public:
 	ResourcePakHdr() : ResourceBase(StaticResType){ }
 	virtual ~ResourcePakHdr() {}
 
-	bool Init(const PakFile& loader)
+	bool Init(const PakFile& loader, const char* szName)
 	{
-		m_nameHash = loader.GetNameHash();
+		SetupHash(szName);
 		return true;
 	}
 

@@ -60,7 +60,6 @@ public:
 	bool	m_bLoadAsStatic;
 };
 
-template <class ResourceType>
 class ResourceData : public ResourceDataBase
 {
 private:
@@ -88,7 +87,7 @@ public:
 				// Ensure it's not being used elsewhere
 				// FIXME: There is a memory leak going on so can't check in this assert yet
 				//ASSERT((*it)->resource.unique());
-				const_cast<ResourceType*>(GetAs<ResourceType>(val->resource))->CleanUp(pDevice);
+				const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
 				vdelete val->resource.get();
 				val->resource.reset();
 				it.RemoveElement();
@@ -101,7 +100,7 @@ public:
 		for (ResourceDynamicIter it = m_resources.BeginDynamic(); !it.IsEnd(); ++it)
 		{
 			ResourceInfo* val = *it;
-			const_cast<ResourceType*>(GetAs<ResourceType>(val->resource))->CleanUp(pDevice);
+			const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
 			vdelete val->resource.get();
 			val->resource.reset();
 			it.RemoveElement();
@@ -124,14 +123,17 @@ public:
 	}
 	 
 	BaseResHandle GetResourceHndl(const U8String& resName);
-	BaseResHandle AddResource(const ResourceType* pResource);
+	BaseResHandle AddResource(const ResourceBase* pResource);
 	void AddResource(BaseResHandle resHndl);
 
 
 	uint32 GetResourceCount() const { return m_resources.Size(); }
 
 	// TODO: Remove this functions accessing the raw resource
+	template <class ResourceType>
 	const ResourceType* GetResource(const U8String &resName);
+	
+	template <class ResourceType>
 	const ResourceType* GetResource(uint32 uIndex) const
 	{
 		// Slow!!! Do not use outside of init
@@ -151,20 +153,17 @@ private:
 };
 
 
-template <class ResourceType>
-inline ResourceData<ResourceType>::ResourceData() : m_resources(50, true, true)
+inline ResourceData::ResourceData() : m_resources(50, true, true)
 {
 }
 
-template <class ResourceType>
-inline ResourceData<ResourceType>::~ResourceData()
+inline ResourceData::~ResourceData()
 {
 	ASSERT(m_resources.Size() == 0);
 }
 
 
-template <class ResourceType>
-inline BaseResHandle ResourceData<ResourceType>::AddResource(const ResourceType* pResource)
+inline BaseResHandle ResourceData::AddResource(const ResourceBase* pResource)
 {
 #ifdef DEBUG_RESOURCE_MGR
 	m_loadTimer.Stop();
@@ -180,8 +179,7 @@ inline BaseResHandle ResourceData<ResourceType>::AddResource(const ResourceType*
 	return ret;
 }
 
-template <class ResourceType>
-inline void ResourceData<ResourceType>::AddResource(BaseResHandle resHandle)
+inline void ResourceData::AddResource(BaseResHandle resHandle)
 {
 #ifdef DEBUG_RESOURCE_MGR
 	m_loadTimer.Stop();
@@ -192,8 +190,8 @@ inline void ResourceData<ResourceType>::AddResource(BaseResHandle resHandle)
 	pInfo->bStatic = m_bLoadAsStatic;
 }
 
-template <class ResourceType>
-BaseResHandle ResourceData<ResourceType>::GetResourceHndl(const U8String& resName)
+
+BaseResHandle ResourceData::GetResourceHndl(const U8String& resName)
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
 	NameHash nameHash = ResourceDictionary::calcNameHash( resName.CStr() );
@@ -222,7 +220,7 @@ BaseResHandle ResourceData<ResourceType>::GetResourceHndl(const U8String& resNam
 }
 
 template <class ResourceType>
-const ResourceType* ResourceData<ResourceType>::GetResource(const U8String &resName)
+const ResourceType* ResourceData::GetResource(const U8String &resName)
 {
 	return GetAs<ResourceType>(GetResourceHndl(resName));
 }

@@ -220,6 +220,8 @@ void ParticleMgr::UpdateBuffers(usg::GFXDevice* pDevice)
 
 void ParticleMgr::CreateInstances(GFXDevice* pDevice, uint32 uInstances)
 {
+	// FIXME: Pre-loading will have to be refactored
+#if 0
 	uint32 uParticleEffects = ResourceMgr::Inst()->GetParticleEffectCount();
 	const float fMaxRibbonTime = 1.2f;
 
@@ -275,7 +277,7 @@ void ParticleMgr::CreateInstances(GFXDevice* pDevice, uint32 uInstances)
 		pTrail->Alloc(m_pDevice, this, &ribbon);
 		m_freeRibbons.AddToEnd(pTrail);
 	}
-
+#endif
 }
 
 ParticleEffectHndl ParticleMgr::CreateEffect(const Matrix4x4& mMat, const Vector3f& vVelocity, const char* szName, bool bCustom, float fScale)

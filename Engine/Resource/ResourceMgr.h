@@ -45,10 +45,6 @@ public:
 
 	void LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName);
 
-	// For pre-loading
-	uint32 GetParticleEffectCount();
-	const ParticleEffectResource* GetParticleEffectByIndex(uint32 uIndex);
-
 	// We can't return this as const as we need to iterate through it
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);
 
