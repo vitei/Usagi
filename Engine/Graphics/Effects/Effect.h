@@ -8,7 +8,8 @@
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Resource/PakFile.h"
+#include "Engine/Resource/CustomEffectDecl.h"
+#include "Engine/Resource/FileDependencies.h"
 
 
 namespace usg {
@@ -22,7 +23,7 @@ public:
 	Effect();
 	virtual ~Effect();
 
-	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
+	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData);
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 	//void Apply() const;
 

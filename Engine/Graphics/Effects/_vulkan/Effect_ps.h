@@ -19,7 +19,7 @@ public:
 	Effect_ps();
 	~Effect_ps();
 
-	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
+	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData, uint32 uDataSize);
 	void CleanUp(GFXDevice* pDevice);
 
 	uint32 GetStageCount() const { return m_uStageCount; }

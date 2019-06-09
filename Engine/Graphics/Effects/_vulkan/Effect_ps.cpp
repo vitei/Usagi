@@ -7,9 +7,16 @@
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Resource/PakFile.h"
 #include "Engine/Graphics/Effects/Shader.h"
+#include "Engine/Resource/FileDependencies.h"
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 
+const char* g_szUsageStrings[] =
+{
+	"vertex_shader",
+	"fragment_shader",
+	"geometry_shader"
+};
 
 namespace usg {
 
@@ -36,31 +43,24 @@ namespace usg {
 	}
 
 
-	bool Effect_ps::Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize)
+	bool Effect_ps::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData, uint32 uDataSize)
 	{
 		const PakFileDecl::EffectEntry* pEffectHdr = PakFileDecl::GetCustomHeader<PakFileDecl::EffectEntry>(pFileHeader);
 		
 		m_uStageCount = 0;
 		for (uint32 i = 0; i < (uint32)ShaderType::COUNT; i++)
 		{
-			if (pEffectHdr->CRC[i] != 0)
+			BaseResHandle resource = pDependencies->GetDependencyByType(utl::CRC32(g_szUsageStrings[i]));
+			ASSERT(!resource || resource->GetResourceType() == ResourceType::SHADER);
+			if(resource)
 			{
-				ResourceBase* pResourceBase = pakFile->GetResource(pEffectHdr->CRC[i]);
-				ASSERT(pResourceBase && pResourceBase->GetResourceType() == ResourceType::SHADER);
-				if(pResourceBase)
-				{
-					Shader* pShader = (Shader*)pResourceBase;
-					VkPipelineShaderStageCreateInfo shaderStage = {};
-					shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-					shaderStage.pName = "main";
-					shaderStage.module = pShader->GetPlatform().GetShaderModule();
-					shaderStage.stage = g_shaderStages[i];
-					m_stageCreateInfo[m_uStageCount++] = shaderStage;
-				}
-				else
-				{
-					return false;
-				}
+				Shader* pShader = (Shader*)resource.get();
+				VkPipelineShaderStageCreateInfo shaderStage = {};
+				shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				shaderStage.pName = "main";
+				shaderStage.module = pShader->GetPlatform().GetShaderModule();
+				shaderStage.stage = g_shaderStages[i];
+				m_stageCreateInfo[m_uStageCount++] = shaderStage;
 			}
 		}
 		return true;

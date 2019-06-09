@@ -15,15 +15,11 @@
 // Suppress the definition of min/max of minwindef.h
 #define NOMINMAX
 #define USE_VULKAN
+#define WIN32_LEAN_AND_MEAN
 
-//#include <winext/cafe.h>
 #include <windows.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <math.h>
 #include <limits.h>
 #include <new>
-#include <stdlib.h>
 #undef min
 #undef max
 
@@ -44,7 +40,7 @@
 #define DLL_EXPORT extern "C" _declspec(dllexport)
 
 #define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
-
+#define SUPPORTS_PRAGMA_ONCE
 
 #define SUPPRESS_WARNING(WARNING, STATEMENT) STATEMENT
 #define NO_OPERATION __noop

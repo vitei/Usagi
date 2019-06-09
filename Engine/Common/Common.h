@@ -52,6 +52,15 @@ typedef sint32 pb_ssize_t;
 #define CCW_WINDING 1
 #endif
 
+#ifdef SUPPORTS_PRAGMA_ONCE
+#define HEADER_GUARD_OPEN(NAME)
+#define HEADER_GUARD_CLOSE
+#else
+#define HEADER_GUARD_OPEN(NAME)		#ifndef STRINGIFY(USG_/NAME/_HEADER)\
+									#define STRINGIFY(USG_/NAME/_HEADER)
+#define HEADER_GUARD_CLOSE #endif
+#endif
+
 #if !defined(DEPENDENT_TEMPLATE)
 #define DEPENDENT_TEMPLATE template
 #endif

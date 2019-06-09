@@ -123,19 +123,19 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			PakFile pakFile;
 			// TODO: We should be creating the resources on the main thread but then doing the loading on another thread
 			pakFile.Load(pDevice, name.CStr());
-			usg::map<uint32, ResourceBase*>& resources = pakFile.GetResources();
+			usg::map<uint32, BaseResHandle>& resources = pakFile.GetResources();
 			for (auto& itr : resources)
 			{
 				switch (itr.second->GetResourceType())
 				{
 				case ResourceType::EFFECT:
-					m_pImpl->effects.AddResource((Effect*)itr.second);
+					m_pImpl->effects.AddResource(itr.second);
 					break;
 				case ResourceType::SHADER:
-					m_pImpl->shaders.AddResource((Shader*)itr.second);
+					m_pImpl->shaders.AddResource(itr.second);
 					break;
 				case ResourceType::TEXTURE:
-					m_pImpl->textures.AddResource((Texture*)itr.second);
+					m_pImpl->textures.AddResource(itr.second);
 					break;
 				default:
 					ASSERT(false);

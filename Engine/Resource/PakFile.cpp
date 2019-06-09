@@ -63,21 +63,27 @@ namespace usg
 		name.ToLower();
 
 		void* pData = pFileInfo->uDataOffset == USG_INVALID_ID ? nullptr : ((uint8*)pFileScratch) + pFileInfo->uDataOffset;
+		FileDependencies deps;
+		if (pFileInfo->uDependenciesCount > 0)
+		{
+			const PakFileDecl::Dependency* pDependencies = PakFileDecl::GetDependencies(pFileInfo);
+			deps.Init(this, pDependencies, pFileInfo->uDependenciesCount);
+		}
 
 		switch ((usg::ResourceType)pFileInfo->uResourceType)
 		{
 		case usg::ResourceType::EFFECT:
 		{
 			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
-			pEffect->Init(pDevice, this, pFileInfo, pData);
-			m_resources[pFileInfo->CRC] = pEffect;
+			pEffect->Init(pDevice, pFileInfo, &deps, pData);
+			m_resources[pFileInfo->CRC] = BaseResHandle(pEffect);
 			break;
 		}
 		case usg::ResourceType::SHADER:
 		{
 			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
 			pShader->Init(pDevice, this, pFileInfo, pData);
-			m_resources[pFileInfo->CRC] = pShader;
+			m_resources[pFileInfo->CRC] = BaseResHandle(pShader);
 			break;
 		}
 		default:
@@ -85,7 +91,7 @@ namespace usg
 		}
 	}
 
-	ResourceBase* PakFile::GetResource(uint32 uCRC)
+	BaseResHandle PakFile::GetResource(uint32 uCRC)
 	{
 		if (m_resources.find(uCRC) != m_resources.end())
 		{

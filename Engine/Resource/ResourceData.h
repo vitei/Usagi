@@ -125,6 +125,7 @@ public:
 	 
 	BaseResHandle GetResourceHndl(const U8String& resName);
 	BaseResHandle AddResource(const ResourceType* pResource);
+	void AddResource(BaseResHandle resHndl);
 
 
 	uint32 GetResourceCount() const { return m_resources.Size(); }
@@ -177,6 +178,18 @@ inline BaseResHandle ResourceData<ResourceType>::AddResource(const ResourceType*
 	ret = pInfo->resource;
 
 	return ret;
+}
+
+template <class ResourceType>
+inline void ResourceData<ResourceType>::AddResource(BaseResHandle resHandle)
+{
+#ifdef DEBUG_RESOURCE_MGR
+	m_loadTimer.Stop();
+#endif
+	ResourceInfo* pInfo = m_resources.Alloc();
+	pInfo->resource = resHandle;
+	pInfo->uTag = m_uTag;
+	pInfo->bStatic = m_bLoadAsStatic;
 }
 
 template <class ResourceType>

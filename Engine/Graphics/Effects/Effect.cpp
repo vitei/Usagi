@@ -27,7 +27,7 @@ namespace usg {
 		}
 	}
 
-	bool Effect::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
+	bool Effect::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData)
 	{
 		const PakFileDecl::EffectEntry* pEffectHdr = PakFileDecl::GetCustomHeader<PakFileDecl::EffectEntry>(pFileHeader);
 		m_pBinary = mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_SHADER, pFileHeader->uCustomHeaderSize, 8);
@@ -36,7 +36,7 @@ namespace usg {
 
 		m_name = pFileHeader->szName;
 		SetupHash(m_name.CStr());
-		bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
+		bool bLoaded = m_platform.Init(pDevice, pFileHeader, pDependencies, pData, pFileHeader->uDataSize);
 		// FIXME: This should be done internally
 		SetReady(true);
 		return bLoaded;

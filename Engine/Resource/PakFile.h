@@ -25,18 +25,17 @@ namespace usg
 		void CleanUp(GFXDevice* pDevice);
 
 		// This should be valid before threading so we can return handles to resources
-		usg::map<uint32, ResourceBase*>& GetResources() { return m_resources; }
-		ResourceBase* GetResource(uint32 uCRC);
-
+		usg::map<uint32, BaseResHandle>& GetResources() { return m_resources; }
+		BaseResHandle GetResource(uint32 uCRC);
 		const static ResourceType StaticResType = ResourceType::PAK_HEADER;
 
 	private:
-		void LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFielInfo, void* pFileScratch);
+		void LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch);
 
-		usg::map<uint32, ResourceBase*>	m_resources;
+		usg::map<uint32, BaseResHandle>	m_resources;
 
 	};
 
 }
 
-#endif	// #ifndef _USG_GRAPHICS_SCENE_MODEL_H_
+#endif	// #ifndef _USG_RESOURCE_PAK_FILE_H_

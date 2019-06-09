@@ -390,7 +390,6 @@ int main(int argc, char *argv[])
 					if (shaderEntry != requiredShaders[i].end())
 					{
 						effect.AddDependency((*shaderEntry).second.GetName(), g_szUsageStrings[i]);
-						break;
 					}
 				}
 			}
