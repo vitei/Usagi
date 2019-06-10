@@ -63,7 +63,9 @@ namespace usg
 		{
 			m_nameHash = ResourceDictionary::calcNameHash( name );
 			m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
+#ifdef DEBUG_BUILD
 			m_name = name;
+#endif
 		}
 
 		bool		m_bReady;
