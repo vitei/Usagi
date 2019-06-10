@@ -31,11 +31,15 @@ public:
 	const Effect_ps& GetPlatform() const { return m_platform; }
 
 	const static ResourceType StaticResType = ResourceType::EFFECT;
+	
+	// For optional information about attributes and descriptors
+	CustomEffectResHndl GetCustomEffect() const { return m_customFX; }
 
 private:
 	PRIVATIZE_RES_COPY(Effect)
 
-	Effect_ps	m_platform;
+	Effect_ps			m_platform;
+	CustomEffectResHndl	m_customFX;
 };
 
 

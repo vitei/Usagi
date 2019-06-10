@@ -60,8 +60,6 @@ public:
 	}
 	HighLevelType& operator*() const { return *((HighLevelType*)m_pPointer); }
 	HighLevelType* get() const { return (HighLevelType*)m_pPointer; }
-
-	ResourceHandle& operator=(BaseResHandle &rhs) { ASSERT(rhs->GetResourceType() == CmpType); return *(BaseResHandle)this; }
 };
 
 typedef ResourceHandle<const CollisionModelResource, ResourceType::COLLISION> CollisionModelResHndl;

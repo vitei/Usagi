@@ -1,3 +1,4 @@
+#include "Engine/Common/Common.h"
 #include "MaterialDefinitionExporter.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Core/String/String_Util.h"

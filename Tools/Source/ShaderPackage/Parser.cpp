@@ -1,12 +1,8 @@
 #include "Engine/Common/Common.h"
-#include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
-#include "Engine/Graphics/Textures/TGAFile.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
-#include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "../ResourcePak/ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>

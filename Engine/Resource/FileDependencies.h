@@ -29,8 +29,10 @@ namespace usg
 		uint32 GetDependencyCount() const { return (uint32)m_dependencies.size(); }
 		BaseResHandle GetDependencyByCRC(uint32 uFileCRC) const;
 		BaseResHandle GetDependencyByIndex(uint32 uFileIndex) const;
-		BaseResHandle GetDependencyByType(uint32 uUsageCRC) const;
-		void GetAllDependenciesOfType(uint32 uUsageCRC, usg::vector<const FileDependency*>& depOut) const;
+		BaseResHandle GetDependencyByUsageCRC(uint32 uUsageCRC) const;
+		void GetAllDependenciesWithUsageCRC(uint32 uUsageCRC, usg::vector<const FileDependency*>& depOut) const;
+		BaseResHandle GetDependencyByFileType(ResourceType eType) const;
+		void GetAllDependenciesWithFileType(ResourceType eType, usg::vector<const FileDependency*>& depOut) const;
 
 	private:
 

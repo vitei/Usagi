@@ -1,3 +1,4 @@
+#include "Engine/Common/Common.h"
 #include "CmdlBinaryStore.h"
 
 #include <algorithm>

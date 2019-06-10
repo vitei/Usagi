@@ -1,3 +1,4 @@
+#include "Engine/Common/Common.h"
 #include "Material.h"
 
 namespace exchange {

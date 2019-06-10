@@ -19,6 +19,11 @@ namespace usg {
 
 	bool Effect::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData)
 	{
+		BaseResHandle handle = pDependencies->GetDependencyByFileType(ResourceType::CUSTOM_EFFECT);
+		if (handle)
+		{
+			m_customFX = handle;
+		}
 		SetupHash(pFileHeader->szName);
 		bool bLoaded = m_platform.Init(pDevice, pFileHeader, pDependencies, pData, pFileHeader->uDataSize);
 		// FIXME: This should be done internally

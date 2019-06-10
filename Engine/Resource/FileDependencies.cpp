@@ -58,7 +58,7 @@ namespace usg
 		return m_dependencies[uFileIndex].resHandle;
 	}
 
-	BaseResHandle FileDependencies::GetDependencyByType(uint32 uUsageCRC) const
+	BaseResHandle FileDependencies::GetDependencyByUsageCRC(uint32 uUsageCRC) const
 	{
 		for (auto& dep : m_dependencies)
 		{
@@ -70,11 +70,34 @@ namespace usg
 		return BaseResHandle(nullptr);
 	}
 
-	void FileDependencies::GetAllDependenciesOfType(uint32 uUsageCRC, usg::vector<const FileDependency*>& depOut) const
+	void FileDependencies::GetAllDependenciesWithUsageCRC(uint32 uUsageCRC, usg::vector<const FileDependency*>& depOut) const
 	{
 		for (auto& dep : m_dependencies)
 		{
 			if (dep.uUsageCRC == uUsageCRC)
+			{
+				depOut.push_back(&dep);
+			}
+		}
+	}
+
+	BaseResHandle FileDependencies::GetDependencyByFileType(ResourceType eType) const
+	{
+		for (auto& dep : m_dependencies)
+		{
+			if (dep.resHandle->GetResourceType() == eType)
+			{
+				return dep.resHandle;
+			}
+		}
+		return BaseResHandle(nullptr);
+	}
+
+	void FileDependencies::GetAllDependenciesWithFileType(ResourceType eType, usg::vector<const FileDependency*>& depOut) const
+	{
+		for (auto& dep : m_dependencies)
+		{
+			if (dep.resHandle->GetResourceType() == eType)
 			{
 				depOut.push_back(&dep);
 			}

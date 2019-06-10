@@ -11,11 +11,11 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 
-const char* g_szUsageStrings[] =
+static uint32 g_usageCRC[] =
 {
-	"vertex_shader",
-	"fragment_shader",
-	"geometry_shader"
+	utl::CRC32("vertex_shader"),
+	utl::CRC32("fragment_shader"),
+	utl::CRC32("geometry_shader")
 };
 
 namespace usg {
@@ -48,7 +48,7 @@ namespace usg {
 		m_uStageCount = 0;
 		for (uint32 i = 0; i < (uint32)ShaderType::COUNT; i++)
 		{
-			BaseResHandle resource = pDependencies->GetDependencyByType(utl::CRC32(g_szUsageStrings[i]));
+			BaseResHandle resource = pDependencies->GetDependencyByUsageCRC(g_usageCRC[i]);
 			ASSERT(!resource || resource->GetResourceType() == ResourceType::SHADER);
 			if(resource)
 			{

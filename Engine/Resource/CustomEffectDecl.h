@@ -39,6 +39,7 @@ namespace usg
 			uint8	defaultData[64];
 			uint32 	uIndex;
 			uint32	eConstantType;
+			uint32	uCount;
 		};
 
 		struct Constant

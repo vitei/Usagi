@@ -1,5 +1,5 @@
+#include "Engine/Common/Common.h"
 #include "FbxLoad.h"
-
 #include "common.h"
 //#include "pugi_util.h"
 #include "Engine/Core/stl/map.h"
@@ -95,7 +95,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 //		break;
 	case FbxLight::ePoint:
 		pLight->spec.base.kind = usg::LightKind_POINT;
-		pLight->position = mMatUsg.vPos().v3() * m_appliedScale;
+		pLight->position = mMatUsg.vPos().v3() * (float)m_appliedScale;
 		break;
 	default:
 		// Unhandled
@@ -152,8 +152,8 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 	}
 
 	pLight->spec.atten.bEnabled = pFBXLight->LightType.Get() != FbxLight::eDirectional;
-	pLight->spec.atten.fNear = fAttenuationStart * m_appliedScale;
-	pLight->spec.atten.fFar = fFarEnd * m_appliedScale;
+	pLight->spec.atten.fNear = fAttenuationStart * (float)m_appliedScale;
+	pLight->spec.atten.fFar = fFarEnd * (float)m_appliedScale;
 
 	cmdl.AddLight(pLight);
 
