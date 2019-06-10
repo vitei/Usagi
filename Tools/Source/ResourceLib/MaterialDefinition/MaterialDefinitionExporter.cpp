@@ -4,7 +4,6 @@
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Core/Utility.h"
-#include "common.h"
 #include <yaml-cpp/yaml.h>
 
 struct Mapping
@@ -389,7 +388,8 @@ bool MaterialDefinitionExporter::GetVariable(uint32 uSet, void* pSrc, const char
 
 void MaterialDefinitionExporter::ExportFile( const char* path )
 {
-	FILE* handle = fopen( path, "wb" );
+	FILE* handle = nullptr;
+	fopen_s(&handle, path, "wb");
 	
 	uint32 uHeaderSize = sizeof(usg::CustomEffectDecl::Header);
 	uint32 uAttributeSize = sizeof(usg::CustomEffectDecl::Attribute) * (uint32_t)m_attributes.size();

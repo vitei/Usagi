@@ -3,7 +3,7 @@
 #include "OwnSTLDecl.h"
 
 #include "fbx/FbxConverter.h"
-#include "MaterialDefinition/MaterialDefinitionExporter.h"
+#include "../ResourceLib/MaterialDefinition/MaterialDefinitionExporter.h"
 #include "Dependencies/DependencyTracker.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
 #include "./StringUtil.h"

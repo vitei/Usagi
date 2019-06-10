@@ -3,7 +3,7 @@
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
-#include "../ResourcePak/ResourcePakExporter.h"
+#include "ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <algorithm>

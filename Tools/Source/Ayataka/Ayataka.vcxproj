@@ -46,6 +46,9 @@
     <ProjectReference Include="..\..\..\_build\projects\Engine\ThirdParty\ThirdParty.vcxproj">
       <Project>{491fe2ef-d449-4fdd-a3ce-9a1102aa2af4}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\ResourceLib\ResourceLib.vcxproj">
+      <Project>{5d046ed5-cc03-4e84-9bb6-292c0ffbe2fe}</Project>
+    </ProjectReference>
     <ProjectReference Include="AyatakaLib.vcxproj">
       <Project>{688218e8-b33e-47a4-b8da-a54913a077e6}</Project>
     </ProjectReference>
