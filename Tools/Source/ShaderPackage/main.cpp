@@ -34,10 +34,9 @@ struct EffectEntry : public ResourceEntry
 {
 	virtual void* GetData() override { return nullptr; }
 	virtual uint32 GetDataSize() override { return 0; };
-	virtual void* GetCustomHeader() { return &entry; }
-	virtual uint32 GetCustomHeaderSize() { return sizeof(entry); }
+	virtual void* GetCustomHeader() { return nullptr; }
+	virtual uint32 GetCustomHeaderSize() { return 0; }
 
-	usg::PakFileDecl::EffectEntry entry;
 };
 
 struct ShaderEntry : public ResourceEntry
@@ -381,22 +380,17 @@ int main(int argc, char *argv[])
 		{
 			EffectEntry effect;
 			effect.SetName(setItr.name, usg::ResourceType::EFFECT);
-			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
 			for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 			{
-				if (effect.entry.CRC[i] != 0)
+				if (setItr.CRC[i] != 0)
 				{
-					auto shaderEntry = requiredShaders[i].find(effect.entry.CRC[i]);
+					auto shaderEntry = requiredShaders[i].find(setItr.CRC[i]);
 					if (shaderEntry != requiredShaders[i].end())
 					{
 						effect.AddDependency((*shaderEntry).second.GetName(), g_szUsageStrings[i]);
 					}
 				}
 			}
-			// TODO: Add attribute
-			effect.entry.uSamplerCount = 0;
-			effect.entry.uAttributeCount = 0;
-			effect.entry.uConstantSetCount = 0;
 			effectEntries.push_back(effect);
 		} 
 	} 

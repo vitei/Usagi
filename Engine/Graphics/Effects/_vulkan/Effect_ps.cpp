@@ -45,8 +45,6 @@ namespace usg {
 
 	bool Effect_ps::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData, uint32 uDataSize)
 	{
-		const PakFileDecl::EffectEntry* pEffectHdr = PakFileDecl::GetCustomHeader<PakFileDecl::EffectEntry>(pFileHeader);
-		
 		m_uStageCount = 0;
 		for (uint32 i = 0; i < (uint32)ShaderType::COUNT; i++)
 		{

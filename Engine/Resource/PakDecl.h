@@ -39,17 +39,6 @@ namespace usg
 			uint32 UsageCRC;	// Hint to the resource how this is to be used
 		};
 
-		struct EffectEntry
-		{
-			uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
-			uint32		uAttributeOffset;
-			uint32		uAttributeCount;
-			uint32		uSamplerOffset;
-			uint32		uSamplerCount;
-			uint32		uConstantSetDeclOffset;
-			uint32		uConstantSetCount;
-		};
-
 		struct ShaderEntry
 		{
 			ShaderType	eShaderType;

@@ -36,13 +36,6 @@ private:
 	PRIVATIZE_RES_COPY(Effect)
 
 	Effect_ps	m_platform;
-
-	CustomEffectDecl::Sampler* m_pSamplers;
-	CustomEffectDecl::Attribute* m_pAttributes;
-	CustomEffectDecl::ConstantSet* m_pConstantSets;
-	PakFileDecl::EffectEntry* m_pHeader;
-
-	void*	m_pBinary;
 };
 
 
