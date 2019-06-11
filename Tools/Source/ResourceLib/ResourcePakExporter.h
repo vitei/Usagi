@@ -19,9 +19,9 @@ struct ResourceEntry
 	ResourceEntry() {}
 	virtual ~ResourceEntry() {}
 
-	virtual void* GetData() = 0;
+	virtual const void* GetData() = 0;
 	virtual uint32 GetDataSize() = 0;
-	virtual void* GetCustomHeader() = 0;
+	virtual const void* GetCustomHeader() = 0;
 	virtual uint32 GetCustomHeaderSize() = 0;
 
 	void SetName(const std::string& fileName, usg::ResourceType eType)

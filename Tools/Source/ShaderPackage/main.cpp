@@ -6,6 +6,7 @@
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
+#include "../ResourceLib/MaterialDefinition/MaterialDefinitionExporter.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
@@ -32,24 +33,34 @@ const char* g_szUsageStrings[] =
 
 struct EffectEntry : public ResourceEntry
 {
-	virtual void* GetData() override { return nullptr; }
+	virtual const void* GetData() override { return nullptr; }
 	virtual uint32 GetDataSize() override { return 0; };
-	virtual void* GetCustomHeader() { return nullptr; }
+	virtual const void* GetCustomHeader() { return nullptr; }
 	virtual uint32 GetCustomHeaderSize() { return 0; }
 
 };
 
 struct ShaderEntry : public ResourceEntry
 {
-	virtual void* GetData() override { return binary; }
+	virtual const void* GetData() override { return binary; }
 	virtual uint32 GetDataSize() override { return binarySize; };
-	virtual void* GetCustomHeader() { return &entry; }
+	virtual const void* GetCustomHeader() { return &entry; }
 	virtual uint32 GetCustomHeaderSize() {return sizeof(entry); }
 
 	usg::PakFileDecl::ShaderEntry entry;
 
 	void* binary;
 	uint32 binarySize;
+};
+
+struct CustomFXEntry : public ResourceEntry
+{
+	virtual const void* GetData() override { return materialDef.GetBinary(); }
+	virtual uint32 GetDataSize() override { return materialDef.GetBinarySize(); };
+	virtual const void* GetCustomHeader() { return &materialDef.GetHeader(); }
+	virtual uint32 GetCustomHeaderSize() { return sizeof(usg::PakFileDecl::CustomFXHeader); }
+
+	MaterialDefinitionExporter materialDef;
 };
 
 
@@ -74,7 +85,8 @@ struct EffectDefinition
 bool ParseManually(const char* szFileName, const char* szDefines, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles);
 
 
-bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, const std::string& includes,
+	ShaderEntry& shader, std::vector<std::string>& referencedFiles)
 {
 	std::string shaderCode;
 	std::string defines = setDefines;
@@ -93,7 +105,8 @@ bool CompileOGLShader(const std::string& inputFileName, const std::string& setDe
 	return false;
 }
 
-bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes,
+	ShaderEntry& shader, std::vector<std::string>& referencedFiles)
 {
 	// Get the input file name
 	std::string outputFileName = tempFileName;
