@@ -82,11 +82,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(USAGI_DIR)\_libs\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(USAGI_DIR)\_libs\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
