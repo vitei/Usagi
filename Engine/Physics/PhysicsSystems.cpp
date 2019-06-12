@@ -251,7 +251,7 @@ namespace usg
 				}
 			}
 
-			static void PreSimulation(const Inputs& inputs, Outputs& outputs)
+			static void PreSimulation(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
 				mutableRtd.bSimulationRunning = true;
@@ -261,10 +261,10 @@ namespace usg
 				ProcessNewActors(inputs, outputs);
 				ProcessDirtyActors(inputs, outputs);
 				ClearCollisions(inputs, outputs);
-				VehicleUpdate(inputs, outputs);
+				VehicleUpdate(inputs, outputs, fDelta);
 			}
 
-			static void VehicleUpdate(const Inputs& inputs, Outputs& outputs)
+			static void VehicleUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				if (inputs.scene.GetRuntimeData().GetData().vehicleData.vehicleList.size() == 0)
 				{
@@ -288,7 +288,7 @@ namespace usg
 				{
 					mutableRtd.vehicleData.vehicleWheelQueryResults[i] = { &mutableRtd.vehicleData.wheelQueryResults[0] + PX_MAX_NB_WHEELS*i, vehicles[i]->mWheelsSimData.getNbWheels() };
 				}
-				PxVehicleUpdates(physics::GetTimeStep(), ToPhysXVec3(inputs.scene->vGravity), *mutableRtd.vehicleData.pFrictionPairs, uVehicleCount, vehicles, &mutableRtd.vehicleData.vehicleWheelQueryResults[0]);
+				PxVehicleUpdates(fDelta, ToPhysXVec3(inputs.scene->vGravity), *mutableRtd.vehicleData.pFrictionPairs, uVehicleCount, vehicles, &mutableRtd.vehicleData.vehicleWheelQueryResults[0]);
 			}
 
 			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
@@ -297,8 +297,8 @@ namespace usg
 				{
 					return;
 				}
-				PreSimulation(inputs, outputs);
-				inputs.scene.GetRuntimeData().GetData().pScene->simulate(physics::GetTimeStep());
+				PreSimulation(inputs, outputs, fDelta);
+				inputs.scene.GetRuntimeData().GetData().pScene->simulate(fDelta);// physics::GetTimeStep());
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const physics::details::Events::MarkShapeDirty& evt)
