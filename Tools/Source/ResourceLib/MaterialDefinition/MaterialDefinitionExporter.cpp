@@ -167,20 +167,7 @@ void SetDefaultData(usg::CustomEffectDecl::Attribute& attrib, const YAML::Node& 
 
 MaterialDefinitionExporter::~MaterialDefinitionExporter()
 {
-	for (uint32 i = 0; i < m_constantSets.size(); i++)
-	{
-		if (m_constantSets[i].pRawData)
-		{
-			usg::mem::Free(m_constantSets[i].pRawData);
-		}
-	}
 
-	if (m_pBinary)
-	{
-		usg::mem::Free(m_pBinary);
-		m_pBinary = nullptr;
-		m_uBinarySize = 0;
-	}
 }
 
 static memsize AlignSize(memsize uSize, memsize uAlign)
@@ -262,14 +249,15 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 		}
 
 		// Keep aligned to 4 bytes, helps us export and read
-		setData.uRawDataSize = (uint32_t)AlignSize(uOffset, 4);
-		setData.set.uDataSize = setData.uRawDataSize;
-		setData.pRawData = usg::mem::Alloc(usg::MEMTYPE_STANDARD, usg::ALLOC_DEBUG, setData.uRawDataSize);
+		uint32 uRawDataSize = (uint32_t)AlignSize(uOffset, 4);
+
+		setData.set.uDataSize = uRawDataSize;
+		setData.rawData.resize(uRawDataSize);
 
 		uint32 uIndex = 0;
 		for (YAML::const_iterator variableIt = variableDefs.begin(); variableIt != variableDefs.end(); ++variableIt)
 		{
-			SetDefaultData(setData.constants[uIndex], (*variableIt)["default"], setData.pRawData);
+			SetDefaultData(setData.constants[uIndex], (*variableIt)["default"], setData.rawData.data());
 			uIndex++;
 		}
 
@@ -278,15 +266,16 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 	return true;
 }
 
-int MaterialDefinitionExporter::Load(const char* path)
+int MaterialDefinitionExporter::Load(YAML::Node& mainNode)
 {
-	YAML::Node mainNode = YAML::LoadFile(path);
-
-	m_effectName = mainNode["Shader"]["name"].as<std::string>();
-	m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
-	m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
-	m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
-	m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
+	if (mainNode["Shader"])
+	{
+		m_effectName = mainNode["Shader"]["name"].as<std::string>();
+		m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
+		m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
+		m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
+		m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
+	}
 
 	YAML::Node attributes = mainNode["Attributes"];
 	LoadAttributes(attributes);
@@ -302,6 +291,13 @@ int MaterialDefinitionExporter::Load(const char* path)
 	return 0;
 }
 
+int MaterialDefinitionExporter::Load(const char* path)
+{
+	YAML::Node mainNode = YAML::LoadFile(path);
+	return Load(mainNode);
+
+}
+
 uint32 MaterialDefinitionExporter::GetConstantSetCount()
 {
 	return (uint32_t)m_constantSets.size();
@@ -309,7 +305,7 @@ uint32 MaterialDefinitionExporter::GetConstantSetCount()
 
 uint32 MaterialDefinitionExporter::GetConstantSetSize(uint32 uSet)
 {
-	uint32 uSize = m_constantSets[uSet].uRawDataSize;
+	uint32 uSize = (uint32)m_constantSets[uSet].rawData.size();
 	return uSize;
 }
 
@@ -320,7 +316,7 @@ const char* MaterialDefinitionExporter::GetConstantSetName(uint32 uSet)
 
 void MaterialDefinitionExporter::CopyDefaultData(uint32 uSet, void* pDst)
 {
-	memcpy(pDst, m_constantSets[uSet].pRawData, m_constantSets[uSet].uRawDataSize);
+	memcpy(pDst, m_constantSets[uSet].rawData.data(), m_constantSets[uSet].rawData.size());
 }
 
 bool MaterialDefinitionExporter::GetTextureIndex(const char* szHint, uint32& indexOut)
@@ -395,13 +391,6 @@ bool MaterialDefinitionExporter::GetVariable(uint32 uSet, void* pSrc, const char
 
 void MaterialDefinitionExporter::InitBinaryData()
 {
-	if (m_pBinary)
-	{
-		usg::mem::Free(m_pBinary);
-		m_pBinary = nullptr;
-		m_uBinarySize = 0;
-	}
-
 	uint32 uHeaderSize = sizeof(usg::CustomEffectDecl::Header);
 	uint32 uAttributeSize = sizeof(usg::CustomEffectDecl::Attribute) * (uint32_t)m_attributes.size();
 	uint32 uSamplerSize = sizeof(usg::CustomEffectDecl::Sampler) * (uint32_t)m_samplers.size();
@@ -416,11 +405,11 @@ void MaterialDefinitionExporter::InitBinaryData()
 	uint32 uRawDataSize = 0;
 	for (uint32 i = 0; i < m_constantSets.size(); i++)
 	{
-		uRawDataSize += m_constantSets[i].uRawDataSize;
+		uRawDataSize += (uint32)m_constantSets[i].rawData.size();
 	}
 
-	m_uBinarySize = uAttributeSize + uSamplerSize + uConstantSetSize + uDeclSize + uRawDataSize;
-	m_pBinary = (uint8*)usg::mem::Alloc(usg::MEMTYPE_STANDARD, usg::ALLOC_OBJECT, m_uBinarySize);
+	uint32 uBinarySize = uAttributeSize + uSamplerSize + uConstantSetSize + uDeclSize + uRawDataSize;
+	m_binary.resize(uBinarySize);
 
 	m_header.uAttributeCount = (uint32_t)m_attributes.size();
 	m_header.uAttributeOffset = 0;
@@ -429,20 +418,20 @@ void MaterialDefinitionExporter::InitBinaryData()
 	m_header.uConstantSetCount = (uint32_t)m_constantSets.size();
 	m_header.uConstantSetDeclOffset = m_header.uSamplerOffset + uSamplerSize;
 
-	memcpy(m_pBinary + m_header.uAttributeOffset, m_attributes.data(),uAttributeSize);
-	memcpy(m_pBinary + m_header.uSamplerOffset, m_samplers.data(), uSamplerSize);
+	memcpy(m_binary.data() + m_header.uAttributeOffset, m_attributes.data(),uAttributeSize);
+	memcpy(m_binary.data() + m_header.uSamplerOffset, m_samplers.data(), uSamplerSize);
 
 	uint32 uDeclOffset = m_header.uConstantSetDeclOffset + uConstantSetSize;
 	uint32 uVariableOffset = uDeclOffset + uDeclSize;
 
-	uint8* pDst = m_pBinary + m_header.uConstantSetDeclOffset;
+	uint8* pDst = m_binary.data() + m_header.uConstantSetDeclOffset;
 
 	for (uint32 i = 0; i < (uint32_t)m_constantSets.size(); i++)
 	{
 		m_constantSets[i].set.uDeclOffset = uDeclOffset;
 		m_constantSets[i].set.uDataOffset = uVariableOffset;
 		uDeclOffset += (uint32_t)m_constantSets[i].constants.size() * sizeof(usg::CustomEffectDecl::Constant);
-		uVariableOffset += m_constantSets[i].uRawDataSize;
+		uVariableOffset += (uint32)m_constantSets[i].rawData.size();
 		memcpy(pDst, &m_constantSets[i].set, sizeof(usg::CustomEffectDecl::ConstantSet));
 		pDst += sizeof(usg::CustomEffectDecl::ConstantSet);
 	}
@@ -455,11 +444,10 @@ void MaterialDefinitionExporter::InitBinaryData()
 
 	for (uint32 i = 0; i < m_constantSets.size(); i++)
 	{
-		memcpy(pDst, m_constantSets[i].pRawData, m_constantSets[i].uRawDataSize);
-		pDst += m_constantSets[i].uRawDataSize;
+		memcpy(pDst, m_constantSets[i].rawData.data(), m_constantSets[i].rawData.size());
+		pDst += m_constantSets[i].rawData.size();
 	}
 
-	ASSERT(pDst - m_pBinary == m_uBinarySize);
 
 	// FIXME: Needs removing
 	strcpy_s(m_header.effectName, m_effectName.c_str());
@@ -467,6 +455,9 @@ void MaterialDefinitionExporter::InitBinaryData()
 	strcpy_s(m_header.transparentEffectName, m_transparentEffectName.c_str());
 	strcpy_s(m_header.omniShadowEffectName, m_omniShadowEffectName.c_str());
 	strcpy_s(m_header.deferredEffectName, m_deferredEffectName.c_str());
+
+	m_uHeaderCRC = utl::CRC32(&m_header, sizeof(m_header));
+	m_uDataCRC = utl::CRC32(m_binary.data(), (uint32)m_binary.size());
 
 }
 
@@ -478,7 +469,7 @@ void MaterialDefinitionExporter::ExportFile( const char* path )
 	InitBinaryData();
 
 	fwrite(&m_header, sizeof(m_header), 1, handle);
-	fwrite(m_pBinary, 1, m_uBinarySize, handle);
+	fwrite(m_binary.data(), 1, m_binary.size(), handle);
 
 	fclose( handle );
 }

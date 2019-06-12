@@ -18,6 +18,14 @@ namespace usg
 		{
 			uint32 uVersionId;
 			uint32 uFileCount;
+			uint32 uResDataOffset;
+			uint32 uTempDataOffset;
+		};
+
+		enum FileFlags
+		{
+			FILE_FLAG_NONE = 0,
+			FILE_FLAG_KEEP_DATA = (1 << 0),
 		};
 
 		struct FileInfo
@@ -27,9 +35,11 @@ namespace usg
 			uint32			uTotalFileInfoSize;
 			uint32			uCustomHeaderSize;	// Straight after file info
 			uint32			uDependenciesCount;	// After custom header
-			uint32			uDataOffset;
+			// Data that is required for the lifetime of the resource
+			uint32			uDataOffset;	
 			uint32			uDataSize;
 			uint32			uResourceType;	// See ResourceBase
+			uint32			uFileFlags;
 		};
 
 		struct Dependency

@@ -21,6 +21,9 @@ struct ResourceEntry
 
 	virtual const void* GetData() = 0;
 	virtual uint32 GetDataSize() = 0;
+	// Data which is going to be transfered to the GPU should return false, other data
+	// should return true so as to avoid copying memory
+	virtual bool KeepDataAfterLoading() { return false; }
 	virtual const void* GetCustomHeader() = 0;
 	virtual uint32 GetCustomHeaderSize() = 0;
 
@@ -47,6 +50,8 @@ struct ResourceEntry
 	bool operator<(const ResourceEntry &rhs) const
 	{
 		const auto& rhsDeps = rhs.GetDeps();
+		if (dependencies.size() == 0 && rhs.dependencies.size() > 0)
+			return true;
 		for (size_t i = 0; i < rhsDeps.size(); i++)
 		{
 			if (rhsDeps[i].fileNameCRC == uFileCRC)
@@ -77,12 +82,21 @@ namespace ResourcePakExporter
 		// Sort these entries so that dependencies come before other files
 		std::sort(entries.begin(), entries.end(), ComparePointers);
 
-		uint32 uDataOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
+		uint32 uCPUDataOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			uDataOffset += sizeof(usg::PakFileDecl::FileInfo);
-			uDataOffset += entries[i]->GetCustomHeaderSize();
-			uDataOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
+			uCPUDataOffset += sizeof(usg::PakFileDecl::FileInfo);
+			uCPUDataOffset += entries[i]->GetCustomHeaderSize();
+			uCPUDataOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
+		}
+
+		uint32 uGPUDataOffset = uCPUDataOffset;
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			if (entries[i]->KeepDataAfterLoading())
+			{
+				uGPUDataOffset += entries[i]->GetDataSize();
+			}
 		}
 
 		FILE* pFileOut = nullptr;
@@ -97,6 +111,8 @@ namespace ResourcePakExporter
 		usg::PakFileDecl::ResourcePakHdr hdr;
 		hdr.uVersionId = usg::PakFileDecl::CURRENT_VERSION;
 		hdr.uFileCount = (uint32)entries.size();
+		hdr.uResDataOffset = uCPUDataOffset;
+		hdr.uTempDataOffset = uGPUDataOffset;
 
 		fwrite(&hdr, sizeof(hdr), 1, pFileOut);
 
@@ -108,11 +124,26 @@ namespace ResourcePakExporter
 			fileInfo.uCustomHeaderSize = entries[i]->GetCustomHeaderSize();
 			fileInfo.uDependenciesCount = (uint32)entries[i]->GetDeps().size();
 			fileInfo.uDataSize = entries[i]->GetDataSize();
-			fileInfo.uDataOffset = fileInfo.uDataSize > 0 ? uDataOffset : USG_INVALID_ID;
 			fileInfo.uResourceType = (uint32)entries[i]->GetResourceType();
 			// TODO: Probably want to have an alignment value for the data
 			fileInfo.uTotalFileInfoSize = (uint32)(sizeof(fileInfo) + entries[i]->GetCustomHeaderSize() + (sizeof(usg::PakFileDecl::Dependency) * entries[i]->GetDeps().size()));
-			uDataOffset += fileInfo.uDataSize;
+			if (fileInfo.uDataSize > 0)
+			{
+				if (entries[i]->KeepDataAfterLoading())
+				{
+					fileInfo.uDataOffset = uCPUDataOffset;
+					uCPUDataOffset += fileInfo.uDataSize;
+				}
+				else
+				{
+					fileInfo.uDataOffset = uGPUDataOffset;
+					uGPUDataOffset += fileInfo.uDataSize;
+				}
+			}
+			else
+			{
+				fileInfo.uDataOffset = USG_INVALID_ID;
+			}
 			fwrite(&fileInfo, sizeof(fileInfo), 1, pFileOut);
 
 			if (fileInfo.uCustomHeaderSize > 0)
@@ -142,10 +173,22 @@ namespace ResourcePakExporter
 		}
 
 
-		// Now do the data
+		// Now do the CPU data
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
+			if (entries[i]->KeepDataAfterLoading())
+			{
+				fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
+			}
+		}
+
+		// Now do the GPU data
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			if (!entries[i]->KeepDataAfterLoading())
+			{
+				fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
+			}
 		}
 
 		fclose(pFileOut);

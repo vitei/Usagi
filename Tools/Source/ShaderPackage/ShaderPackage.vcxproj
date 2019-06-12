@@ -188,9 +188,6 @@
       <Project>{5d046ed5-cc03-4e84-9bb6-292c0ffbe2fe}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\ResourcePak\ResourcePakExporter.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

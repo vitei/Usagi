@@ -11,6 +11,7 @@ public:
 	virtual ~MaterialDefinitionExporter();
 
 	int Load(const char* path);
+	int Load(YAML::Node& mainNode);
 	bool LoadAttributes(YAML::Node& attributeNode);
 	bool LoadSamplers(YAML::Node& attributeNode);
 	bool LoadConstantSets(YAML::Node& attributeNode);
@@ -21,8 +22,7 @@ public:
 	{
 		usg::CustomEffectDecl::ConstantSet	set;
 		std::vector<usg::CustomEffectDecl::Constant> constants;
-		void*	pRawData;
-		uint32	uRawDataSize;
+		std::vector<uint8> rawData;
 	};
 
 	// Utility functions for setting up the models which make use of these definitions
@@ -54,8 +54,10 @@ public:
 
 	const usg::CustomEffectDecl::Header& GetHeader() const { return m_header; }
 	uint32 GetHeaderSize() const { return sizeof(m_header); }
-	const void* GetBinary() const { return (void*)m_pBinary; }
-	uint32 GetBinarySize() const { return m_uBinarySize; }
+	const void* GetBinary() const { return (void*)m_binary.data(); }
+	uint32 GetBinarySize() const { return (uint32)m_binary.size(); }
+
+	uint64 GetCRC() const { ASSERT(m_binary.size() > 0); return m_uCRC; }
 private:
 
 	usg::CustomEffectDecl::Header m_header;
@@ -69,8 +71,17 @@ private:
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;
 	std::vector<ConstantSetData> m_constantSets;
 
-	uint8*	m_pBinary = nullptr;
-	uint32	m_uBinarySize = 0;
+	std::vector<uint8> m_binary;
+	
+	union 
+	{
+		struct 
+		{
+			uint32 m_uHeaderCRC;
+			uint32 m_uDataCRC;
+		};
+		uint64	m_uCRC = 0;
+	};
 };
 
 #endif // MaterialAnimationConverter_h__

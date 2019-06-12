@@ -30,6 +30,7 @@ namespace usg
 			if (pDependencies[i].PakIndex != USG_INVALID_ID)
 			{
 				dep.resHandle = pCurrentFile->GetResource(pDependencies[i].FileCRC);
+				ASSERT(dep.resHandle);
 			}
 			else
 			{

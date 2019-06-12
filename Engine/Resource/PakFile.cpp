@@ -11,6 +11,7 @@
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Effects/Shader.h"
+#include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Memory/ScratchRaw.h"
@@ -70,6 +71,7 @@ namespace usg
 			deps.Init(this, pDependencies, pFileInfo->uDependenciesCount);
 		}
 
+		// FIXME: Make the init function virtual to save this mess
 		switch ((usg::ResourceType)pFileInfo->uResourceType)
 		{
 		case usg::ResourceType::EFFECT:
@@ -84,6 +86,13 @@ namespace usg
 			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
 			pShader->Init(pDevice, this, pFileInfo, pData);
 			m_resources[pFileInfo->CRC] = BaseResHandle(pShader);
+			break;
+		}
+		case usg::ResourceType::CUSTOM_EFFECT:
+		{
+			CustomEffectResource* pRes = vnew(ALLOC_OBJECT)CustomEffectResource;
+			//pRes->Init(pDevice, this, pFileInfo, pData);
+			m_resources[pFileInfo->CRC] = BaseResHandle(pRes);
 			break;
 		}
 		default:

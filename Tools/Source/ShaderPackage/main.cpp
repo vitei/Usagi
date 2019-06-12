@@ -31,6 +31,7 @@ const char* g_szUsageStrings[] =
 	"geometry_shader"
 };
 
+
 struct EffectEntry : public ResourceEntry
 {
 	virtual const void* GetData() override { return nullptr; }
@@ -59,8 +60,12 @@ struct CustomFXEntry : public ResourceEntry
 	virtual uint32 GetDataSize() override { return materialDef.GetBinarySize(); };
 	virtual const void* GetCustomHeader() { return &materialDef.GetHeader(); }
 	virtual uint32 GetCustomHeaderSize() { return materialDef.GetHeaderSize();  }
+	// We keep the data as it is, just fix up the pointers
+	virtual bool KeepDataAfterLoading() { return true; }
 
-	MaterialDefinitionExporter materialDef;
+	MaterialDefinitionExporter	materialDef;
+	uint64						definitionCRC;	// Rather than getting overly clever we just check for duplicates
+
 };
 
 
@@ -71,11 +76,13 @@ struct DefineSets
 	std::string defineSetName;
 	std::string definesAsCRC;
 	uint32		CRC[(uint32)usg::ShaderType::COUNT];
+	uint64		CustomFXCRC;
 };
 
 struct EffectDefinition
 {
 	std::string name;
+	std::string customFXName;
 	std::string prog[(uint32)usg::ShaderType::COUNT];
 
 	std::vector<DefineSets> sets;
@@ -245,7 +252,8 @@ int main(int argc, char *argv[])
 
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
-	YAML::Node shaders = mainNode["Effects"];
+	YAML::Node yamlEffect = mainNode["Effects"];
+	YAML::Node customFX = mainNode["CustomEffects"];
 	std::map<uint32, ShaderEntry> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	std::vector<EffectDefinition> effects;
 	std::vector<std::string> referencedFiles;
@@ -256,13 +264,16 @@ int main(int argc, char *argv[])
 		std::replace(formatted.begin(), formatted.end(), '\\', '/');
 		effectDependencies << formatted << ": ";
 	}
+
+	std::vector<CustomFXEntry> customFXEntries;
 	
-	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
+	for (YAML::const_iterator it = yamlEffect.begin(); it != yamlEffect.end(); ++it)
 	{
 		EffectDefinition def;
 		def.name = (*it)["name"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
+		def.customFXName = (*it)["custom_effect"] ? (*it)["custom_effect"].as<std::string>() : "";
 		{
 			bool bHasDefault = true;
 			if ((*it)["has_default"])
@@ -332,6 +343,30 @@ int main(int argc, char *argv[])
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
+			def.sets[i].CustomFXCRC = 0;
+			if (def.customFXName.size() > 0)
+			{
+				CustomFXEntry entry;
+				entry.materialDef.Load(customFX[def.customFXName]);
+				entry.materialDef.InitBinaryData();
+				uint64 uCustomFXCRC = entry.materialDef.GetCRC();
+				bool bFound = false;
+				for (int i = 0; i < customFXEntries.size(); i++)
+				{
+					if (customFXEntries[i].definitionCRC == uCustomFXCRC)
+					{
+						bFound = true;
+					}
+				}
+				if (!bFound)
+				{
+					std::string customFXName = intFileName + "." + def.customFXName + "." + std::to_string(customFXEntries.size()) + ".cfx";
+					entry.SetName(customFXName, usg::ResourceType::CUSTOM_EFFECT);
+					entry.definitionCRC = uCustomFXCRC;
+					customFXEntries.push_back(entry);
+				}
+				def.sets[i].CustomFXCRC = uCustomFXCRC;
+			}
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
 				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
@@ -387,12 +422,14 @@ int main(int argc, char *argv[])
 
 	std::vector<ResourceEntry*> resources;
 	std::vector<EffectEntry> effectEntries;
+
 	for (auto& effectItr : effects)
 	{
 		for (auto& setItr : effectItr.sets)
 		{
 			EffectEntry effect;
 			effect.SetName(setItr.name, usg::ResourceType::EFFECT);
+
 			for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 			{
 				if (setItr.CRC[i] != 0)
@@ -401,6 +438,18 @@ int main(int argc, char *argv[])
 					if (shaderEntry != requiredShaders[i].end())
 					{
 						effect.AddDependency((*shaderEntry).second.GetName(), g_szUsageStrings[i]);
+					}
+				}
+			}
+
+			if (setItr.CustomFXCRC != 0)
+			{
+				for (auto& customFX : customFXEntries)
+				{
+					if (customFX.definitionCRC == setItr.CustomFXCRC)
+					{
+						effect.AddDependency(customFX.GetName(), "CustomFX");
+						break;
 					}
 				}
 			}
@@ -420,6 +469,11 @@ int main(int argc, char *argv[])
 	for (auto& effectItr : effectEntries)
 	{
 		resources.push_back(&effectItr);
+	}
+
+	for (auto& customFX : customFXEntries)
+	{
+		resources.push_back(&customFX);
 	}
 
 	// Write out the file
