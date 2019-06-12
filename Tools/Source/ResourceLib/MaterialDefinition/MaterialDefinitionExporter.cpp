@@ -191,6 +191,13 @@ bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 		attrib.eConstantType = GetConstantType((*it)["type"].as<std::string>().c_str());
 		attrib.uCount = (*it)["count"] ? (*it)["count"].as<uint32>() : 1;
 		SetDefaultData(attrib, (*it)["default"]);
+		if ((*it)["defines"])
+		{
+			if (!IsValidWithDefineSet((*it)["defines"].as<std::string>()))
+			{
+				continue;
+			}
+		}
 		m_attributes.push_back(attrib);
 	}
 
@@ -212,6 +219,13 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 		{
 			usg::MemClear(sampler.texName, sizeof(sampler.texName));
 		}
+		if ((*it)["defines"])
+		{
+			if (!IsValidWithDefineSet((*it)["defines"].as<std::string>()))
+			{
+				continue;
+			}
+		}
 		m_samplers.push_back(sampler);
 	}
 
@@ -223,6 +237,13 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 	for (YAML::const_iterator setIt = constantDefs.begin(); setIt != constantDefs.end(); ++setIt)
 	{
 		ConstantSetData setData;
+		if ((*setIt)["defines"])
+		{
+			if (!IsValidWithDefineSet((*setIt)["defines"].as<std::string>()))
+			{
+				continue;
+			}
+		}
 		YAML::Node variableDefs = (*setIt)["Variables"];
 		setData.set.uConstants = (uint32_t)variableDefs.size();
 		strcpy_s(setData.set.szName, sizeof(setData.set.szName), (*setIt)["name"].as<std::string>().c_str());
@@ -245,6 +266,13 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 			uOffset = AlignOffset(uOffset, constant.eConstantType);
 			constant.uiOffset = uOffset;
 			uOffset += GetSize(constant.eConstantType, constant.uiCount);
+			if ((*variableIt)["defines"])
+			{
+				if (!IsValidWithDefineSet((*variableIt)["defines"].as<std::string>()))
+				{
+					continue;
+				}
+			}
 			setData.constants.push_back(constant);
 		}
 
@@ -266,8 +294,30 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 	return true;
 }
 
-int MaterialDefinitionExporter::Load(YAML::Node& mainNode)
+int MaterialDefinitionExporter::Load(YAML::Node& mainNode, const std::string& defines)
 {
+	m_defines.clear();
+	std::string defineList = defines;
+	size_t nextDefine = std::string::npos;
+
+	while (!defineList.empty())
+	{
+		nextDefine = defineList.find_first_of(' ');
+		if (nextDefine != std::string::npos)
+		{
+			m_defines.push_back(defineList.substr(0, nextDefine));
+			defineList = defineList.substr(nextDefine + 1);
+		}
+		else
+		{
+			// The last define
+			m_defines.push_back(defineList);
+			defineList.clear();
+		}
+
+	} while (nextDefine != std::string::npos);
+
+
 	if (mainNode["Shader"])
 	{
 		m_effectName = mainNode["Shader"]["name"].as<std::string>();
@@ -291,10 +341,10 @@ int MaterialDefinitionExporter::Load(YAML::Node& mainNode)
 	return 0;
 }
 
-int MaterialDefinitionExporter::Load(const char* path)
+int MaterialDefinitionExporter::Load(const char* path, const std::string& defines)
 {
 	YAML::Node mainNode = YAML::LoadFile(path);
-	return Load(mainNode);
+	return Load(mainNode, defines);
 
 }
 
@@ -387,6 +437,51 @@ bool MaterialDefinitionExporter::GetVariable(uint32 uSet, void* pSrc, const char
 		}
 	}
 	return false;
+}
+
+bool MaterialDefinitionExporter::IsValidWithDefineSet(const std::string& conditions)
+{
+	std::string defineList = conditions;
+	size_t nextDefine = std::string::npos;
+	std::string thisCondition;
+
+	while (!defineList.empty())
+	{
+		nextDefine = defineList.find_first_of(' ');
+		if (nextDefine != std::string::npos)
+		{
+			thisCondition = defineList.substr(0, nextDefine);
+			defineList = defineList.substr(nextDefine + 1);
+		}
+		else
+		{
+			// The last define
+			thisCondition = defineList;
+			defineList.clear();
+		}
+
+		bool bShouldNotHave = thisCondition[0] == '!';
+		bool bFound = false;
+		if (bShouldNotHave)
+		{
+			thisCondition = thisCondition.substr(1);
+		}
+		for (int i = 0; i < m_defines.size(); i++)
+		{
+			if (thisCondition == m_defines[i])
+			{
+				bFound = true;
+			}
+		}
+
+		if (bShouldNotHave == bFound)
+		{
+			return false;
+		}
+
+	} while (nextDefine != std::string::npos);
+
+	return true;
 }
 
 void MaterialDefinitionExporter::InitBinaryData()

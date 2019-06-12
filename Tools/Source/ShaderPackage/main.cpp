@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
 			if (def.customFXName.size() > 0)
 			{
 				CustomFXEntry entry;
-				entry.materialDef.Load(customFX[def.customFXName]);
+				entry.materialDef.Load(customFX[def.customFXName], def.sets[i].defines);
 				entry.materialDef.InitBinaryData();
 				uint64 uCustomFXCRC = entry.materialDef.GetCRC();
 				bool bFound = false;

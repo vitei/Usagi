@@ -10,8 +10,8 @@ public:
 	MaterialDefinitionExporter() {}
 	virtual ~MaterialDefinitionExporter();
 
-	int Load(const char* path);
-	int Load(YAML::Node& mainNode);
+	int Load(const char* path, const std::string& defines);
+	int Load(YAML::Node& mainNode, const std::string& defines);
 	bool LoadAttributes(YAML::Node& attributeNode);
 	bool LoadSamplers(YAML::Node& attributeNode);
 	bool LoadConstantSets(YAML::Node& attributeNode);
@@ -59,6 +59,7 @@ public:
 
 	uint64 GetCRC() const { ASSERT(m_binary.size() > 0); return m_uCRC; }
 private:
+	bool IsValidWithDefineSet(const std::string& conditions);
 
 	usg::CustomEffectDecl::Header m_header;
 
@@ -70,6 +71,7 @@ private:
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;
 	std::vector<ConstantSetData> m_constantSets;
+	std::vector<std::string> m_defines;
 
 	std::vector<uint8> m_binary;
 	
