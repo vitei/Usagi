@@ -33,7 +33,6 @@ namespace usg
 	CustomEffectResource::CustomEffectResource() :
 		ResourceBase(StaticResType)
 	{
-		m_pHeader = NULL;
 		m_pConstantSets = NULL;
 		m_pBinary = NULL;
 		m_pSamplers = NULL;
@@ -72,20 +71,21 @@ namespace usg
 		SetupHash(szFileName);
 		File file(szFileName, FILE_ACCESS_READ );
 
-		m_pBinary = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, (uint32)file.GetSize(), FILE_READ_ALIGN);
-		file.Read(file.GetSize(), m_pBinary);
-		m_pHeader = (CustomEffectDecl::Header*)m_pBinary;
+		memsize uBinarySize = file.GetSize() - sizeof(m_header);
+		m_pBinary = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uBinarySize, FILE_READ_ALIGN);
+		file.Read(sizeof(m_header), &m_header);
+		file.Read(uBinarySize, m_pBinary);
 
-		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_pHeader->uAttributeOffset);
-		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_pHeader->uSamplerOffset);
+		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_header.uAttributeOffset);
+		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_header.uSamplerOffset);
 
-		ASSERT(m_pHeader->uConstantSetCount < MAX_CONSTANT_SETS);
+		ASSERT(m_header.uConstantSetCount < MAX_CONSTANT_SETS);
 
-		m_pConstantSets = (CustomEffectDecl::ConstantSet*)(((uint8*)m_pBinary) + m_pHeader->uConstantSetDeclOffset);
+		m_pConstantSets = (CustomEffectDecl::ConstantSet*)(((uint8*)m_pBinary) + m_header.uConstantSetDeclOffset);
 
 		uint32 uTotalShaderConsts = 0;
 
-		for (uint32 uSet = 0; uSet < m_pHeader->uConstantSetCount; uSet++)
+		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
 		{
 			ShaderConstantDecl* pDecl = NULL;
 			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset;
@@ -97,7 +97,7 @@ namespace usg
 
 		ShaderConstantDecl cap = SHADER_CONSTANT_END();
 		m_pShaderConstDecl = vnew(ALLOC_OBJECT)ShaderConstantDecl[uTotalShaderConsts];
-		for(uint32 uSet=0; uSet<m_pHeader->uConstantSetCount; uSet++)
+		for(uint32 uSet=0; uSet< m_header.uConstantSetCount; uSet++)
 		{
 			ShaderConstantDecl* pDecl = &m_pShaderConstDecl[m_uConstDeclOffset[uSet]];
 			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary)+m_pConstantSets[uSet].uDeclOffset);
@@ -120,7 +120,7 @@ namespace usg
 
 	uint32 CustomEffectResource::GetAttribBinding(const char* szAttrib) const
 	{
-		for(uint32 i=0; i<m_pHeader->uAttributeCount; i++)
+		for(uint32 i=0; i< m_header.uAttributeCount; i++)
 		{
 			if( str::Compare(szAttrib, m_pAttributes[i].hint) )
 			{
@@ -132,12 +132,12 @@ namespace usg
 
 	uint32 CustomEffectResource::GetAttribCount() const
 	{
-		return m_pHeader->uAttributeCount;
+		return m_header.uAttributeCount;
 	}
 
 	const CustomEffectDecl::Attribute* CustomEffectResource::GetAttribute(uint32 uIndex) const
 	{
-		if (uIndex >= m_pHeader->uAttributeCount)
+		if (uIndex >= m_header.uAttributeCount)
 		{
 			return nullptr;
 		}
@@ -146,7 +146,7 @@ namespace usg
 
 	uint32 CustomEffectResource::GetSamplerBinding(const char* szSampler) const
 	{
-		for(uint32 i=0; i<m_pHeader->uSamplerCount; i++)
+		for(uint32 i=0; i< m_header.uSamplerCount; i++)
 		{
 			if( str::Compare(szSampler, m_pSamplers[i].hint) )
 			{
@@ -159,18 +159,18 @@ namespace usg
 
 	uint32 CustomEffectResource::GetConstantSetCount() const
 	{
-		return m_pHeader->uConstantSetCount;
+		return m_header.uConstantSetCount;
 	}
 
 	uint32 CustomEffectResource::GetConstantCount(uint32 uSet) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		return m_pConstantSets[uSet].uConstants;	
 	}
 
 	const CustomEffectDecl::Constant* CustomEffectResource::GetConstant(uint32 uSet, uint32 uAttrib) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary)+m_pConstantSets[uSet].uDeclOffset);
 		ASSERT(uAttrib<m_pConstantSets[uSet].uConstants);
 		return &pConstant[uAttrib];
@@ -179,13 +179,13 @@ namespace usg
 
 	void* CustomEffectResource::GetDefaultData(uint32 uSet) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		return ((uint8*)(m_pBinary) + m_pConstantSets[uSet].uDataOffset);
 	}
 
 	const char* CustomEffectResource::GetDefaultTexture(uint32 uSamplerBinding)
 	{
-		for (uint32 i = 0; i < m_pHeader->uSamplerCount; i++)
+		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
 		{
 			if (m_pSamplers[i].uIndex == uSamplerBinding)
 			{
@@ -197,27 +197,27 @@ namespace usg
 
 	const char* CustomEffectResource::GetEffectName() const
 	{
-		return m_pHeader->effectName;
+		return m_header.effectName;
 	}
 
 	const char* CustomEffectResource::GetDepthEffectName() const
 	{
-		return m_pHeader->shadowEffectName;
+		return m_header.shadowEffectName;
 	}
 
 	const char* CustomEffectResource::GetDeferredEffectName() const
 	{
-		return m_pHeader->deferredEffectName;
+		return m_header.deferredEffectName;
 	}
 
 	const char* CustomEffectResource::GetTransparentEffectName() const
 	{
-		return m_pHeader->transparentEffectName;
+		return m_header.transparentEffectName;
 	}
 
 	const char* CustomEffectResource::GetOmniDepthEffectName() const
 	{
-		return m_pHeader->omniShadowEffectName;
+		return m_header.omniShadowEffectName;
 	}
 
 }

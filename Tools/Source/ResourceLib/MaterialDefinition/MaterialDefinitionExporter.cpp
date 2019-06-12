@@ -174,6 +174,13 @@ MaterialDefinitionExporter::~MaterialDefinitionExporter()
 			usg::mem::Free(m_constantSets[i].pRawData);
 		}
 	}
+
+	if (m_pBinary)
+	{
+		usg::mem::Free(m_pBinary);
+		m_pBinary = nullptr;
+		m_uBinarySize = 0;
+	}
 }
 
 static memsize AlignSize(memsize uSize, memsize uAlign)
@@ -386,11 +393,15 @@ bool MaterialDefinitionExporter::GetVariable(uint32 uSet, void* pSrc, const char
 	return false;
 }
 
-void MaterialDefinitionExporter::ExportFile( const char* path )
+void MaterialDefinitionExporter::InitBinaryData()
 {
-	FILE* handle = nullptr;
-	fopen_s(&handle, path, "wb");
-	
+	if (m_pBinary)
+	{
+		usg::mem::Free(m_pBinary);
+		m_pBinary = nullptr;
+		m_uBinarySize = 0;
+	}
+
 	uint32 uHeaderSize = sizeof(usg::CustomEffectDecl::Header);
 	uint32 uAttributeSize = sizeof(usg::CustomEffectDecl::Attribute) * (uint32_t)m_attributes.size();
 	uint32 uSamplerSize = sizeof(usg::CustomEffectDecl::Sampler) * (uint32_t)m_samplers.size();
@@ -401,50 +412,73 @@ void MaterialDefinitionExporter::ExportFile( const char* path )
 	{
 		uDeclSize += (uint32_t)m_constantSets[i].constants.size() * sizeof(usg::CustomEffectDecl::Constant);
 	}
-	 
-	usg::CustomEffectDecl::Header header;
-	header.uAttributeCount = (uint32_t)m_attributes.size();
-	header.uAttributeOffset = uHeaderSize;
-	header.uSamplerCount = (uint32_t)m_samplers.size();
-	header.uSamplerOffset = header.uAttributeOffset + uAttributeSize;
-	header.uConstantSetCount = (uint32_t)m_constantSets.size();
-	header.uConstantSetDeclOffset = header.uSamplerOffset + uSamplerSize;
 
-	strcpy_s(header.effectName, m_effectName.c_str());
-	strcpy_s(header.shadowEffectName, m_shadowEffectName.c_str());
-	strcpy_s(header.transparentEffectName, m_transparentEffectName.c_str());
-	strcpy_s(header.omniShadowEffectName, m_omniShadowEffectName.c_str());
-	strcpy_s(header.deferredEffectName, m_deferredEffectName.c_str());
+	uint32 uRawDataSize = 0;
+	for (uint32 i = 0; i < m_constantSets.size(); i++)
+	{
+		uRawDataSize += m_constantSets[i].uRawDataSize;
+	}
 
-	// Write the header, attributes and samplers
-	fwrite(&header, 1, sizeof(header), handle);
-	fwrite(m_attributes.data(), 1, uAttributeSize, handle);
-	fwrite(m_samplers.data(), 1, uSamplerSize, handle);
+	m_uBinarySize = uAttributeSize + uSamplerSize + uConstantSetSize + uDeclSize + uRawDataSize;
+	m_pBinary = (uint8*)usg::mem::Alloc(usg::MEMTYPE_STANDARD, usg::ALLOC_OBJECT, m_uBinarySize);
 
-	// Write all of the headers
-	uint32 uDeclOffset = header.uConstantSetDeclOffset + uConstantSetSize;
+	m_header.uAttributeCount = (uint32_t)m_attributes.size();
+	m_header.uAttributeOffset = 0;
+	m_header.uSamplerCount = (uint32_t)m_samplers.size();
+	m_header.uSamplerOffset = m_header.uAttributeOffset + uAttributeSize;
+	m_header.uConstantSetCount = (uint32_t)m_constantSets.size();
+	m_header.uConstantSetDeclOffset = m_header.uSamplerOffset + uSamplerSize;
+
+	memcpy(m_pBinary + m_header.uAttributeOffset, m_attributes.data(),uAttributeSize);
+	memcpy(m_pBinary + m_header.uSamplerOffset, m_samplers.data(), uSamplerSize);
+
+	uint32 uDeclOffset = m_header.uConstantSetDeclOffset + uConstantSetSize;
 	uint32 uVariableOffset = uDeclOffset + uDeclSize;
+
+	uint8* pDst = m_pBinary + m_header.uConstantSetDeclOffset;
+
 	for (uint32 i = 0; i < (uint32_t)m_constantSets.size(); i++)
 	{
 		m_constantSets[i].set.uDeclOffset = uDeclOffset;
 		m_constantSets[i].set.uDataOffset = uVariableOffset;
 		uDeclOffset += (uint32_t)m_constantSets[i].constants.size() * sizeof(usg::CustomEffectDecl::Constant);
 		uVariableOffset += m_constantSets[i].uRawDataSize;
-		fwrite(&m_constantSets[i].set, sizeof(usg::CustomEffectDecl::ConstantSet), 1, handle);
-	}
-	uint32 uPos = ftell(handle);
-	// Write the declarations
-	for (uint32 i = 0; i < m_constantSets.size(); i++)
-	{
-		fwrite(m_constantSets[i].constants.data(), sizeof(usg::CustomEffectDecl::Constant), m_constantSets[i].constants.size(), handle);
+		memcpy(pDst, &m_constantSets[i].set, sizeof(usg::CustomEffectDecl::ConstantSet));
+		pDst += sizeof(usg::CustomEffectDecl::ConstantSet);
 	}
 
-	uPos = ftell(handle);
-	// Write the default data
 	for (uint32 i = 0; i < m_constantSets.size(); i++)
 	{
-		fwrite(m_constantSets[i].pRawData, 1, m_constantSets[i].uRawDataSize, handle);
+		memcpy(pDst, m_constantSets[i].constants.data(), sizeof(usg::CustomEffectDecl::Constant)*m_constantSets[i].constants.size());
+		pDst += sizeof(usg::CustomEffectDecl::Constant)*m_constantSets[i].constants.size();
 	}
+
+	for (uint32 i = 0; i < m_constantSets.size(); i++)
+	{
+		memcpy(pDst, m_constantSets[i].pRawData, m_constantSets[i].uRawDataSize);
+		pDst += m_constantSets[i].uRawDataSize;
+	}
+
+	ASSERT(pDst - m_pBinary == m_uBinarySize);
+
+	// FIXME: Needs removing
+	strcpy_s(m_header.effectName, m_effectName.c_str());
+	strcpy_s(m_header.shadowEffectName, m_shadowEffectName.c_str());
+	strcpy_s(m_header.transparentEffectName, m_transparentEffectName.c_str());
+	strcpy_s(m_header.omniShadowEffectName, m_omniShadowEffectName.c_str());
+	strcpy_s(m_header.deferredEffectName, m_deferredEffectName.c_str());
+
+}
+
+void MaterialDefinitionExporter::ExportFile( const char* path )
+{
+	FILE* handle = nullptr;
+	fopen_s(&handle, path, "wb");
+
+	InitBinaryData();
+
+	fwrite(&m_header, sizeof(m_header), 1, handle);
+	fwrite(m_pBinary, 1, m_uBinarySize, handle);
 
 	fclose( handle );
 }

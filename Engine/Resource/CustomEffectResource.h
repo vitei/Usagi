@@ -62,7 +62,7 @@ namespace usg
 		ShaderConstantDecl*		 		m_pShaderConstDecl;
 		uint32							m_uConstDeclOffset[MAX_CONSTANT_SETS];
 
-		CustomEffectDecl::Header*		m_pHeader;
+		CustomEffectDecl::Header		m_header;
 		CustomEffectDecl::ConstantSet*	m_pConstantSets;
 		CustomEffectDecl::Sampler*		m_pSamplers;
 		CustomEffectDecl::Attribute*	m_pAttributes;

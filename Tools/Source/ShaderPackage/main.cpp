@@ -58,7 +58,7 @@ struct CustomFXEntry : public ResourceEntry
 	virtual const void* GetData() override { return materialDef.GetBinary(); }
 	virtual uint32 GetDataSize() override { return materialDef.GetBinarySize(); };
 	virtual const void* GetCustomHeader() { return &materialDef.GetHeader(); }
-	virtual uint32 GetCustomHeaderSize() { return sizeof(usg::PakFileDecl::CustomFXHeader); }
+	virtual uint32 GetCustomHeaderSize() { return materialDef.GetHeaderSize();  }
 
 	MaterialDefinitionExporter materialDef;
 };

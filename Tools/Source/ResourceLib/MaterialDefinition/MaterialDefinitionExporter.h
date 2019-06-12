@@ -15,6 +15,7 @@ public:
 	bool LoadSamplers(YAML::Node& attributeNode);
 	bool LoadConstantSets(YAML::Node& attributeNode);
 	void ExportFile( const char* path );
+	void InitBinaryData();
 
 	struct ConstantSetData
 	{
@@ -50,7 +51,14 @@ public:
 	}
 
 	bool GetVariable(uint32 uSet, void* pSrc, const char* szName, void* pData, uint32 uSize, uint32 uOffset);
+
+	const usg::CustomEffectDecl::Header& GetHeader() const { return m_header; }
+	uint32 GetHeaderSize() const { return sizeof(m_header); }
+	const void* GetBinary() const { return (void*)m_pBinary; }
+	uint32 GetBinarySize() const { return m_uBinarySize; }
 private:
+
+	usg::CustomEffectDecl::Header m_header;
 
 	std::string m_effectName;
 	std::string m_deferredEffectName;
@@ -60,6 +68,9 @@ private:
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;
 	std::vector<ConstantSetData> m_constantSets;
+
+	uint8*	m_pBinary = nullptr;
+	uint32	m_uBinarySize = 0;
 };
 
 #endif // MaterialAnimationConverter_h__
