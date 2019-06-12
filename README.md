@@ -144,6 +144,8 @@ Issues
 
 **The current is a list of known issues with Usagi which need to be addressed.**
 
+The physics system currently assumes a fixed framerate of 60fps
+
 If there is not at least one child entity systems on the root entity will not be run  
 
 There is no longer a system other than submodules for linking projects and engine versions  
