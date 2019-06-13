@@ -8,7 +8,6 @@
 #include <sstream>
 #include <algorithm>
 #include <fstream>
-#include <ShaderLang.h>
 #include <pb.h>
 
 

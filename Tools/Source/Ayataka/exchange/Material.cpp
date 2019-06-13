@@ -6,7 +6,7 @@ namespace exchange {
 
 void Material::InitCustomMaterial(const char* szName)
 {
-	m_materialDef.Load(szName);
+	m_materialDef.Load(szName, "");
 	for (uint32 i = 0; i < m_materialDef.GetConstantSetCount(); i++)
 	{
 		AddConstantSet(m_materialDef.GetConstantSetName(i), m_materialDef.GetConstantSetSize(i));

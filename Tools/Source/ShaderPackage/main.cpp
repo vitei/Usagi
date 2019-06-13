@@ -11,11 +11,15 @@
 #include "ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
+#include <shaderc/shaderc.h>
 #include <algorithm>
 #include <fstream>
-#include <ShaderLang.h>
+
 #include <pb.h>
 
+
+shaderc_compiler_t compiler;
+shaderc_compile_options_t compileOptions;
 
 const char* g_szExtensions[] =
 {
@@ -29,6 +33,14 @@ const char* g_szUsageStrings[] =
 	"vertex_shader",
 	"fragment_shader",
 	"geometry_shader"
+};
+
+
+const shaderc_shader_kind g_shaderKinds[] =
+{
+	shaderc_shader_kind::shaderc_glsl_vertex_shader,
+	shaderc_shader_kind::shaderc_glsl_fragment_shader,
+	shaderc_shader_kind::shaderc_glsl_geometry_shader
 };
 
 
@@ -112,6 +124,49 @@ bool CompileOGLShader(const std::string& inputFileName, const std::string& setDe
 	return false;
 }
 
+#if 0
+bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes,
+	ShaderEntry& shader, std::vector<std::string>& referencedFiles)
+{
+	std::string shaderCode;
+	std::string defines = setDefines;
+	if (setDefines.size() > 0)
+		defines += " ";
+	defines += "PLATFORM_PC ";
+	defines += "API_VULKAN";
+
+
+	if (ParseManually(inputFileName.c_str(), defines.c_str(), includes, shaderCode, referencedFiles))
+	{
+		// Want to move away from manual parsing, when we do we'll need to pass in the defines like this
+		//shaderc_compile_options_clone
+	//SHADERC_EXPORT void shaderc_compile_options_add_macro_definition(
+//		shaderc_compile_options_t options, const char* name, size_t name_length,
+	//	const char* value, size_t value_length);
+		
+		shaderc_compilation_result_t result = shaderc_compile_into_spv(compiler, shaderCode.c_str(), shaderCode.size(), g_shaderKinds[(uint32)shader.entry.eShaderType], inputFileName.c_str(), "main", compileOptions);
+		shaderc_compilation_status status = shaderc_result_get_compilation_status(result);
+		if (status == shaderc_compilation_status_success)
+		{
+			shader.binary = new uint8[shaderc_result_get_length(result)];
+			memcpy(shader.binary, shaderc_result_get_bytes(result), shaderc_result_get_length(result));
+			shader.binarySize = (uint32)shaderc_result_get_length(result);
+			shaderc_result_release(result);
+			return true;
+		}
+		else
+		{
+			const char* msg = shaderc_result_get_error_message(result);
+			ASSERT_MSG(false, msg);
+			return false;
+		}
+	}
+
+
+	return false;
+}
+
+#else
 bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes,
 	ShaderEntry& shader, std::vector<std::string>& referencedFiles)
 {
@@ -182,6 +237,7 @@ bool CompileVulkanShader(const std::string& inputFileName, const std::string& se
 
 	return true;
 }
+#endif
 
 
 bool CheckArgument(std::string& target, const std::string& argument)
@@ -209,6 +265,16 @@ int main(int argc, char *argv[])
 	std::string packageName;
 	std::string includeDirs;
 	std::string arg;
+
+	compiler = shaderc_compiler_initialize();
+	compileOptions = shaderc_compile_options_initialize();
+
+	// Enable debug
+	shaderc_compile_options_set_generate_debug_info(compileOptions);
+
+	shaderc_compile_options_set_optimization_level(compileOptions, shaderc_optimization_level_performance);
+
+	shaderc_compile_options_set_warnings_as_errors(compileOptions);
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -498,6 +564,8 @@ int main(int argc, char *argv[])
 	depFile.clear();
 	depFile << effectDependencies.str();
 
+	shaderc_compiler_release(compiler);
+	shaderc_compile_options_release(compileOptions);
 
 	return 0;
 }
