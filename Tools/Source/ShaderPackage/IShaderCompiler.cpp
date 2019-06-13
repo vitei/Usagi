@@ -1,6 +1,7 @@
 #include "Engine/Common/Common.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
+#include "../ResourceLib/MaterialDefinition/MaterialDefinitionExporter.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
 #include "ResourcePakExporter.h"
@@ -22,12 +23,32 @@ IShaderCompiler::~IShaderCompiler()
 }
 
 
-bool LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
+// FIXME: This code has survived since before Usagi even existed, originally designed for glsl emulation
+// It could very obviously do with a re-write
+
+enum EPragmaType
 {
+	PRAGMA_TYPE_NONE = 0,
+	PRAGMA_TYPE_INCLUDE,
+	PRAGMA_TYPE_AUTO_GEN
+};
+
+EPragmaType LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
+{
+	EPragmaType eType = PRAGMA_TYPE_NONE;
 	szPragmaLine = strstr(szProgram, "#include");
 	if (!szPragmaLine)
 	{
-		return false;
+		szPragmaLine = strstr(szProgram, "// <<GENERATED CODE>>");
+		if (!szPragmaLine)
+		{
+			return PRAGMA_TYPE_NONE;
+		}
+		eType = PRAGMA_TYPE_AUTO_GEN;
+	}
+	else
+	{
+		eType = PRAGMA_TYPE_INCLUDE;
 	}
 
 	// Terminate the previous string
@@ -44,17 +65,77 @@ bool LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
 	*szNextLine = '\0';	// Terminate the pragma line
 	szNextLine++;
 
-	return true;
+	return eType;
 }
 
-bool ParseManually(const char* szFileName, const char* szDefines, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles)
+bool InsertIncludeFile(const char* szFileName, char* szPragma, std::vector<char*>& buffer, const std::string& includes, std::vector<std::string>& referencedFiles)
 {
-	const int MAX_STRING_ARRAY = 30;
+	while (*szPragma != '\"')
+		szPragma++;
+
+	szPragma++;
+
+	char* search = szPragma;
+	while (*search != '\0' && *search != '\"')
+		search++;
+
+	ASSERT(*search == '\"');
+	*search = '\0';
+
+	FILE* pIncludeFile;
+	std::string includeName = szFileName;
+	includeName = includeName.substr(0, includeName.find_last_of("\\/"));
+	includeName += "/";
+	includeName += szPragma;
+	std::string fullIncludeName = includeName;
+	fopen_s(&pIncludeFile, includeName.c_str(), "rb");
+	if (!pIncludeFile)
+	{
+		std::string nextInclude = includes;
+		while (nextInclude.find_first_of("-I") != std::string::npos)
+		{
+			nextInclude = nextInclude.substr(nextInclude.find_first_of("-I") + 2);
+			std::string includePath = nextInclude;
+			if (includePath.find_first_of(" ") != std::string::npos)
+			{
+				includePath = includePath.substr(0, includePath.find_first_of(" "));
+			}
+			// Check in the include paths
+			fullIncludeName = includePath + "/" + szPragma;
+			fopen_s(&pIncludeFile, fullIncludeName.c_str(), "rb");
+		}
+	}
+
+	if (!pIncludeFile)
+	{
+		printf("Could not find include file %s in %s\n", includeName.c_str(), szFileName);
+		return false;
+	}
+
+	char fullPath[256];
+	_fullpath(fullPath, fullIncludeName.c_str(), 256);
+	referencedFiles.push_back(fullPath);
+
+	fseek(pIncludeFile, 0, SEEK_END);
+	memsize uFileSize = ftell(pIncludeFile);
+	fseek(pIncludeFile, 0, SEEK_SET);
+
+	buffer.push_back((char*)malloc(sizeof(char)*uFileSize + 1));
+
+	size_t uRead = fread(buffer.back(), 1, uFileSize, pIncludeFile);
+	buffer.back()[uRead] = '\0';
+	fclose(pIncludeFile);
+
+	return true;
+
+}
+
+bool ParseManually(const char* szFileName, const char* szDefines, const class MaterialDefinitionExporter* pMaterialDef, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles)
+{
 	FILE* pShaderFile;
 	fopen_s(&pShaderFile, szFileName, "rb");
 
-	char* buffer[MAX_STRING_ARRAY];
-	uint32 uBufferCount = 0;
+	std::vector<char*> buffer;
 
 	if (!pShaderFile)
 		return false;
@@ -101,33 +182,29 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 	{
 		defines[0] = '\0';
 	}
-	char* stringArray[MAX_STRING_ARRAY];
+	std::vector<char*> stringArray;
 	// File size
 	fseek(pShaderFile, 0, SEEK_END);
 	memsize uFileSize = ftell(pShaderFile);
 	fseek(pShaderFile, 0, SEEK_SET);
 
-	buffer[0] = (char*)malloc(sizeof(char)*uFileSize + 1);
-	uBufferCount++;
-	ASSERT(buffer[0] != NULL);
+	buffer.push_back( (char*)malloc(sizeof(char)*uFileSize + 1) );
 
-	if (!buffer[0])
-		return false;
-
-	memsize uRead = fread(buffer[0], 1, uFileSize, pShaderFile);
-	buffer[0][uRead] = '\0';
+	memsize uRead = fread(buffer.back(), 1, uFileSize, pShaderFile);
+	buffer.back()[uRead] = '\0';
 	fclose(pShaderFile);
 
 
-	stringArray[0] = defines;
-	stringArray[1] = buffer[0];
+	stringArray.push_back(defines);
+	stringArray.push_back(buffer.back());
 
-	uint32 uArrayIndex = 1;
 	bool bFound = true;
 	char* szPragma = NULL;
 	while (bFound)
 	{
-		bFound = LocatePragma(stringArray[uArrayIndex], szPragma, stringArray[uArrayIndex + 1]);
+		char* remainder;
+		EPragmaType eType = LocatePragma(stringArray.back(), szPragma, remainder);
+		bFound = eType != PRAGMA_TYPE_NONE;
 
 		if (!bFound)
 		{
@@ -135,75 +212,46 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 			break;
 		}
 
-		while (*szPragma != '\"')
-			szPragma++;
-
-		szPragma++;
-
-		char* search = szPragma;
-		while (*search != '\0' && *search != '\"')
-			search++;
-
-		ASSERT(*search == '\"');
-		*search = '\0';
-
-		FILE* pIncludeFile;
-		std::string includeName = szFileName;
-		includeName = includeName.substr(0, includeName.find_last_of("\\/"));
-		includeName += "/";
-		includeName += szPragma;
-		std::string fullIncludeName = includeName;
-		fopen_s(&pIncludeFile, includeName.c_str(), "rb");
-		if (!pIncludeFile)
+		if (eType == PRAGMA_TYPE_INCLUDE)
 		{
-			std::string nextInclude = includes;
-			while (nextInclude.find_first_of("-I") != std::string::npos)
+			if (InsertIncludeFile(szFileName, szPragma, buffer, includes, referencedFiles))
 			{
-				nextInclude = nextInclude.substr(nextInclude.find_first_of("-I") + 2);
-				std::string includePath = nextInclude;
-				if (includePath.find_first_of(" ") != std::string::npos)
-				{
-					includePath = includePath.substr(0, includePath.find_first_of(" "));
-				}
-				// Check in the include paths
-				fullIncludeName = includePath + "/" + szPragma;
-				fopen_s(&pIncludeFile, fullIncludeName.c_str(), "rb");
+				stringArray.push_back(buffer.back());
+			}
+			else
+			{
+				// FIXME: Mem leak
+				ASSERT(false);
+				return false;
+			}
+		}
+		else
+		{
+			if (pMaterialDef)
+			{
+				const std::string automatedCode = pMaterialDef->GetAutomatedCode();
+				buffer.push_back((char*)malloc(automatedCode.size() + 1));
+				strcpy_s(buffer.back(), automatedCode.size(), automatedCode.c_str());
+				buffer.back()[automatedCode.size()] = '\0';
+				stringArray.push_back(buffer.back());
+			}
+			else
+			{
+				ASSERT(false);
+				return false;
 			}
 		}
 
-		if (!pIncludeFile)
-		{
-			printf("Could not find include file %s in %s\n", includeName.c_str(), szFileName);
-			return false;
-		}
-
-		_fullpath(fullPath, fullIncludeName.c_str(), 256);
-		referencedFiles.push_back(fullPath);
-
-		fseek(pIncludeFile, 0, SEEK_END);
-		memsize uFileSize = ftell(pIncludeFile);
-		fseek(pIncludeFile, 0, SEEK_SET);
-
-		buffer[uBufferCount] = (char*)malloc(sizeof(char)*uFileSize + 1);
-
-		uRead = fread(buffer[uBufferCount], 1, uFileSize, pIncludeFile);
-		buffer[uBufferCount][uRead] = '\0';
-		fclose(pIncludeFile);
-
-		stringArray[uArrayIndex + 2] = stringArray[uArrayIndex + 1];
-		stringArray[uArrayIndex + 1] = buffer[uBufferCount];
-
-		uBufferCount++;
-		uArrayIndex += 2;
+		stringArray.push_back(remainder);
 	}
 
 	fileOut = "";
-	for (uint32 i = 0; i < uArrayIndex + 1; i++)
+	for (size_t i = 0; i < stringArray.size(); i++)
 	{
 		fileOut += stringArray[i];
 	}
 
-	for (uint32 i = 0; i < uBufferCount; i++)
+	for (uint32 i = 0; i < buffer.size(); i++)
 	{
 		free(buffer[i]);
 	}

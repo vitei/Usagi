@@ -58,6 +58,7 @@ public:
 	uint32 GetBinarySize() const { return (uint32)m_binary.size(); }
 
 	uint64 GetCRC() const { ASSERT(m_binary.size() > 0); return m_uCRC; }
+	const std::string& GetAutomatedCode() const { return m_automatedCode; }
 private:
 	bool IsValidWithDefineSet(const std::string& conditions);
 
@@ -68,6 +69,7 @@ private:
 	std::string m_transparentEffectName;
 	std::string m_shadowEffectName;
 	std::string m_omniShadowEffectName;
+	std::string m_automatedCode;
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;
 	std::vector<ConstantSetData> m_constantSets;

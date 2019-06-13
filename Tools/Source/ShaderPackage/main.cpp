@@ -263,6 +263,7 @@ int main(int argc, char *argv[])
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
 			def.sets[i].CustomFXCRC = 0;
+			MaterialDefinitionExporter* pDef = nullptr;
 			if (def.customFXName.size() > 0)
 			{
 				CustomFXEntry entry;
@@ -274,6 +275,7 @@ int main(int argc, char *argv[])
 				{
 					if (customFXEntries[i].definitionCRC == uCustomFXCRC)
 					{
+						pDef = &customFXEntries[i].materialDef;
 						bFound = true;
 					}
 				}
@@ -283,6 +285,7 @@ int main(int argc, char *argv[])
 					entry.SetName(customFXName, usg::ResourceType::CUSTOM_EFFECT);
 					entry.definitionCRC = uCustomFXCRC;
 					customFXEntries.push_back(entry);
+					pDef = &customFXEntries.back().materialDef;
 				}
 				def.sets[i].CustomFXCRC = uCustomFXCRC;
 			}
@@ -310,7 +313,7 @@ int main(int argc, char *argv[])
 						bool bSuccess = false;
 						std::string tempFileName = intFileName + ".SPV";
 						tempFileName = tempDir + "/" + tempFileName;
-						bSuccess = pCompiler->Compile(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, referencedFiles);
+						bSuccess = pCompiler->Compile(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, pDef, referencedFiles);
 						if (!bSuccess)
 						{
 							return -1;
