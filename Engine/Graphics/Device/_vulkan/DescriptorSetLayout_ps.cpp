@@ -128,7 +128,7 @@ namespace usg {
 			}
 			pBindings[i].descriptorCount = pDecl->uCount;
 			m_poolSize[i].type = pBindings[i].descriptorType;
-			m_poolSize[i].descriptorCount = pDecl->uCount;
+			m_poolSize[i].descriptorCount = pDecl->uCount * g_allocGroupSize;
 		}
 
 		VkDescriptorSetLayoutCreateInfo create_info = {};

@@ -17,20 +17,13 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 
 
 
-in VertexData
-{
-    INT_LOC(0) vec4    vo_vColor;
-    INT_LOC(1) vec2    vo_vTexCoord;
-
-} vertexData[];
+ATTRIB_LOC(0) in vec4    vo_vColor[];
+ATTRIB_LOC(1) in vec2    vo_vTexCoord[];
 
 
-out GeometryData
-{
-    INT_LOC(0) vec4 	go_vColor;
-    INT_LOC(1) vec2 	go_vTexcoord;
+ATTRIB_LOC(0) out vec4 	go_vColor;
+ATTRIB_LOC(1) out vec2 	go_vTexcoord;
 
-} geometryData;
 
 
 void CreateVertex(int ii, vec2 vTexCoord, vec4 pos)
@@ -38,9 +31,9 @@ void CreateVertex(int ii, vec2 vTexCoord, vec4 pos)
 	//vec4 pos;
   
 	//pos = vec4(vPos, 0.0, 1.0);
-	geometryData.go_vColor = vertexData[ii].vo_vColor;
+	go_vColor = vo_vColor[ii];
 
-	geometryData.go_vTexcoord = vTexCoord;
+	go_vTexcoord = vTexCoord;
 
 	//pos = pos * mProj;
 
@@ -56,7 +49,7 @@ void main(void)
         vec2 vTLPos = gl_in[ii].gl_Position.xy;
         vec2 vSize = vCharSize.xy;
         vec4 vTexCoordMinMax;
-        vTexCoordMinMax = vertexData[ii].vo_vTexCoord.xyxy + vTexCoordRng;
+        vTexCoordMinMax = vo_vTexCoord[ii].xyxy + vTexCoordRng;
 
         vec4 vPos = vec4(vTLPos, 0.0, 1.0) * mProj;
 

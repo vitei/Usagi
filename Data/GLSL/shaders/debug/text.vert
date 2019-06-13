@@ -6,12 +6,9 @@ ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec2 ao_texCoord0;
 ATTRIB_LOC(2) in vec4 ao_color;
 
-out VertexData
-{
-    INT_LOC(0) vec4    vo_vColor;
-    INT_LOC(1) vec2    vo_vTexCoord;
+ATTRIB_LOC(0) out vec4    vo_vColor;
+ATTRIB_LOC(1) out vec2    vo_vTexCoord;
 
-} vertexData;
 
  
 void main(void)
@@ -20,6 +17,6 @@ void main(void)
  	
  	gl_Position		= vPosition;	
 
-	vertexData.vo_vColor 	= ao_color;	
-	vertexData.vo_vTexCoord	= ao_texCoord0;
+	vo_vColor 	= ao_color;	
+	vo_vTexCoord	= ao_texCoord0;
 }

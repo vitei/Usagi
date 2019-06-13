@@ -804,7 +804,8 @@ uint32 ModelResource::GetModelDeclUVReusse(const exchange::Shape* pShape, const 
 			for (size_t uTexDst = 0; uTexDst < pMaterial->textureCoordinators_count; ++uTexDst)
 			{
 				const usg::exchange::TextureCoordinator& texCo = pMaterial->textureCoordinators[uTexDst];
-				if (texCo.sourceCoordinate == texUV)
+				// FIXME: Remove hardcoding by adding support for arrays on attributes!
+				if (texCo.sourceCoordinate == texUV && uTexDst < 4)
 				{
 					element.uAttribId = uUVIndex + (uint32)uTexDst;
 					memcpy(&elements[uCount], &element, sizeof(VertexElement));
