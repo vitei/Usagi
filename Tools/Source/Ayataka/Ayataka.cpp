@@ -141,7 +141,7 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 int ConvertMaterialDefinition(aya::string outputPath, aya::string inputPath)
 {
 	MaterialDefinitionExporter exporter;
-	exporter.Load(inputPath.c_str());
+	exporter.Load(inputPath.c_str(), "");
 	exporter.ExportFile(outputPath.c_str());
 
 	return 0;

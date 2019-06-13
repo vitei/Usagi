@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Utility.h"
 #include "Engine/Resource/PakDecl.h"
+#include <algorithm>
 #include <vector>
 
 struct DependencyEntry

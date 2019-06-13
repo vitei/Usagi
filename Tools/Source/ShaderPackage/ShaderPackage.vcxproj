@@ -150,12 +150,14 @@ xcopy $(USAGI_DIR)\Engine\ThirdParty\shaderc\bin\shaderc_shared.dll $(USAGI_DIR)
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IShaderCompiler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="OpenGLShaderCompiler.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="VulkanShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\ThirdParty\msdfgen\Msdfgen.vcxproj">
@@ -191,6 +193,11 @@ xcopy $(USAGI_DIR)\Engine\ThirdParty\shaderc\bin\shaderc_shared.dll $(USAGI_DIR)
     <ProjectReference Include="..\ResourceLib\ResourceLib.vcxproj">
       <Project>{5d046ed5-cc03-4e84-9bb6-292c0ffbe2fe}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IShaderCompiler.h" />
+    <ClInclude Include="OpenGLShaderCompiler.h" />
+    <ClInclude Include="VulkanShaderCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

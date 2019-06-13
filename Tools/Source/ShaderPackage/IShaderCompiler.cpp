@@ -9,6 +9,17 @@
 #include <algorithm>
 #include <fstream>
 #include <pb.h>
+#include "IShaderCompiler.h"
+
+
+IShaderCompiler::IShaderCompiler()
+{
+}
+
+
+IShaderCompiler::~IShaderCompiler()
+{
+}
 
 
 bool LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
@@ -67,7 +78,7 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 			while (*szDefines == ' ')
 			{
 				szDefines++;
-			} 
+			}
 
 			do
 			{
@@ -79,7 +90,7 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 				{
 					*szDefineLoc++ = *szDefines;
 				}
-				
+
 				szDefines++;
 			} while (*szDefines != ' ' && *szDefines != '\0');
 			*szDefineLoc++ = '\n';
@@ -187,7 +198,7 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 	}
 
 	fileOut = "";
-	for (uint32 i = 0; i < uArrayIndex+1; i++)
+	for (uint32 i = 0; i < uArrayIndex + 1; i++)
 	{
 		fileOut += stringArray[i];
 	}
@@ -199,6 +210,3 @@ bool ParseManually(const char* szFileName, const char* szDefines, const std::str
 
 	return true;
 }
-
-
-
