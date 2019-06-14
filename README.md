@@ -1,7 +1,9 @@
 usagi
 =====
 
-Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/).  
+Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/). The engine is still in the early stages of the open sourcing process; be sure to check out the [wiki](https://github.com/vitei/Usagi/wiki) in order to understand the intention.     
+
+By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential. 
 
 In Usagi the entire world is grouped into a hierarchy of entities. These entities are very fine grained, every bone on every character is an entity, with optional additional logical entities where required.  
 
@@ -50,9 +52,6 @@ static void OnEvent(const Inputs& inputs, Outputs& outputs, const KillEntityEven
 	outputs.state.Modify().current = STATUS_DEAD;
 }
 ```
-
-By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
-
 
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine. Vitei was developing  games limited in scope but with high technical demands for Nintendo platforms, so we set about creating an engine suited to those titles.  
 
@@ -142,9 +141,11 @@ Since the code base is in a very early state the assumption is no one outside of
 Issues
 ----------------------
 
-**The current is a list of known issues with Usagi which need to be addressed.**
+**The current is a list of known issues with Usagi which need to be addressed on the main branch.**
 
-The physics system currently assumes a fixed framerate of 60fps
+If using one of the more recent versions of the Vulkan SDK validation needs to be disabled; in particular it is strict about unused input attributes.  
+
+The physics system currently assumes a fixed framerate of 60fps 
 
 If there is not at least one child entity systems on the root entity will not be run  
 
@@ -154,7 +155,7 @@ A replacement model editor would be required to take advantage of the existing c
 
 Resource loading is slow and single threaded  
 
-Resources don't have an internal list of dependenices  
+Resources don't have an internal list of dependenices 
 
 The running of systems is not yet multi-threaded  
 
@@ -162,6 +163,7 @@ Spot and projection lights are not properlly culled
 
 The AI would need updating to be able to control flying vehicles  
 
+Details of when these issues are to be addressed can be found in the [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap)  
 
 License
 ----------------------
