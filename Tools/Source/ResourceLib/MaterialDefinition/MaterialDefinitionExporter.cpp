@@ -24,22 +24,97 @@ static const Mapping g_constantMappings[]
 	{ "ivec4",	usg::CT_VECTOR4I },
 	{ "uvec4",	usg::CT_VECTOR4U },
 	{ "bool",	usg::CT_BOOL },
-	{ "invalid", usg::CT_STRUCT }
+	{ "invalid", usg::CT_STRUCT },
+	{ nullptr, USG_INVALID_ID }
 };
 
-
-uint32 GetConstantType(const char* szTypeName)
+static const Mapping g_shaderMappings[]
 {
-	for (uint32 i = 0; i < ARRAY_SIZE(g_constantMappings); i++)
+	{ "VS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_VERTEX },
+	{ "GS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_GEOMETRY },
+	{ "PS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_PIXEL },
+	{ nullptr, USG_INVALID_ID }
+};
+
+static const Mapping g_bufferBindingMappings[]
+{
+	{ "Material", usg::SHADER_CONSTANT_MATERIAL },
+	{ "Material1", usg::SHADER_CONSTANT_MATERIAL_1 },
+	{ "Custom0", usg::SHADER_CONSTANT_CUSTOM_0 },
+	{ "Custom1", usg::SHADER_CONSTANT_CUSTOM_1 },
+	{ "Custom2", usg::SHADER_CONSTANT_CUSTOM_2 },
+	{ "Custom3", usg::SHADER_CONSTANT_CUSTOM_3 },
+	{ nullptr, USG_INVALID_ID }
+};
+
+static const uint32 g_shaderFlagMap[]
+{
+	usg::SHADER_FLAG_VERTEX,
+	usg::SHADER_FLAG_PIXEL,
+	usg::SHADER_FLAG_GEOMETRY
+};
+
+uint32 GetType(const char* szTypeName, const Mapping* pMapping)
+{
+	while(pMapping->szName)
 	{
-		if (str::Compare(szTypeName, g_constantMappings[i].szName))
+		if (str::Compare(szTypeName, pMapping->szName))
 		{
-			return g_constantMappings[i].uValue;
+			return pMapping->uValue;
 		}
+		pMapping++;
 	}
 
 	ASSERT(false);
 	return 0;
+}
+
+const char* GetType(uint32 uType, const Mapping* pMapping)
+{
+	while (pMapping->szName)
+	{
+		if (uType == pMapping->uValue)
+		{
+			return pMapping->szName;
+		}
+		pMapping++;
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+uint32 GetConstantType(const char* szTypeName)
+{
+	return GetType(szTypeName, g_constantMappings);
+}
+
+const char* GetConstantType(uint32 uConstantType)
+{
+	return GetType(uConstantType, g_constantMappings);
+}
+
+uint32 GetShaderType(const char* szTypeName)
+{
+	std::stringstream stream;
+	std::string entry;
+	stream << szTypeName;
+	uint32 uOut = 0;
+	while (stream >> entry)
+	{
+		uOut |= GetType(entry.c_str(), g_shaderMappings);
+	}
+	return uOut;
+}
+
+uint32 GetBufferMapping(const char* szTypeName)
+{
+	return GetType(szTypeName, g_bufferBindingMappings);
+}
+
+const char* GetBufferMapping(uint32 uConstantType)
+{
+	return GetType(uConstantType, g_bufferBindingMappings);
 }
 
 
@@ -187,6 +262,7 @@ bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 	{
 		usg::CustomEffectDecl::Attribute attrib;
 		strcpy_s(attrib.hint, sizeof(attrib.hint), (*it)["hint"].as<std::string>().c_str());
+		strcpy_s(attrib.name, sizeof(attrib.name), (*it)["name"].as<std::string>().c_str());
 		attrib.uIndex = (*it)["index"].as<uint32>();
 		attrib.eConstantType = GetConstantType((*it)["type"].as<std::string>().c_str());
 		attrib.uCount = (*it)["count"] ? (*it)["count"].as<uint32>() : 1;
@@ -243,6 +319,15 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 			{
 				continue;
 			}
+		}
+		if ((*setIt)["shaderType"])
+		{
+			std::string type = (*setIt)["shaderType"].as<std::string>();
+			setData.set.uShaderSets = GetShaderType(type.c_str());
+		}
+		if ((*setIt)["binding"])
+		{
+			setData.set.uBinding = GetBufferMapping((*setIt)["binding"].as<std::string>().c_str());
 		}
 		YAML::Node variableDefs = (*setIt)["Variables"];
 		setData.set.uConstants = (uint32_t)variableDefs.size();
@@ -554,6 +639,56 @@ void MaterialDefinitionExporter::InitBinaryData()
 	m_uHeaderCRC = utl::CRC32(&m_header, sizeof(m_header));
 	m_uDataCRC = utl::CRC32(m_binary.data(), (uint32)m_binary.size());
 
+}
+
+void MaterialDefinitionExporter::InitAutomatedCode()
+{
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::VS; i++)
+	{
+		m_automatedCode[i] = "";
+	}
+
+	char buffer[512];
+	for (const auto& attrib : m_attributes)
+	{
+		if (attrib.uCount > 1)
+		{
+			sprintf_s(buffer, sizeof(buffer), "ATTRIB_LOC(%d) in %s %s[%d];\n", attrib.uIndex, GetConstantType(attrib.eConstantType), attrib.name, attrib.uCount);
+		}
+		else
+		{
+			sprintf_s(buffer, sizeof(buffer), "ATTRIB_LOC(%d) in %s %s;\n", attrib.uIndex, GetConstantType(attrib.eConstantType), attrib.name);
+		}
+		m_automatedCode[(uint32)usg::ShaderType::VS] += buffer;
+	}
+	m_automatedCode[(uint32)usg::ShaderType::VS] += "\n";
+
+	for (uint32 uShaderType = 0; uShaderType < (uint32)usg::ShaderType::COUNT; uShaderType++)
+	{
+		for (uint32 i = 0; i < (uint32_t)m_constantSets.size(); i++)
+		{
+			if ( (m_constantSets[i].set.uShaderSets & g_shaderFlagMap[uShaderType]) )
+			{
+				sprintf_s(buffer, sizeof(buffer), "BUFFER_LAYOUT(1,  %d) uniform %s\n{\n", m_constantSets[i].set.uBinding, GetBufferMapping(m_constantSets[i].set.uBinding));
+				m_automatedCode[uShaderType] += buffer;
+				for (uint32 j = 0; j < (uint32)m_constantSets[i].constants.size(); j++)
+				{
+					usg::CustomEffectDecl::Constant& constant = m_constantSets[i].constants[j];
+					if (constant.uiCount == 1)
+					{
+						sprintf_s(buffer, sizeof(buffer), "\t %s %s;\n", GetConstantType(constant.eConstantType), constant.szName);
+					}
+					else
+					{
+						sprintf_s(buffer, sizeof(buffer), "\t %s %s[%d];\n", GetConstantType(constant.eConstantType), constant.szName, constant.uiCount);
+					}
+					m_automatedCode[uShaderType] += buffer;
+				}
+				sprintf_s(buffer, sizeof(buffer), "}%s;\n\n", m_constantSets[i].set.szName);
+				m_automatedCode[uShaderType] += buffer;
+			}
+		}
+	}
 }
 
 void MaterialDefinitionExporter::ExportFile( const char* path )

@@ -13,9 +13,9 @@
 
 #include <fbxsdk.h>
 
-struct VertexElement
+struct FBXVertexElement
 {
-	VertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
+	FBXVertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
 	{
 		for (uint32 i = 0; i < 4; i++)
 		{
@@ -50,7 +50,7 @@ struct VertexElement
 		}
 	}
 
-	bool operator==(const VertexElement& rhs) const
+	bool operator==(const FBXVertexElement& rhs) const
 	{
 		if (type != rhs.type || uIndex != rhs.uIndex || uCount != rhs.uCount || eElementType != rhs.eElementType)
 		{
@@ -68,7 +68,7 @@ struct VertexElement
 		return true;
 	}
 
-	bool operator!=(const VertexElement& rhs) const
+	bool operator!=(const FBXVertexElement& rhs) const
 	{
 		return !(*this == rhs);
 	}
@@ -76,7 +76,7 @@ struct VertexElement
 
 struct TempVertex
 {
-	usg::vector<VertexElement> elements;
+	usg::vector<FBXVertexElement> elements;
 	union 
 	{
 		struct
@@ -90,7 +90,7 @@ struct TempVertex
 
 	void CalculateHash()
 	{
-		caluclatedHash = utl::CRC32(elements.data(), (uint32)(sizeof(VertexElement) * elements.size()));
+		caluclatedHash = utl::CRC32(elements.data(), (uint32)(sizeof(FBXVertexElement) * elements.size()));
 	}
 
 	bool operator==(const TempVertex& rhs) const
@@ -118,11 +118,11 @@ private:
 	
 	// Mesh data
 	void AddMesh(Cmdl& cmdl, ::exchange::Shape*, FbxNode* pNode, FbxMesh* mesh);
-	void GetUV(FbxMesh* pMesh, int iVertexIndex, int iTexUVIndex, int iUVLayer, VertexElement& outUV);
-	bool GetColor(FbxMesh* pMesh, int iVertexIndex, int inColorId, VertexElement& outColor);
-	bool GetNormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outNormal);
-	bool GetBinormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outBinormal);
-	bool GetTangent(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outTangent);
+	void GetUV(FbxMesh* pMesh, int iVertexIndex, int iTexUVIndex, int iUVLayer, FBXVertexElement& outUV);
+	bool GetColor(FbxMesh* pMesh, int iVertexIndex, int inColorId, FBXVertexElement& outColor);
+	bool GetNormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outNormal);
+	bool GetBinormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outBinormal);
+	bool GetTangent(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outTangent);
 	uint32 GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* currMesh); 	// Returns the maximum of bones weighting any one vertex
 	void RemoveDuplicateVertices();
 

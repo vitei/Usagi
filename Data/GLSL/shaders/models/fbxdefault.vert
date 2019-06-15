@@ -2,33 +2,9 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/global_3d.inc"
 
-// Input attributes
-ATTRIB_LOC(0) in vec3 ao_position;
-ATTRIB_LOC(1) in vec3 ao_normal;
-#ifdef HAS_SKELETON
-ATTRIB_LOC(3) in uvec4 ao_boneIndex;
-ATTRIB_LOC(4) in vec4 ao_boneWeight;
-#endif
-ATTRIB_LOC(5) in vec4 ao_color;
-ATTRIB_LOC(6) in vec2 ao_texCoord[4];
-
-#ifdef HAS_BUMP
-ATTRIB_LOC(2) in vec3 ao_tangent;
-ATTRIB_LOC(10) in vec3 ao_binormal;
-#endif
+// <<GENERATED_CODE>>
 
 #include "../includes/model_transform.inc"
-
-// FIXME: Seperate out into seperate vertex and pixel buffers
-BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
-{
-	// Materials
-	mat3x4	mTexMatrix[4];
-	int 	iBoneCount;
-	bool	bBumpMap;
-
-} uVSMaterial;
-
 
 // Output attributes
 ATTRIB_LOC(0) out vec4 vo_vTexCoord01;

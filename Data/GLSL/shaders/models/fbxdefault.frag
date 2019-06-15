@@ -14,23 +14,7 @@
 #endif
 
 
-BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
-{
-	// Materials
-	vec4	emission;
-	vec4	diffuse;
-	vec4	specular;
-	float	reflectionfactor;
-	float 	specularpow;
-	float	alpha;
-	bool	bDiffuseMap;
-	bool	bBumpMap;
-	bool	bSpecMap;
-	bool 	bEmissiveMap;
-	bool 	bReflectionMap;
-} uMaterial;
-
-
+// <<GENERATED_CODE>>
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 SAMPLER_LOC(1, 1) uniform sampler2D sampler1;

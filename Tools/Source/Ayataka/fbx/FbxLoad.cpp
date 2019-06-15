@@ -1269,14 +1269,14 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 	m_activeVerts.reserve(m_uTrianglesTmp * 3);
 
 	// TODO: Do a better job of selecting the vertex type
-	VertexElement position("position", usg::exchange::VertexAttribute_POSITION, usg::VE_FLOAT, 0, 3);
-	VertexElement normal("normal", usg::exchange::VertexAttribute_NORMAL, usg::VE_FLOAT, 0, 3);
-	VertexElement tangent("tangent", usg::exchange::VertexAttribute_TANGENT, usg::VE_FLOAT, 0, 3);
-	VertexElement color("color", usg::exchange::VertexAttribute_COLOR, usg::VE_FLOAT, 0, 3);
-	VertexElement binormal("binormal", usg::exchange::VertexAttribute_BINORMAL, usg::VE_FLOAT, 0, 3);
-	VertexElement blendweight("blendweight", usg::exchange::VertexAttribute_BONE_WEIGHT, usg::VE_FLOAT, 0, 4);
-	VertexElement blendindices("blendindex", usg::exchange::VertexAttribute_BONE_INDEX, usg::VE_UBYTE, 0, 4);
-	VertexElement UV("UV0", usg::exchange::VertexAttribute_UV, usg::VE_FLOAT, 0, 2);
+	FBXVertexElement position("position", usg::exchange::VertexAttribute_POSITION, usg::VE_FLOAT, 0, 3);
+	FBXVertexElement normal("normal", usg::exchange::VertexAttribute_NORMAL, usg::VE_FLOAT, 0, 3);
+	FBXVertexElement tangent("tangent", usg::exchange::VertexAttribute_TANGENT, usg::VE_FLOAT, 0, 3);
+	FBXVertexElement color("color", usg::exchange::VertexAttribute_COLOR, usg::VE_FLOAT, 0, 3);
+	FBXVertexElement binormal("binormal", usg::exchange::VertexAttribute_BINORMAL, usg::VE_FLOAT, 0, 3);
+	FBXVertexElement blendweight("blendweight", usg::exchange::VertexAttribute_BONE_WEIGHT, usg::VE_FLOAT, 0, 4);
+	FBXVertexElement blendindices("blendindex", usg::exchange::VertexAttribute_BONE_INDEX, usg::VE_UBYTE, 0, 4);
+	FBXVertexElement UV("UV0", usg::exchange::VertexAttribute_UV, usg::VE_FLOAT, 0, 2);
 
 	// Set up the defaults for all of the vertex types
 	position.uCount = 3;
@@ -1398,7 +1398,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 	}
 }
 
-void FbxLoad::GetUV(FbxMesh* pMesh, int iCtrlPoint, int iTexUVIndex, int inUVLayer, VertexElement& outUV)
+void FbxLoad::GetUV(FbxMesh* pMesh, int iCtrlPoint, int iTexUVIndex, int inUVLayer, FBXVertexElement& outUV)
 {
 	if (pMesh->GetElementUVCount() <= inUVLayer)
 	{
@@ -1450,7 +1450,7 @@ void FbxLoad::GetUV(FbxMesh* pMesh, int iCtrlPoint, int iTexUVIndex, int inUVLay
 	}
 }
 
-bool FbxLoad::GetColor(FbxMesh* pMesh, int iCtrlPoint, int inColorId, VertexElement& outColor)
+bool FbxLoad::GetColor(FbxMesh* pMesh, int iCtrlPoint, int inColorId, FBXVertexElement& outColor)
 {
 	if (pMesh->GetElementVertexColorCount() <= inColorId)
 	{
@@ -1512,7 +1512,7 @@ bool FbxLoad::GetColor(FbxMesh* pMesh, int iCtrlPoint, int inColorId, VertexElem
 	return true;
 }
 
-bool FbxLoad::GetNormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, VertexElement& outNormal)
+bool FbxLoad::GetNormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, FBXVertexElement& outNormal)
 {
 	if (pMesh->GetElementNormalCount() < 1)
 	{
@@ -1576,7 +1576,7 @@ bool FbxLoad::GetNormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, VertexEleme
 	return true;
 }
 
-bool FbxLoad::GetBinormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, VertexElement& outBinormal)
+bool FbxLoad::GetBinormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, FBXVertexElement& outBinormal)
 {
 	if (pMesh->GetElementBinormalCount() < 1)
 	{
@@ -1640,7 +1640,7 @@ bool FbxLoad::GetBinormal(FbxMesh* pMesh, int iCtrlPoint, int iVertex, VertexEle
 	return true;
 }
 
-bool FbxLoad::GetTangent(FbxMesh* pMesh, int iCtrlPoint, int iVertex, VertexElement& outTangent)
+bool FbxLoad::GetTangent(FbxMesh* pMesh, int iCtrlPoint, int iVertex, FBXVertexElement& outTangent)
 {
 	if (pMesh->GetElementTangentCount() < 1)
 	{

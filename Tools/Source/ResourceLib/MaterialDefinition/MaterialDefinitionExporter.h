@@ -1,6 +1,7 @@
 #ifndef MaterialDefinitionExporter_h__
 #define MaterialDefinitionExporter_h__
 #include "Engine/Resource/CustomEffectDecl.h"
+#include "Engine/Graphics/RenderConsts.h"
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -17,6 +18,7 @@ public:
 	bool LoadConstantSets(YAML::Node& attributeNode);
 	void ExportFile( const char* path );
 	void InitBinaryData();
+	void InitAutomatedCode();
 
 	struct ConstantSetData
 	{
@@ -58,7 +60,7 @@ public:
 	uint32 GetBinarySize() const { return (uint32)m_binary.size(); }
 
 	uint64 GetCRC() const { ASSERT(m_binary.size() > 0); return m_uCRC; }
-	const std::string& GetAutomatedCode() const { return m_automatedCode; }
+	const std::string& GetAutomatedCode(usg::ShaderType eType) const { return m_automatedCode[(uint32)eType]; }
 private:
 	bool IsValidWithDefineSet(const std::string& conditions);
 
@@ -69,7 +71,7 @@ private:
 	std::string m_transparentEffectName;
 	std::string m_shadowEffectName;
 	std::string m_omniShadowEffectName;
-	std::string m_automatedCode;
+	std::string m_automatedCode[(uint32)usg::ShaderType::COUNT];
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;
 	std::vector<ConstantSetData> m_constantSets;

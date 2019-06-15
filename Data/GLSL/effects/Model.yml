@@ -8,7 +8,7 @@ CustomEffects:
       - { index: 3, name: ao_boneIndex,  hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ] }
       - { index: 4, name: ao_boneWeight,  hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ]  }
       - { index: 5, name: ao_color, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
-      - { index: 6, hint: ao_texCoord, hint: "uv", type: vec2, count: 4, default: [0.0, 0.0] }
+      - { index: 6, name: ao_texCoord, hint: "uv", type: vec2, count: 4, default: [0.0, 0.0] }
     Samplers:
       - { index: 0, hint: "DiffuseColor", default: "Textures/white_default" }
       - { index: 1, hint: "NormalMap", default: "Textures/normal_default", defines: "HAS_BUMP !SHADOW_PASS" }
@@ -17,15 +17,15 @@ CustomEffects:
       - { index: 4, hint: "Reflection", default: "Textures/white_cube", defines: "!SHADOW_PASS"  }      
     ConstantDefs:      
       - name: uVSMaterial
-        binding: <%= Usg::ShaderConstantType::SHADER_CONSTANT_MATERIAL %>   
-        shaderType: <%= Usg::ShaderConstantType::SHADER_FLAG_VERTEX %>   
+        binding: Material   
+        shaderType: VS
         Variables:
          - { type: mat3x4,   name: mTexMatrix,    count: 4  }  # 0
          - { type: int,      name: iBoneCount,    count: 1, default: 0  }  # 0
          - { type: bool,     name: bBumpMap,      count: 1, default: false  }  # 0
       - name: uMaterial
-        binding: <%= Usg::ShaderConstantType::SHADER_CONSTANT_MATERIAL_1 %>
-        shaderType: <%= Usg::ShaderConstantType::SHADER_FLAG_PIXEL %>   
+        binding: Material1
+        shaderType: PS
         Variables:
           - { type: vec4,   name: emission,       count: 1 }  # 0
           - { type: vec4,   name: diffuse,        count: 1 }  # 16

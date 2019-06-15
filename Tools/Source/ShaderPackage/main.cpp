@@ -269,6 +269,7 @@ int main(int argc, char *argv[])
 				CustomFXEntry entry;
 				entry.materialDef.Load(customFX[def.customFXName], def.sets[i].defines);
 				entry.materialDef.InitBinaryData();
+				entry.materialDef.InitAutomatedCode();
 				uint64 uCustomFXCRC = entry.materialDef.GetCRC();
 				bool bFound = false;
 				for (int i = 0; i < customFXEntries.size(); i++)
@@ -313,7 +314,7 @@ int main(int argc, char *argv[])
 						bool bSuccess = false;
 						std::string tempFileName = intFileName + ".SPV";
 						tempFileName = tempDir + "/" + tempFileName;
-						bSuccess = pCompiler->Compile(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, pDef, referencedFiles);
+						bSuccess = pCompiler->Compile(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, pDef, referencedFiles, (usg::ShaderType)j);
 						if (!bSuccess)
 						{
 							return -1;

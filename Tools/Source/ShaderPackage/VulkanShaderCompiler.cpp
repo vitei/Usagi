@@ -35,7 +35,7 @@ void VulkanShaderCompiler::Init()
 
 #if 1
 bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes,
-	ShaderEntry& shader, const class MaterialDefinitionExporter* pMaterialDef, std::vector<std::string>& referencedFiles)
+	ShaderEntry& shader, const class MaterialDefinitionExporter* pMaterialDef, std::vector<std::string>& referencedFiles, usg::ShaderType eType)
 {
 	std::string shaderCode;
 	std::string defines = setDefines;
@@ -45,7 +45,7 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 	defines += "API_VULKAN";
 
 
-	if (ParseManually(inputFileName.c_str(), defines.c_str(), pMaterialDef, includes, shaderCode, referencedFiles))
+	if (ParseManually(inputFileName.c_str(), defines.c_str(), pMaterialDef, includes, shaderCode, referencedFiles, eType))
 	{
 		// Want to move away from manual parsing, when we do we'll need to pass in the defines like this
 		//shaderc_compile_options_clone

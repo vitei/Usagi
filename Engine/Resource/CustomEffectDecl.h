@@ -35,6 +35,7 @@ namespace usg
 
 		struct Attribute
 		{
+			char	name[32];
 			char	hint[32];
 			uint8	defaultData[64];
 			uint32 	uIndex;
@@ -58,6 +59,8 @@ namespace usg
 			uint32	uDeclOffset;
 			uint32	uDataOffset;
 			uint32	uDataSize;
+			uint32	uShaderSets;
+			uint32  uBinding;
 		};
 
 	}

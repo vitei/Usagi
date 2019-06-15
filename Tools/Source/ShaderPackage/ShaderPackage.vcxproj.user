@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>Data/GLSL/effects/WCIVEffects.yml -o_romfiles/win/Effects/WCIVEffects.pak -t_build/Effects -sData/GLSL/shaders -avulkan -iUsagi/Data/GLSL/Shaders</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>Usagi/Data/GLSL/effects/Model.yml -o_romfiles/win/Effects/Model.pak -t_build/Effects -sUsagi/Data/GLSL/shaders -avulkan -iUsagi/Data/GLSL/Shaders</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>

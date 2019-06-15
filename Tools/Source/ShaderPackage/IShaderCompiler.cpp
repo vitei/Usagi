@@ -36,20 +36,23 @@ enum EPragmaType
 EPragmaType LocatePragma(char* szProgram, char*& szPragmaLine, char*& szNextLine)
 {
 	EPragmaType eType = PRAGMA_TYPE_NONE;
-	szPragmaLine = strstr(szProgram, "#include");
-	if (!szPragmaLine)
+	char* include = strstr(szProgram, "#include");
+	char* generated = strstr(szProgram, "// <<GENERATED_CODE>>");
+	szPragmaLine = nullptr;
+	if (include && (!generated || include < generated) )
 	{
-		szPragmaLine = strstr(szProgram, "// <<GENERATED CODE>>");
-		if (!szPragmaLine)
-		{
-			return PRAGMA_TYPE_NONE;
-		}
-		eType = PRAGMA_TYPE_AUTO_GEN;
-	}
-	else
-	{
+		szPragmaLine = include;
 		eType = PRAGMA_TYPE_INCLUDE;
 	}
+	else if (generated && (!include || generated < include))
+	{
+		szPragmaLine = generated;
+		eType = PRAGMA_TYPE_AUTO_GEN;
+
+	}
+	
+	if (!szPragmaLine)
+		return PRAGMA_TYPE_NONE;
 
 	// Terminate the previous string
 	szPragmaLine[0] = '\0';
@@ -130,7 +133,8 @@ bool InsertIncludeFile(const char* szFileName, char* szPragma, std::vector<char*
 
 }
 
-bool ParseManually(const char* szFileName, const char* szDefines, const class MaterialDefinitionExporter* pMaterialDef, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles)
+bool ParseManually(const char* szFileName, const char* szDefines, const class MaterialDefinitionExporter* pMaterialDef, const std::string& includes,
+	std::string& fileOut, std::vector<std::string>& referencedFiles, usg::ShaderType eShaderType)
 {
 	FILE* pShaderFile;
 	fopen_s(&pShaderFile, szFileName, "rb");
@@ -229,9 +233,9 @@ bool ParseManually(const char* szFileName, const char* szDefines, const class Ma
 		{
 			if (pMaterialDef)
 			{
-				const std::string automatedCode = pMaterialDef->GetAutomatedCode();
+				const std::string automatedCode = pMaterialDef->GetAutomatedCode(eShaderType);
 				buffer.push_back((char*)malloc(automatedCode.size() + 1));
-				strcpy_s(buffer.back(), automatedCode.size(), automatedCode.c_str());
+				strcpy_s(buffer.back(), automatedCode.size()+1, automatedCode.c_str());
 				buffer.back()[automatedCode.size()] = '\0';
 				stringArray.push_back(buffer.back());
 			}
