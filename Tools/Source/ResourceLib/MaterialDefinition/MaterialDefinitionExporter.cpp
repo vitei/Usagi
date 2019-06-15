@@ -370,6 +370,13 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 		uint32 uIndex = 0;
 		for (YAML::const_iterator variableIt = variableDefs.begin(); variableIt != variableDefs.end(); ++variableIt)
 		{
+			if ((*variableIt)["defines"])
+			{
+				if (!IsValidWithDefineSet((*variableIt)["defines"].as<std::string>()))
+				{
+					continue;
+				}
+			}
 			SetDefaultData(setData.constants[uIndex], (*variableIt)["default"], setData.rawData.data());
 			uIndex++;
 		}

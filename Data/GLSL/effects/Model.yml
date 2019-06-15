@@ -3,10 +3,10 @@ CustomEffects:
     Attributes:
       - { index: 0, name: ao_position, hint: "position", type: vec3 }
       - { index: 1, name: ao_normal, hint: "normal",   type: vec3 }
-      - { index: 2, name: ao_tangent, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ]}
-      - { index: 10, name: ao_binormal, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ]  }
-      - { index: 3, name: ao_boneIndex,  hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ] }
-      - { index: 4, name: ao_boneWeight,  hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ]  }
+      - { index: 2, name: ao_tangent, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP" }
+      - { index: 10, name: ao_binormal, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP"  }
+      - { index: 3, name: ao_boneIndex,  hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ], defines: "HAS_SKELETON" }
+      - { index: 4, name: ao_boneWeight,  hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ], defines: "HAS_SKELETON"  }
       - { index: 5, name: ao_color, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
       - { index: 6, name: ao_texCoord, hint: "uv", type: vec2, count: 4, default: [0.0, 0.0] }
     Samplers:
@@ -26,6 +26,7 @@ CustomEffects:
       - name: uMaterial
         binding: Material1
         shaderType: PS
+        defines: "!SHADOW_PASS"
         Variables:
           - { type: vec4,   name: emission,       count: 1 }  # 0
           - { type: vec4,   name: diffuse,        count: 1 }  # 16
@@ -34,7 +35,7 @@ CustomEffects:
           - { type: float,  name: specularpow,    count: 1, default: 10.0 } # 52
           - { type: float,  name: alpha,          count: 1, default: 1.0 } # 56
           - { type: bool,   name: bDiffuseMap,    default: false } # 60
-          - { type: bool,   name: bBumpMap,       default: false } # 64
+          - { type: bool,   name: bBumpMap,       default: false, defines: "HAS_BUMP" } # 64
           - { type: bool,   name: bSpecMap,       default: false } # 68
           - { type: bool,   name: bEmissiveMap,   default: false } # 72            
           - { type: bool,   name: bReflectionMap, default: false } # 76
