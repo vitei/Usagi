@@ -201,6 +201,20 @@ void mem::Free(MemType eHeap, void* pData, bool bNotifyGPU)
 	}
 }
 
+void* mem::ReAlloc(void* pData, uint32 uSize)
+{
+#ifdef PLATFORM_PC
+	if (usg::mem::s_bConventionalMemManagement)
+	{
+		return realloc(pData, uSize);
+	}
+	else
+#endif
+	{
+		return MemHeap::Reallocate(pData, uSize);
+	}
+}
+
 void mem::Free(void* pData)
 {
 #ifdef PLATFORM_PC

@@ -38,6 +38,11 @@ void* MemHeap_ps::Alloc(memsize uSize, memsize uAlign, bool bGPUUse)
 	return pData;
 }
 
+void* MemHeap_ps::ReAlloc(void* pData, memsize uSize)
+{
+	return realloc(pData, uSize);
+}
+
 void  MemHeap_ps::Free(void* pFree, memsize uAlign, bool bGPUUse)
 {
 	ASSERT(pFree!=NULL);

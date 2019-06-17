@@ -126,6 +126,7 @@ namespace ResourcePakExporter
 			fileInfo.uDependenciesCount = (uint32)entries[i]->GetDeps().size();
 			fileInfo.uDataSize = entries[i]->GetDataSize();
 			fileInfo.uResourceType = (uint32)entries[i]->GetResourceType();
+			fileInfo.uFileFlags = entries[i]->KeepDataAfterLoading() ? usg::PakFileDecl::FILE_FLAG_KEEP_DATA : 0;
 			// TODO: Probably want to have an alignment value for the data
 			fileInfo.uTotalFileInfoSize = (uint32)(sizeof(fileInfo) + entries[i]->GetCustomHeaderSize() + (sizeof(usg::PakFileDecl::Dependency) * entries[i]->GetDeps().size()));
 			if (fileInfo.uDataSize > 0)

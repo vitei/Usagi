@@ -5,6 +5,7 @@
 #define ResourceBase_h__
 
 #include "Engine/Resource/ResourceDictionary.h"
+#include "PakDecl.h"
 #include "Engine/Core/stl/string.h"
 
 namespace usg
@@ -48,6 +49,7 @@ namespace usg
 		DataHash GetDataHash() const { return m_dataHash; }
 
 		// Support for asynchronous loading, coded to match level editor for now
+		virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) { ASSERT(false); return false; }
 		virtual void CleanUp(GFXDevice* pDevice) {}
 		bool IsReady() const { return m_bReady; }
 		void SetReady(bool bReady) { m_bReady = bReady; }

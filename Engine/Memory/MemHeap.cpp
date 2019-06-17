@@ -87,6 +87,35 @@ memsize MemHeap::AlignAddress(memsize uAddress, memsize uAlign)
 }
 
 
+void* MemHeap::ReAlloc(void* pMem, memsize uNewSize)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
+	AllocHeader* pHeader = (AllocHeader *)((char *)pMem - sizeof(AllocHeader));
+	AllocHeader* pPrev = pHeader;
+
+	void* pOrigAlloc = (void*)((memsize)pHeader - (memsize)pHeader->uAlignOffset);
+	void* pNew = m_platform.ReAlloc((void*)pOrigAlloc, uNewSize);
+
+	pHeader = (AllocHeader *)((char *)pMem - sizeof(AllocHeader));
+	if (pHeader != pPrev)
+	{
+		if (pHeader->pPrev)
+		{
+			pHeader->pPrev->pNext = pHeader;
+		}
+		if (pHeader->pNext)
+		{
+			pHeader->pNext->pPrev = pHeader;
+		}
+		if (m_pHeadAlloc == pHeader)
+		{
+			m_pHeadAlloc = pHeader;
+		}
+	}
+	return pNew;
+}
+
 void* MemHeap::Allocate(memsize uBytes, memsize uAlign, uint8 uGroup, MemAllocType eType, bool bGpu)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);
@@ -166,6 +195,16 @@ void MemHeap::Deallocate(void * pMem)
 	}
     AllocHeader* pHeader = (AllocHeader *)((char *)pMem - sizeof(AllocHeader));
     pHeader->pHeap->Deallocate(pHeader);
+}
+
+void* MemHeap::Reallocate(void* pMem, memsize uNewSize)
+{
+	if (pMem == nullptr)
+	{
+		return nullptr;
+	}
+	AllocHeader* pHeader = (AllocHeader *)((char *)pMem - sizeof(AllocHeader));
+	return pHeader->pHeap->ReAlloc(pHeader, uNewSize);
 }
 
 memsize MemHeap::GetAlignment(const void* const pMem)

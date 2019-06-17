@@ -21,7 +21,7 @@ public:
 	Shader() : ResourceBase(StaticResType) {}
 	virtual ~Shader() {}
 
-	bool Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData);
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
 	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
 
 	Shader_ps& GetPlatform() { return m_platform; }
@@ -36,10 +36,10 @@ private:
 };
 
 
-inline bool Shader::Init(GFXDevice* pDevice, PakFile* pFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData)
+inline bool Shader::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 {
 	SetupHash(pFileHeader->szName);
-	bool bLoaded = m_platform.Init(pDevice, pFile, pFileHeader, pData, pFileHeader->uDataSize);
+	bool bLoaded = m_platform.Init(pDevice, pFileHeader, pDependencies, pData);
 	// FIXME: This should be done internally
 	SetReady(true);
 	return bLoaded;

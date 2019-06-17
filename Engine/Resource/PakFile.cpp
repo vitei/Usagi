@@ -57,6 +57,27 @@ namespace usg
 		
 	}
 
+	ResourceBase* PakFile::CreateResource(usg::ResourceType eType)
+	{
+		switch (eType)
+		{
+		case usg::ResourceType::EFFECT:
+		{
+			return vnew(ALLOC_OBJECT)Effect;
+		}
+		case usg::ResourceType::SHADER:
+		{
+			return vnew(ALLOC_OBJECT)Shader;
+		}
+		case usg::ResourceType::CUSTOM_EFFECT:
+		{
+			return vnew(ALLOC_OBJECT)CustomEffectResource;
+		}
+		default:
+			ASSERT(false);
+		}
+		return nullptr;
+	}
 
 	void PakFile::LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
 	{
@@ -72,32 +93,10 @@ namespace usg
 		}
 
 		// FIXME: Make the init function virtual to save this mess
-		switch ((usg::ResourceType)pFileInfo->uResourceType)
-		{
-		case usg::ResourceType::EFFECT:
-		{
-			Effect* pEffect = vnew(ALLOC_OBJECT)Effect;
-			pEffect->Init(pDevice, pFileInfo, &deps, pData);
-			m_resources[pFileInfo->CRC] = BaseResHandle(pEffect);
-			break;
-		}
-		case usg::ResourceType::SHADER:
-		{
-			Shader* pShader = vnew(ALLOC_OBJECT)Shader;
-			pShader->Init(pDevice, this, pFileInfo, pData);
-			m_resources[pFileInfo->CRC] = BaseResHandle(pShader);
-			break;
-		}
-		case usg::ResourceType::CUSTOM_EFFECT:
-		{
-			CustomEffectResource* pRes = vnew(ALLOC_OBJECT)CustomEffectResource;
-			//pRes->Init(pDevice, this, pFileInfo, pData);
-			m_resources[pFileInfo->CRC] = BaseResHandle(pRes);
-			break;
-		}
-		default:
-			ASSERT(false);
-		}
+		ResourceBase* pBaseRes = CreateResource((usg::ResourceType)pFileInfo->uResourceType);
+	
+		pBaseRes->Init(pDevice, pFileInfo, &deps, pData);
+		m_resources[pFileInfo->CRC] = BaseResHandle(pBaseRes);
 	}
 
 	BaseResHandle PakFile::GetResource(uint32 uCRC)

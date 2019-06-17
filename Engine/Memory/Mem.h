@@ -53,6 +53,7 @@ namespace mem
 	void FreeToLastTag();
 
 	void Free(void*);
+	void* ReAlloc(void* pData, uint32 uSize);
 
 	const char* GetAllocString(MemAllocType eType);
 	MemHeap* GetMainHeap();

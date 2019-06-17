@@ -22,7 +22,9 @@ public:
 	void Initialize(void* location, memsize uSize);
     
     void* Allocate(memsize bytes, memsize uAlign, uint8 uGroup, MemAllocType eType, bool bGpu = false);
+	void* ReAlloc(void* pData, memsize uNewSize);
     static void Deallocate(void* pMem);
+	static void* Reallocate(void* pMem, memsize uNewSize);
 	static memsize GetAlignment(const void* const pMem);
 
 	memsize AlignAddress(memsize uAddress, memsize uAlign);

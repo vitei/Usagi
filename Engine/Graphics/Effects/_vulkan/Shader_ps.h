@@ -20,7 +20,7 @@ public:
 	~Shader_ps();
 
 	void Init(GFXDevice* pDevice, const char* szEffectName) { ASSERT(false); }
-	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
+	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData);
 	void CleanUp(GFXDevice* pDevice);
 
 	// PS

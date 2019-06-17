@@ -31,6 +31,7 @@ namespace usg
 
 	private:
 		void LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch);
+		static ResourceBase* CreateResource(usg::ResourceType eType);
 
 		usg::map<uint32, BaseResHandle>	m_resources;
 

@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Resource/ResourceBase.h"
+#include "Engine/Resource/PakDecl.h"
 #include "CustomEffectDecl.h"
 
 namespace usg
@@ -28,6 +29,7 @@ namespace usg
 		CustomEffectResource();
 		~CustomEffectResource();
 
+		virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
 		void Init(GFXDevice* pDevice, const char* szFileName);
 
 		uint32 GetAttribBinding(const char* szAttrib) const;

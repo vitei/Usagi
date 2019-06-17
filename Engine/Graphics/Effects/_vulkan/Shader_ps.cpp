@@ -23,13 +23,13 @@ namespace usg {
 	}
 
 
-	bool Shader_ps::Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize)
+	bool Shader_ps::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 	{	
 		VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
 		VkShaderModuleCreateInfo moduleCreateInfo = {};
 		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		moduleCreateInfo.pNext = NULL;
-		moduleCreateInfo.codeSize = uDataSize;
+		moduleCreateInfo.codeSize = pFileHeader->uDataSize;
 		moduleCreateInfo.pCode = (uint32_t*)pData;
 		moduleCreateInfo.flags = 0;
 

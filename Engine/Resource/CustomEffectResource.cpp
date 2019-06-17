@@ -66,6 +66,17 @@ namespace usg
 
 	}
 
+	bool CustomEffectResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData)
+	{
+		m_header = *(PakFileDecl::GetCustomHeader<usg::CustomEffectDecl::Header>(pFileHeader));
+		ASSERT(pFileHeader->uFileFlags & PakFileDecl::FILE_FLAG_KEEP_DATA);
+		
+		// WIP: Need to have pakfiles keeping their cpu data around
+
+		return false;
+	}
+
+
 	void CustomEffectResource::Init(GFXDevice* pDevice, const char* szFileName)
 	{
 		SetupHash(szFileName);
