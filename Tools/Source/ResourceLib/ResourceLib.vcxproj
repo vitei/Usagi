@@ -112,6 +112,9 @@
     <PostBuildEvent>
       <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -146,6 +149,9 @@
     <PostBuildEvent>
       <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="MaterialDefinition\MaterialDefinitionExporter.h" />
