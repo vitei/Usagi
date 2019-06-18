@@ -83,21 +83,26 @@ namespace ResourcePakExporter
 		// Sort these entries so that dependencies come before other files
 		std::sort(entries.begin(), entries.end(), ComparePointers);
 
-		uint32 uCPUDataOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
+		uint32 uTmpOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			uCPUDataOffset += sizeof(usg::PakFileDecl::FileInfo);
-			uCPUDataOffset += entries[i]->GetCustomHeaderSize();
-			uCPUDataOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
+			uTmpOffset += sizeof(usg::PakFileDecl::FileInfo);
+			uTmpOffset += entries[i]->GetCustomHeaderSize();
+			uTmpOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
 		}
 
-		uint32 uGPUDataOffset = uCPUDataOffset;
+		uint32 uKeepOffset = uTmpOffset;
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			if (entries[i]->KeepDataAfterLoading())
+			if (!entries[i]->KeepDataAfterLoading())
 			{
-				uGPUDataOffset += entries[i]->GetDataSize();
+				uKeepOffset += entries[i]->GetDataSize();
 			}
+		}
+
+		if (uKeepOffset == uTmpOffset)
+		{
+			uKeepOffset = USG_INVALID_ID;
 		}
 
 		FILE* pFileOut = nullptr;
@@ -112,8 +117,8 @@ namespace ResourcePakExporter
 		usg::PakFileDecl::ResourcePakHdr hdr;
 		hdr.uVersionId = usg::PakFileDecl::CURRENT_VERSION;
 		hdr.uFileCount = (uint32)entries.size();
-		hdr.uResDataOffset = uCPUDataOffset;
-		hdr.uTempDataOffset = uGPUDataOffset;
+		hdr.uResDataOffset = uKeepOffset;
+		hdr.uTempDataOffset = uTmpOffset;
 
 		fwrite(&hdr, sizeof(hdr), 1, pFileOut);
 
@@ -131,15 +136,15 @@ namespace ResourcePakExporter
 			fileInfo.uTotalFileInfoSize = (uint32)(sizeof(fileInfo) + entries[i]->GetCustomHeaderSize() + (sizeof(usg::PakFileDecl::Dependency) * entries[i]->GetDeps().size()));
 			if (fileInfo.uDataSize > 0)
 			{
-				if (entries[i]->KeepDataAfterLoading())
+				if (!entries[i]->KeepDataAfterLoading())
 				{
-					fileInfo.uDataOffset = uCPUDataOffset;
-					uCPUDataOffset += fileInfo.uDataSize;
+					fileInfo.uDataOffset = uTmpOffset;
+					uTmpOffset += fileInfo.uDataSize;
 				}
 				else
 				{
-					fileInfo.uDataOffset = uGPUDataOffset;
-					uGPUDataOffset += fileInfo.uDataSize;
+					fileInfo.uDataOffset = uKeepOffset;
+					uKeepOffset += fileInfo.uDataSize;
 				}
 			}
 			else
@@ -174,20 +179,19 @@ namespace ResourcePakExporter
 			}
 		}
 
-
-		// Now do the CPU data
+		// Now do the GPU data
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			if (entries[i]->KeepDataAfterLoading())
+			if (!entries[i]->KeepDataAfterLoading())
 			{
 				fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
 			}
 		}
 
-		// Now do the GPU data
+		// Now do the CPU data
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
-			if (!entries[i]->KeepDataAfterLoading())
+			if (entries[i]->KeepDataAfterLoading())
 			{
 				fwrite(entries[i]->GetData(), entries[i]->GetDataSize(), 1, pFileOut);
 			}

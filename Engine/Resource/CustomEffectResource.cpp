@@ -33,10 +33,11 @@ namespace usg
 	CustomEffectResource::CustomEffectResource() :
 		ResourceBase(StaticResType)
 	{
-		m_pConstantSets = NULL;
-		m_pBinary = NULL;
-		m_pSamplers = NULL;
-		m_pAttributes = NULL;
+		m_pConstantSets = nullptr;
+		m_pBinary = nullptr;
+		m_pAlloc = nullptr;
+		m_pSamplers = nullptr;
+		m_pAttributes = nullptr;
 		for (uint32 i = 0; i < MAX_CONSTANT_SETS; i++)
 		{
 			m_uConstDeclOffset[i] = 0;
@@ -45,9 +46,9 @@ namespace usg
 
 	CustomEffectResource::~CustomEffectResource()
 	{
-		if(m_pBinary)
+		if(m_pAlloc)
 		{
-			mem::Free(m_pBinary);
+			mem::Free(m_pAlloc);
 		}
 	}
 
@@ -68,10 +69,11 @@ namespace usg
 
 	bool CustomEffectResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData)
 	{
-		m_header = *(PakFileDecl::GetCustomHeader<usg::CustomEffectDecl::Header>(pFileHeader));
+		m_header = *(PakFileDecl::GetCustomHeader<CustomEffectDecl::Header>(pFileHeader));
 		ASSERT(pFileHeader->uFileFlags & PakFileDecl::FILE_FLAG_KEEP_DATA);
 		
-		// WIP: Need to have pakfiles keeping their cpu data around
+		m_pBinary = pData;
+		FixUpPointers();
 
 		return false;
 	}
@@ -83,10 +85,15 @@ namespace usg
 		File file(szFileName, FILE_ACCESS_READ );
 
 		memsize uBinarySize = file.GetSize() - sizeof(m_header);
-		m_pBinary = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uBinarySize, FILE_READ_ALIGN);
+		m_pAlloc = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uBinarySize, FILE_READ_ALIGN);
 		file.Read(sizeof(m_header), &m_header);
-		file.Read(uBinarySize, m_pBinary);
+		file.Read(uBinarySize, m_pAlloc);
+		m_pBinary = m_pAlloc;
+		FixUpPointers();
+	}
 
+	void CustomEffectResource::FixUpPointers()
+	{
 		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_header.uAttributeOffset);
 		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_header.uSamplerOffset);
 
@@ -100,7 +107,7 @@ namespace usg
 		{
 			ShaderConstantDecl* pDecl = NULL;
 			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset;
-			
+
 			m_uConstDeclOffset[uSet] = uTotalShaderConsts;
 
 			uTotalShaderConsts += m_pConstantSets[uSet].uConstants + 1;
@@ -108,12 +115,12 @@ namespace usg
 
 		ShaderConstantDecl cap = SHADER_CONSTANT_END();
 		m_pShaderConstDecl = vnew(ALLOC_OBJECT)ShaderConstantDecl[uTotalShaderConsts];
-		for(uint32 uSet=0; uSet< m_header.uConstantSetCount; uSet++)
+		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
 		{
 			ShaderConstantDecl* pDecl = &m_pShaderConstDecl[m_uConstDeclOffset[uSet]];
-			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary)+m_pConstantSets[uSet].uDeclOffset);
+			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset);
 			uint32 uVar = 0;
-			for( ; uVar < m_pConstantSets[uSet].uConstants; uVar++ )
+			for (; uVar < m_pConstantSets[uSet].uConstants; uVar++)
 			{
 				str::Copy(pDecl[uVar].szName, pConstant[uVar].szName, USG_IDENTIFIER_LEN);
 				pDecl[uVar].eType = (ConstantType)pConstant[uVar].eConstantType;
@@ -126,7 +133,6 @@ namespace usg
 			usg::MemCpy(&pDecl[uVar], &cap, sizeof(ShaderConstantDecl));
 
 		}
-
 	}
 
 	uint32 CustomEffectResource::GetAttribBinding(const char* szAttrib) const

@@ -24,7 +24,7 @@ namespace usg
 	PakFile::PakFile() :
 		ResourceBase(StaticResType)
 	{
-		
+		m_pPersistantData = nullptr;
 	}
 
 	PakFile::~PakFile()
@@ -37,21 +37,38 @@ namespace usg
 	{
 		SetupHash(szFileName);
 		File pakFile(szFileName);
-		ScratchRaw scratch(pakFile.GetSize(), FILE_READ_ALIGN);
-		pakFile.Read(pakFile.GetSize(), scratch.GetRawData());
 
-		const PakFileDecl::ResourcePakHdr* pHeader = scratch.GetDataAtOffset<PakFileDecl::ResourcePakHdr>(0);
-		
-		if (pHeader->uFileCount == 0 || pHeader->uVersionId != PakFileDecl::CURRENT_VERSION)
+		PakFileDecl::ResourcePakHdr		header;
+
+		pakFile.Read(sizeof(header), &header);
+		pakFile.SeekPos(0);	// We will grab the header again to keep offsets consistent
+
+		if (header.uFileCount == 0 || header.uVersionId != PakFileDecl::CURRENT_VERSION)
 		{
 			ASSERT(false);
 			return;
 		}
 
-		const PakFileDecl::FileInfo* pFileInfo = scratch.GetDataAtOffset<PakFileDecl::FileInfo>(sizeof(PakFileDecl::ResourcePakHdr));
-		for (uint32 i = 0; i < pHeader->uFileCount; i++)
+		size_t pakSize = pakFile.GetSize();
+		size_t uPersistentDataSize = header.uResDataOffset == USG_INVALID_ID ? 0 : (uint32)pakFile.GetSize() - header.uResDataOffset;
+		uint32 uTempDataSize = uPersistentDataSize > 0 ? header.uResDataOffset : (uint32)pakFile.GetSize();
+
+
+		ScratchRaw scratch(uTempDataSize, FILE_READ_ALIGN);
+
+		pakFile.Read(uTempDataSize, scratch.GetRawData());
+
+		if (uPersistentDataSize > 0)
 		{
-			LoadFile(pDevice, pFileInfo, scratch.GetRawData());
+			m_pPersistantData = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uPersistentDataSize, FILE_READ_ALIGN);
+			pakFile.Read(uPersistentDataSize, m_pPersistantData);
+		}
+	
+
+		const PakFileDecl::FileInfo* pFileInfo = scratch.GetDataAtOffset<PakFileDecl::FileInfo>(sizeof(PakFileDecl::ResourcePakHdr));
+		for (uint32 i = 0; i < header.uFileCount; i++)
+		{
+			LoadFile(pDevice, header.uResDataOffset, pFileInfo, scratch.GetRawData());
 			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo + pFileInfo->uTotalFileInfoSize);
 		}
 		
@@ -79,12 +96,27 @@ namespace usg
 		return nullptr;
 	}
 
-	void PakFile::LoadFile(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
+	void PakFile::LoadFile(GFXDevice* pDevice, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
 	{
 		U8String name = pFileInfo->szName;
 		name.ToLower();
 
-		void* pData = pFileInfo->uDataOffset == USG_INVALID_ID ? nullptr : ((uint8*)pFileScratch) + pFileInfo->uDataOffset;
+		void* pData = nullptr;
+		if (pFileInfo->uDataOffset == USG_INVALID_ID)
+		{
+			pData = nullptr;
+		}
+		else
+		{
+			if (pFileInfo->uFileFlags & PakFileDecl::FILE_FLAG_KEEP_DATA)
+			{
+				pData = ((uint8*)m_pPersistantData) - uPersistentOffset + pFileInfo->uDataOffset;
+			}
+			else
+			{
+				pData = ((uint8*)pFileScratch) + pFileInfo->uDataOffset;
+			}
+		}
 		FileDependencies deps;
 		if (pFileInfo->uDependenciesCount > 0)
 		{

@@ -26,7 +26,7 @@ class ProtocolBufferFile;
 class ConstantSet;
 class CustomEffectResource;
 class ResourceBase;
-class ResourcePakHdr;
+class PakFile;
 
 typedef ResourcePointer<const ResourceBase> BaseResHandle;
 
@@ -71,7 +71,7 @@ typedef ResourceHandle<const CustomEffectResource, ResourceType::CUSTOM_EFFECT> 
 typedef ResourceHandle<const SkeletalAnimationResource, ResourceType::SKEL_ANIM> SkeletalAnimationResHndl;
 typedef ResourceHandle<const ParticleEffectResource, ResourceType::PARTICLE_EFFECT> ParticleEffectResHndl;
 typedef ResourceHandle<const ParticleEmitterResource, ResourceType::PARTICLE_EMITTER> ParticleEmitterResHndl;
-typedef ResourceHandle<const ResourcePakHdr, ResourceType::PAK_HEADER> ResourcePakHndl;
+typedef ResourceHandle<const PakFile, ResourceType::PAK_FILE> ResourcePakHndl;
 
 
 }

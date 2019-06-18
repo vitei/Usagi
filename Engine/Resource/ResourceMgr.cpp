@@ -21,7 +21,6 @@
 #include "Engine/Core/stl/string.h"
 #include "Engine/Resource/ResourceData.h"
 #include "Engine/Resource/ResourceDictionary.h"
-#include "Engine/Resource/ResourcePakHdr.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Core/String/String_Util.h"
@@ -94,18 +93,15 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			ProfilingTimer loadTimer;
 			loadTimer.Start();
 #endif
-			PakFile pakFile;
-			// TODO: We should be creating the resources on the main thread but then doing the loading on another thread
-			pakFile.Load(pDevice, name.CStr());
-			usg::map<uint32, BaseResHandle>& resources = pakFile.GetResources();
+			PakFile* pakFile = vnew(ALLOC_OBJECT)PakFile;
+			pakFile->Load(pDevice, name.CStr());
+			usg::map<uint32, BaseResHandle>& resources = pakFile->GetResources();
 			for (auto& itr : resources)
 			{
 				m_pImpl->resources.AddResource(itr.second);
 			}
-
-			ResourcePakHdr* pHdr = vnew(ALLOC_OBJECT)ResourcePakHdr;
-			pHdr->Init(pakFile, name.CStr());
-			m_pImpl->resources.AddResource(pHdr);
+			pakFile->ClearHandles();
+			m_pImpl->resources.AddResource(pakFile);
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			loadTimer.Stop();
 			DEBUG_PRINT("Loaded %s in %f milliseconds\n", name.CStr(), loadTimer.GetTotalMilliSeconds());

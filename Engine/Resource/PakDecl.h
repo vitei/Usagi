@@ -18,8 +18,8 @@ namespace usg
 		{
 			uint32 uVersionId;
 			uint32 uFileCount;
-			uint32 uResDataOffset;
 			uint32 uTempDataOffset;
+			uint32 uResDataOffset;
 		};
 
 		enum FileFlags

@@ -56,18 +56,20 @@ namespace usg
 		const static ResourceType StaticResType = ResourceType::CUSTOM_EFFECT;
 
 	private:
+		void FixUpPointers();
 		enum
 		{
 			MAX_CONSTANT_SETS = 4
 		};
-		void*							m_pBinary;
-		ShaderConstantDecl*		 		m_pShaderConstDecl;
-		uint32							m_uConstDeclOffset[MAX_CONSTANT_SETS];
+		void*									m_pAlloc;
+		ShaderConstantDecl*						m_pShaderConstDecl;
+		uint32									m_uConstDeclOffset[MAX_CONSTANT_SETS];
 
-		CustomEffectDecl::Header		m_header;
-		CustomEffectDecl::ConstantSet*	m_pConstantSets;
-		CustomEffectDecl::Sampler*		m_pSamplers;
-		CustomEffectDecl::Attribute*	m_pAttributes;
+		CustomEffectDecl::Header				m_header;
+		const void*								m_pBinary;
+		const CustomEffectDecl::ConstantSet*	m_pConstantSets;
+		const CustomEffectDecl::Sampler*		m_pSamplers;
+		const CustomEffectDecl::Attribute*		m_pAttributes;
 	};
 
 }
