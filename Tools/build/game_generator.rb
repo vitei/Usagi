@@ -98,7 +98,7 @@ def projects(config, n, order_only_deps, win_bp_cpp, data_deps)
 
   n.alias('projects', all_projects.to_a)
 
-  exe_files = order_only_deps + win_bp_cpp +
+  exe_files = ['includes'] + order_only_deps + win_bp_cpp +
     data_deps.to_a + [config.name_data_hash_list]
   n.alias('exe_files', exe_files)
   n.defaults('exe_files')

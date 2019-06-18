@@ -375,9 +375,9 @@ end
 #####################################################################
 GeneratorUtil.create_build_id($engine, n)
 generated_headers = $engine.protocol_headers + [$engine.build_id_header]
-#includes = includes($engine, $platform, n)
-#generated_headers.push(*includes)
-#n.alias('includes', generated_headers)
+includes = includes($engine, $platform, n)
+generated_headers.push(*includes)
+n.alias('includes', generated_headers)
 
 win_bp_cpp = []
 bp_objects, bp_generated_headers = boilerplate($engine, n, generated_headers, win_bp_cpp)
