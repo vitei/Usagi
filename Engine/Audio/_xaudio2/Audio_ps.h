@@ -29,7 +29,6 @@ public:
 	void Init();
 
 	SoundFile* CreateSoundFile(const SoundFileDef* pDef);
-	void LoadSound(uint32 uSoundId);
 	void AddListener(AudioListener* pListener);
 	void RemoveListener(AudioListener* pListener);
 	void Update(float fElapsed);
