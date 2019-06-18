@@ -296,7 +296,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
 	// FIXME: Temporarily disabling validation whilst fixes for unconsumed shader warnings are applied
-#ifdef DEBUG_BUILD
+#if 0//def DEBUG_BUILD
 	int validationLayerCount = 1;
 	const char *validationLayerNames[] =
 	{
