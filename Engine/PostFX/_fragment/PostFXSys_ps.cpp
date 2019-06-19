@@ -563,6 +563,8 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, Reso
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.alphaState.SetColor0Only();
 
+	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
+
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineDecl.layout.descriptorSets[1] = multiDesc;
@@ -580,6 +582,8 @@ PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, Resourc
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.alphaState.SetColor0Only();
+
+	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
