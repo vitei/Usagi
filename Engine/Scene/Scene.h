@@ -105,6 +105,10 @@ public:
 
 	uint32 GetFrame() const { return m_uFrame; }
 
+	void SetActiveCamera(uint32 uCameraId, uint32 uViewContext);
+	void AddCamera(const Camera* pCamera);
+	void RemoveCamera(const Camera* pCamera);
+
 private:
 	void			PerformVisibilityTesting(GFXDevice* pDevice);
 	void			UpdateSceneContexts(GFXDevice* pDevice);

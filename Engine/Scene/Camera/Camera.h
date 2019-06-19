@@ -40,9 +40,16 @@ public:
 	void SetRightHanded(bool bRightHanded) { m_bRightHanded = bRightHanded; }
 	bool IsRightHanded() const { return m_bRightHanded; }
 
+	void SetID(uint32 uID) { m_uID = uID; }
+	uint32 GetID() const { return m_uID; }
+	void SetRenderMask(uint32 uRenderMask) { m_uRenderMask = uRenderMask; }
+	uint32 GetRenderMask() const { return m_uRenderMask; }
+
 protected:
 	Frustum		m_frustum;
 	Matrix4x4	m_mModel;
+	uint32		m_uID;
+	uint32		m_uRenderMask;
 private:
 	
 	bool m_bRightHanded;

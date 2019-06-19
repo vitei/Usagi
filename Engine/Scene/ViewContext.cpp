@@ -159,14 +159,13 @@ namespace usg {
 		vdelete m_pImpl;
 	}
 
-	void ViewContext::Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
+	void ViewContext::Init(GFXDevice* pDevice, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
 	{
 		SetHighestLOD(uHighestLOD);
 		SetRenderMask(uRenderMask);
 		m_pImpl->pPostFXSys = pFXSys;
 
-		m_pImpl->pCamera = pCamera;
-		m_pImpl->searchObject.Init(GetScene(), this, m_pImpl->pCamera->GetFrustum(), uRenderMask);
+		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask);
 		Debug3D::GetRenderer()->InitContextData(pDevice, this);
 	}
 
@@ -189,6 +188,9 @@ namespace usg {
 	void ViewContext::SetCamera(const Camera* pCamera)
 	{
 		m_pImpl->pCamera = pCamera;
+		usg::Fog& fog = GetFog();
+		fog.SetMinDepth(pCamera->GetFar() * 0.8f);
+		fog.SetMaxDepth(pCamera->GetFar());
 		m_pImpl->searchObject.SetFrustum(&pCamera->GetFrustum());
 	}
 

@@ -23,13 +23,11 @@ public:
 
 	~SceneSearchFrustum() {}
 
-	void Init(Scene* pScene, SceneContext* pContext, const Frustum& frustum, uint32 uMask)
+	void Init(Scene* pScene, SceneContext* pContext, uint32 uMask)
 	{
 		m_pScene	= pScene;
 		m_pContext	= pContext;
 		InitInt(uMask);
-		SetFrustum(&frustum);
-
 	}
 
 	virtual void Callback(void* pUserData);

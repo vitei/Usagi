@@ -3,10 +3,12 @@
 #include "Engine/Framework/ModelMgr.h"
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Scene/Common/Decal.h"
+#include "Engine/Scene/Camera/HMDCamera.h"
 #include "Engine/Scene/Common/GroundDecals.h"
 #include "Engine/Graphics/Lights/Light.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
+#include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
 
@@ -143,4 +145,82 @@ namespace usg
 			p.GetRuntimeData().pMgr = nullptr;
 		}
 	}
+
+	template<>
+	void OnLoaded<CameraComponent>(Component<CameraComponent>& p, ComponentLoadHandles& handles,
+		bool bWasPreviouslyCalled)
+	{
+		bool bIsNull = p.GetRuntimeData().pCamera == NULL;
+
+		if (bWasPreviouslyCalled && !bIsNull)
+		{
+			return;
+		}
+
+		usg::Matrix4x4 m = usg::Matrix4x4::Identity();
+		p.GetRuntimeData().pCamera = vnew(ALLOC_OBJECT) usg::StandardCamera;
+		p.GetRuntimeData().pCamera->SetUp(m, p->fAspectRatio, p->fFOV, p->fNearPlaneDist, p->fFarPlaneDist);
+		p.GetRuntimeData().pCamera->SetRenderMask(p->uRenderMask);
+		p.GetRuntimeData().pCamera->SetID(p->uCamId);
+
+		handles.pScene->AddCamera(p.GetRuntimeData().pCamera);
+
+	}
+
+	template<>
+	void OnActivate<CameraComponent>(Component<CameraComponent>& p)
+	{
+		p.GetRuntimeData().pCamera = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<CameraComponent>(Component<CameraComponent>& p, ComponentLoadHandles& handles)
+	{
+		if (p.GetRuntimeData().pCamera)
+		{
+			vdelete p.GetRuntimeData().pCamera;
+			p.GetRuntimeData().pCamera = nullptr;
+		}
+	}
+
+
+	template<>
+	void OnLoaded<HMDCameraComponent>(Component<HMDCameraComponent>& p, ComponentLoadHandles& handles,
+		bool bWasPreviouslyCalled)
+	{
+		bool bIsNull = p.GetRuntimeData().pCamera == NULL;
+
+		if (bWasPreviouslyCalled && !bIsNull)
+		{
+			return;
+		}
+
+		p.GetRuntimeData().pCamera = vnew(ALLOC_OBJECT) HMDCamera;
+		if (handles.pDevice)
+		{
+			p.GetRuntimeData().pCamera->Init(handles.pDevice->GetHMD(), p->fNearPlaneDist, p->fFarPlaneDist);
+		}
+		p.GetRuntimeData().pCamera->SetRenderMask(p->uRenderMask);
+		p.GetRuntimeData().pCamera->SetID(p->uCamId);
+
+		handles.pScene->AddCamera(p.GetRuntimeData().pCamera);
+	}
+
+	template<>
+	void OnActivate<HMDCameraComponent>(Component<HMDCameraComponent>& p)
+	{
+		p.GetRuntimeData().pCamera = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<HMDCameraComponent>(Component<HMDCameraComponent>& p, ComponentLoadHandles& handles)
+	{
+		if (p.GetRuntimeData().pCamera)
+		{
+			handles.pScene->RemoveCamera(p.GetRuntimeData().pCamera);
+			vdelete p.GetRuntimeData().pCamera;
+			p.GetRuntimeData().pCamera = nullptr;
+		}
+	}
+
 }

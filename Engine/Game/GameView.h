@@ -26,16 +26,12 @@ namespace usg
 		const usg::GFXBounds& GetBounds() const;
 		void SetBounds(usg::GFXBounds& bounds);
 		usg::ViewContext* GetViewContext() { return m_pViewContext; }
-		usg::StandardCamera& GetCamera() { return m_camera; }
-		usg::HMDCamera& GetHMDCamera() { return m_hmdCamera; }
 
 	private:
 		void SetViewContext(usg::ViewContext& context);
 
 		usg::ViewContext* m_pViewContext = nullptr;
 		usg::GFXBounds m_bounds;
-		usg::StandardCamera	m_camera;
-		usg::HMDCamera	m_hmdCamera;
 		usg::DebugRender* m_pDebugRender = nullptr;
 
 	};

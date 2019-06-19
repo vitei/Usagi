@@ -5,6 +5,7 @@
 #include "Engine/Framework/SystemCategories.h"
 #include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
+#include "Engine/Scene/Camera/HMDCamera.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Graphics/Lights/ProjectionLight.h"
@@ -83,6 +84,12 @@ namespace usg
 					uMask &= ~event.uDisableBits;
 					view->SetRenderMask(uMask);
 				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::EnableCamera& event)
+			{
+				Scene* scene = outputs.sceneComp.GetRuntimeData().pScene;
+				scene->SetActiveCamera(event.uCameraID, event.uContext);
 			}
 		};
 
@@ -202,6 +209,73 @@ namespace usg
 				}
 			}
 		};
+
+
+		class UpdateHMDCameraInternals : public usg::System
+		{
+		public:
+			struct Inputs
+			{
+				usg::Required<usg::MatrixComponent> mtx;
+			};
+
+			struct Outputs
+			{
+				usg::Required<usg::HMDCameraComponent> cam;
+				usg::Required<usg::TransformComponent> trans;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
+
+			static void LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				outputs.cam.GetRuntimeData().pCamera->SetModelMatrix(inputs.mtx->matrix);
+				outputs.cam.GetRuntimeData().pCamera->Update();
+			}
+
+		};
+
+
+		class UpdateSceneCamera : public usg::System
+		{
+		public:
+			struct Inputs
+			{
+				usg::Required<usg::MatrixComponent> mtx;
+			};
+
+			struct Outputs
+			{
+				usg::Required<usg::CameraComponent> cam;
+				usg::Required<usg::TransformComponent> trans;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
+
+			static void LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				const Vector3f vPos = inputs.mtx->matrix.TransformVec3(Vector3f(0.0f, 0.0f, 0.0f), 1.0f);
+				const auto& vUp = inputs.mtx->matrix.vUp().v3().GetNormalised();
+				const auto& vForward = inputs.mtx->matrix.vFace().v3().GetNormalised();
+				auto& cameraRtd = outputs.cam.GetRuntimeData();
+				ASSERT(cameraRtd.pCamera != nullptr);
+				Matrix4x4 mtx;
+				mtx.LookAt(vPos, vPos + vForward, vUp);
+				cameraRtd.pCamera->SetUp(mtx, outputs.cam->fAspectRatio, outputs.cam->fFOV, outputs.cam->fNearPlaneDist, outputs.cam->fFarPlaneDist);
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetAspectRatio& evt)
+			{
+				outputs.cam.Modify().fAspectRatio = evt.fAspectRatio;
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetFieldOfView& evt)
+			{
+				outputs.cam.Modify().fFOV = evt.fFOV;
+			}
+
+		};
+
 
 	}
 

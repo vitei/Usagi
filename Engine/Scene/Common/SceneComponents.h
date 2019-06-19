@@ -41,6 +41,21 @@ namespace usg
 	{
 		ModelMgr* 			pMgr;
 	};
+
+	class StandardCamera;
+	class HMDCamera;
+
+	template<>
+	struct RuntimeData<CameraComponent>
+	{
+		StandardCamera* pCamera;
+	};
+
+	template<>
+	struct RuntimeData<HMDCameraComponent>
+	{
+		HMDCamera* pCamera;
+	};
 }
 
 #endif

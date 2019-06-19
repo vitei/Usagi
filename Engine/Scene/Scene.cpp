@@ -74,6 +74,7 @@ struct Scene::PIMPL
 	FastPool<ScTransformNode>	transformNodes;
 	List<SceneContext>			sceneContexts;
 	List<RenderGroup>			staticComponents;
+	usg::List<const Camera>		cameras;
 	Debug3D						debug3D;
 	ProfilingTimer				profileTimers[TIMER_COUNT];
 };
@@ -132,6 +133,23 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 const RenderPassHndl& Scene::GetShadowRenderPass() const
 {
 	return m_pImpl->lightMgr.GetShadowPassHndl();
+}
+
+
+void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
+{
+	if (uViewContext > GetViewContextCount())
+		return;
+
+	for (List<const Camera>::Iterator it = m_pImpl->cameras.Begin(); !it.IsEnd(); ++it)
+	{
+		if ((*it)->GetID() == uCameraId)
+		{
+			GetViewContext(uViewContext)->SetCamera((*it));
+			GetViewContext(uViewContext)->SetRenderMask((*it)->GetRenderMask());
+			return;
+		}
+	}
 }
 
 
@@ -471,6 +489,27 @@ const Camera* Scene::GetSceneCamera(uint32 uIndex) const
 	}
 
 	return NULL;
+}
+
+void Scene::AddCamera(const Camera* pCamera)
+{
+	if (m_pImpl->cameras.GetSize() == 0)
+	{
+		for (FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.Begin(); !it.IsEnd(); ++it)
+		{
+			if (!(*it)->GetCamera())
+			{
+				(*it)->SetCamera(pCamera);
+				(*it)->SetRenderMask(pCamera->GetRenderMask());
+			}
+		}
+	}
+	m_pImpl->cameras.AddToEnd(pCamera);
+}
+
+void Scene::RemoveCamera(const Camera* pCamera)
+{
+	m_pImpl->cameras.Remove(pCamera);
 }
 
 LightMgr& Scene::GetLightMgr()
