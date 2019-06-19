@@ -556,6 +556,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		alphaDecl.srcBlendAlpha = usg::BLEND_FUNC_ZERO;
 		alphaDecl.dstBlendAlpha = usg::BLEND_FUNC_ONE;
 	}
+	pipelineState.depthState.bDepthWrite = false;
 	m_meshArray[m_uMeshCount].pipelines.transparentPipeline = pipelineState;
 
 	
