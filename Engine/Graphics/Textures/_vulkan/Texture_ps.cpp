@@ -81,6 +81,8 @@ VkFormat GetFormatGLI(uint32 uFormat)
 		return VK_FORMAT_R8_UNORM;
 	case gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16:
 		return VK_FORMAT_BC7_UNORM_BLOCK;
+	case gli::format::FORMAT_RGBA_BP_SRGB_BLOCK16:
+		return VK_FORMAT_BC7_SRGB_BLOCK;
 	case gli::format::FORMAT_BGRA8_UNORM_PACK8:
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	default:
