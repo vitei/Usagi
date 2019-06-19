@@ -6,6 +6,7 @@
 #include "Engine/HID/Mouse.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Scene/Model/Model.h"
@@ -112,7 +113,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 
 	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidth, uHeight, false);
 	
-	m_postFX.Init(pDevice, uWidth, uHeight, 0);
+	m_postFX.Init(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 0);
 
 	// Use the raw textures directly so artists can just place new ones in without having to rake
 	// Disabling for now as the directory structure has changed
@@ -122,7 +123,8 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_scene.Init(pDevice, worldBounds, NULL);
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(fAspect);
-	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
+	m_pSceneCtxt->Init(pDevice, &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
+	m_pSceneCtxt->SetCamera(&m_camera.GetCamera());
 
 	m_pViewportHack = vnew(usg::ALLOC_OBJECT)ViewportHack;
 	m_pViewportHack->Init(pDevice, &m_scene, m_previewViewport);

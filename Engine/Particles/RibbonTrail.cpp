@@ -313,7 +313,7 @@ void RibbonTrail::UpdateBuffers(GFXDevice* pDevice)
 	m_constantSet.UpdateData(pDevice);
 }
 
-bool RibbonTrail::Draw(usg::GFXContext* pContext, usg::PostFXSys* pPostFXSys)
+bool RibbonTrail::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	if(m_uSetVerts > 1)
 	{
