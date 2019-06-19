@@ -7,6 +7,8 @@
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/HID/InputEnums.pb.h"
+#include "Engine/Debug/DebugCameraController.h"
+
 
 namespace usg {
 
@@ -26,13 +28,11 @@ public:
 	void SetActive(bool bActive) { m_bActive = bActive; }
 	bool GetActive() { return m_bActive; }
 
-private:
-	bool ReadButton(uint32 uButtonShift, ButtonState eState = BUTTON_STATE_PRESSED) const;
-	float ReadAxis(uint32 eAxis) const;
-	
-	Matrix4x4		m_modelMat;
-	uint32			m_uSpeed;
-	bool			m_bActive;
+private:	
+	DebugCameraController	m_controller;
+	Matrix4x4				m_modelMat;
+	uint32					m_uSpeed;
+	bool					m_bActive;
 };
 
 }
