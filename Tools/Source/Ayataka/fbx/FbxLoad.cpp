@@ -463,7 +463,7 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 		// Emissive Factor
 		double1 = reinterpret_cast<FbxSurfaceLambert *>(pFBXMaterial)->EmissiveFactor;
 	//	emissive *= double1;
-		pMaterial->SetVariableArray("emission", emissive.rgba(), 4);
+		//pMaterial->SetVariableArray("emission", emissive.rgba(), 4);
 		
 		// Transparency Factor
 		double3 = reinterpret_cast<FbxSurfaceLambert *>(pFBXMaterial)->TransparentColor;

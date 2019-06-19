@@ -70,7 +70,8 @@ void main(void)
 	{
     	vEmissive = texture( sampler2, vo_vTexCoord01.xy ).rgb; 
 	}
-	//vEmissive *= uMaterial.emission.rgb;
+	
+	vEmissive += uMaterial.emission.rgb;
 
 #ifndef DEFERRED_SHADING
 	vec4 vFragPrimaryColor = vec4(0);

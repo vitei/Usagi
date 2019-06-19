@@ -97,9 +97,14 @@ namespace usg
 				outputs.model.GetRuntimeData().pModel->SetScale(event.fScale);
 			}
 
-			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::OverrideColorEvent& event)
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::OverrideModelVectorEvent& event)
 			{
-				outputs.model.GetRuntimeData().pModel->OverrideVariable("color", event.color, event.uColStage);
+				outputs.model.GetRuntimeData().pModel->OverrideVariable(event.varName, event.vVector, 0);
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::OverrideModelScalarEvent& event)
+			{
+				outputs.model.GetRuntimeData().pModel->OverrideVariable(event.varName, event.fScalar, 0);
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::UpdateModelRenderMask& event)

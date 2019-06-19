@@ -26,13 +26,20 @@ message ScaleModel
 	required float fScale = 1;
 }
 
-message OverrideColorEvent
+message OverrideModelVectorEvent
 {
 	// TODO: Replace material name with hash
-	required string strMat = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
-	required uint32 uColStage = 2 [default=0];
-	required Color color = 3;
+	required string varName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required Vector4f vVector = 2;
 }
+
+message OverrideModelScalarEvent
+{
+	// TODO: Replace material name with hash
+	required string varName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required float fScalar = 2;
+}
+
 
 message ModifyAnimationConditionEvent
 {
