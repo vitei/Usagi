@@ -213,8 +213,6 @@ namespace usg
 				Required<usg::TurnableComponent>	turnable;
 				Required<usg::SimulationActive, FromParents> simactive;
 				Optional<usg::BoneComponent>		bone;
-
-				Required<usg::EventManagerHandle, FromSelfOrParents> eventManager;
 			};
 
 			struct Outputs
