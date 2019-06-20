@@ -6,3 +6,9 @@ message RequestDebugCameraState
 {
 	required bool bEnable = 1;
 }
+
+
+message RequestDebugCameraState_Internal
+{
+	required bool bEnable = 1;
+}
