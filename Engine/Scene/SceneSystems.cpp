@@ -222,7 +222,6 @@ namespace usg
 			struct Outputs
 			{
 				usg::Required<usg::HMDCameraComponent> cam;
-				usg::Required<usg::TransformComponent> trans;
 			};
 
 			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
@@ -247,7 +246,6 @@ namespace usg
 			struct Outputs
 			{
 				usg::Required<usg::CameraComponent> cam;
-				usg::Required<usg::TransformComponent> trans;
 			};
 
 			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)

@@ -10,6 +10,11 @@
 #include "Engine/Debug/DebugStats.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Debug/DebugComponents.pb.h"
+#include "Engine/Debug/DebugCamera.h"
+#include "Engine/Debug/DebugEvents.pb.h"
+#include "Engine/Scene/Camera/StandardCamera.h"
+#include "Engine/Scene/Common/SceneComponents.pb.h"
+#include "Engine/Debug/DebugComponents.pb.h"
 #include "Engine/Framework/SystemCoordinator.h"
 
 namespace usg
@@ -74,6 +79,42 @@ namespace usg
 	namespace Systems {
 		typedef RenderDebug<usg::Components::Sphere> RenderDebugSphere;
 	}
+
+	class UpdateDebugCamera : public System
+	{
+	public:
+		struct Inputs
+		{
+			Required<DebugCameraComponent> debug;
+			Required< SystemTimeComponent, FromParents> systemTime;
+		};
+
+		struct Outputs
+		{
+			Required<DebugCameraComponent> debug;
+			Required<MatrixComponent>      matrix;
+		};
+
+		DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
+
+		static void Run(const Inputs& in, Outputs& outputs, float dt)
+		{
+			if (in.debug.GetRuntimeData().pDebugCam->GetActive())
+			{
+				DebugCamera* pDebugCam = outputs.debug.GetRuntimeData().pDebugCam;
+				pDebugCam->Update(in.systemTime->fSystemElapsed);
+				outputs.matrix.Modify().matrix = pDebugCam->GetModelMat();
+			}
+		}
+
+		static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::RequestDebugCameraState& event)
+		{
+			// FIXME: Need to send a message to the scene to switch to this camera
+			outputs.debug.GetRuntimeData().pDebugCam->SetActive(event.bEnable);
+		}
+	};
+
+
 }
 
 #include GENERATED_SYSTEM_CODE(Engine/Debug/DebugSystems.cpp)

@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include OS_HEADER(Engine/Core/Timer, TimeTracker.h)
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Framework/Signal.h"
 #include "Engine/Framework/ComponentEntity.h"
@@ -307,6 +308,24 @@ namespace usg
 				          inputs.eventManager->handle, setHealth.amount);
 			}
 		};
+
+
+		class UpdateSystemTime : public usg::System
+		{
+		public:
+			struct Outputs
+			{
+				Required<usg::SystemTimeComponent> sysTime;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_PRE_EARLY)
+
+			static void Run(const Inputs& in, Outputs& outputs, float dt)
+			{
+				outputs.sysTime.Modify().fSystemElapsed = outputs.sysTime.GetRuntimeData().pTimeTracker->GetDeltaTime();
+			}
+		};
+
 	}
 }
 

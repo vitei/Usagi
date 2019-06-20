@@ -12,6 +12,7 @@ namespace usg
 {
 
 class GFXDevice;
+class TimeTracker;
 
 template<>
 struct RuntimeData<usg::Components::ActiveDevice>
@@ -23,6 +24,12 @@ template<>
 struct RuntimeData<usg::Components::Identifier>
 {
 	uint32 uNameHash = 0;
+};
+
+template<>
+struct RuntimeData<usg::Components::SystemTimeComponent>
+{
+	TimeTracker* pTimeTracker;
 };
 
 inline void ActiveDevice_init(Required<usg::Components::ActiveDevice>& c, GFXDevice* pDevice)

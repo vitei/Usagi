@@ -1,0 +1,8 @@
+import 'nanopb.proto';
+
+package usg.Events;
+
+message RequestDebugCameraState
+{
+	required bool bEnable = 1;
+}

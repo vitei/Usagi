@@ -1,0 +1,12 @@
+# DO NOT ADD A TRANSFORM COMPONENT
+# The debug camera manually fills out the matrix component
+Identifier:
+  name: "DebugCam"
+MatrixComponent:
+CameraComponent:
+  fFOV: 50.0
+  fNearPlaneDist: 0.1
+  fFarPlaneDist: 1000.0 
+  uRenderMask: <%= Usg::RenderMask::RENDER_MASK_ALL %>    
+  uCamId: <%= Zlib::crc32('DebugCam') %>    
+DebugCameraComponent:
