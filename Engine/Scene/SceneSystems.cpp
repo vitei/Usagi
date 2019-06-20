@@ -43,7 +43,7 @@ namespace usg
 			{
 				Required<SceneComponent> sceneComp;
 				Required<ActiveDevice> device;
-				Required<usg::SimulationActive, FromSelfOrParents> simactive;
+				Required<SimulationActive, FromSelfOrParents> simactive;
 			};
 
 			struct Outputs
