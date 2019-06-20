@@ -190,6 +190,19 @@ void ParticleMgr::CleanUp(GFXDevice* pDevice, Scene* pScene)
 	{
 		(*it)->CleanUp(pDevice);
 	}
+
+
+	for (List<RibbonTrail>::Iterator it = m_freeRibbons.Begin(); !it.IsEnd(); ++it)
+	{
+		(*it)->CleanUp(pDevice);
+	}
+
+	for (List<RibbonTrail>::Iterator it = m_activeRibbons.Begin(); !it.IsEnd(); ++it)
+	{
+		(*it)->CleanUp(pDevice);
+	}
+
+
 }
 	
 bool ParticleMgr::Update(float fElapsed)
