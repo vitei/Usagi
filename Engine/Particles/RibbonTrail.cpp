@@ -311,6 +311,7 @@ void RibbonTrail::UpdateBuffers(GFXDevice* pDevice)
 	m_vertices.Unlock(lock);
 
 	m_constantSet.UpdateData(pDevice);
+	m_material.UpdateDescriptors(pDevice);
 }
 
 bool RibbonTrail::Draw(GFXContext* pContext, RenderContext& renderContext)
