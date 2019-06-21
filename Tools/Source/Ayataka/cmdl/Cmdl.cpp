@@ -185,10 +185,10 @@ void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)
 	// switch direction and exchange each other
 	Vector3 min = pShape->GetAABBMin();
 	Vector3 max = pShape->GetAABBMax();
-	float newMaxZ = min.z *= -1.0f;
-	float newMinZ = max.z *= -1.0f;
-	min.z = newMinZ;
-	max.z = newMaxZ;
+	float newMaxZ = min.z;
+	float newMinZ = max.z;
+	min.z = newMaxZ;
+	max.z = newMinZ;
 	pShape->SetAABB( min, max );
 
 	pShape->pb().boundingSphere.center.z *= -1.0f;
