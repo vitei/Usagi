@@ -21,7 +21,7 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 
 	m_fileList.Init("../../Data/Particle/Effects/", ".vpb");
 	m_instanceFileList.Init("../../Data/Particle/Emitters/", ".vpb");
-	m_textureFileList.Init("../../Data/Textures/ribbon", ".dds");
+	m_textureFileList.Init("../../Usagi/Data/Textures/ribbon", ".dds");
 	m_loadFilePaths.Init("Load Dir", m_fileList.GetFileNamesRaw(), 0);
 
 	m_loadButton.Init("Load");
