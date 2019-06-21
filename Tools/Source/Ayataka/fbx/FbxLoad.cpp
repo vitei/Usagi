@@ -345,8 +345,9 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					textName = textName.substr(0, length);
 					const char* drive = strrchr(textName.c_str(), ':');
 
-					if (drive != nullptr)
+					//if (drive != nullptr)
 					{
+						// We just ignore directories for our models textures
 						size_t pos = textName.find_last_of("\\/");
 						// Relative path is absolute :(
 						if (pos != std::string::npos)
@@ -354,7 +355,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 							textName = textName.substr(pos+1);
 						}
 					}
-
+					 
 					if (textName.size() >= sizeof(pNewMaterial->pb().textures[uTexIndex].textureName))
 					{
 						printf("Texture name %s too long\n", textName.c_str());
