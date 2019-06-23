@@ -11,6 +11,7 @@ static const char* g_szAnimationTiming[] =
 	"Flip book scaled",
 	"Flip book looped",
 	"Random image",
+	"Scaled to time",
 	NULL
 };
 
@@ -271,6 +272,10 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 	case usg::particles::TEX_MODE_RANDOM_IMAGE:
 		patternIdx = usg::Math::Rand()%structData.textureData[0].textureAnim.animIndex_count;
 		break;
+	case usg::particles::TEX_MODE_FIT_TO_TIME:
+		patternIdx = (uint32)((m_fAnimTime / structData.life.frames[0].fValue)*( structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) );
+		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)structData.textureData[0].textureAnim.animIndex_count - 1);
+		break;
 	case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
 		patternIdx = ((uint32)((30.f)*m_fAnimTime))%structData.textureData[0].textureAnim.animIndex_count;
 		fElapsed *= m_animTimeScale.GetValue(0);
@@ -281,7 +286,10 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		return;
 	}
 
-	patternIdx = structData.textureData[0].textureAnim.animIndex[ patternIdx ];
+	if (structData.textureData[0].textureAnim.eTexMode != usg::particles::TEX_MODE_FIT_TO_TIME)
+	{
+		patternIdx = structData.textureData[0].textureAnim.animIndex[patternIdx];
+	}
 
 	usg::Vector2f vMin, vMax;
 	float fAspect = GetUVCoords(patternIdx, vMin, vMax);

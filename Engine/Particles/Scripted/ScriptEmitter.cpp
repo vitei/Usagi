@@ -571,6 +571,9 @@ namespace usg
 			case usg::particles::TEX_MODE_RANDOM_IMAGE:
 				patternIdx = Math::Rand();
 				break;
+			case usg::particles::TEX_MODE_FIT_TO_TIME:
+				patternIdx = (uint32)(((m_fEffectTime - pOut->fLifeStart) * pOut->fInvLife) * (texData.uPatternRepeatHor * texData.uPatternRepeatVer) );
+				break;
 			case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
 				patternIdx = ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale));
 				break;
@@ -579,7 +582,10 @@ namespace usg
 			}
 
 			patternIdx += pMetaData->uRandom[i];
-			patternIdx = texAnim.animIndex[ patternIdx % texAnim.animIndex_count ];
+			if (texAnim.eTexMode != usg::particles::TEX_MODE_FIT_TO_TIME)
+			{
+				patternIdx = texAnim.animIndex[patternIdx % texAnim.animIndex_count];
+			}
 
 			uint32 uNoX = patternIdx % texData.uPatternRepeatHor;
 			uint32 uNoY = (patternIdx / texData.uPatternRepeatHor);

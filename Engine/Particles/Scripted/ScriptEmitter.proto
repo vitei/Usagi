@@ -39,7 +39,8 @@ enum TextureMode
 	TEX_MODE_FLIPBOOK_ONCE = 1;
 	TEX_MODE_FLIPBOOK_LOOP = 2;
 	TEX_MODE_RANDOM_IMAGE = 3;
-	TEX_MODE_COUNT = 4;
+	TEX_MODE_FIT_TO_TIME = 4;
+	TEX_MODE_COUNT = 5;
 };
 
 enum ParticleColorMode
