@@ -35,7 +35,7 @@ CustomEffects:
           - { type: float,  name: specularpow,    count: 1, default: 10.0 } # 52
           - { type: float,  name: alpha,          count: 1, default: 1.0 } # 56
           - { type: bool,   name: bDiffuseMap,    default: false } # 60
-          - { type: bool,   name: bBumpMap,       default: false, defines: "HAS_BUMP" } # 64
+          - { type: bool,   name: bBumpMap,       default: false } # 64
           - { type: bool,   name: bSpecMap,       default: false } # 68
           - { type: bool,   name: bEmissiveMap,   default: false } # 72            
           - { type: bool,   name: bReflectionMap, default: false } # 76
