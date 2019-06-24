@@ -164,6 +164,30 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 {
 	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
 	const char* pBoneName = pNode->GetName();
+	// Remove duplicate names
+	int loopIdx = 0;
+	char name[256];
+	strcpy_s(name, pNode->GetName());
+	bool nameUnique = true;
+	do
+	{
+		nameUnique = true;
+		for (size_t i = 0; i < pSkeleton->Bones().size(); i++)
+		{
+			if (strcmp(pSkeleton->Bones()[i].name, name) == 0)
+			{
+				nameUnique = false;
+				break;
+			}
+		}
+		if (!nameUnique)
+		{
+			sprintf_s(name, "%s\.%03i", pNode->GetName(), ++loopIdx);
+		}
+	} while (!nameUnique);
+
+	pNode->SetName(name);
+	pBoneName = pNode->GetName();
 	if (iParentIdx == (-1))
 	{
 		STRING_COPY(rSkeleton.rootBoneName, pBoneName);
