@@ -83,7 +83,8 @@ void InitializeMatrix(Entity e, ComponentLoadHandles& handles)
 
 	struct Outputs
 	{
-		Required<MatrixComponent> worldMtx;
+		Required<MatrixComponent>		worldMtx;
+		Optional<TransformComponent>	tran;
 	};
 
 	Inputs inputs;
@@ -93,7 +94,8 @@ void InitializeMatrix(Entity e, ComponentLoadHandles& handles)
 		handles.GetComponent(e, inputs.parentMtx) &&
 		handles.GetComponent(e, inputs.tran) &&
 		handles.GetComponent(e, inputs.scale) &&
-		handles.GetComponent(e, outputs.worldMtx);
+		handles.GetComponent(e, outputs.worldMtx) &&
+		handles.GetComponent(e, outputs.tran);
 
 	if (!bDidSetInputOutputs)
 	{
@@ -102,11 +104,13 @@ void InitializeMatrix(Entity e, ComponentLoadHandles& handles)
 
 	Matrix4x4 mLocal;
 
+	bool bShouldTransformBeWorld = false;
 	if (inputs.tran.Exists())
 	{
 		const Component<TransformComponent>& transform = inputs.tran.Force();
 		mLocal = transform->rotation;
 		mLocal.Translate(transform->position.x, transform->position.y, transform->position.z);
+		bShouldTransformBeWorld = !transform->bInheritFromParent;
 	}
 	else
 	{
@@ -131,6 +135,14 @@ void InitializeMatrix(Entity e, ComponentLoadHandles& handles)
 
 	// cache transform info the matrix component
 	outputs.worldMtx.Modify().matrix = mWorld;
+
+	if (bShouldTransformBeWorld && outputs.tran.Exists())
+	{
+		Component<TransformComponent>& transform = outputs.tran.Force();
+		transform.Modify().rotation = mWorld;
+		transform.Modify().position = mWorld.vPos().v3();
+	}
+
 }
 
 void InitializeScale(Entity e, ComponentLoadHandles& handles)
