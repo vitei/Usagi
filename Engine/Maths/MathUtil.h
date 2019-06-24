@@ -162,6 +162,13 @@ namespace Math
 		float fLerp = GetLerpValue(fMinInput, fMaxInput, fInputValue);
 		return Lerp(fMinOutput, fMaxOutput, fLerp);
 	}
+
+	inline float RemapRangeClamped(float fMinInput, float fMaxInput, float fMinOutput, float fMaxOutput, float fInputValue)
+	{
+		float fLerp = Clamp(GetLerpValue(fMinInput, fMaxInput, fInputValue), 0.0f, 1.0f);
+		return Lerp(fMinOutput, fMaxOutput, fLerp);
+	}
+
 	
 	inline float AccelerateToValue(const float currentValue, const float desiredValue, const float maxChange)
 	{
