@@ -1940,6 +1940,12 @@ bool FbxLoad::PostProcessSkeleton(Cmdl& cmdl)
 
 		::usg::exchange::Sphere tempSphere = pShape->pb().boundingSphere;
 
+		// If skinned the vertices will have been in bind pose location
+		if (pShape->GetSkinningType() != usg::exchange::SkinningType_NO_SKINNING)
+		{
+			tempSphere.center = bone.invBindPoseTrans.TransformVec3(tempSphere.center);
+		}
+
 		if (bone.boundingSphere.center.Magnitude() == 0.0f && bone.boundingSphere.radius == 0.0f)
 		{
 			bone.boundingSphere.center = tempSphere.center;
