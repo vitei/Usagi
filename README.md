@@ -149,6 +149,8 @@ If using one of the more recent versions of the Vulkan SDK validation needs to b
 
 The physics system currently assumes a fixed framerate of 60fps 
 
+Multiple Inherits[] inside a single yaml file will currently be ignored
+
 If there is not at least one child entity systems on the root entity will not be run  
 
 There is no longer a system other than submodules for linking projects and engine versions  
