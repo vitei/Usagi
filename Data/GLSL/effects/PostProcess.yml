@@ -14,3 +14,4 @@ Effects:
   - { name: Downscale2x2,           vert: PostFX/fullscreen,        frag: PostFX/downscale2x2 }
   - { name: Gauss5x5,               vert: PostFX/fullscreen,        frag: PostFX/guass }
   - { name: Fader,                  vert: PostFX/fader,             frag: PostFX/fader }
+  - { name: Copy,                   vert: PostFX/fullscreen,        frag: PostFX/screencopy }
