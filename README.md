@@ -1,7 +1,7 @@
 usagi
 =====
 
-Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/). The engine is still in the early stages of the open sourcing process; be sure to check out the [wiki](https://github.com/vitei/Usagi/wiki) in order to understand the intention.     
+Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/). The engine is still in the early stages of the open sourcing process;  be sure to check out the [wiki](https://github.com/vitei/Usagi/wiki) in order to understand the intention.     
 
 By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential. 
 
@@ -136,7 +136,7 @@ Current Version 0.2.1
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
-v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  
+v0.2.1 enables Vulkan validation and has addressed many of the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  
 
 Since the code base is in a very early state the assumption is no one outside of the original developers are using the code base for anything other than reference; if you do attempt to make a project in Usagi be aware that you may periodically have to delete your build files (directories that begin with an underscore (such as _build) may periodically have to be deleted as the build system is altered.
 
@@ -144,6 +144,8 @@ Issues
 ----------------------
 
 **The current is a list of known issues with Usagi which need to be addressed on the main branch.**
+
+Only the more recent nVidia cards have been tested since switching to Vulkan
 
 If using one of the more recent versions of the Vulkan SDK validation needs to be disabled; in particular it is strict about unused input attributes.  
 
