@@ -639,37 +639,39 @@ const VkPhysicalDevice GFXDevice_ps::GetGPU(uint32 uIndex) const
 
 uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags properties, VkMemoryPropertyFlags prefferedProps) const
 {
+	uint32 uMemoryType = 0;
 	prefferedProps |= properties;
-	
-	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
-	{
-		if (((typeBits >> uMemoryType) && 1) == 1)
-		{
-			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
-			if ((type.propertyFlags & prefferedProps) == prefferedProps)
+	bool bFound = false;
+
+	for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i)
+	{
+		if (typeBits & 0x1)
+		{
+			if ((m_memoryProperites[0].memoryTypes[i].propertyFlags & properties) == properties)
 			{
-				return uMemoryType;
+				if (!bFound)
+				{
+					uMemoryType = i;
+					bFound = true;
+				}
+				else if ( (m_memoryProperites[0].memoryTypes[i].propertyFlags & prefferedProps) == prefferedProps)
+				{
+					uMemoryType = i;
+				}
 			}
 		}
+
+		typeBits >>= 1;
 	}
 
-
-	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
+	if (bFound)
 	{
-		if ( ((typeBits >> uMemoryType) && 1) == 1)
-		{
-			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
-
-			if ((type.propertyFlags & properties) == properties)
-			{
-				return uMemoryType;
-			}
-		}
+		return uMemoryType;
 	}
 
 	ASSERT(false);
-	return ~0U;
+	return USG_INVALID_ID;
 }
 
 
