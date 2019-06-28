@@ -44,16 +44,17 @@ CustomEffectRuntime::~CustomEffectRuntime()
 }
 
 
-void CustomEffectRuntime::Init(GFXDevice* pDevice, const char* szName)
+void CustomEffectRuntime::Init(GFXDevice* pDevice, const CustomEffectResHndl& hndl)
 {
-	m_resource = ResourceMgr::Inst()->GetCustomEffectRes(pDevice, szName);
+	m_resource = hndl;
+
 	m_uConstantSets = m_resource->GetConstantSetCount();
 
-	if(m_uConstantSets)
+	if (m_uConstantSets)
 	{
 		m_pConstantSets = vnew(ALLOC_OBJECT) ConstantSet[m_uConstantSets];
 
-		for(uint32 i=0; i<m_resource->GetConstantSetCount(); i++)
+		for (uint32 i = 0; i < m_resource->GetConstantSetCount(); i++)
 		{
 			m_pConstantSets[i].Init(pDevice, m_resource->GetConstantDecl(i));
 
@@ -63,6 +64,13 @@ void CustomEffectRuntime::Init(GFXDevice* pDevice, const char* szName)
 			m_pConstantSets[i].Unlock();
 		}
 	}
+}
+
+
+void CustomEffectRuntime::Init(GFXDevice* pDevice, const char* szName)
+{
+	CustomEffectResHndl hndl = ResourceMgr::Inst()->GetCustomEffectRes(pDevice, szName);
+	Init(pDevice, hndl);
 }
 
 void CustomEffectRuntime::Init(GFXDevice* pDevice, const CustomEffectRuntime* pCopy)

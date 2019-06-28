@@ -38,6 +38,7 @@ namespace usg
 		m_pAlloc = nullptr;
 		m_pSamplers = nullptr;
 		m_pAttributes = nullptr;
+		m_pShaderConstDecl = nullptr;
 		for (uint32 i = 0; i < MAX_CONSTANT_SETS; i++)
 		{
 			m_uConstDeclOffset[i] = 0;
@@ -50,8 +51,18 @@ namespace usg
 		{
 			mem::Free(m_pAlloc);
 		}
+		// FIXME: These should be exported as part of the file rather that seperate allocations
+		if (m_pShaderConstDecl)
+		{
+			vdelete m_pShaderConstDecl;
+		}
+		if (m_pDescriptorDecl)
+		{
+			vdelete m_pDescriptorDecl;
+		}
 	}
 
+	// FIXME: Deprecate this; binding point now specified in the declaration
 	uint32 CustomEffectResource::GetBindingPoint(uint32 uSet)
 	{
 		const char* szName = m_pConstantSets[uSet].szName;
@@ -73,9 +84,9 @@ namespace usg
 		ASSERT(pFileHeader->uFileFlags & PakFileDecl::FILE_FLAG_KEEP_DATA);
 		
 		m_pBinary = pData;
-		FixUpPointers();
+		FixUpPointers(pDevice);
 
-		return false;
+		return true;
 	}
 
 
@@ -89,10 +100,10 @@ namespace usg
 		file.Read(sizeof(m_header), &m_header);
 		file.Read(uBinarySize, m_pAlloc);
 		m_pBinary = m_pAlloc;
-		FixUpPointers();
+		FixUpPointers(pDevice);
 	}
 
-	void CustomEffectResource::FixUpPointers()
+	void CustomEffectResource::FixUpPointers(GFXDevice* pDevice)
 	{
 		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_header.uAttributeOffset);
 		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_header.uSamplerOffset);
@@ -105,7 +116,7 @@ namespace usg
 
 		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
 		{
-			ShaderConstantDecl* pDecl = NULL;
+			ShaderConstantDecl* pDecl = nullptr;
 			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset;
 
 			m_uConstDeclOffset[uSet] = uTotalShaderConsts;
@@ -113,6 +124,7 @@ namespace usg
 			uTotalShaderConsts += m_pConstantSets[uSet].uConstants + 1;
 		}
 
+		// FIXME: Place in the binary data
 		ShaderConstantDecl cap = SHADER_CONSTANT_END();
 		m_pShaderConstDecl = vnew(ALLOC_OBJECT)ShaderConstantDecl[uTotalShaderConsts];
 		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
@@ -127,12 +139,38 @@ namespace usg
 				pDecl[uVar].uiCount = pConstant[uVar].uiCount;
 				pDecl[uVar].uiOffset = pConstant[uVar].uiOffset;
 				pDecl[uVar].uiSize = 0;
-				pDecl[uVar].pSubDecl = NULL;
+				pDecl[uVar].pSubDecl = nullptr;
 			}
 			// Cap off this shader declaration
 			usg::MemCpy(&pDecl[uVar], &cap, sizeof(ShaderConstantDecl));
 
 		}
+
+		// FIXME: Place in the binary data
+		uint32 uDescDeclCount = m_header.uConstantSetCount + m_header.uSamplerCount + 1;
+		m_pDescriptorDecl = vnew(ALLOC_OBJECT)DescriptorDeclaration[uDescDeclCount];
+		DescriptorDeclaration* pDescDecl = m_pDescriptorDecl;
+		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
+		{
+			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			pDescDecl->uCount = 1;
+			pDescDecl->shaderType = usg::SHADER_FLAG_PIXEL;
+			pDescDecl->uBinding = m_pSamplers[i].uIndex;
+			pDescDecl++;
+		}
+
+		for (uint32 i = 0; i < m_header.uConstantSetCount; i++)
+		{
+			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER;
+			pDescDecl->uCount = 1;
+			pDescDecl->shaderType = (ShaderTypeFlags)m_pConstantSets[i].uShaderSets;
+			pDescDecl->uBinding = m_pConstantSets[i].uBinding;
+			pDescDecl++;
+		}
+
+		*pDescDecl = DESCRIPTOR_END();
+
+		m_descLayout = pDevice->GetDescriptorSetLayout(m_pDescriptorDecl);
 	}
 
 	uint32 CustomEffectResource::GetAttribBinding(const char* szAttrib) const

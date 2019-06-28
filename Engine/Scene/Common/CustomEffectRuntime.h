@@ -18,6 +18,7 @@ public:
 	CustomEffectRuntime();
 	~CustomEffectRuntime();
     
+	void Init(GFXDevice* pDevice, const CustomEffectResHndl& hndl);
 	void Init(GFXDevice* pDevice, const char* szName);
 	void Init(GFXDevice* pDevice, const CustomEffectRuntime* pCopy);
 	void CleanUp(GFXDevice* pDevice);

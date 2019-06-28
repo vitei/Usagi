@@ -37,6 +37,8 @@ namespace usg
 		const CustomEffectDecl::Attribute* GetAttribute(uint32 uIndex) const;
 		uint32 GetSamplerBinding(const char* szSampler) const;
 
+		const DescriptorDeclaration* GetDescriptorDecl() const { return m_pDescriptorDecl; }
+		const DescriptorSetLayoutHndl& GetDescriptorLayoutHndl() const { return m_descLayout; }
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
 
 		uint32 GetConstantSetCount() const;
@@ -56,15 +58,17 @@ namespace usg
 		const static ResourceType StaticResType = ResourceType::CUSTOM_EFFECT;
 
 	private:
-		void FixUpPointers();
+		void FixUpPointers(GFXDevice* pDevice);
 		enum
 		{
 			MAX_CONSTANT_SETS = 4
 		};
 		void*									m_pAlloc;
 		ShaderConstantDecl*						m_pShaderConstDecl;
+		DescriptorDeclaration*					m_pDescriptorDecl;
 		uint32									m_uConstDeclOffset[MAX_CONSTANT_SETS];
 
+		DescriptorSetLayoutHndl					m_descLayout;
 		CustomEffectDecl::Header				m_header;
 		const void*								m_pBinary;
 		const CustomEffectDecl::ConstantSet*	m_pConstantSets;
