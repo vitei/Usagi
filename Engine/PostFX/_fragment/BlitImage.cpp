@@ -8,6 +8,7 @@
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Layout/Global2D.h"
 #include "BlitImage.h"
 
 namespace usg {
@@ -46,7 +47,7 @@ void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPas
 	m_sampler = pDevice->GetSampler(pointDecl);
 
 
-	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D	);
 	pipelineDecl.layout.descriptorSets[1] = matDescriptors;
 	pipelineDecl.layout.uDescriptorSetCount = 2;
 	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
