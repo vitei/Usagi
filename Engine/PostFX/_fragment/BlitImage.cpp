@@ -41,6 +41,8 @@ void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPas
 	pipelineDecl.ePrimType = PT_TRIANGLES;
 	pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.Copy");
 
+	pipelineDecl.alphaState.SetColor0Only();
+
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	
 	SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);

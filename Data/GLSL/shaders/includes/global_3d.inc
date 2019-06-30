@@ -55,14 +55,6 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 #endif
 
 
-#ifndef OVERRIDE_TRANS
-BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
-{
-	mat3x4	mModelMat;
-};
-#endif
-
-
 #ifndef SHADOW_PASS
 float CalculateLinearFog(in vec3 vViewDir)
 {

@@ -217,6 +217,13 @@ namespace usg
 		return m_header.uConstantSetCount;
 	}
 
+	uint32 CustomEffectResource::GetConstantSetBinding(uint32 uSet) const
+	{
+		ASSERT(uSet < m_header.uConstantSetCount);
+		return m_pConstantSets[uSet].uBinding;
+	}
+
+
 	uint32 CustomEffectResource::GetConstantCount(uint32 uSet) const
 	{
 		ASSERT(uSet< m_header.uConstantSetCount);

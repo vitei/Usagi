@@ -16,13 +16,6 @@
 
 // <<GENERATED_CODE>>
 
-SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
-SAMPLER_LOC(1, 1) uniform sampler2D sampler1;
-SAMPLER_LOC(1, 2) uniform sampler2D sampler2;
-SAMPLER_LOC(1, 3) uniform sampler2D sampler3;
-SAMPLER_LOC(1, 4) uniform samplerCube sampler4;
-
-
 ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
 ATTRIB_LOC(1) in vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) in vec4 vo_vColor;

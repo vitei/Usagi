@@ -10,6 +10,11 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
   float fElapsedTime;
 };
 
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
+{
+  mat3x4  mModelMat;
+};
+
 ATTRIB_LOC(0) in vec3 	ao_position;
 ATTRIB_LOC(1) in float 	ao_fCreateTime;
 ATTRIB_LOC(2) in float 	ao_fLength;	// The length of the line at the point this point was spawned

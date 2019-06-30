@@ -30,6 +30,7 @@ namespace usg
 		{
 			char 	hint[32];
 			char    texName[64];
+			uint32	eTexType;
 			uint32	uIndex;
 		};
 

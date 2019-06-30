@@ -42,6 +42,7 @@ namespace usg
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
 
 		uint32 GetConstantSetCount() const;
+		uint32 GetConstantSetBinding(uint32 uSet) const;
 		uint32 GetConstantCount(uint32 uSet) const;
 		const CustomEffectDecl::Constant* GetConstant(uint32 uSet, uint32 uConstant) const;
 		uint32 GetBindingPoint(uint32 uSet);

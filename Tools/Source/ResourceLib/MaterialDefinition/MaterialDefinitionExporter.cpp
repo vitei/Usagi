@@ -12,6 +12,14 @@ struct Mapping
 	uint32 uValue;
 };
 
+static const Mapping g_textureTypeMappings[]
+{
+	{ "sampler2D", usg::TD_TEXTURE2D },
+	{ "sampler1D", usg::TD_TEXTURE1D },
+	{ "samplerCube", usg::TD_TEXTURECUBE },
+	{ "sampler3D", usg::TD_TEXTURE3D }
+};
+
 static const Mapping g_constantMappings[]
 {
 	{ "mat4x4", usg::CT_MATRIX_44 },
@@ -105,6 +113,16 @@ uint32 GetShaderType(const char* szTypeName)
 		uOut |= GetType(entry.c_str(), g_shaderMappings);
 	}
 	return uOut;
+}
+
+uint32 GetTextureMapping(const char* szTypeName)
+{
+	return GetType(szTypeName, g_textureTypeMappings);
+}
+
+const char* GetTextureMapping(uint32 uConstantType)
+{
+	return GetType(uConstantType, g_textureTypeMappings);
 }
 
 uint32 GetBufferMapping(const char* szTypeName)
@@ -302,6 +320,14 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 				continue;
 			}
 		}
+		if ((*it)["type"])
+		{
+			sampler.eTexType = GetTextureMapping((*it)["type"].as<std::string>().c_str());
+		}
+		else
+		{
+			sampler.eTexType = usg::TD_TEXTURE2D;
+		}
 		m_samplers.push_back(sampler);
 	}
 
@@ -325,13 +351,17 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 			std::string type = (*setIt)["shaderType"].as<std::string>();
 			setData.set.uShaderSets = GetShaderType(type.c_str());
 		}
-		if ((*setIt)["binding"])
-		{
-			setData.set.uBinding = GetBufferMapping((*setIt)["binding"].as<std::string>().c_str());
-		}
+		setData.set.uBinding = GetBufferMapping((*setIt)["binding"].as<std::string>().c_str());
 		YAML::Node variableDefs = (*setIt)["Variables"];
 		setData.set.uConstants = (uint32_t)variableDefs.size();
-		strcpy_s(setData.set.szName, sizeof(setData.set.szName), (*setIt)["name"].as<std::string>().c_str());
+		if ((*setIt)["name"])
+		{
+			strcpy_s(setData.set.szName, sizeof(setData.set.szName), (*setIt)["name"].as<std::string>().c_str());
+		}
+		else
+		{
+			memset(setData.set.szName, 0, sizeof(setData.set.szName));
+		}
 		uint32 uOffset = 0;
 		// First collect the information about the variables
 		for (YAML::const_iterator variableIt = variableDefs.begin(); variableIt != variableDefs.end(); ++variableIt)
@@ -650,12 +680,22 @@ void MaterialDefinitionExporter::InitBinaryData()
 
 void MaterialDefinitionExporter::InitAutomatedCode()
 {
-	for (uint32 i = 0; i < (uint32)usg::ShaderType::VS; i++)
+	for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
 	{
 		m_automatedCode[i] = "";
 	}
 
 	char buffer[512];
+
+	for (const auto& sampler : m_samplers)
+	{
+		// TODO: When the custom effects are fully integrated we can start naming these
+		sprintf_s(buffer, sizeof(buffer), "SAMPLER_LOC(1, %d) uniform %s sampler%d;\n", sampler.uIndex, GetTextureMapping(sampler.eTexType), sampler.uIndex);
+
+		m_automatedCode[(uint32)usg::ShaderType::PS] += buffer;
+	}
+	m_automatedCode[(uint32)usg::ShaderType::VS] += "\n";
+
 	for (const auto& attrib : m_attributes)
 	{
 		if (attrib.uCount > 1)

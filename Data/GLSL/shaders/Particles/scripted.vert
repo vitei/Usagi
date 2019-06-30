@@ -19,6 +19,11 @@ const float two_pi = 6.28318530;
 const float one_over_2pi = 0.159154943;
 const float pi = 3.14159265;
 
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
+{
+    mat3x4  mModelMat;
+};
+
 BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 {
     vec4    vGravityDir;
@@ -37,7 +42,7 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
     bool    bLocalEffect;
 };
 
-BUFFER_LAYOUT(1,  UBO_CUSTOM_3_ID) uniform Custom0
+BUFFER_LAYOUT(1,  UBO_CUSTOM_3_ID) uniform Custom3
 {
     float   fEffectTime;
 };

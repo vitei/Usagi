@@ -14,7 +14,7 @@ CustomEffects:
       - { index: 1, hint: "NormalMap", default: "Textures/normal_default", defines: "HAS_BUMP !SHADOW_PASS" }
       - { index: 2, hint: "EmissiveFactor", default: "Textures/black_default", defines: "!SHADOW_PASS"  }
       - { index: 3, hint: "SpecularColor", default: "Textures/black_default", defines: "!SHADOW_PASS"  }
-      - { index: 4, hint: "Reflection", default: "Textures/white_cube", defines: "!SHADOW_PASS"  }      
+      - { index: 4, hint: "Reflection",  type: "samplerCube", default: "Textures/white_cube", defines: "!SHADOW_PASS"  }      
     ConstantDefs:      
       - name: uVSMaterial
         binding: Material   
@@ -23,6 +23,10 @@ CustomEffects:
          - { type: mat3x4,   name: mTexMatrix,    count: 4  }  # 0
          - { type: int,      name: iBoneCount,    count: 1, default: 0  }  # 0
          - { type: bool,     name: bBumpMap,      count: 1, default: false  }  # 0
+      - binding: Custom0
+        shaderType: VS
+        Variables:
+         - { type: mat3x4,   name: mModelMat,    count: 1  }  # 0
       - name: uMaterial
         binding: Material1
         shaderType: PS

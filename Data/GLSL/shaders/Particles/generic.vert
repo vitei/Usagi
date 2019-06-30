@@ -20,6 +20,11 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
     vec4 vEffectConsts2;
 };
 
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
+{
+    mat3x4  mModelMat;
+};
+
 // Input attributes
 ATTRIB_LOC(0) in vec3 ao_position;
 ATTRIB_LOC(1) in vec4 ao_color;
