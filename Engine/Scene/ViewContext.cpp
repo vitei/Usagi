@@ -189,7 +189,7 @@ namespace usg {
 	{
 		m_pImpl->pCamera = pCamera;
 		usg::Fog& fog = GetFog();
-		fog.SetMinDepth(pCamera->GetFar() * 0.95f);
+		fog.SetMinDepth(pCamera->GetFar() * 0.8f);
 		fog.SetMaxDepth(pCamera->GetFar());
 		m_pImpl->searchObject.SetFrustum(&pCamera->GetFrustum());
 	}
