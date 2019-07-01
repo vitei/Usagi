@@ -66,8 +66,7 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 		else
 		{
 			const char* msg = shaderc_result_get_error_message(result);
-			printf(msg);
-			ASSERT_MSG(false, msg);
+			FATAL_RELEASE(false, msg);
 			return false;
 		}
 	}
