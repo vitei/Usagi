@@ -89,7 +89,7 @@ extern "C" void cDebugprintf(const char *szFile, int line, const char* func, uin
 
 		if(uFlags & DEBUG_MSG_ERROR)
 		{
-			DumpDebugLog();
+		//	DumpDebugLog();
 			FATAL_RELEASE_INT(g_errorMsgB);
 		}
 	}
