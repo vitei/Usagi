@@ -23,6 +23,7 @@ class RenderGroup;
 class ViewContext;
 class ShadowContext;
 class OmniShadowContext;
+class OffscreenRenderNode;
 class Camera;
 class LightMgr;
 class ParticleMgr;
@@ -75,7 +76,11 @@ public:
 
 	void			PreUpdate();
 	void			TransformUpdate(float fElapsed);
+	void			PreDraw(GFXContext* pContext);
 	void			Update(GFXDevice* pDevice);
+
+	void			RegisterOffscreenRenderNode(OffscreenRenderNode* pNode);
+	void			DeregisterOffscreenRenderNode(OffscreenRenderNode* pNode);
 
 	const Camera*	GetSceneCamera(uint32 uIndex) const;
 

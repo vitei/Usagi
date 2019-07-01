@@ -10,6 +10,7 @@
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Scene/ShadowContext.h"
+#include "Engine/Scene/OffscreenRenderNode.h"
 #include "Engine/Scene/OmniShadowContext.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Scene/Octree.h"
@@ -75,6 +76,7 @@ struct Scene::PIMPL
 	List<SceneContext>			sceneContexts;
 	List<RenderGroup>			staticComponents;
 	usg::List<const Camera>		cameras;
+	usg::List<OffscreenRenderNode> offscreenNodes;
 	Debug3D						debug3D;
 	ProfilingTimer				profileTimers[TIMER_COUNT];
 };
@@ -231,6 +233,16 @@ RenderGroup* Scene::CreateRenderGroup(const TransformNode* pTransform)
 	return pSceneComponent;
 }
 
+
+void Scene::RegisterOffscreenRenderNode(OffscreenRenderNode* pNode)
+{
+	m_pImpl->offscreenNodes.AddToEnd(pNode);
+}
+
+void Scene::DeregisterOffscreenRenderNode(OffscreenRenderNode* pNode)
+{
+	m_pImpl->offscreenNodes.Remove(pNode);
+}
 
 void Scene::UpdateMask(const TransformNode* pTransform, uint32 uMask)
 {
@@ -433,6 +445,15 @@ void Scene::PreUpdate()
 {
 	m_uFrame++;
 	m_pImpl->debug3D.Clear();
+}
+
+void Scene::PreDraw(GFXContext* pContext)
+{
+	m_pImpl->lightMgr.GlobalShadowRender(pContext, this);
+	for (auto itr = m_pImpl->offscreenNodes.Begin(); !itr.IsEnd(); ++itr)
+	{
+		(*itr)->Draw(pContext);
+	}
 }
 
 void Scene::Update(GFXDevice* pDevice)
