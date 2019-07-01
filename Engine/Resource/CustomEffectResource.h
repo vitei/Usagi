@@ -38,6 +38,7 @@ namespace usg
 		uint32 GetSamplerBinding(const char* szSampler) const;
 
 		const DescriptorDeclaration* GetDescriptorDecl() const { return m_pDescriptorDecl; }
+		const VertexElement* GetVertexElements() const { return m_pVertexDecl; }
 		const DescriptorSetLayoutHndl& GetDescriptorLayoutHndl() const { return m_descLayout; }
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
 
@@ -67,6 +68,7 @@ namespace usg
 		void*									m_pAlloc;
 		ShaderConstantDecl*						m_pShaderConstDecl;
 		DescriptorDeclaration*					m_pDescriptorDecl;
+		VertexElement*							m_pVertexDecl;
 		uint32									m_uConstDeclOffset[MAX_CONSTANT_SETS];
 
 		DescriptorSetLayoutHndl					m_descLayout;

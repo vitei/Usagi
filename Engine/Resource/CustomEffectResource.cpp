@@ -35,6 +35,7 @@ namespace usg
 	{
 		m_pConstantSets = nullptr;
 		m_pBinary = nullptr;
+		m_pVertexDecl = nullptr;
 		m_pAlloc = nullptr;
 		m_pSamplers = nullptr;
 		m_pAttributes = nullptr;
@@ -59,6 +60,10 @@ namespace usg
 		if (m_pDescriptorDecl)
 		{
 			vdelete m_pDescriptorDecl;
+		}
+		if (m_pVertexDecl)
+		{
+			vdelete m_pVertexDecl;
 		}
 	}
 
@@ -169,6 +174,26 @@ namespace usg
 		}
 
 		*pDescDecl = DESCRIPTOR_END();
+
+		// TODO: Once stable move this to the exporter side
+		uint32 uVertexElemCnt = m_header.uAttributeCount + 1;
+		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
+		VertexElement* pElement = m_pVertexDecl;
+		memsize uOffset = 0;
+		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
+		{
+			// Keep the data aligned
+			uOffset = AlignSizeUp(uOffset, g_uVertexElementSizes[m_pAttributes[i].eConstantType]);
+			pElement->uAttribId = m_pAttributes[i].uIndex;
+			pElement->uCount = m_pAttributes[i].uCount;
+			pElement->eType = (usg::VertexElementType)m_pAttributes[i].eConstantType;
+			pElement->bIntegerReg = false;
+			pElement->bNormalised = false;
+			pElement->uOffset = uOffset;
+			uOffset += pElement->uCount * g_uVertexElementSizes[m_pAttributes[i].eConstantType];
+			pElement++;
+		}
+		*pElement = VERTEX_DATA_END();
 
 		m_descLayout = pDevice->GetDescriptorSetLayout(m_pDescriptorDecl);
 	}

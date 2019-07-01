@@ -246,6 +246,18 @@ const uint32 g_uConstantCPUAllignment[CT_COUNT] =
 	sizeof(float) * 4	// CT_STRUCT (Not a valid size on it's own)
 };
 
+
+const uint32 g_uVertexElementSizes[VE_INVALID] =
+{
+	sizeof(sint8),  // VE_BYTE = 0,
+	sizeof(uint8),  // VE_UBYTE = 1,
+	sizeof(sint16), // VE_SHORT = 2,
+	sizeof(uint16), // VE_USHORT = 3,
+	sizeof(float),  // VE_FLOAT = 4,
+	sizeof(sint32), // VE_INT = 5,
+	sizeof(uint32) // VE_UINT = 6,
+};
+
 static_assert(ARRAY_SIZE(g_uConstantCPUAllignment) == CT_COUNT, "Entries in CPU alignment don't match the constant count in the ConstantType enum, has an extra value been added?");
 
 struct ShaderConstantDecl
