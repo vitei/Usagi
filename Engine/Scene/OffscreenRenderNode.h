@@ -11,6 +11,7 @@
 
 namespace usg
 {
+	class GFXContext;
 
 	class OffscreenRenderNode
 	{

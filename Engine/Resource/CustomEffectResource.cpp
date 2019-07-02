@@ -180,17 +180,18 @@ namespace usg
 		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
 		VertexElement* pElement = m_pVertexDecl;
 		memsize uOffset = 0;
-		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
+		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
 		{
 			// Keep the data aligned
-			uOffset = AlignSizeUp(uOffset, g_uVertexElementSizes[m_pAttributes[i].eConstantType]);
+			uOffset = AlignSizeUp(uOffset, g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]);
 			pElement->uAttribId = m_pAttributes[i].uIndex;
-			pElement->uCount = m_pAttributes[i].uCount;
-			pElement->eType = (usg::VertexElementType)m_pAttributes[i].eConstantType;
+			pElement->uCount = g_veCountMapping[m_pAttributes[i].eConstantType] * m_pAttributes[i].uCount;
+			// FIXME: This is actually the constant type; need to remove the VE types (they should be interchangeable)
+			pElement->eType = g_veMapping[m_pAttributes[i].eConstantType];
 			pElement->bIntegerReg = false;
 			pElement->bNormalised = false;
 			pElement->uOffset = uOffset;
-			uOffset += pElement->uCount * g_uVertexElementSizes[m_pAttributes[i].eConstantType];
+			uOffset += pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType];
 			pElement++;
 		}
 		*pElement = VERTEX_DATA_END();
