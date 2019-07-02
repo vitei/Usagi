@@ -195,6 +195,8 @@ namespace usg
 		}
 		*pElement = VERTEX_DATA_END();
 
+		m_uVertexSize = AlignSizeUp(uOffset, 4);
+
 		m_descLayout = pDevice->GetDescriptorSetLayout(m_pDescriptorDecl);
 	}
 

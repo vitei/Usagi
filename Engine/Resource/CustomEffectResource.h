@@ -41,6 +41,7 @@ namespace usg
 		const VertexElement* GetVertexElements() const { return m_pVertexDecl; }
 		const DescriptorSetLayoutHndl& GetDescriptorLayoutHndl() const { return m_descLayout; }
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
+		memsize GetVertexSize() const { return m_uVertexSize; }
 
 		uint32 GetConstantSetCount() const;
 		uint32 GetConstantSetBinding(uint32 uSet) const;
@@ -77,6 +78,7 @@ namespace usg
 		const CustomEffectDecl::ConstantSet*	m_pConstantSets;
 		const CustomEffectDecl::Sampler*		m_pSamplers;
 		const CustomEffectDecl::Attribute*		m_pAttributes;
+		memsize									m_uVertexSize;
 	};
 
 }
