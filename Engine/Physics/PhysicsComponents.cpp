@@ -91,8 +91,9 @@ namespace usg
 				handles.GetComponent(child, mtxFromSelfOrParents);
 				if (mtxFromSelfOrParents.Exists())
 				{
-					const Quaternionf qRot = mtxFromSelfOrParents.Force()->matrix;
+					Quaternionf qRot = mtxFromSelfOrParents.Force()->matrix;
 					const Vector3f vPos = mtxFromSelfOrParents.Force()->matrix.vPos().v3();
+					qRot.Normalise();
 					physx::PxTransform t;
 					t.p = ToPhysXVec3(vPos);
 					t.q = ToPhysXQuaternion(qRot);
