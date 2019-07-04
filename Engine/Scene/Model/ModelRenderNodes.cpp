@@ -218,9 +218,6 @@ void Model::RenderMesh::VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTr
 		m_uOverrides |= m_uReqOverrides;
 	}
 
-	m_descriptorSet.UpdateDescriptors(pDevice);
-
-
 	if (m_uOverrides)
 	{
 		// FIXME: Use the customFX runtime
@@ -228,7 +225,7 @@ void Model::RenderMesh::VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTr
 		if(m_pOverridesConstants[1])
 			m_pOverridesConstants[1]->UpdateData(pDevice);
 	}
-
+	m_descriptorSet.UpdateDescriptors(pDevice);
 
 }
 
