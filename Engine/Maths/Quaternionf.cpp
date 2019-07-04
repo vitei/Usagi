@@ -116,6 +116,9 @@ void Quaternionf::FillFromMatrix(const Matrix4x4 &mat)
 			w = ( mat.M[0][1] - mat.M[1][0] ) / S;
 		break;
 	}
+
+	// Getting slight rounding errors through
+	Normalise();
 }
 
 void Quaternionf::SetFromEuler(float yaw, float pitch, float roll)
