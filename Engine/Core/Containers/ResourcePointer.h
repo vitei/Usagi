@@ -134,6 +134,8 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
 		pPtr = pPrev;
 	}
 
+	m_pPrev = nullptr;
+	m_pNext = nullptr;
 	m_pPointer = nullptr;
 }
 
