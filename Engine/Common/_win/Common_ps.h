@@ -64,7 +64,11 @@ typedef unsigned long long uint64;
 typedef wchar_t            char16; 
 typedef float              float32;
 typedef double             float64;
-typedef float              real;	// set to double for double precision
+
+// Should start using these for areas where we want to be able to specify precision globally
+typedef float			   real;	
+typedef int				   sint;
+typedef unsigned int	   uint;
 typedef size_t             memsize;
 typedef HWND               WindHndl;
 
