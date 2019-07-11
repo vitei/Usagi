@@ -68,6 +68,11 @@ void Cmdl::AddLight(Light* p)
 	m_lightStream.push_back(p);
 }
 
+void Cmdl::AddCamera(Camera* p)
+{
+	m_cameraStream.push_back(p);
+}
+
 void Cmdl::SetSkeleton( ::exchange::Skeleton* p )
 {
 	ASSERT_MSG( m_pSkeleton == NULL, "overwrite!" );

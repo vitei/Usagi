@@ -43,6 +43,47 @@ void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 	pSkeleton->Bones().push_back(bone);
 }
 
+void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
+{
+	FbxCamera* pFBXCamera = pNode->GetCamera();
+	if (!pFBXCamera)
+		return;
+
+	Cmdl::Camera* pCamera = vnew(ALLOC_OBJECT) Cmdl::Camera();
+
+	FbxNode* pParentBone = pNode->GetParent();
+	while (pParentBone && pParentBone->GetNodeAttribute() && (pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	{
+		pParentBone = pParentBone->GetParent();
+	}
+
+	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	{
+		const char* pBoneName = pParentBone->GetName();
+		pCamera->parentBone = pBoneName;
+	}
+	else
+	{
+		pCamera->parentBone = cmdl.GetSkeleton()->pb().rootBoneName;
+	}
+
+	FbxAMatrix globalPoseMatrix = GetGlobalPoseMatrix(pNode);
+	FbxAMatrix localPoseMatrix = GetLocalPoseMatrix(cmdl, globalPoseMatrix, pCamera->parentBone.c_str());
+
+	FbxVector4 rotate = localPoseMatrix.GetR();
+	FbxVector4 translate = localPoseMatrix.GetT();
+
+	pCamera->name = pFBXCamera->GetName();
+	pCamera->fov = (real)pFBXCamera->FieldOfViewY.Get();
+	pCamera->nearPlane = (real)pFBXCamera->GetNearPlane();
+	pCamera->farPlane = (real)pFBXCamera->GetFarPlane();
+	pCamera->rotate.Assign(Math::DegreesToRadians((float)rotate[0]), Math::DegreesToRadians((float)rotate[1]), Math::DegreesToRadians((float)rotate[2]));
+	pCamera->position.Assign((float)(translate[0] * m_appliedScale), (float)(translate[1] * m_appliedScale), (float)(translate[2] * m_appliedScale));
+
+	cmdl.AddCamera(pCamera);
+
+}
+
 void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 {
 	FbxLight* pFBXLight = pNode->GetLight();
@@ -160,44 +201,8 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 }
 
 
-void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering)
+FbxAMatrix FbxLoad::GetGlobalPoseMatrix(FbxNode* pNode)
 {
-	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
-	const char* pBoneName = pNode->GetName();
-	// Remove duplicate names
-	int loopIdx = 0;
-	char name[256];
-	strcpy_s(name, pNode->GetName());
-	bool nameUnique = true;
-	do
-	{
-		nameUnique = true;
-		for (size_t i = 0; i < pSkeleton->Bones().size(); i++)
-		{
-			if (strcmp(pSkeleton->Bones()[i].name, name) == 0)
-			{
-				nameUnique = false;
-				break;
-			}
-		}
-		if (!nameUnique)
-		{
-			sprintf_s(name, "%s\.%03i", pNode->GetName(), ++loopIdx);
-		}
-	} while (!nameUnique);
-
-	pNode->SetName(name);
-	pBoneName = pNode->GetName();
-	if (iParentIdx == (-1))
-	{
-		STRING_COPY(rSkeleton.rootBoneName, pBoneName);
-	}
-	rSkeleton.bonesNum++; 
-
-	usg::exchange::Bone bone;
-	usg::exchange::Bone_init(&bone);
-	bone.isNeededRendering = bIsNeededRendering;
-	
 	// First try and find a bind pose matrix for the bone
 	bool bFoundBindMatrix = false;
 	bool bBindFromPose = false;
@@ -239,7 +244,62 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 		globalPoseMatrix = pNode->EvaluateGlobalTransform();
 	}
 
+	return globalPoseMatrix;
+}
 
+FbxAMatrix FbxLoad::GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName)
+{
+	if (!m_bHasDefaultStaticBone)
+	{
+		uint32 boneIndex = FindBone(cmdl, szParentName);
+		if (boneIndex != USG_INVALID_ID)
+		{
+			return m_globalBonePoses[boneIndex].Inverse() * globalPose;
+		}
+	}
+	return globalPose;
+}
+void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering)
+{
+	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
+	const char* pBoneName = pNode->GetName();
+	// Remove duplicate names
+	int loopIdx = 0;
+	char name[256];
+	strcpy_s(name, pNode->GetName());
+	bool nameUnique = true;
+	do
+	{
+		nameUnique = true;
+		for (size_t i = 0; i < pSkeleton->Bones().size(); i++)
+		{
+			if (strcmp(pSkeleton->Bones()[i].name, name) == 0)
+			{
+				nameUnique = false;
+				break;
+			}
+		}
+		if (!nameUnique)
+		{
+			sprintf_s(name, "%s\.%03i", pNode->GetName(), ++loopIdx);
+		}
+	} while (!nameUnique);
+
+	pNode->SetName(name);
+	pBoneName = pNode->GetName();
+	if (iParentIdx == (-1))
+	{
+		STRING_COPY(rSkeleton.rootBoneName, pBoneName);
+	}
+	rSkeleton.bonesNum++;
+
+	usg::exchange::Bone bone;
+	usg::exchange::Bone_init(&bone);
+	bone.isNeededRendering = bIsNeededRendering;
+
+	
+
+	FbxAMatrix globalPoseMatrix = GetGlobalPoseMatrix(pNode);
 	FbxAMatrix localPoseMatrix = globalPoseMatrix;
 
 
@@ -257,12 +317,12 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 	FbxVector4 scale = localPoseMatrix.GetS();
 	FbxVector4 rotate = localPoseMatrix.GetR();
 	FbxVector4 translate = localPoseMatrix.GetT();
-	
+
 	// FIXME: For some reason the conversion unit doesn't seem to impact the bind pose so we have to do that manually
 	// Transform
 	bone.scale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 	bone.rotate.Assign(Math::DegreesToRadians((float)rotate[0]), Math::DegreesToRadians((float)rotate[1]), Math::DegreesToRadians((float)rotate[2]));
-	bone.translate.Assign((float)(translate[0]* m_appliedScale), (float)(translate[1] * m_appliedScale), (float)(translate[2] * m_appliedScale));
+	bone.translate.Assign((float)(translate[0] * m_appliedScale), (float)(translate[1] * m_appliedScale), (float)(translate[2] * m_appliedScale));
 	bone.parentIndex = iParentIdx;
 
 	LoaderUtil::setupTransformMatrix(bone.transform, bone.scale, bone.rotate, bone.translate);
@@ -700,6 +760,7 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 		}
 		cmdl.SetSkeleton(pSkeleton);
 		ReadLightsRecursive(cmdl, pRootNode);
+		ReadCamerasRecursive(cmdl, pRootNode);
 		if (!bSkeletonOnly)
 		{
 			ReadAnimations(cmdl, modelScene);
@@ -1048,6 +1109,22 @@ void FbxLoad::ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* p
 	}
 }
 
+
+void FbxLoad::ReadCamerasRecursive(Cmdl& cmdl, FbxNode* pNode)
+{
+	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType())
+	{
+		if (pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eCamera
+			|| pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eCameraStereo)
+		{
+			AddCamera(cmdl, pNode);
+		}
+	}
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		ReadCamerasRecursive(cmdl, pNode->GetChild(i));
+	}
+}
 
 void FbxLoad::ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode)
 {

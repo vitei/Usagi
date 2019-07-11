@@ -17,8 +17,10 @@ message ActiveDevice
 	option (nanopb_msgopt).has_ondeactivate = true;
 }
 
+
 message TransformComponent
 {
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
 	required Vector3f position = 1;
 	required Quaternionf rotation = 2;
 	required bool bInheritFromParent = 3 [default = true, (usagi).doc_en = "Position and rotation are in local space if true, world space if false"];
@@ -31,6 +33,7 @@ message ScaleComponent
 
 message MatrixComponent
 {
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required Matrix4x4 matrix = 1;

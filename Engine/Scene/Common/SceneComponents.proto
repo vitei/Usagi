@@ -63,6 +63,7 @@ message ModelMgrComponent
 
 message CameraComponent
 {
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
 	option (nanopb_msgopt).has_onactivate = true;
 	option (nanopb_msgopt).has_ondeactivate = true;
 	option (nanopb_msgopt).has_onloaded = true;

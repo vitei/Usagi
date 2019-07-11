@@ -24,6 +24,7 @@ module SkeletonExtractor
       @name = name
       @children = []
       @light_children = []
+      @camera_children = []
       @scale = {}
       @rotate = {}
       @translate = {}
@@ -34,6 +35,10 @@ module SkeletonExtractor
 
     def add_light(light)
       @light_children << light
+    end
+
+    def add_camera(camera)
+      @camera_children << camera
     end
 
     def find(name, depth)
@@ -77,7 +82,7 @@ module SkeletonExtractor
         object['StateComponent'] = {'current' => Usg::STATUS::ACTIVE} 
       end
 
-      if @children.length > 0 or @light_children.length > 0
+      if @children.length > 0 or @light_children.length > 0 or @camera_children.length > 0
         object['Children'] = []
       end
 
@@ -92,6 +97,12 @@ module SkeletonExtractor
           object['Children'] << c.to_object
         end
       end
+
+      if @camera_children.length > 0 
+        @camera_children.each do |c|
+          object['Children'] << c.to_object
+        end
+      end      
 
       return object
     end

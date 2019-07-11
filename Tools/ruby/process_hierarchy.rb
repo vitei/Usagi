@@ -15,6 +15,7 @@ require 'zlib'
 
 require_relative 'lib/skeletonextractor'
 require_relative 'lib/lightextractor'
+require_relative 'lib/cameraextractor'
 
 $defaults = {}
 $entities = []
@@ -245,6 +246,7 @@ def create_bone_hierarchy(model_component)
   if path.file?
     hierarchy = SkeletonExtractor::extract(path.to_path)
     hierarchy = LightExtractor::extract(path.to_path, hierarchy)
+    #hierarchy = CameraExtractor::extract(path.to_path, hierarchy)
   else
     message = "WARNING! Model '#{modelDepPath.to_path}' not found!\n"
     warn message

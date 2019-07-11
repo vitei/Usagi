@@ -230,6 +230,44 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		}
 	}
 
+	if (mCmdl.GetCameraNum() > 0)
+	{
+		//	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
+		pugi::xml_node cameraSet = hierarchyNode.append_child("camera_array");
+
+		pugi::xml_attribute cameraArrayLength = cameraSet.append_attribute("length");
+		cameraArrayLength.set_value((unsigned int)mCmdl.GetLightNum());
+
+		for (uint32 i = 0; i < mCmdl.GetCameraNum(); i++)
+		{
+			pugi::xml_node camera = cameraSet.append_child("camera");
+			const Cmdl::Camera* pCamera = mCmdl.GetCamera(i);
+
+			pugi::xml_attribute name = camera.append_attribute("name");
+			name.set_value(pCamera->name.c_str());
+			pugi::xml_attribute parentName = camera.append_attribute("parent_name");
+			parentName.set_value(pCamera->parentBone.c_str());
+
+			char buff[100];
+			snprintf(buff, sizeof(buff), "%f %f %f", pCamera->position.x, pCamera->position.y, pCamera->position.z);
+			pugi::xml_attribute position = camera.append_attribute("position");
+			position.set_value(buff);
+
+			snprintf(buff, sizeof(buff), "%f %f %f", pCamera->rotate.x, pCamera->rotate.y, pCamera->rotate.z);
+			pugi::xml_attribute rotate = camera.append_attribute("rotate");
+			rotate.set_value(buff);
+
+			pugi::xml_attribute fov = camera.append_attribute("fov");
+			fov.set_value(pCamera->fov);
+
+			pugi::xml_attribute nearPlane = camera.append_attribute("near");
+			nearPlane.set_value(pCamera->nearPlane);
+
+			pugi::xml_attribute farPlane = camera.append_attribute("far");
+			farPlane.set_value(pCamera->farPlane);
+		}
+	}
+
 
 	skeletonDocument.save_file(path.c_str());
 }

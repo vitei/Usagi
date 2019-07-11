@@ -1,5 +1,5 @@
-#ifndef FMDALOAD_H
-#define FMDALOAD_H
+#ifndef FBXLOAD_H
+#define FBXLOAD_H
 
 #include "cmdl/Cmdl.h"
 #include "exchange/Mesh.h"
@@ -114,6 +114,7 @@ private:
 	void ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode);
 	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
 	void ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode);
+	void ReadCamerasRecursive(Cmdl& cmdl, FbxNode* pNode);
 	void ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	
 	// Mesh data
@@ -149,6 +150,7 @@ private:
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
 	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering);
 	void AddLight(Cmdl& cmdl, FbxNode* pNode);
+	void AddCamera(Cmdl& cmdl, FbxNode* pNode);
 	uint32 FindBone(Cmdl& cmdl, const char* szName);
 	uint32 FindBoneRenderingId(Cmdl& cmdl, const char* szName);
 	void AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* pCurrMesh);
@@ -156,6 +158,8 @@ private:
 	void SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName);
 	void SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMaterial* inMaterial, bool bTransparent) const;
 	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE);
+	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
+	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
 
 	// Below here are custom tweaks for our own behaviour
 	// At this stage only used for culling duplicate bones used for the LOD system
