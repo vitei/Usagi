@@ -96,7 +96,7 @@ namespace usg
 					physx::PxTransform t;
 					t.p = ToPhysXVec3(vPos);
 					t.q = ToPhysXQuaternion(qRot);
-					ASSERT(t.isValid());
+					ASSERT(t.q.isUnit());
 					return t;
 				}
 			}
@@ -115,6 +115,8 @@ namespace usg
 			trans = trans.transform(parentTrans);
 			e = e->GetParentEntity();
 		}
+		// Some propagated error
+		trans.q = trans.q.getNormalized();
 		return trans;
 	}
 
