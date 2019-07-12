@@ -81,6 +81,7 @@ public:
 private:
 	template<class T> void DeleteAll( std::vector< T, aya::Allocator<T> >& v );
 	void ReverseCoordinateInt(Light* pLight );
+	void ReverseCoordinateInt(Camera* pCamera);
 	void ReverseCoordinateInt(::exchange::Shape* pShape);
 	void ReverseCoordinateInt( ::exchange::Stream& stream );
 	void CalculatePolygonNormal( ::exchange::Shape* pShape );

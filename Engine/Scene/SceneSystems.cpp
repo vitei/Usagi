@@ -86,10 +86,10 @@ namespace usg
 				}
 			}
 
-			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::EnableCamera& event)
+			static void OnEvent(const Inputs& in, Outputs& out, const EnableCamera& evt)
 			{
-				Scene* scene = outputs.sceneComp.GetRuntimeData().pScene;
-				scene->SetActiveCamera(event.uCameraID, event.uContext);
+				Scene* scene = out.sceneComp.GetRuntimeData().pScene;
+				scene->SetActiveCamera(evt.uCameraID, evt.uContext);
 			}
 		};
 

@@ -9,6 +9,37 @@
 
 static const FbxTime::EMode FRAME_MODE = FbxTime::eFrames30;
 
+Matrix4x4 ToMat4x4(FbxAMatrix in)
+{
+	Matrix4x4 mMatUsg;
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			mMatUsg.M[i][j] = (float)in.Get(i, j);
+		}
+	}
+	return mMatUsg;
+}
+
+FbxAMatrix ToFbxMat(Matrix4x4 in)
+{
+	FbxAMatrix mRet;
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			mRet[i][j] = in.M[i][j];
+		}
+	}
+	return mRet;
+}
+
+Vector4f ToVec4(FbxVector4 in)
+{
+	return Vector4f(in[0], in[1], in[2], in[3]);
+}
+
 FbxLoad::FbxLoad()
 {
 	m_uMeshMaterialOffset = 0;
@@ -43,6 +74,7 @@ void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 	pSkeleton->Bones().push_back(bone);
 }
 
+
 void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 {
 	FbxCamera* pFBXCamera = pNode->GetCamera();
@@ -68,15 +100,34 @@ void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 	}
 
 	FbxAMatrix globalPoseMatrix = GetGlobalPoseMatrix(pNode);
+
+	FbxVector4 position = pFBXCamera->EvaluatePosition();//pFBXCamera->Position.Get();
+	FbxVector4 interestPos = pFBXCamera->EvaluateLookAtPosition();//pFBXCamera->InterestPosition.Get();
+	FbxVector4 up = pFBXCamera->EvaluateUpDirection(position, interestPos);
+	FbxVector4 forward = interestPos - position;
+	up[3] = 0.0f; forward[3] = 0.0f;
+	forward.Normalize();
+
+	// TODO: Handle roll
+	Matrix4x4 cameraMat;
+	FbxVector4 right = forward.CrossProduct(up);
+	right[3] = 0.0f;
+	cameraMat.ModelMatrix(ToVec4(right), ToVec4(up), ToVec4(forward), ToVec4(position));
+	FbxVector4 rotate = globalPoseMatrix.GetR();
+	globalPoseMatrix = ToFbxMat(cameraMat);
+
 	FbxAMatrix localPoseMatrix = GetLocalPoseMatrix(cmdl, globalPoseMatrix, pCamera->parentBone.c_str());
 
-	FbxVector4 rotate = localPoseMatrix.GetR();
+
+
+	rotate = localPoseMatrix.GetR();
 	FbxVector4 translate = localPoseMatrix.GetT();
 
+	FbxCamera::EApertureMode eApMode = pFBXCamera->GetApertureMode();
 	pCamera->name = pFBXCamera->GetName();
 	pCamera->fov = (real)pFBXCamera->FieldOfViewY.Get();
-	pCamera->nearPlane = (real)pFBXCamera->GetNearPlane();
-	pCamera->farPlane = (real)pFBXCamera->GetFarPlane();
+	pCamera->nearPlane = (real)(pFBXCamera->GetNearPlane() * m_appliedScale);
+	pCamera->farPlane = (real)(pFBXCamera->GetFarPlane() * m_appliedScale);
 	pCamera->rotate.Assign(Math::DegreesToRadians((float)rotate[0]), Math::DegreesToRadians((float)rotate[1]), Math::DegreesToRadians((float)rotate[2]));
 	pCamera->position.Assign((float)(translate[0] * m_appliedScale), (float)(translate[1] * m_appliedScale), (float)(translate[2] * m_appliedScale));
 

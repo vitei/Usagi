@@ -91,6 +91,12 @@ void Cmdl::ReverseCoordinate()
 		ReverseCoordinateInt(m_lightStream.at(i));
 	}
 
+
+	size = m_cameraStream.size();
+	for (size_t i = 0; i < size; ++i) {
+		ReverseCoordinateInt(m_cameraStream.at(i));
+	}
+
 	if( m_pSkeleton ) {
 		m_pSkeleton->ReverseCoordinate();
 	}
@@ -154,6 +160,13 @@ void Cmdl::ReverseCoordinateInt(Light* pLight)
 {
 	pLight->position.x *= -1.0f;
 	pLight->spec.direction.x *= -1.0f;
+}
+
+void Cmdl::ReverseCoordinateInt(Camera* pCamera)
+{
+	pCamera->position.x *= -1.0f;
+	pCamera->rotate.y *= -1.0f;
+	pCamera->rotate.z *= -1.0f;
 }
 
 void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)
