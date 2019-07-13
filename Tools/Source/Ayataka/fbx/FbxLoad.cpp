@@ -113,14 +113,13 @@ void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 	FbxVector4 right = forward.CrossProduct(up);
 	right[3] = 0.0f;
 	cameraMat.ModelMatrix(ToVec4(right), ToVec4(up), ToVec4(forward), ToVec4(position));
-	FbxVector4 rotate = globalPoseMatrix.GetR();
 	globalPoseMatrix = ToFbxMat(cameraMat);
 
 	FbxAMatrix localPoseMatrix = GetLocalPoseMatrix(cmdl, globalPoseMatrix, pCamera->parentBone.c_str());
 
 
 
-	rotate = localPoseMatrix.GetR();
+	FbxVector4 rotate = localPoseMatrix.GetR();
 	FbxVector4 translate = localPoseMatrix.GetT();
 
 	FbxCamera::EApertureMode eApMode = pFBXCamera->GetApertureMode();
