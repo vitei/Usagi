@@ -236,7 +236,7 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		pugi::xml_node cameraSet = hierarchyNode.append_child("camera_array");
 
 		pugi::xml_attribute cameraArrayLength = cameraSet.append_attribute("length");
-		cameraArrayLength.set_value((unsigned int)mCmdl.GetLightNum());
+		cameraArrayLength.set_value((unsigned int)mCmdl.GetCameraNum());
 
 		for (uint32 i = 0; i < mCmdl.GetCameraNum(); i++)
 		{
