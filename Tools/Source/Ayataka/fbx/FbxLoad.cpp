@@ -460,6 +460,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 	while (property.IsValid())
 	{
 		uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
+		const char* szName = property.GetNameAsCStr();
 		for (uint32 i = 0; i < uTextureCount; ++i)
 		{
 			FbxLayeredTexture* layeredTexture = property.GetSrcObject<FbxLayeredTexture>(i);
@@ -688,11 +689,41 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
+	std::string effectName = "FBXDefault";
+	FbxProperty p = pFBXMaterial->FindProperty("EffectName", false);
+	if (p.IsValid())
+	{
+		std::string nodeName = p.GetName();
+		EFbxType eType = p.GetPropertyDataType().GetType();
+		if (eType == eFbxString)
+		{
+			FbxString string = p.Get< FbxString >();
+			effectName = string;
+		}
+	}
+
 	// FIXME: Get custom effect definitions
 	const char* szUsagiPath = getenv("USAGI_DIR");
 	std::string emuPath = szUsagiPath;
 	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\CustomFX\\FBXDefault.yml";
+	emuPath += "\\Data\\CustomFX\\";
+	emuPath += effectName;
+	emuPath += ".yml";
+	FILE* pFile = nullptr;
+	if (fopen_s(&pFile, emuPath.c_str(), "r") != 0)
+	{
+		fclose(pFile);
+		emuPath = szUsagiPath;
+		emuPath += "..\\Data\\CustomFX\\";
+		emuPath += effectName;
+		emuPath += ".yml";
+		if (!fopen_s(&pFile, emuPath.c_str(), "r"))
+		{
+			FATAL_RELEASE(false, "Could not find effect %s", effectName.c_str());
+			return nullptr;
+		}
+	}
+	
 	pNewMaterial->SetIsCustomFX(false);
 
 	m_pDependencies->LogDependency(emuPath.c_str());

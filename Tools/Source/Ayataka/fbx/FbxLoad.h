@@ -10,7 +10,6 @@
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Scene/Model/SkeletalAnimation.pb.h"
-
 #include <fbxsdk.h>
 
 struct FBXVertexElement
