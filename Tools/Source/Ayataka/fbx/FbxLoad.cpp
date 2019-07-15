@@ -99,6 +99,7 @@ void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 		pCamera->parentBone = cmdl.GetSkeleton()->pb().rootBoneName;
 	}
 
+
 	FbxAMatrix globalPoseMatrix = GetGlobalPoseMatrix(pNode);
 
 	FbxVector4 position = pFBXCamera->EvaluatePosition();//pFBXCamera->Position.Get();
@@ -115,6 +116,10 @@ void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 	cameraMat.ModelMatrix(ToVec4(right), ToVec4(up), ToVec4(forward), ToVec4(position));
 	globalPoseMatrix = ToFbxMat(cameraMat);
 
+	globalPoseMatrix = GetGlobalPoseMatrix(pNode);
+	FbxAMatrix rot;
+	rot.SetR(FbxVector4(0.0f, 90.0f, 0.0f));
+	globalPoseMatrix = globalPoseMatrix * rot;
 	FbxAMatrix localPoseMatrix = GetLocalPoseMatrix(cmdl, globalPoseMatrix, pCamera->parentBone.c_str());
 
 
