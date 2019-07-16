@@ -72,6 +72,10 @@ void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 	m_bHasDefaultStaticBone = true;
 
 	pSkeleton->Bones().push_back(bone);
+
+	FbxAMatrix Identity; 
+	Identity.SetIdentity();
+	m_globalBonePoses.push_back(Identity);
 }
 
 
@@ -84,12 +88,16 @@ void FbxLoad::AddCamera(Cmdl& cmdl, FbxNode* pNode)
 	Cmdl::Camera* pCamera = vnew(ALLOC_OBJECT) Cmdl::Camera();
 
 	FbxNode* pParentBone = pNode->GetParent();
-	while (pParentBone && pParentBone->GetNodeAttribute() && (pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	FbxNodeAttribute::EType attribType = pParentBone && pParentBone->GetNodeAttribute() ? pParentBone->GetNodeAttribute()->GetAttributeType() : FbxNodeAttribute::EType::eUnknown;
+	while (pParentBone && 
+		!(attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker) )
 	{
 		pParentBone = pParentBone->GetParent();
+		attribType = (pParentBone && pParentBone->GetNodeAttribute() ? pParentBone->GetNodeAttribute()->GetAttributeType() : FbxNodeAttribute::EType::eUnknown);
 	}
 
-	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	if (pParentBone &&
+		(attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)  )
 	{
 		const char* pBoneName = pParentBone->GetName();
 		pCamera->parentBone = pBoneName;
@@ -153,7 +161,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		pParentBone = pParentBone->GetParent();
 	}
 
-	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton))
 	{
 		const char* pBoneName = pParentBone->GetName();
 		pLight->parentBone = pBoneName;
@@ -838,12 +846,12 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 
 	if (pRootNode)
 	{
-		ReadSkeleton(pSkeleton, pRootNode);
-		// To simplify the code always give us a root bone
-		if (pSkeleton->Bones().size() == 0)
+		if (IsIdentityBoneRequired(pRootNode))
 		{
 			AddIdentityBone(pSkeleton);
 		}
+
+		ReadSkeleton(pSkeleton, pRootNode);
 		cmdl.SetSkeleton(pSkeleton);
 		ReadLightsRecursive(cmdl, pRootNode);
 		ReadCamerasRecursive(cmdl, pRootNode);
@@ -1150,25 +1158,51 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
 	}
 }
 
+
 void FbxLoad::ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode)
 {
+	ReadDeformersRecursive(pSkeleton, pRootNode);
 
-	for (int iChildIndex = 0; iChildIndex < pRootNode->GetChildCount(); ++iChildIndex)
-	{
-		FbxNode* pCurrNode = pRootNode->GetChild(iChildIndex);
-		ReadDeformersRecursive(pSkeleton, pCurrNode);
-	}
-
-	for (int iChildIndex = 0; iChildIndex < pRootNode->GetChildCount(); ++iChildIndex)
-	{
-		FbxNode* pCurrNode = pRootNode->GetChild(iChildIndex);
-		ReadBonesRecursive(pSkeleton, pCurrNode, -1);
-	}
+	ReadBonesRecursive(pSkeleton, pRootNode, m_bHasDefaultStaticBone ? 0 : -1);
 }
+
+int FbxLoad::GetParentBoneCountRecursive(FbxNode* pNode, int Count)
+{
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		Count = GetParentBoneCountRecursive(pNode->GetChild(i), Count);
+	}
+	if (IsBone(pNode))
+	{
+		FbxNode* pParent = pNode->GetParent();
+		bool bHasParent = false;
+		while (pParent)
+		{
+			if (IsBone(pParent))
+			{
+				bHasParent = true;
+			}
+			pParent = pParent->GetParent();
+		}
+		if (!bHasParent)
+		{
+			Count++;
+		}
+	}
+	return Count;
+}
+
+bool FbxLoad::IsIdentityBoneRequired(FbxNode* pNode)
+{
+	int BoneCount = GetParentBoneCountRecursive(pNode, 0);
+	
+	return BoneCount != 1;
+}
+
 
 void FbxLoad::ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode)
 {
-	if (pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
+	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 	{
 		FbxMesh* pCurrMesh = pNode->GetMesh();
 		uint32 uDeformers = pCurrMesh->GetDeformerCount();
@@ -1227,9 +1261,22 @@ void FbxLoad::ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode)
 	}
 }
 
-void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
+bool FbxLoad::IsBone(FbxNode* pNode)
 {
 	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType())
+	{
+		FbxNodeAttribute::EType attribType = pNode->GetNodeAttribute()->GetAttributeType();
+		if (attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
+{
+	if (IsBone(pNode))
 	{
 		FbxNodeAttribute::EType attribType = pNode->GetNodeAttribute()->GetAttributeType();
 		if ( attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)

@@ -137,7 +137,7 @@ private:
 	void AddMaterials(Cmdl& cmdl, FbxNode* pNode);
 	void AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pNewMaterial);
 	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);
-
+	
 
 	::exchange::Shape* NewShape(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Mesh* NewMesh(Cmdl& cmdl, FbxNode* pShapeNode);
@@ -147,6 +147,8 @@ private:
 	::exchange::Skeleton* NewSkeleton();
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
+	bool IsIdentityBoneRequired(FbxNode* pRootNode);
+	int GetParentBoneCountRecursive(FbxNode* pRootNode, int Count);
 	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering);
 	void AddLight(Cmdl& cmdl, FbxNode* pNode);
 	void AddCamera(Cmdl& cmdl, FbxNode* pNode);
@@ -159,6 +161,7 @@ private:
 	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE);
 	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
 	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
+	bool IsBone(FbxNode* pNode);
 
 	// Below here are custom tweaks for our own behaviour
 	// At this stage only used for culling duplicate bones used for the LOD system
