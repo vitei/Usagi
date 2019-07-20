@@ -10,15 +10,16 @@ module SkeletonExtractor
     NORMAL = 0
     INTERMEDIATE = 1
     BILLBOARD = 2
+    MARKER = 3
   end
-
 
   ##################
   # classes        #
   ##################
   class BoneNode
     attr_accessor :name, :children, :scale, :rotate, :translate
-    attr_accessor :is_root, :type, :billboard_mode
+    attr_accessor :is_root, :type, :billboard_mode, :needed_rendering
+
 
     def initialize(name, is_root=false)
       @name = name
@@ -31,6 +32,7 @@ module SkeletonExtractor
       @is_root = is_root
       @type = BoneType::NORMAL
       @billboard_mode = Usg::Exchange::BoneBillboardMode::OFF
+      @needed_rendering = true
     end
 
     def add_light(light)
@@ -65,7 +67,8 @@ module SkeletonExtractor
         'TransformComponent' => {'position' => Hash[@translate],
           'rotation' => rotationMatrix.rotation_matrix_to_quaternion()},
         'BoneComponent' => {'m_scale' => @scale,
-          'm_rotate' => @rotate, 'm_translate' => @translate},}
+          'm_rotate' => @rotate, 'm_translate' => @translate},
+        'MatrixComponent' => {} }
 
       case @type
       when BoneType::NORMAL
@@ -73,6 +76,8 @@ module SkeletonExtractor
         object['IntermediateBone'] = {}
         object.delete('BoneComponent')
         object.delete('Identifier')
+      when BoneType::MARKER
+        object.delete('BoneComponent')
       when BoneType::BILLBOARD
         object.delete('TransformComponent')
         object['Billboard'] = {'mode' => @billboard_mode}
@@ -118,7 +123,7 @@ module SkeletonExtractor
     doc = Nokogiri::XML(File.read(model_filename))
 
     queries = {:skeleton => 'hierarchy', :bones => 'bone_array > bone', :name => 'name',
-      :parent => 'parent_name', :billboard => 'billboard',
+      :parent => 'parent_name', :billboard => 'billboard', :needed_rendering => 'needed_rendering',
     :billboard_disabled => 'none'}
 
 
@@ -187,6 +192,13 @@ module SkeletonExtractor
         nodeCopy.billboard_mode = Usg::Exchange::BoneBillboardMode::const_get(billboard_mode.upcase)
         node.children << nodeCopy
       end
+
+      needed_rendering = true
+      if b[queries[:needed_rendering]] == "false"
+        needed_rendering = false
+        node.type = BoneType::MARKER
+      end
+
     end
 
     return rootBone

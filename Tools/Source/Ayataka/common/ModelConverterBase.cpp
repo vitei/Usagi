@@ -121,6 +121,9 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		pugi::xml_attribute parentName = bone.append_attribute("parent_name");
 		parentName.set_value(exBone.parentName);
 
+		pugi::xml_attribute neededRendering = bone.append_attribute("needed_rendering");
+		neededRendering.set_value(exBone.isNeededRendering ? "true" : "false" );
+
 		pugi::xml_attribute billboard = bone.append_attribute("billboard");
 		switch (pSkeleton->Bones()[i].billboardMode)
 		{

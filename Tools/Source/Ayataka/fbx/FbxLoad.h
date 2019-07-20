@@ -111,7 +111,7 @@ private:
 
 	// Skeleton
 	void ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode);
-	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	void ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode);
 	void ReadCamerasRecursive(Cmdl& cmdl, FbxNode* pNode);
 	void ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
@@ -149,10 +149,10 @@ private:
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
 	bool IsIdentityBoneRequired(FbxNode* pRootNode);
 	int GetParentBoneCountRecursive(FbxNode* pRootNode, int Count);
-	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering);
+	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, bool bIsNeededRendering);
 	void AddLight(Cmdl& cmdl, FbxNode* pNode);
 	void AddCamera(Cmdl& cmdl, FbxNode* pNode);
-	uint32 FindBone(Cmdl& cmdl, const char* szName);
+	uint32 FindBone(::exchange::Skeleton& skel, const char* szName);
 	uint32 FindBoneRenderingId(Cmdl& cmdl, const char* szName);
 	void AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* pCurrMesh);
 	bool SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pMaterial);
@@ -211,7 +211,8 @@ private:
 	bool					m_bHasNormalMap;
 	bool					m_bHasDefaultStaticBone;
 	double					m_appliedScale;
-	FbxNode*				m_pLODRootMeshNode;
+	FbxNode*				m_pParentBoneNode;
+	FbxScene*				m_pScene;
 	usg::vector<uint32>		m_indicesTmp;
 	usg::vector<TempVertex>	m_activeVerts;
 	usg::vector<WeightingInfo> m_activeWeights;

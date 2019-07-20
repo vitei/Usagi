@@ -45,14 +45,14 @@ FbxLoad::FbxLoad()
 	m_uMeshMaterialOffset = 0;
 	m_bHasNormalMap = false;
 	m_bHasDefaultStaticBone = false;
-	m_pLODRootMeshNode = nullptr;
+	m_pParentBoneNode = nullptr;
 	m_appliedScale = 1.0;
 }
 
 void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
 {
+	const char* pRootBoneName = m_pScene->GetName();
 	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
-	const char* pRootBoneName = "root_bone";
 	STRING_COPY(rSkeleton.rootBoneName, pRootBoneName);
 	rSkeleton.bonesNum = 1;
 
@@ -314,7 +314,7 @@ FbxAMatrix FbxLoad::GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const 
 {
 	if (!m_bHasDefaultStaticBone)
 	{
-		uint32 boneIndex = FindBone(cmdl, szParentName);
+		uint32 boneIndex = FindBone(*cmdl.GetSkeleton(), szParentName);
 		if (boneIndex != USG_INVALID_ID)
 		{
 			return m_globalBonePoses[boneIndex].Inverse() * globalPose;
@@ -322,7 +322,7 @@ FbxAMatrix FbxLoad::GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const 
 	}
 	return globalPose;
 }
-void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx, bool bIsNeededRendering)
+void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, bool bIsNeededRendering)
 {
 	usg::exchange::Skeleton& rSkeleton = pSkeleton->pb();
 	const char* pBoneName = pNode->GetName();
@@ -350,7 +350,14 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 
 	pNode->SetName(name);
 	pBoneName = pNode->GetName();
-	if (iParentIdx == (-1))
+
+	FbxNode* pParent = pNode->GetParent();
+	while (pParent && !IsBone(pParent))
+	{
+		pParent = pParent->GetParent();
+	}
+
+	if (!pParent && !m_bHasDefaultStaticBone)
 	{
 		STRING_COPY(rSkeleton.rootBoneName, pBoneName);
 	}
@@ -366,15 +373,44 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 	FbxAMatrix localPoseMatrix = globalPoseMatrix;
 
 
-	if (iParentIdx >= 0)
+	if (pParent)
 	{
+		int iParentIdx = FindBone(*pSkeleton, pParent->GetName());
 		// Name
-		STRING_COPY(bone.parentName, pSkeleton->Bones()[iParentIdx].name);
+		STRING_COPY(bone.parentName, pParent->GetName());
 		localPoseMatrix = m_globalBonePoses[iParentIdx].Inverse() * localPoseMatrix;
+		if (pNode->GetChildCount() == 0 && !bIsNeededRendering)
+		{
+			FbxNode* Root = nullptr;
+			FbxNode* Tmp = pNode;
+			while (Tmp->GetParent())
+			{
+				if (IsBone(Tmp))
+				{
+					Root = Tmp;
+				}
+				Tmp = Tmp->GetParent();
+			}
+			// Convenience hack for markers to match the orientation
+			if (Root)
+			{
+				FbxAMatrix RootPose = Root->EvaluateGlobalTransform();;
+				RootPose.SetT(FbxVector4(0.0f, 0.f, 0.f, 1.f));
+				localPoseMatrix = localPoseMatrix * RootPose.Inverse();
+			}
+		}
+		bone.parentIndex = iParentIdx;
 	}
 	else
 	{
-		memset(bone.parentName, 0, sizeof(bone.parentName));
+		if (m_bHasDefaultStaticBone)
+		{
+			STRING_COPY(bone.parentName, rSkeleton.rootBoneName);
+		}
+		else
+		{
+			memset(bone.parentName, 0, sizeof(bone.parentName));
+		}
 	}
 
 	FbxVector4 scale = localPoseMatrix.GetS();
@@ -386,7 +422,6 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iPare
 	bone.scale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 	bone.rotate.Assign(Math::DegreesToRadians((float)rotate[0]), Math::DegreesToRadians((float)rotate[1]), Math::DegreesToRadians((float)rotate[2]));
 	bone.translate.Assign((float)(translate[0] * m_appliedScale), (float)(translate[1] * m_appliedScale), (float)(translate[2] * m_appliedScale));
-	bone.parentIndex = iParentIdx;
 
 	LoaderUtil::setupTransformMatrix(bone.transform, bone.scale, bone.rotate, bone.translate);
 
@@ -830,6 +865,7 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies)
 {
 	m_pDependencies = pDependencies;
+	m_pScene = modelScene;
 
 	FbxNode* pRootNode = modelScene->GetRootNode();
 	::exchange::Skeleton* pSkeleton = NewSkeleton();
@@ -914,11 +950,11 @@ uint32 FbxLoad::FindBoneRenderingId(Cmdl& cmdl, const char* szName)
 	return 0;
 }
 
-uint32 FbxLoad::FindBone(Cmdl& cmdl, const char* szName)
+uint32 FbxLoad::FindBone(::exchange::Skeleton& skel, const char* szName)
 {
-	for (uint32 i = 0; i < cmdl.GetSkeleton()->Bones().size(); i++)
+	for (uint32 i = 0; i < skel.Bones().size(); i++)
 	{
-		if (strcmp(cmdl.GetSkeleton()->Bones()[i].name, szName) == 0)
+		if (strcmp(skel.Bones()[i].name, szName) == 0)
 		{
 			return i;
 		}
@@ -1083,15 +1119,26 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 
 			RegisterBoneUsage(cmdl, boneName.c_str(), eSkinType);
 
-			strncpy(info.rootBoneName, boneName.c_str(), sizeof(info.rootBoneName) - 1);
-			info.rootBoneIndex = FindBone(cmdl, boneName.c_str());
 		}
+	}
+
+	FbxNode* pParent = ppNode;
+	while (pParent && !IsBone(pParent))
+	{
+		pParent = pParent->GetParent();
+	}
+	if (eSkinType == usg::exchange::SkinningType_NO_SKINNING)
+	{
+		std::string boneName = pParent->GetName();
+		strncpy(info.rootBoneName, boneName.c_str(), sizeof(info.rootBoneName) - 1);
+		info.rootBoneIndex = FindBone(*cmdl.GetSkeleton(), boneName.c_str());
 	}
 
 	if (info.rootBoneName[0] == '\0')
 	{
 		strncpy(info.rootBoneName, cmdl.GetSkeleton()->Bones()[0].name, sizeof(info.rootBoneName) - 1);
 		info.rootBoneIndex = 0;
+
 	}
 
 }
@@ -1123,14 +1170,25 @@ void FbxLoad::RegisterBoneUsage(Cmdl& cmdl, const char* szBoneName, usg::exchang
 
 void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
 {
-	m_pLODRootMeshNode = nullptr;
+	m_pParentBoneNode = nullptr;
 	if (pNode->GetNodeAttribute())
 	{
 		auto type = pNode->GetNodeAttribute()->GetAttributeType();
 		switch (type)
 		{
 		case FbxNodeAttribute::eMesh:
-			m_pLODRootMeshNode = pNode;
+
+			FbxMesh* pMesh = (FbxMesh*)pNode;
+			if (pMesh->GetDeformerCount(FbxDeformer::eSkin) == 0)
+			{
+				FbxNode* pParent = pNode;
+				while (pParent && !IsBone(pParent))
+				{
+					pParent = pParent->GetParent();
+				}
+				m_pParentBoneNode = pParent;
+			}
+
 			m_uMeshMaterialOffset = cmdl.GetMaterialNum();
 			AddMaterials(cmdl, pNode);
 			
@@ -1163,7 +1221,7 @@ void FbxLoad::ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode)
 {
 	ReadDeformersRecursive(pSkeleton, pRootNode);
 
-	ReadBonesRecursive(pSkeleton, pRootNode, m_bHasDefaultStaticBone ? 0 : -1);
+	ReadBonesRecursive(pSkeleton, pRootNode);
 }
 
 int FbxLoad::GetParentBoneCountRecursive(FbxNode* pNode, int Count)
@@ -1181,6 +1239,7 @@ int FbxLoad::GetParentBoneCountRecursive(FbxNode* pNode, int Count)
 			if (IsBone(pParent))
 			{
 				bHasParent = true;
+				break;
 			}
 			pParent = pParent->GetParent();
 		}
@@ -1266,28 +1325,29 @@ bool FbxLoad::IsBone(FbxNode* pNode)
 	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType())
 	{
 		FbxNodeAttribute::EType attribType = pNode->GetNodeAttribute()->GetAttributeType();
-		if (attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)
+		if (attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker
+			|| pNode->GetParent() == m_pScene->GetRootNode() )
 		{
+			if (attribType == FbxNodeAttribute::eMesh && ((FbxMesh*)pNode->GetNodeAttribute())->GetDeformerCount() > 0)
+			{
+				return false;
+			}
 			return true;
 		}
 	}
 	return false;
 }
 
-void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx)
+void FbxLoad::ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode)
 {
 	if (IsBone(pNode))
 	{
 		FbxNodeAttribute::EType attribType = pNode->GetNodeAttribute()->GetAttributeType();
-		if ( attribType == FbxNodeAttribute::eSkeleton || attribType == FbxNodeAttribute::eNull || attribType == FbxNodeAttribute::eMarker)
-		{
-			AddBone(pSkeleton, pNode, iParentIdx, attribType == FbxNodeAttribute::eSkeleton);
-		}
+		AddBone(pSkeleton, pNode, attribType == FbxNodeAttribute::eSkeleton || pNode->GetParent() == m_pScene->GetRootNode());
 	}
-	iParentIdx = (int)pSkeleton->Bones().size() - 1;	// If we were a bone we will have incremented this value
 	for (int i = 0; i < pNode->GetChildCount(); i++)
 	{
-		ReadBonesRecursive(pSkeleton, pNode->GetChild(i), iParentIdx);
+		ReadBonesRecursive(pSkeleton, pNode->GetChild(i));
 	}
 }
 
@@ -1365,10 +1425,10 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 
 FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime)
 {
-	if (m_pLODRootMeshNode != nullptr && m_pLODRootMeshNode != pNode && !m_bHasDefaultStaticBone )
+	if (m_pParentBoneNode != nullptr && !m_bHasDefaultStaticBone )
 	{
 		FbxAMatrix mWorld = pNode->EvaluateGlobalTransform(pTime);
-		FbxAMatrix mSkeletonWorld = m_pLODRootMeshNode->EvaluateGlobalTransform(pTime);
+		FbxAMatrix mSkeletonWorld = m_pParentBoneNode->EvaluateGlobalTransform(pTime);
 		FbxAMatrix mCombined = mSkeletonWorld.Inverse() * mWorld;
 		return mCombined;
 	}
@@ -1526,7 +1586,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 	FbxAMatrix transform = GetCombinedMatrixForNode(pNode);
 	FbxAMatrix normalTransform = transform.Inverse();
 	normalTransform = normalTransform.Transpose();
-
+	
 	//fbxsdk::FbxAMatrix trans = pNode->EvaluateLocalTransform();
 	
 	FbxLayerElementArrayTemplate<int>* materialIndices;
@@ -1951,7 +2011,6 @@ uint32 FbxLoad::FindBone(uint32 uOriginalIndex, const vector<BoneInfo>& boneInfo
 		}
 		i++;
 	}
-	ASSERT(false);
 	return 0;
 }
 
@@ -2076,7 +2135,7 @@ bool FbxLoad::PostProcessSkeleton(Cmdl& cmdl)
 		// Setup all primitives' bounding sphere
 		::exchange::PrimitiveInfo& primInfo = pShape->GetPrimitiveInfo();
 
-		primInfo.rootBoneIndex = FindBone(cmdl, primInfo.rootBoneName);
+		primInfo.rootBoneIndex = FindBone(*cmdl.GetSkeleton(), primInfo.rootBoneName);
 
 		uint32_t boneIndex = primInfo.rootBoneIndex;
 
