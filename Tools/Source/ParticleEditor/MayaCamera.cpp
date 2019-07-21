@@ -8,12 +8,12 @@ const float32 fRotationMultiplier = 0.005f;
 const float32 fZoomMultiplier = 0.25f;
 const float32 fPanningMultiplier = 0.05f;
 const float32 fMinZoom = 2.5f;
-const float32 fMaxZoom = 60.f;
+const float32 fMaxZoom = 200.f;
 
 void MayaCamera::Init(float fAspect)
 {
 	m_vLookAtPos.Assign(0.0f, 0.0f, 0.0f);
-	m_vEyePosition.Assign(0.0f, 0.0f, 5.0f);
+	m_vEyePosition.Assign(0.0f, 0.0f, 25.0f);
 	usg::Matrix4x4 mCameraMat;
 	mCameraMat.LoadIdentity();
 	m_camera.SetUp(mCameraMat, fAspect, 60.0f, 1.0f, 500.0f);

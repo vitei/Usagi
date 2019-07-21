@@ -18,6 +18,8 @@ void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
 {
 	if (m_pModel)
 	{
+		m_pModel->AddToScene(false);
+		m_pModel->GPUUpdate(pDevice);
 		m_pModel->CleanUp(pDevice);
 		vdelete m_pModel;
 	}
@@ -61,6 +63,8 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 	
 		if (m_pModel)
 		{
+			m_pModel->AddToScene(false);
+			m_pModel->GPUUpdate(pDevice);
 			m_pModel->CleanUp(pDevice);
 			vdelete m_pModel;
 		}
@@ -71,12 +75,18 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 	if (m_pModel)
 	{
 		m_pModel->AddToScene(m_visible.GetValue());
+		m_pModel->GPUUpdate(pDevice);
 		if (m_visible.GetValue())
 		{
 			usg::Matrix4x4 mat = usg::Matrix4x4::Identity();
 			mat.SetPos(m_position.GetValueV3());
-			m_pModel->GetSkeleton().GetBone(0)->SetTransform(mat);
-			m_pModel->GetSkeleton().GetBone(0)->UpdateConstants(pDevice);
+			m_pModel->SetTransform(mat);
+			for (uint32 i = 0; i < m_pModel->GetSkeleton().GetBoneCount(); i++)
+			{
+				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetBindMatrix() * mat;
+				m_pModel->GetSkeleton().GetBone(i)->SetTransform(mBoneMat);
+				m_pModel->GetSkeleton().GetBone(i)->UpdateConstants(pDevice);
+			}
 		}
 	}
 }
