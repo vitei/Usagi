@@ -293,6 +293,7 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
 	m_editorShapes.CleanUp(pDevice);
 	m_textureSettings.CleanUp(pDevice);
+	m_previewModel.CleanUp(pDevice);
 	m_guiRend.CleanUp(pDevice);
 	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
 	m_scene.DeleteViewContext(m_pSceneCtxt);

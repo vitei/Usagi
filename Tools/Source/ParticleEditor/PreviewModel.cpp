@@ -11,8 +11,14 @@ const float g_fTrailSpeed = 20.f;
 
 PreviewModel::~PreviewModel()
 {
+	
+}
+
+void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
+{
 	if (m_pModel)
 	{
+		m_pModel->CleanUp(pDevice);
 		vdelete m_pModel;
 	}
 }
@@ -27,7 +33,7 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiR
 
 	pRenderer->AddWindow(&m_window);
 
-	m_modelFileList.Init("Models/particle_editor/", ".vmdc");
+	m_modelFileList.Init("Models", ".vmdf", true);
 	m_loadFilePaths.Init("Load Dir", m_modelFileList.GetFileNamesRaw(), 0);
 
 	m_loadButton.Init("Load");
@@ -51,11 +57,11 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
 	if(m_loadButton.GetValue())
 	{
-		usg::U8String modelName = "particle_editor/";
-		modelName += m_loadFilePaths.GetSelectedName();
+		usg::U8String modelName = m_loadFilePaths.GetSelectedName();
 	
 		if (m_pModel)
 		{
+			m_pModel->CleanUp(pDevice);
 			vdelete m_pModel;
 		}
 

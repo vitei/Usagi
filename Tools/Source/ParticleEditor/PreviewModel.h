@@ -25,6 +25,7 @@ public:
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer);
 	void Update(usg::GFXDevice* pDevice, float fElapsed);
+	void CleanUp(usg::GFXDevice* pDevice);
 private:
 
 	usg::Model*			  m_pModel;
