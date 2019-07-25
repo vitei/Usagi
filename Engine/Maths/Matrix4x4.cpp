@@ -339,6 +339,59 @@ void Matrix4x4::Scale( float x, float y, float z, float w )
     SetPos(vPos() * w);
 }
 
+
+Matrix4x4 Matrix4x4::operator + (const Matrix4x4 rhs)
+{
+	Matrix4x4 tmpMatrix;
+
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			tmpMatrix[i][j] =(M[i][j] + rhs.M[i][j]);
+		}
+	}
+	return tmpMatrix;
+}
+
+Matrix4x4& Matrix4x4::operator += (const Matrix4x4 rhs)
+{
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			M[i][j] = (M[i][j] + rhs.M[i][j]);
+		}
+	}
+	return *this;
+}
+
+Matrix4x4 Matrix4x4::operator * (float fRhs)
+{
+	Matrix4x4 tmpMatrix;
+
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			tmpMatrix[i][j] = (M[i][j] * fRhs);
+		}
+	}
+	return tmpMatrix;
+}
+
+Matrix4x4& Matrix4x4::operator *= (float fRhs)
+{
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			M[i][j] *= fRhs;
+		}
+	}
+	return *this;
+}
+
 Matrix4x4 Matrix4x4::operator *= ( Matrix4x4 rhs )
 {
 	*this = *this * rhs;

@@ -51,8 +51,14 @@ public:
 	Matrix4x4& operator=(const Matrix4x3& in) { Assign(in); return *this; }
 	Matrix4x4& operator=(const Matrix3x3& in);
 
-	Matrix4x4 operator *= (Matrix4x4 matr);
+	Matrix4x4 operator *= (const Matrix4x4 matr);
 	bool operator == (const Matrix4x4 &mat) const;
+
+	Matrix4x4 operator + (const Matrix4x4 rhs);
+	Matrix4x4& operator += (const Matrix4x4 rhs);
+
+	Matrix4x4 operator * (float fRhs);
+	Matrix4x4& operator *= (float fRhs);
 	
 	void MakeRotateX(float x);
 	void MakeRotateY(float y);
