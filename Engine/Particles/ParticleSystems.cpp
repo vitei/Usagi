@@ -5,6 +5,7 @@
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Physics/PhysicsEvents.pb.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Particles/ParticleEvents.pb.h"
@@ -42,7 +43,7 @@ namespace usg
 					{
 						if (inputs.particle->bIsScripted)
 						{
-							inputs.scene.GetRuntimeData().pScene->CreateScriptedEffect(p, inputs.mtx->matrix, inputs.particle->name, V3F_ZERO, inputs.particle->fScale);
+							inputs.scene.GetRuntimeData().pScene->CreateScriptedEffect(p, inputs.mtx->matrix, inputs.particle->name, inputs.particle->vVelocity, inputs.particle->fScale);
 						}
 						else
 						{
@@ -69,6 +70,12 @@ namespace usg
 			{
 				outputs.particle.GetRuntimeData().hndl.EnableEmission(emission.bEnable);
 			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetLinearVelocity& evt)
+			{
+				outputs.particle.Modify().vVelocity = evt.vVelocity;
+			}
+
 		};
 	}
 }

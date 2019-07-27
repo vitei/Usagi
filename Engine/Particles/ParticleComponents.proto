@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
 package usg;
 
 option (nanopb_fileopt).include = "Engine/Particles/ParticleComponents.h";
@@ -15,4 +16,5 @@ message ParticleComponent
 	required float fScale = 2 [default=1.0];
 	required bool bSpawn = 3 [default=false];
 	required bool bIsScripted = 4 [default=false];
+	required usg.Vector3f vVelocity = 5;
 }

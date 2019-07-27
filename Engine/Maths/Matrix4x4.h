@@ -34,6 +34,7 @@ public:
 	~ Matrix4x4() {}
 
 	void LoadIdentity();
+	void Clear();
 
 	void Transpose();
 	void GetTranspose(Matrix4x4 &out) const;

@@ -71,6 +71,15 @@ void Bone::RemoveTransformNode(Scene* pScene)
 }
 
 
+Matrix4x4 Bone::GetBindMatrix(bool bIncludeParents) const
+{ 
+	if (m_pParent && bIncludeParents)
+	{
+		return m_pResource->mBindMatrix * m_pParent->GetBindMatrix(true);
+	}
+	return m_pResource->mBindMatrix; 
+}
+
 void Bone::AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod, bool bDynamic)
 {
 	if(!m_pRenderGroup)

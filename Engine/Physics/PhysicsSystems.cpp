@@ -499,6 +499,18 @@ namespace usg
 				pRigidDynamic->setLinearVelocity(ToPhysXVec3(evt.vVelocity));
 			}
 
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const AddLinearVelocity& evt)
+			{
+				if (!inputs.rigidBody->bDynamic || inputs.rigidBody->bKinematic)
+				{
+					return;
+				}
+				ASSERT(inputs.rigidBody->bDynamic);
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(pRigidDynamic != nullptr);
+				pRigidDynamic->setLinearVelocity(ToPhysXVec3(evt.vVelocity) + pRigidDynamic->getLinearVelocity());
+			}
+
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetAngularVelocity& evt)
 			{
 				if (!inputs.rigidBody->bDynamic || inputs.rigidBody->bKinematic)

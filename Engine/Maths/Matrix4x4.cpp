@@ -57,6 +57,11 @@ void Matrix4x4::LoadIdentity(void)
 	_11 = _22 = _33 = _44 = 1.0f;
 }
 
+void Matrix4x4::Clear()
+{
+	MemSet(&_11, 0, sizeof(Matrix4x4));
+}
+
 void Matrix4x4::Copy( const float* in )
 {
 	MemCpy(m, in, sizeof(float)*16);

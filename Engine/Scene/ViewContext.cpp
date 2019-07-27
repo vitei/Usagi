@@ -43,6 +43,7 @@ namespace usg {
 		Vector4f	vHemGroundColor;
 		Vector4f	vHemisphereDir;
 		Vector4f	vShadowColor;
+		float		fAspect;
 	};
 
 	static const ShaderConstantDecl g_globalSceneCBDecl[] =
@@ -63,6 +64,7 @@ namespace usg {
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemGroundColor,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemisphereDir,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vShadowColor,		CT_VECTOR_4, 1),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, fAspect,			CT_FLOAT, 1),
 		SHADER_CONSTANT_END()
 	};
 
@@ -315,6 +317,14 @@ namespace usg {
 			m_pImpl->fog[0].GetColor().FillV4(globalData->vFogColor);
 			pCamera->GetViewMatrix((ViewType)i).GetInverse(globalData->mInvViewMat);
 			globalData->vShadowColor = m_shadowColor;
+			if (m_pImpl->pPostFXSys)
+			{
+				globalData->fAspect = m_pImpl->pPostFXSys->GetInitialRT()->GetWidth() / (float)m_pImpl->pPostFXSys->GetInitialRT()->GetHeight();
+			}
+			else
+			{
+				globalData->fAspect = 1.0f;
+			}
 			m_pImpl->globalConstants[i].Unlock();
 			m_pImpl->globalConstants[i].UpdateData(pDevice);
 

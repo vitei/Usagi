@@ -52,7 +52,7 @@ public:
 	// frames matrix
 	const Matrix4x4& GetWorldMatrix() const { return m_pTransformNode->GetMatrix(); }
 	const Matrix4x4& GetInverseBindMatrix() const { return m_pResource->mInvBindMatrix;  }
-	const Matrix4x4& GetBindMatrix() const { return m_pResource->mBindMatrix; }
+	Matrix4x4 GetBindMatrix(bool bIncludeParents) const;
 	const usg::Sphere& GetLocalColSphere() const { return m_pResource->cColSphere;  }
 	void AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod = 0, bool bDynamic = false);
 	void RemoveRenderNode(Scene* pScene, RenderNode* pNode);
