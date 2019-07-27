@@ -1119,7 +1119,10 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 
 			RegisterBoneUsage(cmdl, boneName.c_str(), eSkinType);
 
-		}
+			strncpy(info.rootBoneName, boneName.c_str(), sizeof(info.rootBoneName) - 1);
+			info.rootBoneIndex = FindBone(*cmdl.GetSkeleton(), boneName.c_str());
+
+		}  
 	}
 
 	FbxNode* pParent = ppNode;
