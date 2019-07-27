@@ -6,6 +6,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Physics/PhysicsEvents.pb.h"
+#include "Engine/Physics/PhysicsComponents.pb.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Particles/ParticleEvents.pb.h"
@@ -26,6 +27,7 @@ namespace usg
 					FromSelfOrParents > mtx;
 				Required< SceneComponent, FromSelfOrParents > scene;	// Fixme is actually an output so should be sending messages
 				Required< ParticleComponent > particle;
+				Optional< RigidBody, FromSelfOrParents > rigidBody;
 			};
 
 			struct Outputs
@@ -43,7 +45,13 @@ namespace usg
 					{
 						if (inputs.particle->bIsScripted)
 						{
-							inputs.scene.GetRuntimeData().pScene->CreateScriptedEffect(p, inputs.mtx->matrix, inputs.particle->name, inputs.particle->vVelocity, inputs.particle->fScale);
+							usg::Vector3f vVelocity = inputs.particle->vVelocity;
+							if (inputs.rigidBody.Exists())
+							{
+								vVelocity = physics::GetLinearVelocity(inputs.rigidBody);
+								outputs.particle.Modify().vVelocity = vVelocity;
+							}
+							inputs.scene.GetRuntimeData().pScene->CreateScriptedEffect(p, inputs.mtx->matrix, inputs.particle->name, vVelocity, inputs.particle->fScale);
 						}
 						else
 						{
@@ -71,9 +79,21 @@ namespace usg
 				outputs.particle.GetRuntimeData().hndl.EnableEmission(emission.bEnable);
 			}
 
+			// FIXME: Update from rigid body is present
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetLinearVelocity& evt)
 			{
-				outputs.particle.Modify().vVelocity = evt.vVelocity;
+				if (!inputs.rigidBody.Exists())
+				{
+					outputs.particle.Modify().vVelocity = evt.vVelocity;
+				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const AddLinearVelocity& evt)
+			{
+				if (!inputs.rigidBody.Exists())
+				{
+					outputs.particle.Modify().vVelocity += evt.vVelocity;
+				}
 			}
 
 		};
