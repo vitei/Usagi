@@ -30,6 +30,7 @@ namespace usg
 		bool SetFont(FontHndl pFont);
 		bool SetPosition(float x, float y, float z = 0.0f);
 		bool SetColor(const Color& color);
+		void SetOriginTL(bool bTL) { m_drawer.SetOriginTL(bTL); }
 		bool SetGradationStartColor(Color newcolor);
 		bool SetGradationEndColor(Color newcolor);
 		bool SetBackgroundColor(Color newColor);

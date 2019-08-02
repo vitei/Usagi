@@ -24,6 +24,7 @@ namespace usg
 		void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
 		void CleanUp(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
+		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }
 		bool Draw(GFXContext* context, bool b3D);
 	
 		bool Resize(uint32 uStrLen);
@@ -77,6 +78,7 @@ namespace usg
 		int				m_alignFlags;
 		float			m_fWidthLimit;
 		bool			m_bufferValid;
+		bool			m_bOriginTL;
 		bool			m_bDirty;	// Regenerate is anything is dirty
 
 		Vertex			m_textBufferTmp[MAX_CHAR_VERTICES];

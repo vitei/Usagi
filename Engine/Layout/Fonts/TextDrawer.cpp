@@ -38,6 +38,7 @@ namespace usg
 	TextDrawer::TextDrawer(Text* p) : m_pParent(p)
 	{
 		m_bufferValid = false;
+		m_bOriginTL = false;
 	}
 
 	TextDrawer::~TextDrawer()
@@ -272,7 +273,14 @@ namespace usg
 
 			colorUpper.FillU8(pVert->cColUpper[0], pVert->cColUpper[1], pVert->cColUpper[2], pVert->cColUpper[3]);
 			colorLower.FillU8(pVert->cColLower[0], pVert->cColLower[1], pVert->cColLower[2], pVert->cColLower[3]);
-			pVert->vUVRange.Assign(fLeft, fBottom, fRight, fTop);
+			if (m_bOriginTL)
+			{
+				pVert->vUVRange.Assign(fLeft, fTop, fRight, fBottom);
+			}
+			else
+			{
+				pVert->vUVRange.Assign(fLeft, fBottom, fRight, fTop);
+			}
 			colorBg.FillU8(pVert->cColBg[0], pVert->cColBg[1], pVert->cColBg[2], pVert->cColBg[3]);
 			color.FillU8(pVert->cColFg[0], pVert->cColFg[1], pVert->cColFg[2], pVert->cColFg[3]);
 			pVert->fDepth = fZPos;
