@@ -16,6 +16,7 @@ StringTable::StringTable()
  m_keystringCount(0)
 {
 	m_hashtable.SetAllocator(mem::GetMainHeap());
+	m_styleHashtable.SetAllocator(mem::GetMainHeap());
 }
 
 StringTable::~StringTable() 
@@ -34,6 +35,11 @@ void StringTable::Init(const char* szFilename, Region region, Language language)
 	file.Read(&m_table);
 	bool bInsertSucceeded = false;
 
+	for (auto itr = m_table.textStyles.Begin(); !itr.IsEnd(); ++itr)
+	{
+		m_styleHashtable.Insert((*itr).name, &(*itr));
+	}
+
 	for (auto itr = m_table.keyStrings.Begin(); !itr.IsEnd(); ++itr)
 	{
 		bInsertSucceeded = m_hashtable.Insert((*itr).key, &(*itr));
@@ -43,16 +49,27 @@ void StringTable::Init(const char* szFilename, Region region, Language language)
 	}
 }
 
-Keystring* StringTable::Find(const char* szKey) const
+StringTable::KeyString StringTable::Find(const char* szKey) const
 {
-	return m_hashtable.Get(szKey);
+	KeyString keyString;
+	keyString.pStr = m_hashtable.Get(szKey);
+	if (keyString.pStr)
+	{
+		keyString.pStyle = m_styleHashtable.Get(keyString.pStr->styleCRC);
+	}
+	return keyString;
 }
 
 
-usg::Keystring* StringTable::Find(uint32 crc) const
+StringTable::KeyString StringTable::Find(uint32 crc) const
 {
-	string_crc lookupCRC(crc);
-	return m_hashtable.Get(lookupCRC);
+	KeyString keyString;
+	keyString.pStr = m_hashtable.Get(crc);
+	if (keyString.pStr)
+	{
+		keyString.pStyle = m_styleHashtable.Get(keyString.pStr->styleCRC);
+	}
+	return keyString;
 }
 
 void StringTable::CreatePathToStringsFile(U8String& path, const char* szBasename, Region region,

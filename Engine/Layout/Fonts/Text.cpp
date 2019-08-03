@@ -2,6 +2,8 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Layout/StringTable.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Text.h"
 
 namespace usg
@@ -30,6 +32,30 @@ namespace usg
 	void Text::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
 	{
 		m_drawer.Init(pDevice, renderPass);
+	}
+
+	void Text::SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC)
+	{
+		StringTable::KeyString string = StringTable::Inst()->Find(uCRC);
+		if (string.pStr)
+		{
+			SetText(string.pStr->text);
+		}
+		if (string.pStyle)
+		{
+			if (string.pStyle->has_backgroundColor)
+			{
+				SetBackgroundColor(string.pStyle->backgroundColor);
+			}
+			if (string.pStyle->has_color)
+			{
+				SetColor(string.pStyle->color);
+			}
+			SetScale(usg::Vector2f(string.pStyle->charHeight, string.pStyle->charHeight));
+			SetCharSpacing(string.pStyle->charSpacing);
+			SetLineSpacing(string.pStyle->lineSpacing);
+			SetFont(pMgr->GetFont(pDevice, string.pStyle->fontName));
+		}
 	}
 
 	void Text::CleanUp(GFXDevice* pDevice)

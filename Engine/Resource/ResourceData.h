@@ -122,7 +122,7 @@ public:
 		}
 	}
 	 
-	BaseResHandle GetResourceHndl(const U8String& resName);
+	BaseResHandle GetResourceHndl(const U8String& resName, ResourceType eType);
 	BaseResHandle AddResource(const ResourceBase* pResource);
 	void AddResource(BaseResHandle resHndl);
 
@@ -131,7 +131,7 @@ public:
 
 	// TODO: Remove this functions accessing the raw resource
 	template <class ResourceType>
-	const ResourceType* GetResource(const U8String &resName);
+	const ResourceType* GetResource(const U8String &resName, usg::ResourceType eType);
 	
 	template <class ResourceType>
 	const ResourceType* GetResource(uint32 uIndex) const
@@ -191,7 +191,7 @@ inline void ResourceData::AddResource(BaseResHandle resHandle)
 }
 
 
-BaseResHandle ResourceData::GetResourceHndl(const U8String& resName)
+BaseResHandle ResourceData::GetResourceHndl(const U8String& resName, ResourceType eType)
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
 	NameHash nameHash = ResourceDictionary::calcNameHash( resName.CStr() );
@@ -202,8 +202,9 @@ BaseResHandle ResourceData::GetResourceHndl(const U8String& resName)
 #endif
 	for (typename FastPool<ResourceInfo>::Iterator it = m_resources.Begin(); !it.IsEnd(); ++it)
 	{
-		if( (*it)->resource->GetNameHash() == nameHash
+		if( ( (*it)->resource->GetNameHash() == nameHash
 			|| ((*it)->resource->GetDataHash() == dataHash && dataHash != 0 ) )
+			&& (*it)->resource->GetResourceType() == eType )
 		{
 #ifdef DEBUG_RESOURCE_MGR
 			m_findTimer.Stop();
@@ -220,9 +221,9 @@ BaseResHandle ResourceData::GetResourceHndl(const U8String& resName)
 }
 
 template <class ResourceType>
-const ResourceType* ResourceData::GetResource(const U8String &resName)
+const ResourceType* ResourceData::GetResource(const U8String &resName, usg::ResourceType eType)
 {
-	return GetAs<ResourceType>(GetResourceHndl(resName));
+	return GetAs<ResourceType>(GetResourceHndl(resName, eType));
 }
 
 } // namespace usg

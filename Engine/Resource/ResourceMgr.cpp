@@ -83,7 +83,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 	U8String name = szPath;
 	name += szName;
 	name += ".pak";
-	ResourcePakHndl hndl = m_pImpl->resources.GetResourceHndl(name.CStr());
+	ResourcePakHndl hndl = m_pImpl->resources.GetResourceHndl(name.CStr(), ResourceType::PAK_FILE);
 	// Only load if we don't already have one
 	if (!hndl)
 	{
@@ -121,7 +121,7 @@ EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 	LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
 	u8Name += ".fx";
 
-	EffectHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name);
+	EffectHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::EFFECT);
 
 	return pEffect;
 
@@ -131,7 +131,7 @@ EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 CollisionModelResHndl ResourceMgr::GetCollisionModel(const char* szFileName)
 {
 	U8String u8Name = szFileName;
-	CollisionModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name);
+	CollisionModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::COLLISION);
 
 	// TODO: Remove from the final build, should load in blocks
 	if (!pModel)
@@ -149,7 +149,7 @@ CollisionModelResHndl ResourceMgr::GetCollisionModel(const char* szFileName)
 CustomEffectResHndl ResourceMgr::GetCustomEffectRes(GFXDevice* pDevice, const char* szFileName)
 {
 	U8String u8Name = szFileName;
-	CustomEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name);
+	CustomEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::CUSTOM_EFFECT);
 
 	// TODO: Remove from the final build, should load in blocks
 	if (!pEffect)
@@ -167,7 +167,7 @@ CustomEffectResHndl ResourceMgr::GetCustomEffectRes(GFXDevice* pDevice, const ch
 ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 {
 	U8String u8Name = szFileName;
-	ProtocolBufferFile* pFile = const_cast<ProtocolBufferFile*>(m_pImpl->resources.GetResource<ProtocolBufferFile>(u8Name));
+	ProtocolBufferFile* pFile = const_cast<ProtocolBufferFile*>(m_pImpl->resources.GetResource<ProtocolBufferFile>(u8Name, ResourceType::PROTOCOL_BUFFER));
 
 	if(!pFile)
 	{
@@ -188,7 +188,7 @@ ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex, GPULocation eGPULocation)
 {
 	U8String u8Name = szTextureName;
-	TextureHndl	pTexture = m_pImpl->resources.GetResourceHndl(u8Name);
+	TextureHndl	pTexture = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::TEXTURE);
 
 	// TODO: Remove from the final build, should load in blocks
 	if(!pTexture)
@@ -252,7 +252,7 @@ ModelResHndl ResourceMgr::GetModelAsInstance(GFXDevice* pDevice, const char* szM
 FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 {
 	U8String u8Name = m_fontDir + szFontName;
-	FontHndl pFont = m_pImpl->resources.GetResourceHndl(u8Name);
+	FontHndl pFont = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::FONT);
 	if( !pFont )
 	{
 		if ( pDevice == nullptr )
@@ -277,7 +277,7 @@ ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const
 	U8String path = "Particle/";
 	path += szFileName;
 	path += ".pem";
-	ParticleEmitterResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr());
+	ParticleEmitterResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::PARTICLE_EMITTER);
 	if (!pEffect)
 	{
 		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
@@ -304,7 +304,7 @@ ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 	U8String path = "Particle/";
 	path += szFileName;
 	path += ".pfx";
-	ParticleEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr());
+	ParticleEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::PARTICLE_EFFECT);
 	if (!pEffect)
 	{
 		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
@@ -327,7 +327,7 @@ ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 SkeletalAnimationResHndl ResourceMgr::GetSkeletalAnimation( const char* szFileName )
 {
 	U8String path = m_modelDir + szFileName;
-	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.CStr());
+	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::SKEL_ANIM);
 	if( !p )
 	{
 		if( File::FileStatus( path.CStr() ) == FILE_STATUS_VALID)
@@ -364,7 +364,7 @@ void ResourceMgr::ClearAllResources(GFXDevice* pDevice)
 ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName, bool bInstance, bool bFastMem)
 {
 	U8String u8Name = m_modelDir + szModelName;
-	ModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name);
+	ModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::MODEL);
 	if(!pModel)
 	{
 		m_pImpl->resources.StartLoad();

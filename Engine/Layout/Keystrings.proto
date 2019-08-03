@@ -10,24 +10,27 @@ package usg;
 
 
 message TextStyle {
-	required float charHeight = 1;
-	required float charSpacing = 2;
-	required float lineSpacing = 3;
-	required uint32 displayLines = 4;
-	optional string fontName = 5 [(nanopb).max_size = 32];
-	optional Color color = 6;
-	optional Color backgroundColor = 7;
-	required float tabWidth = 8  [default = 2.0];
+    required string name = 1 [(nanopb).max_size = 32];
+	required float charHeight = 2;
+	required float charSpacing = 3;
+	required float lineSpacing = 4;
+	required uint32 displayLines = 5;
+	required string fontName = 6 [(nanopb).max_size = 32];
+	optional Color color = 7;
+	optional Color backgroundColor = 8;
+	required float tabWidth = 9 [default = 2.0];
 };
 
 
-message Keystring {
+message KeyStringDef {
 	required string key = 1 [(nanopb).max_size = 32];
 	required string text = 2 [(nanopb).max_size = 140];
-	required TextStyle style = 3;
+	required uint32 styleCRC = 3;
 };
+
 
 message KeystringTable
 {
-	repeated Keystring keyStrings = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+	repeated TextStyle textStyles = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+	repeated KeyStringDef keyStrings = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 }

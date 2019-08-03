@@ -25,6 +25,7 @@ namespace usg
 		void CleanUp(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		bool Draw(GFXContext* context, bool b3D = false);
+		void SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC);
 		bool SetText(const char* str);
 		bool SetText(const U8String& u8Str);
 		bool SetFont(FontHndl pFont);
