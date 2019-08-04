@@ -74,6 +74,9 @@ namespace usg
 		alphaDecl.SetColor0Only();
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
+		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_MAX;
+		alphaDecl.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
+		alphaDecl.dstBlendAlpha = BLEND_FUNC_DST_ALPHA;
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
 		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.DistanceField");
