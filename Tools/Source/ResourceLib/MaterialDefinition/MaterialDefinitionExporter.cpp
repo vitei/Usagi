@@ -152,6 +152,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 {
 	if (node)
 	{
+		uint8* pSrc = pD8;
 		switch (uConstantType)
 		{
 		case usg::CT_MATRIX_44:
@@ -222,22 +223,31 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 		{
 			float value = node.as<float>();
 			memcpy(pD8, &value, sizeof(float));
+			pD8 += sizeof(float);
 			break;
 		}
 		case usg::CT_INT:
 		{
 			int value = node.as<int>();
 			memcpy(pD8, &value, sizeof(int));
+			pD8 += sizeof(int);
 			break;
 		}
 		case usg::CT_BOOL:
 		{
 			bool value = node.as<bool>();
 			memcpy(pD8, &value, sizeof(bool));
+			pD8 += sizeof(bool);
 			break;
 		}
 		default:
 			ASSERT(false);
+		}
+
+		for (uint32 i = 1; i < uConstantCount; i++)
+		{
+			memcpy(pD8, pSrc, usg::g_uConstantSize[uConstantType]);
+			pD8 += usg::g_uConstantSize[uConstantType];
 		}
 	}
 	else
