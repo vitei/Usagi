@@ -24,6 +24,7 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
     m_createInfo.depthClampEnable = VK_FALSE;
     m_createInfo.rasterizerDiscardEnable = VK_FALSE;
     m_createInfo.depthBiasEnable = decl.bUseDepthBias;
+	m_createInfo.lineWidth = decl.fLineWidth;
 	m_createInfo.lineWidth = 1.0f;
 }
 
