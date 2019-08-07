@@ -164,6 +164,10 @@ namespace usg
 		p.GetRuntimeData().pCamera->SetID(p->uCamId);
 
 		handles.pScene->AddCamera(p.GetRuntimeData().pCamera);
+		if(p->bForceSwitch)
+		{
+			handles.pScene->SetActiveCamera(p->uCamId, 0);
+		}
 
 	}
 
