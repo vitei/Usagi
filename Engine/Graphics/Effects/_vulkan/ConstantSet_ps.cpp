@@ -220,6 +220,9 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		case CT_VECTOR_4:
 			WriteVector4((Vector4f*)(pCPUData+pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;
+		case CT_VECTOR_3:
+			WriteVector3((Vector3f*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
+			break;
 		case CT_VECTOR_2:
 			WriteVector2((Vector2f*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;

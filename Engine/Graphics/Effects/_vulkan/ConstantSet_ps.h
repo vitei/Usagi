@@ -41,6 +41,7 @@ private:
 	void WriteMatrix44(const Matrix4x4* pMat, uint32 uCount, uint8* pGPUTarget);
 	void WriteMatrix43(const Matrix4x3* pMat, uint32 uCount, uint8* pGPUTarget);
 	void WriteVector4(const Vector4f* pVec, uint32 uCount, uint8* pGPUTarget);
+	void WriteVector3(const Vector3f* pVec, uint32 uCount, uint8* pGPUTarget);
 	void WriteVector2(const Vector2f* pVec, uint32 uCount, uint8* pGPUTarget);
 	void WriteFloat(const float* pFloat, uint32 uCount, uint8* pGPUTarget);
 	void WriteBool(const bool* pVal, uint32 uCount, uint8* pGPUTarget);
@@ -105,6 +106,17 @@ inline void ConstantSet_ps::WriteVector4(const Vector4f* pVec, uint32 uCount, ui
 {
 	Vector4f* pDst = (Vector4f*)pGPUTarget;
 	for(uint32 i=0; i<uCount; i++)
+	{
+		*pDst = *pVec;
+		pDst++;
+		pVec++;
+	}
+}
+
+inline void ConstantSet_ps::WriteVector3(const Vector3f* pVec, uint32 uCount, uint8* pGPUTarget)
+{
+	Vector3f* pDst = (Vector3f*)pGPUTarget;
+	for (uint32 i = 0; i < uCount; i++)
 	{
 		*pDst = *pVec;
 		pDst++;
