@@ -32,7 +32,7 @@ const uint32 g_uGPUAlignments[CT_COUNT] =
 	sizeof(float)*4,	// CT_MATRIX_44
 	sizeof(float)*4,	// CT_MATRIX_43
 	sizeof(float)*4,	// CT_VECTOR_4
-	sizeof(float)*3,	// CT_VECTOR_3
+	sizeof(float)*4,	// CT_VECTOR_3
 	sizeof(float)*2,	// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
