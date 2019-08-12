@@ -345,7 +345,7 @@ void Matrix4x4::Scale( float x, float y, float z, float w )
 }
 
 
-Matrix4x4 Matrix4x4::operator + (const Matrix4x4 rhs)
+Matrix4x4 Matrix4x4::operator + (const Matrix4x4 rhs) const
 {
 	Matrix4x4 tmpMatrix;
 
@@ -371,7 +371,7 @@ Matrix4x4& Matrix4x4::operator += (const Matrix4x4 rhs)
 	return *this;
 }
 
-Matrix4x4 Matrix4x4::operator * (float fRhs)
+Matrix4x4 Matrix4x4::operator * (float fRhs) const
 {
 	Matrix4x4 tmpMatrix;
 
