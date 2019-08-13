@@ -26,6 +26,7 @@ public:
 				float r41, float r42, float r43, float r44 );
 
 	Matrix4x4(const Matrix4x3& in) { Assign(in); }
+	Matrix4x4(const Matrix3x3& in) { *this = in; }
 	Matrix4x4(const Quaternionf &quat)
 	{
 		*this = quat;
@@ -53,7 +54,7 @@ public:
 	Matrix4x4& operator=(const Matrix3x3& in);
 
 	Matrix4x4 operator *= (const Matrix4x4 matr);
-	bool operator == (const Matrix4x4 &mat) const;
+	bool operator == (const Matrix4x4 &mat) const; 
 
 	Matrix4x4 operator + (const Matrix4x4 rhs) const;
 	Matrix4x4& operator += (const Matrix4x4 rhs);
