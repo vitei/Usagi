@@ -295,6 +295,9 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
+	// Smooth lines are hugely helpful, but not online until 1.1.117
+	//extensions.push_back("VK_EXT_line_rasterization");
+
 	// FIXME: Temporarily disabling validation whilst fixes for unconsumed shader warnings are applied
 #if 0//def DEBUG_BUILD
 	int validationLayerCount = 1;

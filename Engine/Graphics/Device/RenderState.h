@@ -55,6 +55,7 @@ public:
 	CullFace		eCullFace;
 	float			fDepthBias;
 	float			fLineWidth;
+	bool			bLineSmooth;
 	bool			bUseDepthBias;
 	bool			bMultisample;
 	bool			bWireframe;
