@@ -26,7 +26,6 @@ public:
 
 	void Transpose();
 
-
 	const Vector3f vRight() const	{ return Vector3f(_11, _12, _13); }
 	const Vector3f vUp() const		{ return Vector3f(_21, _22, _23); }
 	const Vector3f vFace() const	{ return Vector3f(_31, _32, _33); }

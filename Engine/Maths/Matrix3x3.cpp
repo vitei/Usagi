@@ -29,6 +29,18 @@ void Matrix3x3::LoadIdentity(void)
 	_11 = _22 = _33 = 1.0f;
 }
 
+void Matrix3x3::Transpose()
+{
+	Matrix3x3 mTmpMatrix = *this;
+	for (uint32 i = 0; i < 3; i++)
+	{
+		for (uint32 j = 0; j < 3; j++)
+		{
+			M[i][j] = mTmpMatrix.M[j][i];
+		}
+	}
+}
+
 void Matrix3x3::operator = (const Quaternionf &q)
 {	 
 	M[0][0] = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
@@ -41,6 +53,5 @@ void Matrix3x3::operator = (const Quaternionf &q)
 	M[2][1] = 2.0f * (q.y *q.z - q.x *q.w);
 	M[2][2] = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
 }
-
 
 }

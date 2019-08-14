@@ -11,13 +11,15 @@
 
 namespace usg{
 
-class Matrix4x4f;
+class Matrix4x4;
+class Matrix3x3;
 
 class Quaternionf
 {
 public:
 	Quaternionf(void) { Identity(); }
 	Quaternionf(const Matrix4x4& mat) { FillFromMatrix(mat); }
+	Quaternionf(const Matrix3x3& mat) { FillFromMatrix(mat); }
 	Quaternionf( float inX, float inY, float inZ, float inW )
 		{ Assign( inX, inY, inZ, inW ); }
 	Quaternionf( const Vector3f& v, float inW );
@@ -32,6 +34,7 @@ public:
 	Quaternionf operator* ( const Quaternionf &q ) const;	
 	void operator *= (const Quaternionf &q );
 	const Quaternionf& operator = (const Matrix4x4 &mat) { FillFromMatrix(mat); return *this; }
+	const Quaternionf& operator = (const Matrix3x3 &mat) { FillFromMatrix(mat); return *this; }
 
 	// Subtraction and addition
 	Quaternionf operator +( const Quaternionf &addQuart ) const;
@@ -53,6 +56,7 @@ public:
 	float MagnitudeSquared() const;
 	inline void Normalise();
 	void FillFromMatrix(const Matrix4x4& mat);
+	void FillFromMatrix(const Matrix3x3& mat);
 
 	// Helper functions, don't rely on these when you've a lot of movement on multiple axes
 	float GetYaw() const { return asinf(-2*(x*z - w*y)); }
