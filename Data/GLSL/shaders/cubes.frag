@@ -1,6 +1,4 @@
 #include "includes/platformdefines.inc"
-#include "includes/global_3d.inc"
-#include "includes/depth_write.inc"
 
 in GeometryData
 {
