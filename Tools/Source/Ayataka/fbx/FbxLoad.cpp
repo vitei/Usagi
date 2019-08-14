@@ -47,6 +47,7 @@ FbxLoad::FbxLoad()
 	m_bHasDefaultStaticBone = false;
 	m_pParentBoneNode = nullptr;
 	m_appliedScale = 1.0;
+	m_fAttenScale = 1.0;
 }
 
 void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
@@ -155,13 +156,13 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 
 	usg::LightSpec_init(&pLight->spec);
 
-	FbxNode* pParentBone = pNode->GetParent();
-	while (pParentBone && pParentBone->GetNodeAttribute() && (pParentBone->GetNodeAttribute()->GetAttributeType() != FbxNodeAttribute::eSkeleton))
+	FbxNode* pParentBone = pNode;
+	while (pParentBone && !IsBone(pParentBone))
 	{
 		pParentBone = pParentBone->GetParent();
 	}
 
-	if (pParentBone && (pParentBone->GetNodeAttribute() && pParentBone->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton))
+	if (pParentBone && IsBone(pParentBone))
 	{
 		const char* pBoneName = pParentBone->GetName();
 		pLight->parentBone = pBoneName;
@@ -173,7 +174,29 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 
 	FbxAMatrix mGeometry;
 	Matrix4x4 mMatUsg;
-	mGeometry = GetCombinedMatrixForNode(pNode);//pNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);//GetCombinedMatrixForNode(pNode);
+	mGeometry = GetCombinedMatrixForNode(pNode, pParentBone);//pNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);//GetCombinedMatrixForNode(pNode);
+
+	// Undo the root transform that conversion puts in
+	{
+		FbxNode* Root = nullptr;
+		FbxNode* Tmp = pNode;
+		while (Tmp->GetParent())
+		{
+			if (IsBone(Tmp))
+			{
+				Root = Tmp;
+			}
+			Tmp = Tmp->GetParent();
+		}
+	
+		if (Root)
+		{
+			FbxAMatrix RootPose = Root->EvaluateGlobalTransform();;
+			RootPose.SetT(FbxVector4(0.0f, 0.f, 0.f, 1.f));
+			mGeometry = mGeometry * RootPose.Inverse();
+		}
+	}
+
 	for (uint32 i = 0; i < 4; i++)
 	{
 		for (uint32 j = 0; j < 4; j++)
@@ -256,8 +279,8 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 	}
 
 	pLight->spec.atten.bEnabled = pFBXLight->LightType.Get() != FbxLight::eDirectional;
-	pLight->spec.atten.fNear = fAttenuationStart * (float)m_appliedScale;
-	pLight->spec.atten.fFar = fFarEnd * (float)m_appliedScale;
+	pLight->spec.atten.fNear = fAttenuationStart * (float)m_fAttenScale;
+	pLight->spec.atten.fFar = fFarEnd * (float)m_fAttenScale;
 
 	cmdl.AddLight(pLight);
 
@@ -1437,12 +1460,12 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 	return uMaxWeights;
 }
 
-FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime)
+FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxNode* pParent, FbxTime pTime)
 {
-	if (m_pParentBoneNode != nullptr )
+	if (pParent != nullptr )
 	{
 		FbxAMatrix mWorld = pNode->EvaluateGlobalTransform(pTime);
-		FbxAMatrix mSkeletonWorld = m_pParentBoneNode->EvaluateGlobalTransform(pTime);
+		FbxAMatrix mSkeletonWorld = pParent->EvaluateGlobalTransform(pTime);
 		FbxAMatrix mCombined = mSkeletonWorld.Inverse() * mWorld;
 		return mCombined;
 	}
@@ -1597,7 +1620,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 	fbxsdk::FbxStringList uvNames;
 	currMesh->GetUVSetNames(uvNames); 
 	
-	FbxAMatrix transform = GetCombinedMatrixForNode(pNode);
+	FbxAMatrix transform = GetCombinedMatrixForNode(pNode, m_pParentBoneNode);
 	FbxAMatrix normalTransform = transform.Inverse();
 	normalTransform = normalTransform.Transpose();
 	

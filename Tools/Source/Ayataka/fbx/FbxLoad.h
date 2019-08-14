@@ -105,6 +105,7 @@ public:
 
 	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
+	void SetAttenScale(double fScale) { m_fAttenScale = fScale; }
 
 private:
 	void ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic);
@@ -158,7 +159,7 @@ private:
 	bool SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pMaterial);
 	void SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName);
 	void SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMaterial* inMaterial, bool bTransparent) const;
-	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE);
+	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxNode* pParent, FbxTime pTime = FBXSDK_TIME_INFINITE);
 	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
 	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
 	bool IsBone(FbxNode* pNode);
@@ -212,6 +213,7 @@ private:
 	bool					m_bHasDefaultStaticBone;
 	bool					m_bCollisionMesh;
 	double					m_appliedScale;
+	double					m_fAttenScale;
 	FbxNode*				m_pParentBoneNode;
 	FbxScene*				m_pScene;
 	usg::vector<uint32>		m_indicesTmp;

@@ -113,6 +113,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
 	//fbxLoader.SetAppliedScale(scale);
+	fbxLoader.SetAttenScale(scale);	// The convert scene doesn't handle this
 	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies );
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
