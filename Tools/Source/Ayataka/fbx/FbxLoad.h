@@ -103,11 +103,11 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
 
 private:
-	void ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode);
+	void ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic);
 
 	// Skeleton
 	void ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode);
@@ -117,7 +117,7 @@ private:
 	void ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	
 	// Mesh data
-	void AddMesh(Cmdl& cmdl, ::exchange::Shape*, FbxNode* pNode, FbxMesh* mesh);
+	void AddMesh(Cmdl& cmdl, ::exchange::Shape*, FbxNode* pNode, FbxMesh* mesh, bool bStatic);
 	void GetUV(FbxMesh* pMesh, int iVertexIndex, int iTexUVIndex, int iUVLayer, FBXVertexElement& outUV);
 	bool GetColor(FbxMesh* pMesh, int iVertexIndex, int inColorId, FBXVertexElement& outColor);
 	bool GetNormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outNormal);
@@ -210,6 +210,7 @@ private:
 	uint32					m_uMeshMaterialTmp;
 	bool					m_bHasNormalMap;
 	bool					m_bHasDefaultStaticBone;
+	bool					m_bCollisionMesh;
 	double					m_appliedScale;
 	FbxNode*				m_pParentBoneNode;
 	FbxScene*				m_pScene;

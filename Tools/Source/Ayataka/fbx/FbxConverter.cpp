@@ -95,7 +95,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	// could be reduced further by converting directly with the fbx sdk
 	//AxisOverride axisOverride;
 	//axisOverride.ConvertScene(scene);
-	FbxRootNodeUtility::RemoveAllFbxRoots(scene);
+	//FbxRootNodeUtility::RemoveAllFbxRoots(scene);
 	FbxAxisSystem::OpenGL.ConvertScene(scene);
 	FbxSystemUnit::ConversionOptions options = FbxSystemUnit::DefaultConversionOptions;
 	// We don't use the FBX convert scene as it messes with scales rather than positions
@@ -113,7 +113,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
 	//fbxLoader.SetAppliedScale(scale);
-	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, pDependencies );
+	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies );
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
 	SetNameFromPath( path.c_str() );

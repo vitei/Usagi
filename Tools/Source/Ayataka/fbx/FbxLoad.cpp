@@ -862,10 +862,11 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies)
 {
 	m_pDependencies = pDependencies;
 	m_pScene = modelScene;
+	m_bCollisionMesh = bCollisionModel;
 
 	FbxNode* pRootNode = modelScene->GetRootNode();
 	::exchange::Skeleton* pSkeleton = NewSkeleton();
@@ -882,19 +883,29 @@ void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, Depende
 
 	if (pRootNode)
 	{
-		if (IsIdentityBoneRequired(pRootNode))
+		if (bCollisionModel || IsIdentityBoneRequired(pRootNode))
 		{
 			AddIdentityBone(pSkeleton);
 		}
 
-		ReadSkeleton(pSkeleton, pRootNode);
+		if (!bCollisionModel)
+		{
+			ReadSkeleton(pSkeleton, pRootNode);
+		}
+
 		cmdl.SetSkeleton(pSkeleton);
-		ReadLightsRecursive(cmdl, pRootNode);
-		ReadCamerasRecursive(cmdl, pRootNode);
+		if (!bCollisionModel)
+		{
+			ReadLightsRecursive(cmdl, pRootNode);
+			ReadCamerasRecursive(cmdl, pRootNode);
+		}
 		if (!bSkeletonOnly)
 		{
-			ReadAnimations(cmdl, modelScene);
-			ReadMeshRecursive(cmdl, pRootNode);
+			if (!bCollisionModel)
+			{
+				ReadAnimations(cmdl, modelScene);
+			}
+			ReadMeshRecursive(cmdl, pRootNode, bCollisionModel);
 		}
 	}
 
@@ -1130,7 +1141,7 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 	{
 		pParent = pParent->GetParent();
 	}
-	if (eSkinType == usg::exchange::SkinningType_NO_SKINNING)
+	if (eSkinType == usg::exchange::SkinningType_NO_SKINNING && !m_bCollisionMesh)
 	{
 		std::string boneName = pParent->GetName();
 		strncpy(info.rootBoneName, boneName.c_str(), sizeof(info.rootBoneName) - 1);
@@ -1171,7 +1182,7 @@ void FbxLoad::RegisterBoneUsage(Cmdl& cmdl, const char* szBoneName, usg::exchang
 }
 
 
-void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
+void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic)
 {
 	m_pParentBoneNode = nullptr;
 	if (pNode->GetNodeAttribute())
@@ -1189,7 +1200,7 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
 				{
 					pParent = pParent->GetParent();
 				}
-				m_pParentBoneNode = pParent;
+				m_pParentBoneNode = bStatic ? nullptr : pParent;
 			}
 
 			m_uMeshMaterialOffset = cmdl.GetMaterialNum();
@@ -1200,7 +1211,7 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
 				if (pNode->GetNodeAttributeByIndex(uAttribId)->GetAttributeType() == FbxNodeAttribute::eMesh)
 				{
 					::exchange::Shape* pShape = NewShape(cmdl, pNode);
-					AddMesh(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId));
+					AddMesh(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId), bStatic);
 					RemoveDuplicateVertices();
 					// Now add the verts and indices
 					AddStreams(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId));
@@ -1215,7 +1226,7 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode)
 
 	for (int i = 0; i < pNode->GetChildCount(); ++i)
 	{
-		ReadMeshRecursive(cmdl, pNode->GetChild(i));
+		ReadMeshRecursive(cmdl, pNode->GetChild(i), bStatic);
 	}
 }
 
@@ -1419,7 +1430,7 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 				(*weightItr).fValue /= fTotalWeight;
 			}
 		}
-		uMaxWeights = usg::Math::Max((uint32)itr->weights.size(), uMaxWeights);
+		uMaxWeights = usg::Math::Max((uint32)itr->weights.size(), uMaxWeights); 
 	}
 
 
@@ -1428,7 +1439,7 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 
 FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime)
 {
-	if (m_pParentBoneNode != nullptr && !m_bHasDefaultStaticBone )
+	if (m_pParentBoneNode != nullptr )
 	{
 		FbxAMatrix mWorld = pNode->EvaluateGlobalTransform(pTime);
 		FbxAMatrix mSkeletonWorld = m_pParentBoneNode->EvaluateGlobalTransform(pTime);
@@ -1558,7 +1569,7 @@ void FbxLoad::ReadAnimationsRecursive(FbxAnimStack* pAnimStack, ::exchange::Anim
 	}
 }
 
-void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* currMesh)
+void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* currMesh, bool bStatic)
 {
 	m_activeVerts.clear();
 	m_indicesTmp.clear();
