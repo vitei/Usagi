@@ -42,11 +42,6 @@ public:
 private:
 
 	static DebugRender* 	m_psRenderer;
-	enum DEBUG_PAGES
-	{
-		PAGE_MAIN = 0,
-		PAGE_MEMORY
-	};
 
 	enum
 	{

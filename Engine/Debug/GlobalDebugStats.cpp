@@ -86,6 +86,9 @@ namespace usg {
 		case PAGE_MAIN:
 			// Do nothing, we want the main page to be empty
 			break;
+		case PAGE_PHYSICS:
+
+			break;
 		//case PAGE_THREADS:
 //			break;
 		default:

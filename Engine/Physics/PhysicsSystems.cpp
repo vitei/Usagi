@@ -13,6 +13,8 @@
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Physics/PhysicsComponents.pb.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
+#include "Engine/Debug/GlobalDebugStats.h"
+#include "Engine/Debug/DebugStats.h"
 #include "Engine/Physics/PhysX.h"
 #include <limits>
 #include "Engine/Physics/PhysXVehicle/VehicleSceneQueryData.h"
@@ -386,7 +388,8 @@ namespace usg
 #ifndef FINAL_BUILD
 				auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
 				mutableRtd.diagnostics.fFetchResultsTime.Add(timer.GetTotalMilliSeconds());
-				if (mutableRtd.diagnostics.bDebugRenderOnNextFrame)
+				bool bPhysicsDebug = DebugStats::Inst()->GetPage() == GlobalDebugStats::PAGE_PHYSICS;
+				if (mutableRtd.diagnostics.bDebugRenderOnNextFrame || bPhysicsDebug)
 				{
 					mutableRtd.diagnostics.bDebugRenderOnNextFrame = false;
 					physics::DebugRender(*inputs.visualScene.GetRuntimeData().pScene->GetSceneCamera(0));

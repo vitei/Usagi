@@ -33,6 +33,16 @@ namespace usg
 		void SetThreadActivity(int iIdx, const char* szActivitys);
 		void RegisterCPUTimer(const ProfilingTimer* pTimer) { m_pCpuTimer = pTimer; }
 
+		enum GLOBAL_PAGES
+		{
+			PAGE_MAIN = 0,
+			PAGE_TIMING,
+			PAGE_MEMORY,
+			PAGE_PHYSICS,
+			//	PAGE_THREADS,
+			PAGE_COUNT
+		};
+
 	private:
 		void DrawTimingPage(DebugRender* pRender);
 		void DrawThreadsPage(DebugRender* pRender);
@@ -41,14 +51,7 @@ namespace usg
 
 		void UpdateFPS(float fElapsed);
 
-		enum GLOBAL_PAGES
-		{
-			PAGE_MAIN = 0,
-			PAGE_TIMING,
-			PAGE_MEMORY,
-		//	PAGE_THREADS,
-			PAGE_COUNT
-		};
+
 
 		enum 
 		{
