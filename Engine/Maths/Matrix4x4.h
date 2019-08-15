@@ -100,6 +100,7 @@ public:
 	void Translate( const Vector3f &translation );
 
 	void Translate( float x, float y, float z );
+	void Orthonormalize();
 
 	inline void SetTranslation( const Vector4f &pos );
 	inline void SetTranslation( const Vector3f &pos );

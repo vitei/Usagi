@@ -173,6 +173,20 @@ float Matrix4x4::Determinant() const
 	return - (_14 * minor.x + _24 * minor.y + _34 * minor.z + _44 * minor.w);
 }
 
+void Matrix4x4::Orthonormalize()
+{
+	usg::Matrix3x3 mRot = *this;
+	mRot.Orthonormalize();
+
+	for (uint32 i = 0; i < 3; i++)
+	{
+		for (uint32 j = 0; j < 3; j++)
+		{
+			M[i][j] = mRot.M[i][j];
+		}
+	}
+}
+
 void Matrix4x4::GetQuickInverse(Matrix4x4& out) const
 {
 	out._11 = _11;

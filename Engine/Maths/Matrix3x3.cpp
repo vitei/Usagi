@@ -9,6 +9,24 @@
 namespace usg{
 
 
+Matrix3x3::Matrix3x3(
+	float r11, float r12, float r13,
+	float r21, float r22, float r23,
+	float r31, float r32, float r33)
+{
+	_11 = r11;
+	_12 = r12;
+	_13 = r13;
+
+	_21 = r21;
+	_22 = r22;
+	_23 = r23;
+
+	_31 = r31;
+	_32 = r32;
+	_33 = r33;
+}
+
 Matrix3x3 Matrix3x3::operator*( const Matrix4x4 &rhs ) const
 {
 	Matrix3x3 tmpMatrix;
@@ -40,6 +58,41 @@ void Matrix3x3::Transpose()
 		}
 	}
 }
+
+void Matrix3x3::Orthonormalize()
+{
+	usg::Vector3f vUpVec = vUp().GetNormalised();
+	usg::Vector3f vForward = vFace().GetNormalised();
+
+	usg::Vector3f vRight = CrossProduct(vUpVec, vForward);
+
+	usg::Vector3f vUp = CrossProduct(vForward, vRight);
+
+	_11 = vRight.x;
+	_12 = vRight.y;
+	_13 = vRight.z;
+
+	_21 = vUp.x;
+	_22 = vUp.y;
+	_23 = vUp.z;
+
+	_31 = vForward.x;
+	_32 = vForward.y;
+	_33 = vForward.z;
+}
+
+const Matrix3x3& Matrix3x3::operator=(const Matrix4x4 &rhs)
+{
+	for (uint32 i = 0; i < 3; i++)
+	{
+		for (uint32 j = 0; j < 3; j++)
+		{
+			M[i][j] = rhs.M[i][j];
+		}
+	}
+	return *this;
+}
+
 
 void Matrix3x3::operator = (const Quaternionf &q)
 {	 
