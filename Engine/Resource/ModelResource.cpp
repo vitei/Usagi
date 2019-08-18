@@ -178,8 +178,6 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	m_bNeedsRootNode = false;
 	m_uBoneNodes = 0;
 
-	//szFileName = "Models\\t1ply_m016_devilcatSwitch\\DevilCat.vmdn";
-
 	m_bInstance = false;// bInstance;
 	U8String path = szFileName;
 	path.TruncateToPath();
