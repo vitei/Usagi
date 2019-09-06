@@ -142,8 +142,6 @@ namespace usg
 	private:
 		void FileFinished(AsyncFile* pFile);
 
-		AsyncFile		file;
-
 		CriticalSection		m_criticalSection;
 		FastPool<AsyncFile>	m_fileThreads;
 		List<AsyncFile>		m_clearList;
