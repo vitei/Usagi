@@ -41,7 +41,7 @@ public:
 	
 	void JoinThread()
 	{
-		if( m_thread.IsValid() && !m_thread.IsAlive() )
+		if( m_thread.IsValid() /*&& !m_thread.IsAlive()*/ )
 		{
 			m_thread.Join();
 			m_thread.Finalize();
