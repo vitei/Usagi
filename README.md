@@ -130,6 +130,8 @@ The build process has not been improved or significantly modified and currently 
 
 1. Reset to ensure environment variable changes take effect  
 
+1. Ensure you have up-to-date drivers and have installed the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows)  
+
 1. Follow the instructions in that projects README.md  
 
 Current Version 0.2.1
