@@ -17,6 +17,7 @@ class SoundFile
 {
 public:
 	virtual void Init(const SoundFileDef* pSoundFile, Audio* pAudio, const char* pszLocalizedSubdir = NULL) = 0;
+	virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio) = 0;
 	virtual void Cleanup(Audio* pAudio) = 0;
 	virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional) = 0;
 	

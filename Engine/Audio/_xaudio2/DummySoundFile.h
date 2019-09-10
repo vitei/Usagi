@@ -18,6 +18,7 @@ namespace usg{
 		~DummySoundFile() {}
 
 		virtual void Init(const SoundFileDef* pSoundFile, Audio* pAudio, const char* pszLocalizedSubdir = NULL) { }
+		virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio) { }
 		virtual void Cleanup(Audio* pAudio) { }
 		virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional) {}
 

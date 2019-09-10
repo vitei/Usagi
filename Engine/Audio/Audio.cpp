@@ -92,6 +92,29 @@ Audio::~Audio()
 	m_archives.clear();
 }
 
+void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount)
+{
+#if !DISABLE_SOUND
+
+	Archive archive;
+	str::Copy(archive.name, pszArchiveName, USG_MAX_PATH);
+
+	archive.ppSoundFiles = vnew(ALLOC_AUDIO)SoundFile*[uCount];
+
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		const SoundFileDef* pDef = &pSounds[i].def;
+		archive.ppSoundFiles[i] = m_platform.CreateSoundFile(pDef);
+		ASSERT(archive.ppSoundFiles[i] != NULL);
+		archive.ppSoundFiles[i]->InitRaw(pDef, pSounds[i].pRawData, pSounds[i].rawDataSize, this);
+		ASSERT(m_soundHashes[pDef->crc] == NULL);
+		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
+	}
+#endif
+
+	m_archives.push_back(archive);
+}
+
 void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName)
 {
 #if !DISABLE_SOUND

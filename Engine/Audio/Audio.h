@@ -35,6 +35,13 @@ public:
 		SoundObject		object;
 	};
 
+	struct CustomSound
+	{
+		SoundFileDef	def;
+		void*			pRawData;
+		size_t			rawDataSize;
+	};
+
 	Audio();
 	~Audio();
 
@@ -43,6 +50,9 @@ public:
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
 	void UnloadArchive(const char* pszArchiveName);
+
+	void LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount);
+
 	AudioType GetAudioType(uint32 uSoundId);
 	float GetVolume(uint32 uSoundId);
 	SoundHandle Prepare2DSound(uint32 crc, const float fVolume, bool bPlay=true );
