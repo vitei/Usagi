@@ -40,7 +40,8 @@ void SoundObject_ps::Reset()
 
 void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 {
-	if( FAILED( Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice( &m_pSourceVoice, &waveFile.GetFormat() ) ) )
+	HRESULT result = Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat());
+	if( FAILED( result ) )
 	{
 		ASSERT(false);
 		return;

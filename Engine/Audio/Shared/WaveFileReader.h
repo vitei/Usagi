@@ -24,6 +24,7 @@ public:
     WaveFileReader();
     WaveFileReader(const char* pPathName);
     ~WaveFileReader();
+	void Initialize(const void* pData, memsize size);
     void Initialize(const char* pPathName);
     void Finalize();
     sint64 GetDataSize() const { return m_DataSize; }
@@ -36,10 +37,19 @@ public:
 	bool GetLooped() const { return m_bLooped; }
 	uint32 GetLoopStart() const { return m_loopStart; }
 	uint32 GetLoopLength() const { return m_loopLength; }
+	
+	void SeekPos(size_t pos) { m_pCurr = &m_pData[pos]; }
+	void Read(size_t size, void* pDst) { usg::MemCpy(pDst, m_pCurr, size); m_pCurr += size; }
+	void AdvanceBytes(size_t size) { m_pCurr += size; }
+	size_t GetPos() { return (size_t)(m_pCurr - m_pData); }
 
 private:
 
-	usg::File m_Reader;
+	const uint8*	m_pData;
+	const uint8*	m_pCurr;
+	size_t			m_rawDataSize;
+	bool			m_bOwnsData;
+
 	WaveFormat m_format;
 
 	bool m_bLooped;
