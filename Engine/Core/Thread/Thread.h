@@ -29,8 +29,8 @@ public:
 	void StartThread(uint32 uStackSize = Thread_ps::DEFAULT_THREAD_STACK_SIZE, int uPriority = Thread_ps::DEFAULT_THREAD_PRIORITY)
 	{
 		ASSERT( m_thread.IsValid() == false );
-		m_thread.StartThread( Thread::CallFromThread, this, uStackSize, uPriority );
 		m_bExec = true;
+		m_thread.StartThread( Thread::CallFromThread, this, uStackSize, uPriority );
 	}
 	
 
