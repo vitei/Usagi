@@ -57,6 +57,7 @@ inline void ASSERT(bool condition)
 // For file loading only, will quit the game on failure, even in release mode
 inline void FATAL_RELEASE_INT( const TCHAR* msg )
 {
+	ASSERT(false);
 	MessageBox(0, msg, TEXT("FATAL"), 0);
 }
 
