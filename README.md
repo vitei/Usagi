@@ -66,9 +66,12 @@ The open source release is currently in progress, for more details see the [intr
 
 Whilst the engine isn't that old the compilers targetted did mean we were unable to modern C++ features. Some of these features are creeping into the code base, but there is not currently an pro-active effort to update to C++ 11 - 17 (but such code is now welcome as no attempt is being made to maintain compatability with those systems).
 
-The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title, but work is progressing to demonstrate that potential. The engine is not where it needs to be; but there was a plan in place to get it there. Contributions to help meet the goals of the roadmap from those with relevant experience would be welcome.
+The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title, but work is progressing to demonstrate that potential. The engine is not where it needs to be; but there was a plan in place to get it there.   
+The majority of work is currently focused on a closed source project which is being used to ensure the engine functions as intended.  
+Contributions to help meet the goals of the roadmap from those with relevant experience would be welcome.  
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
+
 
 
 Getting up and running
