@@ -166,6 +166,26 @@ namespace usg {
 	void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	{
 		pDisplay->GetPlatform().SetAsTarget(m_cmdBuff);
+
+		if (uClearFlags & RenderTarget::RT_FLAG_COLOR_0)
+		{
+			uint32 uGlFlags = 0;
+			static VkClearAttachment clearAttachment = {};
+			VkClearValue clearVal = {};
+			clearAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			clearAttachment.clearValue = clearVal;
+			clearAttachment.colorAttachment = 0;
+
+			uint32 uWidth, uHeight;
+			pDisplay->GetActualDimensions(uWidth, uHeight, false);
+			VkClearRect clearRect = {};
+			clearRect.layerCount = 1;
+			clearRect.rect.offset = { 0, 0 };
+			clearRect.rect.extent = { uWidth, uHeight };
+
+			vkCmdClearAttachments(m_cmdBuff, 1, &clearAttachment, 1, &clearRect);
+
+		}
 	}
 
 	void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev)
