@@ -291,6 +291,26 @@ float Audio::GetVolume(uint32 uSoundId)
 	return 0.0f;
 }
 
+SoundHandle Audio::PrepareCustomStream(const StreamingSoundDef& def, float fVolume)
+{
+#if !DISABLE_SOUND	
+	SoundActorHandle emptyHndl;
+	SoundHandle handle;
+
+	handle = CreateSound(emptyHndl);
+	if (handle.IsValid())
+	{
+		//DEBUG_PRINT("[Audio::PrepareSound] %s\n", m_ppSoundFiles[uSoundId]->GetName().CStr());
+		handle.GetObject()->SetCustomData(def);
+		handle.SetVolume(fVolume);
+	}
+	return handle;
+
+#else
+	return SoundHandle();
+#endif
+}
+
 SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
 {
 #if !DISABLE_SOUND	

@@ -26,6 +26,7 @@ public:
 	float GetVolume() const;
 	bool IsValid() const { return GetPointer()!=NULL; }
 	void SetActiveTrack(uint32 uTrack, float fFadeTime);
+	void SubmitData(void* pData, memsize size);
 
 	SoundActorHandle GetSoundActor();
 
@@ -119,6 +120,15 @@ inline bool SoundHandle::IsPlaying() const
 	return false;
 }
 
+inline void SoundHandle::SubmitData(void* pData, memsize size)
+{
+	SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		pObject->SubmitData(pData, size);
+	}
+}
+
 inline void SoundHandle::SetActiveTrack(uint32 uTrack, float fTime)
 {
 	SoundObject* pObject = GetPointer();
@@ -139,6 +149,7 @@ inline SoundObject_ps* SoundHandle::GetPlatform()
 	}
 	return NULL;
 }
+
 
 inline SoundActorHandle SoundHandle::GetSoundActor()
 {

@@ -28,6 +28,8 @@ namespace usg
 		virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) override;
 
 	protected:
+		virtual void PreModeUpdate(float fElapsed) {}
+		virtual void OverlayRender(usg::GFXContext* pImmContext, Display* pDisplay, IHeadMountedDisplay* pHMD) {}
 		void StartNextMode(usg::GFXDevice* pDevice);
 		virtual uint32 GetNextMode() const = 0;
 		virtual void ModeFinished() = 0;

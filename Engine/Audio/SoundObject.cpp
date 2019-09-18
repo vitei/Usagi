@@ -20,8 +20,15 @@ void SoundObject::Reset()
 	m_fScaledFileVolume = 1.0f;
 	m_fade.Reset();
 	m_platform.Reset();
+	m_bCustomData = false;
 }
 
+
+void SoundObject::SetCustomData(const struct StreamingSoundDef& def)
+{
+	m_bCustomData = true;
+	m_platform.SetCustomData(def);
+}
 
 void SoundObject::SetSoundFile(const SoundFile* pSoundFile)
 {

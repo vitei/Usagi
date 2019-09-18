@@ -90,6 +90,10 @@ namespace usg
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)
 	{
+		if (m_pActiveMode)
+		{
+			m_pActiveMode->CleanUp(pDevice);
+		}
 		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode());
 #ifdef USE_THREADED_LOADING
 		m_pInternalData->m_pInitThread->StartThread(4096 * 10);
@@ -108,6 +112,8 @@ namespace usg
 		bool bFinished = true;
 		usg::Fader::Inst()->Update(pDevice);
 		m_debug.Update(fElapsed);
+
+		PreModeUpdate(fElapsed);
 
 		switch (m_eState)
 		{
@@ -212,6 +218,7 @@ namespace usg
 		{
 			pImmContext->RenderToDisplay(pDisplay);
 		}
+		OverlayRender(pImmContext, pDisplay, pHMD);
 		m_debugRender.Draw(pImmContext);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);

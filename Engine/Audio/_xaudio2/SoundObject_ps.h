@@ -20,6 +20,7 @@ public:
 
 	void Init(Audio* pAudio);
 	void SetSoundFile(WaveFile* pWaveFile, bool bPositional, bool bLoop);
+	void SetCustomData(const struct StreamingSoundDef& def);
 	void Reset();
 	void Update(const SoundObject* pParent);
 	bool IsPlaying() const;
@@ -28,12 +29,14 @@ public:
 
 	void BindWaveFile(WaveFile& waveFile, uint32 uPriority);
 	void SetActiveTrack(uint32 uTrack, float fLerpTime) {  }
+	void SubmitData(void* pData, memsize size);
 private:
 
 	void Start();
 	void Stop();
 	void Pause();
 	
+	class XAudioVoiceCallback* m_pCallback;
 	WaveFile*				m_pSoundFile;
 	bool					m_bLooping;
 	bool					m_bPositional;
@@ -42,6 +45,7 @@ private:
 	uint32					m_uChannels;
 	bool					m_bPaused;
 	bool					m_bValid;
+	bool					m_bCustomData;
 };
 
 }

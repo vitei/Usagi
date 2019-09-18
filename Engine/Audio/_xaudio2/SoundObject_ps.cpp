@@ -3,11 +3,27 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Audio/Audio.h"
+#include "Engine/Audio/SoundCallbacks.h"
 #include "SoundObject_ps.h"
 
 namespace usg{
 
 
+	class XAudioVoiceCallback : public IXAudio2VoiceCallback
+	{
+	public:
+		XAudioVoiceCallback(SoundCallbacks* pIn) { pCallbackInt = pIn; }
+
+		void STDMETHODCALLTYPE OnStreamEnd() { pCallbackInt->StreamEnd(); }
+		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { pCallbackInt->PassedEnd(); }
+		void STDMETHODCALLTYPE OnVoiceProcessingPassStart(UINT32 samples) { }
+		void STDMETHODCALLTYPE OnBufferEnd(void * context) { pCallbackInt->BufferEnd(); }
+		void STDMETHODCALLTYPE OnBufferStart(void * context) { pCallbackInt->BufferStart(); }
+		void STDMETHODCALLTYPE OnLoopEnd(void * context) { pCallbackInt->LoopEnd(); }
+		void STDMETHODCALLTYPE OnVoiceError(void * context, HRESULT Error) {}
+
+		SoundCallbacks* pCallbackInt;
+	};
 
 SoundObject_ps::SoundObject_ps()
 {
@@ -15,6 +31,8 @@ SoundObject_ps::SoundObject_ps()
 	m_uChannels = 0;
 	m_bValid = false;
 	m_bPaused = false;
+	m_bCustomData = false;
+	m_pCallback = nullptr;
 }
 
 SoundObject_ps::~SoundObject_ps()
@@ -35,6 +53,11 @@ void SoundObject_ps::Reset()
 		m_pSourceVoice = NULL;
 		m_bValid = false;
 		m_bPaused = false;
+	}
+	if (m_pCallback)
+	{
+		vdelete m_pCallback;
+		m_pCallback = nullptr;
 	}
 }
 
@@ -68,8 +91,44 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 		return;
 	}
 
+	m_bCustomData = false;
 	m_bValid = true;
 }
+
+void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
+{
+	WAVEFORMATEX format = { 0 };
+	format.wFormatTag = WAVE_FORMAT_PCM;
+	format.nChannels = def.uChannels;
+	format.wBitsPerSample = def.uBitsPerSample;
+	format.nSamplesPerSec = def.uSampleRate;
+	format.nBlockAlign = format.wBitsPerSample / 8 * format.nChannels;
+	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+	if (def.pCallbacks)
+	{
+		m_pCallback = vnew(ALLOC_AUDIO) XAudioVoiceCallback(def.pCallbacks);
+	}
+	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback);
+
+	m_bCustomData = true;
+}
+
+void SoundObject_ps::SubmitData(void* pData, memsize size)
+{
+	if (m_bCustomData)
+	{
+		XAUDIO2_BUFFER buffer = { 0 };
+		buffer.AudioBytes = (uint32)size;
+		buffer.pAudioData = (const BYTE*)pData;
+		m_pSourceVoice->SubmitSourceBuffer(&buffer);
+	}
+	else
+	{
+		// Trying to add data to a sound loaded from file
+		ASSERT(false);
+	}
+}
+
 
 void SoundObject_ps::SetSoundFile(WaveFile* pWaveFile, bool bPositional, bool bLoop)
 {

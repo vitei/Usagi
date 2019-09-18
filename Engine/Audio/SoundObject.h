@@ -20,6 +20,7 @@ public:
 	~SoundObject() {}
 
 	void Init(Audio* pAudio) { m_platform.Init(pAudio); }
+	void SetCustomData(const struct StreamingSoundDef& def);
 	void Reset();
 	void Start(float fTime = 0.0f);
 	void Pause(float fTime = 0.3f);
@@ -60,6 +61,8 @@ public:
 
 	void SetActiveTrack(uint32 uTrack, float fLerpTime) { m_platform.SetActiveTrack(uTrack, fLerpTime);  }
 
+	void SubmitData(void* pData, memsize size) { m_platform.SubmitData(pData, size); }
+
 private:
 
 
@@ -76,6 +79,7 @@ private:
 	float				m_fAtten;
 	float				m_fPitch;
 	uint32				m_uPriority;
+	bool				m_bCustomData;
 };
 
 inline bool SoundObject::GetLooping() const

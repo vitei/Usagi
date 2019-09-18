@@ -25,6 +25,15 @@ class SoundHandle;
 class Vector3f;
 class SoundFile;
 class IHeadMountedDisplay;
+class SoundCallbacks;
+
+struct StreamingSoundDef
+{
+	uint32 uChannels = 2;
+	uint32 uBitsPerSample = 16;
+	uint32 uSampleRate = 4800;
+	SoundCallbacks* pCallbacks = nullptr;
+};
 
 class Audio : public Singleton<Audio>
 {
@@ -55,6 +64,7 @@ public:
 
 	AudioType GetAudioType(uint32 uSoundId);
 	float GetVolume(uint32 uSoundId);
+	SoundHandle PrepareCustomStream(const StreamingSoundDef& def, float fVolume = 1.0f);
 	SoundHandle Prepare2DSound(uint32 crc, const float fVolume, bool bPlay=true );
 	SoundHandle Prepare3DSound(SoundActorHandle& actorHandle, uint32 crc, const float fVolume, bool bPlay = true);
 	// For when we want a one shot sound that isn't going to move with an actor
