@@ -30,6 +30,8 @@ public:
 	void BindWaveFile(WaveFile& waveFile, uint32 uPriority);
 	void SetActiveTrack(uint32 uTrack, float fLerpTime) {  }
 	void SubmitData(void* pData, memsize size);
+
+	uint64 GetSamplesPlayed() const;
 private:
 
 	void Start();

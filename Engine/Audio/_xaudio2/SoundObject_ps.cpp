@@ -228,5 +228,15 @@ bool SoundObject_ps::IsPlaying() const
 	return voiceState.BuffersQueued > 0;
 }
 
+uint64 SoundObject_ps::GetSamplesPlayed() const
+{
+	if (!m_bValid)
+		return 0;
+
+	XAUDIO2_VOICE_STATE voiceState;
+	m_pSourceVoice->GetState(&voiceState);
+	return voiceState.SamplesPlayed;
+}
+
 
 }

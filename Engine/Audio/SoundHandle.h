@@ -27,6 +27,7 @@ public:
 	bool IsValid() const { return GetPointer()!=NULL; }
 	void SetActiveTrack(uint32 uTrack, float fFadeTime);
 	void SubmitData(void* pData, memsize size);
+	uint64 GetSamplesPlayed() const;
 
 	SoundActorHandle GetSoundActor();
 
@@ -39,8 +40,6 @@ public:
 
 private:
 };
-
-
 
 inline void SoundHandle::Start(float fTime)
 {
@@ -118,6 +117,16 @@ inline bool SoundHandle::IsPlaying() const
 		return pObject->IsPlaying();
 	}
 	return false;
+}
+
+inline uint64 SoundHandle::GetSamplesPlayed() const
+{
+	const SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		return pObject->GetSamplesPlayed();
+	}
+	return 0;
 }
 
 inline void SoundHandle::SubmitData(void* pData, memsize size)
