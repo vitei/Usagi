@@ -47,6 +47,7 @@ public:
 
 	void SetActor(SoundActorHandle actor) { m_soundActor = actor; }
 	void SetSoundFile(const SoundFile* pSoundFile);
+	AudioType GetAudioType() const { return m_pSoundFile ? m_pSoundFile->GetAudioType() : AUDIO_TYPE_CUSTOM; }
 	const SoundFile* GetSoundFile() { return m_pSoundFile; }
 	PLAY_STATE GetRequestedPlayState() const { return m_ePlayState; }
 	void ClearRequestedPlayState() { m_ePlayState = PLAY_STATE_NONE; }

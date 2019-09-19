@@ -251,7 +251,7 @@ void Audio::Update(float fElapsed)
 			SetMixParams(pSound->object.GetSoundActor().GetPosition(), pSound->object.GetSoundActor().GetVelocity(), &pSound->object );
 		}
 
-		if ( !(pSound->object.GetRequestedPlayState() == PLAY_STATE_PLAYING) || !(m_bPaused[pSound->object.GetSoundFile()->GetAudioType()]))
+		if ( !(pSound->object.GetRequestedPlayState() == PLAY_STATE_PLAYING) || !(m_bPaused[pSound->object.GetAudioType()]))
 		{
 			pSound->object.Update(fElapsed);
 			pSound->object.ClearRequestedPlayState();

@@ -110,6 +110,7 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 	}
 	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback);
 
+	m_bValid = true;
 	m_bCustomData = true;
 }
 
