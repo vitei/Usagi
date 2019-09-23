@@ -58,6 +58,14 @@ namespace usg
 		const char* GetDepthEffectName() const;
 		const char* GetOmniDepthEffectName() const;
 
+		// Utility functions for basic vertex setup (only suitable for small numbers, e.g. HUD)
+		bool SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVerCount = 1) const;
+		template <class VariableType>
+		bool SetVertexAttribute(void* pVertData, const char* szName, VariableType var, uint32 uVertexId, uint32 uVerCount = 1) const
+		{
+			return SetVertexAttribute(pVertData, szName, (void*)&var, sizeof(VariableType), uVertexId, uVerCount);
+		}
+
 		const static ResourceType StaticResType = ResourceType::CUSTOM_EFFECT;
 
 	private:

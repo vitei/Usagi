@@ -310,5 +310,30 @@ namespace usg
 		return m_header.omniShadowEffectName;
 	}
 
+	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const
+	{
+		memsize uOffsetBase = uVertexId * GetVertexSize();
+		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+		{
+			if (str::Compare(szName, m_pAttributes[i].hint))
+			{
+				uOffsetBase += m_pVertexDecl[i].uOffset;
+				if ((m_pAttributes[i].uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]) < uSrcSize)
+				{
+					ASSERT(false);
+					return false;
+				}
+				break;
+			}
+		}
+
+		for (uint32 i = 0; i < uVertCount; i++)
+		{
+			usg::MemCpy((uint8*)(pVertData)+uOffsetBase, pSrc, uSrcSize);
+			uOffsetBase += GetVertexSize();
+		}
+		return true;
+	}
+
 }
 
