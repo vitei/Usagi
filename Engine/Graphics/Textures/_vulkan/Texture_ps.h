@@ -12,6 +12,7 @@ namespace usg {
 class Texture;
 class Effect;
 class GFXDevice;
+class GFXContext;
 typedef struct _TexturePak TexturePak;
 
 class Texture_ps
@@ -30,6 +31,7 @@ public:
 
 	bool Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation);
 	bool Load(GFXDevice* pDevice, const TexturePak& pak, const void* pData) { ASSERT(false); return false; }	// Not yet implemented on PC
+	void SetRawData(GFXDevice* pDevice, GFXContext* pCtx, void* pData);
 
 	static bool FileExists(const char* szFileName);
 	void NotifyOfTextureID(uint32 uTexID) { }
@@ -54,7 +56,18 @@ private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
+	void InitStaging(GFXDevice* pDevice);
+	void FreeStaging(GFXDevice* pDevice);
 
+	struct TexStaging
+	{
+		VkMemoryRequirements memReq;
+		VkBuffer		buffer;
+		VkDeviceMemory	memory;
+		bool			bValid = false;
+	};
+
+	TexStaging		m_staging;
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;
 	VkImageView		m_imageView;
@@ -66,6 +79,7 @@ private:
 	uint32			m_uHeight;
 	uint32			m_uDepth;
 	uint32			m_uFaces;
+	uint32			m_uBpp;
 };
 
 }

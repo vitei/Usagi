@@ -23,7 +23,8 @@ public:
 	void UpdateTextureID();
 
 	// TODO: Have create raw pass a texture format. For now we just assume RGBA8
-	void CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels);
+	void CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels, bool bDynamic = false);
+	void SetRawData(GFXDevice* pDevice, GFXContext* pContext, void* pData) { m_platform.SetRawData(pDevice, pContext, pData); }
 	static bool FileExists(const char* szFileName) { return Texture_ps::FileExists(szFileName); }
 
 	void CleanUp(GFXDevice* pDevice);
@@ -60,9 +61,9 @@ private:
 };
 
 // FIXME: Remove this when we only have one method of loading
-inline void Texture::CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels)
+inline void Texture::CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels, bool bDynamic)
 {
-	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels);
+	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels, TD_TEXTURE2D, bDynamic ? TU_FLAG_SHADER_READ | TU_FLAG_TRANSFER_DST : TU_FLAG_SHADER_READ);
 	SetReady(true);
 }
 
