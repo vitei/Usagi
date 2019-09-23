@@ -42,13 +42,15 @@ namespace usg
 
 
 		uint32 i = 0;
+		uint32 j = 0;
 		while (i < m_uFileSize)
 		{
-			m_pData[i+0] = pSrc[i+2];       //grab blue
-			m_pData[i+1] = pSrc[i+1];		//assign red to blue
-			m_pData[i+2] = pSrc[i+0];		//assign blue to red
+			m_pData[i+0] = pSrc[j+2];       //grab blue
+			m_pData[i+1] = pSrc[j+1];		//assign red to blue
+			m_pData[i+2] = pSrc[j+0];		//assign blue to red
 
 			i += 3;     //skip to next blue byte
+			j += uSrcOffset;
 		}
 	}
 
