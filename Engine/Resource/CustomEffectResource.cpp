@@ -313,18 +313,25 @@ namespace usg
 	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const
 	{
 		memsize uOffsetBase = uVertexId * GetVertexSize();
+		bool bFound = false;
 		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
 		{
-			if (str::Compare(szName, m_pAttributes[i].hint))
+			if (str::Compare(szName, m_pAttributes[i].name))
 			{
 				uOffsetBase += m_pVertexDecl[i].uOffset;
-				if ((m_pAttributes[i].uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]) < uSrcSize)
+				if ((m_pVertexDecl[i].uCount * g_uConstantSize[m_pVertexDecl[i].eType]) < uSrcSize)
 				{
 					ASSERT(false);
 					return false;
 				}
+				bFound = true;
 				break;
 			}
+		}
+		if (!bFound)
+		{
+			ASSERT(false);
+			return false;
 		}
 
 		for (uint32 i = 0; i < uVertCount; i++)
