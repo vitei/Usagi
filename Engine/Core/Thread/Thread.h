@@ -83,6 +83,8 @@ public:
 	static void Sleep( uint32 uMilliseconds ) { Thread_ps::Sleep( uMilliseconds ); }
 	
 protected:
+	bool		ExecEnabled() const { return m_bExec; }
+
 	uint32		m_uDelay;	// Hide a stutter
 
 private:
