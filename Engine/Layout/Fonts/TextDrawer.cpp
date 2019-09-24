@@ -291,8 +291,9 @@ namespace usg
 			pVert++;
 
 			uCharsThisLine++;
-			fPosX += vDimensions.x + font->GetCharacterSpacing() * vScale.x;
-			fLineWidth += vDimensions.x;
+			float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
+			fPosX += fCharWidth;
+			fLineWidth += fCharWidth;
 			// We can't manage anymore
 			if (uFoundCharCount >= MAX_CHARS)
 				break;
