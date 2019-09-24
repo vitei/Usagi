@@ -95,6 +95,7 @@ namespace usg
 
 		const uint32 newStrLength = u8Str.CharCount();
 
+		/*
 		// Null string...
 		if( newStrLength == 0 )
 		{
@@ -102,7 +103,7 @@ namespace usg
 			DEBUG_PRINT("Text warning: Tried to set a string of zero length.\n");
 #endif
 			return false;
-		}
+		}*/
 
 		if( newStrLength > m_drawer.GetMaxStringLength() )
 		{
