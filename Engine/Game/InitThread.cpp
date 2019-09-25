@@ -40,8 +40,8 @@ namespace usg
 		{
 			vdelete *m_ppLoadMode;
 			*m_ppLoadMode = NULL;
-			m_pDevice->ClearDynamicResources();
 			usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
+			m_pDevice->ClearDynamicResources();
 			mem::FreeToLastTag();
 		}
 
