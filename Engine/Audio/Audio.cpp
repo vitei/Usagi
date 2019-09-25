@@ -451,7 +451,7 @@ void Audio::StopAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType)
+		if ((*it)->object.GetAudioType() == eType)
 		{
 			(*it)->hndl.Stop(fTime);
 		}
@@ -463,7 +463,7 @@ void Audio::PauseAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType)
+		if ((*it)->object.GetAudioType() == eType)
 		{
 			(*it)->hndl.Pause(fTime);
 		}
@@ -475,7 +475,7 @@ void Audio::ResumeAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType && (*it)->object.IsPaused())
+		if ((*it)->object.GetAudioType() == eType && (*it)->object.IsPaused())
 		{
 			(*it)->hndl.Start(fTime);
 		}
