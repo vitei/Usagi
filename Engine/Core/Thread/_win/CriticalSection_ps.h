@@ -13,7 +13,7 @@ namespace usg
 class CriticalSection_ps
 {
 public:	
-	CriticalSection_ps() {  }
+	CriticalSection_ps() { InitializeCriticalSection(&m_cs); }
 	~CriticalSection_ps() {  }
 
 

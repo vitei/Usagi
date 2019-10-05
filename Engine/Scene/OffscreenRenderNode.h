@@ -22,7 +22,6 @@ namespace usg
 		virtual bool Draw(GFXContext* pContext) = 0;
 
 	private:
-		PRIVATIZE_COPY(OffscreenRenderNode);
 
 	};
 

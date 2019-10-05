@@ -115,8 +115,7 @@ public:
 	static void Unmount(FILE_TYPE eMode, bool bSave) { File_ps::Unmount(eMode, bSave); }
 
 private:
-	File(const File& File) {};
-	const File& operator=(const File& src);
+	PRIVATIZE_COPY(File)
 
 	static FILE_INIT_RESULT m_sInitResult;
 

@@ -9,7 +9,6 @@ using namespace usg;
 CatchupEntities::CatchupEntities()
 	: m_pMem(nullptr)
 	, m_uQueueSize(0)
-	, m_catchupQueue{0}
 {
 	
 }

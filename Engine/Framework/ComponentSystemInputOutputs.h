@@ -15,7 +15,7 @@ static const size_t SYSTEM_DEFAULT_POOL_SIZE = 100;
 struct GenericInputOutputs : public HierearchyNode<GenericInputOutputs>
 {
 	GenericInputOutputs(void* inputs, void* outputs)
-		: genericInputs(inputs), genericOutputs(outputs) {}
+		: entity(nullptr), genericInputs(inputs), genericOutputs(outputs) {}
 	Entity      entity;
 	void* const genericInputs;
 	void* const genericOutputs;

@@ -61,6 +61,7 @@ namespace usg {
 	}
 
 	File::File(void)
+		: m_eAccessMode(FILE_ACCESS_READ)
 	{
 #ifdef DEBUG_FILE_READING
 		m_pProfile = NULL;

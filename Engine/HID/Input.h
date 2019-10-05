@@ -35,8 +35,6 @@ public:
 
 	static Input_ps&	GetPlatform();
 private:
-
-	PRIVATIZE_COPY(Input);
 };
 
 }

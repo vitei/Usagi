@@ -98,8 +98,8 @@ FILE_INIT_RESULT File_ps::InitFileSystem()
 }
 
 File_ps::File_ps()
+	: m_pFile(nullptr)
 {
-	m_pFile = NULL;
 }
 
 File_ps::File_ps(const char* szFileName, FILE_ACCESS_MODE eMode, FILE_TYPE eFileType)

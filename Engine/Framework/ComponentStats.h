@@ -33,12 +33,9 @@ private:
 		: uTotalBlocks(0)
 		, uTotalActiveComponents(0)
 		, uTotalActiveEntities(0)
+		, uComponentBitfield{0}
 		, bDirty(false)
 		{
-			for (uint32 i = 0; i < MAX_BITFIELD_SIZE; i++)
-			{
-				uComponentBitfield[i] = 0;
-			}
 		}
 
 		uint32	uTotalBlocks;

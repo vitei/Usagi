@@ -45,6 +45,7 @@ public:
 		, m_pPrevComponent(NULL)
 		, m_pNextComponent(NULL)
 		, m_uEntity(0)
+		, m_modifyId(0)
 		, m_bDidRunOnLoaded(false)
 		, m_bFreeRequested(false)
 	{}

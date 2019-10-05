@@ -42,8 +42,8 @@ public:
 	static void Unmount(FILE_TYPE eMode, bool bSave) {  }
 
 private:
-	File_ps(const File_ps& File) {};
-	const File_ps& operator=(const File_ps& src);
+	PRIVATIZE_COPY(File_ps)
+
 	FILE*	m_pFile;
 
 };
