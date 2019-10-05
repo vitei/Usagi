@@ -37,7 +37,7 @@ FbxAMatrix ToFbxMat(Matrix4x4 in)
 
 Vector4f ToVec4(FbxVector4 in)
 {
-	return Vector4f(in[0], in[1], in[2], in[3]);
+	return Vector4f((float)in[0], (float)in[1], (float)in[2], (float)in[3]);
 }
 
 FbxLoad::FbxLoad()

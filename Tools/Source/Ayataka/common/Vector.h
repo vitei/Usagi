@@ -17,7 +17,7 @@ public:
 	}
 
 	float calcLength( void ) {
-		return sqrt( ( x * x ) + ( y * y ) );
+		return sqrtf( ( x * x ) + ( y * y ) );
 	}
 
 	void normalize( void ) {
@@ -87,7 +87,7 @@ public:
 	}
 
 	float calcLength( void ) {
-		return sqrt( ( x * x ) + ( y * y ) + ( z * z ) );
+		return sqrtf( ( x * x ) + ( y * y ) + ( z * z ) );
 	}
 
 	void normalize( void ) {
