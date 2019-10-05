@@ -1233,14 +1233,18 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic)
 			{
 				if (pNode->GetNodeAttributeByIndex(uAttribId)->GetAttributeType() == FbxNodeAttribute::eMesh)
 				{
-					::exchange::Shape* pShape = NewShape(cmdl, pNode);
-					AddMesh(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId), bStatic);
-					RemoveDuplicateVertices();
-					// Now add the verts and indices
-					AddStreams(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId));
-					cmdl.AddShape(pShape);
-					::exchange::Mesh* pMesh = NewMesh(cmdl, pNode);
-					cmdl.AddMesh(pMesh);
+					FbxMesh* pAttribMesh = (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId);
+					if (pAttribMesh->GetPolygonCount() > 0)
+					{
+						::exchange::Shape* pShape = NewShape(cmdl, pNode);
+						AddMesh(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId), bStatic);
+						RemoveDuplicateVertices();
+						// Now add the verts and indices
+						AddStreams(cmdl, pShape, pNode, (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId));
+						cmdl.AddShape(pShape);
+						::exchange::Mesh* pMesh = NewMesh(cmdl, pNode);
+						cmdl.AddMesh(pMesh);
+					}
 				}
 			}
 			break;
