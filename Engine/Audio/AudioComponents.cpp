@@ -15,7 +15,7 @@ namespace usg
 	template<>
 	void OnActivate<SoundActorComponent>(Component<SoundActorComponent>& s)
 	{
-		s.GetRuntimeData().hndl = Audio::Inst()->CreateSoundActor(V3F_ZERO);
+		s.GetRuntimeData().hndl = Audio::Inst()->CreateSoundActor(Vector3f::ZERO);
 	}
 
 	template<>

@@ -27,6 +27,12 @@ class Vector3f
 		const Vector3f &divVector, float scalarValue );
 
 public:
+	static const Vector3f ZERO;
+	static const Vector3f ONE;
+	static const Vector3f X_AXIS;
+	static const Vector3f Y_AXIS;
+	static const Vector3f Z_AXIS;
+
 	Vector3f() {}
 	
 	Vector3f( float ax, float ay, float az )
@@ -72,7 +78,7 @@ public:
 	bool TryNormalise();
 	void GetNormalised(Vector3f& out) const;
 	Vector3f GetNormalised() const;
-	Vector3f GetNormalisedIfNZero(const Vector3f &vDefault = Vector3f(0.f, 0.0f, 0.0f)) const;
+	Vector3f GetNormalisedIfNZero(const Vector3f &vDefault = ZERO) const;
 
 	Vector3f Project(const Vector3f& norm) const;
 	
@@ -120,13 +126,6 @@ public:
 		};
 	};
 };
-
-
-static const Vector3f V3F_ZERO(0.0f, 0.0f, 0.0f);
-static const Vector3f V3F_ONE(1.0f, 1.0f, 1.0f);
-static const Vector3f V3F_X_AXIS(1.0f, 0.0f, 0.0f);
-static const Vector3f V3F_Y_AXIS(0.0f, 1.0f, 0.0f);
-static const Vector3f V3F_Z_AXIS(0.0f, 0.0f, 1.0f);
 
 
 // Accommodates C style functions so that the scalar can be on either side of the equation

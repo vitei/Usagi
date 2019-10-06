@@ -392,7 +392,7 @@ namespace usg
 		m_emission.Init(&m_emissionDef.emission.emissionRate);
 		const usg::particles::EmitterShapeDetails& shapeDef = m_pEmitterShape->GetDetails();
 		m_baseScale.Init(&m_emissionDef.particleScale.standardValue, 0.0f);
-		m_vVelocityOffset = V3F_ZERO;
+		m_vVelocityOffset = Vector3f::ZERO;
 		m_baseScale.SetMultiplier(m_fScale);
 
 		// Always on to silence warnings
@@ -773,7 +773,7 @@ namespace usg
 			Quaternionf q;
 			Vector3f dir = m_emissionDef.vVelocityDir;
 			dir.TryNormalise();
-			q.MakeVectorRotation( V3F_Y_AXIS, dir );
+			q.MakeVectorRotation(Vector3f::Y_AXIS, dir );
 			vVelocity = vVelocity * q;
 
 			vVelocityOut = ( vVelocityOut + vVelocity * m_dirVelocity.GetValue() ) * m_emissionDef.fSpeedRandomness;

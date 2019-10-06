@@ -13,7 +13,7 @@ namespace usg{
 class AudioListener
 {
 public:	
-	AudioListener() { m_fCullRadius = 6.0f; m_vVelocity = V3F_ZERO; m_fSoundSpeed = 340.f; m_fSpeakerRadius = 1.0f; }
+	AudioListener() { m_fCullRadius = 6.0f; m_vVelocity = Vector3f::ZERO; m_fSoundSpeed = 340.f; m_fSpeakerRadius = 1.0f; }
 	~AudioListener() {}
 
 	void Init() { m_platform.Init(); }

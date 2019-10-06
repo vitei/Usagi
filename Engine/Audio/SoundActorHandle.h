@@ -52,7 +52,7 @@ inline Vector3f SoundActorHandle::GetPosition() const
 	{
 		return pActor->GetPosition();
 	}
-	return V3F_ZERO;
+	return Vector3f::ZERO;
 }
 
 inline Vector3f SoundActorHandle::GetVelocity() const
@@ -62,7 +62,7 @@ inline Vector3f SoundActorHandle::GetVelocity() const
 	{
 		return pActor->GetVelocity();
 	}
-	return V3F_ZERO;
+	return Vector3f::ZERO;
 }
 
 inline SoundActor_ps* SoundActorHandle::GetPlatform3D()

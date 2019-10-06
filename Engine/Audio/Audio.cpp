@@ -713,7 +713,7 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			Vector3f vTransPos = (*it)->GetViewMatrix().TransformVec3(vPos, 1.0f);
 			Vector3f vTransNorm(vTransPos.x, 0.0f, vTransPos.z);
 			float fTransPosMag = vTransNorm.Magnitude();
-			vTransNorm = vTransNorm.GetNormalisedIfNZero(V3F_Z_AXIS);
+			vTransNorm = vTransNorm.GetNormalisedIfNZero(Vector3f::Z_AXIS);
 
 			float fAngle = acosf(vTransNorm.z) * Math::Sign(vTransNorm.x);
 			float fSpeakerRadius = (*it)->GetSpeakerRadius();

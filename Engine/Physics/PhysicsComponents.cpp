@@ -518,10 +518,10 @@ namespace usg
 		auto pScene = handles.pPhysicsScene;
 
 		Vector3f vToCircle;
-		Vector3f vOtherVec = V3F_Z_AXIS;
-		if (DotProduct(c->vDirection, V3F_Z_AXIS) > 0.99f)
+		Vector3f vOtherVec = Vector3f::Z_AXIS;
+		if (DotProduct(c->vDirection, Vector3f::Z_AXIS) > 0.99f)
 		{
-			vOtherVec = V3F_X_AXIS;
+			vOtherVec = Vector3f::X_AXIS;
 		}
 		vToCircle = CrossProduct(c->vDirection, vOtherVec).GetNormalised()*c->fRadius;
 
@@ -661,7 +661,7 @@ namespace usg
 
 		physx::PxTransform t1(physx::PxIdentity);
 		Quaternionf q1;
-		q1.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		q1.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
 		t1.q = ToPhysXQuaternion(q1);
 		t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity(), handles).position);
 
@@ -670,7 +670,7 @@ namespace usg
 		// myTrans.Modify().bInheritFromParent = false;
 		physx::PxTransform t2(physx::PxIdentity);
 		Quaternionf q2;
-		q2.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		q2.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
 		t2.q = ToPhysXQuaternion(q2);
 		
 		auto pJoint = physx::PxRevoluteJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
@@ -783,7 +783,7 @@ namespace usg
 		physx::PxTransform t1(physx::PxIdentity);
 		t1.p = ToPhysXVec3(myTransformRelativeToConnectedParent.position);
 		Quaternionf q1;
-		q1.MakeVectorRotation(V3F_X_AXIS, c->vAxis);
+		q1.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
 		t1.q = ToPhysXQuaternion(q1);
 
 		physx::PxTransform t2(physx::PxIdentity);

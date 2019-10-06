@@ -472,9 +472,9 @@ namespace usg
 			// FIXME: Animations should contrain unmodified bones for lerping perposes
 			if (m_pBoneInfo[uBone].fTotalWeighting > 0.0f)
 			{
-				m_pBoneInfo[uBone].trans.vPos = V3F_ZERO;
+				m_pBoneInfo[uBone].trans.vPos = Vector3f::ZERO;
 				m_pBoneInfo[uBone].trans.qRot.Assign(0.0f, 0.0f, 0.0f, 0.0f);
-				m_pBoneInfo[uBone].trans.vScale = V3F_ZERO;
+				m_pBoneInfo[uBone].trans.vScale = Vector3f::ZERO;
 			}
 		}
 

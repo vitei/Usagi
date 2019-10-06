@@ -30,7 +30,7 @@ namespace usg
 		WheelHelper()
 		{
 			bImmovable = false;
-			vOffsetFromHub = V3F_ZERO;
+			vOffsetFromHub = Vector3f::ZERO;
 		}
 	};
 
@@ -463,13 +463,13 @@ namespace usg
 			{
 				for (physx::PxU32 i = 0; i < uNumWheels; i++)
 				{
-					wheelConvexMeshes[i] = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(wheelHelpers[i].vOffsetFromHub, V3F_X_AXIS, wheelRadii[i], wheelWidths[i], 8);
+					wheelConvexMeshes[i] = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(wheelHelpers[i].vOffsetFromHub, Vector3f::X_AXIS, wheelRadii[i], wheelWidths[i], 8);
 					wheelMaterials[i] = CreateMaterial(vehicle->wheelMaterial, pPhysics);
 				}
 			}
 			else
 			{
-				physx::PxConvexMesh* pWheelMesh = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(V3F_ZERO, V3F_X_AXIS, vehicle->fWheelRadius, vehicle->fWheelWidth, 8);
+				physx::PxConvexMesh* pWheelMesh = handles.pPhysicsScene->pMeshCache->GetCylinderMesh(Vector3f::ZERO, Vector3f::X_AXIS, vehicle->fWheelRadius, vehicle->fWheelWidth, 8);
 				for (physx::PxU32 i = 0; i < uNumWheels; i++)
 				{
 					wheelConvexMeshes[i] = pWheelMesh;
@@ -645,7 +645,7 @@ namespace usg
 							col.m_rgba[0] = (rtd.wheelsData.wheel[i].uGroundMaterialMask % 256) / 255.0f;
 
 							const auto qVehicleRotation = ToUsgQuaternionf(inputs.vehicleCollider.GetRuntimeData().pVehicleDrive->getRigidDynamicActor()->getGlobalPose().q);
-							const auto vRight = V3F_X_AXIS*qVehicleRotation;
+							const auto vRight = Vector3f::X_AXIS*qVehicleRotation;
 							const float32 fRadius = inputs.vehicleCollider.GetRuntimeData().wheelsData.wheel[i].fRadius;
 							Debug3D::GetRenderer()->AddLine(ToUsgVec3(wheelTransform.p) - vRight*0.55f, ToUsgVec3(wheelTransform.p) + vRight*0.55f, Color::Red, 0.01f);
 							Debug3D::GetRenderer()->AddSphere(ToUsgVec3(wheelTransform.p), fRadius, wheelRes.isInAir ? Color(1, 0, 0, 0.25f) : col);

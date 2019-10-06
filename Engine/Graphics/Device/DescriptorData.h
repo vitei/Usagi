@@ -15,7 +15,7 @@ class ConstantSet;
 
 struct DescriptorData
 {
-	DescriptorType eDescType;
+	DescriptorType eDescType = DESCRIPTOR_TYPE_INVALID;
 
 	// We can't (shouldn't) unionise smart pointers
 	struct TexData
@@ -24,9 +24,9 @@ struct DescriptorData
 		SamplerHndl			sampler;
 	} texData;
 
-	const ConstantSet*		pConstBuffer;
+	const ConstantSet*		pConstBuffer = nullptr;
 
-	uint32					uLastUpdateIdx;
+	uint32					uLastUpdateIdx = USG_INVALID_ID;
 
 	
 	// Other types use a raw pointer to the appropriate type
