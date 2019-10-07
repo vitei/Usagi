@@ -66,7 +66,7 @@ namespace usg
 			break;
 			case WINDOW_TYPE_COLLAPSABLE:
 			{
-				m_bCollapsed = !ImGui::CollapsingHeader(m_szName, 0);// NULL, true, !m_bDefaultCollapsed);
+				m_bCollapsed = !ImGui::CollapsingHeader(m_szName, m_bDefaultCollapsed ? 0 : ImGuiTreeNodeFlags_DefaultOpen);// NULL, true, !m_bDefaultCollapsed);
 				if( m_bCollapsed )
 					return false;
 			}
