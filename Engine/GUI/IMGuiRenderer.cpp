@@ -81,19 +81,20 @@ void IMGuiRenderer::DrawInt(ImDrawData* pDrawData)
 	for (int n = 0; n < pDrawData->CmdListsCount; n++)
 	{
 		const ImDrawList* cmd_list = pDrawData->CmdLists[n];
-		for (int i = 0; i < cmd_list->VtxBuffer.size(); i++)
+		for (int i = 0; i < cmd_list->IdxBuffer.size(); i++)
 		{
-			pVert->u = cmd_list->VtxBuffer[i].uv.x;
-			pVert->v = 1.0f - cmd_list->VtxBuffer[i].uv.y;
+			const ImDrawVert& vert = cmd_list->VtxBuffer[cmd_list->IdxBuffer[i]];
+			pVert->u = vert.uv.x;
+			pVert->v = 1.0f - vert.uv.y;
 
-			pVert->c.AssignRGBA32(cmd_list->VtxBuffer[i].col);
-			pVert->x = cmd_list->VtxBuffer[i].pos.x;
-			pVert->y = cmd_list->VtxBuffer[i].pos.y;
+			pVert->c.AssignRGBA32(vert.col);
+			pVert->x = vert.pos.x;
+			pVert->y = vert.pos.y;
 			pVert->z = fZPos;
 
 			pVert++;
 		}
-		uVertCount += (uint32)cmd_list->VtxBuffer.size();
+		uVertCount += (uint32)cmd_list->IdxBuffer.size();
 	}
 	m_vertexBuffer.SetContents(g_pDevice, pVerts, uVertCount);
 
@@ -102,6 +103,7 @@ void IMGuiRenderer::DrawInt(ImDrawData* pDrawData)
 
 	// Render command lists
 	uint32 uScreenHeight = (uint32)pContext->GetActiveViewport().height;
+	int Offset = 0;
 	for (int n = 0; n < pDrawData->CmdListsCount; n++)
 	{
 		const ImDrawList* cmd_list = pDrawData->CmdLists[n];
@@ -121,7 +123,8 @@ void IMGuiRenderer::DrawInt(ImDrawData* pDrawData)
 				pContext->SetDescriptorSet((DescriptorSet*)pcmd->TextureId, 1);
 				pContext->SetScissorRect((uint32)pcmd->ClipRect.x, (uint32)(uScreenHeight - pcmd->ClipRect.w), (uint32)(pcmd->ClipRect.z - pcmd->ClipRect.x), (uint32)(pcmd->ClipRect.w - pcmd->ClipRect.y));
 				//g_pd3dDeviceContext->RSSetScissorRects(1, &r); 
-				pContext->DrawImmediate(pcmd->ElemCount, pcmd->VtxOffset );
+				pContext->DrawImmediate(pcmd->ElemCount, pcmd->VtxOffset + Offset);
+				Offset += pcmd->ElemCount;
 			}
 		}
 	}
