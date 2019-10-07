@@ -9,8 +9,9 @@
 
 namespace usg
 {
-	GUIWindow::GUIWindow() :
-		m_items(20)
+	GUIWindow::GUIWindow() 
+		: m_menuBar(false)
+		, m_items(20)
 	{
 		m_fScale = 1.0f;
 		m_bShowBorders = false;
@@ -23,7 +24,7 @@ namespace usg
 
 	}
 
-	void GUIWindow::Init(const char* szName, const Vector2f& vPos, const Vector2f& vSize, uint32 uMaxItems, WindowType eType)
+	void GUIWindow::Init(const char* szName, const Vector2f& vPos, const Vector2f& vSize, WindowType eType)
 	{
 		m_vPosition = vPos;
 		m_vSize = vSize;
@@ -37,12 +38,6 @@ namespace usg
 	{
 		m_items.AddToEnd(pItem);
 	}
-
-	void GUIWindow::SetVisible(bool bVisible)
-	{
-		m_bVisible = bVisible;
-	}
-
 
 	bool GUIWindow::UpdateAndAddToDrawList()
 	{
@@ -62,7 +57,7 @@ namespace usg
 				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiCond_Once);	// Don't allow our menus to be moved (for now)
 				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiCond_Once);
 				bool bReturn;
-				ImGui::Begin(m_szName, &bReturn, 0);
+				ImGui::Begin(m_szName, &bReturn, m_menuBar.IsVisible() ? ImGuiWindowFlags_MenuBar : 0);
 			}
 			break;
 			case WINDOW_TYPE_COLLAPSABLE:
@@ -76,6 +71,8 @@ namespace usg
 				ASSERT(false);
 		}	
 		
+		m_menuBar.UpdateAndAddToDrawList();
+
 		ImGui::PushItemWidth(150.f);
 		ImGui::SetWindowFontScale(m_fScale);
 		if(m_bVisible)

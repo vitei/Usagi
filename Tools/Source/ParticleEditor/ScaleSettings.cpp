@@ -18,7 +18,7 @@ void ScaleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	usg::Vector2f vWindowPos(340.0f, 600.0f);
 	usg::Vector2f vWindowSize(320.f, 300.f);
 
-	m_window.Init("Scaling", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Scaling", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_sliders[SLIDER_RANDOMNESS].Init("Randomise", 0.0f, 1.0f, 0.0f);
 	m_sliders[SLIDER_INITIAL].Init("Initial %", 0.0f, 5.0f, 0.0f);
 	m_sliders[SLIDER_INTERMEDIATE].Init("Intermediate %", 0.0f, 5.0f, 1.0f);

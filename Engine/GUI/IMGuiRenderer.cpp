@@ -29,6 +29,7 @@ static GFXDevice* g_pDevice = NULL;
 
 IMGuiRenderer::IMGuiRenderer() 
 	: m_pIMGUIContext(nullptr)
+	, m_mainMenuBar(true)
 	, m_windows(2)
 {
 	g_spGUIRenderer = this;
@@ -394,6 +395,7 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
     ImGui::NewFrame();
 	m_bActive = true;
 
+	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList();
 	for(List<GUIWindow>::Iterator it = m_windows.Begin(); !it.IsEnd(); ++it)
 	{
 		bChanged = (*it)->UpdateAndAddToDrawList() || bChanged;

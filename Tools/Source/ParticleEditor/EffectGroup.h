@@ -6,6 +6,7 @@
 #include "Engine/Particles/ParticleEffect.h"
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/GUI/GuiWindow.h"
+#include "Engine/GUI/GuiMenu.h"
 #include "Engine/GUI/IMGuiRenderer.h"
 #include "EmitterInstance.h"
 #include "RibbonInstance.h"
@@ -52,6 +53,10 @@ private:
 	usg::GUIButton				m_saveButton;
 	
 	usg::GUIWindow					m_window;
+	usg::GUIMenu					m_fileMenu;
+	usg::GUIMenuItem				m_saveItem;
+	usg::GUIMenuItem				m_loadItem;
+
 	usg::GUIButton					m_addEmitterButton;
 	usg::GUIButton					m_addTrailButton;
 	usg::GUIIntInput				m_instanceCount;

@@ -59,7 +59,7 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vWindowPos(0.0f, 0.0f);
 	usg::Vector2f vWindowSize(320.f, 240.f);
-	m_window.Init("Blend", vWindowPos, vWindowSize, 1, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Blend", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_comboBoxes[COMBO_BOX_RGB_SRC].Init("Rgb Source", g_szBlendFunc, usg::BLEND_FUNC_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_RGB_DST].Init("Rgb Dest", g_szBlendFunc, usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_RGB_OP].Init("Rgb Op", g_szBlendEq, usg::BLEND_EQUATION_ADD);

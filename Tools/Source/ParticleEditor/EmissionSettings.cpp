@@ -26,7 +26,7 @@ void EmissionSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	int maxParticles = 20;
 	usg::Vector2f vWindowPos(0.0f, 300.0f);
 	usg::Vector2f vWindowSize(320.f, 350.f);
-	m_window.Init("Emission", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Emission", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	//m_oneTimeCheckBox.Init("One shot", false);
 	m_emissionType.Init("Mode", g_szTypeStrings, 0);
 	m_maxParticles.Init("Max particles", &maxParticles, 1, 0, 2000 );

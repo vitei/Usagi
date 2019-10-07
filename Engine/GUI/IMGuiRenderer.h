@@ -43,6 +43,9 @@ namespace usg
 
 		void DrawInt(struct ImDrawData* pDrawData);
 		bool Active()const { return m_bActive; }
+
+		GUIMenuBar& GetMainMenuBar() { return m_mainMenuBar; }
+
 	private:
 		void CreateFontsTexture(GFXDevice* pDevice);
 		void Shutdown();
@@ -67,6 +70,7 @@ namespace usg
 		VertexBuffer			m_vertexBuffer;
 		GFXContext*				m_pContext;	// Should be null except when we are performing the rendering via callbacks
 
+		GUIMenuBar				m_mainMenuBar;
 		List<GUIWindow>			m_windows;
 	};
 

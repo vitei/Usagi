@@ -19,7 +19,7 @@ void MotionParameters::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	usg::Vector2f vWindowPos(0.0f, 500.0f);
 	usg::Vector2f vWindowSize(320.f, 340.f);
 	float defaultVec[] = { 0.0f, 1.0f, 0.0f };
-	m_window.Init("Motion params", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Motion params", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_sliders[SLIDER_POSITION_RANDOM].Init("Position random", 0.0f, 2.0f, 0.0f);
 	m_window.AddItem(&m_sliders[SLIDER_POSITION_RANDOM]);
 	m_anims[FLOAT_ANIM_OMNI_VELOCITY].Init(&m_window, "Omni speed");

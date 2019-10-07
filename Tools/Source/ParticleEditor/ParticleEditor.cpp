@@ -154,26 +154,26 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	//m_guiRend.AddWindow(&m_testWindow);
 	usg::Vector2f vPos(350.0f, 460.0f);
 	usg::Vector2f vScale(340.f, 530.f);
-	m_emitterWindow.Init("Emitter", vPos, vScale, 20 );
+	m_emitterWindow.Init("Emitter", vPos, vScale);
 
 	vPos.Assign(700.0f, 460.0f);
-	m_effectWindow.Init("Effect", vPos, vScale, 20 );
+	m_effectWindow.Init("Effect", vPos, vScale );
 
 	vPos.Assign(1450.0f, 0.0f);
 	vScale.Assign(340.f, 990.f);
-	m_lifeMotionWindow.Init("Life and motion", vPos, vScale, 20);
+	m_lifeMotionWindow.Init("Life and motion", vPos, vScale);
 
 	vPos.Assign(1100.0f, 0.0f);
 	vScale.Assign(340.f, 990);
-	m_particleAppearanceWindow.Init("Particle appearance", vPos, vScale, 20);
+	m_particleAppearanceWindow.Init("Particle appearance", vPos, vScale);
 
 	vPos.Assign(0.0f, 0.0f);
 	vScale.Assign(340.f, 120.f);
-	m_previewWindow.Init("Preview", vPos, vScale, 20);
+	m_previewWindow.Init("Preview", vPos, vScale);
 
 	vPos.Assign(740.0f, 120.0f);
 	vScale.Assign(340.f, 100.f);
-	m_fileWindow.Init("File", vPos, vScale, 20, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_fileWindow.Init("File", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	//m_loadFilePaths.Init("Load dir", m_fileNames, 0);
 	m_loadButton.Init("Load");
 	m_loadButton.SetSameLine(true);

@@ -10,6 +10,7 @@
 
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Maths/Vector2f.h"
+#include "GuiMenuBar.h"
 #include "GuiItems.h"
 
 namespace usg
@@ -29,9 +30,8 @@ namespace usg
 			WINDOW_TYPE_COLLAPSABLE
 		};
 
-		void Init(const char* szName, const Vector2f& vPos, const Vector2f& vSize, uint32 uMaxItems, WindowType eType = WINDOW_TYPE_PARENT);
+		void Init(const char* szName, const Vector2f& vPos, const Vector2f& vSize, WindowType eType = WINDOW_TYPE_PARENT);
 		void AddItem(GUIItem* pItem);
-		void SetVisible(bool bVisible);
 		void SetSize(const Vector2f& vSize) { m_vSize = vSize;  }
 		void SetDefaultCollapsed(bool bCollapsed) { m_bDefaultCollapsed = bCollapsed; }
 		bool GetCollapsed() { return m_bCollapsed;  }
@@ -40,6 +40,8 @@ namespace usg
 
 		void SetScale(float fScale) { m_fScale = fScale; }
 		void SetShowBorders(bool bShow) { m_bShowBorders = bShow; }
+
+		GUIMenuBar& GetMenuBar() { return m_menuBar; }
 
 	private:
 
@@ -52,6 +54,8 @@ namespace usg
 		bool		m_bCollapsed;
 		char		m_szName[USG_IDENTIFIER_LEN];
 	
+
+		GUIMenuBar		m_menuBar;
 		List<GUIItem>	m_items;
 
 	};

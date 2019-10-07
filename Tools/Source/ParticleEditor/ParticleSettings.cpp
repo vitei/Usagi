@@ -29,7 +29,7 @@ void ParticleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	usg::Vector2f vWindowPos(800.0f, 300.0f);
 	usg::Vector2f vWindowSize(320.f, 240.f);
 	
-	m_window.Init("Particle init", vWindowPos, vWindowSize, 1, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Particle init", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_life.Init(&m_window, "Lifetime");
 
 	m_particleType.Init("Type", g_szParticleType, 0);

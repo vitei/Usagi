@@ -9,7 +9,7 @@ void FloatAnim::Init(usg::GUIWindow* pWindow, const char* szName)
 
 	usg::Vector2f vPos(0.0f, 0.0f);
 	usg::Vector2f vScale(270.f, 80.f);
-	m_childWindow.Init(szName, vPos, vScale, 11, usg::GUIWindow::WINDOW_TYPE_CHILD );
+	m_childWindow.Init(szName, vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	pWindow->AddItem(&m_childWindow);
 
 	m_title.Init(szName);

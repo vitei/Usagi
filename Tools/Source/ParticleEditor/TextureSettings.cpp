@@ -33,7 +33,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	usg::Vector2f vWindowSize(320.f, 240.f);
 	usg::Vector2f vTextureSize(64.f, 64.f);
 	int defaultRepeat[] = { 1, 1 };
-	m_window.Init("Texture", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Texture", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", true, usg::GPU_LOCATION_STANDARD);
 	vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 	m_texture.Init(pDevice, "Particle tex", vTextureSize, m_pTexture);
@@ -49,7 +49,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_previewButton.InitAsTexture(pDevice, "Preview", m_pTexture);
 
 	usg::Vector2f vAnimWindowSize(280.0f, 70.0f);
-	m_animFrameWindow.Init("Frames", vWindowPos, vAnimWindowSize, 16, usg::GUIWindow::WINDOW_TYPE_CHILD );
+	m_animFrameWindow.Init("Frames", vWindowPos, vAnimWindowSize, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	m_animFrameWindow.SetShowBorders(true);
 
 	char frameName[256];

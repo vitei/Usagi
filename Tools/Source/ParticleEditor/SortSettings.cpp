@@ -26,7 +26,7 @@ void SortSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vWindowPos(340.0f, 400.0f);
 	usg::Vector2f vWindowSize(320.f, 145.f);
-	m_window.Init("Sorting", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Sorting", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_renderLayer.Init("Layer", g_szLayerStrings, 0);
 	int defaultPriority = 11;
 	m_priority.Init("Priority", &defaultPriority, 1, 0, 128);

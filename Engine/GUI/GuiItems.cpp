@@ -117,6 +117,22 @@ namespace usg
 		return bResult;
 	}
 
+	void GUIMenuItem::Init(const char* szName, const char* szToolTip)
+	{
+		InitBase(szName);
+		if (szToolTip)
+		{
+			m_szToolTip = szToolTip;
+		}
+	}
+
+	bool GUIMenuItem::UpdateAndAddToDrawList()
+	{
+		ImGui::MenuItem(GetName(), m_szToolTip.c_str());
+		// TODO: Need a callback if selected
+		return false;
+	}
+
 	void GUIText::Init(const char* szName)
 	{
 		InitBase(szName);

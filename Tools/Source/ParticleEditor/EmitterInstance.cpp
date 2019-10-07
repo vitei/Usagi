@@ -27,7 +27,7 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	usg::U8String name;
 	m_pParent = pParent;
 	name.ParseString("Effect %d", uIndex);
-	m_emitterWindow.Init(name.CStr(), vPos, vScale, 20, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	m_emitterWindow.Init(name.CStr(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
 	pParent->GetWindow().AddItem(&m_emitterWindow);
 	m_removeEmitterButton.Init("Remove Emitter");
 	m_loadEmitterButton.Init("Load");
@@ -43,7 +43,7 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_scale.Init("Scale", 0.001f, 20.0f, fDefault1, 3);
 	m_particleScale.Init("Particle Scale", 0.01f, 20.0f, 1.0f);
 	m_startTime.Init("Start time", 0.0f, 5.0f, 0.0f);
-	m_parameterWindow.Init("Parameters", vPos, vScale, 4, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_parameterWindow.Init("Parameters", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_parameterWindow.SetDefaultCollapsed(true);
 
 

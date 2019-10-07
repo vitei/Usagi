@@ -32,7 +32,7 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 	usg::U8String name;
 	m_pParent = pParent;
 	name.ParseString("Ribbon %d", uIndex);
-	m_emitterWindow.Init(name.CStr(), vPos, vScale, 20, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	m_emitterWindow.Init(name.CStr(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
 	pParent->GetWindow().AddItem(&m_emitterWindow);
 	m_removeTrailButton.Init("Remove Trail");
 

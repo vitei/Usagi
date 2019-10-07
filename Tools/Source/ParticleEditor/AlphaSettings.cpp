@@ -17,7 +17,7 @@ void AlphaSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vWindowPos(340.0f, 400.0f);
 	usg::Vector2f vWindowSize(320.f, 145.f);
-	m_window.Init("Alpha", vWindowPos, vWindowSize, 5, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Alpha", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 
 	m_sliders[SLIDER_INITIAL_ALPHA].Init("Start alpha", 0.0f, 1.0f, 0.0f);
 	m_sliders[SLIDER_INTERMEDIATE_ALPHA].Init("Standard alpha", 0.0f, 1.0f, 1.0f);

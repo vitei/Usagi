@@ -9,7 +9,18 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 {
 	usg::Vector2f vPos(0.0f, 240.0f);
 	usg::Vector2f vScale(340.f, 750.f);
-	m_window.Init("Effect Group", vPos, vScale, 20);
+	m_window.Init("Effect Group", vPos, vScale);
+
+	m_fileMenu.Init("File");
+	m_saveItem.Init("Load");
+	m_loadItem.Init("Save");
+	m_fileMenu.AddItem(&m_loadItem);
+	m_fileMenu.AddItem(&m_saveItem);
+
+	usg::GUIMenuBar& menuBar = m_window.GetMenuBar();
+	menuBar.SetVisible(true);
+	menuBar.AddItem(&m_fileMenu);
+
 	m_addEmitterButton.Init("Add Emitter");
 	m_addTrailButton.Init("Add trail");
 	m_addTrailButton.SetSameLine(true);

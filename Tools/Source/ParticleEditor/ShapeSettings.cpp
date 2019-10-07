@@ -27,7 +27,7 @@ void ShapeSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vWindowPos(800.0f, 600.0f);
 	usg::Vector2f vWindowSize(320.f, 240.f);
-	m_window.Init("Shape settings", vWindowPos, vWindowSize, 1, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Shape settings", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 
 	float fDefaultZero[] = { 0.0f, 0.0f, 0.0f};
 	float fDefaultOne[] = {1.0f, 1.0f, 1.0f};
@@ -47,7 +47,7 @@ void ShapeSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_hollowness.Init("Hollowness", 0.0f, 1.0f, 0.0f);
 
 	vWindowSize.Assign(300.f, 100.f);
-	m_arcWindow.Init("Arc", vWindowPos, vWindowSize, 20, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	m_arcWindow.Init("Arc", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_CHILD);
 
 	m_arcTitle.Init("Arc");
 	m_arcWidthDeg.Init("Width", 0.0f, 360.f, 360.f);

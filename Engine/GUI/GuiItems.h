@@ -24,7 +24,10 @@ namespace usg
 		GUI_ITEM_TYPE_INT_INPUT,
 		GUI_ITEM_TYPE_WINDOW,
 		GUI_ITEM_TYPE_TEXT_INPUT,
-		GUI_ITEM_TEXTURE
+		GUI_ITEM_TYPE_TEXTURE,
+		GUI_ITEM_TYPE_MENU_BAR,
+		GUI_ITEM_TYPE_MENU,
+		GUI_ITEM_TYPE_MENU_ITEM
 	};
 
 	class GUIItem
@@ -51,6 +54,19 @@ namespace usg
 		bool	m_bVisible;
 		char	m_szName[USG_IDENTIFIER_LEN];
 
+	};
+
+	class GUIMenuItem : public GUIItem
+	{
+	public:
+		GUIMenuItem() {}
+		virtual ~GUIMenuItem() {}
+
+		void Init(const char* szName, const char* szToolTip = nullptr);
+		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_MENU_ITEM; }
+		virtual bool UpdateAndAddToDrawList();
+	private:
+		usg::string m_szToolTip;
 	};
 
 	class GUIText : public GUIItem

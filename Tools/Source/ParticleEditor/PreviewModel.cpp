@@ -29,7 +29,7 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiR
 {
 	usg::Vector2f vPos(0.0f, 130.0f);
 	usg::Vector2f vScale(340.f, 100.f);
-	m_window.Init("Preview Model", vPos, vScale, 20);
+	m_window.Init("Preview Model", vPos, vScale);
 	m_visible.Init("Show", true);
 	m_visible.SetSameLine(false);
 

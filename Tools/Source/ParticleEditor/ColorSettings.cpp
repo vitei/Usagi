@@ -28,7 +28,7 @@ void ColorSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	usg::Vector2f vWindowPos(340.0f, 130.0f);
 	usg::Vector2f vWindowSize(320.f, 240.f);
 
-	m_window.Init("Color Settings", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Color Settings", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_colorAnimMode.Init("Color mode", g_szColorAnimMode, 0);
 	m_sliders[SLIDER_TIME_IN_END].Init("Color 1 hold end", 0.0f, 1.0f, 0.0f);
 	m_sliders[SLIDER_PEAK_TIME].Init("Color 1 > 2 end", 0.0f, 1.0f, 0.3f);
