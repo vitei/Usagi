@@ -30,6 +30,7 @@ namespace usg
 
 		str::Copy(m_szName, szName, USG_IDENTIFIER_LEN);
 		m_eWindowType = eType;
+	
 	}
 	
 	void GUIWindow::AddItem(GUIItem* pItem)
@@ -58,10 +59,10 @@ namespace usg
 			break;
 			case WINDOW_TYPE_PARENT:
 			{
-				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiCond_Always);	// Don't allow our menus to be moved (for now)
-				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiCond_Always);
+				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiCond_Once);	// Don't allow our menus to be moved (for now)
+				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiCond_Once);
 				bool bReturn;
-				ImGui::Begin(m_szName, &bReturn, ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize);
+				ImGui::Begin(m_szName, &bReturn, 0);
 			}
 			break;
 			case WINDOW_TYPE_COLLAPSABLE:

@@ -153,18 +153,18 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_guiRend.InitResources(pDevice, m_scene, uWidth, uHeight, 20000);
 	//m_guiRend.AddWindow(&m_testWindow);
 	usg::Vector2f vPos(350.0f, 460.0f);
-	usg::Vector2f vScale(340.f, 600.f);
+	usg::Vector2f vScale(340.f, 530.f);
 	m_emitterWindow.Init("Emitter", vPos, vScale, 20 );
 
 	vPos.Assign(700.0f, 460.0f);
 	m_effectWindow.Init("Effect", vPos, vScale, 20 );
 
 	vPos.Assign(1450.0f, 0.0f);
-	vScale.Assign(340.f, 1100.f);
+	vScale.Assign(340.f, 990.f);
 	m_lifeMotionWindow.Init("Life and motion", vPos, vScale, 20);
 
-	vPos.Assign(1100.0f, 200.0f);
-	vScale.Assign(340.f, 860);
+	vPos.Assign(1100.0f, 0.0f);
+	vScale.Assign(340.f, 990);
 	m_particleAppearanceWindow.Init("Particle appearance", vPos, vScale, 20);
 
 	vPos.Assign(0.0f, 0.0f);
@@ -317,18 +317,21 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_camera.Update(fElapsed);
 	m_effectGroup.Update(pDevice, fElapsed, m_repeat.GetValue(), m_bPaused, bRestart);
 
-	if(m_previewType.GetSelected() == 0)
+	if (m_previewType.GetSelected() != m_uPrevPreviewType)
 	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
-		if (m_variables.has_cBackgroundColor && m_previewType.GetSelected() == 0)
+		if (m_previewType.GetSelected() == 0)
 		{
-			m_clearColor.SetValue(m_variables.cBackgroundColor);
+			m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
+			if (m_variables.has_cBackgroundColor && m_previewType.GetSelected() == 0)
+			{
+				m_clearColor.SetValue(m_variables.cBackgroundColor);
+			}
 		}
-	}
-	else
-	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM<<1);
-		m_clearColor.SetValue(m_effectGroup.GetBackgroundColor());
+		else
+		{
+			m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM << 1);
+			m_clearColor.SetValue(m_effectGroup.GetBackgroundColor());
+		}
 	}
 
 	// Treating our particle effect seperately to a standard one managed by the particle mgr
@@ -346,6 +349,8 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 			bRestart |= m_repeat.GetValue();
 		}
 	}
+
+	m_uPrevPreviewType = m_previewType.GetSelected();
 
 	bool bLoad = m_loadButton.GetValue();
 	usg::U8String loadName;

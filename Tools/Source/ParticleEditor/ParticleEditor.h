@@ -92,6 +92,7 @@ private:
 	usg::GUICheckBox		m_repeat;
 	usg::GUIColorSelect		m_clearColor;
 	usg::GUIComboBox		m_previewType;
+	uint32					m_uPrevPreviewType;
 	bool					m_bPaused;
 	FileList<MAX_FILE_COUNT> m_fileList;
 	EffectGroup				m_effectGroup;

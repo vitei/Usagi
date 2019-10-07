@@ -14,7 +14,7 @@
 
 bool	 g_bFullScreen = false;
 uint32 g_uWindowWidth = 1800;
-uint32 g_uWindowHeight = 1100;
+uint32 g_uWindowHeight = 1000;
 
 using namespace usg;
 

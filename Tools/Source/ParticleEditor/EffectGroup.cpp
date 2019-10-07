@@ -8,7 +8,7 @@ const float g_fTrailSpeed = 20.f;
 void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vPos(0.0f, 240.0f);
-	usg::Vector2f vScale(340.f, 860.f);
+	usg::Vector2f vScale(340.f, 750.f);
 	m_window.Init("Effect Group", vPos, vScale, 20);
 	m_addEmitterButton.Init("Add Emitter");
 	m_addTrailButton.Init("Add trail");
