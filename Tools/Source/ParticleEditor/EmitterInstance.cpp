@@ -118,9 +118,9 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 		usg::U8String selectName = m_emitterSelect.GetSelectedName();
 		selectName.TruncateExtension();
 		str::Copy(m_emitterData.emitterName, selectName.CStr(), sizeof(m_emitterData.emitterName));
-		m_emitterData.vPosition = usg::V3F_ZERO;
-		m_emitterData.vRotation = usg::V3F_ZERO;
-		m_emitterData.vScale = usg::V3F_ONE;
+		m_emitterData.vPosition = usg::Vector3f::ZERO;
+		m_emitterData.vRotation = usg::Vector3f::ZERO;
+		m_emitterData.vScale = usg::Vector3f::ONE;
 		m_emitterData.fParticleScale = 1.0f;
 		m_emitterData.fReleaseFrame = 0.0f;
 	}

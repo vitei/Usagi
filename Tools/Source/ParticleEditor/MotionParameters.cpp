@@ -73,11 +73,11 @@ bool MotionParameters::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEm
 	bool bAltered = false;
 
 	bAltered |= Compare(structData.fPositionRandomness, m_sliders[SLIDER_POSITION_RANDOM].GetValue());
-	bAltered |= CompareUnitVector(structData.vVelocityDir, m_sliders[SLIDER_VELOCITY_DIR].GetValueV3(), usg::V3F_Y_AXIS);
+	bAltered |= CompareUnitVector(structData.vVelocityDir, m_sliders[SLIDER_VELOCITY_DIR].GetValueV3(), usg::Vector3f::Y_AXIS);
 	m_sliders[SLIDER_VELOCITY_DIR].SetValue(structData.vVelocityDir);
 	bAltered |= Compare(structData.fVelocityDirConeDeg, m_sliders[SLIDER_DIR_VELOCITY_CONE_DEG].GetValue());
 	bAltered |= Compare(structData.fSpeedRandomness, m_sliders[SLIDER_SPEED_RANDOMNESS].GetValue());
-	bAltered |= CompareUnitVector(structData.vGravityDir, m_sliders[SLIDER_GRAVITY_DIR].GetValueV3(), -usg::V3F_Y_AXIS);
+	bAltered |= CompareUnitVector(structData.vGravityDir, m_sliders[SLIDER_GRAVITY_DIR].GetValueV3(), -usg::Vector3f::Y_AXIS);
 	m_sliders[SLIDER_GRAVITY_DIR].SetValue(structData.vGravityDir);
 	bAltered |= Compare(structData.fGravityStrength, m_floatEntries[FLOAT_ENTRY_GRAVITY_STRENGTH].GetValue());
 	bAltered |= Compare(structData.fDrag, m_sliders[SLIDER_DRAG].GetValue());

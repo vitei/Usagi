@@ -113,6 +113,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;_DEBUG;NW_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

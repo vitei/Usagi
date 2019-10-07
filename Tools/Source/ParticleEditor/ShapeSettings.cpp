@@ -104,7 +104,7 @@ void ShapeSettings::SetShapeSettings(const usg::particles::EmitterShapeDetails& 
 	m_gravityDir.SetValue(m_shapeDetails.baseShape.vGravity);
 	m_velocity.SetValue(m_shapeDetails.baseShape.vVelocity);
 
-	m_identityMatrix.SetValue( m_shapeDetails.baseShape.vPosition == usg::V3F_ZERO && m_shapeDetails.baseShape.vRotation == usg::V3F_ZERO && m_shapeDetails.baseShape.vScale == usg::V3F_ONE);
+	m_identityMatrix.SetValue( m_shapeDetails.baseShape.vPosition == usg::Vector3f::ZERO && m_shapeDetails.baseShape.vRotation == usg::Vector3f::ZERO && m_shapeDetails.baseShape.vScale == usg::Vector3f::ONE);
 }
 
 bool ShapeSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
@@ -114,9 +114,9 @@ bool ShapeSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	bAltered |= Compare(structData.eShape,m_shapeType.GetSelected());
 	if(m_identityMatrix.GetValue())
 	{
-		m_position.SetValue(usg::V3F_ZERO);
-		m_rotation.SetValue(usg::V3F_ZERO);
-		m_scale.SetValue(usg::V3F_ONE);
+		m_position.SetValue(usg::Vector3f::ZERO);
+		m_rotation.SetValue(usg::Vector3f::ZERO);
+		m_scale.SetValue(usg::Vector3f::ONE);
 	}
 	m_position.SetVisible(!m_identityMatrix.GetValue());
 	m_rotation.SetVisible(!m_identityMatrix.GetValue());

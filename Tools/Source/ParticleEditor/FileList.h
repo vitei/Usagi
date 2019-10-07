@@ -1,8 +1,9 @@
 #ifndef _USG_PARTICLE_EDITOR_FILE_LIST_H_
 #define _USG_PARTICLE_EDITOR_FILE_LIST_H_
 
-#include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <filesystem>
 #include "Engine/Core/stl/string.h"
 
 template <int FileCount>
@@ -56,14 +57,14 @@ public:
 
 		if (!m_bSubDirectories)
 		{
-			for (auto it = std::experimental::filesystem::directory_iterator(m_directory.CStr()); it != std::experimental::filesystem::directory_iterator(); ++it)
+			for (auto it = std::filesystem::directory_iterator(m_directory.CStr()); it != std::filesystem::directory_iterator(); ++it)
 			{
 				ProcessFile(it->path());
 			}
 		}
 		else
 		{
-			for (auto it = std::experimental::filesystem::recursive_directory_iterator(m_directory.CStr()); it != std::experimental::filesystem::recursive_directory_iterator(); ++it)
+			for (auto it = std::filesystem::recursive_directory_iterator(m_directory.CStr()); it != std::filesystem::recursive_directory_iterator(); ++it)
 			{
 				ProcessFile(it->path());
 			}

@@ -59,7 +59,7 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 
 	const char * const p_string = "ribbon/trail";
 	str::Copy(m_emitterData.textureName, p_string, sizeof(m_emitterData.textureName));
-	m_emitterData.vPosition = usg::V3F_ZERO;
+	m_emitterData.vPosition = usg::Vector3f::ZERO;
 	m_emitterData.cStartColor.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 	m_emitterData.cEndColor.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 	m_emitterData.fLifeTime = 0.5f;
@@ -140,7 +140,7 @@ void RibbonInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonD
 		usg::U8String selectName = m_textureSelect.GetSelectedName();
 		selectName.TruncateExtension();
 		str::Copy(m_emitterData.textureName, selectName.CStr(), sizeof(m_emitterData.textureName));
-		m_emitterData.vPosition = usg::V3F_ZERO;
+		m_emitterData.vPosition = usg::Vector3f::ZERO;
 		m_emitterData.cStartColor.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 		m_emitterData.cEndColor.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 		m_emitterData.fLifeTime = 0.5f;

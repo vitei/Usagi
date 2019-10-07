@@ -41,12 +41,13 @@ namespace usg
 
 		virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 
-		void DrawInt(struct ImDrawList** const cmd_lists, int cmd_lists_count);
+		void DrawInt(struct ImDrawData* pDrawData);
 		bool Active()const { return m_bActive; }
 	private:
 		void CreateFontsTexture(GFXDevice* pDevice);
 		void Shutdown();
 
+		struct ImGuiContext*	m_pIMGUIContext;
 		RenderGroup*			m_pRenderGroup;
 		Scene*					m_pScene;
 		bool					m_bActive;

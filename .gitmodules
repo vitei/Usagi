@@ -1,6 +1,6 @@
 [submodule "Engine/ThirdParty/imgui"]
 	path = Engine/ThirdParty/imgui
-	url = https://github.com/vitei/imgui.git
+	url = https://github.com/ocornut/imgui.git
 [submodule "Engine/ThirdParty/EASTL"]
 	path = Engine/ThirdParty/EASTL
 	url = https://github.com/vitei/EASTL.git
@@ -19,3 +19,6 @@
 [submodule "Engine/ThirdParty/gli"]
 	path = Engine/ThirdParty/gli
 	url = https://github.com/vitei/gli.git
+[submodule "Engine/ThirdParty/ImGuiColorTextEdit"]
+	path = Engine/ThirdParty/ImGuiColorTextEdit
+	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git

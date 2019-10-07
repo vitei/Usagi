@@ -66,6 +66,6 @@ void MayaCamera::BuildCameraMatrix()
 	usg::Vector3f vOffset = usg::Vector3f(m_vEyePosition.x, m_vEyePosition.y, 0.0f);
 	vEyePos = m_rotation.TransformVec3(vEyePos, 0.0f);
 	vOffset = m_rotation.TransformVec3(vOffset, 0.0f);
-	mCameraMat.LookAt(vEyePos+vOffset, m_vLookAtPos+vOffset, usg::V3F_Y_AXIS);
+	mCameraMat.LookAt(vEyePos+vOffset, m_vLookAtPos+vOffset, usg::Vector3f::Y_AXIS);
 	m_camera.SetUp(mCameraMat, m_camera.GetProjection());
 }

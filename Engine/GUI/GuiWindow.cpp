@@ -53,20 +53,20 @@ namespace usg
 		{
 			case WINDOW_TYPE_CHILD:
 			{
-				ImGui::BeginChild(m_szName, ImVec2(vScale.x, vScale.y), true, m_bShowBorders? ImGuiWindowFlags_ShowBorders : 0);
+				ImGui::BeginChild(m_szName, ImVec2(vScale.x, vScale.y), true, 0);// m_bShowBorders ? ImGuiWindowFlags_ShowBorders : 0);
 			}
 			break;
 			case WINDOW_TYPE_PARENT:
 			{
-				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiSetCond_Always);	// Don't allow our menus to be moved (for now)
-				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiSetCond_Always);
+				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiCond_Always);	// Don't allow our menus to be moved (for now)
+				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiCond_Always);
 				bool bReturn;
 				ImGui::Begin(m_szName, &bReturn, ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize);
 			}
 			break;
 			case WINDOW_TYPE_COLLAPSABLE:
 			{
-				m_bCollapsed = !ImGui::CollapsingHeader(m_szName, NULL, true, !m_bDefaultCollapsed);
+				m_bCollapsed = !ImGui::CollapsingHeader(m_szName, 0);// NULL, true, !m_bDefaultCollapsed);
 				if( m_bCollapsed )
 					return false;
 			}
@@ -85,7 +85,7 @@ namespace usg
 				if(pItem->IsVisible())
 				{
 					bChanged = pItem->UpdateAndAddToDrawList() || bChanged;
-					pItem->SetHovered(ImGui::IsItemHoveredRect());
+					pItem->SetHovered(ImGui::IsItemHovered());
 				}
 				else
 				{
