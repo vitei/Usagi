@@ -176,7 +176,6 @@
   <ItemGroup>
     <ClCompile Include="..\AlphaSettings.cpp" />
     <ClCompile Include="..\BlendSettings.cpp" />
-    <ClCompile Include="..\ColorSelection.cpp" />
     <ClCompile Include="..\ColorSettings.cpp" />
     <ClCompile Include="..\EditorShapes.cpp" />
     <ClCompile Include="..\EffectGroup.cpp" />
@@ -200,7 +199,6 @@
   <ItemGroup>
     <ClInclude Include="..\AlphaSettings.h" />
     <ClInclude Include="..\BlendSettings.h" />
-    <ClInclude Include="..\ColorSelection.h" />
     <ClInclude Include="..\ColorSettings.h" />
     <ClInclude Include="..\EditorShapes.h" />
     <ClInclude Include="..\EffectGroup.h" />

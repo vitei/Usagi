@@ -24,7 +24,6 @@
 #include "SortSettings.h"
 #include "FileList.h"
 #include "EffectGroup.h"
-#include "ColorSelection.h"
 #include "EditorShapes.h"
 
 void ReloadEmitterFromFileOrGetActive(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName);
@@ -93,7 +92,6 @@ private:
 	usg::GUICheckBox		m_repeat;
 	usg::GUIColorSelect		m_clearColor;
 	usg::GUIComboBox		m_previewType;
-	ColorSelection			m_colorSelection;
 	bool					m_bPaused;
 	FileList<MAX_FILE_COUNT> m_fileList;
 	EffectGroup				m_effectGroup;

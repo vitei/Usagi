@@ -5,7 +5,6 @@
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/GUI/GuiWindow.h"
 #include "Engine/GUI/GuiItems.h"
-#include "ColorSelection.h"
 #include "EmitterModifier.h"
 #include "FloatAnim.h"
 
@@ -20,7 +19,6 @@ public:
 	ColorSettings();
 	~ColorSettings();
 
-	void SetColorSelection(ColorSelection* pSelection) { m_pColorSelection = pSelection; }
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer);
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData);
 	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
@@ -37,7 +35,6 @@ private:
 		SLIDER_COUNT
 	};
 
-	ColorSelection*			m_pColorSelection;
 	usg::GUIComboBox		m_colorAnimMode;
 	usg::GUIColorSelect		m_colors[COLOR_COUNT];
 	usg::GUICheckBox		m_randomRepetition;

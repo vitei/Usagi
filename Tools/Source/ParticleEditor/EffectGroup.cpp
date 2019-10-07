@@ -5,7 +5,7 @@
 
 const float g_fTrailSpeed = 20.f;
 
-void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer, ColorSelection* pSelection)
+void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer)
 {
 	usg::Vector2f vPos(0.0f, 240.0f);
 	usg::Vector2f vScale(340.f, 860.f);
@@ -45,7 +45,7 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 
 	for(uint32 i=0; i<MAX_RIBBONS; i++)
 	{
-		m_ribbons[i].Init(pDevice, *pScene, this, i, pSelection);
+		m_ribbons[i].Init(pDevice, *pScene, this, i);
 	}
 
 	usg::Matrix4x4 mEffectMat;

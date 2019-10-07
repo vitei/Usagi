@@ -187,7 +187,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_fileWindow.AddItem(&m_saveFile);
 	m_fileWindow.AddItem(&m_saveButton);
 
-	m_effectGroup.Init(pDevice, &m_scene, &m_guiRend, &m_colorSelection);
+	m_effectGroup.Init(pDevice, &m_scene, &m_guiRend);
 
 	m_previewType.Init("Preview mode", g_szPreviewType, 0);
 	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play") );
@@ -248,7 +248,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 		(*it)->Init(pDevice, &m_guiRend);
 	}
 
-	m_colorSettings.SetColorSelection(&m_colorSelection);
 
 	for(usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
 	{
@@ -261,11 +260,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 
 	m_fileList.Init("../../Data/Particle/Emitters/", ".vpb");
 	m_loadFilePaths.Init("Load Dir", m_fileList.GetFileNamesRaw(), 0);
-
-	m_colorSelection.Init(pDevice, m_scene);
-	m_colorSelection.SetPosition(1150.0f, 880.0f);
-	m_colorSelection.SetSize(240.f, 200.0f);
-
 
 	usg::DirLight* pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, false);
 	usg::Color ambient(0.4f, 0.4f, 0.4f);
@@ -287,7 +281,6 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	m_effectGroup.CleanUp(pDevice);
 	m_emitter.CleanUp(pDevice);
 	m_effect.CleanUp(pDevice);
-	m_colorSelection.CleanUp(pDevice);
 	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
 	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
 	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
@@ -320,8 +313,6 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 	if(m_previewButtons[BUTTON_PLAY].GetValue())
 		m_bPaused = false;
-
-	m_colorSelection.Update(pDevice, fElapsed);
 
 	m_camera.Update(fElapsed);
 	m_effectGroup.Update(pDevice, fElapsed, m_repeat.GetValue(), m_bPaused, bRestart);
@@ -484,13 +475,7 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	m_postFX.BeginScene(pGFXCtxt, usg::PostFXSys::TRANSFER_FLAGS_CLEAR);
 
 	bool bClearColorChanged = false;
-	if(m_clearColor.IsHovered())
-	{
-		if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED))
-		{
-			m_clearColor.SetValue( m_colorSelection.GetColor() );
-		}
-	}
+
 	if (m_previewType.GetSelected() == 0)
 	{
 		m_variables.cBackgroundColor = m_clearColor.GetValue();
@@ -519,7 +504,6 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	pGFXCtxt->RenderToDisplay(pDisplay);
 
 	m_guiRend.Draw(pGFXCtxt, context);
-	m_colorSelection.Draw(pGFXCtxt, &m_postFX);
 
 
 	if(pDisplayDRC)

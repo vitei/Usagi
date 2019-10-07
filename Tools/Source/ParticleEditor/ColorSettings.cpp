@@ -82,27 +82,6 @@ bool ColorSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	bool bAltered = false;
 	usg::particles::ParticleColor& colorVars = structData.particleColor;
 
-	usg::Color selectColor = m_pColorSelection->GetColor();
-	for(uint32 i=0; i<3; i++)
-	{
-		usg::Color prev = m_colors[i].GetValue();
-		if(m_colors[i].IsHovered())
-		{
-			if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED))
-			{
-				selectColor.a() = prev.a();
-				m_colors[i].SetValue( selectColor );
-				m_pColorSelection->SaveColor(m_colors[i].GetValue() );
-			}
-
-			if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_MIDDLE, usg::BUTTON_STATE_PRESSED))
-			{
-				m_pColorSelection->SetColor(pDevice, m_colors[i].GetValue() );
-			}
-		}
-		m_colors[i].SetHovered(false);
-	}
-
 	bAltered |= Compare(colorVars.fInTimeEnd,m_sliders[SLIDER_TIME_IN_END].GetValue());
 	bAltered |= Compare(colorVars.fPeak,m_sliders[SLIDER_PEAK_TIME].GetValue());
 	bAltered |= Compare(colorVars.fOutTimeStart,m_sliders[SLIDER_TIME_OUT_START].GetValue());
