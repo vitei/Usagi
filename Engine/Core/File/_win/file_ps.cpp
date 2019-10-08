@@ -7,6 +7,7 @@
 #include "Engine/Memory/Mem.h"
 #include "File_ps.h"
 #include <stdio.h>
+#include <commdlg.h>
 #include <errno.h>
 
 namespace usg {
@@ -44,6 +45,24 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
     return FILE_STATUS_NOT_FOUND;
 }
 
+
+bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
+{
+	OPENFILENAME open;
+	ZeroMemory(&open, sizeof(open));
+
+	open.lStructSize = sizeof(LPOPENFILENAMEA);
+	open.lpstrFilter = pathInOut.szFilters;
+	open.nFileOffset = 1;
+	open.lpstrFile[0] = '\0';
+	open.nMaxFile = sizeof(pathInOut.szPathOut);
+	open.lpstrTitle = pathInOut.szWindowTitle;
+	open.Flags = OFN_FILEMUSTEXIST;
+
+	BOOL Selected = GetOpenFileName(&open);
+
+	return Selected;
+}
 
 bool File_ps::Delete(const char* szName, FILE_TYPE eFileType)
 {

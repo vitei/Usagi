@@ -43,6 +43,13 @@ enum FILE_STATUS
 	FILE_STATUS_INVALID
 };
 
+struct FileOpenPath
+{
+	char  szPathOut[USG_MAX_PATH] = {};
+	char* szFilters = nullptr;
+	char* szWindowTitle;
+};
+
 }
 
 #include OS_HEADER(Engine/Core/File, file_ps.h)
@@ -83,6 +90,7 @@ public:
 
 
 	static FILE_STATUS FileStatus(const char* szFileName, const FILE_TYPE eFileType = FILE_TYPE_RESOURCE) { return File_ps::FileStatus(szFileName, eFileType); }
+	static bool UserFileOpenPath(FileOpenPath& pathInOut) { return File_ps::UserFileOpenPath(pathInOut); }
 	static bool CreateFileDirectory(const char* szDirName, FILE_TYPE eType = FILE_TYPE_SAVE_DATA)
 	{
 		ASSERT(eType!= FILE_TYPE_RESOURCE);
