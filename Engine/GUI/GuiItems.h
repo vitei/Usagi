@@ -67,7 +67,7 @@ namespace usg
 		bool	m_bSameLine;
 		bool	m_bHovered;
 		bool	m_bVisible;
-		char	m_szName[USG_IDENTIFIER_LEN];
+		char	m_szName[USG_MAX_PATH];
 
 	};
 
@@ -113,6 +113,7 @@ namespace usg
 		virtual ~GUIText() {}
 
 		void Init(const char* szName);
+		void SetText(const char* szName);
 		virtual GuiItemType GetItemType() const { return GuiItemType::TEXT; }
 		void SetColor(const Color& color);
 		const Color& GetColor() { return m_color; }

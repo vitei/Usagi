@@ -8,6 +8,7 @@ const float g_fTrailSpeed = 20.f;
 EffectGroup::EffectGroup()
 	: m_loadItem(false)
 	, m_saveAsItem(true)
+	, m_bReInit(false)
 {
 
 }
@@ -24,9 +25,11 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
 	m_saveAsItem.SetExtension("vpb");
+	m_saveAsItem.SetCallbacks(this);
 	m_loadItem.Init("Load");
 	m_loadItem.AddFilter("Vitei ProtoBuf", "* .vpb");
 	m_loadItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
+	m_loadItem.SetCallbacks(this);
 	
 	m_fileMenu.AddItem(&m_loadItem);
 	m_fileMenu.AddItem(&m_saveItem);
@@ -48,18 +51,11 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_fileList.Init("../../Data/Particle/Effects/", ".vpb");
 	m_instanceFileList.Init("../../Data/Particle/Emitters/", ".vpb");
 	m_textureFileList.Init("../../Usagi/Data/Textures/ribbon", ".dds");
-	m_loadFilePaths.Init("Load Dir", m_fileList.GetFileNamesRaw(), 0);
 
-	m_loadButton.Init("Load");
-	m_loadButton.SetSameLine(true);
-	m_saveFile.Init("Save Dir", "");
-	m_saveButton.Init("Save");
-	m_saveButton.SetSameLine(true);
+	m_fileName.Init("");
 
-	m_window.AddItem(&m_loadFilePaths);
-	m_window.AddItem(&m_loadButton);
-	m_window.AddItem(&m_saveFile);
-	m_window.AddItem(&m_saveButton);
+
+	m_window.AddItem(&m_fileName);
 	m_window.AddItem(&m_instanceCount);
 	m_window.AddItem(&m_addEmitterButton);
 	m_window.AddItem(&m_addTrailButton);
@@ -83,12 +79,39 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 
 void EffectGroup::LoadCallback(const char* szName, const char* szFilePath)
 {
+	usg::ProtocolBufferFile file(szFilePath);
+	bool bReadSucceeded = file.Read(&m_effectGroup);
 
+	m_fileName.SetText(szFilePath);
+
+	m_bReInit = true;
 }
 
 void EffectGroup::SaveCallback(const char* szName, const char* szFilePath)
 {
+	m_effectGroup.emitters_count = 0;
+	m_effectGroup.ribbons_count = 0;
+	for (int i = 0; i < MAX_INSTANCES; i++)
+	{
+		if (m_instances[i].GetActive())
+		{
+			m_effectGroup.emitters[i] = m_instances[i].GetData();
+			m_effectGroup.emitters_count++;
+		}
+	}
 
+	for (int i = 0; i < MAX_RIBBONS; i++)
+	{
+		if (m_ribbons[i].GetActive())
+		{
+			m_effectGroup.ribbons[i] = m_ribbons[i].GetData();
+			m_effectGroup.ribbons_count++;
+		}
+	}
+
+	usg::ProtocolBufferFile file(szFilePath, usg::FILE_ACCESS_WRITE);
+	bool bWritten = file.Write(&m_effectGroup);
+	ASSERT(bWritten);
 }
 
 void EffectGroup::CleanUp(usg::GFXDevice* pDevice)
@@ -153,8 +176,6 @@ void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, bool bRepeat, 
 	}
 	uFrame++;
 
-	m_loadFilePaths.UpdateOptions(m_fileList.GetFileNamesRaw());
-
 	for(uint32 i=0; i<MAX_INSTANCES; i++)
 	{
 		if(m_instances[i].GetActive())
@@ -201,84 +222,43 @@ void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, bool bRepeat, 
 		m_effectGroup.has_uPreloadCount = true;
 	}
 
-	if(m_loadButton.GetValue())
+	if (m_bReInit)
 	{
-		usg::U8String scriptName = "../../Data/Particle/Effects/";
-		scriptName += m_loadFilePaths.GetSelectedName();
-		m_saveFile.SetInput(m_loadFilePaths.GetSelectedName());
-		usg::ProtocolBufferFile file(scriptName.CStr());
-		bool bReadSucceeded = file.Read(&m_effectGroup);
-
-		if(bReadSucceeded)
+		// The emitters
+		uint32 uEmitter = 0;
+		for (; uEmitter < m_effectGroup.emitters_count; uEmitter++)
 		{
-			// The emitters
-			uint32 uEmitter = 0;
-			for(; uEmitter<m_effectGroup.emitters_count; uEmitter++)
-			{
-				m_instances[uEmitter].AddToScene(pDevice, &m_effectGroup.emitters[uEmitter]);
-			}
+			m_instances[uEmitter].AddToScene(pDevice, &m_effectGroup.emitters[uEmitter]);
+		}
 
-			for(;uEmitter < MAX_INSTANCES; uEmitter++)
-			{
-				if(m_instances[uEmitter].GetActive())
-					m_instances[uEmitter].RemoveFromScene();
-			}
+		for (; uEmitter < MAX_INSTANCES; uEmitter++)
+		{
+			if (m_instances[uEmitter].GetActive())
+				m_instances[uEmitter].RemoveFromScene();
+		}
 
-			if (m_effectGroup.has_uPreloadCount == false)
-			{
-				m_effectGroup.uPreloadCount = 1;
-				m_effectGroup.has_uPreloadCount = true;
-			}
-			int preload = (int)m_effectGroup.uPreloadCount;
-			m_instanceCount.SetValues(&preload);
+		if (m_effectGroup.has_uPreloadCount == false)
+		{
+			m_effectGroup.uPreloadCount = 1;
+			m_effectGroup.has_uPreloadCount = true;
+		}
+		int preload = (int)m_effectGroup.uPreloadCount;
+		m_instanceCount.SetValues(&preload);
 
-			// Now process the ribbon trails
-			uEmitter = 0;
-			for(; uEmitter<m_effectGroup.ribbons_count; uEmitter++)
-			{
-				m_ribbons[uEmitter].AddToScene(pDevice, &m_effectGroup.ribbons[uEmitter]);
-			}
+		// Now process the ribbon trails
+		uEmitter = 0;
+		for (; uEmitter < m_effectGroup.ribbons_count; uEmitter++)
+		{
+			m_ribbons[uEmitter].AddToScene(pDevice, &m_effectGroup.ribbons[uEmitter]);
+		}
 
-			for(;uEmitter < MAX_RIBBONS; uEmitter++)
-			{
-				if(m_ribbons[uEmitter].GetActive())
-					m_ribbons[uEmitter].RemoveFromScene();
-			}
+		for (; uEmitter < MAX_RIBBONS; uEmitter++)
+		{
+			if (m_ribbons[uEmitter].GetActive())
+				m_ribbons[uEmitter].RemoveFromScene();
 		}
 		bRestart = true;
-	}
-
-	if(m_saveButton.GetValue() && str::StringLength(m_saveFile.GetInput()) > 0)
-	{
-		m_effectGroup.emitters_count = 0;
-		m_effectGroup.ribbons_count = 0;
-		for (int i = 0; i < MAX_INSTANCES; i++)
-		{
-			if(m_instances[i].GetActive())
-			{
-				m_effectGroup.emitters[i] = m_instances[i].GetData();
-				m_effectGroup.emitters_count++;
-			}
-		}
-
-		for(int i=0; i < MAX_RIBBONS; i++)
-		{
-			if(m_ribbons[i].GetActive())
-			{
-				m_effectGroup.ribbons[i] = m_ribbons[i].GetData();
-				m_effectGroup.ribbons_count++;
-			}
-		}
-
-		usg::U8String scriptName = "../../Data/Particle/Effects/";
-		scriptName += m_saveFile.GetInput();
-		if(!scriptName.HasExtension("vpb"))
-		{
-			scriptName += ".vpb";
-		}
-		usg::ProtocolBufferFile file(scriptName.CStr(), usg::FILE_ACCESS_WRITE);
-		bool bWritten  = file.Write(&m_effectGroup);
-		ASSERT(bWritten);
+		m_bReInit = false;
 	}
 
 	usg::Gamepad* pPad = usg::Input::GetGamepad(0);

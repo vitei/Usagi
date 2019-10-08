@@ -51,10 +51,7 @@ private:
 	FileList<MAX_FILE_COUNT>	m_fileList;
 	FileList<MAX_FILE_COUNT>	m_instanceFileList;
 	FileList<MAX_FILE_COUNT>	m_textureFileList;
-	usg::GUIComboBox			m_loadFilePaths;
-	usg::GUIButton				m_loadButton;
-	usg::GUITextInput			m_saveFile;
-	usg::GUIButton				m_saveButton;
+	usg::GUIText				m_fileName;
 	
 	usg::GUIWindow					m_window;
 	usg::GUIMenu					m_fileMenu;
@@ -69,6 +66,8 @@ private:
 	usg::Scene*						m_pScene;
 
 	usg::ParticleEffect				m_effect;
+
+	bool							m_bReInit;
 };
 
 

@@ -27,7 +27,7 @@ namespace usg
 
 	void GUIItem::InitBase(const char* szName)
 	{
-		str::Copy(m_szName, szName, USG_IDENTIFIER_LEN);
+		str::Copy(m_szName, szName, sizeof(m_szName));
 	}
 
 	void GUIItem::UpdateBase()
@@ -201,6 +201,11 @@ namespace usg
 	{
 		InitBase(szName);
 		m_color.Assign(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	void GUIText::SetText(const char* szName)
+	{
+		InitBase(szName);
 	}
 
 	void GUIText::SetColor(const Color& color)
