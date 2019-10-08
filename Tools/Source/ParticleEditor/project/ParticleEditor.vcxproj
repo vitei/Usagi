@@ -117,7 +117,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>

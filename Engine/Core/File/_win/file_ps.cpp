@@ -7,6 +7,8 @@
 #include "Engine/Memory/Mem.h"
 #include "File_ps.h"
 #include <stdio.h>
+#include <shobjidl.h> 
+#include <shlwapi.h>
 #include <commdlg.h>
 #include <errno.h>
 
@@ -46,9 +48,8 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
 }
 
 
-bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
+void FillOutOpenFileName(FileOpenPath& pathInOut, OPENFILENAME& open)
 {
-	OPENFILENAME open;
 	ZeroMemory(&open, sizeof(open));
 
 	open.lStructSize = sizeof(OPENFILENAME);
@@ -59,7 +60,32 @@ bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
 	open.nMaxFile = sizeof(pathInOut.szPathOut);
 	open.lpstrTitle = pathInOut.szWindowTitle;
 	open.lpstrDefExt = pathInOut.szDefaultExt;
-	open.Flags = OFN_FILEMUSTEXIST;
+}
+
+bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
+{
+	OPENFILENAME open;
+	char szPath[USG_MAX_PATH];
+
+	FillOutOpenFileName(pathInOut, open);
+
+	if (!pathInOut.szOpenDir)
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		open.lpstrInitialDir = szPath;
+	}
+	else if (PathIsRelative(pathInOut.szOpenDir))
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		strcat_s(szPath, pathInOut.szOpenDir);
+		open.lpstrInitialDir = szPath;
+	}
+	else
+	{
+		open.lpstrInitialDir = pathInOut.szOpenDir;
+	}
+
+	open.Flags = OFN_FILEMUSTEXIST; 
 
 	BOOL Selected = GetOpenFileName(&open);
 
@@ -69,16 +95,26 @@ bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
 bool File_ps::UserFileSavePath(FileOpenPath& pathInOut)
 {
 	OPENFILENAME open;
-	ZeroMemory(&open, sizeof(open));
+	char szPath[USG_MAX_PATH];
 
-	open.lStructSize = sizeof(OPENFILENAME);
-	open.lpstrFilter = pathInOut.szFilters;
-	open.nFileOffset = 1;
-	open.lpstrFile = pathInOut.szPathOut;
-	open.lpstrFile[0] = '\0';
-	open.nMaxFile = sizeof(pathInOut.szPathOut);
-	open.lpstrTitle = pathInOut.szWindowTitle;
-	open.lpstrDefExt = pathInOut.szDefaultExt;
+	FillOutOpenFileName(pathInOut, open);
+
+	if (!pathInOut.szOpenDir)
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		open.lpstrInitialDir = szPath;
+	}
+	else if (PathIsRelative(pathInOut.szOpenDir))
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		strcat_s(szPath, pathInOut.szOpenDir);
+		open.lpstrInitialDir = szPath;
+	}
+	else
+	{
+		open.lpstrInitialDir = pathInOut.szOpenDir;
+	}
+
 	open.Flags = OFN_PATHMUSTEXIST;
 
 	BOOL Selected = GetSaveFileName(&open);
@@ -134,6 +170,8 @@ FILE_INIT_RESULT File_ps::InitFileSystem()
 {
 	CreateDirectory("..\\_savedata", 0);
 	CreateDirectory("..\\_dump", 0);
+
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED |COINIT_DISABLE_OLE1DDE);
 
 	return FILE_INIT_RESULT_SUCCESS;
 }

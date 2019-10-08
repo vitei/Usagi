@@ -49,6 +49,7 @@ struct FileOpenPath
 	const char* szFilters = nullptr;
 	const char* szWindowTitle = nullptr;
 	const char* szDefaultExt = nullptr;
+	const char* szOpenDir = nullptr;
 };
 
 }

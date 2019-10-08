@@ -93,10 +93,12 @@ namespace usg
 		virtual ~GUIMenuLoad() {}
 
 		void SetFilters(const char* szFilters);
+		void SetStartPath(const char* szPath) { m_szPath = szPath; }
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 	private:
 		virtual void Run();
 
+		usg::string m_szPath;
 		usg::string m_szFilters;
 	};
 
@@ -109,10 +111,12 @@ namespace usg
 
 		void SetFilters(const char* szFilters);
 		void SetExtension(const char* szExt);
+		void SetStartPath(const char* szPath) { m_szPath = szPath; }
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 	protected:
 		virtual void Run();
 
+		usg::string m_szPath;
 		usg::string m_szExt;
 		usg::string m_szFilters;
 	};

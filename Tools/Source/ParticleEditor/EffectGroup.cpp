@@ -14,10 +14,12 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
 	m_saveAsItem.Init("Save As...");
-	m_saveAsItem.SetFilters("Vitei ProtoBuf\0*.vpb\0\0");
+	m_saveAsItem.SetFilters(".vpb (Vitei ProtoBuf)\0*.vpb\0\0");
+	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
 	m_saveAsItem.SetExtension("vpb");
 	m_loadItem.Init("Load");
-	m_loadItem.SetFilters("Vitei ProtoBuf\0*.vpb\0\0");
+	m_loadItem.SetFilters(".vpb (Vitei ProtoBuf)\0*.vpb\0\0");
+	m_loadItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
 	
 	m_fileMenu.AddItem(&m_loadItem);
 	m_fileMenu.AddItem(&m_saveItem);
@@ -70,6 +72,16 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_effect.Init(pDevice, pScene, mEffectMat);
 
 	m_pScene = pScene;
+}
+
+void EffectGroup::LoadCallback(const char* szName, const char* szFilePath)
+{
+
+}
+
+void EffectGroup::SaveCallback(const char* szName, const char* szFilePath)
+{
+
 }
 
 void EffectGroup::CleanUp(usg::GFXDevice* pDevice)

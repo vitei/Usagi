@@ -156,6 +156,7 @@ namespace usg
 		FileOpenPath fileName;
 		fileName.szWindowTitle = m_szName;
 		fileName.szFilters = m_szFilters.c_str();
+		fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
 		if (File::UserFileOpenPath(fileName))
 		{
 			if (m_pCallbacks)
@@ -181,6 +182,7 @@ namespace usg
 		fileName.szWindowTitle = m_szName;
 		fileName.szFilters = m_szFilters.c_str();
 		fileName.szDefaultExt = m_szExt.c_str();
+		fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
 		if (File::UserFileSavePath(fileName))
 		{
 			if (m_pCallbacks)

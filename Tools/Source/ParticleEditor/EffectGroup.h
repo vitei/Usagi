@@ -12,7 +12,7 @@
 #include "RibbonInstance.h"
 #include "FileList.h"
 
-class EffectGroup
+class EffectGroup : public usg::GUICallbacks
 {
 public:
 	enum
@@ -38,6 +38,10 @@ public:
 	usg::ParticleEffect&		GetEffect() { return m_effect; }
 	void						Reset(usg::GFXDevice* pDevice);
 	bool						LoadEmitterRequested(usg::U8String& name);
+	
+	// GUI Callbacks
+	virtual void LoadCallback(const char* szName, const char* szFilePath) override;
+	virtual void SaveCallback(const char* szName, const char* szFilePath) override;
 private:
 
 	EmitterInstance				m_instances[MAX_INSTANCES];
