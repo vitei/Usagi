@@ -6,16 +6,18 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "GuiItems.h"
 #include "Engine/Core/String/String_Util.h"
+#include <commdlg.h>
 
 namespace usg
 {
 
 	GUIItem::GUIItem()
+		: m_pCallbacks(nullptr)
+		, m_bSameLine(false)
+		, m_bHovered(false)
+		, m_bVisible(true)
+		, m_szName{}
 	{
-		m_szName[0] = '\0';
-		m_bVisible = true;
-		m_bSameLine = false;
-		m_bHovered = false;
 	}
 
 	GUIItem::~GUIItem()
@@ -117,20 +119,75 @@ namespace usg
 		return bResult;
 	}
 
-	void GUIMenuItem::Init(const char* szName, const char* szToolTip)
+	void GUIMenuItem::Init(const char* szName, const char* szShortCut)
 	{
 		InitBase(szName);
-		if (szToolTip)
+		if (szShortCut)
 		{
-			m_szToolTip = szToolTip;
+			m_szShortCut = szShortCut;
+		}
+	}
+
+	void GUIMenuItem::Run()
+	{
+		if (m_pCallbacks)
+		{
+			m_pCallbacks->FileOption(m_szName);
 		}
 	}
 
 	bool GUIMenuItem::UpdateAndAddToDrawList()
 	{
-		ImGui::MenuItem(GetName(), m_szToolTip.c_str());
-		// TODO: Need a callback if selected
+		if (ImGui::MenuItem(GetName(), m_szShortCut.c_str()))
+		{
+			Run();
+		}
+		
 		return false;
+	}
+
+	void GUIMenuLoad::SetFilters(const char* szFilters)
+	{
+		m_szFilters = szFilters;
+	}
+
+	void GUIMenuLoad::Run()
+	{
+		FileOpenPath fileName;
+		fileName.szWindowTitle = m_szName;
+		fileName.szFilters = m_szFilters.c_str();
+		if (File::UserFileOpenPath(fileName))
+		{
+			if (m_pCallbacks)
+			{
+				m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+			}
+		}
+	}
+
+	void GUIMenuSaveAs::SetFilters(const char* szFilters)
+	{
+		m_szFilters = szFilters;
+	}
+
+	void GUIMenuSaveAs::SetExtension(const char* szExt)
+	{
+		m_szExt = szExt;
+	}
+
+	void GUIMenuSaveAs::Run()
+	{
+		FileOpenPath fileName;
+		fileName.szWindowTitle = m_szName;
+		fileName.szFilters = m_szFilters.c_str();
+		fileName.szDefaultExt = m_szExt.c_str();
+		if (File::UserFileSavePath(fileName))
+		{
+			if (m_pCallbacks)
+			{
+				m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+			}
+		}
 	}
 
 	void GUIText::Init(const char* szName)

@@ -36,7 +36,7 @@ namespace usg
 		void SetDefaultCollapsed(bool bCollapsed) { m_bDefaultCollapsed = bCollapsed; }
 		bool GetCollapsed() { return m_bCollapsed;  }
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_WINDOW; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::WINDOW; }
 
 		void SetScale(float fScale) { m_fScale = fScale; }
 		void SetShowBorders(bool bShow) { m_bShowBorders = bShow; }

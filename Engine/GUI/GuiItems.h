@@ -13,21 +13,34 @@
 
 namespace usg
 {
-	enum GuiItemType
+	enum class GuiItemType
 	{
-		GUI_ITEM_TYPE_BUTTON = 0,
-		GUI_ITEM_TYPE_TEXT,
-		GUI_ITEM_TYPE_COLOR_SELECT,
-		GUI_ITEM_TYPE_COMBO_BOX,
-		GUI_ITEM_TYPE_SLIDER,
-		GUI_ITEM_TYPE_CHECK_BOX,
-		GUI_ITEM_TYPE_INT_INPUT,
-		GUI_ITEM_TYPE_WINDOW,
-		GUI_ITEM_TYPE_TEXT_INPUT,
-		GUI_ITEM_TYPE_TEXTURE,
-		GUI_ITEM_TYPE_MENU_BAR,
-		GUI_ITEM_TYPE_MENU,
-		GUI_ITEM_TYPE_MENU_ITEM
+		BUTTON = 0,
+		TEXT,
+		COLOR_SELECT,
+		COMBO_BOX,
+		SLIDER,
+		CHECK_BOX,
+		INT_INPUT,
+		WINDOW,
+		TEXT_INPUT,
+		TEXTURE,
+		MENU_BAR,
+		MENU,
+		MENU_ITEM
+	};
+
+	// Bit cleaner for our purposes than standard callbacks as we'll want a few per type
+	class GUICallbacks
+	{
+	public:
+		virtual void LoadCallback(const char* szName, const char* szFilePath) {}
+		virtual void SaveCallback(const char* szName, const char* szFilePath) {}
+		virtual void FloatChanged(const char* szName, float* pData, uint32 uCount) {}
+		virtual void IntChanged(const char* szName, int* pData, uint32 uCount) {}
+		virtual void BoolChanged(const char* szName, bool* pData, uint32 uCount) {}
+		virtual void FileOption(const char* szName) {}
+	private:
 	};
 
 	class GUIItem
@@ -41,6 +54,7 @@ namespace usg
 		virtual bool UpdateAndAddToDrawList() = 0;
 
 		void SetVisible(bool bVisible) { m_bVisible = bVisible; }
+		void SetCallbacks(GUICallbacks* pCallbacks) { m_pCallbacks = pCallbacks; }
 		void SetSameLine(bool bSameLine) { m_bSameLine = bSameLine; }
 		bool IsVisible() const { return m_bVisible; }
 		void SetHovered(bool bHovered) { m_bHovered = bHovered; }
@@ -49,6 +63,7 @@ namespace usg
 		void InitBase(const char* szName);
 		void UpdateBase();
 
+		GUICallbacks* m_pCallbacks;
 		bool	m_bSameLine;
 		bool	m_bHovered;
 		bool	m_bVisible;
@@ -62,11 +77,44 @@ namespace usg
 		GUIMenuItem() {}
 		virtual ~GUIMenuItem() {}
 
-		void Init(const char* szName, const char* szToolTip = nullptr);
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_MENU_ITEM; }
+		void Init(const char* szName, const char* szShortCut = nullptr);
+		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 		virtual bool UpdateAndAddToDrawList();
+	protected:
+		virtual void Run();
+		usg::string m_szShortCut;
+	};
+
+	class GUIMenuLoad : public GUIMenuItem
+	{
+		typedef GUIMenuItem Inherited;
+	public:
+		GUIMenuLoad() {}
+		virtual ~GUIMenuLoad() {}
+
+		void SetFilters(const char* szFilters);
+		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 	private:
-		usg::string m_szToolTip;
+		virtual void Run();
+
+		usg::string m_szFilters;
+	};
+
+	class GUIMenuSaveAs : public GUIMenuItem
+	{
+		typedef GUIMenuItem Inherited;
+	public:
+		GUIMenuSaveAs() {}
+		virtual ~GUIMenuSaveAs() {}
+
+		void SetFilters(const char* szFilters);
+		void SetExtension(const char* szExt);
+		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
+	protected:
+		virtual void Run();
+
+		usg::string m_szExt;
+		usg::string m_szFilters;
 	};
 
 	class GUIText : public GUIItem
@@ -76,7 +124,7 @@ namespace usg
 		virtual ~GUIText() {}
 
 		void Init(const char* szName);
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_TEXT; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::TEXT; }
 		void SetColor(const Color& color);
 		const Color& GetColor() { return m_color; }
 		virtual bool UpdateAndAddToDrawList();
@@ -98,7 +146,7 @@ namespace usg
 		void SetUVs(Vector2f vUVMin, Vector2f vUVMax);
 		void SetTexture(GFXDevice* pDevice, TextureHndl pTexture);
 
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_BUTTON; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::BUTTON; }
 		virtual bool UpdateAndAddToDrawList();
 	private:
 		usg::DescriptorSet	m_descriptor;	// Not passing raw textures in this brave new world
@@ -121,7 +169,7 @@ namespace usg
 		void SetValue(const Color& color);
 		Color GetValue() { return Color(m_color) * (1/255.f); }
 		float* GetValueInt() { return m_color; }
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_COLOR_SELECT; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::COLOR_SELECT; }
 		virtual bool UpdateAndAddToDrawList();
 	private:
 		float m_color[4];
@@ -145,7 +193,7 @@ namespace usg
 		void SetSelectedByName(const char* szName);
 		virtual bool UpdateAndAddToDrawList();
 
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_COMBO_BOX; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::COMBO_BOX; }
 		const char* GetSelectedName() { return m_selectedName.CStr(); }
 	private:
 		const char*	m_szZeroSepNames;
@@ -175,7 +223,7 @@ namespace usg
 		void SetValue(const Vector4f &vec) { ASSERT(m_uCount==4); m_fValue[0] = vec.x;  m_fValue[1] = vec.y; m_fValue[2] = vec.z; m_fValue[3] = vec.w;}
 		void SetValue(float fValue, uint32 uIndex=0) { m_fValue[uIndex] = fValue; }
 
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_SLIDER; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::SLIDER; }
 
 	protected:
 		enum
@@ -201,7 +249,7 @@ namespace usg
 		bool GetValue() { return m_bValue; }
 		void SetValue(bool bValue) { m_bValue = bValue; }
 
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_CHECK_BOX; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::CHECK_BOX; }
 
 	private:
 		bool m_bValue;
@@ -225,7 +273,7 @@ namespace usg
 		int GetValue(uint32 uIndex) { return m_values[uIndex]; }
 		void SetValues(int* pValues);
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_INT_INPUT; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::INT_INPUT; }
 
 	private:
 		int		m_values[MAX_VALUES];
@@ -245,7 +293,7 @@ namespace usg
 		void SetSize(Vector2f vSize) { m_vScale = vSize; }
 		void SetUVs(Vector2f vUVMin, Vector2f vUVMax);
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_INT_INPUT; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::INT_INPUT; }
 		void SetTexture(GFXDevice* pDevice, usg::TextureHndl pTexture);
 
 	private:
@@ -267,7 +315,7 @@ namespace usg
 
 		void Init(const char* szName, const char* szDefault);
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_TEXT_INPUT; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::TEXT_INPUT; }
 		bool GetUpdated() { return m_bUpdated; }
 		const char* GetInput() { return m_input; }
 		void SetInput(const char* szData);

@@ -22,7 +22,7 @@ namespace usg
 
 		void AddItem(GUIMenu* pItem);
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_MENU_BAR; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_BAR; }
 
 	private:
 

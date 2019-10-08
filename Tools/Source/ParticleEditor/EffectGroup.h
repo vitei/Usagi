@@ -54,8 +54,9 @@ private:
 	
 	usg::GUIWindow					m_window;
 	usg::GUIMenu					m_fileMenu;
+	usg::GUIMenuSaveAs				m_saveAsItem;
+	usg::GUIMenuLoad				m_loadItem;
 	usg::GUIMenuItem				m_saveItem;
-	usg::GUIMenuItem				m_loadItem;
 
 	usg::GUIButton					m_addEmitterButton;
 	usg::GUIButton					m_addTrailButton;

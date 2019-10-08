@@ -51,15 +51,37 @@ bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
 	OPENFILENAME open;
 	ZeroMemory(&open, sizeof(open));
 
-	open.lStructSize = sizeof(LPOPENFILENAMEA);
+	open.lStructSize = sizeof(OPENFILENAME);
 	open.lpstrFilter = pathInOut.szFilters;
 	open.nFileOffset = 1;
+	open.lpstrFile = pathInOut.szPathOut;
 	open.lpstrFile[0] = '\0';
 	open.nMaxFile = sizeof(pathInOut.szPathOut);
 	open.lpstrTitle = pathInOut.szWindowTitle;
+	open.lpstrDefExt = pathInOut.szDefaultExt;
 	open.Flags = OFN_FILEMUSTEXIST;
 
 	BOOL Selected = GetOpenFileName(&open);
+
+	return Selected;
+}
+
+bool File_ps::UserFileSavePath(FileOpenPath& pathInOut)
+{
+	OPENFILENAME open;
+	ZeroMemory(&open, sizeof(open));
+
+	open.lStructSize = sizeof(OPENFILENAME);
+	open.lpstrFilter = pathInOut.szFilters;
+	open.nFileOffset = 1;
+	open.lpstrFile = pathInOut.szPathOut;
+	open.lpstrFile[0] = '\0';
+	open.nMaxFile = sizeof(pathInOut.szPathOut);
+	open.lpstrTitle = pathInOut.szWindowTitle;
+	open.lpstrDefExt = pathInOut.szDefaultExt;
+	open.Flags = OFN_PATHMUSTEXIST;
+
+	BOOL Selected = GetSaveFileName(&open);
 
 	return Selected;
 }

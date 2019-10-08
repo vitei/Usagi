@@ -21,7 +21,7 @@ namespace usg
 		void Init(const char* szName);
 		void AddItem(GUIItem* pItem);
 		virtual bool UpdateAndAddToDrawList();
-		virtual GuiItemType GetItemType() const { return GUI_ITEM_TYPE_MENU; }
+		virtual GuiItemType GetItemType() const { return GuiItemType::MENU; }
 
 	private:
 
