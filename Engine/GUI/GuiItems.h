@@ -85,41 +85,26 @@ namespace usg
 		usg::string m_szShortCut;
 	};
 
-	class GUIMenuLoad : public GUIMenuItem
+	class GUIMenuLoadSave : public GUIMenuItem
 	{
 		typedef GUIMenuItem Inherited;
 	public:
-		GUIMenuLoad() {}
-		virtual ~GUIMenuLoad() {}
+		GUIMenuLoadSave(bool bSave) { m_bSave = bSave; }
+		virtual ~GUIMenuLoadSave() {}
 
-		void SetFilters(const char* szFilters);
+		void AddFilter(const char* szDisplay, const char* szPattern);
+		void SetExtension(const char* szExt);
 		void SetStartPath(const char* szPath) { m_szPath = szPath; }
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 	private:
 		virtual void Run();
 
-		usg::string m_szPath;
-		usg::string m_szFilters;
-	};
-
-	class GUIMenuSaveAs : public GUIMenuItem
-	{
-		typedef GUIMenuItem Inherited;
-	public:
-		GUIMenuSaveAs() {}
-		virtual ~GUIMenuSaveAs() {}
-
-		void SetFilters(const char* szFilters);
-		void SetExtension(const char* szExt);
-		void SetStartPath(const char* szPath) { m_szPath = szPath; }
-		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
-	protected:
-		virtual void Run();
-
-		usg::string m_szPath;
+		usg::vector<usg::string> m_filterStrings;
 		usg::string m_szExt;
-		usg::string m_szFilters;
+		usg::string m_szPath;
+		bool		m_bSave;
 	};
+
 
 	class GUIText : public GUIItem
 	{

@@ -146,50 +146,55 @@ namespace usg
 		return false;
 	}
 
-	void GUIMenuLoad::SetFilters(const char* szFilters)
+	void GUIMenuLoadSave::AddFilter(const char* szDisplay, const char* szPattern)
 	{
-		m_szFilters = szFilters;
+		m_filterStrings.push_back(usg::string(szDisplay));
+		m_filterStrings.push_back(usg::string(szPattern));
 	}
 
-	void GUIMenuLoad::Run()
-	{
-		FileOpenPath fileName;
-		fileName.szWindowTitle = m_szName;
-		fileName.szFilters = m_szFilters.c_str();
-		fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
-		if (File::UserFileOpenPath(fileName))
-		{
-			if (m_pCallbacks)
-			{
-				m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
-			}
-		}
-	}
-
-	void GUIMenuSaveAs::SetFilters(const char* szFilters)
-	{
-		m_szFilters = szFilters;
-	}
-
-	void GUIMenuSaveAs::SetExtension(const char* szExt)
+	void GUIMenuLoadSave::SetExtension(const char* szExt)
 	{
 		m_szExt = szExt;
 	}
 
-	void GUIMenuSaveAs::Run()
+	void GUIMenuLoadSave::Run()
 	{
+		usg::vector<usg::FileOpenPath::Filter> filters;
+		filters.resize(m_filterStrings.size() / 2);
+		for (size_t i = 0; i < filters.size(); i ++)
+		{
+			filters[i].szDisplayName = m_filterStrings[i * 2].c_str();
+			filters[i].szExtPattern = m_filterStrings[(i * 2)+1].c_str();
+		}
+
 		FileOpenPath fileName;
 		fileName.szWindowTitle = m_szName;
-		fileName.szFilters = m_szFilters.c_str();
-		fileName.szDefaultExt = m_szExt.c_str();
+		fileName.szDefaultExt = m_szExt.size() > 0 ? m_szExt.c_str() : nullptr;
+		fileName.pFilters = filters.data();
+		fileName.uFilterCount = (uint32)filters.size();
 		fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
-		if (File::UserFileSavePath(fileName))
+
+		if (m_bSave)
 		{
-			if (m_pCallbacks)
+			if (File::UserFileSavePath(fileName))
 			{
-				m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+				}
 			}
 		}
+		else
+		{
+			if (File::UserFileOpenPath(fileName))
+			{
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+				}
+			}
+		}
+
 	}
 
 	void GUIText::Init(const char* szName)

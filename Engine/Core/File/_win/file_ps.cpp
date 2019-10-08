@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/vector.h"
 #include "Engine/Memory/Mem.h"
 #include "File_ps.h"
 #include <stdio.h>
@@ -47,79 +48,130 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
     return FILE_STATUS_NOT_FOUND;
 }
 
-
-void FillOutOpenFileName(FileOpenPath& pathInOut, OPENFILENAME& open)
+usg::wstring s2w(const usg::string& s)
 {
-	ZeroMemory(&open, sizeof(open));
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	if (len > 256)
+	{
+		ASSERT(false);
+		return L"";
+	}
+	wchar_t szBuff[256];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, szBuff, len);
+	usg::wstring r(szBuff);
+	return r;
+}
 
-	open.lStructSize = sizeof(OPENFILENAME);
-	open.lpstrFilter = pathInOut.szFilters;
-	open.nFileOffset = 1;
-	open.lpstrFile = pathInOut.szPathOut;
-	open.lpstrFile[0] = '\0';
-	open.nMaxFile = sizeof(pathInOut.szPathOut);
-	open.lpstrTitle = pathInOut.szWindowTitle;
-	open.lpstrDefExt = pathInOut.szDefaultExt;
+usg::string ws2s(const usg::wstring& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
+	if (len > 256)
+	{
+		ASSERT(false);
+		return "";
+	}
+	char szBuff[256];
+	WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, szBuff, len, 0, 0);
+	usg::string r(szBuff);
+	return r;
+}
+
+// Absolutely HIDEOUS Vita onwards file path code
+bool SelectPath(FileOpenPath& pathInOut, bool bSave)
+{
+	char szPath[USG_MAX_PATH];
+
+	if (!pathInOut.szOpenDir)
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+	}
+	else if (PathIsRelative(pathInOut.szOpenDir))
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		strcat_s(szPath, "\\");
+		strcat_s(szPath, pathInOut.szOpenDir);
+	}
+	else
+	{
+		strcpy_s(szPath, pathInOut.szOpenDir);
+	}
+
+	GetFullPathName(szPath, sizeof(szPath), szPath, nullptr);
+
+	usg::vector< COMDLG_FILTERSPEC> specs;
+	usg::vector< usg::wstring > strings;
+	for (uint32 i=0; i<pathInOut.uFilterCount; i++)
+	{
+		COMDLG_FILTERSPEC spec;
+
+		usg::wstring szNameTmp = s2w(pathInOut.pFilters[i].szDisplayName);
+
+		strings.push_back(szNameTmp);
+		spec.pszName = strings.back().data();
+
+		usg::wstring szPatternTmp = s2w(pathInOut.pFilters[i].szExtPattern);
+
+		strings.push_back(szPatternTmp);
+		spec.pszSpec = strings.back().data();
+
+		specs.push_back(spec);
+	}
+
+	usg::wstring stemp = s2w(szPath);
+	LPCWSTR sw = stemp.c_str();
+
+	usg::string sext(pathInOut.szDefaultExt ? pathInOut.szDefaultExt : "");
+	usg::wstring sexttemp = s2w(sext.c_str());
+	LPCWSTR swext = sexttemp.c_str();
+
+	bool bFound = false;
+	IFileOpenDialog* pFileOpenDialog = NULL;
+	IFileSaveDialog* pFileSaveDialog = NULL;
+	IShellItem* pShellItem = NULL;
+
+	HRESULT hr;
+	if(!bSave)
+		hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileOpenDialog));
+	else
+		hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileSaveDialog));
+	
+	IFileDialog* pDialog = bSave ? (IFileDialog*)pFileSaveDialog : (IFileDialog*)pFileOpenDialog;
+
+	if (SUCCEEDED(hr))
+	{
+		IShellItem* psiFolder; //IShellItemFilter* psiFilter;
+		hr = pDialog->SetOptions(bSave ? FOS_PATHMUSTEXIST : FOS_FILEMUSTEXIST);
+		hr = pDialog->SetDefaultExtension(swext);
+		//hr = pFileOpenDialog->SetFilter(psiFilter);
+		hr = pDialog->SetFileTypes((UINT)specs.size(), specs.data());
+		hr = SHCreateItemFromParsingName(sw, NULL, IID_PPV_ARGS(&psiFolder));
+		hr = pDialog->SetFolder(psiFolder);
+		hr = pDialog->Show(nullptr);
+		if (SUCCEEDED(hr))
+		{
+			hr = pDialog->GetResult(&pShellItem);
+			LPWSTR str = nullptr;
+			pShellItem->GetDisplayName(SIGDN_FILESYSPATH, &str);
+			usg::string fileOut = ws2s(str);
+			strcpy_s(pathInOut.szPathOut, fileOut.c_str());
+			bFound = true;
+		}
+	}
+	return bFound;
 }
 
 bool File_ps::UserFileOpenPath(FileOpenPath& pathInOut)
 {
-	OPENFILENAME open;
-	char szPath[USG_MAX_PATH];
-
-	FillOutOpenFileName(pathInOut, open);
-
-	if (!pathInOut.szOpenDir)
-	{
-		GetCurrentDirectory(sizeof(szPath), szPath);
-		open.lpstrInitialDir = szPath;
-	}
-	else if (PathIsRelative(pathInOut.szOpenDir))
-	{
-		GetCurrentDirectory(sizeof(szPath), szPath);
-		strcat_s(szPath, pathInOut.szOpenDir);
-		open.lpstrInitialDir = szPath;
-	}
-	else
-	{
-		open.lpstrInitialDir = pathInOut.szOpenDir;
-	}
-
-	open.Flags = OFN_FILEMUSTEXIST; 
-
-	BOOL Selected = GetOpenFileName(&open);
-
-	return Selected;
+	return SelectPath(pathInOut, false);
 }
 
 bool File_ps::UserFileSavePath(FileOpenPath& pathInOut)
 {
-	OPENFILENAME open;
-	char szPath[USG_MAX_PATH];
-
-	FillOutOpenFileName(pathInOut, open);
-
-	if (!pathInOut.szOpenDir)
-	{
-		GetCurrentDirectory(sizeof(szPath), szPath);
-		open.lpstrInitialDir = szPath;
-	}
-	else if (PathIsRelative(pathInOut.szOpenDir))
-	{
-		GetCurrentDirectory(sizeof(szPath), szPath);
-		strcat_s(szPath, pathInOut.szOpenDir);
-		open.lpstrInitialDir = szPath;
-	}
-	else
-	{
-		open.lpstrInitialDir = pathInOut.szOpenDir;
-	}
-
-	open.Flags = OFN_PATHMUSTEXIST;
-
-	BOOL Selected = GetSaveFileName(&open);
-
-	return Selected;
+	return SelectPath(pathInOut, true);
 }
 
 bool File_ps::Delete(const char* szName, FILE_TYPE eFileType)

@@ -22,7 +22,7 @@ public:
 		MAX_FILE_COUNT = 512
 	};
 
-	EffectGroup() {}
+	EffectGroup();
 	~EffectGroup() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer);
@@ -58,8 +58,8 @@ private:
 	
 	usg::GUIWindow					m_window;
 	usg::GUIMenu					m_fileMenu;
-	usg::GUIMenuSaveAs				m_saveAsItem;
-	usg::GUIMenuLoad				m_loadItem;
+	usg::GUIMenuLoadSave			m_saveAsItem;
+	usg::GUIMenuLoadSave			m_loadItem;
 	usg::GUIMenuItem				m_saveItem;
 
 	usg::GUIButton					m_addEmitterButton;

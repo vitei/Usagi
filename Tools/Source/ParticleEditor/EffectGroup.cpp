@@ -5,7 +5,14 @@
 
 const float g_fTrailSpeed = 20.f;
 
-void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer)
+EffectGroup::EffectGroup()
+	: m_loadItem(false)
+	, m_saveAsItem(true)
+{
+
+}
+
+void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer) 
 {
 	usg::Vector2f vPos(0.0f, 240.0f);
 	usg::Vector2f vScale(340.f, 750.f);
@@ -14,11 +21,11 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
 	m_saveAsItem.Init("Save As...");
-	m_saveAsItem.SetFilters(".vpb (Vitei ProtoBuf)\0*.vpb\0\0");
+	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
 	m_saveAsItem.SetExtension("vpb");
 	m_loadItem.Init("Load");
-	m_loadItem.SetFilters(".vpb (Vitei ProtoBuf)\0*.vpb\0\0");
+	m_loadItem.AddFilter("Vitei ProtoBuf", "* .vpb");
 	m_loadItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
 	
 	m_fileMenu.AddItem(&m_loadItem);

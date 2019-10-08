@@ -45,11 +45,17 @@ enum FILE_STATUS
 
 struct FileOpenPath
 {
+	struct Filter
+	{
+		const char* szDisplayName;
+		const char* szExtPattern;
+	};
 	char		szPathOut[USG_MAX_PATH] = {};
-	const char* szFilters = nullptr;
 	const char* szWindowTitle = nullptr;
 	const char* szDefaultExt = nullptr;
 	const char* szOpenDir = nullptr;
+	Filter* pFilters = nullptr;
+	uint32  uFilterCount = 0;
 };
 
 }
