@@ -41,6 +41,7 @@ namespace usg {
 			{
 				pLayout->GetPlatform().FreeDescriptorSet(pDevice, m_descSet[i]);
 			}
+			m_bValid = false;
 		}
 	}
 

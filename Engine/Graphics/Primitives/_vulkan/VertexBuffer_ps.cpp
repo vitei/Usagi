@@ -76,6 +76,7 @@ void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
 		vkDestroyBuffer(deviceVK, m_buffer[i], nullptr);
 		vkFreeMemory(deviceVK, m_mem[i], nullptr);
 	}
+	m_uBufferCount = 0;
 }
 
 
