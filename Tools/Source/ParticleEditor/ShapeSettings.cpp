@@ -56,6 +56,7 @@ void ShapeSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 
 	float fDefault[] = {1.0f, 1.0f, 1.0f};
 	m_radius.Init("Radius", 0.0f, 20.0f, fDefault, 3);
+	m_radius.SetToolTip("Size of sphere along each axis");
 	m_sideLength.Init("Side Length", 0.0f, 20.0f, fDefault, 3);
 
 	m_arcWindow.AddItem(&m_arcTitle);

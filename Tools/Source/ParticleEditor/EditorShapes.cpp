@@ -16,6 +16,9 @@ struct TransformData
 	usg::Matrix4x4	mModel;
 	usg::Vector4f	vExtents;
 	usg::Vector4f	vColor;
+	float			fArcStart;
+	float			fArcAngle;
+	bool			bUseArc;
 };
 
 static const ShaderConstantDecl g_transformConstantDef[] = 
@@ -23,6 +26,9 @@ static const ShaderConstantDecl g_transformConstantDef[] =
 	SHADER_CONSTANT_ELEMENT( TransformData, mModel,		CT_MATRIX_44, 1 ),
 	SHADER_CONSTANT_ELEMENT( TransformData, vExtents,	CT_VECTOR_4, 1 ),
 	SHADER_CONSTANT_ELEMENT( TransformData, vColor,		CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT(TransformData, fArcStart,	CT_FLOAT, 1),
+	SHADER_CONSTANT_ELEMENT(TransformData, fArcAngle,	CT_FLOAT, 1),
+	SHADER_CONSTANT_ELEMENT(TransformData, bUseArc,		CT_BOOL, 1),
 	SHADER_CONSTANT_END()
 };
 
@@ -48,9 +54,12 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	pipeline.layout.uDescriptorSetCount = 2;
 
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
-	alphaDecl.bBlendEnable = false;
 	alphaDecl.SetColor0Only();
 	alphaDecl.uColorTargets = 2;
+	alphaDecl.bBlendEnable = true;
+	alphaDecl.blendEq = BLEND_EQUATION_ADD;
+	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
+	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
 	depthDecl.bDepthWrite		= false;
@@ -63,7 +72,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	// FIXME: Replace with a wireframe geometry shader as this is deprecated and will cause some systems to fall over
 	rasDecl.bWireframe = true;
 	rasDecl.eCullFace = usg::CULL_FACE_NONE;
-	rasDecl.bUseDepthBias = false;
+	rasDecl.bUseDepthBias = false; 
 
 	usg::RenderPassHndl renderPassHndl = pScene->GetViewContext(0)->GetRenderPasses().GetRenderPass(*this);
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
@@ -79,7 +88,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	TransformData* pTransformData = m_gridConstants.Lock<TransformData>();
 	pTransformData->mModel = Matrix4x4::Identity();
-	pTransformData->vColor.Assign(0.7f, 0.7f, 0.7f, 1.0f);
+	pTransformData->vColor.Assign(0.7f, 0.7f, 0.7f, 0.4f);
 	pTransformData->vExtents.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 	m_gridConstants.Unlock();
 	m_gridConstants.UpdateData(pDevice);
@@ -96,7 +105,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
-	SetLayer(LAYER_OPAQUE);
+	SetLayer(LAYER_TRANSLUCENT);
 	SetPriority(0);	// After the opaque, very last
 
 }
@@ -247,14 +256,14 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 
 	// Top center
 	pVertex->x = 0.0f;
-	pVertex->y = 0.0f;
-	pVertex->z = -1.0f;
+	pVertex->y = -1.0f;
+	pVertex->z = 0.0f;
 	pVertex++;
 
 	// Base center
 	pVertex->x = 0.0f;
-	pVertex->y = 0.0f;
-	pVertex->z = 1.0f;
+	pVertex->y = 1.0f;
+	pVertex->z = 0.0f;
 	pVertex++;
 
 	for (uint32 i = 0; i < uSlices; i++)
@@ -264,14 +273,14 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 		Vector3f pos = norm * fRadius;
 
 		pVertex->x = pos.x;
-		pVertex->y = pos.y;
-		pVertex->z = -1.0f;	// Put the z at unit distance
+		pVertex->y = -1.0f;
+		pVertex->z = pos.y;
 
 		pVertex++;
 
 		pVertex->x = pos.x;
-		pVertex->y = pos.y;
-		pVertex->z = 1.0f;	// Put the z at unit distance
+		pVertex->y = 1.0f;
+		pVertex->z = pos.y;
 
 		pVertex++;
 	}
@@ -286,34 +295,56 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 	// The side triangles
 	for (uint32 i = 0; i < uSlices - 1; i++)
 	{
-		puFace[0] = (i*2) + uStart;
-		puFace[1] = (i * 2) + uStart + 1;
-		puFace[2] = (i * 2) + uStart + 2;
+		puFace[2] = (i * 2) + uStart;
+		puFace[1] = (i*2) + uStart + 1;
+		puFace[0] = (i*2) + uStart + 2;
+		puFace += 3;
+
+		puFace[0] = (i*2)+uStart + 1;
+		puFace[1] = (i*2) +uStart + 2;
+		puFace[2] = (i*2) +uStart + 3;
 		puFace += 3;
 	}
 
+	puFace[2] = ((uSlices-1) * 2) + uStart;
+	puFace[1] = ((uSlices - 1) * 2) + uStart + 1;
+	puFace[0] =  uStart;
+	puFace += 3;
+
+	puFace[0] =  ((uSlices - 1) * 2) + uStart + 1;
+	puFace[1] =  uStart;
+	puFace[2] =  uStart + 1;
+	puFace += 3;
 
 	// The top triangles
-	for (uint32 i = 0; i < uSlices - 1; i+=2)
+	for (uint32 i = 0; i < uSlices - 1; i++)
 	{
-		puFace[2] = (i * 2) + uStart;
-		puFace[1] = 1;
-		puFace[0] = ((i+1) * 2) + uStart;
+		puFace[0] = (i * 2) + uStart;
+		puFace[1] = 0;
+		puFace[2] = ((i + 1) * 2) + uStart;
 		puFace += 3;
 	}
 
+	puFace[0] = ((uSlices - 1) * 2) + uStart;
+	puFace[1] = 0;
+	puFace[2] = uStart;
+	puFace += 3;
+
 	// The base triangles
-	for (uint32 i = 1; i < uSlices - 1; i+=2)
+	for (uint32 i = 0; i < uSlices - 1; i++)
 	{
 		puFace[2] = (i * 2) + uStart;
 		puFace[1] = 0;
 		puFace[0] = ((i+1) * 2) + uStart;
+		puFace[0]++;
+		puFace[1]++;
+		puFace[2]++;
 		puFace += 3;
 	}
 
-	puFace[2] = uSlices + uStart - 1;
+	puFace[2] = ((uSlices-1)*2) + uStart + 1;
 	puFace[1] = 1;
-	puFace[0] = uStart;
+	puFace[0] = uStart + 1;
 	puFace += 3;
 
 	m_cylinder.vb.Init(pDevice, pVertices, sizeof(PositionVertex), uVertices, "Cylinder");
@@ -361,8 +392,12 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	pTransformData->mModel.SetTranslation(pShape->baseShape.vPosition);
 	pTransformData->mModel = pTransformData->mModel * mScale;
 
-	pTransformData->vColor.Assign(0.0f, 0.0f, 1.0f, 1.0f);
+	pTransformData->vColor.Assign(0.0f, 0.0f, 1.0f, 0.4f);
 	pTransformData->vExtents.Assign(pShape->vShapeExtents.x, pShape->vShapeExtents.y, pShape->vShapeExtents.z, 1.0f);
+	// Give some room for error
+	pTransformData->fArcStart = Math::DegToRad(pShape->arc.fArcStartDeg) - 0.01;
+	pTransformData->fArcAngle = Math::DegToRad(pShape->arc.fArcWidthDeg) + 0.02;
+	pTransformData->bUseArc = eShape == particles::EMITTER_SHAPE_CYLINDER || eShape == particles::EMITTER_SHAPE_SPHERE;
 	m_objectConstants.Unlock();
 	m_objectConstants.UpdateData(pDevice);
 
