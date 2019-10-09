@@ -8,7 +8,7 @@
 
 namespace usg
 {
-	GUIMenu::GUIMenu()
+	GUIMenu::GUIMenu() 
 	{
 	}
 
@@ -33,6 +33,7 @@ namespace usg
 	bool GUIMenu::UpdateAndAddToDrawList()
 	{
 		bool bChanged = false;
+		float fTime = (float)ImGui::GetTime();
 
 		if (ImGui::BeginMenu(m_szName.c_str(), true))
 		{
@@ -42,12 +43,13 @@ namespace usg
 				if (itr->IsVisible())
 				{
 					bChanged |= itr->UpdateAndAddToDrawList();
-					itr->SetHovered(ImGui::IsItemHovered());
+					itr->SetHovered(ImGui::IsItemHovered(), fTime);
 				}
 				else
 				{
-					itr->SetHovered(false);
+					itr->SetHovered(false, fTime);
 				}
+				itr->CommonDraw();
 			}
 
 			ImGui::EndMenu();

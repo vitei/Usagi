@@ -11,6 +11,8 @@
 namespace usg
 {
 
+	const float GUIItem::ms_fToolTipDelay = 1.0f;
+
 	GUIItem::GUIItem()
 		: m_pCallbacks(nullptr)
 		, m_bSameLine(false)
@@ -28,6 +30,14 @@ namespace usg
 	void GUIItem::InitBase(const char* szName)
 	{
 		str::Copy(m_szName, szName, sizeof(m_szName));
+	}
+
+	void GUIItem::CommonDraw()
+	{
+		if (m_toolTip.size() > 0 && m_bHovered && ((ImGui::GetTime() - m_fNewHoverTime) > ms_fToolTipDelay) )
+		{
+			ImGui::SetTooltip(m_toolTip.c_str());
+		}
 	}
 
 	void GUIItem::UpdateBase()
@@ -138,7 +148,7 @@ namespace usg
 
 	bool GUIMenuItem::UpdateAndAddToDrawList()
 	{
-		if (ImGui::MenuItem(GetName(), m_szShortCut.c_str()))
+		if (ImGui::MenuItem(GetName(), m_szShortCut.c_str(), false, m_bEnabled))
 		{
 			Run();
 		}
@@ -180,7 +190,7 @@ namespace usg
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
 				}
 			}
 		}
@@ -190,7 +200,7 @@ namespace usg
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut);
+					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
 				}
 			}
 		}
@@ -433,7 +443,8 @@ namespace usg
 	bool GUICheckBox::UpdateAndAddToDrawList()
 	{
 		UpdateBase();
-		return ImGui::Checkbox(m_szName, &m_bValue);
+		bool bRet =  ImGui::Checkbox(m_szName, &m_bValue);
+		return bRet;
 	}
 
 	void GUIIntInput::Init(const char* szName, int* pDefaults, const uint32 uCount, const int iMin, const int iMax)
@@ -551,8 +562,10 @@ namespace usg
 		ImVec2 vUV1(m_vUVMax.x, m_vUVMax.y);
 		ImVec4 vBorder(1.0f, 1.0f, 1.0f, 1.0f);
 		ImVec4 vTint(1.0f, 1.0f, 1.0f, 1.0f);
-		if(m_bDescValid)
+		if (m_bDescValid)
+		{
 			ImGui::Image((void*)&m_descriptor, vSize, vUV0, vUV1, vTint, vBorder);
+		}
 
 		return false;
 	}

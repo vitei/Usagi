@@ -34,8 +34,8 @@ namespace usg
 	class GUICallbacks
 	{
 	public:
-		virtual void LoadCallback(const char* szName, const char* szFilePath) {}
-		virtual void SaveCallback(const char* szName, const char* szFilePath) {}
+		virtual void LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath) {}
+		virtual void SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath) {}
 		virtual void FloatChanged(const char* szName, float* pData, uint32 uCount) {}
 		virtual void IntChanged(const char* szName, int* pData, uint32 uCount) {}
 		virtual void BoolChanged(const char* szName, bool* pData, uint32 uCount) {}
@@ -52,13 +52,15 @@ namespace usg
 
 		virtual GuiItemType GetItemType() const = 0;
 		virtual bool UpdateAndAddToDrawList() = 0;
+		virtual void CommonDraw();
 
 		void SetVisible(bool bVisible) { m_bVisible = bVisible; }
 		void SetCallbacks(GUICallbacks* pCallbacks) { m_pCallbacks = pCallbacks; }
 		void SetSameLine(bool bSameLine) { m_bSameLine = bSameLine; }
 		bool IsVisible() const { return m_bVisible; }
-		void SetHovered(bool bHovered) { m_bHovered = bHovered; }
+		void SetHovered(bool bHovered, float fTime) { if (bHovered && !m_bHovered) { m_fNewHoverTime = fTime; } m_bHovered = bHovered; }
 		bool IsHovered() const { return m_bHovered; }
+		void SetToolTip(const char* szTooltip) { m_toolTip = szTooltip; }
 	protected:
 		void InitBase(const char* szName);
 		void UpdateBase();
@@ -67,22 +69,28 @@ namespace usg
 		bool	m_bSameLine;
 		bool	m_bHovered;
 		bool	m_bVisible;
+		float	m_fNewHoverTime;
+		string	m_toolTip;
 		char	m_szName[USG_MAX_PATH];
+
+		static const float ms_fToolTipDelay;
 
 	};
 
 	class GUIMenuItem : public GUIItem
 	{
 	public:
-		GUIMenuItem() {}
+		GUIMenuItem() : m_bEnabled(true) {}
 		virtual ~GUIMenuItem() {}
 
 		void Init(const char* szName, const char* szShortCut = nullptr);
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 		virtual bool UpdateAndAddToDrawList();
+		void SetEnabled(bool bEnabled) { m_bEnabled = bEnabled; }
 	protected:
 		virtual void Run();
 		usg::string m_szShortCut;
+		bool			m_bEnabled;
 	};
 
 	class GUIMenuLoadSave : public GUIMenuItem
@@ -95,6 +103,7 @@ namespace usg
 		void AddFilter(const char* szDisplay, const char* szPattern);
 		void SetExtension(const char* szExt);
 		void SetStartPath(const char* szPath) { m_szPath = szPath; }
+		const char* GetStartPath() const { return m_szPath.c_str(); }
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
 	private:
 		virtual void Run();

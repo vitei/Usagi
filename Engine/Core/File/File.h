@@ -51,6 +51,7 @@ struct FileOpenPath
 		const char* szExtPattern;
 	};
 	char		szPathOut[USG_MAX_PATH] = {};
+	char		szRelativePathOut[260] = {};
 	const char* szWindowTitle = nullptr;
 	const char* szDefaultExt = nullptr;
 	const char* szOpenDir = nullptr;

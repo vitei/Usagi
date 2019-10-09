@@ -26,9 +26,7 @@ namespace usg
 	private:
 
 		usg::string		m_szName;
-	
 		list<GUIItem*>	m_items;
-
 	};
 
 }
