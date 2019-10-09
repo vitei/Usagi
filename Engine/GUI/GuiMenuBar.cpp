@@ -35,6 +35,7 @@ namespace usg
 
 		bool bChanged = false;
 		bool bOpened = false;
+		real rTime = (real)ImGui::GetTime();
 
 		if (m_bMainMenu)
 		{
@@ -52,11 +53,11 @@ namespace usg
 				if (itr->IsVisible())
 				{
 					bChanged |= itr->UpdateAndAddToDrawList();
-					itr->SetHovered(ImGui::IsItemHovered());
+					itr->SetHovered(ImGui::IsItemHovered(), rTime);
 				}
 				else
 				{
-					itr->SetHovered(false);
+					itr->SetHovered(false, rTime);
 				}
 			}
 

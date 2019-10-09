@@ -44,6 +44,7 @@ namespace usg
 		Vector2f vPos = m_vPosition * m_fScale;
 		Vector2f vScale = m_vSize * m_fScale;
 		bool bChanged = false;
+		real rTime = (real)ImGui::GetTime();
 
 		switch(m_eWindowType)
 		{
@@ -83,12 +84,13 @@ namespace usg
 				if(pItem->IsVisible())
 				{
 					bChanged = pItem->UpdateAndAddToDrawList() || bChanged;
-					pItem->SetHovered(ImGui::IsItemHovered());
+					pItem->SetHovered(ImGui::IsItemHovered(), rTime);
 				}
 				else
 				{
-					pItem->SetHovered(false);
+					pItem->SetHovered(false, rTime);
 				}
+				pItem->CommonDraw();
 			}
 		}
 		ImGui::PopItemWidth();

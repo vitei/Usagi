@@ -40,8 +40,9 @@ public:
 	bool						LoadEmitterRequested(usg::U8String& name);
 	
 	// GUI Callbacks
-	virtual void LoadCallback(const char* szName, const char* szFilePath) override;
-	virtual void SaveCallback(const char* szName, const char* szFilePath) override;
+	virtual void LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath) override;
+	virtual void SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath) override;
+	virtual void FileOption(const char* szName) override;
 private:
 
 	EmitterInstance				m_instances[MAX_INSTANCES];

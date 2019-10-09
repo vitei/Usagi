@@ -42,10 +42,15 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 	m_textureSelect.Init("Emitter", pParent->GetRibbonTexFileList().GetFileNamesRaw(), 0);
 
 	m_position.Init("Position", -20.0f, 20.0f, fDefault0, 3);
+	m_position.SetToolTip("Offset from emitter");
 	m_colors[COLOR_START].Init("Start Color");
+	m_colors[COLOR_START].SetToolTip("Color at emission time");
 	m_colors[COLOR_END].Init("End Color");
+	m_colors[COLOR_END].SetToolTip("Color at fade out time");
 	m_lifeTime.Init("Life Time", 0.0f, 5.0f, 0.5f);
+	m_lifeTime.SetToolTip("Time from emission to fade out in seconds");
 	m_scale.Init("Scale", 0.0f, 10.f, 0.15f);
+	m_scale.SetToolTip("Width in m");
 
 	m_emitterWindow.AddItem(&m_textureSelect);
 	m_emitterWindow.AddItem(&m_position);

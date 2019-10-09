@@ -41,8 +41,11 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_position.Init("Position", -20.0f, 20.0f, fDefault0, 3);
 	m_rotation.Init("Rotation", -360.0f, 360.0f, fDefault0, 3);
 	m_scale.Init("Scale", 0.001f, 20.0f, fDefault1, 3);
+	m_scale.SetToolTip("Multiplier on emission volume size and velocities");
 	m_particleScale.Init("Particle Scale", 0.01f, 20.0f, 1.0f);
+	m_particleScale.SetToolTip("Multiplier on particle size");
 	m_startTime.Init("Start time", 0.0f, 5.0f, 0.0f);
+	m_startTime.SetToolTip("Delay before starting emission");
 	m_parameterWindow.Init("Parameters", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_parameterWindow.SetDefaultCollapsed(true);
 

@@ -21,6 +21,7 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
+	m_saveItem.SetEnabled(false);
 	m_saveAsItem.Init("Save As...");
 	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
@@ -40,7 +41,9 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	menuBar.AddItem(&m_fileMenu);
 
 	m_addEmitterButton.Init("Add Emitter");
+	m_addEmitterButton.SetToolTip("Add a particle emitter");
 	m_addTrailButton.Init("Add trail");
+	m_addTrailButton.SetToolTip("Add a ribbon trail which moves with the emitter");
 	m_addTrailButton.SetSameLine(true);
 
 	int uInstances = 1;
@@ -77,17 +80,18 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_pScene = pScene;
 }
 
-void EffectGroup::LoadCallback(const char* szName, const char* szFilePath)
+void EffectGroup::LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath)
 {
 	usg::ProtocolBufferFile file(szFilePath);
 	bool bReadSucceeded = file.Read(&m_effectGroup);
 
-	m_fileName.SetText(szFilePath);
+	m_fileName.SetText(szRelPath);
+	m_saveItem.SetEnabled(true);
 
 	m_bReInit = true;
 }
 
-void EffectGroup::SaveCallback(const char* szName, const char* szFilePath)
+void EffectGroup::SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath)
 {
 	m_effectGroup.emitters_count = 0;
 	m_effectGroup.ribbons_count = 0;
@@ -112,6 +116,19 @@ void EffectGroup::SaveCallback(const char* szName, const char* szFilePath)
 	usg::ProtocolBufferFile file(szFilePath, usg::FILE_ACCESS_WRITE);
 	bool bWritten = file.Write(&m_effectGroup);
 	ASSERT(bWritten);
+	m_fileName.SetText(szRelPath);
+	m_saveItem.SetEnabled(true);
+}
+
+void EffectGroup::FileOption(const char* szName)
+{
+	if (strcmp(szName, m_saveItem.GetName()) == 0)
+	{
+		usg::string name = m_loadItem.GetStartPath();
+		name += m_fileName.GetName();
+		// Just ride the save as code
+		SaveCallback(m_saveAsItem.GetName(), name.c_str(), m_fileName.GetName());
+	}
 }
 
 void EffectGroup::CleanUp(usg::GFXDevice* pDevice)
