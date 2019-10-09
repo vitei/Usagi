@@ -48,7 +48,7 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
     return FILE_STATUS_NOT_FOUND;
 }
 
-usg::wstring s2w(const usg::string& s)
+usg::wstring StringToWString(const usg::string& s)
 {
 	int len;
 	int slength = (int)s.length() + 1;
@@ -64,7 +64,7 @@ usg::wstring s2w(const usg::string& s)
 	return r;
 }
 
-usg::string ws2s(const usg::wstring& s)
+usg::string WStringToString(const usg::wstring& s)
 {
 	int len;
 	int slength = (int)s.length() + 1;
@@ -108,12 +108,12 @@ bool SelectPath(FileOpenPath& pathInOut, bool bSave)
 	{
 		COMDLG_FILTERSPEC spec;
 
-		usg::wstring szNameTmp = s2w(pathInOut.pFilters[i].szDisplayName);
+		usg::wstring szNameTmp = StringToWString(pathInOut.pFilters[i].szDisplayName);
 
 		strings.push_back(szNameTmp);
 		spec.pszName = strings.back().data();
 
-		usg::wstring szPatternTmp = s2w(pathInOut.pFilters[i].szExtPattern);
+		usg::wstring szPatternTmp = StringToWString(pathInOut.pFilters[i].szExtPattern);
 
 		strings.push_back(szPatternTmp);
 		spec.pszSpec = strings.back().data();
@@ -121,11 +121,11 @@ bool SelectPath(FileOpenPath& pathInOut, bool bSave)
 		specs.push_back(spec);
 	}
 
-	usg::wstring stemp = s2w(szPath);
+	usg::wstring stemp = StringToWString(szPath);
 	LPCWSTR sw = stemp.c_str();
 
 	usg::string sext(pathInOut.szDefaultExt ? pathInOut.szDefaultExt : "");
-	usg::wstring sexttemp = s2w(sext.c_str());
+	usg::wstring sexttemp = StringToWString(sext.c_str());
 	LPCWSTR swext = sexttemp.c_str();
 
 	bool bFound = false;
@@ -156,8 +156,19 @@ bool SelectPath(FileOpenPath& pathInOut, bool bSave)
 			hr = pDialog->GetResult(&pShellItem);
 			LPWSTR str = nullptr;
 			pShellItem->GetDisplayName(SIGDN_FILESYSPATH, &str);
-			usg::string fileOut = ws2s(str);
+			usg::string fileOut = WStringToString(str);
 			strcpy_s(pathInOut.szPathOut, fileOut.c_str());
+			PathRelativePathTo(pathInOut.szRelativePathOut, pathInOut.szPathOut, 0, szPath, FILE_ATTRIBUTE_DIRECTORY);
+			const char* szFileName = PathFindFileName(pathInOut.szPathOut);
+			if (strcmp(pathInOut.szRelativePathOut, ".\\") == 0)
+			{
+				strcpy_s(pathInOut.szRelativePathOut, szFileName);
+			}
+			else
+			{
+				strcat_s(pathInOut.szRelativePathOut, szFileName);
+			}
+			
 			bFound = true;
 		}
 	}
