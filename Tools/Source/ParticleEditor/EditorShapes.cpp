@@ -212,6 +212,8 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	m_objectConstants.Unlock();
 	m_objectConstants.UpdateData(pDevice);
 
+	m_objectMat.UpdateDescriptors(pDevice);
+
 	m_eShape = eShape;
 }
 
