@@ -76,7 +76,6 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	m_objectMat.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_objectConstants);
 	m_objectMat.UpdateDescriptors(pDevice);
 	m_gridMat.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_gridConstants);
-	m_gridMat.UpdateDescriptors(pDevice);
 
 	TransformData* pTransformData = m_gridConstants.Lock<TransformData>();
 	pTransformData->mModel = Matrix4x4::Identity();
@@ -84,6 +83,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	pTransformData->vExtents.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 	m_gridConstants.Unlock();
 	m_gridConstants.UpdateData(pDevice);
+	m_gridMat.UpdateDescriptors(pDevice);
 
 	MakeSphere(pDevice);
 	MakeCube(pDevice);

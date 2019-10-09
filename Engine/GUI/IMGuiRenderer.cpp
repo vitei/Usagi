@@ -143,6 +143,7 @@ void IMGuiRenderer::PostUpdate(float fElapsed)
 void IMGuiRenderer::BufferUpdate(GFXDevice* pDevice)
 {
 	m_constantSet.UpdateData(pDevice);
+	m_globalDescriptor.UpdateDescriptors(pDevice);
 	g_pDevice = pDevice;
 } 
 
