@@ -22,6 +22,7 @@ public:
 private:
 	void MakeSphere(usg::GFXDevice* pDevice);
 	void MakeCube(usg::GFXDevice* pDevice);
+	void MakeCylinder(usg::GFXDevice* pDevice);
 	void MakeGrid(usg::GFXDevice* pDevice);
 
 	struct RenderItem

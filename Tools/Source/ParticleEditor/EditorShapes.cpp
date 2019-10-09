@@ -87,6 +87,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	MakeSphere(pDevice);
 	MakeCube(pDevice);
+	MakeCylinder(pDevice);
 	MakeGrid(pDevice);
 
 	m_pScene = pScene;
@@ -126,10 +127,28 @@ bool EditorShapes::Draw(usg::GFXContext* pContext, RenderContext& renderContext)
 	pContext->DrawIndexed(&m_grid.ib);
 
 	m_objectMat.Apply(pContext);
-	if(m_eShape==usg::particles::EMITTER_SHAPE_SPHERE)
+	switch (m_eShape)
+	{
+	case usg::particles::EMITTER_SHAPE_SPHERE:
 	{
 		pContext->SetVertexBuffer(&m_sphere.vb);
 		pContext->DrawIndexed(&m_sphere.ib);
+		break;
+	}
+	case usg::particles::EMITTER_SHAPE_CUBE:
+	{
+		pContext->SetVertexBuffer(&m_box.vb);
+		pContext->DrawIndexed(&m_box.ib);
+		break;
+	}
+	case usg::particles::EMITTER_SHAPE_CYLINDER:
+	{
+		pContext->SetVertexBuffer(&m_cylinder.vb);
+		pContext->DrawIndexed(&m_cylinder.ib);
+		break;
+	}
+	default:
+		break;
 	}
 
 	return true;
@@ -191,9 +210,149 @@ void EditorShapes::MakeGrid(GFXDevice* pDevice)
 	m_grid.ib.Init(pDevice, puIndices, uIndices);
 }
 
+static inline void sincosf(float angle, float* psin, float* pcos)
+{
+	*psin = sinf(angle);
+	*pcos = cosf(angle);
+}
+
+
+void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
+{
+	const float fRadius = 1.0f;	// Will be scaled in the	vertexShader;
+	const uint32 uSlices = 32;
+
+	uint32 uBaseTriangles = uSlices;
+	uint32 uSideTriangles = uSlices * 2;
+
+	uint32 uVertices = (uBaseTriangles * 2) + 2;	// Extras are the centre of each end
+	uint32 uIndices = ((uBaseTriangles*2) + uSideTriangles) * 3;
+
+	PositionVertex* pVertices = NULL;
+	ScratchObj<PositionVertex> scratchVertices(pVertices, uVertices, 4);
+	uint16* puIndices = NULL;
+	ScratchObj<uint16> scratchIndices(puIndices, uIndices, 4);
+
+	float fSinI[uSlices];
+	float fCosI[uSlices];
+
+	for (uint32 i = 0; i < uSlices; i++)
+	{
+		sincosf(2.0f * Math::pi * i / uSlices, fSinI + i, fCosI + i);
+	}
+
+
+	// Generate vertices
+	PositionVertex* pVertex = pVertices;
+
+	// Top center
+	pVertex->x = 0.0f;
+	pVertex->y = 0.0f;
+	pVertex->z = -1.0f;
+	pVertex++;
+
+	// Base center
+	pVertex->x = 0.0f;
+	pVertex->y = 0.0f;
+	pVertex->z = 1.0f;
+	pVertex++;
+
+	for (uint32 i = 0; i < uSlices; i++)
+	{
+		Vector3f norm(fSinI[i], fCosI[i], 0.0f);
+		norm.Normalise();	// Shouldn't be necessary, but ensure accuracy
+		Vector3f pos = norm * fRadius;
+
+		pVertex->x = pos.x;
+		pVertex->y = pos.y;
+		pVertex->z = 1.0f;	// Put the z at unit distance
+
+		pVertex++;
+
+		pVertex->x = pos.x;
+		pVertex->y = pos.y;
+		pVertex->z = -1.0f;	// Put the z at unit distance
+
+		pVertex++;
+	}
+
+
+	// Generate indices
+	uint16* puFace = puIndices;
+
+
+	uint16 uStart = 2;
+
+	// The side triangles
+	for (uint32 i = 0; i < uSlices - 1; i++)
+	{
+		puFace[0] = (i*2) + uStart;
+		puFace[1] = (i * 2) + uStart + 1;
+		puFace[2] = (i * 2) + uStart + 2;
+		puFace += 3;
+	}
+
+	puFace[0] = uSlices + uStart - 1;
+	puFace[1] = 0;
+	puFace[2] = uStart;
+	puFace += 3;
+
+
+	// The top triangles
+	for (uint32 i = 0; i < uSlices - 1; i+=2)
+	{
+		puFace[2] = (i * 2) + uStart;
+		puFace[1] = 1;
+		puFace[0] = (i * 2) + uStart + 1;
+		puFace += 3;
+	}
+
+	// The base triangles
+	for (uint32 i = 1; i < uSlices - 1; i+=2)
+	{
+		puFace[2] = (i * 2) + uStart;
+		puFace[1] = 0;
+		puFace[0] = (i * 2) + uStart + 1;
+		puFace += 3;
+	}
+
+	puFace[2] = uSlices + uStart - 1;
+	puFace[1] = 1;
+	puFace[0] = uStart;
+	puFace += 3;
+
+	m_cylinder.vb.Init(pDevice, pVertices, sizeof(PositionVertex), uVertices, "Cylinder");
+	m_cylinder.ib.Init(pDevice, puIndices, uIndices, PT_TRIANGLES);
+}
+
 void EditorShapes::MakeCube(GFXDevice* pDevice)
 {
-	
+	PositionVertex verts[8] =
+	{
+		// Top
+		{ -1.0f,  1.0f, -1.0f }, // 0 - BL
+		{  1.0f,  1.0f, -1.0f }, // 1 - BR
+		{  1.0f,  1.0f,  1.0f }, // 2 - FR
+		{ -1.0f,  1.0f,  1.0f }, // 3 - FL
+		// Bottom
+		{ -1.0f, -1.0f, -1.0f }, // 4 - BL
+		{  1.0f, -1.0f, -1.0f }, // 5 - BR
+		{  1.0f, -1.0f,  1.0f }, // 6 - FR
+		{ -1.0f, -1.0f,  1.0f }, // 7 - FL
+	};
+
+	uint16 iIndices[36] =
+	{
+		3, 1, 0, 3, 2, 1,    // Top
+		4, 3, 0, 4, 7, 3,    // Left
+		7, 2, 3, 7, 6, 2,    // Front
+		6, 1, 2, 6, 5, 1,    // Right
+		5, 0, 1, 5, 4, 0,    // Back
+		4, 6, 7, 4, 5, 6     // Bottom
+	};
+
+	m_box.vb.Init(pDevice, verts, sizeof(PositionVertex), 8, "Cube");
+	m_box.ib.Init(pDevice, iIndices, 36, PT_TRIANGLES);
 }
 
 void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape eShape, const usg::particles::EmitterShapeDetails* pShape, float fElapsed)
@@ -217,17 +376,12 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	m_eShape = eShape;
 }
 
-static inline void sincosf( float angle, float* psin, float* pcos )
-{
-	*psin = sinf( angle );
-	*pcos = cosf( angle );
-}
 
 void EditorShapes::MakeSphere(GFXDevice* pDevice)
 {
 	const float fRadius = 1.0f;	// Will be scaled in the vertexShader;
-	const uint32 uSlices = 9;
-	const uint32 uStacks = 9;
+	const uint32 uSlices = 12;
+	const uint32 uStacks = 12;
 
 	uint32 uIndices		= (2 * ( uStacks - 1 ) * uSlices)*3;
 	uint32 uVertices	= ( uStacks - 1 ) * uSlices + 2;
