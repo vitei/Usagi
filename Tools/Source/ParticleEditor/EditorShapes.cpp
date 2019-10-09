@@ -265,13 +265,13 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 
 		pVertex->x = pos.x;
 		pVertex->y = pos.y;
-		pVertex->z = 1.0f;	// Put the z at unit distance
+		pVertex->z = -1.0f;	// Put the z at unit distance
 
 		pVertex++;
 
 		pVertex->x = pos.x;
 		pVertex->y = pos.y;
-		pVertex->z = -1.0f;	// Put the z at unit distance
+		pVertex->z = 1.0f;	// Put the z at unit distance
 
 		pVertex++;
 	}
@@ -292,18 +292,13 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 		puFace += 3;
 	}
 
-	puFace[0] = uSlices + uStart - 1;
-	puFace[1] = 0;
-	puFace[2] = uStart;
-	puFace += 3;
-
 
 	// The top triangles
 	for (uint32 i = 0; i < uSlices - 1; i+=2)
 	{
 		puFace[2] = (i * 2) + uStart;
 		puFace[1] = 1;
-		puFace[0] = (i * 2) + uStart + 1;
+		puFace[0] = ((i+1) * 2) + uStart;
 		puFace += 3;
 	}
 
@@ -312,7 +307,7 @@ void EditorShapes::MakeCylinder(usg::GFXDevice* pDevice)
 	{
 		puFace[2] = (i * 2) + uStart;
 		puFace[1] = 0;
-		puFace[0] = (i * 2) + uStart + 1;
+		puFace[0] = ((i+1) * 2) + uStart;
 		puFace += 3;
 	}
 
