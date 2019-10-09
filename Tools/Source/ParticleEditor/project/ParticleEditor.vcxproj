@@ -124,7 +124,7 @@
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+      <Command>call $(USAGI_DIR)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
