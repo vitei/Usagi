@@ -94,7 +94,7 @@ void ShapeSettings::SetShapeSettings(const usg::particles::EmitterShapeDetails& 
 	m_position.SetValue(m_shapeDetails.baseShape.vPosition);
 	m_rotation.SetValue(m_shapeDetails.baseShape.vRotation);
 	m_scale.SetValue(m_shapeDetails.baseShape.vScale);
-	m_hollowness.SetValue(1.0f-m_shapeDetails.baseShape.fHollowness);
+	m_hollowness.SetValue(m_shapeDetails.baseShape.fHollowness);
 	m_randomizeStart.SetValue(m_shapeDetails.arc.bRandomizeStartAngle);
 	m_arcStartDeg.SetValue(m_shapeDetails.arc.fArcStartDeg);
 	m_arcWidthDeg.SetValue(m_shapeDetails.arc.fArcWidthDeg);

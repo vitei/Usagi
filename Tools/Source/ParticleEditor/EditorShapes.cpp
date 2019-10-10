@@ -64,7 +64,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
 	depthDecl.bDepthWrite		= false;
 	depthDecl.bDepthEnable		= true;
-	depthDecl.eDepthFunc 		= DEPTH_TEST_ALWAYS;
+	depthDecl.eDepthFunc 		= DEPTH_TEST_LEQUAL;
 	depthDecl.bStencilEnable	= false;
 	depthDecl.eStencilTest		= STENCIL_TEST_ALWAYS;
 
@@ -105,8 +105,8 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
-	SetLayer(LAYER_TRANSLUCENT);
-	SetPriority(0);	// After the opaque, very last
+	SetLayer(LAYER_SKY);
+	SetPriority(128);	// After the opaque, very last
 
 }
 

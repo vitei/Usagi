@@ -24,9 +24,10 @@ void main(void)
 	if(bUseArc)
 	{
 		float angle = atan(vPos.x, vPos.z);
+		float min = fArcStart + fArcEnd > (2*3.16f) ? (fArcStart + fArcEnd)-(2*3.159f) : -100.0f;
 		if(angle < 0.0)
 			angle += (2*3.1459);
-		if(angle < fArcStart || angle > (fArcStart + fArcEnd))
+		if(angle > min && (angle < fArcStart || angle > (fArcStart + fArcEnd)))
 		{
 			vPos.x = 0.0f;
 			vPos.z = 0.0f;
