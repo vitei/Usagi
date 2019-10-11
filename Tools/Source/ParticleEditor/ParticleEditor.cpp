@@ -154,8 +154,8 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_guiRend.Init();
 	m_guiRend.InitResources(pDevice, m_scene, uWidth, uHeight, 20000);
 	//m_guiRend.AddWindow(&m_testWindow);
-	usg::Vector2f vPos(350.0f, 460.0f);
-	usg::Vector2f vScale(340.f, 530.f);
+	usg::Vector2f vPos(1200.0f, 0.0f);
+	usg::Vector2f vScale(370.f, 700.f);
 	m_emitterWindow.Init("Emitter", vPos, vScale);
 
 	m_emitterTabBar.Init("Emitter");
@@ -173,17 +173,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_emitterTabBar.AddItem(&m_blendTab);
 	m_emitterTabBar.AddItem(&m_scaleTab);
 	m_emitterTabBar.AddItem(&m_motionTab);
-
-	vPos.Assign(700.0f, 460.0f);
-	m_effectWindow.Init("Effect", vPos, vScale );
-
-	vPos.Assign(1450.0f, 0.0f);
-	vScale.Assign(340.f, 990.f);
-	m_lifeMotionWindow.Init("Life and motion", vPos, vScale);
-
-	vPos.Assign(1100.0f, 0.0f);
-	vScale.Assign(340.f, 990);
-	m_particleAppearanceWindow.Init("Particle appearance", vPos, vScale);
 
 	vPos.Assign(0.0f, 0.0f);
 	vScale.Assign(340.f, 120.f);
@@ -227,9 +216,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_previewWindow.AddItem(&m_previewType);
 
 	m_guiRend.AddWindow(&m_emitterWindow);
-	m_guiRend.AddWindow(&m_lifeMotionWindow);
-	m_guiRend.AddWindow(&m_particleAppearanceWindow);
-	m_guiRend.AddWindow(&m_effectWindow);
 	m_guiRend.AddWindow(&m_previewWindow);
 
 	m_fileMenu.Init("File");
@@ -575,6 +561,7 @@ void ParticleEditor::OnMessage(usg::GFXDevice* const pDevice, const uint32 messa
 		pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
 		pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
 		pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+		m_guiRend.Resize(pDevice, uWidth, uHeight);
 	}
 	break;
 	case 'WMIN':

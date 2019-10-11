@@ -28,6 +28,7 @@ namespace usg
 		void Init();
 		void CleanUp(GFXDevice* device);
 		void InitResources(GFXDevice* device, usg::Scene& scene, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts = 12000);
+		void Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight);
 		void AddWindow(GUIWindow* pWindow) { m_windows.AddToEnd(pWindow); }
 		// Can do this or simply call directly
 		void AddToScene(GFXDevice* pDevice, Scene* pScene);

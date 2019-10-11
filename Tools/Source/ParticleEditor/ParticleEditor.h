@@ -95,9 +95,6 @@ private:
 	usg::GUIMenuLoadSave	m_loadItem;
 	usg::GUIMenuItem		m_saveItem;
 
-	usg::GUIWindow			m_lifeMotionWindow;
-	usg::GUIWindow			m_particleAppearanceWindow;
-	usg::GUIWindow			m_effectWindow;
 	usg::GUIWindow			m_previewWindow;
 	usg::GUIButton			m_previewButtons[BUTTON_COUNT];
 	usg::GUIWindow			m_fileWindow;

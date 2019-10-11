@@ -195,6 +195,12 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     io.Fonts->ClearTexData();
 }
 
+void IMGuiRenderer::Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight)
+{
+	m_uScreenWidth = uWidth;
+	m_uScreenHeight = uHeight;
+}
+
 void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
 {
 	m_uMaxVerts = uMaxVerts;
