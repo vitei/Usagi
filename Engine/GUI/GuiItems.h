@@ -27,6 +27,8 @@ namespace usg
 		TEXTURE,
 		MENU_BAR,
 		MENU,
+		TAB_BAR,
+		TAB,
 		MENU_ITEM
 	};
 

@@ -18,6 +18,8 @@
 #include "AlphaSettings.h"
 #include "ScaleSettings.h"
 #include "MotionParameters.h"
+#include "Engine/GUI/GuiTab.h"
+#include "Engine/GUI/GuiTabBar.h"
 #include "TextureSettings.h"
 #include "ShapeSettings.h"
 #include "ParticleSettings.h"
@@ -79,6 +81,20 @@ private:
 	class ViewportHack*		m_pViewportHack;
 
 	usg::GUIWindow			m_emitterWindow;
+	usg::GUITabBar			m_emitterTabBar;
+	usg::GUITab				m_emitterShapeTab;
+	usg::GUITab				m_emissionTab;
+	usg::GUITab				m_textureTab;
+	usg::GUITab				m_colorTab;
+	usg::GUITab				m_blendTab;
+	usg::GUITab				m_scaleTab;
+	usg::GUITab				m_motionTab;
+	usg::GUIMenu			m_fileMenu;
+	// FIXME: Move over
+	usg::GUIMenuLoadSave	m_saveAsItem;
+	usg::GUIMenuLoadSave	m_loadItem;
+	usg::GUIMenuItem		m_saveItem;
+
 	usg::GUIWindow			m_lifeMotionWindow;
 	usg::GUIWindow			m_particleAppearanceWindow;
 	usg::GUIWindow			m_effectWindow;

@@ -68,13 +68,15 @@ namespace usg
 					return false;
 			}
 			break;
+			case WINDOW_TYPE_DUMMY:
+				break;
 			default:
 				ASSERT(false);
 		}	
 		
 		m_menuBar.UpdateAndAddToDrawList();
 
-		ImGui::PushItemWidth(150.f);
+		ImGui::PushItemWidth(180.f);
 		ImGui::SetWindowFontScale(m_fScale);
 		if(m_bVisible)
 		{
@@ -103,6 +105,8 @@ namespace usg
 			case WINDOW_TYPE_PARENT:
 				ImGui::End();
 			break;
+			case WINDOW_TYPE_DUMMY:
+				break;
 			default:
 				break;
 		}

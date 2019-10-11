@@ -27,7 +27,8 @@ namespace usg
 		{
 			WINDOW_TYPE_PARENT = 0,
 			WINDOW_TYPE_CHILD,
-			WINDOW_TYPE_COLLAPSABLE
+			WINDOW_TYPE_COLLAPSABLE,
+			WINDOW_TYPE_DUMMY	// A container for items that doesn't imapct appearance
 		};
 
 		void Init(const char* szName, const Vector2f& vPos, const Vector2f& vSize, WindowType eType = WINDOW_TYPE_PARENT);
@@ -43,6 +44,7 @@ namespace usg
 
 		GUIMenuBar& GetMenuBar() { return m_menuBar; }
 
+		List<GUIItem>& GetItems() { return m_items; }
 	private:
 
 		Vector2f	m_vPosition;
@@ -52,7 +54,6 @@ namespace usg
 		bool		m_bShowBorders;
 		bool		m_bDefaultCollapsed;
 		bool		m_bCollapsed;
-		char		m_szName[USG_IDENTIFIER_LEN];
 	
 
 		GUIMenuBar		m_menuBar;

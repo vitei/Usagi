@@ -92,6 +92,8 @@ void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptE
 
 ParticleEditor::ParticleEditor()
 : GameInterface()
+, m_saveAsItem(true)
+, m_loadItem(false)
 {
 	m_bPaused = false;
 	g_spParticleEditor = this;
@@ -156,6 +158,22 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	usg::Vector2f vScale(340.f, 530.f);
 	m_emitterWindow.Init("Emitter", vPos, vScale);
 
+	m_emitterTabBar.Init("Emitter");
+	m_emitterShapeTab.Init("Shape");
+	m_emissionTab.Init("Emit");
+	m_textureTab.Init("Texture");
+	m_colorTab.Init("Color");
+	m_blendTab.Init("Blend");
+	m_scaleTab.Init("Scale");
+	m_motionTab.Init("Motion");
+	m_emitterTabBar.AddItem(&m_emitterShapeTab);
+	m_emitterTabBar.AddItem(&m_emissionTab);
+	m_emitterTabBar.AddItem(&m_textureTab);
+	m_emitterTabBar.AddItem(&m_colorTab);
+	m_emitterTabBar.AddItem(&m_blendTab);
+	m_emitterTabBar.AddItem(&m_scaleTab);
+	m_emitterTabBar.AddItem(&m_motionTab);
+
 	vPos.Assign(700.0f, 460.0f);
 	m_effectWindow.Init("Effect", vPos, vScale );
 
@@ -214,21 +232,41 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_guiRend.AddWindow(&m_effectWindow);
 	m_guiRend.AddWindow(&m_previewWindow);
 
-	m_emitterWindow.AddItem(&m_fileWindow);
-	m_shapeSettings.AddToWindow(m_emitterWindow);
-	m_emissionSettings.AddToWindow(m_emitterWindow);
+	m_fileMenu.Init("File");
+	m_saveItem.Init("Save");
+	m_saveItem.SetEnabled(false);
+	m_saveAsItem.Init("Save As...");
+	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
+	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
+	m_saveAsItem.SetExtension("vpb");
+	//m_saveAsItem.SetCallbacks(this);
+	m_loadItem.Init("Load");
+	m_loadItem.AddFilter("Vitei ProtoBuf", "* .vpb");
+	m_loadItem.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
+	//m_loadItem.SetCallbacks(this);
 
-	m_particleSettings.AddToWindow(m_lifeMotionWindow);
-	m_motionParams.AddToWindow(m_lifeMotionWindow);
-	m_rotationSettings.AddToWindow(m_lifeMotionWindow);
+	m_fileMenu.AddItem(&m_loadItem);
+	m_fileMenu.AddItem(&m_saveItem);
+	m_fileMenu.AddItem(&m_saveAsItem);
+
+	usg::GUIMenuBar& menuBar = m_emitterWindow.GetMenuBar();
+	menuBar.SetVisible(true);
+	menuBar.AddItem(&m_fileMenu);
+	m_emitterWindow.AddItem(&m_emitterTabBar);
+	m_shapeSettings.AddToTab(m_emitterShapeTab);
+	m_emissionSettings.AddToTab(m_emissionTab);
+
+	m_particleSettings.AddToTab(m_emissionTab);
+	m_motionParams.AddToTab(m_motionTab);
+	m_rotationSettings.AddToTab(m_motionTab);
 	
-	m_textureSettings.AddToWindow(m_particleAppearanceWindow);
-	m_colorSettings.AddToWindow(m_particleAppearanceWindow);
-	m_alphaSettings.AddToWindow(m_particleAppearanceWindow);
-	m_scaleSettings.AddToWindow(m_particleAppearanceWindow);
+	m_textureSettings.AddToTab(m_textureTab);
+	m_colorSettings.AddToTab(m_colorTab);
+	m_alphaSettings.AddToTab(m_colorTab);
+	m_scaleSettings.AddToTab(m_scaleTab);
 
-	m_blendSettings.AddToWindow(m_effectWindow);
-	m_sortSettings.AddToWindow(m_effectWindow);
+	m_blendSettings.AddToTab(m_blendTab);
+	m_sortSettings.AddToTab(m_blendTab);
 
 	m_modifiers.AddToEnd(&m_shapeSettings);
 	m_modifiers.AddToEnd(&m_emissionSettings);
