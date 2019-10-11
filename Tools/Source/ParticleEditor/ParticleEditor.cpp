@@ -157,6 +157,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	usg::Vector2f vPos(1200.0f, 0.0f);
 	usg::Vector2f vScale(370.f, 700.f);
 	m_emitterWindow.Init("Emitter", vPos, vScale);
+	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview");
 
 	m_emitterTabBar.Init("Emitter");
 	m_emitterShapeTab.Init("Shape");
@@ -215,6 +216,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_previewWindow.AddItem(&m_clearColor);
 	m_previewWindow.AddItem(&m_previewType);
 
+	m_guiRend.AddWindow(&m_effectPreview.GetGUIWindow());
 	m_guiRend.AddWindow(&m_emitterWindow);
 	m_guiRend.AddWindow(&m_previewWindow);
 
@@ -305,6 +307,7 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	m_effectGroup.CleanUp(pDevice);
 	m_emitter.CleanUp(pDevice);
 	m_effect.CleanUp(pDevice);
+	m_effectPreview.CleanUp(pDevice);
 	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
 	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
 	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);

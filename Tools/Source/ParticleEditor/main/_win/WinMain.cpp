@@ -51,7 +51,6 @@ static void ToggleFullScreen(const HWND hwnd)
 				(SWP_NOOWNERZORDER | SWP_FRAMECHANGED));
 
 		}
-		ShowCursor(FALSE);
 	}
 	else
 	{
@@ -59,7 +58,6 @@ static void ToggleFullScreen(const HWND hwnd)
 		SetWindowLong(hwnd, GWL_STYLE, (dwStyle | WS_OVERLAPPEDWINDOW));
 		SetWindowPlacement(hwnd, &g_OldWindowPlacement);
 		SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, uFlags);
-		ShowCursor(TRUE);
 	}
 	GameMessage('WSZE', nullptr);
 }

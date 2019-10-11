@@ -25,6 +25,7 @@
 #include "ParticleSettings.h"
 #include "SortSettings.h"
 #include "FileList.h"
+#include "PreviewWindow.h"
 #include "EffectGroup.h"
 #include "EditorShapes.h"
 
@@ -77,6 +78,7 @@ private:
 	EditorShapes			m_editorShapes;
 	usg::DebugStats			m_debug;
 	PreviewModel			m_previewModel;
+	PreviewWindow			m_effectPreview;
 	usg::DirLight*			m_pDirLight;
 	class ViewportHack*		m_pViewportHack;
 
