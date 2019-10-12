@@ -34,7 +34,7 @@ public:
 private:
 
 	usg::Model*			  m_pModel;
-	
+
 
 	FileList<MAX_FILE_COUNT>	m_modelFileList;
 	usg::GUIComboBox			m_loadFilePaths;

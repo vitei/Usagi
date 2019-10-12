@@ -94,41 +94,19 @@ ParticleEditor::ParticleEditor()
 : GameInterface()
 {
 	g_spParticleEditor = this;
-	m_pDirLight = nullptr;
-	m_pViewportHack = nullptr;
 }
 
 
 
 void ParticleEditor::Init(usg::GFXDevice* pDevice)
 {
-	usg::AABB worldBounds;
-	worldBounds.SetCentreRadii(usg::Vector3f(0.0f, 0.0f, 0.0f), usg::Vector3f(512.0f, 512.0f, 512.0f));
-
-	uint32 uWidth = 750;
-	uint32 uHeight = 500;
-	float fAspect = (float)uWidth/(float)uHeight;
-	m_previewViewport.InitViewport(340, 600, uWidth, uHeight);
-
+	uint32 uWidth;
+	uint32 uHeight;
 
 	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidth, uHeight, false);
 	
 	m_postFX.Init(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 0);
 
-	// Use the raw textures directly so artists can just place new ones in without having to rake
-	// Disabling for now as the directory structure has changed
-	//usg::ResourceMgr::Inst()->SetTextureDir("../../Data/Textures/");
-	//usg::ResourceMgr::Inst()->EnableReloadingOfDirtyAssets(true);
-
-	m_scene.Init(pDevice, worldBounds, NULL);
-	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
-	m_camera.Init(fAspect);
-	m_pSceneCtxt->Init(pDevice, &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
-	m_pSceneCtxt->SetCamera(&m_camera.GetCamera());
-
-	m_pViewportHack = vnew(usg::ALLOC_OBJECT)ViewportHack;
-	m_pViewportHack->Init(pDevice, &m_scene, m_previewViewport);
-	
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
 	m_effect.Init(pDevice, &m_effectPreview.GetScene(), mEffectMat);
@@ -146,7 +124,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
 	m_effect.AddEmitter(pDevice, &m_emitter);
 	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
-	m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
 
 	/*m_testWindow.Init("Test Window", usg::Vector2f(0.0f, 0.0f), usg::Vector2f(400.f, 200.f), 10);
 	m_testButton.Init("Test Button");
@@ -154,25 +131,12 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_testWindow.AddItem(&m_testButton);
 	m_testWindow.AddItem(&m_testColor);*/
 	m_guiRend.Init();
-	m_guiRend.InitResources(pDevice, m_scene, uWidth, uHeight, 20000);
+	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
 	//m_guiRend.AddWindow(&m_testWindow);
 
 	usg::Vector2f vPos(740.0f, 120.0f);
 	usg::Vector2f vScale(340.f, 100.f);
-	m_fileWindow.Init("File", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
-	//m_loadFilePaths.Init("Load dir", m_fileNames, 0);
-	m_loadButton.Init("Load");
-	m_loadButton.SetSameLine(true);
-	m_saveFile.Init("Save Dir", "");
-	m_saveButton.Init("Save");
-	m_saveButton.SetSameLine(true);
-
-	//m_guiRend.AddWindow(&m_fileWindow);
-	m_fileWindow.AddItem(&m_loadFilePaths);
-	m_fileWindow.AddItem(&m_loadButton);
-	m_fileWindow.AddItem(&m_saveFile);
-	m_fileWindow.AddItem(&m_saveButton);
-
+	
 	m_effectGroup.Init(pDevice, &m_effectPreview.GetScene(), &m_guiRend);
 
 	m_guiRend.AddWindow(&m_effectPreview.GetGUIWindow());
@@ -181,19 +145,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	
 	m_emitterWindow.GetShapeSettings().SetShapeSettings(m_emitter.GetShapeDetails());
 
-	m_fileList.Init("../../Data/Particle/Emitters/", ".vpb");
-	m_loadFilePaths.Init("Load Dir", m_fileList.GetFileNamesRaw(), 0);
-
-	usg::DirLight* pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, false);
-	usg::Color ambient(0.4f, 0.4f, 0.4f);
-	usg::Color diffuse(0.8f, 0.8f, 0.8f);
-	usg::Vector4f vDirection(0.4f, -1.0f, 0.4f, 0.0f);
-	vDirection.Normalise();
-	pDirLight->SetAmbient(ambient);
-	pDirLight->SetDiffuse(diffuse);
-	pDirLight->SetDirection(vDirection);
-	pDirLight->SwitchOn(true);
-	m_pDirLight = pDirLight;
 
 	m_bIsRunning = true;
 } 
@@ -209,9 +160,6 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	m_emitterWindow.CleanUp(pDevice);
 	m_editorShapes.CleanUp(pDevice);
 	m_guiRend.CleanUp(pDevice);
-	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
-	m_scene.DeleteViewContext(m_pSceneCtxt);
-	m_scene.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()
@@ -230,7 +178,6 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_emitterWindow.Update(pDevice, fElapsed);
 	m_emitterPreview.Update(pDevice, fElapsed);
 
-	m_camera.Update(fElapsed);
 	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
 
@@ -249,7 +196,6 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	if (m_effectGroup.LoadEmitterRequested(loadName))
 	{
 		loadName += ".vpb";
-		m_loadFilePaths.SetSelectedByName(loadName.CStr());
 		bLoad = true;
 	}
 	
@@ -296,43 +242,13 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 		}
 	}
 	
-	static uint32 uFrame = 0;
-	if(uFrame > 33)
-	{
-		m_fileList.Update();
-		uFrame = 0;
-	}
-	uFrame++;
-
-	m_loadFilePaths.UpdateOptions(m_fileList.GetFileNamesRaw());
-
 	m_guiRend.PostUpdate(fElapsed);
 
-	if(m_saveButton.GetValue() && m_saveFile.GetInput()[0] != '\0')
-	{
-		usg::U8String scriptName = "../../Data/Particle/Emitters/";
-		m_activeEdit = m_saveFile.GetInput();
-		if(!m_activeEdit.HasExtension("vpb"))
-		{
-			m_activeEdit += ".vpb";
-		}
-		// TODO: If we saved as a different name to the file we were editing then re-load the existing effect group
-		// as the changes need to be discarded
-		scriptName += m_activeEdit;
-		usg::ProtocolBufferFile file(scriptName.CStr(), usg::FILE_ACCESS_WRITE);
-		bool bWritten  = file.Write(&m_emitterWindow.GetVariables());
-		ASSERT(bWritten);
-		usg::particles::EmitterShapeDetails* pDetails = m_emitterWindow.GetShapeSettings().GetShapeDetails();
-		bWritten = file.Write(pDetails);
-		ASSERT(bWritten);
-	}
 
 	m_editorShapes.Update(pDevice, m_emitterWindow.GetVariables().eShape, m_emitterWindow.GetShapeSettings().GetShapeDetails(), fElapsed);
 
 	m_effect.UpdateBuffers(pDevice);
 	m_emitter.UpdateBuffers(pDevice);
-	m_scene.TransformUpdate(fElapsed);
-	m_scene.Update(pDevice);
 }
 
 void ParticleEditor::Draw(usg::GFXDevice* pDevice)
@@ -364,15 +280,8 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 
 
 	m_postFX.GetInitialRT()->SetClearColor(m_effectPreview.GetBackgroundColor());
-	pGFXCtxt->ApplyViewport(m_previewViewport);
 	pGFXCtxt->ClearRenderTarget();
 
-	m_pSceneCtxt->PreDraw(pGFXCtxt, usg::VIEW_CENTRAL);
-	m_pSceneCtxt->DrawScene(pGFXCtxt);
-
-	pGFXCtxt->ApplyViewport(m_postFX.GetInitialRT()->GetViewport());
-	 //m_postFX.GetActiveRT()->SetClearColor(Color(1.f, 1.0f, 0.0f, 1.0f));
-	//pGFXCtxt->ClearRenderTarget( m_postFX.GetFinalRT(), RenderTarget::CLEAR_FLAG_COLOR_0 );
 	usg::RenderNode::RenderContext context;
 	context.pPostFX = &m_postFX;
 	context.eRenderPass = usg::RenderNode::RENDER_PASS_FORWARD;

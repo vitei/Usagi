@@ -46,10 +46,6 @@ private:
 
 	usg::Timer				m_timer;
 	usg::PostFXSys			m_postFX;
-	usg::Scene				m_scene;
-	usg::Viewport			m_previewViewport;
-	usg::ViewContext*		m_pSceneCtxt;
-	MayaCamera				m_camera;
 
 	usg::IMGuiRenderer		m_guiRend;
 	EditorShapes			m_editorShapes;
@@ -57,23 +53,15 @@ private:
 	usg::DebugStats			m_debug;
 	PreviewWindow			m_effectPreview;
 	PreviewWindow			m_emitterPreview;
-	usg::DirLight*			m_pDirLight;
-	class ViewportHack*		m_pViewportHack;
 
 
-	usg::GUIWindow			m_fileWindow;
-	usg::GUIComboBox		m_loadFilePaths;
-	usg::GUIButton			m_loadButton;
-	usg::GUITextInput		m_saveFile;
-	usg::GUIButton			m_saveButton;
-
-	FileList<MAX_FILE_COUNT> m_fileList;
 	EffectGroup				m_effectGroup;
 	EmitterWindow			m_emitterWindow;
 	usg::U8String			m_activeEdit;
 
 	usg::ScriptEmitter		m_emitter;
 	usg::ParticleEffect		m_effect;
+
 };
 
 

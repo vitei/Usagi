@@ -48,6 +48,7 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	m_pScene = pScene;
 
+
 	//m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
 	//m_pModel->Load(pDevice, m_pScene, "particle_editor/Grandmaster.vmdc", false, usg::RenderMask::RENDER_MASK_ALL, true, true, NULL, NULL, false);
 }

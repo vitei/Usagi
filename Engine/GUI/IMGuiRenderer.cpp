@@ -202,7 +202,7 @@ void IMGuiRenderer::Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight)
 	m_uScreenHeight = uHeight;
 }
 
-void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
+void IMGuiRenderer::InitResources(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
 {
 	m_uMaxVerts = uMaxVerts;
 	m_uScreenWidth = uWidth;

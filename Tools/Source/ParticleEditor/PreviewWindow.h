@@ -6,6 +6,7 @@
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Graphics/Lights/DirLight.h"
 #include "EmitterModifier.h"
 #include "PreviewModel.h"
 #include "FloatAnim.h"
@@ -20,8 +21,8 @@ namespace usg
 class PreviewWindow
 {
 public:
-	PreviewWindow() : m_bPaused(false) {}
-	~PreviewWindow() {}
+	PreviewWindow();
+	~PreviewWindow();
 
 	void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName);
 	void CleanUp(usg::GFXDevice* pDevice);
@@ -44,7 +45,7 @@ private:
 		BUTTON_RESTART,
 		BUTTON_COUNT,
 	};
-
+	usg::DirLight*		m_pDirLight;
 	MayaCamera			m_camera;
 	PreviewModel		m_previewModel;
 	usg::Scene			m_scene;

@@ -3,9 +3,21 @@
 #include "Engine/Maths/AABB.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Graphics/Lights/DirLight.h"
 #include "Engine/Maths/MathUtil.h"
 #include "PreviewWindow.h"
  
+
+PreviewWindow::PreviewWindow()
+	: m_bPaused(false)
+{
+	m_pDirLight = nullptr;
+}
+
+PreviewWindow::~PreviewWindow()
+{
+	m_pDirLight = nullptr;
+}
 
 void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName)
 {
@@ -83,6 +95,7 @@ void PreviewWindow::CleanUp(usg::GFXDevice* pDevice)
 	m_postFX.CleanUp(pDevice);
 	m_texture.CleanUp(pDevice);
 	m_scene.Cleanup(pDevice);
+
 }
 
 bool PreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
