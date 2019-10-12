@@ -26,7 +26,7 @@ inline void ASSERT(bool condition)
 	{
 		ShowCursor(TRUE);
 
-		__debugbreak();
+ 		__debugbreak();
 	}
 }
 

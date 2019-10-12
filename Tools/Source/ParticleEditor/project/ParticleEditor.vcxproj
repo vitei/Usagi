@@ -182,6 +182,7 @@
     <ClCompile Include="..\EmissionSettings.cpp" />
     <ClCompile Include="..\EmitterInstance.cpp" />
     <ClCompile Include="..\EmitterModifier.cpp" />
+    <ClCompile Include="..\EmitterWindow.cpp" />
     <ClCompile Include="..\FloatAnim.cpp" />
     <ClCompile Include="..\main\_win\WinMain.cpp" />
     <ClCompile Include="..\MayaCamera.cpp" />

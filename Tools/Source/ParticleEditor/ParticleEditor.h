@@ -9,15 +9,6 @@
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/Debug/DebugStats.h"
 #include "Engine/Graphics/Lights/DirLight.h"
-#include "PreviewModel.h"
-#include "MayaCamera.h"
-#include "BlendSettings.h"
-#include "EmissionSettings.h"
-#include "RotationSettings.h"
-#include "ColorSettings.h"
-#include "AlphaSettings.h"
-#include "ScaleSettings.h"
-#include "MotionParameters.h"
 #include "Engine/GUI/GuiTab.h"
 #include "Engine/GUI/GuiTabBar.h"
 #include "TextureSettings.h"
@@ -25,6 +16,7 @@
 #include "ParticleSettings.h"
 #include "SortSettings.h"
 #include "FileList.h"
+#include "EmitterWindow.h"
 #include "PreviewWindow.h"
 #include "EffectGroup.h"
 #include "EditorShapes.h"
@@ -48,10 +40,6 @@ private:
 
 	enum
 	{
-		BUTTON_PLAY = 0,
-		BUTTON_PAUSE,
-		BUTTON_RESTART,
-		BUTTON_COUNT,
 		MAX_FILE_COUNT = 512,
 		MAX_FILE_NAME_STRING = 8192
 	};
@@ -64,58 +52,27 @@ private:
 	MayaCamera				m_camera;
 
 	usg::IMGuiRenderer		m_guiRend;
-	BlendSettings			m_blendSettings;
-	EmissionSettings		m_emissionSettings;
-	RotationSettings		m_rotationSettings;
-	ColorSettings			m_colorSettings;
-	AlphaSettings			m_alphaSettings;
-	ScaleSettings			m_scaleSettings;
-	MotionParameters		m_motionParams;
-	TextureSettings			m_textureSettings;
-	ShapeSettings			m_shapeSettings;
-	SortSettings			m_sortSettings;
-	ParticleSettings		m_particleSettings;
 	EditorShapes			m_editorShapes;
+
 	usg::DebugStats			m_debug;
-	PreviewModel			m_previewModel;
 	PreviewWindow			m_effectPreview;
+	PreviewWindow			m_emitterPreview;
 	usg::DirLight*			m_pDirLight;
 	class ViewportHack*		m_pViewportHack;
 
-	usg::GUIWindow			m_emitterWindow;
-	usg::GUITabBar			m_emitterTabBar;
-	usg::GUITab				m_emitterShapeTab;
-	usg::GUITab				m_emissionTab;
-	usg::GUITab				m_textureTab;
-	usg::GUITab				m_colorTab;
-	usg::GUITab				m_blendTab;
-	usg::GUITab				m_scaleTab;
-	usg::GUITab				m_motionTab;
-	usg::GUIMenu			m_fileMenu;
-	// FIXME: Move over
-	usg::GUIMenuLoadSave	m_saveAsItem;
-	usg::GUIMenuLoadSave	m_loadItem;
-	usg::GUIMenuItem		m_saveItem;
 
-	usg::GUIWindow			m_previewWindow;
-	usg::GUIButton			m_previewButtons[BUTTON_COUNT];
 	usg::GUIWindow			m_fileWindow;
 	usg::GUIComboBox		m_loadFilePaths;
 	usg::GUIButton			m_loadButton;
 	usg::GUITextInput		m_saveFile;
 	usg::GUIButton			m_saveButton;
-	usg::GUICheckBox		m_repeat;
-	usg::GUIColorSelect		m_clearColor;
-	usg::GUIComboBox		m_previewType;
-	uint32					m_uPrevPreviewType;
-	bool					m_bPaused;
+
 	FileList<MAX_FILE_COUNT> m_fileList;
 	EffectGroup				m_effectGroup;
+	EmitterWindow			m_emitterWindow;
 	usg::U8String			m_activeEdit;
 
-	usg::List<EmitterModifier>	m_modifiers;
-	usg::particles::EmitterEmission	m_variables;
-	usg::ScriptEmitter			m_emitter;
+	usg::ScriptEmitter		m_emitter;
 	usg::ParticleEffect		m_effect;
 };
 

@@ -169,6 +169,7 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // Create DX11 texture
 	DescriptorSetLayoutHndl global = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D);

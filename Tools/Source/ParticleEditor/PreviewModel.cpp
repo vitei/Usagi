@@ -25,15 +25,13 @@ void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
 	}
 }
 
-void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer)
+void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 {
 	usg::Vector2f vPos(0.0f, 130.0f);
 	usg::Vector2f vScale(340.f, 100.f);
-	m_window.Init("Preview Model", vPos, vScale);
+	m_window.Init("Preview Model", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_visible.Init("Show", true);
-	m_visible.SetSameLine(false);
-
-	pRenderer->AddWindow(&m_window);
+	m_visible.SetSameLine(true);
 
 	m_modelFileList.Init("Models", ".vmdf", true);
 	m_loadFilePaths.Init("Load Dir", m_modelFileList.GetFileNamesRaw(), 0);

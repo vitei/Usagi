@@ -60,17 +60,17 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	usg::Vector2f vWindowPos(0.0f, 0.0f);
 	usg::Vector2f vWindowSize(320.f, 240.f);
 	m_window.Init("Blend", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
-	m_comboBoxes[COMBO_BOX_RGB_SRC].Init("Particle RGB Multiplier", g_szBlendFunc, usg::BLEND_FUNC_SRC_ALPHA);
+	m_comboBoxes[COMBO_BOX_RGB_SRC].Init("Src RGB Multiplier", g_szBlendFunc, usg::BLEND_FUNC_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_RGB_SRC].SetToolTip("Multiplier for particle RGB color");
 	m_comboBoxes[COMBO_BOX_RGB_OP].Init("RGB Combine Op", g_szBlendEq, usg::BLEND_EQUATION_ADD);
 	m_comboBoxes[COMBO_BOX_RGB_OP].SetToolTip("How the particle color and bg color are combined");
-	m_comboBoxes[COMBO_BOX_RGB_DST].Init("Background RGB Multipler", g_szBlendFunc, usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+	m_comboBoxes[COMBO_BOX_RGB_DST].Init("Dest RGB Multipler", g_szBlendFunc, usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_RGB_DST].SetToolTip("Multiplier for the background color");
 	
-	m_comboBoxes[COMBO_BOX_ALPHA_SRC].Init("Particle Alpha Multiplier", g_szBlendFunc, usg::BLEND_FUNC_SRC_ALPHA);
+	m_comboBoxes[COMBO_BOX_ALPHA_SRC].Init("Src Alpha Multiplier", g_szBlendFunc, usg::BLEND_FUNC_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_ALPHA_SRC].SetToolTip("Advanced use only: Multiplier for particle alpha");
 
-	m_comboBoxes[COMBO_BOX_ALPHA_DST].Init("Background Alpha Multiplier", g_szBlendFunc, usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+	m_comboBoxes[COMBO_BOX_ALPHA_DST].Init("Dest Alpha Multiplier", g_szBlendFunc, usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
 	m_comboBoxes[COMBO_BOX_ALPHA_DST].SetToolTip("Advanced use only: Multiplier for background alpha");
 	m_comboBoxes[COMBO_BOX_ALPHA_OP].Init("Alpha Combine Op", g_szBlendEq, usg::BLEND_EQUATION_ADD);
 	m_comboBoxes[COMBO_BOX_ALPHA_OP].SetToolTip("OP: \"(ParticleAlpha * SRC) OP (BackgroundAlpha * DST)\"");
