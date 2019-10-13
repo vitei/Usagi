@@ -8,6 +8,7 @@
 #include "ParticlePreviewWindow.h"
  
 ParticlePreviewWindow::ParticlePreviewWindow()
+	: m_bReload(false)
 {
 
 }
@@ -35,6 +36,8 @@ bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
 	Inherited::Update(pDevice, fElapsed);
 
+	m_bReload |= GetRestart();
+
 	if (m_effect.IsAlive())
 	{
 		if (!GetPaused())
@@ -43,17 +46,14 @@ bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 		}
 	}
 
-	if (GetRestart())
+	if (m_bReload)
 	{
-		usg::Matrix4x4 mEffectMat;
-		mEffectMat.LoadIdentity();
 
-		//m_emitter.Init(&m_effect);
-		m_effect.Kill(true);
-		m_effect.Init(pDevice, &GetScene(), mEffectMat);
 	}
 
 	m_effect.UpdateBuffers(pDevice);
+
+	m_bReload = false;
 
 	return true;
 }

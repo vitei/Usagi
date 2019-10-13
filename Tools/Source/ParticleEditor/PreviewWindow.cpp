@@ -80,7 +80,7 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 
 	m_window.AddItem(&m_texture);
 
-	m_pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, true);
+	m_pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, false);
 	m_pDirLight->SetAmbient(usg::Color(0.3f, 0.3f, 0.3f));
 	m_pDirLight->SetDiffuse(usg::Color(2.0f, 2.0f, 2.0f));
 	m_pDirLight->SetSpecularColor(usg::Color(5.0f, 5.0f, 5.0f));

@@ -184,9 +184,10 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 
 	bool bLoad = m_emitterWindow.GetLoaded();	
-	bool bRestart = m_effectPreview.GetRestart();
+	bool bRestart = m_emitterPreview.GetRestart() || (m_emitterPreview.GetRepeat() && !m_emitterPreview.GetEffect().IsAlive());
 	if(bLoad)
 	{
+		m_emitterPreview.SetReload();
 		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
 		if (m_emitterWindow.GetVariables().has_cBackgroundColor)
 		{
@@ -194,17 +195,22 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 		}
 
 		m_emitter.CreateEmitterShape(m_emitterWindow.GetVariables().eShape, *m_emitterWindow.GetShapeSettings().GetShapeDetails() );
+		bRestart = true;
 	}
 
-	/*
+
 	if(bRestart)
 	{
 		usg::Matrix4x4 mEffectMat;
 		mEffectMat.LoadIdentity();
 
+		//m_emitter.Init(&m_effect);
+		m_emitterPreview.GetEffect().Kill(true);
+		m_emitterPreview.GetEffect().Init(pDevice, &m_emitterPreview.GetScene(), mEffectMat);
+
 		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
 		m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
-	}*/
+	}
 
 	bool bUpdated = false;
 	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)

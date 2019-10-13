@@ -14,8 +14,11 @@ public:
 	virtual bool Update(usg::GFXDevice* pDevice, float fElapsed) override;
 	virtual void Draw(usg::GFXContext* pImmContext) override;
 
+	void SetReload() { m_bReload = true; }
+
 	usg::ParticleEffect& GetEffect() { return m_effect; }
 
 private:
 	usg::ParticleEffect		m_effect;
+	bool					m_bReload;
 };
