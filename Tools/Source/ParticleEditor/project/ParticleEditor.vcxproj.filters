@@ -87,6 +87,9 @@
     <ClCompile Include="..\EmitterWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ParticlePreviewWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AlphaSettings.h">
@@ -154,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="..\PreviewWindow.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticlePreviewWindow.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

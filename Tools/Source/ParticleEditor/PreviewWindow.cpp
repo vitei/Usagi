@@ -19,10 +19,9 @@ PreviewWindow::~PreviewWindow()
 	m_pDirLight = nullptr;
 }
 
-void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName)
+void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos)
 {
-	usg::Vector2f vPos(320.0f, 0.0f);
-	usg::Vector2f vSize(420.f, 500.f);
+	usg::Vector2f vSize(420.f, 600.f);
 	m_window.Init(szName, vPos, vSize, usg::GUIWindow::WINDOW_TYPE_PARENT);
 	// TODO: Need to resize with the preview window
 	vSize.Assign(400.f, 400.f);

@@ -188,6 +188,7 @@
     <ClCompile Include="..\MayaCamera.cpp" />
     <ClCompile Include="..\MotionParameters.cpp" />
     <ClCompile Include="..\ParticleEditor.cpp" />
+    <ClCompile Include="..\ParticlePreviewWindow.cpp" />
     <ClCompile Include="..\ParticleSettings.cpp" />
     <ClCompile Include="..\PreviewModel.cpp" />
     <ClCompile Include="..\PreviewWindow.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="..\MayaCamera.h" />
     <ClInclude Include="..\MotionParameters.h" />
     <ClInclude Include="..\ParticleEditor.h" />
+    <ClInclude Include="..\ParticlePreviewWindow.h" />
     <ClInclude Include="..\ParticleSettings.h" />
     <ClInclude Include="..\PreviewModel.h" />
     <ClInclude Include="..\PreviewWindow.h" />

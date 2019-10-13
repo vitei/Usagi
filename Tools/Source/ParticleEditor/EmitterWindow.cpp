@@ -15,8 +15,8 @@ EmitterWindow::EmitterWindow()
 
 void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 {
-	usg::Vector2f vPos(1200.0f, 0.0f);
-	usg::Vector2f vScale(370.f, 700.f);
+	usg::Vector2f vPos(760.0f, 0.0f);
+	usg::Vector2f vScale(370.f, 600.f);
 	m_emitterWindow.Init("Emitter", vPos, vScale);
 
 	m_fileName.Init("");

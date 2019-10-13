@@ -17,7 +17,7 @@
 #include "SortSettings.h"
 #include "FileList.h"
 #include "EmitterWindow.h"
-#include "PreviewWindow.h"
+#include "ParticlePreviewWindow.h"
 #include "EffectGroup.h"
 #include "EditorShapes.h"
 
@@ -52,7 +52,7 @@ private:
 
 	usg::DebugStats			m_debug;
 	PreviewWindow			m_effectPreview;
-	PreviewWindow			m_emitterPreview;
+	ParticlePreviewWindow	m_emitterPreview;
 
 
 	EffectGroup				m_effectGroup;
@@ -60,7 +60,6 @@ private:
 	usg::U8String			m_activeEdit;
 
 	usg::ScriptEmitter		m_emitter;
-	usg::ParticleEffect		m_effect;
 
 };
 

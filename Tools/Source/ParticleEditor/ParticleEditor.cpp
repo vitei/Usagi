@@ -109,32 +109,26 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
-	m_effect.Init(pDevice, &m_effectPreview.GetScene(), mEffectMat);
 
-	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview");
-	m_emitterPreview.Init(pDevice, &m_guiRend, "Emitter Preview");
+	usg::Vector2f vPos(320.0f, 0.f);
+	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview", vPos);
+	vPos.Assign(1130.0f, 0.0f);
+	m_emitterPreview.Init(pDevice, &m_guiRend, "Emitter Preview", vPos);
 
 	m_editorShapes.Init(pDevice, &m_emitterPreview.GetScene());
 
 	m_emitter.Alloc(pDevice, &m_emitterPreview.GetScene().GetParticleMgr(), "water_halo", true );
-	m_emitter.Init(pDevice, &m_effect);
+	m_emitter.Init(pDevice, &m_emitterPreview.GetEffect());
 	m_emitterWindow.GetVariables() = m_emitter.GetDefinition();
 	m_emitterWindow.Init(pDevice, &m_guiRend);
 
 	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
-	m_effect.AddEmitter(pDevice, &m_emitter);
-	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
+	m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 
-	/*m_testWindow.Init("Test Window", usg::Vector2f(0.0f, 0.0f), usg::Vector2f(400.f, 200.f), 10);
-	m_testButton.Init("Test Button");
-	m_testColor.Init("Test color");
-	m_testWindow.AddItem(&m_testButton);
-	m_testWindow.AddItem(&m_testColor);*/
 	m_guiRend.Init();
 	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
-	//m_guiRend.AddWindow(&m_testWindow);
 
-	usg::Vector2f vPos(740.0f, 120.0f);
+	vPos.Assign(740.0f, 120.0f);
 	usg::Vector2f vScale(340.f, 100.f);
 	
 	m_effectGroup.Init(pDevice, &m_effectPreview.GetScene(), &m_guiRend);
@@ -154,7 +148,6 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	pDevice->WaitIdle();
 	m_effectGroup.CleanUp(pDevice);
 	m_emitter.CleanUp(pDevice);
-	m_effect.CleanUp(pDevice);
 	m_effectPreview.CleanUp(pDevice);
 	m_emitterPreview.CleanUp(pDevice);
 	m_emitterWindow.CleanUp(pDevice);
@@ -181,24 +174,8 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
 
-	// Treating our particle effect seperately to a standard one managed by the particle mgr
-	if(m_effect.IsAlive())
-	{
-		if(!m_effectPreview.GetPaused())
-		{
-			m_effect.Update(fElapsed);
-		}
-	}
 
-
-	bool bLoad = m_emitterWindow.GetLoaded();
-	usg::U8String loadName;
-	if (m_effectGroup.LoadEmitterRequested(loadName))
-	{
-		loadName += ".vpb";
-		bLoad = true;
-	}
-	
+	bool bLoad = m_emitterWindow.GetLoaded();	
 	bool bRestart = m_effectPreview.GetRestart();
 	if(bLoad)
 	{
@@ -215,13 +192,9 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	{
 		usg::Matrix4x4 mEffectMat;
 		mEffectMat.LoadIdentity();
-		
-		//m_emitter.Init(&m_effect);
-		m_effect.Kill(true);
-		m_effect.Init(pDevice, &m_effectPreview.GetScene(), mEffectMat);
+
 		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
-		m_effect.AddEmitter(pDevice, &m_emitter);
-		
+		m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 	}
 
 	bool bUpdated = false;
@@ -247,7 +220,6 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 	m_editorShapes.Update(pDevice, m_emitterWindow.GetVariables().eShape, m_emitterWindow.GetShapeSettings().GetShapeDetails(), fElapsed);
 
-	m_effect.UpdateBuffers(pDevice);
 	m_emitter.UpdateBuffers(pDevice);
 }
 

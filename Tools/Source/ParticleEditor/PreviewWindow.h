@@ -22,12 +22,12 @@ class PreviewWindow
 {
 public:
 	PreviewWindow();
-	~PreviewWindow();
+	virtual ~PreviewWindow();
 
-	void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName);
-	void CleanUp(usg::GFXDevice* pDevice);
-	bool Update(usg::GFXDevice* pDevice, float fElapsed);
-	void Draw(usg::GFXContext* pImmContext);
+	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos);
+	virtual void CleanUp(usg::GFXDevice* pDevice);
+	virtual bool Update(usg::GFXDevice* pDevice, float fElapsed);
+	virtual void Draw(usg::GFXContext* pImmContext);
 	usg::Scene& GetScene() { return m_scene; }
 	usg::GUIWindow& GetGUIWindow() { return m_window; }
 
