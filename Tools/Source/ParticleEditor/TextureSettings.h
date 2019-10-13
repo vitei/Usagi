@@ -33,7 +33,7 @@ private:
 	enum 
 	{
 		FRAME_BOXES = 8,
-		MAX_ANIM_FRAMES = 16
+		MAX_ANIM_FRAMES = 128
 	};
 
 	usg::TextureHndl		m_pTexture;

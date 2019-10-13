@@ -48,24 +48,25 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 
 	m_previewButton.InitAsTexture(pDevice, "Preview", m_pTexture);
 
-	usg::Vector2f vAnimWindowSize(280.0f, 70.0f);
+	usg::Vector2f vAnimWindowSize(330.0f, 140.0f);
 	m_animFrameWindow.Init("Frames", vWindowPos, vAnimWindowSize, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	m_animFrameWindow.SetShowBorders(true);
 
 	char frameName[256];
 	for(uint32 i=0; i<MAX_ANIM_FRAMES; i++)
 	{
-		usg::Vector2f vFrameSize(54.f, 54.f);
+		usg::Vector2f vFrameSize(85.f, 85.f);
 		str::ParseVariableArgsC(frameName, 256, "Frame %d", i);
 		m_animTextures[i].Init(pDevice, frameName, vFrameSize, m_pTexture);
 		m_animTextures[i].SetSameLine((i%4)!=0);
+		m_animTextures[i].SetToolTip(frameName);
 		m_animTextures[i].SetVisible(false);
 		m_animFrameWindow.AddItem(&m_animTextures[i]);
 	}
 
 	m_animTitle.Init("Anim timings");
 	int frameCount = 1;
-	m_frameCount.Init("Frame count", &frameCount, 1, 1, 32);
+	m_frameCount.Init("Frame count", &frameCount, 1, 1, MAX_ANIM_FRAMES);
 
 	m_animTimeScale.Init("Anim time scale", 0.1f, 2.0f, 1.0f);
 
@@ -258,7 +259,7 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		m_fAnimTime = 0.0f;
 	}
 
-	float fElapsed = 1.0f/30.f;
+	float fElapsed = 1.0f/60.f;
 
 	m_previewButton.SetVisible(true);
 
@@ -274,7 +275,7 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		break;
 	case usg::particles::TEX_MODE_FIT_TO_TIME:
 		patternIdx = (uint32)((m_fAnimTime / structData.life.frames[0].fValue)*( structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) );
-		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)structData.textureData[0].textureAnim.animIndex_count - 1);
+		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)(structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) - 1);
 		break;
 	case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
 		patternIdx = ((uint32)((30.f)*m_fAnimTime))%structData.textureData[0].textureAnim.animIndex_count;
@@ -295,6 +296,16 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 	float fAspect = GetUVCoords(patternIdx, vMin, vMax);
 	m_previewButton.SetTexture(pDevice, m_pTexture);
 	m_previewButton.SetUVs(vMin, vMax);
+
+	if (m_pTexture->GetWidth() > 350.0f)
+	{
+		float fScale = 350.0f / (float)(m_pTexture->GetWidth()/ m_repeat.GetValue()[0]);
+		m_previewButton.SetScale(usg::Vector2f(fScale, fScale));
+	}
+	else
+	{
+		m_previewButton.SetScale(usg::Vector2f(1.0f, 1.0f));
+	}
 
 	m_fAnimTime += fElapsed;
 }
@@ -318,9 +329,10 @@ void TextureSettings::UpdateAnimFrames(usg::GFXDevice* pDevice)
 		m_animTextures[uAnimId].SetVisible(true);
 		usg::Vector2f vFrameSize;
 		if(fAdjAspect > 1.0f)
-			vFrameSize.Assign(54.f, 54.f/fAdjAspect);
+			vFrameSize.Assign(65.f, 65.f/fAdjAspect);
 		else
-			vFrameSize.Assign(54.f*fAdjAspect, 54.f);
+			vFrameSize.Assign(65.f*fAdjAspect, 65.f);
+
 		m_animTextures[uAnimId].SetSize(vFrameSize);
 	}
 

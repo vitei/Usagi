@@ -145,6 +145,7 @@ namespace usg
 		void SetValue(bool bValue) { m_bValue = bValue; }
 		bool GetValue() const { return m_bValue; }
 		void SetUVs(Vector2f vUVMin, Vector2f vUVMax);
+		void SetScale(Vector2f vScale) { m_vScale = vScale; }
 		void SetTexture(GFXDevice* pDevice, TextureHndl pTexture);
 
 		virtual GuiItemType GetItemType() const { return GuiItemType::BUTTON; }
@@ -153,6 +154,7 @@ namespace usg
 		usg::DescriptorSet	m_descriptor;	// Not passing raw textures in this brave new world
 		usg::TextureHndl	m_pTexture;
 		usg::SamplerHndl	m_sampler;
+		Vector2f			m_vScale;
 		Vector2f			m_vUVMin;
 		Vector2f			m_vUVMax;
 		bool				m_bHasTexture;

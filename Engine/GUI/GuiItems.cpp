@@ -49,6 +49,7 @@ namespace usg
 	}
 
 	GUIButton::GUIButton()
+		: m_vScale(1.0f, 1.0f)
 	{
 		m_bHasTexture = false;
 		m_bTexDescValid = false;
@@ -114,7 +115,7 @@ namespace usg
 		UpdateBase();
 		if(m_bHasTexture)
 		{
-			Vector2f vScale = m_vUVMax - m_vUVMin;
+			Vector2f vScale = (m_vUVMax - m_vUVMin) * m_vScale;
 			ImVec2 vSize((float)m_pTexture->GetWidth()*vScale.x, (float)m_pTexture->GetHeight()*vScale.y);
 			ImVec2 vUVMin(m_vUVMin.x, m_vUVMin.y);
 			ImVec2 vUVMax(m_vUVMax.x, m_vUVMax.y);

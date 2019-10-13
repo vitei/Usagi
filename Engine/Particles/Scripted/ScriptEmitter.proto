@@ -77,7 +77,7 @@ message TextureAnimation
 {
 	required TextureMode  		  		eTexMode = 2 [default = TEX_MODE_NONE];
 	required bool					 	bRandomOffset = 3 [default = false];
-	repeated uint32						animIndex = 4  [(nanopb).max_count = 32];
+	repeated uint32						animIndex = 4  [(nanopb).max_count = 128];
 	required float						fAnimTimeScale = 5 [default = 30.0];
 }
 
