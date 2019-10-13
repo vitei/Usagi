@@ -52,6 +52,7 @@ private:
 	usg::GUIWindow		m_window;
 	usg::GUITexture		m_texture;
 	usg::ViewContext*	m_pSceneCtxt;
+	usg::PipelineStateHndl	m_clearAlphaPipeline;
 
 	usg::GUICheckBox	m_repeat;
 	usg::GUIColorSelect	m_clearColor;

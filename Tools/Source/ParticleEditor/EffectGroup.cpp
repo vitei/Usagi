@@ -15,7 +15,7 @@ EffectGroup::EffectGroup()
 
 void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer) 
 {
-	usg::Vector2f vPos(0.0f, 0.0f);
+	usg::Vector2f vPos(0.0f, 30.0f);
 	usg::Vector2f vScale(320.f, 600.f);
 	m_window.Init("Effect Group", vPos, vScale);
 

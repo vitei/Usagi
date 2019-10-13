@@ -53,6 +53,8 @@ private:
 	usg::DebugStats			m_debug;
 	PreviewWindow			m_effectPreview;
 	ParticlePreviewWindow	m_emitterPreview;
+	usg::GUIMenu			m_windowMenu;
+	usg::GUIMenuItem		m_resetWindow;
 
 
 	EffectGroup				m_effectGroup;

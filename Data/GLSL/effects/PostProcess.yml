@@ -16,3 +16,4 @@ Effects:
   - { name: Fader,                  vert: PostFX/fader,             frag: PostFX/fader }
   - { name: Copy,                   vert: PostFX/fullscreen,        frag: PostFX/screencopy }
   - { name: FilmNoise,              vert: PostFX/fullscreen,        frag: PostFX/filmnoise }  
+  - { name: ClearAlpha,             vert: PostFX/fullscreensolid,   frag: PostFX/clearalpha }  

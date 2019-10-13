@@ -110,9 +110,20 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
 
-	usg::Vector2f vPos(320.0f, 0.f);
+	m_guiRend.Init();
+	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
+
+	usg::GUIMenuBar& bar = m_guiRend.GetMainMenuBar();
+	bar.SetVisible(true);
+
+	m_windowMenu.Init("Window");
+	bar.AddItem(&m_windowMenu);
+	m_resetWindow.Init("Reset Layout");
+	m_windowMenu.AddItem(&m_resetWindow);
+
+	usg::Vector2f vPos(322.0f, 30.f);
 	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview", vPos);
-	vPos.Assign(1130.0f, 0.0f);
+	vPos.Assign(1132.0f, 30.0f);
 	m_emitterPreview.Init(pDevice, &m_guiRend, "Emitter Preview", vPos);
 
 	m_editorShapes.Init(pDevice, &m_emitterPreview.GetScene());
@@ -124,9 +135,6 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 
 	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
 	m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
-
-	m_guiRend.Init();
-	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
 
 	vPos.Assign(740.0f, 120.0f);
 	usg::Vector2f vScale(340.f, 100.f);
@@ -188,6 +196,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 		m_emitter.CreateEmitterShape(m_emitterWindow.GetVariables().eShape, *m_emitterWindow.GetShapeSettings().GetShapeDetails() );
 	}
 
+	/*
 	if(bRestart)
 	{
 		usg::Matrix4x4 mEffectMat;
@@ -195,7 +204,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
 		m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
-	}
+	}*/
 
 	bool bUpdated = false;
 	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)

@@ -3,7 +3,10 @@
 #include "Engine/Maths/AABB.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Resource/ResourceMgr.h"
+#include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Lights/DirLight.h"
+#include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Maths/MathUtil.h"
 #include "PreviewWindow.h"
  
@@ -21,6 +24,22 @@ PreviewWindow::~PreviewWindow()
 
 void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos)
 {
+	usg::PipelineStateDecl pipelineDecl;
+	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
+	pipelineDecl.uInputBindingCount = 1;
+	pipelineDecl.ePrimType = usg::PT_TRIANGLES;
+	pipelineDecl.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.ClearAlpha");
+
+	pipelineDecl.layout.uDescriptorSetCount = 0;
+	pipelineDecl.rasterizerState.eCullFace = usg::CULL_FACE_NONE;
+
+	pipelineDecl.alphaState.SetColor0Only();
+	pipelineDecl.alphaState.bBlendEnable = true;
+	pipelineDecl.alphaState.uColorMask[0] = usg::RT_MASK_ALPHA;
+	pipelineDecl.alphaState.srcBlendAlpha = usg::BLEND_FUNC_ONE;
+	pipelineDecl.alphaState.dstBlendAlpha = usg::BLEND_FUNC_ZERO;
+	pipelineDecl.alphaState.blendEqAlpha = usg::BLEND_EQUATION_ADD;
+
 	usg::Vector2f vSize(420.f, 600.f);
 	m_window.Init(szName, vPos, vSize, usg::GUIWindow::WINDOW_TYPE_PARENT);
 	// TODO: Need to resize with the preview window
@@ -40,8 +59,8 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	m_pSceneCtxt->SetCamera(&m_camera.GetCamera());
 
 	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play"));
-	m_previewButtons[BUTTON_PAUSE].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "pause"));
-	m_previewButtons[BUTTON_RESTART].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "backtostart"));
+	m_previewButtons[BUTTON_PAUSE].InitAsTexture(pDevice, "Pause", usg::ResourceMgr::Inst()->GetTexture(pDevice, "pause"));
+	m_previewButtons[BUTTON_RESTART].InitAsTexture(pDevice, "Restart", usg::ResourceMgr::Inst()->GetTexture(pDevice, "backtostart"));
 	for (uint32 i = 0; i < BUTTON_COUNT; i++)
 	{
 		m_previewButtons[i].SetSameLine(true);
@@ -61,14 +80,14 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 
 	m_window.AddItem(&m_texture);
 
-	bool bRestart = m_previewButtons[BUTTON_RESTART].GetValue();
+	m_pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, true);
+	m_pDirLight->SetAmbient(usg::Color(0.3f, 0.3f, 0.3f));
+	m_pDirLight->SetDiffuse(usg::Color(2.0f, 2.0f, 2.0f));
+	m_pDirLight->SetSpecularColor(usg::Color(5.0f, 5.0f, 5.0f));
+	m_pDirLight->SetDirection(usg::Vector4f(-1.0f, -1.0f, 0.0f, 0.0f).GetNormalised());
+	m_pDirLight->SwitchOn(true);
 
-	if (m_previewButtons[BUTTON_PAUSE].GetValue())
-		m_bPaused = true;
-
-	if (m_previewButtons[BUTTON_PLAY].GetValue())
-		m_bPaused = false;
-
+	m_clearAlphaPipeline = pDevice->GetPipelineState(m_postFX.GetRenderPasses().GetRenderPass(usg::LAYER_ADDITIVE, 128), pipelineDecl);
 
 }
 
@@ -79,6 +98,8 @@ void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 	m_postFX.SetActiveViewContext(m_pSceneCtxt);
 	m_pSceneCtxt->PreDraw(pImmContext, usg::VIEW_CENTRAL);
 	m_pSceneCtxt->DrawScene(pImmContext);
+	pImmContext->SetPipelineState(m_clearAlphaPipeline);
+	m_postFX.DrawFullScreenQuad(pImmContext);
 	m_postFX.SetActiveViewContext(nullptr);
 
 	m_postFX.EndScene();
@@ -86,6 +107,8 @@ void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 
 void PreviewWindow::CleanUp(usg::GFXDevice* pDevice)
 {
+	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
+	m_pDirLight = nullptr;
 	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
 	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
 	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
@@ -103,6 +126,12 @@ bool PreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 	m_previewModel.Update(pDevice, fElapsed);
 	m_scene.TransformUpdate(fElapsed);
 	m_scene.Update(pDevice);
+
+	if (m_previewButtons[BUTTON_PAUSE].GetValue())
+		m_bPaused = true;
+
+	if (m_previewButtons[BUTTON_PLAY].GetValue())
+		m_bPaused = false;
 
 	return true;
 }

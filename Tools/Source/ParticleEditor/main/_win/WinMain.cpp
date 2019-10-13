@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 bool	 g_bFullScreen = false;
-uint32 g_uWindowWidth = 1600;
+uint32 g_uWindowWidth = 1570;
 uint32 g_uWindowHeight = 650;
 
 using namespace usg;
