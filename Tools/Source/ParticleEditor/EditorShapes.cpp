@@ -38,6 +38,11 @@ static const DescriptorDeclaration g_descriptorDecl[] =
 	DESCRIPTOR_END()
 };
 
+EditorShapes::EditorShapes()
+{
+	SetLayer(LAYER_SKY);
+	SetPriority(128);
+}
 
 void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 {
@@ -56,13 +61,13 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 	alphaDecl.SetColor0Only();
 	alphaDecl.uColorTargets = 2;
-	alphaDecl.bBlendEnable = true;
+	alphaDecl.bBlendEnable = false;
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
 	DepthStencilStateDecl& depthDecl = pipeline.depthState;
-	depthDecl.bDepthWrite		= false;
+	depthDecl.bDepthWrite		= true;
 	depthDecl.bDepthEnable		= true;
 	depthDecl.eDepthFunc 		= DEPTH_TEST_LEQUAL;
 	depthDecl.bStencilEnable	= false;
@@ -105,8 +110,6 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
-	SetLayer(LAYER_SKY);
-	SetPriority(128);	// After the opaque, very last
 
 }
 
