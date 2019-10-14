@@ -186,6 +186,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 	break;
 
+	case WM_MOUSEWHEEL:
+	{
+		Input::GetPlatform().RegisterMouseWheel(wparam);
+	}
+	break;
+
 	case WM_DESTROY:
 		GameExit();
 		break;
