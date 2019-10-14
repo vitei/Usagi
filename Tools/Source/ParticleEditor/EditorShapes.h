@@ -42,7 +42,9 @@ private:
 	usg::particles::EmitterShape m_eShape;
 
 	usg::Material		m_objectMat;
+	usg::Material		m_hollowObjectMat;
 	usg::ConstantSet	m_objectConstants;
+	usg::ConstantSet	m_hollowObjectConstants;
 	usg::Material		m_gridMat;
 	usg::ConstantSet	m_gridConstants;
 

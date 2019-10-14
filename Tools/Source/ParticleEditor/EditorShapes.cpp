@@ -83,13 +83,17 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	usg::RenderPassHndl renderPassHndl = pScene->GetViewContext(0)->GetRenderPasses().GetRenderPass(*this);
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
 	m_objectMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+	m_hollowObjectMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 	pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Wireframe");
 	m_gridMat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 	m_objectConstants.Init(pDevice, g_transformConstantDef);
+	m_hollowObjectConstants.Init(pDevice, g_transformConstantDef);
 	m_gridConstants.Init(pDevice, g_transformConstantDef);
 	m_objectMat.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_objectConstants);
 	m_objectMat.UpdateDescriptors(pDevice);
+	m_hollowObjectMat.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_hollowObjectConstants);
+	m_hollowObjectMat.UpdateDescriptors(pDevice);
 	m_gridMat.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_gridConstants);
 
 	TransformData* pTransformData = m_gridConstants.Lock<TransformData>();
@@ -117,7 +121,9 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 void EditorShapes::CleanUp(usg::GFXDevice* pDevice)
 {
 	m_objectConstants.CleanUp(pDevice);
+	m_hollowObjectConstants.CleanUp(pDevice);
 	m_objectMat.Cleanup(pDevice);
+	m_hollowObjectMat.Cleanup(pDevice);
 	m_gridMat.Cleanup(pDevice);
 	m_gridConstants.CleanUp(pDevice);
 	m_grid.vb.CleanUp(pDevice);
@@ -142,29 +148,33 @@ bool EditorShapes::Draw(usg::GFXContext* pContext, RenderContext& renderContext)
 	pContext->SetVertexBuffer(&m_grid.vb);
 	pContext->DrawIndexed(&m_grid.ib);
 
-	m_objectMat.Apply(pContext);
-	switch (m_eShape)
+	for (uint32 i = 0; i < 2; i++)
 	{
-	case usg::particles::EMITTER_SHAPE_SPHERE:
-	{
-		pContext->SetVertexBuffer(&m_sphere.vb);
-		pContext->DrawIndexed(&m_sphere.ib);
-		break;
-	}
-	case usg::particles::EMITTER_SHAPE_CUBE:
-	{
-		pContext->SetVertexBuffer(&m_box.vb);
-		pContext->DrawIndexed(&m_box.ib);
-		break;
-	}
-	case usg::particles::EMITTER_SHAPE_CYLINDER:
-	{
-		pContext->SetVertexBuffer(&m_cylinder.vb);
-		pContext->DrawIndexed(&m_cylinder.ib);
-		break;
-	}
-	default:
-		break;
+		usg::Material& mat = i == 0 ? m_objectMat : m_hollowObjectMat;
+		mat.Apply(pContext);
+		switch (m_eShape)
+		{
+		case usg::particles::EMITTER_SHAPE_SPHERE:
+		{
+			pContext->SetVertexBuffer(&m_sphere.vb);
+			pContext->DrawIndexed(&m_sphere.ib);
+			break;
+		}
+		case usg::particles::EMITTER_SHAPE_CUBE:
+		{
+			pContext->SetVertexBuffer(&m_box.vb);
+			pContext->DrawIndexed(&m_box.ib);
+			break;
+		}
+		case usg::particles::EMITTER_SHAPE_CYLINDER:
+		{
+			pContext->SetVertexBuffer(&m_cylinder.vb);
+			pContext->DrawIndexed(&m_cylinder.ib);
+			break;
+		}
+		default:
+			break;
+		}
 	}
 
 	return true;
@@ -393,7 +403,11 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	Matrix4x4 mScale;
 	mScale.MakeScale(pShape->baseShape.vScale);
 
+	Matrix4x4 mHollowScale;
+	mHollowScale.MakeScale(pShape->baseShape.vScale * (1.0f - pShape->baseShape.fHollowness));
+
 	TransformData* pTransformData = m_objectConstants.Lock<TransformData>();
+	TransformData* pTransformHollow = m_hollowObjectConstants.Lock<TransformData>();
 	pTransformData->mModel.LoadIdentity();
 	pTransformData->mModel.MakeRotate(Math::DegToRad(pShape->baseShape.vRotation.x), -Math::DegToRad(pShape->baseShape.vRotation.y), Math::DegToRad(pShape->baseShape.vRotation.z));
 	pTransformData->mModel.SetTranslation(pShape->baseShape.vPosition);
@@ -405,10 +419,22 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	pTransformData->fArcStart = Math::DegToRad(pShape->arc.fArcStartDeg) - 0.01;
 	pTransformData->fArcAngle = Math::DegToRad(pShape->arc.fArcWidthDeg) + 0.02;
 	pTransformData->bUseArc = eShape == particles::EMITTER_SHAPE_CYLINDER || eShape == particles::EMITTER_SHAPE_SPHERE;
+	*pTransformHollow = *pTransformData;
+	pTransformHollow->vColor.Assign(0.5f, 0.0f, 1.0f, 0.4f);
+
+	pTransformHollow->mModel.LoadIdentity();
+	pTransformHollow->mModel.MakeRotate(Math::DegToRad(pShape->baseShape.vRotation.x), -Math::DegToRad(pShape->baseShape.vRotation.y), Math::DegToRad(pShape->baseShape.vRotation.z));
+	pTransformHollow->mModel.SetTranslation(pShape->baseShape.vPosition);
+	pTransformHollow->mModel = pTransformHollow->mModel * mHollowScale;
+
+	m_hollowObjectConstants.Unlock();
+	m_hollowObjectConstants.UpdateData(pDevice);
 	m_objectConstants.Unlock();
 	m_objectConstants.UpdateData(pDevice);
 
+
 	m_objectMat.UpdateDescriptors(pDevice);
+	m_hollowObjectMat.UpdateDescriptors(pDevice);
 
 	m_eShape = eShape;
 }
