@@ -11,7 +11,7 @@
 class EditorShapes : public usg::RenderNode
 {
 public:
-	EditorShapes() {}
+	EditorShapes();
 	~EditorShapes() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene);

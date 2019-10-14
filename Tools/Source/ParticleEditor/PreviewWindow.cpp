@@ -87,7 +87,7 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	m_pDirLight->SetDirection(usg::Vector4f(-1.0f, -1.0f, 0.0f, 0.0f).GetNormalised());
 	m_pDirLight->SwitchOn(true);
 
-	m_clearAlphaPipeline = pDevice->GetPipelineState(m_postFX.GetRenderPasses().GetRenderPass(usg::LAYER_ADDITIVE, 128), pipelineDecl);
+	m_clearAlphaPipeline = pDevice->GetPipelineState(m_postFX.GetRenderPasses().GetRenderPass(usg::LAYER_OVERLAY, 128), pipelineDecl);
 
 }
 
