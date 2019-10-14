@@ -18,6 +18,7 @@ public:
 	void CleanUp(usg::GFXDevice* pDevice);
 	void Update(usg::GFXDevice* pDEvice, usg::particles::EmitterShape eShape, const usg::particles::EmitterShapeDetails* pShape, float fElapsed);
 	bool Draw(usg::GFXContext* pContext, RenderContext& renderContext) override;
+	void Enable(bool bEnable) { m_bEnable = bEnable; }
 	
 private:
 	void MakeSphere(usg::GFXDevice* pDevice);
@@ -45,6 +46,7 @@ private:
 	usg::Material		m_gridMat;
 	usg::ConstantSet	m_gridConstants;
 
+	bool				m_bEnable;
 };
 
 

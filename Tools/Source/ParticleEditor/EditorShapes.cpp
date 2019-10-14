@@ -38,7 +38,8 @@ static const DescriptorDeclaration g_descriptorDecl[] =
 	DESCRIPTOR_END()
 };
 
-EditorShapes::EditorShapes()
+EditorShapes::EditorShapes() 
+	: m_bEnable(true)
 {
 	SetLayer(LAYER_SKY);
 	SetPriority(128);
@@ -134,6 +135,9 @@ void EditorShapes::CleanUp(usg::GFXDevice* pDevice)
 
 bool EditorShapes::Draw(usg::GFXContext* pContext, RenderContext& renderContext)
 {
+	if (!m_bEnable)
+		return false;
+
 	m_gridMat.Apply(pContext);
 	pContext->SetVertexBuffer(&m_grid.vb);
 	pContext->DrawIndexed(&m_grid.ib);

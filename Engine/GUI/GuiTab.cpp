@@ -9,6 +9,7 @@
 namespace usg
 {
 	GUITab::GUITab()
+		: m_bOpen(true)
 	{
 	}
 
@@ -37,7 +38,7 @@ namespace usg
 
 		if (ImGui::BeginTabItem(m_szName.c_str()))
 		{
-
+			m_bOpen = true;
 			for (auto itr : m_items)
 			{
 				if (itr->IsVisible())
@@ -53,6 +54,10 @@ namespace usg
 			}
 
 			ImGui::EndTabItem();
+		}
+		else
+		{
+			m_bOpen = false;
 		}
 
 		return bChanged;

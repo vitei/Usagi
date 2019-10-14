@@ -234,6 +234,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 
 	m_editorShapes.Update(pDevice, m_emitterWindow.GetVariables().eShape, m_emitterWindow.GetShapeSettings().GetShapeDetails(), fElapsed);
+	m_editorShapes.Enable(m_emitterWindow.IsShapeTabOpen());
 
 	m_emitter.UpdateBuffers(pDevice);
 }

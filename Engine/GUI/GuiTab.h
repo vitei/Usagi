@@ -22,11 +22,13 @@ namespace usg
 		void AddItem(GUIItem* pItem);
 		virtual bool UpdateAndAddToDrawList();
 		virtual GuiItemType GetItemType() const { return GuiItemType::TAB; }
+		bool IsOpen() const { return m_bOpen; }
 
 	private:
 
 		usg::string		m_szName;
 		list<GUIItem*>	m_items;
+		bool			m_bOpen;
 	};
 
 }
