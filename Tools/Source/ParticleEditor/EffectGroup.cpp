@@ -176,7 +176,7 @@ void EffectGroup::EmitterModified(usg::GFXDevice* pDevice, const char* szName, c
 }
 
 
-void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, bool bRepeat, bool bPause, bool bRestart)
+void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, float fPreviewSpeed, bool bRepeat, bool bPause, bool bRestart)
 {
 	static uint32 uFrame = 0;
 	if((uFrame % 536) == 0)
@@ -302,7 +302,7 @@ void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, bool bRepeat, 
 	{
 		if(!bPause)
 		{
-			m_effect.Update(fElapsed);
+			m_effect.Update(fElapsed * fPreviewSpeed);
 			m_effect.UpdateBuffers(pDevice);
 		}
 	}

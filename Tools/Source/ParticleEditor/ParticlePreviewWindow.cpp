@@ -42,7 +42,7 @@ bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 	{
 		if (!GetPaused())
 		{
-			m_effect.Update(fElapsed);
+			m_effect.Update(fElapsed * GetPlaySpeed());
 		}
 	}
 

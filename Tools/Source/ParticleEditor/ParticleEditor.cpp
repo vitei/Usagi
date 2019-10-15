@@ -179,7 +179,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_emitterWindow.Update(pDevice, fElapsed);
 	m_emitterPreview.Update(pDevice, fElapsed);
 
-	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
+	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetPlaySpeed(), m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
 
 

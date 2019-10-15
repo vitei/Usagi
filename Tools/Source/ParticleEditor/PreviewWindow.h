@@ -40,6 +40,7 @@ public:
 	bool GetPaused() { return m_bPaused; }
 	bool GetRepeat() { return m_repeat.GetValue(); }
 	bool GetRestart() { return m_previewButtons[BUTTON_RESTART].GetValue(); }
+	float GetPlaySpeed() const;
 	void SetBackgroundColor(const usg::Color& color) { m_clearColor.SetValue(color); }
 	const usg::Color& GetBackgroundColor() { return m_clearColor.GetValue(); }
 

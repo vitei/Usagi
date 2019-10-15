@@ -153,3 +153,11 @@ bool PreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 
 	return true;
 }
+
+float PreviewWindow::GetPlaySpeed() const
+{
+	if (!m_speedOverride.GetValue())
+		return 1.0f;
+
+	return m_playbackSpeed.GetValue();
+}

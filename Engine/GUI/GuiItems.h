@@ -217,10 +217,10 @@ namespace usg
 		void Init(const char* szName, float fMin, float fMax, const float* fDefault, uint32 uItems = 1);
 		void Init(const char* szName, float fMin, float fMax, float fDefault);
 		virtual bool UpdateAndAddToDrawList();
-		float GetValue(uint32 uIndex = 0) { return m_fValue[uIndex]; }
-		Vector2f GetValueV2() { ASSERT(m_uCount==2); return Vector2f(m_fValue[0], m_fValue[1]); }
-		Vector3f GetValueV3() { ASSERT(m_uCount==3); return Vector3f(m_fValue[0], m_fValue[1], m_fValue[2]); }
-		Vector4f GetValueV4() { ASSERT(m_uCount==4); return Vector4f(m_fValue[0], m_fValue[1], m_fValue[2], m_fValue[3]); }
+		float GetValue(uint32 uIndex = 0) const { return m_fValue[uIndex]; }
+		Vector2f GetValueV2() const { ASSERT(m_uCount==2); return Vector2f(m_fValue[0], m_fValue[1]); }
+		Vector3f GetValueV3() const { ASSERT(m_uCount==3); return Vector3f(m_fValue[0], m_fValue[1], m_fValue[2]); }
+		Vector4f GetValueV4() const { ASSERT(m_uCount==4); return Vector4f(m_fValue[0], m_fValue[1], m_fValue[2], m_fValue[3]); }
 		void SetValue(const Vector2f &vec) { ASSERT(m_uCount==2); m_fValue[0] = vec.x;  m_fValue[1] = vec.y; }
 		void SetValue(const Vector3f &vec) { ASSERT(m_uCount==3); m_fValue[0] = vec.x;  m_fValue[1] = vec.y; m_fValue[2] = vec.z; }
 		void SetValue(const Vector4f &vec) { ASSERT(m_uCount==4); m_fValue[0] = vec.x;  m_fValue[1] = vec.y; m_fValue[2] = vec.z; m_fValue[3] = vec.w;}
@@ -249,7 +249,7 @@ namespace usg
 
 		void Init(const char* szName, bool bDefault);
 		virtual bool UpdateAndAddToDrawList();
-		bool GetValue() { return m_bValue; }
+		bool GetValue() const { return m_bValue; }
 		void SetValue(bool bValue) { m_bValue = bValue; }
 
 		virtual GuiItemType GetItemType() const { return GuiItemType::CHECK_BOX; }
