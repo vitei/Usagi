@@ -135,7 +135,7 @@ void PreviewWindow::CleanUp(usg::GFXDevice* pDevice)
 
 bool PreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
-	m_camera.Update(fElapsed);
+	m_camera.Update(fElapsed, m_texture.IsHovered());
 	m_previewModel.Update(pDevice, fElapsed);
 	m_scene.TransformUpdate(fElapsed);
 	m_scene.Update(pDevice);

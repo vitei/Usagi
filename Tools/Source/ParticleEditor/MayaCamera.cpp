@@ -21,27 +21,42 @@ void MayaCamera::Init(float fAspect)
 	BuildCameraMatrix();
 }
 
-void MayaCamera::Update(float fElapsed)
+void MayaCamera::Update(float fElapsed, bool bHasFocus)
 {
 	const usg::Keyboard* pKeyboard = usg::Input::GetKeyboard();
 	const usg::Mouse* pMouse = usg::Input::GetMouse();
-	if(pKeyboard->GetToggleHeld(usg::KEYBOARD_TOGGLE_ALT))
+	if(pKeyboard->GetToggleHeld(usg::KEYBOARD_TOGGLE_ALT) && (bHasFocus || m_bInFocus) )
 	{
-		m_vEyePosition.z -= pMouse->GetAxis(usg::MOUSE_DELTA_WHEEL)*2.5f;
-		if(pMouse->GetButton(usg::MOUSE_BUTTON_LEFT))
+		if (bHasFocus)
 		{
-			usg::Matrix4x4 mTmp;
-			mTmp.MakeRotateYPR( -pMouse->GetAxis(usg::MOUSE_DELTA_X)*fRotationMultiplier, pMouse->GetAxis(usg::MOUSE_DELTA_Y)*fRotationMultiplier, 0.0f);
-			m_rotation = mTmp * m_rotation;
+			m_vEyePosition.z -= pMouse->GetAxis(usg::MOUSE_DELTA_WHEEL) * 2.5f;
 		}
-		if(pMouse->GetButton(usg::MOUSE_BUTTON_RIGHT))
+		
+		if (!m_bInFocus)
 		{
-			m_vEyePosition.z -= pMouse->GetAxis(usg::MOUSE_DELTA_Y)*fZoomMultiplier;
+			m_bInFocus = pMouse->GetButton(usg::MOUSE_BUTTON_LEFT, usg::BUTTON_STATE_PRESSED) ||
+				pMouse->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED) || 
+				pMouse->GetButton(usg::MOUSE_BUTTON_MIDDLE, usg::BUTTON_STATE_PRESSED);
 		}
-		if(pMouse->GetButton(usg::MOUSE_BUTTON_MIDDLE))
+
+
+		if (m_bInFocus)
 		{
-			m_vEyePosition.x -= pMouse->GetAxis(usg::MOUSE_DELTA_X)*fPanningMultiplier;
-			m_vEyePosition.y -= pMouse->GetAxis(usg::MOUSE_DELTA_Y)*fPanningMultiplier;
+			if (pMouse->GetButton(usg::MOUSE_BUTTON_LEFT))
+			{
+				usg::Matrix4x4 mTmp;
+				mTmp.MakeRotateYPR(-pMouse->GetAxis(usg::MOUSE_DELTA_X) * fRotationMultiplier, pMouse->GetAxis(usg::MOUSE_DELTA_Y) * fRotationMultiplier, 0.0f);
+				m_rotation = mTmp * m_rotation;
+			}
+			if (pMouse->GetButton(usg::MOUSE_BUTTON_RIGHT))
+			{
+				m_vEyePosition.z -= pMouse->GetAxis(usg::MOUSE_DELTA_Y) * fZoomMultiplier;
+			}
+			if (pMouse->GetButton(usg::MOUSE_BUTTON_MIDDLE))
+			{
+				m_vEyePosition.x -= pMouse->GetAxis(usg::MOUSE_DELTA_X) * fPanningMultiplier;
+				m_vEyePosition.y -= pMouse->GetAxis(usg::MOUSE_DELTA_Y) * fPanningMultiplier;
+			}
 		}
 		
 	}
