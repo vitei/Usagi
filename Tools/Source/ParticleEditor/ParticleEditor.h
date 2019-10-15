@@ -58,6 +58,8 @@ private:
 	ParticlePreviewWindow	m_emitterPreview;
 	usg::GUIMenu			m_windowMenu;
 	usg::GUIMenuItem		m_resetWindow;
+	usg::GUIMenuItem		m_increaseSize;
+	usg::GUIMenuItem		m_decreaseSize;
 
 
 	EffectGroup				m_effectGroup;
@@ -65,6 +67,7 @@ private:
 	usg::U8String			m_activeEdit;
 
 	usg::ScriptEmitter		m_emitter;
+	WindHndl				m_hwnd;
 
 };
 

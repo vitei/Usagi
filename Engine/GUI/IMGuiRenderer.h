@@ -47,8 +47,9 @@ namespace usg
 
 		GUIMenuBar& GetMainMenuBar() { return m_mainMenuBar; }
 
-		void RequestWindowReset() { m_drawCtxt.uFlags |= RESET_LAYOUT_FLAG; }
-		void SetGlobalScale(float fScale) { m_drawCtxt.fScale = fScale; }
+		void RequestWindowReset() { m_drawCtxt.uFlags |= (RESET_LAYOUT_FLAG| RESET_SIZE_FLAG); }
+		void SetGlobalScale(float fScale) { m_drawCtxt.fScale = fScale; RequestWindowReset(); }
+		float GetScale() const { return m_drawCtxt.fScale; }
 
 	private:
 		void CreateFontsTexture(GFXDevice* pDevice);

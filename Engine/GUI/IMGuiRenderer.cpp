@@ -409,7 +409,7 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
 		bChanged = (*it)->UpdateAndAddToDrawList(m_drawCtxt) || bChanged;
 	}
 	// Clear flags
-	m_drawCtxt.uFlags &= ~(RESET_LAYOUT_FLAG);
+	m_drawCtxt.uFlags &= ~(RESET_LAYOUT_FLAG| RESET_SIZE_FLAG);
 	
 	/*
 	bool show_test_window = true;

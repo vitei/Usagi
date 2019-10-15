@@ -103,6 +103,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	uint32 uWidth;
 	uint32 uHeight;
 
+	m_hwnd = pDevice->GetDisplay(0)->GetHandle();
 	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidth, uHeight, false);
 	
 	m_postFX.Init(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 0);
@@ -119,8 +120,15 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_windowMenu.Init("Window");
 	bar.AddItem(&m_windowMenu);
 	m_resetWindow.Init("Reset Layout");
+	m_increaseSize.Init("Increase Size");
+	m_decreaseSize.Init("Decrease Size");
+	m_decreaseSize.SetEnabled(false);
 	m_windowMenu.AddItem(&m_resetWindow);
+	m_windowMenu.AddItem(&m_increaseSize);
+	m_windowMenu.AddItem(&m_decreaseSize);
 	m_resetWindow.SetCallbacks(this);
+	m_increaseSize.SetCallbacks(this);
+	m_decreaseSize.SetCallbacks(this);
 
 	usg::Vector2f vPos(322.0f, 30.f);
 	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview", vPos);
@@ -169,11 +177,36 @@ ParticleEditor::~ParticleEditor()
 	
 }
 
+extern uint32 g_uWindowWidth;
+extern uint32 g_uWindowHeight;
+
 void ParticleEditor::FileOption(const char* szName)
 {
 	if (strcmp("Reset Layout", szName) == 0)
 	{
 		m_guiRend.RequestWindowReset();
+	}
+	else if (strcmp("Increase Size", szName) == 0)
+	{
+		float fScale = m_guiRend.GetScale() + 0.25f;
+		if (fScale >= 2.0f)
+		{
+			m_increaseSize.SetEnabled(false);
+		}
+		m_decreaseSize.SetEnabled(true);
+		m_guiRend.SetGlobalScale(fScale);
+		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale,(g_uWindowHeight+20.f) * fScale, 0);
+	}
+	else if (strcmp("Decrease Size", szName) == 0)
+	{
+		float fScale = m_guiRend.GetScale() - 0.25f;
+		if (fScale <= 1.0f)
+		{
+			m_decreaseSize.SetEnabled(false);
+		}
+		m_increaseSize.SetEnabled(true);
+		m_guiRend.SetGlobalScale(fScale);
+		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale, (g_uWindowHeight + 20.f) * fScale, 0);
 	}
 }
 

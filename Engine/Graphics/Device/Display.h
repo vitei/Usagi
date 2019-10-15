@@ -45,11 +45,13 @@ public:
 	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
 
 	Display_ps& GetPlatform() { return m_platform; }
+	WindHndl GetHandle() const { return m_window; }
 
 private:
 	PRIVATIZE_COPY(Display)
 
 	Display_ps	m_platform;
+	WindHndl	m_window;
 };
 
 } // namespace usagi

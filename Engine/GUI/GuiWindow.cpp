@@ -56,8 +56,9 @@ namespace usg
 			case WINDOW_TYPE_PARENT:
 			{
 				uint32 uFlags = (ctxt.uFlags & RESET_LAYOUT_FLAG) == 0 ? ImGuiCond_Once : ImGuiCond_Always;
+				uint32 uSizeFlags = (ctxt.uFlags & RESET_SIZE_FLAG) == 0 ? ImGuiCond_Once : ImGuiCond_Always;
 				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), uFlags);	// Don't allow our menus to be moved (for now)
-				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), uFlags);
+				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), uSizeFlags);
 				bool bReturn;
 				ImGui::Begin(m_szName, &bReturn, m_menuBar.IsVisible() ? ImGuiWindowFlags_MenuBar : 0);
 			}

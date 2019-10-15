@@ -34,7 +34,8 @@ namespace usg
 
 	enum 
 	{
-		RESET_LAYOUT_FLAG = (1<<0)
+		RESET_LAYOUT_FLAG = (1<<0),
+		RESET_SIZE_FLAG = (1<<1)
 	};
 
 	struct GUIContext
