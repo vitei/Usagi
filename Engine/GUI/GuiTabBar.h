@@ -22,7 +22,7 @@ namespace usg
 
 		void Init(const char* szName) { InitBase(szName); }
 		void AddItem(GUITab* pItem);
-		virtual bool UpdateAndAddToDrawList();
+		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt);
 		virtual GuiItemType GetItemType() const { return GuiItemType::TAB_BAR; }
 
 	private:

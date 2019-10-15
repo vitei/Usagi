@@ -120,6 +120,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	bar.AddItem(&m_windowMenu);
 	m_resetWindow.Init("Reset Layout");
 	m_windowMenu.AddItem(&m_resetWindow);
+	m_resetWindow.SetCallbacks(this);
 
 	usg::Vector2f vPos(322.0f, 30.f);
 	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview", vPos);
@@ -166,6 +167,14 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 ParticleEditor::~ParticleEditor()
 {
 	
+}
+
+void ParticleEditor::FileOption(const char* szName)
+{
+	if (strcmp("Reset Layout", szName) == 0)
+	{
+		m_guiRend.RequestWindowReset();
+	}
 }
 
 

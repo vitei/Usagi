@@ -39,10 +39,10 @@ namespace usg
 		m_items.AddToEnd(pItem);
 	}
 
-	bool GUIWindow::UpdateAndAddToDrawList()
-	{
-		Vector2f vPos = m_vPosition * m_fScale;
-		Vector2f vScale = m_vSize * m_fScale;
+	bool GUIWindow::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
+		Vector2f vPos = m_vPosition * m_fScale * ctxt.fScale;
+		Vector2f vScale = m_vSize * m_fScale * ctxt.fScale;
 		bool bChanged = false;
 		real rTime = (real)ImGui::GetTime();
 
@@ -55,8 +55,9 @@ namespace usg
 			break;
 			case WINDOW_TYPE_PARENT:
 			{
-				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), ImGuiCond_Once);	// Don't allow our menus to be moved (for now)
-				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), ImGuiCond_Once);
+				uint32 uFlags = (ctxt.uFlags & RESET_LAYOUT_FLAG) == 0 ? ImGuiCond_Once : ImGuiCond_Always;
+				ImGui::SetNextWindowPos(ImVec2(vPos.x, vPos.y), uFlags);	// Don't allow our menus to be moved (for now)
+				ImGui::SetNextWindowSize(ImVec2(vScale.x, vScale.y), uFlags);
 				bool bReturn;
 				ImGui::Begin(m_szName, &bReturn, m_menuBar.IsVisible() ? ImGuiWindowFlags_MenuBar : 0);
 			}
@@ -73,11 +74,12 @@ namespace usg
 			default:
 				ASSERT(false);
 		}	
-		
-		m_menuBar.UpdateAndAddToDrawList();
 
-		ImGui::PushItemWidth(180.f);
-		ImGui::SetWindowFontScale(m_fScale);
+		ImGui::PushItemWidth(ctxt.fScale * 180.f);
+		ImGui::SetWindowFontScale(ctxt.fScale * m_fScale);
+
+		m_menuBar.UpdateAndAddToDrawList(ctxt);
+
 		if(m_bVisible)
 		{
 			for(List<GUIItem>::Iterator it = m_items.Begin(); !it.IsEnd(); ++it)
@@ -85,7 +87,7 @@ namespace usg
 				GUIItem* pItem = (*it);
 				if(pItem->IsVisible())
 				{
-					bChanged = pItem->UpdateAndAddToDrawList() || bChanged;
+					bChanged = pItem->UpdateAndAddToDrawList(ctxt) || bChanged;
 					pItem->SetHovered(ImGui::IsItemHovered(), rTime);
 				}
 				else

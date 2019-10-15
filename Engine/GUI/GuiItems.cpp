@@ -109,13 +109,13 @@ namespace usg
 		}
 	}
 
-	bool GUIButton::UpdateAndAddToDrawList()
-	{
+	bool GUIButton::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bResult = false;
 		UpdateBase();
 		if(m_bHasTexture)
 		{
-			Vector2f vScale = (m_vUVMax - m_vUVMin) * m_vScale;
+			Vector2f vScale = (m_vUVMax - m_vUVMin) * m_vScale * ctxt.fScale;
 			ImVec2 vSize((float)m_pTexture->GetWidth()*vScale.x, (float)m_pTexture->GetHeight()*vScale.y);
 			ImVec2 vUVMin(m_vUVMin.x, m_vUVMin.y);
 			ImVec2 vUVMax(m_vUVMax.x, m_vUVMax.y);
@@ -147,8 +147,8 @@ namespace usg
 		}
 	}
 
-	bool GUIMenuItem::UpdateAndAddToDrawList()
-	{
+	bool GUIMenuItem::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		if (ImGui::MenuItem(GetName(), m_szShortCut.c_str(), false, m_bEnabled))
 		{
 			Run();
@@ -224,8 +224,8 @@ namespace usg
 		m_color = color;
 	}
 
-	bool GUIText::UpdateAndAddToDrawList()
-	{
+	bool GUIText::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		const Color& col = GetColor();
 		ImVec4 imColor(col.r(), col.g(), col.b(), col.a());
 		ImGui::TextColored(imColor, GetName());
@@ -250,8 +250,8 @@ namespace usg
 		m_color[3] = color.a() *255.f;
 	}
 
-	bool GUIColorSelect::UpdateAndAddToDrawList()
-	{
+	bool GUIColorSelect::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
 		Color cReturn = GetValue();
 		bool bChanged = ImGui::ColorEdit4(GetName(), cReturn.m_rgba);
@@ -362,8 +362,8 @@ namespace usg
 		}
 	}
 
-	bool GUIComboBox::UpdateAndAddToDrawList()
-	{
+	bool GUIComboBox::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		int out = m_uSelected;
 		bool bChanged = false;
 		if(m_uItems == USG_INVALID_ID)
@@ -409,8 +409,8 @@ namespace usg
 		m_fMaxValue = fMax;
 	}
 
-	bool GUISlider::UpdateAndAddToDrawList()
-	{
+	bool GUISlider::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 
@@ -441,8 +441,8 @@ namespace usg
 		m_bValue = bDefault;
 	}
 	
-	bool GUICheckBox::UpdateAndAddToDrawList()
-	{
+	bool GUICheckBox::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
 		bool bRet =  ImGui::Checkbox(m_szName, &m_bValue);
 		return bRet;
@@ -466,8 +466,8 @@ namespace usg
 		}
 	}
 	
-	bool GUIIntInput::UpdateAndAddToDrawList()
-	{
+	bool GUIIntInput::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 
@@ -555,10 +555,10 @@ namespace usg
 		m_descriptor.UpdateDescriptors(pDevice);
 	}
 	
-	bool GUITexture::UpdateAndAddToDrawList()
-	{
+	bool GUITexture::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
-		ImVec2 vSize(m_vScale.x, m_vScale.y);
+		ImVec2 vSize(m_vScale.x * ctxt.fScale, m_vScale.y * ctxt.fScale);
 		ImVec2 vUV0(m_vUVMin.x, m_vUVMin.y);
 		ImVec2 vUV1(m_vUVMax.x, m_vUVMax.y);
 		ImVec4 vBorder(1.0f, 1.0f, 1.0f, 1.0f);
@@ -594,16 +594,16 @@ namespace usg
 		str::Copy(m_input, szData, sizeof(m_input));
 	}
 
-	bool GUITextInput::UpdateAndAddToDrawList()
-	{
+	bool GUITextInput::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
 		m_bUpdated = ImGui::InputText(m_szName, m_input, sizeof(m_input));
 
 		return m_bUpdated;
 	}
 	
-	bool GUIFloat::UpdateAndAddToDrawList()
-	{
+	bool GUIFloat::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 		switch(m_uCount)

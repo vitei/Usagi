@@ -28,8 +28,8 @@ namespace usg
 
 
 
-	bool GUIMenuBar::UpdateAndAddToDrawList()
-	{
+	bool GUIMenuBar::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		if (!m_bVisible)
 			return false;
 
@@ -52,7 +52,7 @@ namespace usg
 			{
 				if (itr->IsVisible())
 				{
-					bChanged |= itr->UpdateAndAddToDrawList();
+					bChanged |= itr->UpdateAndAddToDrawList(ctxt);
 					itr->SetHovered(ImGui::IsItemHovered(), rTime);
 				}
 				else

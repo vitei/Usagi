@@ -403,11 +403,13 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
     ImGui::NewFrame();
 	m_bActive = true;
 
-	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList();
+	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList(m_drawCtxt);
 	for(List<GUIWindow>::Iterator it = m_windows.Begin(); !it.IsEnd(); ++it)
 	{
-		bChanged = (*it)->UpdateAndAddToDrawList() || bChanged;
+		bChanged = (*it)->UpdateAndAddToDrawList(m_drawCtxt) || bChanged;
 	}
+	// Clear flags
+	m_drawCtxt.uFlags &= ~(RESET_LAYOUT_FLAG);
 	
 	/*
 	bool show_test_window = true;

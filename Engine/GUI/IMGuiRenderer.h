@@ -32,13 +32,13 @@ namespace usg
 		void AddWindow(GUIWindow* pWindow) { m_windows.AddToEnd(pWindow); }
 		// Can do this or simply call directly
 		void AddToScene(GFXDevice* pDevice, Scene* pScene);
-		
+
 		void BufferUpdate(GFXDevice* pDevice);
 		bool PreUpdate(float fElapsed);
 
 		void PostUpdate(float fElapsed);
 		// For viewports, fake screens etc
-		void SetMouseOffset(const Vector2f &vOffset) { m_vOffset = vOffset; }
+		void SetMouseOffset(const Vector2f& vOffset) { m_vOffset = vOffset; }
 
 		virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 
@@ -46,6 +46,9 @@ namespace usg
 		bool Active()const { return m_bActive; }
 
 		GUIMenuBar& GetMainMenuBar() { return m_mainMenuBar; }
+
+		void RequestWindowReset() { m_drawCtxt.uFlags |= RESET_LAYOUT_FLAG; }
+		void SetGlobalScale(float fScale) { m_drawCtxt.fScale = fScale; }
 
 	private:
 		void CreateFontsTexture(GFXDevice* pDevice);
@@ -67,6 +70,7 @@ namespace usg
 		uint32					m_uMaxVerts;
 		uint32					m_uScreenWidth;
 		uint32					m_uScreenHeight;
+		GUIContext				m_drawCtxt;
 
 		VertexBuffer			m_vertexBuffer;
 		GFXContext*				m_pContext;	// Should be null except when we are performing the rendering via callbacks

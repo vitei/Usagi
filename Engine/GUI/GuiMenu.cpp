@@ -30,8 +30,8 @@ namespace usg
 
 
 
-	bool GUIMenu::UpdateAndAddToDrawList()
-	{
+	bool GUIMenu::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		float fTime = (float)ImGui::GetTime();
 
@@ -42,7 +42,7 @@ namespace usg
 			{
 				if (itr->IsVisible())
 				{
-					bChanged |= itr->UpdateAndAddToDrawList();
+					bChanged |= itr->UpdateAndAddToDrawList(ctxt);
 					itr->SetHovered(ImGui::IsItemHovered(), fTime);
 				}
 				else

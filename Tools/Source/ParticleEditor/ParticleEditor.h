@@ -23,7 +23,7 @@
 
 void ReloadEmitterFromFileOrGetActive(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName);
 
-class ParticleEditor : public usg::GameInterface
+class ParticleEditor : public usg::GameInterface, public usg::GUICallbacks
 {
 public:
 	ParticleEditor();
@@ -36,6 +36,9 @@ public:
 	virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters);
 	
 	void ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName);
+
+	// GUICallbacks
+	virtual void FileOption(const char* szName) override;
 private:
 
 	enum
