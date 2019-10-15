@@ -262,13 +262,12 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 	if(bUpdated)
 	{
-		usg::U8String emitterName = m_activeEdit;
+		usg::U8String emitterName = m_emitterWindow.GetEditFileName();
 		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
 		if(emitterName.Length() > 0)
 		{
 			emitterName.TruncateExtension();
 			m_effectGroup.EmitterModified(pDevice, emitterName.CStr(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
-			m_effectPreview.SetBackgroundColor(m_effectGroup.GetBackgroundColor());
 		}
 	}
 	

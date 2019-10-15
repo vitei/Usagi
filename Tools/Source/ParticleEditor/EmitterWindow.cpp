@@ -29,8 +29,8 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_blendTab.Init("Blend");
 	m_scaleTab.Init("Scale");
 	m_motionTab.Init("Motion");
-	m_emitterTabBar.AddItem(&m_emitterShapeTab);
 	m_emitterTabBar.AddItem(&m_emissionTab);
+	m_emitterTabBar.AddItem(&m_emitterShapeTab);
 	m_emitterTabBar.AddItem(&m_textureTab);
 	m_emitterTabBar.AddItem(&m_colorTab);
 	m_emitterTabBar.AddItem(&m_blendTab);
@@ -68,6 +68,7 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
 	m_saveItem.SetEnabled(false);
+	m_saveItem.SetCallbacks(this);
 	m_saveAsItem.Init("Save As...");
 	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
@@ -131,13 +132,14 @@ void EmitterWindow::LoadCallback(const char* szName, const char* szFilePath, con
 	usg::particles::EmitterShapeDetails shapeDef;
 	bReadSucceeded = file.Read(&shapeDef);
 	m_shapeSettings.SetShapeSettings(shapeDef);
+	m_saveItem.SetEnabled(true);
 
 	m_bLoaded = true;
 }
 
 void EmitterWindow::SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath)
 {
-	usg::U8String scriptName = szName;
+	usg::U8String scriptName = szFilePath;
 
 	usg::ProtocolBufferFile file(scriptName.CStr(), usg::FILE_ACCESS_WRITE);
 	bool bWritten = file.Write(&m_variables);

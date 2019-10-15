@@ -62,7 +62,7 @@ namespace usg
 	public:
 		GUIItem();
 		virtual ~GUIItem();
-		const char* GetName() { return m_szName; }
+		const char* GetName() const { return m_szName; }
 
 		virtual GuiItemType GetItemType() const = 0;
 		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt) = 0;

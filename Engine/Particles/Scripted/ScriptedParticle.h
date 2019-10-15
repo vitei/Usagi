@@ -44,8 +44,7 @@ namespace usg
 			float32 fElapsed;
 		};
 
-		// The simulation for trails is mostly done on the CPU for now since we don't have any better options
-		// on the 3DS
+		// The simulation for trails is mostly done on the CPU as it dates back to the 3DS
 		struct ScriptedTrailMetaData
 		{
 			Vector3f	vVelocity;
@@ -90,6 +89,7 @@ namespace usg
 		struct ScriptedParticleGSTrans
 		{
 			Matrix4x3	mOrientation;
+			Vector2f	vParticleCenter;
 			bool		bCustomMatrix;
 			bool		bYAxisAlign;
 		};
@@ -123,6 +123,7 @@ namespace usg
 		static const ShaderConstantDecl g_scriptedParticleGSTrans[] =
 		{
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, mOrientation,	CT_MATRIX_43, 1),
+			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, vParticleCenter, CT_VECTOR_2, 1),
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, bCustomMatrix,	CT_BOOL, 1),
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, bYAxisAlign,	CT_BOOL, 1),
 			SHADER_CONSTANT_END()
@@ -145,8 +146,8 @@ namespace usg
 		{
 			DESCRIPTOR_ELEMENT(0,							DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
 			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_VERTEX),
-			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM_3,		DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_VERTEX),
-			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM_0,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,			1, SHADER_FLAG_VERTEX),
+			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM_3,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_VERTEX),
+			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM_0,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_VERTEX),
 			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_CUSTOM_1,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_GEOMETRY),
 			DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL_1,	DESCRIPTOR_TYPE_CONSTANT_BUFFER,		1, SHADER_FLAG_PIXEL),
 			DESCRIPTOR_END()

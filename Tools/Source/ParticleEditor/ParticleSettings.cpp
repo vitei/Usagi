@@ -38,7 +38,7 @@ void ParticleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	m_userRotation.Init("User rotation", -360.0f, 360.0f, fDefaultVector, 3);
 
 	float fDefault[] = {0.0f, 0.0f };
-	m_particleCenter.Init("Pivot", -1.0f, 1.0f, fDefault, 2);
+	m_particleCenter.Init("Pivot", -0.5f, 0.5f, fDefault, 2);
 
 	m_window.AddItem(&m_lifeRandomness);
 	m_window.AddItem(&m_particleType);
@@ -54,7 +54,7 @@ void ParticleSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_particleType.SetSelected(structData.eParticleType);
 	m_lifeRandomness.SetValue(structData.fLifeRandomness, 0);
 	m_particleCenter.SetValue(structData.vParticleCenter.x, 0);
-	m_particleCenter.SetValue(structData.vParticleCenter.y, 0);
+	m_particleCenter.SetValue(structData.vParticleCenter.y, 1);
 	m_userRotation.SetValue(structData.emission.vUserRotation);
 }
 

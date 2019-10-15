@@ -64,7 +64,6 @@ private:
 
 	EffectGroup				m_effectGroup;
 	EmitterWindow			m_emitterWindow;
-	usg::U8String			m_activeEdit;
 
 	usg::ScriptEmitter		m_emitter;
 	WindHndl				m_hwnd;

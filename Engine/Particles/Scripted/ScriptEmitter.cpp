@@ -356,6 +356,7 @@ namespace usg
 		m_fragConsts.UpdateData(pDevice);
 
 		Particle::ScriptedParticleGSTrans* pFrame = m_gsTransform.Lock<Particle::ScriptedParticleGSTrans>();
+		pFrame->vParticleCenter = m_emissionDef.vParticleCenter;
 		pFrame->bCustomMatrix = m_emissionDef.eParticleType == particles::PARTICLE_TYPE_USER_ORIENTED;
 		pFrame->bYAxisAlign = m_emissionDef.eParticleType == particles::PARTICLE_TYPE_Y_AXIS_ALIGNED;
 		pFrame->mOrientation = Matrix4x4::Identity();

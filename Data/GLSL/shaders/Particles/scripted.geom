@@ -10,6 +10,7 @@ layout(triangle_strip, max_vertices = 4) out;
 BUFFER_LAYOUT(1, UBO_CUSTOM_1_ID) uniform Instance1
 {
     mat3x4  mUserMat;
+    vec2    vParticleCenter;
     bool    bCustomMatrix;
     bool    bYAxisAlign;
 };
@@ -53,6 +54,7 @@ void CreateVertex(int ii, vec2 scale)
   
     vec2 uv;
     uv = scale - vec2(0.5, 0.5);
+    uv -= vParticleCenter;
     uv *= vertexData[ii].vo_vSize;
 
     if(bYAxisAlign)

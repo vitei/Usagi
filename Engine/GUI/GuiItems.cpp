@@ -191,7 +191,7 @@ namespace usg
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
+					m_pCallbacks->SaveCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
 				}
 			}
 		}

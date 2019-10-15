@@ -41,6 +41,7 @@ public:
 	usg::particles::EmitterEmission& GetVariables() { return m_variables; }
 	usg::List<EmitterModifier>& GetModifiers() { return m_modifiers; }
 	bool IsShapeTabOpen() const { return m_emitterShapeTab.IsOpen(); }
+	const char* GetEditFileName() const { return m_fileName.GetName(); }
 
 	// GUI Callbacks
 	virtual void LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath) override;
