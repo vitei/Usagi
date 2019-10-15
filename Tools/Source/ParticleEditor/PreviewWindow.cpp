@@ -22,7 +22,7 @@ PreviewWindow::~PreviewWindow()
 	m_pDirLight = nullptr;
 }
 
-void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos)
+void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos, uint32 uInitFlags)
 {
 	usg::PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
@@ -61,22 +61,35 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play"));
 	m_previewButtons[BUTTON_PAUSE].InitAsTexture(pDevice, "Pause", usg::ResourceMgr::Inst()->GetTexture(pDevice, "pause"));
 	m_previewButtons[BUTTON_RESTART].InitAsTexture(pDevice, "Restart", usg::ResourceMgr::Inst()->GetTexture(pDevice, "backtostart"));
-	for (uint32 i = 0; i < BUTTON_COUNT; i++)
+	m_speedOverride.Init("Set Speed", false);
+	m_playbackSpeed.Init("Speed", 0.05f, 2.0f, 1.0f);
+	m_playbackSpeed.SetSameLine(true);
+
+	if (uInitFlags | SHOW_PLAY_CONTROLS)
 	{
-		m_previewButtons[i].SetSameLine(true);
-		m_window.AddItem(&m_previewButtons[i]);
+		for (uint32 i = 0; i < BUTTON_COUNT; i++)
+		{
+			m_previewButtons[i].SetSameLine(true);
+			m_window.AddItem(&m_previewButtons[i]);
+		}
+		m_repeat.Init("Repeat", true);
+		m_repeat.SetSameLine(true);
+		m_window.AddItem(&m_repeat);
+
+		m_window.AddItem(&m_speedOverride);
+		m_window.AddItem(&m_playbackSpeed);
 	}
 
-	m_repeat.Init("Repeat", true);
-	m_repeat.SetSameLine(true);
-	m_window.AddItem(&m_repeat);
 	m_clearColor.Init("Background");
 	usg::Color defaultCol(0.1f, 0.1f, 0.1f);
 	m_clearColor.SetValue(defaultCol);
 	m_window.AddItem(&m_clearColor);
 
 	m_previewModel.Init(pDevice, &m_scene);
-	m_previewModel.AddToWindow(&m_window);
+	if (uInitFlags | SHOW_PREVIEW_MODEL)
+	{
+		m_previewModel.AddToWindow(&m_window);
+	}
 
 	m_window.AddItem(&m_texture);
 
@@ -126,6 +139,11 @@ bool PreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 	m_previewModel.Update(pDevice, fElapsed);
 	m_scene.TransformUpdate(fElapsed);
 	m_scene.Update(pDevice);
+
+	m_previewButtons[BUTTON_PAUSE].SetVisible(!m_bPaused);
+	m_previewButtons[BUTTON_PLAY].SetVisible(m_bPaused);
+
+	m_playbackSpeed.SetVisible(m_speedOverride.GetValue());
 
 	if (m_previewButtons[BUTTON_PAUSE].GetValue())
 		m_bPaused = true;

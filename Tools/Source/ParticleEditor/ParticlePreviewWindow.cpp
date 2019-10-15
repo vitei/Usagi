@@ -18,9 +18,9 @@ ParticlePreviewWindow::~ParticlePreviewWindow()
 
 }
 
-void ParticlePreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos)
+void ParticlePreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos, uint32 uFlags)
 {
-	Inherited::Init(pDevice, pRenderer, szName, vPos);
+	Inherited::Init(pDevice, pRenderer, szName, vPos, uFlags);
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
 	m_effect.Init(pDevice, &GetScene(), mEffectMat);

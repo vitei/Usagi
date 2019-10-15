@@ -24,7 +24,13 @@ public:
 	PreviewWindow();
 	virtual ~PreviewWindow();
 
-	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos);
+	enum 
+	{
+		SHOW_PLAY_CONTROLS = (1 << 0),
+		SHOW_PREVIEW_MODEL = (1 << 1)
+	};
+
+	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos, uint32 uInitFlags = SHOW_PLAY_CONTROLS|SHOW_PREVIEW_MODEL);
 	virtual void CleanUp(usg::GFXDevice* pDevice);
 	virtual bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	virtual void Draw(usg::GFXContext* pImmContext);
@@ -51,6 +57,8 @@ private:
 	usg::Scene			m_scene;
 	usg::GUIWindow		m_window;
 	usg::GUITexture		m_texture;
+	usg::GUISlider		m_playbackSpeed;
+	usg::GUICheckBox	m_speedOverride;
 	usg::ViewContext*	m_pSceneCtxt;
 	usg::PipelineStateHndl	m_clearAlphaPipeline;
 
