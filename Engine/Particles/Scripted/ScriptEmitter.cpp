@@ -343,15 +343,6 @@ namespace usg
 		Particle::ScriptedParticleFragment* pFrag = m_fragConsts.Lock<Particle::ScriptedParticleFragment>();
 		pFrag->fAlphaRef  = res.blend.alphaTestFunc == usg::ALPHA_TEST_ALWAYS ? -1.0f : res.blend.alphaTestReference;
 		pFrag->fDepthFade = res.fSoftFadeDistance;
-		if (pFrag->fDepthFade > 0.0f)
-		{
-			pFrag->fDepthFade = 1.0f / pFrag->fDepthFade;
-		}
-		if (bEditor)
-		{
-			// Depth read not working yet and need to replace the editor anyway
-			pFrag->fDepthFade = 0.0f;
-		}
 		m_fragConsts.Unlock();
 		m_fragConsts.UpdateData(pDevice);
 

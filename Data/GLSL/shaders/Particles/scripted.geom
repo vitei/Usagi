@@ -93,7 +93,7 @@ void CreateVertex(int ii, vec2 scale)
     pos = vec4( vEyePos.xyz, 1.0 ) * mProjMat;
     pos.w *= gl_in[ii].gl_Position.w;
 
-    geometryData.vo_fEyeDepth = vEyePos.z/vNearFar.y;
+    geometryData.vo_fEyeDepth = vEyePos.z;
 
     geometryData.vo_vScreenTex = pos.xy / pos.ww;
 

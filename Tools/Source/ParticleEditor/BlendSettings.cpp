@@ -78,7 +78,7 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_comboBoxes[COMBO_BOX_ALPHA_TEST_OP].SetToolTip("Advanced use only: Operation for combining particle and background alpha");
 	m_alphaRef.Init("Alpha Ref", 0.0f, 1.0f, 0.0f);
 	m_alphaRef.SetToolTip("Alpha comparison value (failed pixels won't render");
-	m_softDistance.Init("Softness Rng", 0.0f, 3.0f, 1.0f);
+	m_softDistance.Init("Softness Rng", 0.0f, 10.0f, 1.0f);
 
 	m_constColorSelect.Init("Const Color");
 	usg::Color tmp(1.0f, 1.0f, 1.0f, 1.0f);

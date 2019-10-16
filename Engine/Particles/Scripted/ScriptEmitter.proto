@@ -168,7 +168,6 @@ message SortSettings
 	required uint32			uPriority = 2;
 	required bool			bWriteDepth = 3;
 	optional float 			fDepthOffset = 4;
-	// TODO: Optional depth sort of particles?
 }
 
 message EmitterEmission
