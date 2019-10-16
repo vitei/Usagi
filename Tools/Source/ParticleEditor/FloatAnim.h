@@ -24,6 +24,8 @@ public:
 	bool Update(usg::particles::FloatAnim &src);
 	void SetFromDefinition(usg::particles::FloatAnim &src);
 	void SetVisible(bool bVisible);
+	void SetToolTip(const char* szChar);
+	void SetSingleOnly(bool bSingleOnly);
 	
 private:
 	
@@ -33,6 +35,7 @@ private:
 		MAX_FRAME_COUNT = 10,
 	};
 
+	usg::GUIFloat			m_singleFloat;
 	usg::GUIText			m_title;
 	usg::GUIWindow			m_childWindow;
 	usg::GUIIntInput		m_frameCount;
