@@ -51,6 +51,7 @@ namespace usg
 			case WINDOW_TYPE_CHILD:
 			{
 				ImGui::BeginChild(m_szName, ImVec2(vScale.x, vScale.y), true, 0);// m_bShowBorders ? ImGuiWindowFlags_ShowBorders : 0);
+				CommonDraw();
 			}
 			break;
 			case WINDOW_TYPE_PARENT:

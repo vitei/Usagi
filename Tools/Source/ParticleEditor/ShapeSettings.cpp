@@ -32,27 +32,41 @@ void ShapeSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	float fDefaultZero[] = { 0.0f, 0.0f, 0.0f};
 	float fDefaultOne[] = {1.0f, 1.0f, 1.0f};
 	m_shapeType.Init("Type", g_szShapeType, 0);
+	m_shapeType.SetToolTip("Shape of the emitter");
 	m_scale.Init("Scale", 0.0f, 5.0f, fDefaultOne, 3);
+	m_scale.SetToolTip("Scale of the emitter");
 	m_rotation.Init("Rotation", 0.0f, 360.0f, fDefaultZero, 3);
+	m_rotation.SetToolTip("Orientation of the emitter");
 	m_position.Init("Position", 0.0f, 5.0f, fDefaultZero, 3);
+	m_position.SetToolTip("Offset of the emitter");
 	m_identityMatrix.Init("Identity matrix", true);
+	m_identityMatrix.SetToolTip("No offset or rotation");
 
 	m_velocity.Init("Velocity", -200.f, 200.f, fDefaultZero, 3 );
+	m_velocity.SetToolTip("Initial velocity of the entire emitter");
 	m_velocityRandom.Init("Velocity rand Frac", 0.0f, 1.0f, 0.0f );
+	m_velocityRandom.SetToolTip("Random multiplier applied to the emitter velocity");
 	m_gravityDir.Init("Gravity", -20.f, 50.f, fDefaultZero, 3 );
+	m_gravityDir.SetToolTip("Gravity direction and magnitude");
 
 	m_shapeSpread.Init("Particle Escape Vel", -10.0f, 10.0f, 0.0f);
+	m_shapeSpread.SetToolTip("Additional velocity applied to particles to move them from the shape center");
+
 
 
 	m_hollowness.Init("Hollowness", 0.0f, 1.0f, 0.0f);
+	m_hollowness.SetToolTip("Fraction of shape to use (1=shell only, 0=entire shape)");
 
 	vWindowSize.Assign(300.f, 100.f);
 	m_arcWindow.Init("Arc", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_CHILD);
 
 	m_arcTitle.Init("Arc");
 	m_arcWidthDeg.Init("Width", 0.0f, 360.f, 360.f);
+	m_arcWidthDeg.SetToolTip("Angle (in deg) of the shape to emit from");
 	m_arcStartDeg.Init("Start ang", 0.0f, 360.f, 0.0f);
+	m_arcStartDeg.SetToolTip("Offset (in deg) of start angle to emit from");
 	m_randomizeStart.Init("Randomize start", false);
+	m_randomizeStart.SetToolTip("Should randomize arc start angle");
 
 	float fDefault[] = {1.0f, 1.0f, 1.0f};
 	m_radius.Init("Radius", 0.0f, 20.0f, fDefault, 3);

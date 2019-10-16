@@ -40,8 +40,11 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_fileList.Init("Textures/particles/", ".dds");
 	m_fileListBox.Init("Texture Select", m_fileList.GetFileNamesRaw());
 	m_repeat.Init("Repeat X, Y", defaultRepeat, 2, 1, 32);
+	m_repeat.SetToolTip("Number of sub images in the image along X and Y");
 	m_comboBox.Init("Anim Mode", g_szAnimationTiming, 0);
+	m_comboBox.SetToolTip("How the sub images are to be animated");
 	m_checkBox.Init("Random offset", false);
+	m_checkBox.SetToolTip("Apply a random offset to the image to be displayed");
 
 	usg::SamplerDecl samplerDecl(usg::SF_LINEAR, usg::SC_WRAP);
 	m_sampler = pDevice->GetSampler(samplerDecl);

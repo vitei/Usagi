@@ -31,14 +31,20 @@ void ParticleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	
 	m_window.Init("Particle init", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_life.Init(&m_window, "Lifetime");
+	m_life.SetToolTip("Lifetime particles are spawned with over the duration of the effect");
 
 	m_particleType.Init("Type", g_szParticleType, 0);
+	m_particleType.SetToolTip("The type of particle this emitter spawns");
 	m_lifeRandomness.Init("Life randomness", 0.0f, 1.0f, 0.0f);
+	m_lifeRandomness.SetToolTip("A random value (+ or -) of this scale will be added to each particles lifetime");
 	float fDefaultVector[] = { 0.0f, 0.0f, 0.0f };
 	m_userRotation.Init("User rotation", -360.0f, 360.0f, fDefaultVector, 3);
+	m_userRotation.SetToolTip("Custom orientation for user oriented particles");
+
 
 	float fDefault[] = {0.0f, 0.0f };
 	m_particleCenter.Init("Pivot", -0.5f, 0.5f, fDefault, 2);
+	m_particleCenter.SetToolTip("The center point of a billboard for both rotation and placement");
 
 	m_window.AddItem(&m_lifeRandomness);
 	m_window.AddItem(&m_particleType);

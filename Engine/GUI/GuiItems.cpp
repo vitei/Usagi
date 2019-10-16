@@ -225,10 +225,14 @@ namespace usg
 	}
 
 	bool GUIText::UpdateAndAddToDrawList(const GUIContext& ctxt)
-{
+	{
+		UpdateBase();
+
 		const Color& col = GetColor();
 		ImVec4 imColor(col.r(), col.g(), col.b(), col.a());
 		ImGui::TextColored(imColor, GetName());
+
+		CommonDraw();
 
 		return false;
 	}

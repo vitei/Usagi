@@ -30,12 +30,18 @@ void ColorSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 
 	m_window.Init("Color Settings", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_colorAnimMode.Init("Color mode", g_szColorAnimMode, 0);
+	m_colorAnimMode.SetToolTip("How to animate the color");
 	m_sliders[SLIDER_TIME_IN_END].Init("Color 1 hold end", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_TIME_IN_END].SetToolTip("Time to hold color 1 before lerping to 2");
 	m_sliders[SLIDER_PEAK_TIME].Init("Color 1 > 2 end", 0.0f, 1.0f, 0.3f);
+	m_sliders[SLIDER_PEAK_TIME].SetToolTip("Time at which color 2 is fully interpoloated in");
 	m_sliders[SLIDER_TIME_OUT_START].Init("Color 2 > 3 start", 0.0f, 1.0f, 0.7f);
+	m_sliders[SLIDER_TIME_OUT_START].SetToolTip("Time at color 2 begins to interpolate into 3");
 	m_sliders[SLIDER_ENV_COLOR_LERP].Init("Env color lerp", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_ENV_COLOR_LERP].SetToolTip("How much of the code defined environment color to apply");
 	int repeat = 1;
 	m_repetition.Init("Anim repeat", &repeat, 1, 0, 100);
+	m_repetition.SetToolTip("How many times to repeat the color animation");
 
 	usg::Color cWhite(1.0f, 1.0f, 1.0f, 1.0f);
 	m_colors[0].Init("Color 1");

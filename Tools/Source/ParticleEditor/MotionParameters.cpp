@@ -21,30 +21,43 @@ void MotionParameters::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	float defaultVec[] = { 0.0f, 1.0f, 0.0f };
 	m_window.Init("Motion params", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_sliders[SLIDER_POSITION_RANDOM].Init("Position random", 0.0f, 2.0f, 0.0f);
+	m_sliders[SLIDER_POSITION_RANDOM].SetToolTip("A random offset in any direction to apply to the particle spawn location");
 	m_window.AddItem(&m_sliders[SLIDER_POSITION_RANDOM]);
 	m_anims[FLOAT_ANIM_OMNI_VELOCITY].Init(&m_window, "Omni speed");
-	m_window.AddItem(&m_sliders[FLOAT_ANIM_OMNI_VELOCITY]);
+	m_anims[FLOAT_ANIM_OMNI_VELOCITY].SetToolTip("Random velocity scale to apply spherically");
 	m_sliders[SLIDER_VELOCITY_DIR].Init("Velocity Dir", -1.0f, 1.0f, defaultVec, 3);
+	m_sliders[SLIDER_VELOCITY_DIR].SetToolTip("The base vector to used for any directional velocity");
 	m_window.AddItem(&m_sliders[SLIDER_VELOCITY_DIR]);
 	m_sliders[SLIDER_DIR_VELOCITY_CONE_DEG].Init("Dir Vel Cone Deg", 0.0f, 180.0f, 0.0f);
+	m_sliders[SLIDER_DIR_VELOCITY_CONE_DEG].SetToolTip("The size (in degrees) of the cone formed around that directional velocity");
 	m_window.AddItem(&m_sliders[SLIDER_DIR_VELOCITY_CONE_DEG]);
 	m_anims[FLOAT_ANIM_DIR_VELOCITY].Init(&m_window, "Dir speed");
-	m_sliders[SLIDER_SPEED_RANDOMNESS].Init("Speed randomness", 0.0f, 2.0f, 0.0f);
+	m_anims[FLOAT_ANIM_DIR_VELOCITY].SetToolTip("The directional speed particles are initialized with on spawn");
+	m_sliders[SLIDER_SPEED_RANDOMNESS].Init("Speed randomness", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_SPEED_RANDOMNESS].SetToolTip("Random multiplier to apply to the total speed (+ or - frac)");
 	m_window.AddItem(&m_sliders[SLIDER_SPEED_RANDOMNESS]);
 
 	defaultVec[1] = -1.0f;
 	m_sliders[SLIDER_GRAVITY_DIR].Init("Gravity Dir", -1.0f, 1.0f, defaultVec, 3);
+	m_sliders[SLIDER_GRAVITY_DIR].SetToolTip("Direction of gravity");
 	m_window.AddItem(&m_sliders[SLIDER_GRAVITY_DIR]);
 	m_floatEntries[FLOAT_ENTRY_GRAVITY_STRENGTH].Init("Gravity strength", 0.0f, 20.0f, 0.0f);
+	m_floatEntries[FLOAT_ENTRY_GRAVITY_STRENGTH].SetToolTip("Strength of gravity");
 	m_window.AddItem(&m_floatEntries[FLOAT_ENTRY_GRAVITY_STRENGTH]);
 	m_sliders[SLIDER_DRAG].Init("Drag", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_DRAG].SetToolTip("Drag (air resistance) applied to velocity");
+
 	m_window.AddItem(&m_sliders[SLIDER_DRAG]);
 
 	m_checkBoxes[CHECKBOX_INHERIT_VELOCITY].Init("Inherit velocity", false);
+	m_checkBoxes[CHECKBOX_INHERIT_VELOCITY].SetToolTip("Inherit velocity from the parent effect or move independently");
+
 	m_window.AddItem(&m_checkBoxes[CHECKBOX_INHERIT_VELOCITY]);
 	m_checkBoxes[CHECKBOX_LOCAL_SPACE].Init("Local-space", false);
+	m_checkBoxes[CHECKBOX_LOCAL_SPACE].SetToolTip("If true the emitter will move with the effect (and object it is attached to)");
 	m_window.AddItem(&m_checkBoxes[CHECKBOX_LOCAL_SPACE]);
 	m_checkBoxes[CHECKBOX_UPDATE_ON_CPU].Init("CPU update", false);
+	m_checkBoxes[CHECKBOX_UPDATE_ON_CPU].SetToolTip("Update on CPU (better quality motion, particularly for drag)");
 	m_window.AddItem(&m_checkBoxes[CHECKBOX_UPDATE_ON_CPU]);
 	
 	//pRenderer->AddWindow(&m_window);

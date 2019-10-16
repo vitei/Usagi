@@ -751,6 +751,7 @@ namespace usg
 		vVelocityOut += vOmniVelocity;
 
 
+		float fVelocityMul = Math::RangedRandom(1.0f - m_emissionDef.fSpeedRandomness, 1.0f + m_emissionDef.fSpeedRandomness);
 		if(m_emissionDef.fVelocityDirConeDeg > 0.0f)
 		{	
 			float fRadAngle = Math::DegToRad(m_emissionDef.fVelocityDirConeDeg);
@@ -768,12 +769,13 @@ namespace usg
 			q.MakeVectorRotation(Vector3f::Y_AXIS, dir );
 			vVelocity = vVelocity * q;
 
-			vVelocityOut = ( vVelocityOut + vVelocity * m_dirVelocity.GetValue() ) * m_emissionDef.fSpeedRandomness;
+			vVelocityOut = ( vVelocityOut + vVelocity * m_dirVelocity.GetValue() );
 		}
 		else
 		{
-			vVelocityOut += m_emissionDef.vVelocityDir * m_dirVelocity.GetValue();
+			vVelocityOut += (m_emissionDef.vVelocityDir * m_dirVelocity.GetValue()) ;
 		}
+		vVelocityOut *= fVelocityMul;
 
 
 		// Finally transform the position and the direction by the emitters matrix

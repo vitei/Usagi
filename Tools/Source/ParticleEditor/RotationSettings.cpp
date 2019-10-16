@@ -19,9 +19,13 @@ void RotationSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	usg::Vector2f vWindowSize(320.f, 120.f);
 	m_window.Init("Rotation", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_sliders[SLIDER_BASE_ROTATION].Init("Base value", 0.0f, 360.0f, 0.0f);
+	m_sliders[SLIDER_BASE_ROTATION].SetToolTip("Rotation when spawned");
 	m_sliders[SLIDER_RANDOMISE].Init("Randomise", 0.0f, 360.0f, 360.0f);
+	m_sliders[SLIDER_RANDOMISE].SetToolTip("Random value added to base rotation");
 	m_sliders[SLIDER_SPEED].Init("Speed", -720.0f, 720.0f, 0.0f);
+	m_sliders[SLIDER_SPEED].SetToolTip("Speed of rotation");
 	m_sliders[SLIDER_SPEED_RANDOMISE].Init("Speed randomise", 0.0f, 720.0f, 0.0f);
+	m_sliders[SLIDER_SPEED_RANDOMISE].SetToolTip("Random value added to rotation speed");
 
 	for(uint32 i=0; i<SLIDER_COUNT; i++)
 	{
