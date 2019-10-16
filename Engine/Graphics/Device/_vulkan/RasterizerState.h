@@ -19,7 +19,8 @@ public:
 	const VkPipelineRasterizationStateCreateInfo& GetCreateInfo() { return m_createInfo; }
 
 private:
-	VkPipelineRasterizationStateCreateInfo m_createInfo;
+	VkPipelineRasterizationStateCreateInfo			m_createInfo;
+	VkPipelineRasterizationLineStateCreateInfoEXT	m_lineState;
 };
 
 }
