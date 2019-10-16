@@ -59,6 +59,8 @@ bool ScaleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	bool bAltered = false;
 	usg::particles::ParticleScale& scaleVars = structData.particleScale;
 
+	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
+	m_baseScale.SetSingleOnly(bOneFrame);
 
 	bAltered |= Compare(scaleVars.fRandomness,m_sliders[SLIDER_RANDOMNESS].GetValue());
 	bAltered |= Compare(scaleVars.fInitial,m_sliders[SLIDER_INITIAL].GetValue());

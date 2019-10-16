@@ -85,6 +85,12 @@ bool MotionParameters::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEm
 {
 	bool bAltered = false;
 
+	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
+	for (int i = 0; i < FLOAT_ANIM_COUNT; i++)
+	{
+		m_anims[i].SetSingleOnly(bOneFrame);
+	}
+
 	bAltered |= Compare(structData.fPositionRandomness, m_sliders[SLIDER_POSITION_RANDOM].GetValue());
 	bAltered |= CompareUnitVector(structData.vVelocityDir, m_sliders[SLIDER_VELOCITY_DIR].GetValueV3(), usg::Vector3f::Y_AXIS);
 	m_sliders[SLIDER_VELOCITY_DIR].SetValue(structData.vVelocityDir);

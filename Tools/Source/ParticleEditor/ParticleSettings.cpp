@@ -66,6 +66,8 @@ void ParticleSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 
 bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
 {
+	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
+	m_life.SetSingleOnly(bOneFrame);
 	bool bAltered = false;
 	bAltered = m_life.Update(structData.life);
 	bAltered |= Compare(structData.eParticleType, m_particleType.GetSelected());

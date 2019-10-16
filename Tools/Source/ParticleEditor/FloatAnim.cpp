@@ -14,6 +14,8 @@ void FloatAnim::Init(usg::GUIWindow* pWindow, const char* szName)
 
 	m_title.Init(szName);
 	m_singleFloat.Init(szName, 0.0f, 10.f, 0.0f);
+	m_singleFloat.SetVisible(false);
+	pWindow->AddItem(&m_singleFloat);
 	m_childWindow.AddItem(&m_title);
 	m_childWindow.AddItem(&m_frameCount);
 	char szBoxName[USG_IDENTIFIER_LEN];
@@ -61,14 +63,16 @@ void FloatAnim::SetToolTip(const char* szChar)
 
 void FloatAnim::SetSingleOnly(bool bSingleOnly)
 {
-	if (bSingleOnly)
+	if (bSingleOnly && !m_singleFloat.IsVisible())
 	{
 		m_singleFloat.SetVisible(true);
+		m_singleFloat.SetValue(m_frameInfo[0].GetValue(1));
 		m_childWindow.SetVisible(false);
 	}
-	else
+	else if(!bSingleOnly && m_singleFloat.IsVisible())
 	{
 		m_singleFloat.SetVisible(false);
+		m_frameInfo[0].SetValue(m_singleFloat.GetValue(), 1);
 		m_childWindow.SetVisible(true);
 	}
 }
