@@ -174,6 +174,24 @@ namespace usg
 		bool				m_bValue;
 	};
 
+	class GUILoadButton : public GUIButton
+	{
+		using Inherited = GUIButton;
+	public:
+		GUILoadButton();
+		virtual ~GUILoadButton();
+
+		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt);
+		void AddFilter(const char* szDisplay, const char* szPattern);
+		void SetExtension(const char* szExt) { m_szExt = szExt; }
+		void SetStartPath(const char* szPath) { m_szPath = szPath; }
+
+	private:
+		usg::vector<usg::string> m_filterStrings;
+		usg::string m_szExt;
+		usg::string m_szPath;
+	};
+
 	class GUIColorSelect : public GUIItem
 	{
 	public:

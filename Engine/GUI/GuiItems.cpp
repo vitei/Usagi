@@ -13,6 +13,18 @@ namespace usg
 
 	const float GUIItem::ms_fToolTipDelay = 1.0f;
 
+	usg::vector<usg::FileOpenPath::Filter> GetFiltersFromString(const usg::vector<usg::string>& string)
+	{
+		usg::vector<usg::FileOpenPath::Filter> filters;
+		filters.resize(string.size() / 2);
+		for (size_t i = 0; i < filters.size(); i++)
+		{
+			filters[i].szDisplayName = string[i * 2].c_str();
+			filters[i].szExtPattern = string[(i * 2) + 1].c_str();
+		}
+		return filters;
+	}
+
 	GUIItem::GUIItem()
 		: m_pCallbacks(nullptr)
 		, m_bSameLine(false)
@@ -170,13 +182,7 @@ namespace usg
 
 	void GUIMenuLoadSave::Run()
 	{
-		usg::vector<usg::FileOpenPath::Filter> filters;
-		filters.resize(m_filterStrings.size() / 2);
-		for (size_t i = 0; i < filters.size(); i ++)
-		{
-			filters[i].szDisplayName = m_filterStrings[i * 2].c_str();
-			filters[i].szExtPattern = m_filterStrings[(i * 2)+1].c_str();
-		}
+		usg::vector<usg::FileOpenPath::Filter> filters = GetFiltersFromString(m_filterStrings);
 
 		FileOpenPath fileName;
 		fileName.szWindowTitle = m_szName;
@@ -235,6 +241,50 @@ namespace usg
 		CommonDraw();
 
 		return false;
+	}
+
+	GUILoadButton::GUILoadButton()
+	{
+
+	}
+
+	GUILoadButton::~GUILoadButton()
+	{
+
+	}
+
+	void GUILoadButton::AddFilter(const char* szDisplay, const char* szPattern)
+	{
+		m_filterStrings.push_back(usg::string(szDisplay));
+		m_filterStrings.push_back(usg::string(szPattern));
+	}
+
+	bool GUILoadButton::UpdateAndAddToDrawList(const GUIContext& ctxt)
+	{
+		if (Inherited::UpdateAndAddToDrawList(ctxt))
+		{
+			auto filters = GetFiltersFromString(m_filterStrings);
+			FileOpenPath fileName;
+			fileName.szWindowTitle = m_szName;
+			fileName.szDefaultExt = m_szExt.size() > 0 ? m_szExt.c_str() : nullptr;
+			fileName.pFilters = filters.data();
+			fileName.uFilterCount = (uint32)filters.size();
+			fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
+
+			if (File::UserFileOpenPath(fileName))
+			{
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void GUIColorSelect::Init(const char* szName)
