@@ -23,7 +23,7 @@ inline bool Compare(VariableType& inOut, const ComparisonType newValue)
 void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pParent, uint32 uIndex)
 {
 	usg::Vector2f vPos(0.0f, 0.0f);
-	usg::Vector2f vScale(300.f, 170.f);
+	usg::Vector2f vScale(300.f, 190.f);
 	usg::U8String name;
 	m_pParent = pParent;
 	name.ParseString("Effect %d", uIndex);
@@ -32,8 +32,9 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_removeEmitterButton.Init("Remove Emitter");
 	m_loadEmitterButton.Init("Load");
 	m_loadEmitterButton.SetSameLine(true);
+	m_loadEmitterButton.SetToolTip("Load into the emitter window (WARNING: Will overwrite current file");
 
-	m_emitterSelect.Init("Emitter", pParent->GetFileList().GetFileNamesRaw(), 0);
+	m_emitterName.Init("Emitter");
 
 	float fDefault0[] = { 0.0f, 0.0f, 0.0f };
 	float fDefault1[] = { 1.0f, 1.0f, 1.0f };
@@ -49,8 +50,12 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_parameterWindow.Init("Parameters", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_parameterWindow.SetDefaultCollapsed(true);
 
+	m_changeAssetButton.Init("Change Emitter");
+	m_changeAssetButton.SetExtension("vpb");
+	m_changeAssetButton.AddFilter("Vitei ProtoBuf", "* .vpb");
+	m_changeAssetButton.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
 
-	m_emitterWindow.AddItem(&m_emitterSelect);
+	m_emitterWindow.AddItem(&m_emitterName);
 	m_emitterWindow.AddItem(&m_loadEmitterButton);
 	m_emitterWindow.AddItem(&m_parameterWindow);
 	m_parameterWindow.AddItem(&m_position);
@@ -58,6 +63,7 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_parameterWindow.AddItem(&m_scale);
 	m_parameterWindow.AddItem(&m_particleScale);
 	m_parameterWindow.AddItem(&m_startTime);
+	m_parameterWindow.AddItem(&m_changeAssetButton);
 	m_parameterWindow.AddItem(&m_removeEmitterButton);
 
 	m_emitter.Alloc(pDevice, &scene.GetParticleMgr(), "water_halo", true);
@@ -80,7 +86,7 @@ bool EmitterInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 		return false;
 	}
 
-	m_emitterSelect.UpdateOptions(m_pParent->GetFileList().GetFileNamesRaw());
+	//m_emitterSelect.UpdateOptions(m_pParent->GetFileList().GetFileNamesRaw());
 	bool bAltered = false;
 	bAltered |= Compare(m_emitterData.vPosition, m_position.GetValueV3());
 	bAltered |= Compare(m_emitterData.vRotation, m_rotation.GetValueV3());
@@ -95,30 +101,36 @@ bool EmitterInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 		UpdateInstanceMatrix();
 	}
 
-	m_emitterWindow.SetSize(m_parameterWindow.GetCollapsed() ? usg::Vector2f(300.f, 60.f) : usg::Vector2f(300.f, 200.f));
+	m_emitterWindow.SetSize(m_parameterWindow.GetCollapsed() ? usg::Vector2f(300.f, 60.f) : usg::Vector2f(300.f, 220.f));
 
 	usg::U8String emitterName = m_emitterData.emitterName;
 	emitterName += ".vpb";
-	if(emitterName != m_emitterSelect.GetSelectedName())
+	if(m_changeAssetButton.GetValue())
 	{
-		m_pParent->GetEffect().RemoveEmitter(&m_emitter);
-		emitterName = m_emitterSelect.GetSelectedName();
-		ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, emitterName.CStr());
-		emitterName.TruncateExtension();
-		str::Copy(m_emitterData.emitterName, emitterName.CStr(), sizeof(m_emitterData.emitterName));
-		m_pParent->Reset(pDevice);
-		UpdateInstanceMatrix();
+		LoadEmitter(pDevice, m_changeAssetButton.GetLastResult().relFileName.c_str());
 	}
 	
 
 	return true;
 }
 
+void EmitterInstance::LoadEmitter(usg::GFXDevice* pDevice, const char* szEmitterName)
+{
+	m_pParent->GetEffect().RemoveEmitter(&m_emitter);
+	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, szEmitterName);
+	usg::U8String emitterName = szEmitterName;
+	emitterName.TruncateExtension();
+	str::Copy(m_emitterData.emitterName, emitterName.CStr(), sizeof(m_emitterData.emitterName));
+	m_emitterName.SetText(szEmitterName);
+	m_pParent->Reset(pDevice);
+	UpdateInstanceMatrix();
+}
+
 void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::EmitterData* pInstance)
 {
 	if(pInstance==NULL)
 	{
-		usg::U8String selectName = m_emitterSelect.GetSelectedName();
+		usg::U8String selectName = m_emitterName.GetName();
 		selectName.TruncateExtension();
 		str::Copy(m_emitterData.emitterName, selectName.CStr(), sizeof(m_emitterData.emitterName));
 		m_emitterData.vPosition = usg::Vector3f::ZERO;
@@ -143,7 +155,7 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 
 	usg::U8String emitterName = m_emitterData.emitterName;
 	emitterName += ".vpb";
-	m_emitterSelect.SetSelectedByName(emitterName.CStr());
+	m_emitterName.SetText(emitterName.CStr());
 
 	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, emitterName.CStr());
 	m_pParent->Reset(pDevice);

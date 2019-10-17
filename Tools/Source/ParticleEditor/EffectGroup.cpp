@@ -219,6 +219,7 @@ void EffectGroup::Update(usg::GFXDevice* pDevice, float fElapsed, float fPreview
 			if(!m_instances[i].GetActive())
 			{
 				m_instances[i].AddToScene(pDevice);
+				m_instances[i].LoadEmitter(pDevice, m_addEmitterButton.GetLastResult().relFileName.c_str());
 				break;
 			}
 		}

@@ -24,14 +24,17 @@ public:
 	const usg::particles::EmitterData& GetData() { return m_emitterData; }
 	usg::ScriptEmitter& GetEmitter() { return m_emitter; }
 	bool GetLoadRequest() { return m_loadEmitterButton.GetValue(); }
+
+	void LoadEmitter(usg::GFXDevice* pDevice, const char* szEmitterName);
 private:
 	void Add(bool bAdd) { m_emitterWindow.SetVisible(bAdd); m_bActive = bAdd; }
 	void UpdateInstanceMatrix();
 
 	usg::GUIWindow				m_emitterWindow;
 	usg::GUIWindow				m_parameterWindow;
-	usg::GUIComboBox			m_emitterSelect;
+	usg::GUIText				m_emitterName;
 	usg::GUIButton				m_loadEmitterButton;
+	usg::GUILoadButton			m_changeAssetButton;
 	usg::GUIFloat				m_position;
 	usg::GUIFloat				m_rotation;
 	usg::GUIFloat				m_scale;

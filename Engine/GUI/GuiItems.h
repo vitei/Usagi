@@ -44,6 +44,12 @@ namespace usg
 		uint32 uFlags = 0;
 	};
 
+	struct GUILoadResult
+	{
+		usg::string fileName;
+		usg::string relFileName;
+	};
+
 	// Bit cleaner for our purposes than standard callbacks as we'll want a few per type
 	class GUICallbacks
 	{
@@ -119,9 +125,11 @@ namespace usg
 		void SetStartPath(const char* szPath) { m_szPath = szPath; }
 		const char* GetStartPath() const { return m_szPath.c_str(); }
 		virtual GuiItemType GetItemType() const { return GuiItemType::MENU_ITEM; }
+		const GUILoadResult& GetLastResult() { return m_lastResult; }
 	private:
 		virtual void Run();
 
+		GUILoadResult m_lastResult;
 		usg::vector<usg::string> m_filterStrings;
 		usg::string m_szExt;
 		usg::string m_szPath;
@@ -185,8 +193,9 @@ namespace usg
 		void AddFilter(const char* szDisplay, const char* szPattern);
 		void SetExtension(const char* szExt) { m_szExt = szExt; }
 		void SetStartPath(const char* szPath) { m_szPath = szPath; }
-
+		const GUILoadResult& GetLastResult() const { return m_lastResult; }
 	private:
+		GUILoadResult m_lastResult;
 		usg::vector<usg::string> m_filterStrings;
 		usg::string m_szExt;
 		usg::string m_szPath;

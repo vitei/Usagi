@@ -209,6 +209,8 @@ namespace usg
 				{
 					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
 				}
+				m_lastResult.fileName = fileName.szPathOut;
+				m_lastResult.relFileName = fileName.szRelativePathOut;
 			}
 		}
 
@@ -277,6 +279,13 @@ namespace usg
 				{
 					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
 				}
+				m_lastResult.fileName = fileName.szPathOut;
+				m_lastResult.relFileName = fileName.szRelativePathOut;
+			}
+			else
+			{
+				// Pretend this button wasn't pressed
+				SetValue(false);
 			}
 
 			return true;
