@@ -79,6 +79,7 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_alphaRef.Init("Alpha Ref", 0.0f, 1.0f, 0.0f);
 	m_alphaRef.SetToolTip("Alpha comparison value (failed pixels won't render");
 	m_softDistance.Init("Softness Rng", 0.0f, 10.0f, 1.0f);
+	m_softDistance.SetToolTip("Depth distance over which the particle fades in (values over 0 have a negative impact on performance)");
 
 	m_constColorSelect.Init("Const Color");
 	usg::Color tmp(1.0f, 1.0f, 1.0f, 1.0f);
