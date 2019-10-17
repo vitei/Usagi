@@ -32,7 +32,7 @@ void MayaCamera::Update(float fElapsed, bool bHasFocus)
 			m_vEyePosition.z -= pMouse->GetAxis(usg::MOUSE_DELTA_WHEEL) * 2.5f;
 		}
 		
-		if (!m_bInFocus)
+		if (!m_bInFocus && bHasFocus)
 		{
 			m_bInFocus = pMouse->GetButton(usg::MOUSE_BUTTON_LEFT, usg::BUTTON_STATE_PRESSED) ||
 				pMouse->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED) || 
