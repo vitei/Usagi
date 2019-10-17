@@ -41,6 +41,9 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	menuBar.AddItem(&m_fileMenu);
 
 	m_addEmitterButton.Init("Add Emitter");
+	m_addEmitterButton.SetExtension("vpb");
+	m_addEmitterButton.AddFilter("Vitei ProtoBuf", "* .vpb");
+	m_addEmitterButton.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
 	m_addEmitterButton.SetToolTip("Add a particle emitter");
 	m_addTrailButton.Init("Add trail");
 	m_addTrailButton.SetToolTip("Add a ribbon trail which moves with the emitter");

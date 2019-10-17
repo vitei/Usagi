@@ -60,7 +60,7 @@ private:
 	usg::GUIMenuLoadSave			m_loadItem;
 	usg::GUIMenuItem				m_saveItem;
 
-	usg::GUIButton					m_addEmitterButton;
+	usg::GUILoadButton				m_addEmitterButton;
 	usg::GUIButton					m_addTrailButton;
 	usg::GUIIntInput				m_instanceCount;
 	usg::particles::EffectGroup		m_effectGroup;
