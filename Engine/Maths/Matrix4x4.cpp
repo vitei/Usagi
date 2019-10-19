@@ -155,11 +155,12 @@ void Matrix4x4::MakeRotateYPR(float yaw, float pitch, float roll)
 }
 
 
-void Matrix4x4::Inverse()
+const Matrix4x4& Matrix4x4::Inverse()
 {
 	Matrix4x4 mTmp;
 	GetInverse(mTmp);
 	*this = mTmp;
+	return *this;
 }
 
 float Matrix4x4::Determinant() const

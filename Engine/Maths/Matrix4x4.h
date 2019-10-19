@@ -42,7 +42,7 @@ public:
 
 	inline Vector3f TransformVec3(const Vector3f& vec3, float w = 1.0f) const;
 
-	void Inverse();
+	const Matrix4x4& Inverse();
 	void GetInverse(Matrix4x4 &out) const;
 	void GetQuickInverse(Matrix4x4 &out) const;
 
