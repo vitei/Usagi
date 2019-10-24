@@ -80,6 +80,9 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_alphaRef.SetToolTip("Alpha comparison value (failed pixels won't render");
 	m_softDistance.Init("Softness Rng", 0.0f, 10.0f, 1.0f);
 	m_softDistance.SetToolTip("Depth distance over which the particle fades in (values over 0 have a negative impact on performance)");
+	m_cameraOffset.Init("Camera Offset", 0.0f, 10.0f, 1.0f);
+	m_cameraOffset.SetToolTip("The particle will be displaced by this many units towards the viewer");
+
 
 	m_constColorSelect.Init("Const Color");
 	usg::Color tmp(1.0f, 1.0f, 1.0f, 1.0f);
@@ -94,12 +97,20 @@ void BlendSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_window.AddItem(&m_comboBoxes[COMBO_BOX_ALPHA_TEST_OP]);
 	m_window.AddItem(&m_alphaRef);
 	m_window.AddItem(&m_softDistance);
+	m_window.AddItem(&m_cameraOffset);
 	//pRenderer->AddWindow(&m_window);
 }
 
 void BlendSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData)
 {
 	usg::AlphaStateGroup& alphaDecl = structData.blend;
+
+	if (!structData.has_fCameraOffset)
+	{
+		structData.has_fCameraOffset = true;
+		structData.fCameraOffset = 0.0f;
+	}
+
 	m_comboBoxes[COMBO_BOX_RGB_SRC].SetSelected(alphaDecl.rgbSrcFunc);
 	m_comboBoxes[COMBO_BOX_RGB_DST].SetSelected(alphaDecl.rgbDestFunc);
 	m_comboBoxes[COMBO_BOX_RGB_OP].SetSelected(alphaDecl.rgbOp);
@@ -109,7 +120,8 @@ void BlendSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& st
 	m_comboBoxes[COMBO_BOX_ALPHA_TEST_OP].SetSelected(alphaDecl.alphaTestFunc == usg::ALPHA_TEST_ALWAYS ? 0 : 1);
 	m_alphaRef.SetValue(alphaDecl.alphaTestReference);
 	m_softDistance.SetValue(structData.fSoftFadeDistance);
-	
+	m_cameraOffset.SetValue(structData.fCameraOffset);
+
 	m_bForceUpdate = true;
 }
 
@@ -127,6 +139,7 @@ bool BlendSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	bAltered |= Compare(alphaDecl.alphaTestFunc,m_comboBoxes[COMBO_BOX_ALPHA_TEST_OP].GetSelected() ? usg::ALPHA_TEST_GREATER : usg::ALPHA_TEST_ALWAYS);
 	bAltered |= Compare(alphaDecl.alphaTestReference,m_alphaRef.GetValue());
 	bAltered |= Compare(structData.fSoftFadeDistance, m_softDistance.GetValue());
+	bAltered |= Compare(structData.fCameraOffset, m_cameraOffset.GetValue());
 
 	if(bAltered || m_bForceUpdate)
 	{

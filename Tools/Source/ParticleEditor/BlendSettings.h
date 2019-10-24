@@ -40,6 +40,7 @@ private:
 	usg::GUIColorSelect		m_constColorSelect;
 	usg::GUISlider			m_alphaRef;
 	usg::GUISlider			m_softDistance;
+	usg::GUISlider			m_cameraOffset;
 	bool					m_bForceUpdate;
 };
 

@@ -175,6 +175,7 @@ message EmitterEmission
 	// Effect information
 	required usg.AlphaStateGroup	blend = 1;
 	required float 					fSoftFadeDistance = 32 [default = 0.0];
+	optional float 					fCameraOffset = 33 [default = 0.0];
 	required SortSettings			sortSettings = 29;
 	repeated TextureData			textureData = 2  [(nanopb).max_count = 2];
 	

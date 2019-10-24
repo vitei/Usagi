@@ -90,6 +90,8 @@ namespace usg
 		{
 			Matrix4x3	mOrientation;
 			Vector2f	vParticleCenter;
+			float		fDepthFadeDist;
+			float		fCameraOffset;
 			bool		bCustomMatrix;
 			bool		bYAxisAlign;
 		};
@@ -124,6 +126,8 @@ namespace usg
 		{
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, mOrientation,	CT_MATRIX_43, 1),
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, vParticleCenter, CT_VECTOR_2, 1),
+			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, fDepthFadeDist, CT_FLOAT, 1),
+			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, fCameraOffset, CT_FLOAT, 1),
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, bCustomMatrix,	CT_BOOL, 1),
 			SHADER_CONSTANT_ELEMENT(ScriptedParticleGSTrans, bYAxisAlign,	CT_BOOL, 1),
 			SHADER_CONSTANT_END()
