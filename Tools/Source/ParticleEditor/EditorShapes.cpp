@@ -416,8 +416,8 @@ void EditorShapes::Update(usg::GFXDevice* pDevice, usg::particles::EmitterShape 
 	pTransformData->vColor.Assign(0.0f, 0.0f, 1.0f, 0.4f);
 	pTransformData->vExtents.Assign(pShape->vShapeExtents.x, pShape->vShapeExtents.y, pShape->vShapeExtents.z, 1.0f);
 	// Give some room for error
-	pTransformData->fArcStart = Math::DegToRad(pShape->arc.fArcStartDeg) - 0.01;
-	pTransformData->fArcAngle = Math::DegToRad(pShape->arc.fArcWidthDeg) + 0.02;
+	pTransformData->fArcStart = Math::DegToRad(pShape->arc.fArcStartDeg) - 0.01f;
+	pTransformData->fArcAngle = Math::DegToRad(pShape->arc.fArcWidthDeg) + 0.02f;
 	pTransformData->bUseArc = eShape == particles::EMITTER_SHAPE_CYLINDER || eShape == particles::EMITTER_SHAPE_SPHERE;
 	*pTransformHollow = *pTransformData;
 	pTransformHollow->vColor.Assign(0.5f, 0.0f, 1.0f, 0.4f);

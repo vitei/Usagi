@@ -193,24 +193,26 @@ namespace usg
 
 		if (m_bSave)
 		{
-			if (File::UserFileSavePath(fileName))
+			FilePathResult result;
+			if (File::UserFileSavePath(fileName, result))
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->SaveCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
+					m_pCallbacks->SaveCallback(m_szName, result.szPath, result.szRelativePath);
 				}
 			}
 		}
 		else
 		{
-			if (File::UserFileOpenPath(fileName))
+			usg::vector<FilePathResult> result;
+			if (File::UserFileOpenPath(fileName, result))
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
+					m_pCallbacks->LoadCallback(m_szName, result[0].szPath, result[0].szRelativePath);
 				}
-				m_lastResult.fileName = fileName.szPathOut;
-				m_lastResult.relFileName = fileName.szRelativePathOut;
+				m_lastResult.fileName = result[0].szPath;
+				m_lastResult.relFileName = result[0].szRelativePath;
 			}
 		}
 
@@ -267,20 +269,21 @@ namespace usg
 		{
 			auto filters = GetFiltersFromString(m_filterStrings);
 			FileOpenPath fileName;
+			usg::vector<FilePathResult> result;
 			fileName.szWindowTitle = m_szName;
 			fileName.szDefaultExt = m_szExt.size() > 0 ? m_szExt.c_str() : nullptr;
 			fileName.pFilters = filters.data();
 			fileName.uFilterCount = (uint32)filters.size();
 			fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
 
-			if (File::UserFileOpenPath(fileName))
+			if (File::UserFileOpenPath(fileName, result))
 			{
 				if (m_pCallbacks)
 				{
-					m_pCallbacks->LoadCallback(m_szName, fileName.szPathOut, fileName.szRelativePathOut);
+					m_pCallbacks->LoadCallback(m_szName, result[0].szPath, result[0].szRelativePath);
 				}
-				m_lastResult.fileName = fileName.szPathOut;
-				m_lastResult.relFileName = fileName.szRelativePathOut;
+				m_lastResult.fileName = result[0].szPath;
+				m_lastResult.relFileName = result[0].szRelativePath;
 			}
 			else
 			{

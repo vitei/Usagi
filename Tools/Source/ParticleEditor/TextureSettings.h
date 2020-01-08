@@ -44,6 +44,7 @@ private:
 	usg::GUITexture			m_texture;
 	usg::GUITexture			m_animTextures[MAX_ANIM_FRAMES];
 	usg::GUIButton			m_previewButton;
+	usg::GUIButton			m_createFlipBook;
 	usg::GUITextInput		m_textInput;
 	usg::GUIIntInput		m_repeat;
 	usg::GUIComboBox		m_comboBox;

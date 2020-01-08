@@ -32,8 +32,8 @@ public:
 	memsize GetSize();
 
 	static FILE_STATUS FileStatus(const char* szName, const FILE_TYPE eFileType = FILE_TYPE_RESOURCE);
-	static bool UserFileOpenPath(FileOpenPath& pathInOut);
-	static bool UserFileSavePath(FileOpenPath& pathInOut);
+	static bool UserFileOpenPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result);
+	static bool UserFileSavePath(const FileOpenPath& pathIn, FilePathResult& result);
 	static bool CreateFileDirectory(const char* szName, FILE_TYPE eFileType);
 	static bool Delete(const char* szName, FILE_TYPE eFileType);
 	// Note: The 'maximumFileCount' parameter is ignored on this platform
