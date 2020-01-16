@@ -14,7 +14,7 @@ namespace usg
 	class IMGuiRenderer;
 }
 
-class TextureSettings : public EmitterModifier
+class TextureSettings : public EmitterModifier, public usg::GUICallbacks
 {
 public:
 	TextureSettings();
@@ -26,6 +26,8 @@ public:
 	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
 
 private:
+	virtual void MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results);
+
 	void UpdateAnimFrames(usg::GFXDevice* pDevice);
 	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData);
 	// Returns the aspect
@@ -44,7 +46,7 @@ private:
 	usg::GUITexture			m_texture;
 	usg::GUITexture			m_animTextures[MAX_ANIM_FRAMES];
 	usg::GUIButton			m_previewButton;
-	usg::GUIButton			m_createFlipBook;
+	usg::GUILoadButton		m_createFlipBook;
 	usg::GUITextInput		m_textInput;
 	usg::GUIIntInput		m_repeat;
 	usg::GUIComboBox		m_comboBox;

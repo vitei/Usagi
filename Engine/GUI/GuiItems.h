@@ -55,6 +55,7 @@ namespace usg
 	{
 	public:
 		virtual void LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath) {}
+		virtual void MultiLoadCallback(const char* szName, const usg::vector<FilePathResult>& results) {}
 		virtual void SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath) {}
 		virtual void FloatChanged(const char* szName, float* pData, uint32 uCount) {}
 		virtual void IntChanged(const char* szName, int* pData, uint32 uCount) {}
@@ -194,11 +195,13 @@ namespace usg
 		void SetExtension(const char* szExt) { m_szExt = szExt; }
 		void SetStartPath(const char* szPath) { m_szPath = szPath; }
 		const GUILoadResult& GetLastResult() const { return m_lastResult; }
+		void SetAllowMultiple(bool bAllow) { m_bAllowMultiple = bAllow; }
 	private:
 		GUILoadResult m_lastResult;
 		usg::vector<usg::string> m_filterStrings;
 		usg::string m_szExt;
 		usg::string m_szPath;
+		bool		m_bAllowMultiple;
 	};
 
 	class GUIColorSelect : public GUIItem

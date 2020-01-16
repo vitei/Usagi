@@ -46,6 +46,12 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_checkBox.Init("Random offset", false);
 	m_checkBox.SetToolTip("Apply a random offset to the image to be displayed");
 
+	m_createFlipBook.Init("Create Flipbook");
+	m_createFlipBook.SetAllowMultiple(true);
+	m_createFlipBook.SetExtension("tga");
+	m_createFlipBook.AddFilter("Targa Image File", "*.tga");
+	m_createFlipBook.SetCallbacks(this);
+
 	usg::SamplerDecl samplerDecl(usg::SF_LINEAR, usg::SC_WRAP);
 	m_sampler = pDevice->GetSampler(samplerDecl);
 
@@ -73,6 +79,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 
 	m_animTimeScale.Init("Anim time scale", 0.1f, 2.0f, 1.0f);
 
+	m_window.AddItem(&m_createFlipBook);
 	m_window.AddItem(&m_texture);
 	m_window.AddItem(&m_fileListBox);
 	m_window.AddItem(&m_repeat);
@@ -97,6 +104,31 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_window.AddItem(&m_previewButton);
 
 	//pRenderer->AddWindow(&m_window);
+}
+
+void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results)
+{
+	if (str::Compare(szName, "Create Flipbook"))
+	{
+		if (results.size() > 0)
+		{
+			usg::FileOpenPath::Filter filter;
+			filter.szDisplayName = "Targa\0";
+			filter.szExtPattern = "*.tga\0";
+			usg::FileOpenPath fileName;
+			fileName.szWindowTitle = "Flipbook";
+			fileName.szDefaultExt = "tga";
+			fileName.pFilters = &filter;
+			fileName.uFilterCount = 1;
+			fileName.szOpenDir = nullptr;
+
+			usg::FilePathResult result;
+			if (usg::File::UserFileSavePath(fileName, result))
+			{
+
+			}
+		}
+	}
 }
 
 void TextureSettings::CleanUp(usg::GFXDevice* pDevice)

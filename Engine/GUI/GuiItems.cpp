@@ -249,7 +249,7 @@ namespace usg
 
 	GUILoadButton::GUILoadButton()
 	{
-
+		m_bAllowMultiple = false;
 	}
 
 	GUILoadButton::~GUILoadButton()
@@ -275,12 +275,17 @@ namespace usg
 			fileName.pFilters = filters.data();
 			fileName.uFilterCount = (uint32)filters.size();
 			fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
+			fileName.bAllowMulti = m_bAllowMultiple;
 
 			if (File::UserFileOpenPath(fileName, result))
 			{
 				if (m_pCallbacks)
 				{
 					m_pCallbacks->LoadCallback(m_szName, result[0].szPath, result[0].szRelativePath);
+					if (m_bAllowMultiple)
+					{
+						m_pCallbacks->MultiLoadCallback(m_szName, result);
+					}
 				}
 				m_lastResult.fileName = result[0].szPath;
 				m_lastResult.relFileName = result[0].szRelativePath;
