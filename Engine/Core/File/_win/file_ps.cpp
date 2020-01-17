@@ -125,6 +125,7 @@ bool SelectPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result,
 
 	usg::vector< COMDLG_FILTERSPEC> specs;
 	usg::vector< usg::wstring > strings;
+	strings.resize(pathIn.uFilterCount * 2);
 	for (uint32 i=0; i< pathIn.uFilterCount; i++)
 	{
 		COMDLG_FILTERSPEC spec;
