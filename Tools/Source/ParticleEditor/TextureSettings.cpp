@@ -2,7 +2,9 @@
 #include "Engine/GUI/IMGuiRenderer.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Maths/MathUtil.h"
+#include "Engine/Graphics/Textures/TGAFile.h"
 #include "TextureSettings.h"
+#include "gli/gli.hpp"
 
 
 static const char* g_szAnimationTiming[] =
@@ -113,8 +115,8 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 		if (results.size() > 0)
 		{
 			usg::FileOpenPath::Filter filter;
-			filter.szDisplayName = "Targa\0";
-			filter.szExtPattern = "*.tga\0";
+			filter.szDisplayName = "Targa";
+			filter.szExtPattern = "*.tga";
 			usg::FileOpenPath fileName;
 			fileName.szWindowTitle = "Flipbook";
 			fileName.szDefaultExt = "tga";
@@ -122,10 +124,53 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 			fileName.uFilterCount = 1;
 			fileName.szOpenDir = nullptr;
 
+			usg::vector<usg::TGAFile> files;
+			files.resize(results.size());
+
 			usg::FilePathResult result;
+			bool bSuccess = true;
 			if (usg::File::UserFileSavePath(fileName, result))
 			{
+				for (memsize i = 0; i < results.size(); i++)
+				{
+					if (!files[i].Load(results[i].szPath, usg::FILE_TYPE_RESOURCE))
+					{
+						FATAL_RELEASE(false, "Failed to load TGA file %s", results[i].szPath);
+						bSuccess = false;
+						break;
+					}
 
+					if (i != 0)
+					{
+						if (files[i].GetHeader().uWidth != files[0].GetHeader().uWidth
+							|| files[i].GetHeader().uHeight != files[0].GetHeader().uHeight
+							|| files[i].GetHeader().uDataTypeCode != files[0].GetHeader().uDataTypeCode)
+						{
+							FATAL_RELEASE(false, "Icompataible TGA files %s and %s", results[i].szRelativePath, results[0].szRelativePath);
+							bSuccess = false;
+							break;
+						}
+					}
+				}
+			}
+
+			if (bSuccess)
+			{
+				// Make the file
+				usg::TGAFile outFile;
+				// First calculate the size
+				sint iWidth = sqrt( results.size() + 1 );
+				sint iHeight = ((results.size() + iWidth - 1) / iWidth);
+
+				sint texWidth = files[0].GetHeader().uWidth * iWidth;
+				sint texHeight = files[0].GetHeader().uHeight * iHeight;
+
+				usg::TGAFile::Header hdr = files[0].GetHeader();
+				hdr.uWidth = texWidth;
+				hdr.uHeight = texHeight;
+				outFile.PrepareImage(files[0].GetHeader());
+				
+				outFile.Save("d:\\aaa\\test.tga", usg::FILE_TYPE_RESOURCE);
 			}
 		}
 	}
