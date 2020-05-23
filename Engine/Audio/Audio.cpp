@@ -111,7 +111,7 @@ void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, 
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
 #endif
-
+	archive.uFiles = uCount;
 	m_archives.push_back(archive);
 }
 
@@ -139,7 +139,7 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
 #endif
-
+	archive.uFiles = uCount;
 	m_archives.push_back(archive);
 }
 
