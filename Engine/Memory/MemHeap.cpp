@@ -47,6 +47,14 @@ struct AllocHeader
 };
 
 
+MemHeap::MemHeap() :
+	  m_uInstances(0)
+	, m_bActive(false)
+	, m_bStatic(false)
+	, m_pHeadAlloc(nullptr)
+{
+
+}
 
 void MemHeap::Initialize(memsize uSize)
 {

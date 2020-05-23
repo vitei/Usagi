@@ -18,6 +18,7 @@ struct AllocHeader;
 class MemHeap
 {
 public:
+	MemHeap();
     void Initialize(memsize uSize);
 	void Initialize(void* location, memsize uSize);
     
