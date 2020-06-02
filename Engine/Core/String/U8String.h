@@ -61,6 +61,7 @@ public:
 	bool operator==( const char* szText ) const;
 
 	const char* CStr() const { return m_pszString != NULL ? m_pszString : ""; }
+	char* Data() { return m_pszString; }
 	uint16 Length() const { return m_uStringLen; }
 	uint16 CharCount() const;
 	U8Char GetUTF8CharAtIdx(uint32 p_idx) const;
