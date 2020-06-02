@@ -57,7 +57,7 @@ namespace usg
 		usg::Fader::Create()->Init(pDevice, m_transitionRenderPass);
 		usg::Audio::Create()->Init();
 		usg::MusicManager::Create();
-		m_modeTransition.Init(pDevice);
+		
 		m_eState = STATE_LOADING;
 
 		m_debugRender.Init(pDevice, m_transitionRenderPass);
@@ -65,6 +65,18 @@ namespace usg
 		m_debug.Init(pDevice, &m_debugRender);
 		m_debug.RegisterCPUTimer(&m_cpuTimer);
 
+		m_pTransitionMode = CreateTransitionMode(pDevice);
+	}
+
+	usg::ModeTransition* SimpleGameBase::CreateTransitionMode(usg::GFXDevice* pDevice)
+	{
+		usg::ModeTransition* pTransition = vnew(ALLOC_OBJECT) usg::ModeTransition;
+		pTransition->Init(pDevice);
+		return pTransition;
+	}
+
+	void SimpleGameBase::FinishedStaticLoad(usg::GFXDevice* pDevice)
+	{
 		// Clean this up...
 		usg::mem::AddMemoryTag();
 		usg::ResourceMgr::Inst()->FinishedStaticLoad();
@@ -79,6 +91,10 @@ namespace usg
 			m_pActiveMode->CleanUp(pDevice);
 			vdelete m_pActiveMode;
 			m_pActiveMode = nullptr;
+
+			usg::ResourceMgr::Inst()->ClearDynamicResources(pDevice);
+			pDevice->ClearDynamicResources();
+			mem::FreeToLastTag();
 		}
 
 
@@ -132,7 +148,7 @@ namespace usg
 			{
 				// DeInitHomeButtonDisabledAnimation();
 				m_eState = STATE_TRANSITION;
-				m_modeTransition.Reset();
+				m_pTransitionMode->Reset();
 				usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
 				usg::Audio::Inst()->StopAll(AUDIO_TYPE_SFX, 0.12f);
 			}
@@ -142,7 +158,7 @@ namespace usg
 			}
 			break;
 		case STATE_TRANSITION:
-			if (m_modeTransition.Update(fElapsed))
+			if (m_pTransitionMode->Update(fElapsed))
 			{
 				StartNextMode(pDevice);
 				m_eState = STATE_LOADING;
@@ -150,7 +166,7 @@ namespace usg
 			}
 			break;
 		case STATE_LOADING:
-			m_modeTransition.Update(fElapsed);
+			m_pTransitionMode->Update(fElapsed);
 #ifdef USE_THREADED_LOADING
 			if (m_pInternalData->m_pInitThread->IsThreadEnd())
 #endif
@@ -170,7 +186,7 @@ namespace usg
 			}
 			else
 			{
-				m_modeTransition.Update(fElapsed);
+				m_pTransitionMode->Update(fElapsed);
 			}
 			break;
 		}
@@ -198,7 +214,7 @@ namespace usg
 		case STATE_END_LOADING:
 		case STATE_LOADING:
 		case STATE_TRANSITION:
-			pRenderMode = &m_modeTransition;
+			pRenderMode = m_pTransitionMode;
 			break;
 		default:
 			pRenderMode = m_pActiveMode;
@@ -249,6 +265,7 @@ namespace usg
 			{
 				m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
 			}
+			m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
 		}
 		break;
 		case 'WMIN':

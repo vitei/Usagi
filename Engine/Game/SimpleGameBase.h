@@ -34,6 +34,8 @@ namespace usg
 		virtual uint32 GetNextMode() const = 0;
 		virtual void ModeFinished() = 0;
 		virtual ModeLoadFunc GetLoadFunc() const = 0;
+		virtual usg::ModeTransition* CreateTransitionMode(usg::GFXDevice* pDevice);
+		void FinishedStaticLoad(usg::GFXDevice* pDevice);
 
 		enum State
 		{
@@ -45,14 +47,14 @@ namespace usg
 		};
 
 
-		usg::RenderPassHndl	m_transitionRenderPass;
-		usg::DebugRender	m_debugRender;
-		usg::DebugStats		m_debug;
-		usg::Mode*			m_pActiveMode;
-		usg::Timer			m_timer;
-		usg::ProfilingTimer m_cpuTimer;
-		usg::ModeTransition	m_modeTransition;
-		State				m_eState;
+		usg::RenderPassHndl		m_transitionRenderPass;
+		usg::DebugRender		m_debugRender;
+		usg::DebugStats			m_debug;
+		usg::Mode*				m_pActiveMode;
+		usg::ModeTransition*	m_pTransitionMode;
+		usg::Timer				m_timer;
+		usg::ProfilingTimer		m_cpuTimer;
+		State					m_eState;
 
 		struct InternalData;
 		usg::unique_ptr<InternalData> m_pInternalData;
