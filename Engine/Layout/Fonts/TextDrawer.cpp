@@ -199,10 +199,53 @@ namespace usg
 
 		m_context.Init(m_pParent);
 
-		const U8String& u8Text = m_pParent->GetText();
+		U8String u8Text = m_pParent->GetText();
+		const FontHndl& font = m_pParent->GetFont();
+		float fTmpWidth = 0.0f;
+		char* szTxtTmp = u8Text.Data();
+		const float fWidthLimit = m_pParent->GetWidthLimit();
+
+		if(fWidthLimit > 0.0f)
+		{
+			// Insert fake newlines
+			while(*szTxtTmp != 0)
+			{
+				uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
+				U8Char thisChar(szTxtTmp, uByteCount);
+				if (uByteCount == 1 && *szTxtTmp == '\n')
+				{
+					fTmpWidth = 0.0f;
+				}
+				float fLeft, fRight, fTop, fBottom;
+				Vector2f vScale = m_context.GetScale() * m_pParent->GetFont()->GetDrawScale();
+				bool bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
+				Vector2f vDimensions = Vector2f(font->GetCharacterAspect(fLeft, fRight, fTop, fBottom), 1.0f);
+				vDimensions = vDimensions * vScale;
+				float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
+				fTmpWidth += fCharWidth;
+ 				if (fTmpWidth > fWidthLimit)
+				{
+					szTxtTmp--;
+					while (szTxtTmp > u8Text.CStr())
+					{
+						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
+						U8Char thisChar(szTxtTmp, uByteCount);
+						if (uByteCount == 1 && *szTxtTmp == ' ')
+						{
+							*szTxtTmp = '\n';
+							fTmpWidth = 0.0f;
+							break;
+						}
+						szTxtTmp--;
+					}
+				}
+		
+				szTxtTmp += uByteCount;
+			}
+		}
+
 		const char* szText = u8Text.CStr();
 		uint32 uCharCount = u8Text.CharCount();
-		const FontHndl& font = m_pParent->GetFont();
 		const usg::Color& color = m_context.GetColor();
 		const usg::Color& colorUpper = m_pParent->GetGradationStartColor();
 		const usg::Color& colorLower = m_pParent->GetGradationEndColor();
