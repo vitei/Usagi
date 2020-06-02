@@ -51,3 +51,8 @@ message SetGameState
 	required bool bParticipating = 1;
 	required bool bActive = 2;
 }
+
+message ToggleVisibility
+{
+	required bool bVisible = 1 [default=true];
+}

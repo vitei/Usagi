@@ -156,6 +156,22 @@ namespace usg
 			}
 		};
 
+		class ToggleVisiblity : public System
+		{
+		public:
+			struct Outputs
+			{
+				Required<VisibilityComponent>      visibility;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_POST_GAMEPLAY)
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ToggleVisibility& evt)
+			{
+				outputs.visibility.Modify().bVisible = evt.bVisible;
+			}
+		};
+
 		class ConstructWorldMatrix : public System
 		{
 		public:
