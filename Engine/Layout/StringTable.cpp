@@ -69,6 +69,10 @@ StringTable::KeyString StringTable::Find(uint32 crc) const
 	{
 		keyString.pStyle = m_styleHashtable.Get(keyString.pStr->styleCRC);
 	}
+	else
+	{
+		keyString.pStyle = nullptr;
+	}
 	return keyString;
 }
 
