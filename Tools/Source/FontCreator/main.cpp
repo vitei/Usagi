@@ -131,6 +131,10 @@ void EncodeUVs(const TexInfo& info, const Bounds& bounds, usg::text::CharDefinit
 	vTL += vCelLoc;
 	vBR += vCelLoc;
 
+	// Padding
+	vTL.x -= 0.25f;
+	vBR.x += 0.25f;
+
 	vTL = vTL / vDim;
 	vBR = vBR / vDim;
 
