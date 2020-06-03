@@ -93,7 +93,7 @@ void EncodeCharacter(TexInfo& texDef, const Bitmap<FloatRGB> &bitmap, const Bitm
 
 void WriteKTX(TexInfo& info, const char* szFileName)
 {
-	gli::texture2d Texture(gli::FORMAT_BGRA8_UNORM_PACK8, gli::texture2d::extent_type(info.uWidth, info.uHeight));
+	gli::texture2d Texture(gli::FORMAT_BGRA8_UNORM_PACK8, gli::texture2d::extent_type(info.uWidth, info.uHeight), 1);
 	glm::u8vec4 * LinearAddress0 = Texture[0].data<glm::u8vec4>();
 
 	usg::MemCpy(LinearAddress0, info.pData, info.uBpp*info.uWidth*info.uHeight);
