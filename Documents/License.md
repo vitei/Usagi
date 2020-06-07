@@ -89,5 +89,10 @@ Licensed under: BSD license and .NET implementation with Apache License, Version
 Original Authors: G-Truc Creation  
 Website: https://github.com/g-truc/gli  
 Source Location: Engine\ThirdParty\gli  
-Licensed under: [Happy Bunny license](https://github.com/g-truc/gli/blob/master/manual.md#section0)
+Licensed under: [Happy Bunny license](https://github.com/g-truc/gli/blob/master/manual.md#section0) 
+
+**glsl-film-grain** (modified source)  
+Website: https://github.com/mattdesl/glsl-film-grain 
+Source Location: \Data\GLSL\shaders\PostFX\filmnoise.frag 
+Licensed under: MIT(https://github.com/mattdesl/glsl-film-grain/blob/master/LICENSE.md) 
 
