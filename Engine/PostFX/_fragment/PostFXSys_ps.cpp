@@ -7,6 +7,7 @@
 #include "Bloom.h"
 #include "FXAA.h"
 #include "SMAA.h"
+#include "FilmGrain.h"
 #include "LinearDepth.h"
 #include "DeferredShading.h"
 #include "SkyFog.h"
@@ -64,6 +65,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_uDefaultEffects = 0;
 	m_pFXAA = nullptr;
 	m_pSMAA = nullptr;
+	m_pFilmGrain = nullptr;
 	m_pBloom = nullptr;
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
@@ -75,6 +77,22 @@ PostFXSys_ps::~PostFXSys_ps()
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
 		vdelete m_pDefaultEffects[i];
+	}
+}
+
+void PostFXSys_ps::Update(float fElapsed)
+{
+	if(m_pFilmGrain)
+	{
+		m_pFilmGrain->Update(fElapsed);
+	}
+}
+
+void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
+{
+	if(m_pFilmGrain)
+	{
+		m_pFilmGrain->UpdateBuffer(pDevice);
 	}
 }
 
@@ -265,6 +283,13 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pDeferredShading->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
 	}
+	if(uInitFlags & PostFXSys::EFFECT_FILM_GRAIN)
+	{
+		m_pFilmGrain = vnew(ALLOC_OBJECT) FilmGrain();
+		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
+		m_pFilmGrain->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pFilmGrain;
+	}
 
 	EnableEffects(pDevice, uInitFlags);
 
@@ -320,6 +345,8 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pFXAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FXAA) != 0);
 	if(m_pSMAA)
 		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
+	if (m_pFilmGrain)
+		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 
@@ -396,6 +423,15 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pSMAA->SetDestTarget(pDevice, pDst);
 		m_renderPasses.SetRenderPass(m_pSMAA->GetLayer(), m_pSMAA->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pSMAA;
+	}
+
+	if(uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN)
+	{
+		m_pFilmGrain->SetSourceTarget(pDevice, pDst);
+		pDst = GetLDRTargetForEffect(m_pFilmGrain, pDst);
+		m_pFilmGrain->SetDestTarget(pDevice, pDst);
+		m_renderPasses.SetRenderPass(m_pFilmGrain->GetLayer(), m_pFilmGrain->GetPriority(), pDst->GetRenderPass());
+		m_pFinalEffect = m_pFilmGrain;
 	}
 
 	m_renderPasses.UpdateEnd(pDevice);

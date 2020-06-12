@@ -37,7 +37,8 @@ public:
 		EFFECT_MOTION_BLUR = (1 << 2),
 		EFFECT_DEFERRED_SHADING = (1 << 3),
 		EFFECT_SKY_FOG = (1 << 4),
-		EFFECT_SMAA = (1 << 5)
+		EFFECT_SMAA = (1 << 5),
+		EFFECT_FILM_GRAIN = (1<<6)
 	};
 
 	PostFXSys();
@@ -45,6 +46,9 @@ public:
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
 	void CleanUp(GFXDevice* pDevice);
+
+	void Update(float fElapsed) { m_platform.Update(fElapsed); }
+	void UpdateGPU(GFXDevice* pDevice) { m_platform.UpdateGPU(pDevice); }
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
 
