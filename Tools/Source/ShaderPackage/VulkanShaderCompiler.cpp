@@ -65,9 +65,65 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 		}
 		else
 		{
+			std::string parsed;
+			std::string fileName;
+			size_t iIndex = inputFileName.find_last_of('/');
+			if (iIndex != std::string::npos)
+			{
+				fileName = inputFileName.substr(iIndex + 1, std::string::npos);
+				fileName += ":";
+			}
 			const char* msg = shaderc_result_get_error_message(result);
-			FATAL_RELEASE(false, msg);
+			std::string file = msg;
+
+			while(1 && fileName.length())
+			{
+				iIndex = file.find(fileName);
+				if (iIndex == std::string::npos)
+				{
+					break;
+				}
+				file = file.substr(iIndex + fileName.length(), std::string::npos);
+				iIndex = file.find_first_of('\n');
+				std::string tempFile = file;
+				if (iIndex)
+				{
+					tempFile = tempFile.substr(0, iIndex);
+				}
+				parsed += "\n";
+				parsed += fileName;
+
+				std::string num = file.substr(file.find_first_of(':'), std::string::npos);
+				num = file.substr(0, file.find_first_of(' '));
+				parsed += num;
+				tempFile = tempFile.substr(file.find_first_of(' ') + 1, std::string::npos);
+				int iLineNum = std::stoi(num);
+
+				std::string code = shaderCode;
+				for(int i= 1; i<iLineNum; i++)
+				{
+					iIndex = code.find_first_of('\n');
+					if(iIndex == std::string::npos)
+					{
+						break;
+					}
+					code = code.substr(iIndex + 1, std::string::npos);;
+				}
+				iIndex = code.find_first_of('\n');
+				if(iIndex != std::string::npos)
+				{
+					code = code.substr(0, iIndex);
+				}
+				parsed += code;
+				parsed += "\n";
+				parsed += tempFile;
+				parsed += "\n";
+			}
+
+			FATAL_RELEASE(false, parsed.length() > 0 ? parsed.c_str() : msg);
+
 			return false;
+	
 		}
 	}
 

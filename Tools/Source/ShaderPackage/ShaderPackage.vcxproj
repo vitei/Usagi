@@ -141,7 +141,7 @@ xcopy $(USAGI_DIR)\Engine\ThirdParty\shaderc\bin\shaderc_shared.dll $(USAGI_DIR)
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;$(VK_SDK_PATH)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies);$(USAGI_DIR)\Engine\ThirdParty\shaderc\lib\shaderc_shared.lib</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies);$(USAGI_DIR)\Engine\ThirdParty\shaderc\lib\shaderc_shared.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y
