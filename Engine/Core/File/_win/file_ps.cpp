@@ -238,18 +238,18 @@ bool File_ps::UserFileSavePath(const FileOpenPath& pathIn, FilePathResult& resul
 
 bool File_ps::Delete(const char* szName, FILE_TYPE eFileType)
 {
-	U8String name(g_szFileDir[eFileType]);
+	usg::string name(g_szFileDir[eFileType]);
 	name += szName;
-	return ( remove(name.CStr()) == 0);
+	return ( remove(name.c_str()) == 0);
 }
 
 
 bool File_ps::CreateFileDirectory(const char* szName, FILE_TYPE eType)
 {
-	U8String path= g_szFileDir[eType];
+	usg::string path= g_szFileDir[eType];
 	path += szName;
 
-	return (CreateDirectory(path.CStr(), NULL) == TRUE);
+	return (CreateDirectory(path.c_str(), NULL) == TRUE);
 }
 
 size_t File_ps::NumberOfFilesInDirectory(const char* szDirName, FILE_TYPE eFileType,
@@ -310,9 +310,9 @@ File_ps::~File_ps()
 bool File_ps::Open(const char* szFileName, FILE_ACCESS_MODE eMode, FILE_TYPE eFileType)
 {
     
-	U8String fullPath = g_szFileDir[eFileType];
+	usg::string fullPath = g_szFileDir[eFileType];
 	fullPath += szFileName;
-	fopen_s(&m_pFile, fullPath.CStr(), s_szAccessStrings[eMode]);
+	fopen_s(&m_pFile, fullPath.c_str(), s_szAccessStrings[eMode]);
 	
 	return (m_pFile!=NULL );
 }
