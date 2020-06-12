@@ -17,6 +17,7 @@ namespace usg
 		virtual void BufferEnd() {}
 		virtual void BufferStart() {}
 		virtual void LoopEnd() {}
+		virtual void Stopped() {}
 	};
 
 }

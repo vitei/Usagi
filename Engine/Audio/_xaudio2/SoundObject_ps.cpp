@@ -155,9 +155,16 @@ void SoundObject_ps::Stop()
 		m_pSourceVoice->FlushSourceBuffers();
 		m_bPaused = false;
 		m_bValid = false;
+
 		// FIXME: Reset the internal data
+		if (m_pCallback)
+		{
+			m_pCallback->pCallbackInt->Stopped();
+		}
 	}
 }
+
+
 
 void SoundObject_ps::Pause()
 {
