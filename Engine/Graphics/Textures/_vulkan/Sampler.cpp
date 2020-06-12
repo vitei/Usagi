@@ -78,7 +78,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	createInfo.mipmapMode = g_mipMapMode[decl.eMipFilter];
 	createInfo.addressModeU = g_textureClampMap[decl.eClampU];
 	createInfo.addressModeV = g_textureClampMap[decl.eClampV];
-	createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	createInfo.addressModeW = g_textureClampMap[decl.eClampV];//VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	createInfo.mipLodBias = decl.LodBias;
 	createInfo.anisotropyEnable = decl.eAnisoLevel != SamplerDecl::ANISO_LEVEL_1;
 	createInfo.maxAnisotropy = g_anisoLevel[decl.eAnisoLevel];
