@@ -11,12 +11,12 @@
 #ifdef DEBUG_BUILD
 const uint32 g_uPrintFlags = DEBUG_MSG_LOG | DEBUG_MSG_WARNING | DEBUG_MSG_ERROR | DEBUG_MSG_RAW | DEBUG_MSG_RELEASE;
 const uint32 g_uExcludeFlags = 0;
-#elif (defined RELEASE_BUILD)
-const uint32 g_uPrintFlags = DEBUG_MSG_ERROR | DEBUG_MSG_RAW | DEBUG_MSG_RELEASE;
-const uint32 g_uExcludeFlags = 0;
-#else
+#elif (defined FINAL_BUILD)
 const uint32 g_uPrintFlags = 0;
 const uint32 g_uExcludeFlags = 0xFFFFFFFF;
+#else
+const uint32 g_uPrintFlags = DEBUG_MSG_ERROR | DEBUG_MSG_RAW | DEBUG_MSG_RELEASE;
+const uint32 g_uExcludeFlags = 0;
 #endif
 
 using namespace usg;
@@ -46,7 +46,7 @@ extern "C" void cDebugprintf(const char *szFile, int line, const char* func, uin
 		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsgB), format, vlist);
 		str::ParseVariableArgsC(g_errorMsg, sizeof(g_errorMsg), "ERROR: %s", g_errorMsgB);
 	}
-	if (uFlags & DEBUG_MSG_WARNING)
+	else if (uFlags & DEBUG_MSG_WARNING)
 	{
 		str::ParseVariableArgs(g_errorMsgB, sizeof(g_errorMsgB), format, vlist);
 		str::ParseVariableArgsC(g_errorMsg, sizeof(g_errorMsg), "WARNING: %s", g_errorMsgB);
