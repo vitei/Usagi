@@ -1,0 +1,17 @@
+Effects:
+  - { name: Apply,             vert: PostFX/fullscreen,        frag: ASSAO/Apply }      
+  - { name: GenerateQ,         vert: PostFX/fullscreen,        frag: ASSAO/GenerateQ }  
+  - { name: GenImportanceMap,  vert: PostFX/fullscreen,        frag: ASSAO/GenImportanceMap }    
+  - { name: NonSmartApply,     vert: PostFX/fullscreen,        frag: ASSAO/NonSmartApply }  
+  - { name: NonSmartBlur,      vert: PostFX/fullscreen,        frag: ASSAO/NonSmartBlur }   
+  - { name: NonSmartHalfApply, vert: PostFX/fullscreen,        frag: ASSAO/NonSmartHalfApply }  
+  - { name: PPImportanceMapA,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapA }       
+  - { name: PPImportanceMapB,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapB }       
+  - { name: PrepDepthAndNorm,  vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormals }    
+  - { name: PrepDepthAndNormHf,vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormalsHalf }  
+  - { name: PrepareDepthMip,   vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthMip }      
+  - { name: PrepareDepths,     vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepths }      
+  - { name: PrepareDepthsHalf, vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthsHalf }      
+  - { name: SmartBlur,         vert: PostFX/fullscreen,        frag: ASSAO/SmartBlur }  
+  - { name: SmartBlurWide,     vert: PostFX/fullscreen,        frag: ASSAO/SmartBlurWide }  
+
