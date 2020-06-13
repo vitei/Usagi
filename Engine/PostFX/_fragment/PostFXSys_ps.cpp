@@ -67,6 +67,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pFXAA = nullptr;
 	m_pSMAA = nullptr;
 	m_pFilmGrain = nullptr;
+	m_pSSAO = nullptr;
 	m_pBloom = nullptr;
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
