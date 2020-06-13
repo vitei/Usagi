@@ -95,29 +95,38 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 
 				std::string num = file.substr(file.find_first_of(':'), std::string::npos);
 				num = file.substr(0, file.find_first_of(' '));
-				parsed += num;
-				tempFile = tempFile.substr(file.find_first_of(' ') + 1, std::string::npos);
-				int iLineNum = std::stoi(num);
+				if(num.length() > 0)
+				{
+					parsed += num;
+					tempFile = tempFile.substr(file.find_first_of(' ') + 1, std::string::npos);
+					int iLineNum = std::stoi(num);
 
-				std::string code = shaderCode;
-				for(int i= 1; i<iLineNum; i++)
-				{
-					iIndex = code.find_first_of('\n');
-					if(iIndex == std::string::npos)
+					std::string code = shaderCode;
+					for(int i= 1; i<iLineNum; i++)
 					{
-						break;
+						iIndex = code.find_first_of('\n');
+						if(iIndex == std::string::npos)
+						{
+							break;
+						}
+						code = code.substr(iIndex + 1, std::string::npos);;
 					}
-					code = code.substr(iIndex + 1, std::string::npos);;
+					iIndex = code.find_first_of('\n');
+					if(iIndex != std::string::npos)
+					{
+						code = code.substr(0, iIndex);
+					}
+					parsed += code;
+					parsed += "\n";
+					parsed += tempFile;
+					parsed += "\n";
 				}
-				iIndex = code.find_first_of('\n');
-				if(iIndex != std::string::npos)
+				else
 				{
-					code = code.substr(0, iIndex);
+					std::string error = tempFile.substr(0, tempFile.find_first_of("\n"));
+					parsed += error;
+					parsed += "\n";
 				}
-				parsed += code;
-				parsed += "\n";
-				parsed += tempFile;
-				parsed += "\n";
 			}
 
 			const char* szMessage = parsed.length() > 0 ? parsed.c_str() : msg;
