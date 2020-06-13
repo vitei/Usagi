@@ -23,6 +23,12 @@ struct Vector4i
 	int		w;
 };
 
+struct Vector2i
+{
+	int		x;
+	int		y;
+};
+
 }
 
 #endif

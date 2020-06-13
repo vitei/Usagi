@@ -29,6 +29,7 @@ static const Mapping g_constantMappings[]
 	{ "vec2",	usg::CT_VECTOR_2 },
 	{ "float",	usg::CT_FLOAT },
 	{ "int",	usg::CT_INT },
+	{ "ivec2",	usg::CT_VECTOR2I },
 	{ "ivec4",	usg::CT_VECTOR4I },
 	{ "uvec4",	usg::CT_VECTOR4U },
 	{ "bool",	usg::CT_BOOL },
