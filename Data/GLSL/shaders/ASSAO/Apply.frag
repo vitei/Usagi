@@ -4,7 +4,7 @@
 
 ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
-SAMPLER_LOC(1, 4) uniform sampler2DArray g_FinalSSAO;   
+SAMPLER_LOC(1, 0) uniform sampler2DArray g_FinalSSAO;   
 
 
 layout(location = 0) out vec4 colorOut;

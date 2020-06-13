@@ -1,6 +1,5 @@
 Effects:
   - { name: Apply,             vert: PostFX/fullscreen,        frag: ASSAO/Apply }      
-  - { name: GenerateQ,         vert: PostFX/fullscreen,        frag: ASSAO/GenerateQ }  
   - { name: GenImportanceMap,  vert: PostFX/fullscreen,        frag: ASSAO/GenImportanceMap }    
   - { name: NonSmartApply,     vert: PostFX/fullscreen,        frag: ASSAO/NonSmartApply }  
   - { name: NonSmartBlur,      vert: PostFX/fullscreen,        frag: ASSAO/NonSmartBlur }   
@@ -8,10 +7,34 @@ Effects:
   - { name: PPImportanceMapA,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapA }       
   - { name: PPImportanceMapB,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapB }       
   - { name: PrepDepthAndNorm,  vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormals }    
-  - { name: PrepDepthAndNormHf,vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormalsHalf }  
-  - { name: PrepareDepthMip,   vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthMip }      
+  - { name: PrepDepthAndNormHf,vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormalsHalf }      
   - { name: PrepareDepths,     vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepths }      
   - { name: PrepareDepthsHalf, vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthsHalf }      
   - { name: SmartBlur,         vert: PostFX/fullscreen,        frag: ASSAO/SmartBlur }  
   - { name: SmartBlurWide,     vert: PostFX/fullscreen,        frag: ASSAO/SmartBlurWide }  
-
+  - name: PrepareDepthMip
+    vert: PostFX/fullscreen
+    frag: ASSAO/PrepareDepthMip
+    has_default: false
+    define_sets:
+      -  name: "1"
+         defines: MIP_LEVEL=1
+      -  name: "2"
+         defines: MIP_LEVEL=2
+      -  name: "3"
+         defines: MIP_LEVEL=3
+  - name: GenerateQ
+    vert: PostFX/fullscreen
+    frag: ASSAO/GenerateQ
+    has_default: false
+    define_sets:
+      -  name: "0"
+         defines: GENERATE_PASS=1      
+      -  name: "1"
+         defines: GENERATE_PASS=1
+      -  name: "2"
+         defines: GENERATE_PASS=2
+      -  name: "3"
+         defines: GENERATE_PASS=3     
+      -  name: "3Base"
+         defines: GENERATE_PASS=3 IS_BASE                   

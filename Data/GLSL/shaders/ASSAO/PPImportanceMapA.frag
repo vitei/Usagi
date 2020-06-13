@@ -4,7 +4,7 @@
 
 ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
-SAMPLER_LOC(1, 3) uniform sampler2D g_ImportanceMap;   // corresponds to SSAO_TEXTURE_SLOT3
+SAMPLER_LOC(1, 0) uniform sampler2D g_ImportanceMap;   // corresponds to SSAO_TEXTURE_SLOT3
 
 layout(location = 0) out float colorOut;
 

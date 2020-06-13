@@ -5,7 +5,7 @@
 ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D g_DepthSource;   // corresponds to SSAO_TEXTURE_SLOT0
-SAMPLER_LOC(1, 2) uniform sampler2D g_BlurInput;   // corresponds to SSAO_TEXTURE_SLOT2
+SAMPLER_LOC(1, 1) uniform sampler2D g_BlurInput;   // corresponds to SSAO_TEXTURE_SLOT2
 
 layout(location = 0) out float out0;
 layout(location = 1) out float out1;

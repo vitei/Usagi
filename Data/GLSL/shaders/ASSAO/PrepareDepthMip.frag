@@ -99,5 +99,5 @@ void PrepareDepthMip( const vec4 inPos/*, const vec2 inUV*/, int mipLevel, out f
 
 void main()
 {
-    PrepareDepthMip( gl_FragCoord/*, inUV*/, 1, out0, out1, out2, out3 );
+    PrepareDepthMip( gl_FragCoord/*, inUV*/, MIP_LEVEL, out0, out1, out2, out3 );
 }

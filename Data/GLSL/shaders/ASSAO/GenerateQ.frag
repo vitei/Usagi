@@ -399,13 +399,16 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
 
 
 
-// PSGenerateQ0
 void main()
 {
     float   outShadowTerm;
     float   outWeight;
     vec4  outEdges;
-    GenerateSSAOShadowsInternal( outShadowTerm, outEdges, outWeight, gl_FragCoord.xy/*, inUV*/, 0, false );
+    GenerateSSAOShadowsInternal( outShadowTerm, outEdges, outWeight, gl_FragCoord.xy/*, inUV*/, GENERATE_PASS, false );
     colorOut.x = outShadowTerm;
+#ifdef IS_BASE
+    colorOut.y = outWeight / (float(SSAO_ADAPTIVE_TAP_BASE_COUNT) * 4.0); //0.0; //frac(outWeight / 6.0);// / (float)(SSAO_MAX_TAPS * 4.0);
+#else
     colorOut.y = PackEdges( vec4( 1, 1, 1, 1 ) ); // no edges in low quality
+#endif
 }
