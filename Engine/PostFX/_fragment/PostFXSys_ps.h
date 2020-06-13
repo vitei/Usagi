@@ -114,6 +114,7 @@ protected:
 	class FXAA*				m_pFXAA;
 	class SMAA*				m_pSMAA;
 	class FilmGrain*		m_pFilmGrain;
+	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
 	PostEffect*				m_pFinalEffect;

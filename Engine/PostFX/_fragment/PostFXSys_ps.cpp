@@ -8,6 +8,7 @@
 #include "FXAA.h"
 #include "SMAA.h"
 #include "FilmGrain.h"
+#include "ASSAO.h"
 #include "LinearDepth.h"
 #include "DeferredShading.h"
 #include "SkyFog.h"
@@ -290,6 +291,13 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pFilmGrain->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pFilmGrain;
 	}
+	if(uInitFlags & PostFXSys::EFFECT_SSAO)
+	{
+		m_pSSAO = vnew(ALLOC_OBJECT) ASSAO();
+		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
+		m_pSSAO->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pSSAO;
+	}
 
 	EnableEffects(pDevice, uInitFlags);
 
@@ -347,6 +355,8 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
 	if (m_pFilmGrain)
 		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
+	if (m_pSSAO)
+		m_pSSAO->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SSAO) != 0);
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 

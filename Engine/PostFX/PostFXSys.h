@@ -38,7 +38,8 @@ public:
 		EFFECT_DEFERRED_SHADING = (1 << 3),
 		EFFECT_SKY_FOG = (1 << 4),
 		EFFECT_SMAA = (1 << 5),
-		EFFECT_FILM_GRAIN = (1<<6)
+		EFFECT_FILM_GRAIN = (1<<6),
+		EFFECT_SSAO = (1<<7)
 	};
 
 	PostFXSys();
