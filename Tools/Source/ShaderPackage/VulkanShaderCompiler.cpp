@@ -120,7 +120,8 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 				parsed += "\n";
 			}
 
-			FATAL_RELEASE(false, parsed.length() > 0 ? parsed.c_str() : msg);
+			const char* szMessage = parsed.length() > 0 ? parsed.c_str() : msg;
+			FATAL_RELEASE(false, "%s", szMessage);
 
 			return false;
 	
