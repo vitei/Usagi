@@ -32,30 +32,6 @@ vec3 DecodeNormal( vec3 encodedNormal )
     return normal;
 }
 
-vec4 CalculateEdges( const float centerZ, const float leftZ, const float rightZ, const float topZ, const float bottomZ )
-{
-    // slope-sensitive depth-based edge detection
-    vec4 edgesLRTB = vec4( leftZ, rightZ, topZ, bottomZ ) - centerZ;
-    vec4 edgesLRTBSlopeAdjusted = edgesLRTB + edgesLRTB.yxwz;
-    edgesLRTB = min( abs( edgesLRTB ), abs( edgesLRTBSlopeAdjusted ) );
-    return clamp( ( 1.3 - edgesLRTB / (centerZ * 0.040) ), 0.0, 1.0 );
-
-    // cheaper version but has artifacts
-    // edgesLRTB = abs( vec4( leftZ, rightZ, topZ, bottomZ ) - centerZ; );
-    // return saturate( ( 1.3 - edgesLRTB / (pixZ * 0.06 + 0.1) ) );
-}
-
-
-vec3 NDCToViewspace( vec2 pos, float viewspaceDepth )
-{
-    vec3 ret;
-
-    ret.xy = (g_ASSAOConsts.NDCToViewMul * pos.xy + g_ASSAOConsts.NDCToViewAdd) * viewspaceDepth;
-
-    ret.z = viewspaceDepth;
-
-    return ret;
-}
 
 float CalculatePixelObscurance( vec3 pixelNormal, vec3 hitDelta, float falloffCalcMulSq )
 {

@@ -35,6 +35,8 @@ const uint g_numTaps[5]   = { 3, 5, 12, 0, 0 };
 // an example of higher quality low/medium/high settings
 // static const uint g_numTaps[5]   = { 4, 9, 16, 0, 0 };
 
+const float cSmoothenImportance = 1.0;
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -131,4 +133,62 @@ vec4 UnpackEdges( float _packedVal )
     edgesLRTB.w = float((packedVal >> 0) & 0x03) / 3.0;
 
     return clamp( edgesLRTB + g_ASSAOConsts.InvSharpness, 0.0, 1.0 );
+}
+
+float ScreenSpaceToViewSpaceDepth( float screenDepth )
+{
+    float depthLinearizeMul = g_ASSAOConsts.DepthUnpackConsts.x;
+    float depthLinearizeAdd = g_ASSAOConsts.DepthUnpackConsts.y;
+
+    // Optimised version of "-cameraClipNear / (cameraClipFar - projDepth * (cameraClipFar - cameraClipNear)) * cameraClipFar"
+
+    // Set your depthLinearizeMul and depthLinearizeAdd to:
+    // depthLinearizeMul = ( cameraClipFar * cameraClipNear) / ( cameraClipFar - cameraClipNear );
+    // depthLinearizeAdd = cameraClipFar / ( cameraClipFar - cameraClipNear );
+
+    return depthLinearizeMul / ( depthLinearizeAdd - screenDepth );
+}
+
+vec4 CalculateEdges( const float centerZ, const float leftZ, const float rightZ, const float topZ, const float bottomZ )
+{
+    // slope-sensitive depth-based edge detection
+    vec4 edgesLRTB = vec4( leftZ, rightZ, topZ, bottomZ ) - centerZ;
+    vec4 edgesLRTBSlopeAdjusted = edgesLRTB + edgesLRTB.yxwz;
+    edgesLRTB = min( abs( edgesLRTB ), abs( edgesLRTBSlopeAdjusted ) );
+    return clamp( ( 1.3 - edgesLRTB / (centerZ * 0.040) ), 0.0, 1.0 );
+
+    // cheaper version but has artifacts
+    // edgesLRTB = abs( vec4( leftZ, rightZ, topZ, bottomZ ) - centerZ; );
+    // return saturate( ( 1.3 - edgesLRTB / (pixZ * 0.06 + 0.1) ) );
+}
+
+vec3 NDCToViewspace( vec2 pos, float viewspaceDepth )
+{
+    vec3 ret;
+
+    ret.xy = (g_ASSAOConsts.NDCToViewMul * pos.xy + g_ASSAOConsts.NDCToViewAdd) * viewspaceDepth;
+
+    ret.z = viewspaceDepth;
+
+    return ret;
+}
+
+vec3 CalculateNormal( const vec4 edgesLRTB, vec3 pixCenterPos, vec3 pixLPos, vec3 pixRPos, vec3 pixTPos, vec3 pixBPos )
+{
+    // Get this pixel's viewspace normal
+    vec4 acceptedNormals  = vec4( edgesLRTB.x*edgesLRTB.z, edgesLRTB.z*edgesLRTB.y, edgesLRTB.y*edgesLRTB.w, edgesLRTB.w*edgesLRTB.x );
+
+    pixLPos = normalize(pixLPos - pixCenterPos);
+    pixRPos = normalize(pixRPos - pixCenterPos);
+    pixTPos = normalize(pixTPos - pixCenterPos);
+    pixBPos = normalize(pixBPos - pixCenterPos);
+
+    vec3 pixelNormal = vec3( 0, 0, -0.0005 );
+    pixelNormal += ( acceptedNormals.x ) * cross( pixLPos, pixTPos );
+    pixelNormal += ( acceptedNormals.y ) * cross( pixTPos, pixRPos );
+    pixelNormal += ( acceptedNormals.z ) * cross( pixRPos, pixBPos );
+    pixelNormal += ( acceptedNormals.w ) * cross( pixBPos, pixLPos );
+    pixelNormal = normalize( pixelNormal );
+    
+    return pixelNormal;
 }
