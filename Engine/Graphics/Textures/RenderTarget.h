@@ -45,7 +45,6 @@ public:
 		uint32 uTransferSrcFlags;
 	};
 
-	// Fixme, why are we passing in the dimensions again?
 	void Init(usg::GFXDevice* pDevice, ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth = NULL);
 	void InitMRT(usg::GFXDevice* pDevice, uint32 uColCount, ColorBuffer** ppColorBuffer, DepthStencilBuffer* pDepth = NULL);
 
@@ -56,8 +55,9 @@ public:
 	void Resize(usg::GFXDevice* pDevice);
 	bool IsValid() const { return m_pDepth || m_uTargetCount; }
 
-	uint32 GetWidth() const { return m_platform.GetWidth(); }
-	uint32 GetHeight() const { return m_platform.GetHeight(); }
+	// FIXME: True mip size data from PS
+	uint32 GetWidth(uint32 uMip = 0) const { return m_platform.GetWidth() >> uMip; }
+	uint32 GetHeight(uint32 uMip = 0) const { return m_platform.GetHeight() >> uMip; }
 	const TextureHndl& GetColorTexture(uint32 uTex = 0) const { return m_pColorBuffer[uTex]->GetTexture(); }
 	TextureHndl GetDepthTexture() const;
 	void SetClearColor(const Color &col, uint32 uTarget = 0);

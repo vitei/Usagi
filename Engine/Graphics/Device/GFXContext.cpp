@@ -170,6 +170,42 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 	}
 }
 
+void GFXContext::SetRenderTargetMip(RenderTarget* pTarget, uint32 uMip)
+{
+	bool bHadDS = false;
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+		bHadDS = m_pActiveRT->GetDepthStencilBuffer() != NULL;
+		m_pActiveRT = NULL;
+	}
+
+	if (pTarget)
+	{
+		m_activeTargetBounds.x = 0;
+		m_activeTargetBounds.y = 0;
+		m_activeTargetBounds.width = pTarget->GetWidth();
+		m_activeTargetBounds.height = pTarget->GetHeight();
+
+		if (pTarget != m_pActiveRT)
+		{
+			bool bHasDS = pTarget->GetDepthStencilBuffer() != NULL;
+
+			m_platform.SetRenderTargetMip(pTarget, uMip);
+			m_pActiveRT = pTarget;
+
+
+			uint32 uRTMask = pTarget->GetTargetMask();
+			if (uRTMask != m_uRTMask)
+			{
+				m_uRTMask = uRTMask;
+			}
+		}
+
+		ApplyViewport(pTarget->GetViewport());
+	}
+}
+
 void GFXContext::End()
 {
 	if (m_pActiveRT || m_bRenderToDisplay)

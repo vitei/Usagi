@@ -42,6 +42,7 @@ public:
 
 	void SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport = NULL);
 	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer);
+	void SetRenderTargetMip(RenderTarget* pTarget, uint32 uMip);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
 	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);

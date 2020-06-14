@@ -40,9 +40,11 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 	uint32 uViewsPerFB = uColorCount + (pDepth != nullptr ? 1 : 0);
 	uint32 uLayerCount = uColorCount ? ppColorBuffers[0]->GetTexture()->GetPlatform().GetFaces() : pDepth->GetTexture()->GetPlatform().GetFaces();
+	uint32 uMipCount = uColorCount ? ppColorBuffers[0]->GetMipCount() : 1;
 	uint32 uLayerFBs = uLayerCount > 1 ? uLayerCount : 0;
+	uint32 uMipFBs = uMipCount > 1 ? uMipCount : 0;
 
-	m_imageViews.resize(uViewsPerFB * (uLayerFBs+1));
+	m_imageViews.resize(uViewsPerFB * (uLayerFBs+uMipFBs+1));
 	for (uint32 i = 0; i < uColorCount; i++)
 	{
 		m_imageViews[i] = ppColorBuffers[i]->GetTexture()->GetPlatform().GetImageView();
@@ -99,7 +101,30 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 			uViewIdx += uViewsPerFB;
 		}
+	}
 
+	if (uMipCount > 1)
+	{
+		m_mipInfo.resize(uMipFBs);
+		for (uint32 uMip = 0; uMip < uMipCount; uMip++)
+		{
+			for (uint32 i = 0; i < uColorCount; i++)
+			{
+				m_imageViews[uViewIdx + i] = ppColorBuffers[i]->GetPlatform().GetViewEx(0, uMip);
+			}
+
+			ASSERT(!pDepth);
+			m_layerInfo[uMip].frameBuffer = VK_NULL_HANDLE;
+			m_layerInfo[uMip].createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			m_layerInfo[uMip].createInfo.pNext = NULL;
+			m_layerInfo[uMip].createInfo.attachmentCount = uViewsPerFB;
+			m_layerInfo[uMip].createInfo.pAttachments = &m_imageViews[uViewIdx];
+			m_layerInfo[uMip].createInfo.width = m_uWidth;
+			m_layerInfo[uMip].createInfo.height = m_uHeight;
+			m_layerInfo[uMip].createInfo.layers = 1;
+
+			uViewIdx += uViewsPerFB;
+		}
 	}
 
 	m_fullScreenVP.InitViewport(0, 0, m_uWidth, m_uHeight);

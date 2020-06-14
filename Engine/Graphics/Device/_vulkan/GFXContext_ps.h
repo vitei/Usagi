@@ -45,6 +45,7 @@ public:
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds);
 	void SetRenderTarget(const RenderTarget* pTarget);
 	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayers);
+	void SetRenderTargetMip(const RenderTarget* pTarget, uint32 uMip);
 	void EndRTDraw(const RenderTarget* pTarget);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 

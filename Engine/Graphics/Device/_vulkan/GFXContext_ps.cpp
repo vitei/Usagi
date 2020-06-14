@@ -106,6 +106,30 @@ namespace usg {
 		pDisplay->Transfer(m_pParent, eye, pTarget);
 	}
 
+
+	void GFXContext_ps::SetRenderTargetMip(const RenderTarget* pTarget, uint32 uMip)
+	{
+		if (pTarget)
+		{
+			const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+			uint32 uClearCount = pTarget->GetTargetCount();
+
+			VkRenderPassBeginInfo rp_begin;
+			rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			rp_begin.pNext = NULL;
+			rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+			rp_begin.framebuffer = rtPS.GetMipFrameBuffer(uMip);
+			rp_begin.renderArea.offset.x = 0;
+			rp_begin.renderArea.offset.y = 0;
+			rp_begin.renderArea.extent.width = pTarget->GetWidth(uMip);
+			rp_begin.renderArea.extent.height = pTarget->GetHeight(uMip);
+			rp_begin.clearValueCount = uClearCount;
+			rp_begin.pClearValues = rtPS.GetClearValues();
+
+			vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+		}
+	}
+
 	void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 	{
 		if (pTarget)
