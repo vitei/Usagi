@@ -888,6 +888,11 @@ bool ModelResource::GetSingleAttributeDeclDefault(const CustomEffectDecl::Attrib
 		pElement->eType = VE_INT;
 		pElement->uCount = 4;
 		break;
+	case CT_VECTOR2I:
+		pElement->bIntegerReg = true;
+		pElement->eType = VE_INT;
+		pElement->uCount = 2;
+		break;
 	case CT_VECTOR4U:
 		pElement->bIntegerReg = true;
 		pElement->eType = VE_UINT;

@@ -227,6 +227,7 @@ const uint32 g_uConstantSize[CT_COUNT] =
 	sizeof(float)*2,	// CT_VECTOR_2,
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int)*2,		// CT_VECTOR2I
 	sizeof(int)*4,		// CT_VECTOR4I
 	sizeof(uint32)*4,	// CT_VECTOR4U
 	sizeof(bool),		// CT_BOOL
@@ -243,6 +244,7 @@ const VertexElementType g_veMapping[CT_COUNT] =
 	VE_FLOAT,	// CT_VECTOR_2,
 	VE_FLOAT,	// CT_FLOAT
 	VE_INT,		// CT_INT
+	VE_INT,		// CT_VECTOR2I
 	VE_INT,		// CT_VECTOR4I
 	VE_UINT,	// CT_VECTOR4U
 	VE_INT,		// CT_BOOL
@@ -260,6 +262,7 @@ const uint32 g_veCountMapping[CT_COUNT] =
 	2,	// CT_VECTOR_2,
 	1,	// CT_FLOAT
 	1,	// CT_INT
+	2,	// CT_VECTOR2I
 	4,	// CT_VECTOR4I
 	4,	// CT_VECTOR4U
 	1,		// CT_BOOL
@@ -276,6 +279,7 @@ const uint32 g_uConstantCPUAllignment[CT_COUNT] =
 	sizeof(float),		// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int),		// CT_VECTOR2I
 	sizeof(int),		// CT_VECTOR4I
 	sizeof(uint32),		// CT_VECTOR4U
 	1,					// CT_BOOL
