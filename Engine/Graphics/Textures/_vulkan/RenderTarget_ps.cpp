@@ -81,7 +81,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 		{
 			for (uint32 i = 0; i < uColorCount; i++)
 			{
-				m_imageViews[uViewIdx + i] = ppColorBuffers[i]->GetPlatform().GetLayerView(uLayer);
+				m_imageViews[uViewIdx + i] = ppColorBuffers[i]->GetPlatform().GetViewEx(uLayer, 0);
 			}
 
 			if (pDepth)

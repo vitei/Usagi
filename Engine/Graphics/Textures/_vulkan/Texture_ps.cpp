@@ -222,13 +222,15 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_uUpdateCount++;
 }
 
-VkImageView Texture_ps::CreateLayerImageView(GFXDevice* pDevice, uint32 uLayer) const
+VkImageView Texture_ps::CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint32 uMip) const
 {
 	ASSERT(m_uFaces > uLayer);
 	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
 	view_info.subresourceRange.baseArrayLayer = uLayer;
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.subresourceRange.baseMipLevel = uMip;
+	view_info.subresourceRange.levelCount = 1;
 
 	VkImageView view;
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &view);
