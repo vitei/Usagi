@@ -113,6 +113,22 @@ namespace usg
 		SHADER_CONSTANT_END()
 	};	
 
+
+	static const DescriptorDeclaration g_descriptOneTex[] =
+	{
+		DESCRIPTOR_ELEMENT(0,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_END()
+	};
+
+	static const DescriptorDeclaration g_descriptTwoTex[] =
+	{
+		DESCRIPTOR_ELEMENT(0,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_END()
+	};
+
+
 	ASSAO::ASSAO()
 	{
 
@@ -123,9 +139,49 @@ namespace usg
 
 	}
 
-	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
 	{
+		// Get the handles for the various descriptor layouts
+		DescriptorSetLayoutHndl desc1Tex = pDevice->GetDescriptorSetLayout(g_descriptOneTex);
+		DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptTwoTex);
+		usg::ColorBuffer* pBuffers[4];
+
+		Vector2i halfSize;
+		halfSize.x = pDst->GetWidth() + 1 / 2;
+		halfSize.y = pDst->GetWidth() + 1 / 2;
+		for (int i = 0; i < DEPTH_COUNT; i++)
+		{
+			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
+			pBuffers[i] = &m_halfDepthTargets[i];
+		}
+		m_fourDepthRT.InitMRT(pDevice, DEPTH_COUNT, pBuffers, nullptr );
+		pBuffers[1] = &m_halfDepthTargets[3];	// Demo uses 0 and 3, we'll do the same to avoid confusion for now
+		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr);
+
 		m_constants.Init(pDevice, g_assaoConstantDef);
+
+		PipelineStateDecl pipelineDecl;
+		pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
+		pipelineDecl.uInputBindingCount = 1;
+		pipelineDecl.alphaState.SetColor0Only();
+
+		RasterizerStateDecl& rasDecl = pipelineDecl.rasterizerState;
+		rasDecl.eCullFace = CULL_FACE_NONE;
+
+		pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+		pipelineDecl.layout.uDescriptorSetCount = 2;
+
+		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepths");
+
+		// All the depth targets should have the same render pass
+		m_prepareDepthEffect = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf");
+		m_prepareDepthEffectHalf = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
+
+		//pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.1");
+		//m_mipPasses[0] = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
 	}
 
 	void ASSAO::CleanUp(GFXDevice* pDevice)
