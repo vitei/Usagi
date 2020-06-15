@@ -49,7 +49,7 @@ void ColorBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uBufferId, uint32 uWid
 
 void ColorBuffer_ps::InitExViews(GFXDevice* pDevice)
 {
-	if (m_texture.GetPlatform().GetFaces() > 1)
+	if (m_texture.GetPlatform().GetFaces() > 1 || m_uMips > 1)
 	{
 		m_pExtraViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_texture.GetPlatform().GetFaces() * m_uMips];
 

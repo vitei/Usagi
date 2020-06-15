@@ -154,9 +154,29 @@ namespace usg
 			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
 			pBuffers[i] = &m_halfDepthTargets[i];
 		}
+
 		m_fourDepthRT.InitMRT(pDevice, DEPTH_COUNT, pBuffers, nullptr );
 		pBuffers[1] = &m_halfDepthTargets[3];	// Demo uses 0 and 3, we'll do the same to avoid confusion for now
 		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr);
+
+		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
+		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
+		m_pingPongRT1.Init(pDevice, &m_pingPongCB1);
+		m_pingPongRT2.Init(pDevice, &m_pingPongCB2);
+
+
+		RenderTarget::RenderPassFlags flags;
+		flags.uClearFlags = 0;
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0| RenderTarget::RT_FLAG_COLOR_1| RenderTarget::RT_FLAG_COLOR_2| RenderTarget::RT_FLAG_COLOR_3;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3;
+		m_fourDepthRT.InitRenderPass(pDevice, flags);
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_3;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_3;
+		m_twoDepthRT.InitRenderPass(pDevice, flags);
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
+		m_pingPongRT1.InitRenderPass(pDevice, flags);
+		m_pingPongRT2.InitRenderPass(pDevice, flags);
 
 		m_constants.Init(pDevice, g_assaoConstantDef);
 
@@ -178,10 +198,42 @@ namespace usg
 		m_prepareDepthEffect = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf");
-		m_prepareDepthEffectHalf = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
+		m_prepareDepthHalfEffect = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
 
-		//pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.1");
-		//m_mipPasses[0] = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.1");
+		m_mipPasses[0] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.2");
+		m_mipPasses[1] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.3");
+		m_mipPasses[2] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+
+		// Both ping pongs are the same format, so render pass will be the same
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlur");
+		m_smartBlurEffect = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartBlur");
+		m_nonSmartBlurEffect = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlurWide");
+		m_smartBlurWide = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.0");
+		m_genQPasses[0] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.1");
+		m_genQPasses[1] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.2");
+		m_genQPasses[2] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3");
+		m_genQPasses[3] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3Base");
+		m_genQPasses[4] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
+
 	}
 
 	void ASSAO::CleanUp(GFXDevice* pDevice)

@@ -114,14 +114,14 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 			}
 
 			ASSERT(!pDepth);
-			m_layerInfo[uMip].frameBuffer = VK_NULL_HANDLE;
-			m_layerInfo[uMip].createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			m_layerInfo[uMip].createInfo.pNext = NULL;
-			m_layerInfo[uMip].createInfo.attachmentCount = uViewsPerFB;
-			m_layerInfo[uMip].createInfo.pAttachments = &m_imageViews[uViewIdx];
-			m_layerInfo[uMip].createInfo.width = m_uWidth;
-			m_layerInfo[uMip].createInfo.height = m_uHeight;
-			m_layerInfo[uMip].createInfo.layers = 1;
+			m_mipInfo[uMip].frameBuffer = VK_NULL_HANDLE;
+			m_mipInfo[uMip].createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			m_mipInfo[uMip].createInfo.pNext = NULL;
+			m_mipInfo[uMip].createInfo.attachmentCount = uViewsPerFB;
+			m_mipInfo[uMip].createInfo.pAttachments = &m_imageViews[uViewIdx];
+			m_mipInfo[uMip].createInfo.width = m_uWidth;
+			m_mipInfo[uMip].createInfo.height = m_uHeight;
+			m_mipInfo[uMip].createInfo.layers = 1;
 
 			uViewIdx += uViewsPerFB;
 		}

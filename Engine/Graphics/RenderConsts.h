@@ -109,6 +109,7 @@ enum ColorFormat
 	CF_R_16F,
 	CF_RG_16F,
 	CF_R_8,
+	CF_RG_8,
 	CF_NORMAL,
 	CF_SRGBA,
 	CF_UNDEFINED,

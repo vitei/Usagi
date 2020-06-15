@@ -33,6 +33,7 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_R16_SFLOAT,						// CF_R_16F,
 	VK_FORMAT_R16G16_SFLOAT,					// CF_RG_16F,
 	VK_FORMAT_R8_UNORM,							// CF_R_8
+	VK_FORMAT_R8G8_UNORM,						// CF_RG_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
 	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
@@ -59,6 +60,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT },															// CF_R_16F,
 	{ VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },												// CF_RG_16F,
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
+	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
 	{ },																									// CF_SRGBA
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes

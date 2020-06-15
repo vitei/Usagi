@@ -29,7 +29,7 @@ Effects:
     has_default: false
     define_sets:
       -  name: "0"
-         defines: GENERATE_PASS=1      
+         defines: GENERATE_PASS=0     
       -  name: "1"
          defines: GENERATE_PASS=1
       -  name: "2"

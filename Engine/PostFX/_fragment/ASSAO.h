@@ -52,10 +52,17 @@ private:
 
 	// Note these should all have MIP_COUNT mips
 	ColorBuffer			m_halfDepthTargets[DEPTH_COUNT];
+	ColorBuffer			m_pingPongCB1;
+	ColorBuffer			m_pingPongCB2;
 	RenderTarget		m_fourDepthRT;
 	RenderTarget		m_twoDepthRT;
+	RenderTarget		m_pingPongRT1;
+	RenderTarget		m_pingPongRT2;
 	PipelineStateHndl	m_prepareDepthEffect;
-	PipelineStateHndl	m_prepareDepthEffectHalf;
+	PipelineStateHndl	m_prepareDepthHalfEffect;
+	PipelineStateHndl	m_smartBlurEffect;
+	PipelineStateHndl	m_nonSmartBlurEffect;
+	PipelineStateHndl	m_smartBlurWide;
 	PipelineStateHndl	m_mipPasses[MIP_COUNT-1];
 	PipelineStateHndl	m_genQPasses[GEN_Q_PASS_COUNT];
 };
