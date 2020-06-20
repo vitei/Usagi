@@ -135,6 +135,12 @@ vec4 UnpackEdges( float _packedVal )
     return clamp( edgesLRTB + g_ASSAOConsts.InvSharpness, 0.0, 1.0 );
 }
 
+#if LINEAR_DEPTH
+float ScreenSpaceToViewSpaceDepth( float screenDepth )
+{
+    return screenDepth;
+}
+#else
 float ScreenSpaceToViewSpaceDepth( float screenDepth )
 {
     float depthLinearizeMul = g_ASSAOConsts.DepthUnpackConsts.x;
@@ -148,6 +154,7 @@ float ScreenSpaceToViewSpaceDepth( float screenDepth )
 
     return depthLinearizeMul / ( depthLinearizeAdd - screenDepth );
 }
+#endif
 
 vec4 CalculateEdges( const float centerZ, const float leftZ, const float rightZ, const float topZ, const float bottomZ )
 {

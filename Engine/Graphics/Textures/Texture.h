@@ -44,6 +44,9 @@ public:
 	// For keeping track of resizing/ recreation
 	uint32 GetUpdateIdx() const { return m_platform.GetUpdateIdx(); }
 
+	ImageViewHndl GetImageViewHandle(GFXDevice* pDevice, const ImageViewDef& def) { return m_platform.GetImageView(pDevice, def); }
+	ImageViewHndl GetImageViewHandle() { return m_platform.GetImageView(); }
+
 	const static ResourceType StaticResType = ResourceType::TEXTURE;
 
 	enum 

@@ -7,11 +7,23 @@ Effects:
   - { name: PPImportanceMapA,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapA }       
   - { name: PPImportanceMapB,  vert: PostFX/fullscreen,        frag: ASSAO/PPImportanceMapB }       
   - { name: PrepDepthAndNorm,  vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormals }    
-  - { name: PrepDepthAndNormHf,vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormalsHalf }      
-  - { name: PrepareDepths,     vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepths }      
-  - { name: PrepareDepthsHalf, vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthsHalf }      
+  - { name: PrepDepthAndNormHf,vert: PostFX/fullscreen,        frag: ASSAO/PrepareDepthAndNormalsHalf }          
   - { name: SmartBlur,         vert: PostFX/fullscreen,        frag: ASSAO/SmartBlur }  
   - { name: SmartBlurWide,     vert: PostFX/fullscreen,        frag: ASSAO/SmartBlurWide }  
+  - name: PrepareDepths     
+    vert: PostFX/fullscreen
+    frag: ASSAO/PrepareDepths
+    has_default: true
+    define_sets:
+      -  name: "lin"
+         defines: LINEAR_DEPTH=1    
+  - name: PrepareDepthsHalf
+    vert: PostFX/fullscreen
+    frag: ASSAO/PrepareDepthsHalf 
+    has_default: true
+    define_sets:
+      -  name: "lin"
+         defines: LINEAR_DEPTH=1       
   - name: PrepareDepthMip
     vert: PostFX/fullscreen
     frag: ASSAO/PrepareDepthMip

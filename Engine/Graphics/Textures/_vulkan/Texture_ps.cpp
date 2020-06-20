@@ -99,6 +99,7 @@ VkFormat GetFormatGLI(uint32 uFormat)
 	return VK_FORMAT_R8G8B8_SNORM;
 }
 
+
 VkImageUsageFlags GetImageUsage(uint32 uUsage)
 {
 	VkImageUsageFlags flags = 0;
@@ -144,6 +145,7 @@ Texture_ps::Texture_ps() :
 	, m_uHeight(0)
 	, m_uDepth(0)
 	, m_uFaces(0)
+	, m_uMips(0)
 	, m_uBpp(0)
 {
 
@@ -219,7 +221,40 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_uHeight = uHeight;
 	m_uDepth = 1;
 	m_uFaces = uArrayCount;
+	m_uMips = 1;
 	m_uUpdateCount++;
+}
+
+VkImageView Texture_ps::GetImageView(GFXDevice* pDevice, const ImageViewDef& def)
+{
+	for(auto& itr : m_customViews)
+	{
+		if(itr.def == def)
+		{
+			return itr.view;
+		}
+	}
+
+	CustomView customView;
+	customView.def = def;
+
+	ASSERT(m_uFaces > def.uBaseLayer);
+	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
+	view_info.subresourceRange.baseArrayLayer = def.uBaseLayer;
+	view_info.subresourceRange.layerCount = def.uLayerCount == USG_INVALID_ID ? m_uFaces - def.uBaseLayer : Math::Min(def.uLayerCount, m_uFaces - def.uBaseLayer);
+	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.subresourceRange.baseMipLevel = def.uBaseMip;
+	view_info.subresourceRange.levelCount = def.uMipCount == USG_INVALID_ID ? m_uMips - def.uBaseMip : Math::Min(def.uMipCount, m_uMips - def.uBaseMip);
+
+	VkImageView view;
+	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &view);
+	ASSERT(res == VK_SUCCESS);
+
+	customView.view = view;
+
+	m_customViews.push_back(customView);
+
+	return view;
 }
 
 VkImageView Texture_ps::CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint32 uMip) const
@@ -297,7 +332,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	view_info.format = image_create_info.format;
 	view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	view_info.subresourceRange.baseMipLevel = 0;
-	view_info.subresourceRange.levelCount = 1;
+	view_info.subresourceRange.levelCount = uMipmaps;
 	view_info.subresourceRange.baseArrayLayer = 0;
 	view_info.subresourceRange.layerCount = 1;
 	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -313,6 +348,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	m_uHeight = uHeight;
 	m_uDepth = 1;
 	m_uFaces = 1;
+	m_uMips = uMipmaps;
 
 	// Only raw 3/4byte images for now
 	switch (eFormat)
@@ -505,6 +541,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	m_uHeight = uHeight;
 	m_uDepth = 1;
 	m_uFaces = 1;
+	m_uMips = 1;
 
 }
 
@@ -575,7 +612,17 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
 
 void Texture_ps::CleanUp(GFXDevice* pDevice)
 {
+
+
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
+
+	vkDestroyImageView(vKDevice, m_imageView, nullptr);
+
+	for (auto& itr : m_customViews)
+	{
+		vkDestroyImageView(vKDevice, itr.view, nullptr);
+	}
+
 	if (m_image)
 	{
 		vkDestroyImage(vKDevice, m_image, nullptr);
@@ -634,6 +681,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		m_uHeight = Extent.y;
 		m_uDepth = Extent.z;
 		m_uFaces = FaceTotal;
+		m_uMips = static_cast<uint32>(Texture.layers());
 
 		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormatVK, &formatProperties);
 		GFXDevice_ps& devicePS = pDevice->GetPlatform();

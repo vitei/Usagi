@@ -128,10 +128,33 @@ namespace usg
 		DESCRIPTOR_END()
 	};
 
+	static const DescriptorDeclaration g_descriptFourTex[] =
+	{
+		DESCRIPTOR_ELEMENT(0,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(1,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(2,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(3,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_END()
+	};
+
+	static const DescriptorDeclaration g_descriptGenerateQ[] =
+	{
+		DESCRIPTOR_ELEMENT(0,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(1,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(2,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(3,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(4,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_END()
+	};
+
 
 	ASSAO::ASSAO()
 	{
-
+		m_pSys = nullptr;
+		m_iQualityLevel = 4;
+		m_bHasLinearDepth = false;
 	}
 
 	ASSAO::~ASSAO()
@@ -141,14 +164,29 @@ namespace usg
 
 	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
 	{
+		m_pSys = pSys;
 		// Get the handles for the various descriptor layouts
 		DescriptorSetLayoutHndl desc1Tex = pDevice->GetDescriptorSetLayout(g_descriptOneTex);
 		DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptTwoTex);
+		DescriptorSetLayoutHndl desc4Tex = pDevice->GetDescriptorSetLayout(g_descriptFourTex);
+		DescriptorSetLayoutHndl descGenQ = pDevice->GetDescriptorSetLayout(g_descriptGenerateQ);
 		usg::ColorBuffer* pBuffers[4];
+
+
+		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
+		SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+
+		m_pointSampler = pDevice->GetSampler(pointDecl);
+		pointDecl.SetClamp(SC_MIRROR);
+		m_pointMirrorSampler = pDevice->GetSampler(pointDecl);
+		m_linearSampler = pDevice->GetSampler(linearDecl);
 
 		Vector2i halfSize;
 		halfSize.x = pDst->GetWidth() + 1 / 2;
-		halfSize.y = pDst->GetWidth() + 1 / 2;
+		halfSize.y = pDst->GetHeight() + 1 / 2;
+		Vector2i quarterSize;
+		quarterSize.x = halfSize.x + 1 / 2;
+		quarterSize.y = halfSize.x + 1 / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
 			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
@@ -164,6 +202,14 @@ namespace usg
 		m_pingPongRT1.Init(pDevice, &m_pingPongCB1);
 		m_pingPongRT2.Init(pDevice, &m_pingPongCB2);
 
+		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
+		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
+		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
+		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB);
+
+
+		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
+		m_finalResultsRT.Init(pDevice, &m_finalResultsCB);
 
 		RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = 0;
@@ -177,6 +223,8 @@ namespace usg
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 		m_pingPongRT1.InitRenderPass(pDevice, flags);
 		m_pingPongRT2.InitRenderPass(pDevice, flags);
+
+		m_importanceMapRT.InitRenderPass(pDevice, flags);
 
 		m_constants.Init(pDevice, g_assaoConstantDef);
 
@@ -196,10 +244,18 @@ namespace usg
 
 		// All the depth targets should have the same render pass
 		m_prepareDepthEffect = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepths.lin");
+		m_prepareDepthEffectLin = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
+
+		m_prepareDepthDesc.Init(pDevice, pipelineDecl.layout.descriptorSets[1]);
+		m_prepareDepthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf");
 		m_prepareDepthHalfEffect = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf.lin");
+		m_prepareDepthHalfEffectLin = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
 
+		pipelineDecl.layout.descriptorSets[1] = desc4Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.1");
 		m_mipPasses[0] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
 
@@ -209,7 +265,15 @@ namespace usg
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.3");
 		m_mipPasses[2] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
 
+		for (int i = 0; i < MIP_COUNT - 1; i++)
+		{
+			m_mipDesc[i].Init(pDevice, desc4Tex);
+			m_mipDesc[i].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+			//m_mipDesc[i].SetImageSamplerPairAtBinding(m_f)
+		}
+
 		// Both ping pongs are the same format, so render pass will be the same
+		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlur");
 		m_smartBlurEffect = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
@@ -219,6 +283,7 @@ namespace usg
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlurWide");
 		m_smartBlurWide = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
+		pipelineDecl.layout.descriptorSets[1] = descGenQ;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.0");
 		m_genQPasses[0] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
@@ -234,36 +299,154 @@ namespace usg
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3Base");
 		m_genQPasses[4] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
+
+		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenImportanceMap");
+		m_genImportanceMap = pDevice->GetPipelineState(m_importanceMapRT.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PPImportanceMapA");
+		m_importanceMapA = pDevice->GetPipelineState(m_importanceMapRT.GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PPImportanceMapB");
+		m_importanceMapB = pDevice->GetPipelineState(m_importanceMapRT.GetRenderPass(), pipelineDecl);
+
+
+		// The final passes need to blend the color
+		pipelineDecl.alphaState.bBlendEnable = true;
+		pipelineDecl.alphaState.srcBlend = BLEND_FUNC_ZERO;
+		pipelineDecl.alphaState.srcBlendAlpha = BLEND_FUNC_ZERO;
+		pipelineDecl.alphaState.srcBlend = BLEND_FUNC_SRC_COLOR;
+		pipelineDecl.alphaState.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartApply");
+		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.Apply");
+		m_applyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartHalfApply");
+		m_nonSmartHalfApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+
 	}
 
 	void ASSAO::CleanUp(GFXDevice* pDevice)
 	{
 		m_constants.CleanUp(pDevice);
-
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-		SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
-
-		m_pointSampler = pDevice->GetSampler(pointDecl);
-		m_linearSampler = pDevice->GetSampler(linearDecl);
 	}
 
 	void ASSAO::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	{
-
+		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartApplyEffect);
+		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_applyEffect);
+		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect);
 	}
 
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 	{
+		Vector2i halfSize;
+		halfSize.x = uWidth + 1 / 2;
+		halfSize.y = uHeight + 1 / 2;
+		Vector2i quarterSize;
+		quarterSize.x = halfSize.x + 1 / 2;
+		quarterSize.y = halfSize.x + 1 / 2;
+		for (int i = 0; i < DEPTH_COUNT; i++)
+		{
+			m_halfDepthTargets[i].Resize(pDevice, halfSize.x, halfSize.y);
+		}
+
+		m_fourDepthRT.Resize(pDevice);
+		m_twoDepthRT.Resize(pDevice);
+
+		m_pingPongCB1.Resize(pDevice, halfSize.x, halfSize.y);
+		m_pingPongCB2.Resize(pDevice, halfSize.x, halfSize.y);
+		m_pingPongRT1.Resize(pDevice);
+		m_pingPongRT2.Resize(pDevice);
+
+		m_importanceMapCB.Resize(pDevice, quarterSize.x, quarterSize.y);
+		m_importanceMapPongCB.Resize(pDevice, quarterSize.x, quarterSize.y);
+		m_importanceMapRT.Resize(pDevice);
+		m_importanceMapPongRT.Resize(pDevice);
+
+
+		m_finalResultsCB.Resize(pDevice, halfSize.x, halfSize.y);
+		m_finalResultsRT.Resize(pDevice);
+
 
 	}
 
-	void ASSAO::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-	{
 
+	void ASSAO::SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc)
+	{
+		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
+		m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		m_bHasLinearDepth = false;
+	}
+
+	void ASSAO::SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc)
+	{
+		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
+		m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		m_bHasLinearDepth = true;
 	}
 
 	bool ASSAO::Draw(GFXContext* pContext, RenderContext& renderContext)
 	{
+	#if 0
+		if (!GetEnabled())
+			return false;
+
+		pContext->BeginGPUTag("ASSAO");
+
+		// Prepare depths
+		if (m_bHasLinearDepth)
+		{
+			if(m_iQualityLevel >= 0)
+			{
+				pContext->SetRenderTarget(&m_fourDepthRT);
+				pContext->SetDescriptorSet(&m_prepareDepthDesc, 1);
+				pContext->SetPipelineState(m_prepareDepthEffectLin);
+			}
+			else
+			{
+				pContext->SetRenderTarget(&m_twoDepthRT);
+				pContext->SetDescriptorSet(&m_prepareDepthDesc, 1);
+				pContext->SetPipelineState(m_prepareDepthHalfEffectLin);
+			}
+		}
+		else
+		{
+			if (m_iQualityLevel >= 0)
+			{
+				pContext->SetRenderTarget(&m_fourDepthRT);
+				pContext->SetDescriptorSet(&m_prepareDepthDesc, 1);
+				pContext->SetPipelineState(m_prepareDepthEffect);
+			}
+			else
+			{
+				pContext->SetRenderTarget(&m_twoDepthRT);
+				pContext->SetDescriptorSet(&m_prepareDepthDesc, 1);
+				pContext->SetPipelineState(m_prepareDepthHalfEffect);
+			}
+		}
+		m_pSys->DrawFullScreenQuad(pContext);
+
+		if (m_iQualityLevel > 1)
+		{
+			// Prepare the depth mips
+			for (int i = 0; i < MIP_COUNT-1; i++)
+			{
+				pContext->SetRenderTargetMip(&m_fourDepthRT, i+1);
+				pContext->SetDescriptorSet(&m_mipDesc[i], 1);
+				pContext->SetPipelineState(m_mipPasses[i]);
+				m_pSys->DrawFullScreenQuad(pContext);
+			}
+		}
+
+
+		pContext->EndGPUTag();
+	#endif
+
 		return true;
 	}
 

@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_PC_TEXTURE_H
 
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Textures/ImageViewDef.h"
 #include <vulkan/vulkan.h>
 
 namespace usg {
@@ -14,6 +15,8 @@ class Effect;
 class GFXDevice;
 class GFXContext;
 typedef struct _TexturePak TexturePak;
+
+typedef VkImageView ImageViewHndl;
 
 class Texture_ps
 {
@@ -52,6 +55,8 @@ public:
 	// Caller is responsible for cleaning up this view
 	VkImageView CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint32 uMip) const;
 
+	VkImageView GetImageView(GFXDevice* pDevice, const ImageViewDef& def);
+
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
@@ -67,6 +72,13 @@ private:
 		bool			bValid = false;
 	};
 
+	struct CustomView
+	{
+		ImageViewDef def;
+		VkImageView  view;
+	};
+
+	usg::vector<CustomView>	m_customViews;
 	TexStaging		m_staging;
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;
@@ -79,6 +91,7 @@ private:
 	uint32			m_uHeight;
 	uint32			m_uDepth;
 	uint32			m_uFaces;
+	uint32			m_uMips;
 	uint32			m_uBpp;
 };
 
