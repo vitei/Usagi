@@ -57,7 +57,7 @@ void ColorBuffer_ps::InitExViews(GFXDevice* pDevice)
 		{
 			for(uint32 j=0; j<m_uMips; j++)
 			{
-				m_pExtraViews[i] = m_texture.GetPlatform().CreateImageView(pDevice, i, j);
+				m_pExtraViews[(i*m_uMips)+j] = m_texture.GetPlatform().CreateImageView(pDevice, i, j);
 			}
 		}
 	}

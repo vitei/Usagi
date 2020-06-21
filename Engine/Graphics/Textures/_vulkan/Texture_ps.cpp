@@ -382,7 +382,16 @@ void Texture_ps::InitStaging(GFXDevice* pDevice)
 	VkDevice& devicePS = pDevice->GetPlatform().GetVKDevice();
 
 	uint32 uBpp = m_uBpp;
-	uint32 uImageSize = m_uWidth * m_uHeight * uBpp;
+	uint32 uImageSize = 0;
+
+	uint32 uMipWidth = m_uWidth;
+	uint32 uMipHeight = m_uHeight;
+	for(uint32 i=0; i<m_uMips; i++)
+	{
+		uImageSize += uMipWidth * uMipHeight * uBpp;
+		uMipWidth >>= 1;
+		uMipHeight >>= 1;
+	}
 
 	VkBufferCreateInfo bufferCreateInfo = {};
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

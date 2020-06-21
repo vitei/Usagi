@@ -119,8 +119,8 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 			m_mipInfo[uMip].createInfo.pNext = NULL;
 			m_mipInfo[uMip].createInfo.attachmentCount = uViewsPerFB;
 			m_mipInfo[uMip].createInfo.pAttachments = &m_imageViews[uViewIdx];
-			m_mipInfo[uMip].createInfo.width = m_uWidth;
-			m_mipInfo[uMip].createInfo.height = m_uHeight;
+			m_mipInfo[uMip].createInfo.width = m_uWidth >> uMip;
+			m_mipInfo[uMip].createInfo.height = m_uHeight >> uMip;
 			m_mipInfo[uMip].createInfo.layers = 1;
 
 			uViewIdx += uViewsPerFB;
@@ -147,6 +147,13 @@ void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPas
 		ASSERT(res == VK_SUCCESS);
 	}
 
+	for (auto& itr : m_mipInfo)
+	{
+		itr.createInfo.renderPass = renderPass.GetContents()->GetPass();
+		VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &itr.createInfo, NULL, &itr.frameBuffer);
+		ASSERT(res == VK_SUCCESS);
+	}
+
 }
 
 
@@ -159,6 +166,15 @@ void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
 	}
 
 	for (auto& itr : m_layerInfo)
+	{
+		if (itr.frameBuffer != VK_NULL_HANDLE)
+		{
+			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), itr.frameBuffer, nullptr);
+			itr.frameBuffer = VK_NULL_HANDLE;
+		}
+	}
+
+	for (auto& itr : m_mipInfo)
 	{
 		if (itr.frameBuffer != VK_NULL_HANDLE)
 		{
