@@ -267,6 +267,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
+	extensions.push_back("VK_EXT_validation_features");
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 	
 	// Check to see if an HMD has been loaded and grab the extensions
@@ -298,21 +299,28 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
 	// FIXME: Temporarily disabling validation whilst fixes for unconsumed shader warnings are applied
-#if 0//def DEBUG_BUILD
-	int validationLayerCount = 1;
+#ifdef DEBUG_BUILD
 	const char *validationLayerNames[] =
 	{
-		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
+		"VK_LAYER_KHRONOS_validation" /* Enable validation layers in debug builds to detect validation errors */
 	};
+	int validationLayerCount = ARRAY_SIZE(validationLayerNames);
 #else
 	int validationLayerCount = 0;
 	const char *validationLayerNames[1] = {};
 #endif
 
+	VkValidationFeatureDisableEXT disabledValidation[] = { VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT, VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT };
+	VkValidationFeaturesEXT validation = {};
+	validation.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+	validation.disabledValidationFeatureCount = 2;
+	validation.pDisabledValidationFeatures = disabledValidation;
+
+
 	// initialize the VkInstanceCreateInfo structure
 	VkInstanceCreateInfo inst_info = {};
 	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	inst_info.pNext = NULL;
+	inst_info.pNext = &validation;
 	inst_info.flags = 0;
 	inst_info.pApplicationInfo = &app_info;
 	inst_info.enabledExtensionCount = (uint32)extensions.size();
