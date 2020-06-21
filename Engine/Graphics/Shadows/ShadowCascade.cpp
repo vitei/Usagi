@@ -390,7 +390,7 @@ void ShadowCascade::CreateShadowTex(GFXContext* pContext)
 	if (!m_pRenderTarget)
 		return;
 
-    pContext->BeginGPUTag("Shadow");
+    pContext->BeginGPUTag("ShadowCascade", Color::Grey);
 
 
 	for (uint32 i = 0; i < CASCADE_COUNT; ++i)

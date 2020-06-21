@@ -408,6 +408,21 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
+	if(uEffectFlags & PostFXSys::EFFECT_SSAO)
+	{
+		if(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
+		{
+			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH]);
+		}
+		else
+		{
+			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
+		}
+		// Don't change the destination
+		m_pSSAO->SetDestTarget(pDevice, pDst);
+		m_pFinalEffect = m_pSSAO;
+	}
+
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
 	{
 		m_pBloom->SetSourceTarget(pDevice, pDst);

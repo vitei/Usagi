@@ -158,7 +158,7 @@ void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)
 
 bool Model::RenderMesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	pContext->BeginGPUTag(m_pszName);
+	pContext->BeginGPUTag(m_pszName, Color::Blue);
 
 	// FIXME: Cleaner system?
 	switch (renderContext.eRenderPass)

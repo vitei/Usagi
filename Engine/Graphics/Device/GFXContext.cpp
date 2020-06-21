@@ -254,7 +254,7 @@ void GFXContext::TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisp
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("Transfer");
+	BeginGPUTag("Transfer", Color::Green);
 	m_platform.TransferToHMD(pTarget, pDisplay, bLeftEye);
 	EndGPUTag();
 }
@@ -267,7 +267,7 @@ void GFXContext::Transfer(RenderTarget* pTarget, Display* pDisplay)
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("Transfer");
+	BeginGPUTag("Transfer", Color::Green);
 	m_platform.Transfer(pTarget, pDisplay);
 	EndGPUTag();
 }
@@ -280,14 +280,14 @@ void GFXContext::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GF
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("TransferRect");
+	BeginGPUTag("TransferRect", Color::Green);
 	m_platform.TransferRect(pTarget, pDisplay, srcBounds, dstBounds);
 	EndGPUTag();
 }
 
 void GFXContext::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay)
 {
-	BeginGPUTag("TransferSpectatorDisplay");
+	BeginGPUTag("TransferSpectatorDisplay", Color::Green);
 	m_platform.TransferSpectatorDisplay(pHMD, pDisplay);
 	EndGPUTag();
 }

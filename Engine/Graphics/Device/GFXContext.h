@@ -62,7 +62,7 @@ public:
 	void DrawIndexed(const IndexBuffer* pBuffer);	
 	void DrawIndexedEx(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstanceCount = 1);
 
-	void BeginGPUTag(const char* szName);
+	void BeginGPUTag(const char* szName, const Color& color = Color::White);
 	void EndGPUTag();
 	void EnableProfiling(bool bProfile) { m_platform.EnableProfiling(bProfile); }
 
@@ -117,9 +117,9 @@ inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlo
 	}
 }
 
-inline void GFXContext::BeginGPUTag(const char* szName)
+inline void GFXContext::BeginGPUTag(const char* szName, const Color& color)
 {
-	m_platform.BeginGPUTag(szName);
+	m_platform.BeginGPUTag(szName, color);
 }
 
 inline void GFXContext::EndGPUTag()

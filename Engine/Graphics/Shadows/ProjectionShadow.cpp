@@ -125,7 +125,7 @@ namespace usg
 
 		m_bNothingVisible = m_pSceneContext->GetVisibleGroupCount() == 0;
 
-		pContext->BeginGPUTag("SpotShadow");
+		pContext->BeginGPUTag("SpotShadow", Color::Grey);
 
 		pContext->SetRenderTarget(&m_depthTarget);
 		pContext->ClearRenderTarget(RenderTarget::RT_FLAG_DEPTH);

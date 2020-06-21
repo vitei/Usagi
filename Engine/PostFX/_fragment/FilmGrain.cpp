@@ -157,7 +157,7 @@ bool FilmGrain::Draw(GFXContext* pContext, RenderContext& renderContext)
 	if (!GetEnabled())
 		return false;
 
-	pContext->BeginGPUTag("FilmGrain");
+	pContext->BeginGPUTag("FilmGrain", Color::Green);
 
 	pContext->SetRenderTarget(m_pDestTarget);
 	m_material.Apply(pContext);

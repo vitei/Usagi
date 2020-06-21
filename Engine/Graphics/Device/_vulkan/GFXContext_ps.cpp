@@ -44,6 +44,9 @@ namespace usg {
 		cmd.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmd.commandBufferCount = 1;
 
+		m_pfnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr(pDevice->GetPlatform().GetVKDevice(), "vkCmdDebugMarkerBeginEXT");
+		m_pfnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr(pDevice->GetPlatform().GetVKDevice(), "vkCmdDebugMarkerEndEXT");
+
 		err = vkAllocateCommandBuffers(pDevice->GetPlatform().GetVKDevice(), &cmd, &m_cmdBuff);
 		ASSERT(!err);
 
@@ -266,6 +269,27 @@ namespace usg {
 	void GFXContext_ps::SetBlendColor(const Color& blendColor)
 	{
 		vkCmdSetBlendConstants(m_cmdBuff, blendColor.m_rgba);
+	}
+
+	void GFXContext_ps::BeginGPUTag(const char* szName, const Color& color)
+	{
+		if (m_pfnCmdDebugMarkerBegin)
+		{
+			VkDebugMarkerMarkerInfoEXT markerInfo = {};
+			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+			memcpy(markerInfo.color, color.rgba(), sizeof(float) * 4);
+			markerInfo.pMarkerName = szName;
+			m_pfnCmdDebugMarkerBegin(m_cmdBuff, &markerInfo);
+		}
+	}
+
+	void GFXContext_ps::EndGPUTag()
+	{
+		if (m_pfnCmdDebugMarkerEnd)
+		{
+			m_pfnCmdDebugMarkerEnd(m_cmdBuff);
+
+		}
 	}
 
 	void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)

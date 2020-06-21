@@ -98,7 +98,7 @@ void BlitImage::SetSourceTexture(GFXDevice* pDevice, const TextureHndl& tex)
 
 bool BlitImage::Draw(GFXContext* pContext)
 {
-	pContext->BeginGPUTag("BlitImage");
+	pContext->BeginGPUTag("BlitImage", Color::Green);
 
 	m_material.Apply(pContext);
 

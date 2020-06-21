@@ -298,7 +298,7 @@ namespace usg {
 		if (!GetEnabled())
 			return false;
 
-		pContext->BeginGPUTag("SMAA");
+		pContext->BeginGPUTag("SMAA", Color::Green);
 
 		pContext->SetRenderTarget(&m_renderTargets[RT_EDGES]);
 		pContext->ClearRenderTarget();

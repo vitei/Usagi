@@ -14,6 +14,11 @@
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
 
+#ifdef DEBUG_BUILD
+#define USE_VALIDATION
+#endif
+
+//#define RENDERDOC_BUILD
 
 namespace usg {
 
@@ -267,7 +272,6 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
-	extensions.push_back("VK_EXT_validation_features");
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 	
 	// Check to see if an HMD has been loaded and grab the extensions
@@ -298,17 +302,15 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
-	// FIXME: Temporarily disabling validation whilst fixes for unconsumed shader warnings are applied
-#ifdef DEBUG_BUILD
+	// initialize the VkInstanceCreateInfo structure
+	VkInstanceCreateInfo inst_info = {};
+	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#ifdef USE_VALIDATION
 	const char *validationLayerNames[] =
 	{
 		"VK_LAYER_KHRONOS_validation" /* Enable validation layers in debug builds to detect validation errors */
 	};
 	int validationLayerCount = ARRAY_SIZE(validationLayerNames);
-#else
-	int validationLayerCount = 0;
-	const char *validationLayerNames[1] = {};
-#endif
 
 	VkValidationFeatureDisableEXT disabledValidation[] = { VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT, VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT };
 	VkValidationFeaturesEXT validation = {};
@@ -316,11 +318,16 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	validation.disabledValidationFeatureCount = 2;
 	validation.pDisabledValidationFeatures = disabledValidation;
 
-
-	// initialize the VkInstanceCreateInfo structure
-	VkInstanceCreateInfo inst_info = {};
-	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#ifndef RENDERDOC_BUILD
+	extensions.push_back("VK_EXT_validation_features");
 	inst_info.pNext = &validation;
+#endif
+
+#else
+	int validationLayerCount = 0;
+	const char *validationLayerNames[1] = {};
+#endif
+
 	inst_info.flags = 0;
 	inst_info.pApplicationInfo = &app_info;
 	inst_info.enabledExtensionCount = (uint32)extensions.size();
@@ -434,7 +441,9 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
-
+#ifdef USE_VALIDATION
+	extensions.push_back("VK_EXT_debug_marker");
+#endif
 
 	// Smooth lines are hugely helpful, but not online until 1.1.117
 	//extensions.push_back("VK_EXT_line_rasterization");

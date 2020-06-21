@@ -25,6 +25,22 @@
 
 namespace usg {
 
+	const char* g_szLayerNames[] = {
+		"Background",
+		"Pre World",
+		"Opaque",
+		"Deferred Shading",
+		"Opaque Unlit",
+		"Sky",
+		"Translucent",
+		"Subtractive",
+		"Additive",
+		"Post Process",
+		"Overlay"
+	};
+
+	static_assert( ARRAY_SIZE(g_szLayerNames) == RenderLayer::LAYER_COUNT, "Layer names do not match" );
+
 	struct GlobalConstants
 	{
 		Matrix4x4	mProjMat;
@@ -435,6 +451,7 @@ namespace usg {
 
 		for (uint32 uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
+			pContext->BeginGPUTag(g_szLayerNames[uLayer]);
 			//for(List<RenderNode>::Iterator it = m_drawLists[uLayer].Begin(); !it.IsEnd(); ++it)
 			for (uint32 i = 0; i < m_pImpl->uVisibleNodes[uLayer]; i++)
 			{
@@ -454,6 +471,7 @@ namespace usg {
 			}
 			// TODO: Probably are going to want callbacks at the end of certain layers, for grabbing
 			// the linear depth information etc
+			pContext->EndGPUTag();
 		}
 	}
 

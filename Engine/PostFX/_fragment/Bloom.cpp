@@ -269,7 +269,7 @@ bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 	if (!GetEnabled())
 		return false;
 
-	pContext->BeginGPUTag("Bloom");
+	pContext->BeginGPUTag("Bloom", Color::Green);
 	// Downscale 4x4
 	pContext->SetRenderTarget(&m_scaledSceneRT);
 	pContext->SetPipelineState(m_downscalePipeline);

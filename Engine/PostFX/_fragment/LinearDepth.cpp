@@ -71,7 +71,7 @@ bool LinearDepth::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	ASSERT(false);
 #if 0
-	pContext->BeginGPUTag("LinearDepth");
+	pContext->BeginGPUTag("LinearDepth", Color::Green);
 	
 	pContext->SetRenderTarget(&m_depthRT);
 	RenderTarget* pSceneRT = pPostFXSys->GetActiveRT();

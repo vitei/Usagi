@@ -60,8 +60,8 @@ public:
 
 	void SetBlendColor(const Color& color);
 
-	void BeginGPUTag(const char* szName) {}
-	void EndGPUTag() {}
+	void BeginGPUTag(const char* szName, const Color& color);
+	void EndGPUTag();
 	void EnableProfiling(bool bProfile) {}
 	void UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags);
 
@@ -75,6 +75,9 @@ private:
 	GFXContext*			m_pParent;
 	VkCommandBuffer		m_cmdBuff;
 	VkPipelineLayout	m_pipelineLayout;
+
+	PFN_vkCmdDebugMarkerBeginEXT m_pfnCmdDebugMarkerBegin;
+	PFN_vkCmdDebugMarkerEndEXT m_pfnCmdDebugMarkerEnd;
 };
 
 }
