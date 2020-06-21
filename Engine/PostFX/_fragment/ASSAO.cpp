@@ -152,6 +152,11 @@ namespace usg
 
 	ASSAO::ASSAO()
 	{
+		SetRenderMask(RENDER_MASK_POST_EFFECT);
+		// Don't really care if before or after but going with after
+		SetLayer(LAYER_SKY);
+		SetPriority(2);
+
 		m_pSys = nullptr;
 		m_iQualityLevel = 4;
 		m_bHasLinearDepth = false;
@@ -392,11 +397,10 @@ namespace usg
 
 	bool ASSAO::Draw(GFXContext* pContext, RenderContext& renderContext)
 	{
-	#if 0
 		if (!GetEnabled())
 			return false;
 
-		pContext->BeginGPUTag("ASSAO");
+		pContext->BeginGPUTag("ASSAO", Color::Green);
 
 		// Prepare depths
 		if (m_bHasLinearDepth)
@@ -445,7 +449,6 @@ namespace usg
 
 
 		pContext->EndGPUTag();
-	#endif
 
 		return true;
 	}
