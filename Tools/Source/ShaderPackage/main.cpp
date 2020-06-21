@@ -68,6 +68,7 @@ struct DefineSets
 	std::string defines;
 	std::string defineSetName;
 	std::string definesAsCRC;
+	std::string customFXName;
 	uint32		CRC[(uint32)usg::ShaderType::COUNT];
 	uint64		CustomFXCRC;
 };
@@ -207,6 +208,7 @@ int main(int argc, char *argv[])
 				set.defineSetName = "";
 				set.definesAsCRC = "";
 				set.defines = "";
+				set.customFXName = def.customFXName;
 				if ((*it)["geom"])
 				{
 					def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
@@ -221,6 +223,7 @@ int main(int argc, char *argv[])
 				{
 					// Package.Effect.DefineSet.fx
 					set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
+					set.customFXName = def.customFXName;
 					set.name = intFileName + "." + def.name + set.defineSetName + ".fx";
 					set.defines = (*defineIt)["defines"].as<std::string>();
 					set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
@@ -292,7 +295,7 @@ int main(int argc, char *argv[])
 			}
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
-				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
+				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].customFXName + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
 				if (!def.prog[j].empty())
 				{
 					def.sets[i].CRC[j] = utl::CRC32(progName.c_str());
