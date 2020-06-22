@@ -16,7 +16,11 @@
 
 // Note disable for render doc builds, otherwise VK_EXT_validation_features extension will topple the replay
 #ifdef DEBUG_BUILD
-#define USE_VALIDATION
+//#define USE_VALIDATION
+#endif
+
+#ifndef FINAL_BUILD
+#define USE_DEBUG_MARKERS
 #endif
 
 namespace usg {
@@ -438,8 +442,24 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
-#ifdef USE_VALIDATION
-	extensions.push_back("VK_EXT_debug_marker");
+#ifdef USE_DEBUG_MARKERS
+	
+	bool bExtensionPresent = false;
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, nullptr);
+	usg::vector<VkExtensionProperties> deviceExt(extensionCount);
+	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, deviceExt.data());
+	for (auto extension : deviceExt) {
+		if (strcmp(extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0) {
+			bExtensionPresent = true;
+			break;
+		}
+	}
+
+	if(bExtensionPresent)
+	{
+		extensions.push_back("VK_EXT_debug_marker");
+	}
 #endif
 
 	// Smooth lines are hugely helpful, but not online until 1.1.117
