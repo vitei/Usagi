@@ -45,6 +45,7 @@ public:
 	const VkFramebuffer& GetMipFrameBuffer(uint32 uMip) const { return m_mipInfo[uMip].frameBuffer; }
 
 private:
+	void FreeFramebuffers(GFXDevice* pDevice);
 
 	struct SubBufferInfo
 	{

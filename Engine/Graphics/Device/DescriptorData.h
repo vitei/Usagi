@@ -17,11 +17,12 @@ struct DescriptorData
 {
 	DescriptorType eDescType = DESCRIPTOR_TYPE_INVALID;
 
-	// We can't (shouldn't) unionise smart pointers
+	// We can't (shouldn't) unionize smart pointers
 	struct TexData
 	{
 		TextureHndl 		tex;
 		SamplerHndl			sampler;
+		ImageViewDef		imageView;
 	} texData;
 
 	const ConstantSet*		pConstBuffer = nullptr;

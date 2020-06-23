@@ -47,7 +47,15 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 	m_imageViews.resize(uViewsPerFB * (uLayerFBs+uMipFBs+1));
 	for (uint32 i = 0; i < uColorCount; i++)
 	{
-		m_imageViews[i] = ppColorBuffers[i]->GetTexture()->GetPlatform().GetImageView();
+		if(uMipCount <= 1)
+		{
+			m_imageViews[i] = ppColorBuffers[i]->GetTexture()->GetPlatform().GetImageView();
+		}
+		else
+		{
+			// More than 1 mip means we can't use the default texture view
+			m_imageViews[i] = ppColorBuffers[i]->GetPlatform().GetViewEx(0, 0);
+		}
 	}
 
 	if (pDepth)
@@ -156,8 +164,7 @@ void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPas
 
 }
 
-
-void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
+void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 {
 	if (m_framebuffer != VK_NULL_HANDLE)
 	{
@@ -185,6 +192,12 @@ void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
 }
 
 
+void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
+{
+	FreeFramebuffers(pDevice);
+}
+
+
 void RenderTarget_ps::SetClearColor(const Color& col, uint32 uTarget)
 {
 	m_colorClearValues[uTarget].color.float32[0] = col.r();
@@ -196,6 +209,7 @@ void RenderTarget_ps::SetClearColor(const Color& col, uint32 uTarget)
 
 void RenderTarget_ps::Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
+	FreeFramebuffers(pDevice);
 	InitMRT(pDevice, uCount, ppColorBuffers, pDepth);
 }
 

@@ -45,6 +45,7 @@ private:
 	};
 
 	PostFXSys*		m_pSys;
+	RenderTarget*	m_pDest;
 
 
 	int				m_iQualityLevel;

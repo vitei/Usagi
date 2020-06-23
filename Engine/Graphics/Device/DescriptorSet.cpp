@@ -173,7 +173,7 @@ bool DescriptorSet::IsUptoDate() const
 	return true;
 }
 
-void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
+void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex, const ImageViewDef& imageView)
 {
 	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
 	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
@@ -186,6 +186,7 @@ void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& 
 	m_pData[uResourceIndex].texData.tex = pTexture;
 	m_pData[uResourceIndex].texData.sampler = sampler;
 	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
+	m_pData[uResourceIndex].texData.imageView = imageView;
 }
 
 void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuffer, uint32 uSubIndex)
@@ -203,14 +204,14 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 }
 
 
-void DescriptorSet::SetImageSamplerPairAtBinding(uint32 uBinding, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
+void DescriptorSet::SetImageSamplerPairAtBinding(uint32 uBinding, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex, const ImageViewDef& imageView)
 {
 	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
 	{
 		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
 		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && uBinding == pDecl->uBinding)
 		{
-			SetImageSamplerPair(i, pTexture, sampler, uSubIndex);
+			SetImageSamplerPair(i, pTexture, sampler, uSubIndex, imageView);
 			return;
 		}
 	}

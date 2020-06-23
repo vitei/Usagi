@@ -94,7 +94,15 @@ namespace usg {
 				{
 					VkDescriptorImageInfo image = {};
 					image.sampler = pData[j].texData.sampler.GetContents()->GetSampler();
-					image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					if (pData[j].texData.imageView.IsDefault())
+					{
+						image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					}
+					else
+					{
+						const Texture_ps& texPlat = pData[j].texData.tex->GetPlatform();
+						image.imageView = texPlat.GetImageView(pDevice, pData[j].texData.imageView);
+					}
 					image.imageLayout = pData[j].texData.tex->GetPlatform().GetImageLayout();
 					images.push_back(image);
 				}

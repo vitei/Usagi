@@ -225,7 +225,7 @@ void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_uUpdateCount++;
 }
 
-VkImageView Texture_ps::GetImageView(GFXDevice* pDevice, const ImageViewDef& def)
+VkImageView Texture_ps::GetImageView(GFXDevice* pDevice, const ImageViewDef& def) const
 {
 	for(auto& itr : m_customViews)
 	{
@@ -557,6 +557,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 
 void Texture_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
+	ClearViews(pDevice);
 	m_imageCreateInfo.extent.width = uWidth;
 	m_imageCreateInfo.extent.height = uHeight;
 	Init(pDevice, m_imageCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, uWidth > m_uWidth || uHeight > m_uHeight);
@@ -618,11 +619,8 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
 
 }
 
-
-void Texture_ps::CleanUp(GFXDevice* pDevice)
+void Texture_ps::ClearViews(GFXDevice* pDevice)
 {
-
-
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
 	vkDestroyImageView(vKDevice, m_imageView, nullptr);
@@ -631,7 +629,15 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 	{
 		vkDestroyImageView(vKDevice, itr.view, nullptr);
 	}
+	m_customViews.clear();
+}
 
+
+void Texture_ps::CleanUp(GFXDevice* pDevice)
+{
+	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
+
+	ClearViews(pDevice);
 	if (m_image)
 	{
 		vkDestroyImage(vKDevice, m_image, nullptr);

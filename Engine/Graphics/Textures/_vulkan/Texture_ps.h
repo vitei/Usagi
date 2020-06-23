@@ -55,7 +55,7 @@ public:
 	// Caller is responsible for cleaning up this view
 	VkImageView CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint32 uMip) const;
 
-	VkImageView GetImageView(GFXDevice* pDevice, const ImageViewDef& def);
+	VkImageView GetImageView(GFXDevice* pDevice, const ImageViewDef& def) const;
 
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
@@ -63,6 +63,7 @@ private:
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
 	void InitStaging(GFXDevice* pDevice);
 	void FreeStaging(GFXDevice* pDevice);
+	void ClearViews(GFXDevice* pDevice);
 
 	struct TexStaging
 	{
@@ -78,7 +79,8 @@ private:
 		VkImageView  view;
 	};
 
-	usg::vector<CustomView>	m_customViews;
+	// FIXME: Refactor to pre-load these views
+	mutable usg::vector<CustomView>	m_customViews;
 	TexStaging		m_staging;
 	VkDeviceMemory	m_memory;
 	VkImage			m_image;

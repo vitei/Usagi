@@ -18,13 +18,20 @@ public:
 	uint32 uBaseLayer = 0;
 	uint32 uLayerCount = USG_INVALID_ID;
 
-	bool operator==(const ImageViewDef& rhs)
+	bool IsDefault() const
+	{
+		return *this == Default();
+	}
+
+	bool operator==(const ImageViewDef& rhs) const
 	{
 		return (uBaseMip == rhs.uBaseMip
 				&& uMipCount == rhs.uMipCount
 				&& uBaseLayer == rhs.uBaseLayer
 				&& uLayerCount == rhs.uLayerCount);
 	}
+
+	static ImageViewDef Default() { return ImageViewDef(); }
 
 };
 

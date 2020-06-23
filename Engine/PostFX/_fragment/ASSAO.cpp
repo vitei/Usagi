@@ -158,6 +158,7 @@ namespace usg
 		SetPriority(2);
 
 		m_pSys = nullptr;
+		m_pDest = nullptr;
 		m_iQualityLevel = 4;
 		m_bHasLinearDepth = false;
 	}
@@ -228,8 +229,10 @@ namespace usg
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 		m_pingPongRT1.InitRenderPass(pDevice, flags);
 		m_pingPongRT2.InitRenderPass(pDevice, flags);
+		m_finalResultsRT.InitRenderPass(pDevice, flags);
 
 		m_importanceMapRT.InitRenderPass(pDevice, flags);
+		m_importanceMapPongRT.InitRenderPass(pDevice, flags);
 
 		m_constants.Init(pDevice, g_assaoConstantDef);
 
@@ -274,7 +277,14 @@ namespace usg
 		{
 			m_mipDesc[i].Init(pDevice, desc4Tex);
 			m_mipDesc[i].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
-			//m_mipDesc[i].SetImageSamplerPairAtBinding(m_f)
+			ImageViewDef viewDef;
+			viewDef.uMipCount = 1;
+			for(int j=0; j<DEPTH_COUNT; j++)
+			{
+				viewDef.uBaseMip = i;
+				m_mipDesc[i].SetImageSamplerPairAtBinding(j, m_halfDepthTargets[j].GetTexture(), m_pointSampler, 0,  viewDef);
+			}
+			m_mipDesc[i].UpdateDescriptors(pDevice);
 		}
 
 		// Both ping pongs are the same format, so render pass will be the same
@@ -338,6 +348,11 @@ namespace usg
 	void ASSAO::CleanUp(GFXDevice* pDevice)
 	{
 		m_constants.CleanUp(pDevice);
+		m_prepareDepthDesc.CleanUp(pDevice);
+		for(int i=0; i<MIP_COUNT-1; i++)
+		{
+			m_mipDesc[i].CleanUp(pDevice);
+		}
 	}
 
 	void ASSAO::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
@@ -345,6 +360,8 @@ namespace usg
 		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartApplyEffect);
 		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_applyEffect);
 		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect);
+
+		m_pDest = pDst;
 	}
 
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -377,6 +394,13 @@ namespace usg
 		m_finalResultsCB.Resize(pDevice, halfSize.x, halfSize.y);
 		m_finalResultsRT.Resize(pDevice);
 
+
+		for(int i=0; i<MIP_COUNT-1; i++)
+		{
+			m_mipDesc[i].UpdateDescriptors(pDevice);
+		}
+
+		m_prepareDepthDesc.UpdateDescriptors(pDevice);
 
 	}
 
@@ -447,6 +471,8 @@ namespace usg
 			}
 		}
 
+
+		pContext->SetRenderTarget(m_pDest);
 
 		pContext->EndGPUTag();
 
