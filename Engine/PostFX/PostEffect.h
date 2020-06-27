@@ -24,6 +24,8 @@ public:
 	virtual void CleanUp(GFXDevice* pDevice) {}
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) {}
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
+	virtual void Update(Scene* pScene, float fElapsed) {}
+	virtual void UpdateBuffer(usg::GFXDevice* pDevice) {}
 	void SetEnabled(bool bEnabled);
 	bool GetEnabled() { return m_bEnabled; }
 

@@ -25,6 +25,8 @@ struct Vector4i
 
 struct Vector2i
 {
+	Vector2i() {}
+	Vector2i(int xIn, int yIn) { x = xIn; y = yIn; }
 	int		x;
 	int		y;
 };

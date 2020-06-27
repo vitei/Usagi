@@ -55,7 +55,7 @@ FilmGrain::~FilmGrain()
 }
 
 
-void FilmGrain::Update(float fElapsed)
+void FilmGrain::Update(Scene* pScene, float fElapsed)
 {
 	FilmGrainConstants* pConsts = m_constantSet.Lock<FilmGrainConstants>();
 	pConsts->fTime += fElapsed;

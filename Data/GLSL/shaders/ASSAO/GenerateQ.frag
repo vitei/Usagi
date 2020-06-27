@@ -11,12 +11,24 @@
 
 layout(location = 0) out vec2 colorOut;
 
-SAMPLER_LOC(1, 0) uniform sampler2D g_ViewspaceDepthSource;   // corresponds to SSAO_TEXTURE_SLOT0
-SAMPLER_LOC(1, 1) uniform sampler2D g_NormalmapSource;   // corresponds to SSAO_TEXTURE_SLOT1
-SAMPLER_LOC(1, 2) uniform sampler1D g_LoadCounter;   // corresponds to SSAO_TEXTURE_SLOT2
-SAMPLER_LOC(1, 3) uniform sampler2D g_ImportanceMap;   // corresponds to SSAO_TEXTURE_SLOT3
-SAMPLER_LOC(1, 4) uniform sampler2DArray g_FinalSSAO;   // corresponds to SSAO_TEXTURE_SLOT4
+SAMPLER_LOC(1, 0) uniform sampler2D g_ViewspaceDepthSource;
+SAMPLER_LOC(1, 1) uniform sampler2D g_NormalmapSource;
+#if (defined IS_BASE || GENERATE_PASS == 3)
+SAMPLER_LOC(1, 2) uniform sampler1D g_LoadCounter;   
+SAMPLER_LOC(1, 3) uniform sampler2D g_ImportanceMap;  
+SAMPLER_LOC(1, 4) uniform sampler2DArray g_FinalSSAO; 
+#endif
 
+
+BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
+{
+    vec4        PatternRotScaleMatrices[5];
+
+    ivec2       PerPassFullResCoordOffset;
+    vec2        PerPassFullResUVOffset;
+    int         PassIndex;
+    
+} g_ASSAOPassConsts;
 
 vec3 DecodeNormal( vec3 encodedNormal )
 {
@@ -177,7 +189,7 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
     vec3 pixCenterPos = NDCToViewspace( normalizedScreenPos, pixZ ); // g
 
     // Load this pixel's viewspace normal
-    ivec2 fullResCoord = ivec2(SVPosui * 2 + g_ASSAOConsts.PerPassFullResCoordOffset.xy);
+    ivec2 fullResCoord = ivec2(SVPosui * 2 + g_ASSAOPassConsts.PerPassFullResCoordOffset.xy);
     vec3 pixelNormal = LoadNormal( fullResCoord );
 
     const vec2 pixelDirRBViewspaceSizeAtCenterZ = pixCenterPos.z * g_ASSAOConsts.NDCToViewMul * g_ASSAOConsts.Viewport2xPixelSize;  // optimized approximation of:  vec2 pixelDirRBViewspaceSizeAtCenterZ = NDCToViewspace( normalizedScreenPos.xy + g_ASSAOConsts.ViewportPixelSize.xy, pixCenterPos.z ).xy - pixCenterPos.xy;
@@ -202,7 +214,7 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
 
         // load & update pseudo-random rotation matrix
         uint pseudoRandomIndex = uint( SVPosRounded.y * 2 + SVPosRounded.x ) % 5;
-        vec4 rs = g_ASSAOConsts.PatternRotScaleMatrices[ pseudoRandomIndex ];
+        vec4 rs = g_ASSAOPassConsts.PatternRotScaleMatrices[ pseudoRandomIndex ];
         rotScale = mat2x2( rs.x * pixLookupRadiusMod, rs.y * pixLookupRadiusMod, rs.z * pixLookupRadiusMod, rs.w * pixLookupRadiusMod );
     }
 
@@ -299,17 +311,18 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
             SSAOTap( qualityLevel, obscuranceSum, weightSum, i, rotScale, pixCenterPos, negViewspaceDir, pixelNormal, normalizedScreenPos, mipOffset, falloffCalcMulSq, 1.0, normXY, normXYLength );
         }
     }
+#if (defined IS_BASE || GENERATE_PASS == 3)    
     else // if( qualityLevel == 3 ) adaptive approach
     {
         // add new ones if needed
-        vec2 fullResUV = normalizedScreenPos + g_ASSAOConsts.PerPassFullResUVOffset.xy;
+        vec2 fullResUV = normalizedScreenPos + g_ASSAOPassConsts.PerPassFullResUVOffset.xy;
         float importance = textureLod(g_ImportanceMap, fullResUV, 0.0 ).x;
 
         // this is to normalize SSAO_DETAIL_AO_AMOUNT across all pixel regardless of importance
         obscuranceSum *= (SSAO_ADAPTIVE_TAP_BASE_COUNT / float(SSAO_MAX_TAPS)) + (importance * SSAO_ADAPTIVE_TAP_FLEXIBLE_COUNT / float(SSAO_MAX_TAPS));
 
         // load existing base values
-        vec2 baseValues = texelFetch(g_FinalSSAO, ivec3( SVPosui, g_ASSAOConsts.PassIndex), 0 ).xy;
+        vec2 baseValues = texelFetch(g_FinalSSAO, ivec3( SVPosui, g_ASSAOPassConsts.PassIndex), 0 ).xy;
         weightSum += baseValues.y * float(SSAO_ADAPTIVE_TAP_BASE_COUNT * 4.0);
         obscuranceSum += (baseValues.x) * weightSum;
         
@@ -339,6 +352,7 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
             SSAOTap( qualityLevel, obscuranceSum, weightSum, i, rotScale, pixCenterPos, negViewspaceDir, pixelNormal, normalizedScreenPos, mipOffset, falloffCalcMulSq, weightMod, normXY, normXYLength );
         }
     }
+#endif
 
     // early out for adaptive base - just output weight (used for the next pass)
     if( adaptiveBase )
@@ -404,7 +418,11 @@ void main()
     float   outShadowTerm;
     float   outWeight;
     vec4  outEdges;
+#ifdef IS_BASE
+    GenerateSSAOShadowsInternal( outShadowTerm, outEdges, outWeight, gl_FragCoord.xy/*, inUV*/, GENERATE_PASS, true );
+#else
     GenerateSSAOShadowsInternal( outShadowTerm, outEdges, outWeight, gl_FragCoord.xy/*, inUV*/, GENERATE_PASS, false );
+#endif
     colorOut.x = outShadowTerm;
 #ifdef IS_BASE
     colorOut.y = outWeight / (float(SSAO_ADAPTIVE_TAP_BASE_COUNT) * 4.0); //0.0; //frac(outWeight / 6.0);// / (float)(SSAO_MAX_TAPS * 4.0);

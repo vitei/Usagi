@@ -35,7 +35,7 @@ public:
 
 	void Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
 	void CleanUp(GFXDevice* pDevice);
-	void Update(float fElapsed);
+	void Update(Scene* pScene, float fElapsed);
 	void UpdateGPU(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);

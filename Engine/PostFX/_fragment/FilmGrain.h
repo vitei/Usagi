@@ -25,8 +25,8 @@ public:
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
-	void Update(float fElapsed);
-	void UpdateBuffer(usg::GFXDevice* pDevice);
+	virtual void Update(Scene* pScene, float fElapsed) override;
+	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
 private:
 	PostFXSys*		m_pSys;

@@ -14,6 +14,7 @@
 namespace usg {
 
 class PostFXSys;
+class Camera;
 
 class ASSAO : public PostEffect
 {
@@ -26,10 +27,32 @@ public:
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc);
-	void SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc);
+	void SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc, ColorBuffer* pNorm);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+	virtual void Update(Scene* pScene, float fElapsed) override;
+	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
 private:
+	void UpdateConstants(uint32 uWidth, uint32 uHeight, const usg::Camera* pCamera);
+	void UpdatePassConstants(uint32 uPass, uint32 uWidth, uint32 uHeight);
+
+	struct ASSAO_Settings
+	{
+		float Radius = 1.2f;
+		float ShadowMultiplier = 1.0f;
+		float ShadowPower = 1.50f;
+		float ShadowClamp = 0.98f;
+		float HorizonAngleThreshold = 0.06f;
+		float FadeOutFrom = 50.0f;
+		float FadeOutTo = 300.0f;
+		float AdaptiveQualityLimit = 0.45f;
+		float QualityLevel = 2;
+		float BlurPassCount = 2;
+		float Sharpness = 0.98f;
+		float TemporalSupersamplingAngleOffset = 0.0f;
+		float TemporalSupersamplingRadiusOffset = 1.0f;
+		float DetailShadowStrength = 0.5f;
+	};
 
 	enum
 	{
@@ -40,6 +63,7 @@ private:
 		GEN_Q_PASS_3_BASE,
 		GEN_Q_PASS_COUNT,
 
+		CONST_PASS_COUNT = 4,
 		DEPTH_COUNT = 4,
 		MIP_COUNT = 4
 	};
@@ -48,8 +72,11 @@ private:
 	RenderTarget*	m_pDest;
 
 
+	ASSAO_Settings	m_settings;
+
 	int				m_iQualityLevel;
 	ConstantSet		m_constants;
+	ConstantSet		m_passConstants[CONST_PASS_COUNT];
 
 	SamplerHndl		m_pointSampler;
 	SamplerHndl		m_pointMirrorSampler;
@@ -62,6 +89,7 @@ private:
 	ColorBuffer			m_finalResultsCB;
 	ColorBuffer			m_importanceMapCB;
 	ColorBuffer			m_importanceMapPongCB;
+	ColorBuffer			m_loadTargetCB;
 
 	RenderTarget		m_fourDepthRT;
 	RenderTarget		m_twoDepthRT;
@@ -92,8 +120,10 @@ private:
 
 	DescriptorSet		m_prepareDepthDesc;
 	DescriptorSet		m_mipDesc[MIP_COUNT-1];
+	DescriptorSet		m_genQDesc[GEN_Q_PASS_COUNT];
 
 	bool				m_bHasLinearDepth;
+	bool				m_bGenerateNormals;
 };
 
 }

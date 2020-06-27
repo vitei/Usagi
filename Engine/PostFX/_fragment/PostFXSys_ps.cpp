@@ -82,19 +82,19 @@ PostFXSys_ps::~PostFXSys_ps()
 	}
 }
 
-void PostFXSys_ps::Update(float fElapsed)
+void PostFXSys_ps::Update(Scene* pScene, float fElapsed)
 {
-	if(m_pFilmGrain)
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
-		m_pFilmGrain->Update(fElapsed);
+		m_pDefaultEffects[i]->Update(pScene,fElapsed);
 	}
 }
 
 void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 {
-	if(m_pFilmGrain)
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
-		m_pFilmGrain->UpdateBuffer(pDevice);
+		m_pDefaultEffects[i]->UpdateBuffer(pDevice);
 	}
 }
 
@@ -412,7 +412,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	{
 		if(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 		{
-			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH]);
+			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
 		}
 		else
 		{
