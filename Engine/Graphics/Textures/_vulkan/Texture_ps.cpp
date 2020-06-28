@@ -153,7 +153,8 @@ Texture_ps::Texture_ps() :
 
 Texture_ps::~Texture_ps()
 {
-
+	ASSERT(m_memory == nullptr);
+	ASSERT(m_staging.bValid == false);
 }
 
 
@@ -380,6 +381,8 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 void Texture_ps::InitStaging(GFXDevice* pDevice)
 {
 	VkDevice& devicePS = pDevice->GetPlatform().GetVKDevice();
+	// Avoid double allocation
+	FreeStaging(pDevice);
 
 	uint32 uBpp = m_uBpp;
 	uint32 uImageSize = 0;
