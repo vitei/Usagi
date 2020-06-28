@@ -127,13 +127,19 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 {
 	// Not valid if the owner isn't
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 	if (m_pOwner && m_buffer != VK_NULL_HANDLE)
 	{
-		GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
 		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, nullptr);
 		m_buffer = VK_NULL_HANDLE;
 		m_pOwner = nullptr;
+	}
+
+	if (m_memory)
+	{
+		vkFreeMemory(devicePS.GetVKDevice(), m_memory, nullptr);
+		m_memory = nullptr;
 	}
 }
 

@@ -638,6 +638,7 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
 	ClearViews(pDevice);
+	FreeStaging(pDevice);
 	if (m_image)
 	{
 		vkDestroyImage(vKDevice, m_image, nullptr);
@@ -647,7 +648,6 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 	if (m_memory != VK_NULL_HANDLE)
 	{
 		vkFreeMemory(vKDevice, m_memory, nullptr);
-		vkDestroyImage(vKDevice, m_image, nullptr);
 		m_memory = VK_NULL_HANDLE;
 	}
 }
