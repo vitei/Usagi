@@ -35,6 +35,7 @@ public:
 private:
 	void UpdateConstants(uint32 uWidth, uint32 uHeight, const usg::Camera* pCamera);
 	void UpdatePassConstants(uint32 uPass, uint32 uWidth, uint32 uHeight);
+	void GenerateSSAO(GFXContext* pContext, bool bAdaptive);
 
 	struct ASSAO_Settings
 	{
@@ -46,8 +47,8 @@ private:
 		float FadeOutFrom = 50.0f;
 		float FadeOutTo = 300.0f;
 		float AdaptiveQualityLimit = 0.45f;
-		float QualityLevel = 2;
-		float BlurPassCount = 2;
+		int	QualityLevel = 2;
+		int BlurPassCount = 2;
 		float Sharpness = 0.98f;
 		float TemporalSupersamplingAngleOffset = 0.0f;
 		float TemporalSupersamplingRadiusOffset = 1.0f;
@@ -118,9 +119,12 @@ private:
 	PipelineStateHndl	m_nonSmartApplyEffect;
 	PipelineStateHndl	m_nonSmartHalfApplyEffect;
 
+	DescriptorSet		m_applyDesc;
 	DescriptorSet		m_prepareDepthDesc;
 	DescriptorSet		m_mipDesc[MIP_COUNT-1];
 	DescriptorSet		m_genQDesc[GEN_Q_PASS_COUNT];
+	DescriptorSet		m_blurDescPing;
+	DescriptorSet		m_blurDescPong;
 
 	bool				m_bHasLinearDepth;
 	bool				m_bGenerateNormals;

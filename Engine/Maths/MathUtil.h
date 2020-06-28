@@ -249,6 +249,15 @@ namespace Math
 		x |= x >> 16;
 		return x+1;
 	}
+
+	// TODO: Move to a more general utility file? Not exclusive to maths
+	template<class VariableType>
+	static void Swap(VariableType& a, VariableType& b)
+	{
+		VariableType temp = b;
+		b = a;
+		a = temp;
+	}
 }
 
 } // namespace usagi

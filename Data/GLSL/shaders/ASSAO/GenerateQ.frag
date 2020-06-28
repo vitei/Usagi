@@ -426,7 +426,9 @@ void main()
     colorOut.x = outShadowTerm;
 #ifdef IS_BASE
     colorOut.y = outWeight / (float(SSAO_ADAPTIVE_TAP_BASE_COUNT) * 4.0); //0.0; //frac(outWeight / 6.0);// / (float)(SSAO_MAX_TAPS * 4.0);
-#else
+#elif (GENERATE_PASS == 0)
     colorOut.y = PackEdges( vec4( 1, 1, 1, 1 ) ); // no edges in low quality
+#else
+    colorOut.y = PackEdges( outEdges ); // no edges in low quality
 #endif
 }

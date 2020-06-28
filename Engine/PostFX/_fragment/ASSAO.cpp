@@ -137,6 +137,7 @@ namespace usg
 	static const DescriptorDeclaration g_descriptTwoTex[] =
 	{
 		DESCRIPTOR_ELEMENT(0,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(1,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
 		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
 		DESCRIPTOR_END()
 	};
@@ -213,11 +214,11 @@ namespace usg
 		m_linearSampler = pDevice->GetSampler(linearDecl);
 
 		Vector2i halfSize;
-		halfSize.x = pDst->GetWidth() + 1 / 2;
-		halfSize.y = pDst->GetHeight() + 1 / 2;
+		halfSize.x = (pDst->GetWidth() + 1) / 2;
+		halfSize.y = (pDst->GetHeight() + 1) / 2;
 		Vector2i quarterSize;
-		quarterSize.x = halfSize.x + 1 / 2;
-		quarterSize.y = halfSize.x + 1 / 2;
+		quarterSize.x = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.x + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
 			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
@@ -317,6 +318,15 @@ namespace usg
 			m_mipDesc[i].UpdateDescriptors(pDevice);
 		}
 
+
+		m_blurDescPing.Init(pDevice, desc1Tex);
+		m_blurDescPong.Init(pDevice, desc1Tex);
+
+		m_blurDescPing.SetImageSamplerPairAtBinding(0, m_pingPongCB1.GetTexture(), m_pointMirrorSampler);
+		m_blurDescPong.SetImageSamplerPairAtBinding(0, m_pingPongCB2.GetTexture(), m_pointMirrorSampler);
+		m_blurDescPing.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_blurDescPong.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+
 		// Both ping pongs are the same format, so render pass will be the same
 		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlur");
@@ -380,6 +390,10 @@ namespace usg
 		pipelineDecl.alphaState.srcBlend = BLEND_FUNC_SRC_COLOR;
 		pipelineDecl.alphaState.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
 
+		m_applyDesc.Init(pDevice, desc1Tex);
+		m_applyDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_applyDesc.SetImageSamplerPairAtBinding(0, m_finalResultsCB.GetTexture(), m_pointSampler);
+
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartApply");
 		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
@@ -435,11 +449,11 @@ namespace usg
 		ASSAOConstants* Consts = m_constants.Lock< ASSAOConstants>();
 
 		Vector2i halfSize;
-		halfSize.x = uWidth + 1 / 2;
-		halfSize.y = uHeight + 1 / 2;
+		halfSize.x = (uWidth + 1) / 2;
+		halfSize.y = (uHeight + 1) / 2;
 		Vector2i quarterSize;
-		quarterSize.x = halfSize.x + 1 / 2;
-		quarterSize.y = halfSize.x + 1 / 2;
+		quarterSize.x = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.x + 1) / 2;
 
 		Consts->ViewportPixelSize.Assign(1.0f / (float)uWidth, 1.0f / (float)uHeight);
 		Consts->HalfViewportPixelSize.Assign(1.0f / (float)halfSize.x, 1.0f / (float)halfSize.y);
@@ -518,7 +532,10 @@ namespace usg
 		{
 			m_halfDepthTargets[i].CleanUp(pDevice);
 		}
+		m_blurDescPing.CleanUp(pDevice);
+		m_blurDescPong.CleanUp(pDevice);
 		m_pingPongCB1.CleanUp(pDevice);
+		m_applyDesc.CleanUp(pDevice);
 		m_pingPongCB2.CleanUp(pDevice);
 		m_finalResultsCB.CleanUp(pDevice);
 		m_importanceMapCB.CleanUp(pDevice);
@@ -579,6 +596,9 @@ namespace usg
 		}
 
 		m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		m_blurDescPing.UpdateDescriptors(pDevice);
+		m_blurDescPong.UpdateDescriptors(pDevice);
+		m_applyDesc.UpdateDescriptors(pDevice);
 	}
 
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -641,6 +661,114 @@ namespace usg
 		}
 	}
 
+
+	void ASSAO::GenerateSSAO(GFXContext* pContext, bool bAdaptive)
+	{
+		static const int cMaxBlurPassCount = 6;
+
+		if (bAdaptive)
+		{
+			ASSERT(m_settings.QualityLevel == 3);
+		}
+
+		int passCount = 4;
+
+		for (int pass = 0; pass < passCount; pass++)
+		{
+			if ((m_settings.QualityLevel < 0) && ((pass == 1) || (pass == 2)))
+				continue;
+
+			int blurPasses = m_settings.BlurPassCount;
+			blurPasses = Math::Min(blurPasses, cMaxBlurPassCount);
+
+			if (m_settings.QualityLevel == 3)
+			{
+				// if adaptive, at least one blur pass needed as the first pass needs to read the final texture results - kind of awkward
+				if (bAdaptive)
+					blurPasses = 0;
+				else
+					blurPasses = Math::Max(1, blurPasses);
+			}
+			else
+			{
+				if (m_settings.QualityLevel <= 0)
+				{
+					// just one blur pass allowed for minimum quality 
+					blurPasses = Math::Min(1, m_settings.BlurPassCount);
+				}
+			}
+
+
+			RenderTarget* pPingRT = &m_pingPongRT1;
+			RenderTarget* pPongRT = &m_pingPongRT2;
+			DescriptorSet* pBlurPingDesc = &m_blurDescPing;
+			DescriptorSet* pBlurPongDesc = &m_blurDescPong;
+
+			// Generate
+			{
+				RenderTarget* rts[] = { pPingRT };
+
+				if (blurPasses == 0)
+				{
+					pContext->SetRenderTargetLayer(&m_finalResultsRT, pass);
+				}
+				else
+				{
+					pContext->SetRenderTarget(pPingRT);
+				}
+
+				int shaderIndex = Math::Max(0, (!bAdaptive) ? (m_settings.QualityLevel) : (4));
+				pContext->SetDescriptorSet(&m_genQDesc[shaderIndex], 1);
+				pContext->SetPipelineState(m_genQPasses[shaderIndex]);
+				m_pSys->DrawFullScreenQuad(pContext);
+			}
+
+			// Blur
+			if (blurPasses > 0)
+			{
+				int wideBlursRemaining = Math::Max(0, blurPasses - 2);
+
+				for (int i = 0; i < blurPasses; i++)
+				{
+					// last pass?
+					if (i == (blurPasses - 1))
+					{
+						pContext->SetRenderTargetLayer(&m_finalResultsRT, pass);
+					}
+					else
+					{
+						pContext->SetRenderTarget(pPongRT);
+
+					}
+
+					pContext->SetDescriptorSet(pBlurPingDesc, 1);
+
+					if (m_settings.QualityLevel > 0)
+					{
+						if (wideBlursRemaining > 0)
+						{
+							pContext->SetPipelineState(m_smartBlurWide);
+							wideBlursRemaining--;
+						}
+						else
+						{
+							pContext->SetPipelineState(m_smartBlurEffect);
+						}
+					}
+					else
+					{
+						pContext->SetPipelineState(m_nonSmartBlurEffect);
+					}
+
+					m_pSys->DrawFullScreenQuad(pContext);
+
+					Math::Swap(pPingRT, pPongRT);
+					Math::Swap(pBlurPingDesc, pBlurPongDesc);
+				}
+			}
+		}
+	}
+
 	bool ASSAO::Draw(GFXContext* pContext, RenderContext& renderContext)
 	{
 		if (!GetEnabled())
@@ -693,8 +821,59 @@ namespace usg
 			}
 		}
 
+		if (m_settings.QualityLevel == 3)
+		{
+			GenerateSSAO(pContext, true);
+			
+			// TODO: Need unordered access view unit to be implemented
+			ASSERT(false);
+
+			#if 0
+			// Generate importance map
+			pContext->SetRenderTarget(&m_importanceMapRT);
+			pContext->SetDescriptorSet(&m_importanceMapDesc);
+			pContext->SetPipelineState(m_genImportanceMap);
+			m_pSys->DrawFullScreenQuad(pContext);
+
+
+			pContext->SetRenderTarget(&m_importanceMapRT);
+			pContext->SetDescriptorSet(&m_importanceMapADesc);
+			pContext->SetPipelineState(m_genImportanceMap);
+			m_pSys->DrawFullScreenQuad(pContext);
+
+
+
+			//UINT fourZeroes[4] = { 0, 0, 0, 0 };
+			//dx11Context->ClearUnorderedAccessViewUint(m_loadCounterUAV, fourZeroes);
+			//dx11Context->OMSetRenderTargetsAndUnorderedAccessViews(1, &m_importanceMap.RTV, NULL, SSAO_LOAD_COUNTER_UAV_SLOT, 1, &m_loadCounterUAV, NULL);
+			pContext->SetDescriptorSet(&m_importanceMapBDesc);
+			pContext->SetPipelineState(m_genImportanceMap);
+			m_pSys->DrawFullScreenQuad(pContext);
+
+			#endif
+		}
+
+		GenerateSSAO(pContext, false);
+
 
 		pContext->SetRenderTarget(m_pDest);
+
+		pContext->SetDescriptorSet(&m_applyDesc, 1);
+
+		if (m_settings.QualityLevel < 0)
+		{
+			pContext->SetPipelineState(m_nonSmartHalfApplyEffect);
+		}
+		else if (m_settings.QualityLevel == 0)
+		{
+			pContext->SetPipelineState(m_nonSmartApplyEffect);
+		}
+		else
+		{
+			pContext->SetPipelineState(m_applyEffect);
+		}
+		m_pSys->DrawFullScreenQuad(pContext);
+
 
 		pContext->EndGPUTag();
 

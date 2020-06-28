@@ -22,7 +22,7 @@ void main()
     float c = depths.x;  // g_DepthSource.Load( int3( ivec2(inPos.xy) * 2, 0 ), ivec2( 0, 1 ) ).x;
     float d = depths.y;  // g_DepthSource.Load( int3( ivec2(inPos.xy) * 2, 0 ), ivec2( 1, 1 ) ).x;
 #else
-    ivec2 baseCoord = ivec2(gl_FragCoord.xy);
+    ivec2 baseCoord = ivec2(gl_FragCoord.xy) * 2;
     float a = texelFetchOffset(g_DepthSource, baseCoord, 0, ivec2( 0, 0 ) ).x;
     float b = texelFetchOffset(g_DepthSource, baseCoord, 0, ivec2( 1, 0 ) ).x;
     float c = texelFetchOffset(g_DepthSource, baseCoord, 0, ivec2( 0, 1 ) ).x;
