@@ -76,9 +76,6 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
     vec2        NDCToViewMul;
     vec2        NDCToViewAdd;
 
-    ivec2       PerPassFullResCoordOffset;
-    vec2        PerPassFullResUVOffset;
-
     vec2        Viewport2xPixelSize;
     vec2        Viewport2xPixelSize_x_025;              // Viewport2xPixelSize * 0.25 (for fusing add+mul into mad)
 
@@ -98,15 +95,12 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
     float       AdaptiveSampleCountLimit;
 
     float       InvSharpness;
-    int         PassIndex;
     vec2        QuarterResPixelSize;                    // used for importance map only
-
-    vec4        PatternRotScaleMatrices[5];
 
     float       NormalsUnpackMul;
     float       NormalsUnpackAdd;
     float       DetailAOStrength;
-    float       Dummy0;
+    float       FarDistance;
 
 #if SSAO_ENABLE_NORMAL_WORLD_TO_VIEW_CONVERSION
     mat4x4                NormalsWorldToViewspaceMatrix;
@@ -138,7 +132,7 @@ vec4 UnpackEdges( float _packedVal )
 #if LINEAR_DEPTH
 float ScreenSpaceToViewSpaceDepth( float screenDepth )
 {
-    return screenDepth;
+    return screenDepth * g_ASSAOConsts.FarDistance;
 }
 #else
 float ScreenSpaceToViewSpaceDepth( float screenDepth )
