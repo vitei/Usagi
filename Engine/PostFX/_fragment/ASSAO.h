@@ -122,7 +122,7 @@ private:
 	DescriptorSet		m_applyDesc;
 	DescriptorSet		m_prepareDepthDesc;
 	DescriptorSet		m_mipDesc[MIP_COUNT-1];
-	DescriptorSet		m_genQDesc[GEN_Q_PASS_COUNT];
+	DescriptorSet		m_genQDesc[GEN_Q_PASS_COUNT][DEPTH_COUNT];
 	DescriptorSet		m_blurDescPing;
 	DescriptorSet		m_blurDescPong;
 

@@ -357,17 +357,20 @@ namespace usg
 
 		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
-			m_genQDesc[i].Init(pDevice, i>=3 ? descGenQAdpt : descGenQ);
-			m_genQDesc[i].SetImageSamplerPair(0, m_halfDepthTargets[i].GetTexture(), m_pointSampler);
-			if (i >= 3)
+			for(uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
 			{
-				m_genQDesc[i].SetImageSamplerPair(2, m_loadTargetCB.GetTexture(), m_pointSampler);
-				m_genQDesc[i].SetImageSamplerPair(3, m_importanceMapCB.GetTexture(), m_pointSampler);
-				m_genQDesc[i].SetImageSamplerPair(4, m_finalResultsCB.GetTexture(), m_pointSampler);
+				m_genQDesc[i][uPass].Init(pDevice, i>=3 ? descGenQAdpt : descGenQ);
+				m_genQDesc[i][uPass].SetImageSamplerPair(0, m_halfDepthTargets[uPass].GetTexture(), m_pointSampler);
+				if (i >= 3)
+				{
+					m_genQDesc[i][uPass].SetImageSamplerPair(2, m_loadTargetCB.GetTexture(), m_pointSampler);
+					m_genQDesc[i][uPass].SetImageSamplerPair(3, m_importanceMapCB.GetTexture(), m_pointSampler);
+					m_genQDesc[i][uPass].SetImageSamplerPair(4, m_finalResultsCB.GetTexture(), m_pointSampler);
+				}
+				m_genQDesc[i][uPass].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+				m_genQDesc[i][uPass].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, &m_passConstants[Math::Clamp((int)i, 0, CONST_PASS_COUNT-1)]);
+				// We don't update these yet as we don't have the normals
 			}
-			m_genQDesc[i].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
-			m_genQDesc[i].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, &m_passConstants[Math::Clamp((int)i, 0, CONST_PASS_COUNT-1)]);
-			// We don't update these yet as we don't have the normals
 		}
 
 
@@ -387,8 +390,8 @@ namespace usg
 		pipelineDecl.alphaState.bBlendEnable = true;
 		pipelineDecl.alphaState.srcBlend = BLEND_FUNC_ZERO;
 		pipelineDecl.alphaState.srcBlendAlpha = BLEND_FUNC_ZERO;
-		pipelineDecl.alphaState.srcBlend = BLEND_FUNC_SRC_COLOR;
-		pipelineDecl.alphaState.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
+		pipelineDecl.alphaState.dstBlend = BLEND_FUNC_SRC_COLOR;
+		pipelineDecl.alphaState.dstBlendAlpha = BLEND_FUNC_SRC_ALPHA;
 
 		m_applyDesc.Init(pDevice, desc1Tex);
 		m_applyDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
@@ -398,6 +401,8 @@ namespace usg
 		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.Apply");
+
+
 		m_applyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartHalfApply");
@@ -554,9 +559,12 @@ namespace usg
 			m_passConstants[i].CleanUp(pDevice);
 		}	
 		
-		for (int i = 0; i < GEN_Q_PASS_COUNT; i++)
+		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
-			m_genQDesc[i].CleanUp(pDevice);
+			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
+			{
+				m_genQDesc[i][uPass].CleanUp(pDevice);
+			}
 		}
 	}
 
@@ -590,9 +598,12 @@ namespace usg
 			m_mipDesc[i].UpdateDescriptors(pDevice);
 		}
 
-		for(int i=0; i< GEN_Q_PASS_COUNT; i++)
+		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
-			m_genQDesc[i].UpdateDescriptors(pDevice);
+			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
+			{
+				m_genQDesc[i][uPass].UpdateDescriptors(pDevice);
+			}
 		}
 
 		m_prepareDepthDesc.UpdateDescriptors(pDevice);
@@ -657,7 +668,10 @@ namespace usg
 
 		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
-			m_genQDesc[i].SetImageSamplerPair(1, pNorm->GetTexture(), m_pointSampler);
+			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
+			{
+				m_genQDesc[i][uPass].SetImageSamplerPair(1, pNorm->GetTexture(), m_pointSampler);
+			}
 		}
 	}
 
@@ -671,7 +685,7 @@ namespace usg
 			ASSERT(m_settings.QualityLevel == 3);
 		}
 
-		int passCount = 4;
+		int passCount = DEPTH_COUNT;
 
 		for (int pass = 0; pass < passCount; pass++)
 		{
@@ -718,7 +732,7 @@ namespace usg
 				}
 
 				int shaderIndex = Math::Max(0, (!bAdaptive) ? (m_settings.QualityLevel) : (4));
-				pContext->SetDescriptorSet(&m_genQDesc[shaderIndex], 1);
+				pContext->SetDescriptorSet(&m_genQDesc[shaderIndex][pass], 1);
 				pContext->SetPipelineState(m_genQPasses[shaderIndex]);
 				m_pSys->DrawFullScreenQuad(pContext);
 			}
