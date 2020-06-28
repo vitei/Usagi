@@ -615,11 +615,11 @@ namespace usg
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 	{
 		Vector2i halfSize;
-		halfSize.x = uWidth + 1 / 2;
-		halfSize.y = uHeight + 1 / 2;
+		halfSize.x = (uWidth + 1) / 2;
+		halfSize.y = (uHeight + 1) / 2;
 		Vector2i quarterSize;
-		quarterSize.x = halfSize.x + 1 / 2;
-		quarterSize.y = halfSize.x + 1 / 2;
+		quarterSize.x = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.x + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
 			m_halfDepthTargets[i].Resize(pDevice, halfSize.x, halfSize.y);
