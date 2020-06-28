@@ -39,13 +39,13 @@ private:
 
 	struct ASSAO_Settings
 	{
-		float Radius = 1.2f;
+		float Radius = 10.f;//1.2f;
 		float ShadowMultiplier = 1.0f;
 		float ShadowPower = 1.50f;
 		float ShadowClamp = 0.98f;
 		float HorizonAngleThreshold = 0.06f;
-		float FadeOutFrom = 50.0f;
-		float FadeOutTo = 300.0f;
+		float FadeOutFrom = 900.0f;
+		float FadeOutTo = 1000.0f;
 		float AdaptiveQualityLimit = 0.45f;
 		int	QualityLevel = 2;
 		int BlurPassCount = 2;
