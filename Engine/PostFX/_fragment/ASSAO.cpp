@@ -467,7 +467,7 @@ namespace usg
 		float depthLinearizeMul = -mProj[3][2];           // float depthLinearizeMul = ( clipFar * clipNear ) / ( clipFar - clipNear );
 		float depthLinearizeAdd = mProj[2][2];           // float depthLinearizeAdd = clipFar / ( clipFar - clipNear );
 
-		float tanHalfFOVY = 1.0f / mProj._22;    // = tanf( drawContext.Camera.GetYFOV( ) * 0.5f );
+		float tanHalfFOVY = -1.0f / mProj._22;    // = tanf( drawContext.Camera.GetYFOV( ) * 0.5f );
 		float tanHalfFOVX = 1.0F / mProj._11;    // = tanHalfFOVY * drawContext.Camera.GetAspect( );
 
 		Consts->DepthUnpackConsts.Assign(depthLinearizeMul, depthLinearizeAdd);
