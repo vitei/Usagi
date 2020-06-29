@@ -52,6 +52,7 @@ ConstantSet_ps::ConstantSet_ps()
 	m_bDataValid	= false;
 	m_pOwner		= NULL;
 	m_buffer = VK_NULL_HANDLE;
+	m_memory		= nullptr;
 	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
 	m_uBufferCount = 0;
