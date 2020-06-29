@@ -228,7 +228,7 @@ namespace usg
 		halfSize.y = (pDst->GetHeight() + 1) / 2;
 		Vector2i quarterSize;
 		quarterSize.x = (halfSize.x + 1) / 2;
-		quarterSize.y = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.y + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
 			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
@@ -878,7 +878,7 @@ namespace usg
 			m_pSys->DrawFullScreenQuad(pContext);
 
 
-			pContext->SetRenderTarget(&m_importanceMapRT);
+			pContext->SetRenderTarget(&m_importanceMapPongRT);
 			pContext->SetDescriptorSet(&m_importanceMapADesc, 1);
 			pContext->SetPipelineState(m_importanceMapA);
 			m_pSys->DrawFullScreenQuad(pContext);
@@ -888,6 +888,7 @@ namespace usg
 			//UINT fourZeroes[4] = { 0, 0, 0, 0 };
 			//dx11Context->ClearUnorderedAccessViewUint(m_loadCounterUAV, fourZeroes);
 			//dx11Context->OMSetRenderTargetsAndUnorderedAccessViews(1, &m_importanceMap.RTV, NULL, SSAO_LOAD_COUNTER_UAV_SLOT, 1, &m_loadCounterUAV, NULL);
+			pContext->SetRenderTarget(&m_importanceMapRT);
 			pContext->SetDescriptorSet(&m_importanceMapBDesc, 1);
 			pContext->SetPipelineState(m_importanceMapB);
 			m_pSys->DrawFullScreenQuad(pContext);
