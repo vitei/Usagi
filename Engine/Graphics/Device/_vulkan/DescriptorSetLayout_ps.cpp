@@ -16,7 +16,8 @@ namespace usg {
 	{
 		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,	// DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 0,
 		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 			// DESCRIPTOR_TYPE_CONSTANT_BUFFER,
-		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC	// DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC,
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,	// DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC,
+		VK_DESCRIPTOR_TYPE_STORAGE_IMAGE			// DESCRIPTOR_TYPE_STORAGE_IMAGE
 	};
 
 	VkShaderStageFlags GetShaderFlags(ShaderTypeFlags eFlags)
@@ -122,7 +123,7 @@ namespace usg {
 			pBindings[i].descriptorType = g_descriptorTypes[pDecl->eDescriptorType];
 			pBindings[i].stageFlags = GetShaderFlags(pDecl->shaderType);
 			pBindings[i].binding = pDecl->uBinding;
-			if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || pDecl->eDescriptorType == DESCRIPTOR_TYPE_STORAGE_IMAGE)
 			{
 				pBindings[i].binding += SAMPLER_OFFSET;
 			}

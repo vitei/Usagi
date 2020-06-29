@@ -93,6 +93,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 			switch (pDecl->eDescriptorType)
 			{
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 			{
 				m_pData[uDataIndex].texData.tex = copy.m_pData[uDataIndex].texData.tex;
 				m_pData[uDataIndex].texData.sampler = copy.m_pData[uDataIndex].texData.sampler;
@@ -131,6 +132,7 @@ void DescriptorSet::UpdateTimeTags()
 			break;
 		}
 		case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+		case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 		{
 			if (m_pData[i].texData.tex.get() != nullptr)
 			{
@@ -159,6 +161,7 @@ bool DescriptorSet::IsUptoDate() const
 				break;
 			}
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 			{
 				if (!m_pData[i].texData.tex.get() || (m_pData[i].texData.tex->GetUpdateIdx() != m_pData[i].uLastUpdateIdx) )
 				{

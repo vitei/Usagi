@@ -110,6 +110,22 @@ namespace usg {
 				writes[i].pImageInfo = &images[uIndex];
 				break;
 			}
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			{
+				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				writes[i].dstBinding += SAMPLER_OFFSET;	// Share the offsets of standard samplers
+				size_t uIndex = images.size();
+				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				{
+					VkDescriptorImageInfo image = {};
+					image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					image.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+					images.push_back(image);
+				}
+
+				writes[i].pImageInfo = &images[uIndex];
+				break;
+			}
 			default:
 				ASSERT(false);
 			}

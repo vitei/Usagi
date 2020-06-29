@@ -173,6 +173,14 @@ namespace usg
 		DESCRIPTOR_END()
 	};
 
+	static const DescriptorDeclaration g_descriptImportanceB[] =
+	{
+		DESCRIPTOR_ELEMENT(0,						 DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(1,						 DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
+		DESCRIPTOR_END()
+	};
+
 
 	ASSAO::ASSAO()
 	{
@@ -202,6 +210,8 @@ namespace usg
 		DescriptorSetLayoutHndl desc4Tex = pDevice->GetDescriptorSetLayout(g_descriptFourTex);
 		DescriptorSetLayoutHndl descGenQ = pDevice->GetDescriptorSetLayout(g_descriptGenerateQ);
 		DescriptorSetLayoutHndl descGenQAdpt = pDevice->GetDescriptorSetLayout(g_descriptGenerateQAdpt);
+		DescriptorSetLayoutHndl descImpB = pDevice->GetDescriptorSetLayout(g_descriptImportanceB);
+
 		usg::ColorBuffer* pBuffers[4];
 
 
@@ -238,6 +248,17 @@ namespace usg
 		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
 		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB);
+
+
+		m_importanceMapDesc.Init(pDevice, desc1Tex);
+		m_importanceMapADesc.Init(pDevice, desc1Tex);
+		m_importanceMapBDesc.Init(pDevice, descImpB);
+		m_importanceMapDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_importanceMapDesc.SetImageSamplerPairAtBinding(0, m_finalResultsCB.GetTexture(), m_pointSampler);
+		m_importanceMapADesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_importanceMapADesc.SetImageSamplerPairAtBinding(0, m_importanceMapCB.GetTexture(), m_pointSampler);
+		m_importanceMapBDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_importanceMapBDesc.SetImageSamplerPairAtBinding(0, m_importanceMapPongCB.GetTexture(), m_pointSampler);
 
 
 		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
@@ -383,6 +404,7 @@ namespace usg
 		m_importanceMapA = pDevice->GetPipelineState(m_importanceMapRT.GetRenderPass(), pipelineDecl);
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PPImportanceMapB");
+		pipelineDecl.layout.descriptorSets[1] = descImpB;
 		m_importanceMapB = pDevice->GetPipelineState(m_importanceMapRT.GetRenderPass(), pipelineDecl);
 
 
@@ -547,6 +569,11 @@ namespace usg
 		m_importanceMapPongCB.CleanUp(pDevice);
 		m_loadTargetCB.CleanUp(pDevice);
 
+		m_importanceMapDesc.CleanUp(pDevice);
+		m_importanceMapADesc.CleanUp(pDevice);
+		m_importanceMapBDesc.CleanUp(pDevice);
+
+
 		m_constants.CleanUp(pDevice);
 		m_prepareDepthDesc.CleanUp(pDevice);
 		for(int i=0; i<MIP_COUNT-1; i++)
@@ -610,6 +637,10 @@ namespace usg
 		m_blurDescPing.UpdateDescriptors(pDevice);
 		m_blurDescPong.UpdateDescriptors(pDevice);
 		m_applyDesc.UpdateDescriptors(pDevice);
+		m_importanceMapDesc.UpdateDescriptors(pDevice);
+		m_importanceMapADesc.UpdateDescriptors(pDevice);
+		// TODO: Not yet working
+		//m_importanceMapBDesc.UpdateDescriptors(pDevice);
 	}
 
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -842,17 +873,16 @@ namespace usg
 			// TODO: Need unordered access view unit to be implemented
 			ASSERT(false);
 
-			#if 0
 			// Generate importance map
 			pContext->SetRenderTarget(&m_importanceMapRT);
-			pContext->SetDescriptorSet(&m_importanceMapDesc);
+			pContext->SetDescriptorSet(&m_importanceMapDesc, 1);
 			pContext->SetPipelineState(m_genImportanceMap);
 			m_pSys->DrawFullScreenQuad(pContext);
 
 
 			pContext->SetRenderTarget(&m_importanceMapRT);
-			pContext->SetDescriptorSet(&m_importanceMapADesc);
-			pContext->SetPipelineState(m_genImportanceMap);
+			pContext->SetDescriptorSet(&m_importanceMapADesc, 1);
+			pContext->SetPipelineState(m_importanceMapA);
 			m_pSys->DrawFullScreenQuad(pContext);
 
 
@@ -860,11 +890,10 @@ namespace usg
 			//UINT fourZeroes[4] = { 0, 0, 0, 0 };
 			//dx11Context->ClearUnorderedAccessViewUint(m_loadCounterUAV, fourZeroes);
 			//dx11Context->OMSetRenderTargetsAndUnorderedAccessViews(1, &m_importanceMap.RTV, NULL, SSAO_LOAD_COUNTER_UAV_SLOT, 1, &m_loadCounterUAV, NULL);
-			pContext->SetDescriptorSet(&m_importanceMapBDesc);
-			pContext->SetPipelineState(m_genImportanceMap);
+			pContext->SetDescriptorSet(&m_importanceMapBDesc, 1);
+			pContext->SetPipelineState(m_importanceMapB);
 			m_pSys->DrawFullScreenQuad(pContext);
 
-			#endif
 		}
 
 		GenerateSSAO(pContext, false);

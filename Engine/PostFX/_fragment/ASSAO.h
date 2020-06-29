@@ -125,6 +125,9 @@ private:
 	DescriptorSet		m_genQDesc[GEN_Q_PASS_COUNT][DEPTH_COUNT];
 	DescriptorSet		m_blurDescPing;
 	DescriptorSet		m_blurDescPong;
+	DescriptorSet		m_importanceMapDesc;
+	DescriptorSet		m_importanceMapADesc;
+	DescriptorSet		m_importanceMapBDesc;
 
 	bool				m_bHasLinearDepth;
 	bool				m_bGenerateNormals;
