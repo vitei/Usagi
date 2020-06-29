@@ -6,7 +6,7 @@ ATTRIB_LOC(0) in vec2 vo_vTexCoord;
 
 SAMPLER_LOC(1, 0) uniform sampler2D g_ImportanceMap;   // corresponds to SSAO_TEXTURE_SLOT3
 
-layout(binding=1, r32ui) uniform uimage1D g_LoadCounterOutputUAV;   // corresponds to SSAO_LOAD_COUNTER_UAV_SLOT 
+layout(set=1, binding=1, r32ui) uniform uimage1D g_LoadCounterOutputUAV;   // corresponds to SSAO_LOAD_COUNTER_UAV_SLOT 
 
 layout(location = 0) out float colorOut;
 

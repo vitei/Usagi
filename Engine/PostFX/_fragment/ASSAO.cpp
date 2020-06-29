@@ -259,6 +259,7 @@ namespace usg
 		m_importanceMapADesc.SetImageSamplerPairAtBinding(0, m_importanceMapCB.GetTexture(), m_pointSampler);
 		m_importanceMapBDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 		m_importanceMapBDesc.SetImageSamplerPairAtBinding(0, m_importanceMapPongCB.GetTexture(), m_pointSampler);
+		m_importanceMapBDesc.SetImageAtBinding(1, m_loadTargetCB.GetTexture());
 
 
 		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
@@ -419,6 +420,7 @@ namespace usg
 		m_applyDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 		m_applyDesc.SetImageSamplerPairAtBinding(0, m_finalResultsCB.GetTexture(), m_pointSampler);
 
+		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartApply");
 		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
 
@@ -639,8 +641,7 @@ namespace usg
 		m_applyDesc.UpdateDescriptors(pDevice);
 		m_importanceMapDesc.UpdateDescriptors(pDevice);
 		m_importanceMapADesc.UpdateDescriptors(pDevice);
-		// TODO: Not yet working
-		//m_importanceMapBDesc.UpdateDescriptors(pDevice);
+		m_importanceMapBDesc.UpdateDescriptors(pDevice);
 	}
 
 	void ASSAO::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -869,9 +870,6 @@ namespace usg
 		if (m_settings.QualityLevel == 3)
 		{
 			GenerateSSAO(pContext, true);
-			
-			// TODO: Need unordered access view unit to be implemented
-			ASSERT(false);
 
 			// Generate importance map
 			pContext->SetRenderTarget(&m_importanceMapRT);

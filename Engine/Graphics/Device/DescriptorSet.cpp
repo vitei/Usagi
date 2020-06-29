@@ -176,6 +176,22 @@ bool DescriptorSet::IsUptoDate() const
 	return true;
 }
 
+void DescriptorSet::SetImage(uint32 uLayoutIndex, const TextureHndl& pTexture, const ImageViewDef& imageView)
+{
+	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
+	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
+
+	uint32 uResourceIndex = m_pLayoutDesc->GetResourceIndex(uLayoutIndex, 0);
+	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_STORAGE_IMAGE);
+	ASSERT(pTexture.get() != nullptr);
+
+	// I feel so dirty doing this but we know for a fact that we created this pointer and it saves a lot of extra hassle to get around it
+	m_pData[uResourceIndex].texData.tex = pTexture;
+	m_pData[uResourceIndex].texData.sampler = SamplerHndl();
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
+	m_pData[uResourceIndex].texData.imageView = imageView;
+}
+
 void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex, const ImageViewDef& imageView)
 {
 	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
@@ -204,6 +220,21 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 
 	m_pData[uResourceIndex].pConstBuffer = pBuffer;
 	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
+}
+
+
+void DescriptorSet::SetImageAtBinding(uint32 uBinding, const TextureHndl& pTexture, const ImageViewDef& imageView)
+{
+	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
+	{
+		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
+		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_STORAGE_IMAGE && uBinding == pDecl->uBinding)
+		{
+			SetImage(i, pTexture, imageView);
+			return;
+		}
+	}
+	ASSERT(false);
 }
 
 

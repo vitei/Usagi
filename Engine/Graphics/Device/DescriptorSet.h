@@ -28,10 +28,12 @@ public:
 	void CleanUp(GFXDevice* pDevice);
 
 	void SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex = 0, const ImageViewDef& imageView = ImageViewDef::Default());
+	void SetImage(uint32 uLayoutIndex, const TextureHndl& pTexture, const ImageViewDef& imageView = ImageViewDef::Default());
 	void SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuffer, uint32 uSubIndex = 0);
 
 	// Convenience functions so you don't have to recall the descriptor layout
 	void SetImageSamplerPairAtBinding(uint32 uBinding, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex = 0, const ImageViewDef& imageView = ImageViewDef::Default());
+	void SetImageAtBinding(uint32 uBinding, const TextureHndl& pTexture, const ImageViewDef& imageView = ImageViewDef::Default());
 	void SetConstantSetAtBinding(uint32 uBinding, const ConstantSet* pBuffer, uint32 uSubIndex = 0, uint32 uFlags = SHADER_FLAG_ALL);
 
 	// Not convinced I should allow access, but for now
