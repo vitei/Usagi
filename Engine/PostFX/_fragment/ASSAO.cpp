@@ -152,7 +152,7 @@ namespace usg
 		DESCRIPTOR_END()
 	};
 
-	static const DescriptorDeclaration g_descriptGenerateQAdpt[] =
+	static const DescriptorDeclaration g_descriptGenerateQ3[] =
 	{
 		DESCRIPTOR_ELEMENT(0,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
 		DESCRIPTOR_ELEMENT(1,	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, SHADER_FLAG_PIXEL),
@@ -209,7 +209,7 @@ namespace usg
 		DescriptorSetLayoutHndl desc2Tex = pDevice->GetDescriptorSetLayout(g_descriptTwoTex);
 		DescriptorSetLayoutHndl desc4Tex = pDevice->GetDescriptorSetLayout(g_descriptFourTex);
 		DescriptorSetLayoutHndl descGenQ = pDevice->GetDescriptorSetLayout(g_descriptGenerateQ);
-		DescriptorSetLayoutHndl descGenQAdpt = pDevice->GetDescriptorSetLayout(g_descriptGenerateQAdpt);
+		DescriptorSetLayoutHndl descGenQ3 = pDevice->GetDescriptorSetLayout(g_descriptGenerateQ3);
 		DescriptorSetLayoutHndl descImpB = pDevice->GetDescriptorSetLayout(g_descriptImportanceB);
 
 		usg::ColorBuffer* pBuffers[4];
@@ -370,10 +370,11 @@ namespace usg
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.2");
 		m_genQPasses[2] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
-		pipelineDecl.layout.descriptorSets[1] = descGenQAdpt;
+		pipelineDecl.layout.descriptorSets[1] = descGenQ3;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3");
 		m_genQPasses[3] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
+		pipelineDecl.layout.descriptorSets[1] = descGenQ;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3Base");
 		m_genQPasses[4] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
 
@@ -381,9 +382,9 @@ namespace usg
 		{
 			for(uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
 			{
-				m_genQDesc[i][uPass].Init(pDevice, i>=3 ? descGenQAdpt : descGenQ);
+				m_genQDesc[i][uPass].Init(pDevice, i==3 ? descGenQ3 : descGenQ);
 				m_genQDesc[i][uPass].SetImageSamplerPair(0, m_halfDepthTargets[uPass].GetTexture(), m_pointSampler);
-				if (i >= 3)
+				if (i == 3)
 				{
 					m_genQDesc[i][uPass].SetImageSamplerPair(2, m_loadTargetCB.GetTexture(), m_pointSampler);
 					m_genQDesc[i][uPass].SetImageSamplerPair(3, m_importanceMapCB.GetTexture(), m_pointSampler);
@@ -438,16 +439,15 @@ namespace usg
 	{
 		ASSAOPassConstants* Consts = m_passConstants[uPass].Lock< ASSAOPassConstants>();
 
-		int pass = 0;
-		Consts->PerPassFullResCoordOffset = Vector2i(pass % 2, pass / 2);
-		Consts->PerPassFullResUVOffset = Vector2f(((pass % 2) - 0.0f) / uWidth, ((pass / 2) - 0.0f) / uHeight);
-		Consts->PassIndex = pass;
+		Consts->PerPassFullResCoordOffset = Vector2i(uPass % 2, uPass / 2);
+		Consts->PerPassFullResUVOffset = Vector2f(((uPass % 2) - 0.0f) / uWidth, ((uPass / 2) - 0.0f) / uHeight);
+		Consts->PassIndex = uPass;
 		float additionalAngleOffset = m_settings.TemporalSupersamplingAngleOffset;  // if using temporal supersampling approach (like "Progressive Rendering Using Multi-frame Sampling" from GPU Pro 7, etc.)
 		float additionalRadiusScale = m_settings.TemporalSupersamplingRadiusOffset; // if using temporal supersampling approach (like "Progressive Rendering Using Multi-frame Sampling" from GPU Pro 7, etc.)
 		const int subPassCount = 5;
 		for (int subPass = 0; subPass < subPassCount; subPass++)
 		{
-			int a = pass;
+			int a = uPass;
 			int b = subPass;
 
 			int spmap[5]{ 0, 1, 4, 3, 2 };
@@ -870,7 +870,6 @@ namespace usg
 		if (m_settings.QualityLevel == 3)
 		{
 			GenerateSSAO(pContext, true);
-
 			// Generate importance map
 			pContext->SetRenderTarget(&m_importanceMapRT);
 			pContext->SetDescriptorSet(&m_importanceMapDesc, 1);
@@ -894,7 +893,6 @@ namespace usg
 			m_pSys->DrawFullScreenQuad(pContext);
 
 		}
-
 		GenerateSSAO(pContext, false);
 
 

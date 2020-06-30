@@ -13,7 +13,7 @@ layout(location = 0) out vec2 colorOut;
 
 SAMPLER_LOC(1, 0) uniform sampler2D g_ViewspaceDepthSource;
 SAMPLER_LOC(1, 1) uniform sampler2D g_NormalmapSource;
-#if (defined IS_BASE || GENERATE_PASS == 3)
+#if (!(defined IS_BASE) && GENERATE_PASS == 3)    
 SAMPLER_LOC(1, 2) uniform sampler1D g_LoadCounter;   
 SAMPLER_LOC(1, 3) uniform sampler2D g_ImportanceMap;  
 SAMPLER_LOC(1, 4) uniform sampler2DArray g_FinalSSAO; 
@@ -311,7 +311,7 @@ void GenerateSSAOShadowsInternal( out float outShadowTerm, out vec4 outEdges, ou
             SSAOTap( qualityLevel, obscuranceSum, weightSum, i, rotScale, pixCenterPos, negViewspaceDir, pixelNormal, normalizedScreenPos, mipOffset, falloffCalcMulSq, 1.0, normXY, normXYLength );
         }
     }
-#if (defined IS_BASE || GENERATE_PASS == 3)    
+#if (!(defined IS_BASE) && GENERATE_PASS == 3)    
     else // if( qualityLevel == 3 ) adaptive approach
     {
         // add new ones if needed

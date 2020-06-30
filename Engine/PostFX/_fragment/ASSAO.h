@@ -47,7 +47,7 @@ private:
 		float FadeOutFrom = 900.0f;
 		float FadeOutTo = 1000.0f;
 		float AdaptiveQualityLimit = 0.45f;
-		int	QualityLevel = 2;
+		int	QualityLevel = 3;
 		int BlurPassCount = 2;
 		float Sharpness = 0.98f;
 		float TemporalSupersamplingAngleOffset = 0.0f;
