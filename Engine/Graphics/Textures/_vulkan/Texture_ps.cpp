@@ -124,10 +124,13 @@ VkImageUsageFlags GetImageUsage(uint32 uUsage)
 	{
 		flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	}
+	if(uUsage&TU_FLAG_STORAGE_BIT)
+	{
+		flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+	}
 
 	// Currently lacking flags mapping to the following:
 	// VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002,
-	// VK_IMAGE_USAGE_STORAGE_BIT = 0x00000008,
 	// VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = 0x00000040,
 	// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = 0x00000080,
 
@@ -343,7 +346,6 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	// Create the image view
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &m_imageView);
 	ASSERT(res == VK_SUCCESS);
-
 	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;

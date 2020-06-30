@@ -357,6 +357,28 @@ namespace usg {
 	}
 
 
+	void GFXContext_ps::ClearImage(const TextureHndl& texture, const Color& col)
+	{
+		VkClearColorValue clear;
+		MemClear(&clear, sizeof(VkClearColorValue));
+
+		for (int i = 0; i < 4; i++)
+		{
+			// TODO: Only set the relevant one
+			clear.float32[i] = col.rgba()[i];
+			clear.int32[i] = (sint32)col.rgba()[i];
+			clear.uint32[i] = (uint32)col.rgba()[i];
+		}
+
+		VkImageSubresourceRange subRes = {};
+		subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subRes.layerCount = 1;
+		subRes.levelCount = 1;
+
+		vkCmdClearColorImage(m_cmdBuff, texture->GetPlatform().GetImage(), texture->GetPlatform().GetImageLayout(), &clear, 1, &subRes);
+	}
+
+
 	void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot)
 	{
 		// TODO: Change the interface so we are setting them all at once

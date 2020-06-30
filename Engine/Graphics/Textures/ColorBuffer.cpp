@@ -34,7 +34,7 @@ void ColorBuffer::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorF
 	m_eSampleCount = eSamples;
 	m_eFormat = eFormat;
 
-	ASSERT(uFlags&TU_FLAG_COLOR_ATTACHMENT);
+	//ASSERT(uFlags&TU_FLAG_COLOR_ATTACHMENT);
 	m_platform.Init(pDevice, uWidth, uHeight, eFormat, eSamples, uFlags, uRTLoc, uMipCount);
 }
 

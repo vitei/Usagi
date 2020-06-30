@@ -249,6 +249,7 @@ namespace usg
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
 		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB);
 
+		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT);
 
 		m_importanceMapDesc.Init(pDevice, desc1Tex);
 		m_importanceMapADesc.Init(pDevice, desc1Tex);
@@ -263,7 +264,6 @@ namespace usg
 
 
 		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
-		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32);
 		m_finalResultsRT.Init(pDevice, &m_finalResultsCB);
 
 		RenderTarget::RenderPassFlags flags;
@@ -887,6 +887,7 @@ namespace usg
 			//UINT fourZeroes[4] = { 0, 0, 0, 0 };
 			//dx11Context->ClearUnorderedAccessViewUint(m_loadCounterUAV, fourZeroes);
 			//dx11Context->OMSetRenderTargetsAndUnorderedAccessViews(1, &m_importanceMap.RTV, NULL, SSAO_LOAD_COUNTER_UAV_SLOT, 1, &m_loadCounterUAV, NULL);
+			pContext->ClearImage(m_loadTargetCB.GetTexture(), Color::Black);
 			pContext->SetRenderTarget(&m_importanceMapRT);
 			pContext->SetDescriptorSet(&m_importanceMapBDesc, 1);
 			pContext->SetPipelineState(m_importanceMapB);

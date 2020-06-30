@@ -46,6 +46,7 @@ public:
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
 	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);
+	void ClearImage(const TextureHndl& texture, const Color& col);
 
 	
 	PipelineStateHndl	GetActivePipeline() { return m_activeStateGroup; }
@@ -103,6 +104,11 @@ private:
 inline void GFXContext::ClearRenderTarget(uint32 uFlags)
 {
 	m_platform.ClearRenderTarget(m_pActiveRT, uFlags);
+}
+
+inline void GFXContext::ClearImage(const TextureHndl& texture, const Color& col)
+{
+	m_platform.ClearImage(texture, col);
 }
 
 inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot=0)

@@ -53,6 +53,7 @@ public:
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void ClearRenderTarget(RenderTarget* pRT, uint32 uFlags);
+	void ClearImage(const TextureHndl& texture, const Color& col);
 
 	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);

@@ -88,6 +88,7 @@ enum TextureUsageFlags
 	TU_FLAG_DEPTH_ATTACHMENT = (1 << 4),
 	TU_FLAG_USE_HI_Z = (1 << 5),	// Depth-stencil textures only
 	TU_FLAG_TRANSFER_DST = (1 << 6),	// Images updated via CPU, e.g. video images
+	TU_FLAG_STORAGE_BIT = (1 << 7),		// Images used for unordered access/reads (imageLoad/ imageStore) rather than colorOut 
 	TU_FLAGS_OFFSCREEN_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM,
 	TU_FLAGS_FINAL_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_TRANSFER_SRC | TU_FLAG_FAST_MEM,
 	TU_FLAGS_DEPTH_BUFFER = TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_FAST_MEM | TU_FLAG_USE_HI_Z,
