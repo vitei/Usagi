@@ -247,9 +247,9 @@ namespace usg
 		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
 		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
-		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB);
+		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB); 
 
-		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT);
+		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
 
 		m_importanceMapDesc.Init(pDevice, desc1Tex);
 		m_importanceMapADesc.Init(pDevice, desc1Tex);
@@ -891,11 +891,21 @@ namespace usg
 			//UINT fourZeroes[4] = { 0, 0, 0, 0 };
 			//dx11Context->ClearUnorderedAccessViewUint(m_loadCounterUAV, fourZeroes);
 			//dx11Context->OMSetRenderTargetsAndUnorderedAccessViews(1, &m_importanceMap.RTV, NULL, SSAO_LOAD_COUNTER_UAV_SLOT, 1, &m_loadCounterUAV, NULL);
+			pContext->SetRenderTarget(nullptr);
 			pContext->ClearImage(m_loadTargetCB.GetTexture(), Color::Black);
 			pContext->SetRenderTarget(&m_importanceMapRT);
 			pContext->SetDescriptorSet(&m_importanceMapBDesc, 1);
 			pContext->SetPipelineState(m_importanceMapB);
 			m_pSys->DrawFullScreenQuad(pContext);
+			// FIXME: Gotta handle this more gracefully
+#ifdef USE_VULKAN
+			pContext->SetRenderTarget(nullptr);
+			VkImageSubresourceRange subRes = {};
+			subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			subRes.layerCount = VK_REMAINING_ARRAY_LAYERS;
+			subRes.levelCount = VK_REMAINING_MIP_LEVELS;
+			pContext->GetPlatform().SetImageLayout(m_loadTargetCB.GetTexture()->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subRes);
+#endif
 
 		}
 		GenerateSSAO(pContext, false);

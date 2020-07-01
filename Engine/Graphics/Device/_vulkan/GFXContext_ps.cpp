@@ -372,10 +372,12 @@ namespace usg {
 
 		VkImageSubresourceRange subRes = {};
 		subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		subRes.layerCount = 1;
-		subRes.levelCount = 1;
+		subRes.layerCount = VK_REMAINING_ARRAY_LAYERS;
+		subRes.levelCount = VK_REMAINING_MIP_LEVELS;
 
-		vkCmdClearColorImage(m_cmdBuff, texture->GetPlatform().GetImage(), texture->GetPlatform().GetImageLayout(), &clear, 1, &subRes);
+		SetImageLayout(texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subRes);
+		vkCmdClearColorImage(m_cmdBuff, texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clear, 1, &subRes);
+		SetImageLayout(texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, subRes);
 	}
 
 

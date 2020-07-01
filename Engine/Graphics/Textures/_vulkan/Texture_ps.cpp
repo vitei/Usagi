@@ -246,7 +246,7 @@ VkImageView Texture_ps::GetImageView(GFXDevice* pDevice, const ImageViewDef& def
 	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
 	view_info.subresourceRange.baseArrayLayer = def.uBaseLayer;
 	view_info.subresourceRange.layerCount = def.uLayerCount == USG_INVALID_ID ? m_uFaces - def.uBaseLayer : Math::Min(def.uLayerCount, m_uFaces - def.uBaseLayer);
-	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.viewType = m_uHeight == 1 ? VK_IMAGE_VIEW_TYPE_1D : VK_IMAGE_VIEW_TYPE_2D;
 	view_info.subresourceRange.baseMipLevel = def.uBaseMip;
 	view_info.subresourceRange.levelCount = def.uMipCount == USG_INVALID_ID ? m_uMips - def.uBaseMip : Math::Min(def.uMipCount, m_uMips - def.uBaseMip);
 
@@ -267,7 +267,7 @@ VkImageView Texture_ps::CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint3
 	VkImageViewCreateInfo view_info = m_imageViewCreateInfo;
 	view_info.subresourceRange.baseArrayLayer = uLayer;
 	view_info.subresourceRange.layerCount = 1;
-	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.viewType = m_uHeight == 1 ? VK_IMAGE_VIEW_TYPE_1D : VK_IMAGE_VIEW_TYPE_2D;
 	view_info.subresourceRange.baseMipLevel = uMip;
 	view_info.subresourceRange.levelCount = 1;
 
@@ -305,7 +305,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
     VkImageCreateInfo image_create_info = {};
     image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_create_info.pNext = NULL;
-    image_create_info.imageType = VK_IMAGE_TYPE_2D;
+    image_create_info.imageType = uHeight == 1 ? VK_IMAGE_TYPE_1D : VK_IMAGE_TYPE_2D;
     image_create_info.format = pDevice->GetPlatform().GetColorFormat(eFormat);
 
     image_create_info.extent.width = uWidth;
@@ -339,7 +339,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.levelCount = uMipmaps;
 	view_info.subresourceRange.baseArrayLayer = 0;
 	view_info.subresourceRange.layerCount = 1;
-	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.viewType = uHeight == 1 ? VK_IMAGE_VIEW_TYPE_1D : VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
 	m_imageViewCreateInfo = view_info;
 
@@ -359,6 +359,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	case CF_RGB_888:
 		m_uBpp = 3; break;
 	case CF_RGBA_8888:
+	case CF_R_32:
 		m_uBpp = 4; break;
 	default:
 		break;	// bpp won't be valid
@@ -509,7 +510,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	image_create_info.pNext = NULL;
-	image_create_info.imageType = VK_IMAGE_TYPE_2D;
+	image_create_info.imageType = uHeight == 1 ? VK_IMAGE_TYPE_1D : VK_IMAGE_TYPE_2D;
 	image_create_info.format = depth_format;
 	image_create_info.extent.width = uWidth;
 	image_create_info.extent.height = uHeight;
@@ -542,7 +543,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 	view_info.subresourceRange.levelCount = 1;
 	view_info.subresourceRange.baseArrayLayer = 0;
 	view_info.subresourceRange.layerCount = 1;
-	view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_info.viewType = uHeight == 1 ? VK_IMAGE_VIEW_TYPE_1D : VK_IMAGE_VIEW_TYPE_2D;
 	view_info.flags = 0;
 	m_imageViewCreateInfo = view_info;
 

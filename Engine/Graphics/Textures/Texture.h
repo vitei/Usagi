@@ -66,7 +66,7 @@ private:
 // FIXME: Remove this when we only have one method of loading
 inline void Texture::CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels, bool bDynamic)
 {
-	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels, TD_TEXTURE2D, bDynamic ? TU_FLAG_SHADER_READ | TU_FLAG_TRANSFER_DST : TU_FLAG_SHADER_READ);
+	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels, uHeight == 1 ? TD_TEXTURE1D : TD_TEXTURE2D, bDynamic ? TU_FLAG_SHADER_READ | TU_FLAG_TRANSFER_DST : TU_FLAG_SHADER_READ);
 	SetReady(true);
 }
 
