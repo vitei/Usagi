@@ -68,8 +68,8 @@ private:
 	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
 
-	memsize InitInputBindings(usg::GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl,
-								PipelineStateDecl& pipelineState);
+	memsize InitInputBindings(GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl,
+								int RenderState, PipelineStateDecl& pipelineState);
 
 	SkeletonResource		m_defaultSkeleton;
 	Mesh*                   m_meshArray;

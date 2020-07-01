@@ -20,15 +20,18 @@ void Model::RenderMesh::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId,
 {
 	if (passes.IsRenderPassDeferred(*this))
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.deferredPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFERRED].pipeline);
+		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFERRED].singleVerts);
 	}
 	else if (passes.IsRenderPassTranslucent(*this))
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.transparentPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_TRANSPARENT].pipeline);
+		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_TRANSPARENT].singleVerts);
 	}
 	else
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->pipelines.defaultPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFAULT].pipeline);
+		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFAULT].singleVerts);
 	}
 }
 	
@@ -55,9 +58,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 {
 	m_pMeshResource = pMesh;
 	const char* pszName = pModel->GetResource()->GetName().CStr();
-	for (uint32 i = 0; i < ARRAY_SIZE(pMesh->vertexBuffer); ++i) {
-		SetVertexBuffer(i, &pMesh->vertexBuffer[i]);
-	}
+	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
 
 	//	SetMaterial(&pMesh->material);
@@ -83,26 +84,32 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		// FIXME: This is only valid for shadow render passes, need another pipeline for scene pre depth passes
 		renderPass = pScene->GetShadowRenderPass();
 
-		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.depthPassPipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEPTH].pipeline);
+		SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEPTH].singleVerts);
 	}
 	else
 	{
 		if (pScene->GetRenderPasses(0).IsRenderPassDeferred(*this))
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.deferredPipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEFERRED].pipeline);
+			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEFERRED].singleVerts);
 		}
 		else if (pScene->GetRenderPasses(0).IsRenderPassTranslucent(*this))
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.transparentPipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_TRANSPARENT].pipeline);
+			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_TRANSPARENT].singleVerts);
 		}
 		else
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->pipelines.defaultPipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEFAULT].pipeline);
+			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEFAULT].singleVerts);
 		}
 	}
-	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->pipelines.omniDepthPassPipeline);
 
-	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout);
+	// FIXME: Single verts for omni depth!
+	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline);
+
+	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
 
 	// FIXME: Get the index from the custom fx declaration
 	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
