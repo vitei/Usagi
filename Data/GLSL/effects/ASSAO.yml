@@ -36,7 +36,7 @@ Effects:
       -  name: "3"
          defines: MIP_LEVEL=3
   - name: GenerateQ
-    vert: PostFX/fullscreen
+    vert: PostFX/fullscreenNoUV
     frag: ASSAO/GenerateQ
     has_default: false
     define_sets:

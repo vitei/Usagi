@@ -180,7 +180,7 @@ namespace usg
 		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
 		DESCRIPTOR_END()
 	};
-
+	 
 
 	ASSAO::ASSAO()
 	{
@@ -304,6 +304,7 @@ namespace usg
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepths");
 
 		// All the depth targets should have the same render pass
+		pipelineDecl.alphaState.EnableMultipleTargets(4);
 		m_prepareDepthEffect = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepths.lin");
 		m_prepareDepthEffectLin = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
@@ -311,11 +312,13 @@ namespace usg
 		m_prepareDepthDesc.Init(pDevice, pipelineDecl.layout.descriptorSets[1]);
 		m_prepareDepthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 
+		pipelineDecl.alphaState.EnableMultipleTargets(2);
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf");
 		m_prepareDepthHalfEffect = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthsHalf.lin");
 		m_prepareDepthHalfEffectLin = pDevice->GetPipelineState(m_twoDepthRT.GetRenderPass(), pipelineDecl);
 
+		pipelineDecl.alphaState.EnableMultipleTargets(4);
 		pipelineDecl.layout.descriptorSets[1] = desc4Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.PrepareDepthMip.1");
 		m_mipPasses[0] = pDevice->GetPipelineState(m_fourDepthRT.GetRenderPass(), pipelineDecl);
@@ -350,6 +353,7 @@ namespace usg
 		m_blurDescPong.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 
 		// Both ping pongs are the same format, so render pass will be the same
+		pipelineDecl.alphaState.SetColor0Only();
 		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.SmartBlur");
 		m_smartBlurEffect = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
@@ -377,7 +381,7 @@ namespace usg
 		pipelineDecl.layout.descriptorSets[1] = descGenQ;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.GenerateQ.3Base");
 		m_genQPasses[4] = pDevice->GetPipelineState(m_pingPongRT1.GetRenderPass(), pipelineDecl);
-
+		 
 		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
 			for(uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
