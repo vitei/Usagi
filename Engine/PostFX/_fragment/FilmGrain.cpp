@@ -81,6 +81,7 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.ePrimType = PT_TRIANGLES;
 	pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.FilmNoise");
+	pipelineDecl.alphaState.SetColor0Only();
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	
