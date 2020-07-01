@@ -87,7 +87,8 @@ namespace usg
 		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
 		pipelineState.layout.uDescriptorSetCount = 3;
-		m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
+		// FIXME: Need distance field on the 3D text
+		//m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
 		
 		m_bufferValid = true;
 	}

@@ -4,6 +4,8 @@ ATTRIB_LOC(0) in vec2 go_vPos;
 ATTRIB_LOC(1) in vec4 go_vColor;
 ATTRIB_LOC(2) in vec4 go_vBgColor;
 ATTRIB_LOC(3) in vec2 go_vTexCoord;
+ATTRIB_LOC(4) in vec4 go_vFgColor;
+
 
 SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
 
