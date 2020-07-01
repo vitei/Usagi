@@ -237,7 +237,7 @@ namespace usg
 		}
 		OverlayRender(pImmContext, pDisplay, pHMD);
 		m_debugRender.Draw(pImmContext);
-		usg::Fader::Inst()->Draw(pImmContext, true);*/
+		usg::Fader::Inst()->Draw(pImmContext, true);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
 		m_debug.PostDraw(pDevice);
