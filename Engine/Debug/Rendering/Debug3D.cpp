@@ -106,7 +106,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
 	pipelineState.ePrimType = PT_POINTS;
 	// FIXME: Issue on Vulkan with this effect
-	m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
+	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
 }
 
 void Debug3D::CleanUp(GFXDevice* pDevice)
