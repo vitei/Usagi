@@ -347,8 +347,12 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 
 	// Missing attributes
 	{
-		uint32 uMissingItems = customFXDecl->GetAttribCount() - pipelineState.uInputBindingCount;
-		usg::ScratchRaw singleAttribScratch(uMissingItems * 16, 4);
+		uint32 uMaxSize = 0;
+		for(uint32 i=0; i<customFXDecl->GetAttribCount(); i++)
+		{
+			uMaxSize += g_uConstantSize[customFXDecl->GetAttribute(i)->eConstantType] * customFXDecl->GetAttribute(i)->uCount;
+		}
+		usg::ScratchRaw singleAttribScratch(uMaxSize, 4);
 		uint8* pSingleAttribData = (uint8*)singleAttribScratch.GetRawData();
 		usg::VertexElement* pStaticElements = pElement;
 		uint32 uDataSize = 0;
@@ -375,30 +379,36 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 		{
 			// Set up the vertex buffer for attributes without any vertex streams
 			const CustomEffectDecl::Attribute* attrib = customFXDecl->GetAttribute(i);
-			bool bFound = false;
-			// If we already have it we don't want another copy
-			for (const VertexElement* pCmpElement = m_meshArray[m_uMeshCount].vertexElements[RenderState]; pCmpElement < pElement; pCmpElement++)
+			for (uint32 j = 0; j < attrib->uCount; j++)
 			{
-				if (pCmpElement->uAttribId == attrib->uIndex)
+				uint32 attribIdx = attrib->uIndex + j;
+				bool bFound = false;
+				// If we already have it we don't want another copy
+				for (const VertexElement* pCmpElement = m_meshArray[m_uMeshCount].vertexElements[RenderState]; pCmpElement < pElement; pCmpElement++)
 				{
-					bFound = true;
-					break;
+					uint32 uAttribEnd = attrib->uIndex + attrib->uCount;
+					if (pCmpElement->uAttribId >= (attrib->uIndex + j) && pCmpElement->uAttribId < uAttribEnd)
+					{
+						bFound = true;
+						break;
+					}
 				}
+
+				if (bFound)
+				{
+					continue;
+				}
+
+				GetSingleAttributeDeclDefault(attrib, uDataSize, pElement);
+				pElement->uAttribId += j;
+				pElement++;
+
+				// We didn't have that attribute from the model, so hook it up
+				uint32 uElementSize = g_uConstantSize[attrib->eConstantType];
+				memcpy(pSingleAttribData, attrib->defaultData, uElementSize);
+				pSingleAttribData += uElementSize;
+				uDataSize += uElementSize;
 			}
-
-			if (bFound)
-			{
-				continue;
-			}
-
-			GetSingleAttributeDeclDefault(attrib, uDataSize, pElement);
-			pElement++;
-
-			// We didn't have that attribute from the model, so hook it up
-			uint32 uElementSize = g_uConstantSize[attrib->eConstantType];
-			memcpy(pSingleAttribData, attrib->defaultData, uElementSize);
-			pSingleAttribData += uElementSize;
-			uDataSize += uElementSize;
 		}
 
 		*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
