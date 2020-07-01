@@ -193,6 +193,7 @@ namespace usg
 
 		m_debug.Draw();
 
+
 		usg::MusicManager::Inst()->Update(fElapsed);
 		usg::Audio::Inst()->Update(fElapsed);
 
@@ -236,6 +237,7 @@ namespace usg
 		}
 		OverlayRender(pImmContext, pDisplay, pHMD);
 		m_debugRender.Draw(pImmContext);
+		usg::Fader::Inst()->Draw(pImmContext, true);*/
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
 		m_debug.PostDraw(pDevice);
