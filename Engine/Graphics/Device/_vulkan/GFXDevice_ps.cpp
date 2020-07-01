@@ -437,6 +437,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.textureCompressionBC = VK_TRUE;
 	enabledFeatures.fillModeNonSolid = VK_TRUE;
 	enabledFeatures.independentBlend = VK_TRUE;
+	enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
 
 
 
