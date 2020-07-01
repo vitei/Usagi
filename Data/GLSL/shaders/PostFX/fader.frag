@@ -1,7 +1,7 @@
 #include "../includes/platformdefines.inc"
 
 
-BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
+BUFFER_LAYOUT(0, UBO_MATERIAL_ID) uniform Material
 {
 	// Materials
 	float fFade;
