@@ -52,7 +52,7 @@ public:
 	static uint32 GetBoneIndexCount(const usg::exchange::Shape* pShape);
 	static bool HasAttribute(const usg::exchange::VertexStreamInfo* pInfo, exchange::VertexAttribute attrib, uint32 uCount);
 	static void GetSingleAttributeDecl( usg::exchange::VertexAttribute attr, uint32 uCount, VertexElement element[2] );
-	static bool GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime,const char* szName, uint32 uCount, VertexElement* pElement);
+	static bool GetSingleAttributeDeclNamed(const CustomEffectResHndl& fxRes, const char* szName, uint32 uCount, VertexElement* pElement);
 	static bool GetSingleAttributeDeclDefault(const CustomEffectDecl::Attribute* pAttib, uint32 uOffset, VertexElement* pElement);
 
 	const usg::vector<uint32>& GetRigidBoneIndices() const { return m_rigidBoneIndices; }
@@ -67,6 +67,9 @@ private:
 	void SetupSkeleton( uint8* p );
 	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
+
+	memsize InitInputBindings(usg::GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl,
+								PipelineStateDecl& pipelineState);
 
 	SkeletonResource		m_defaultSkeleton;
 	Mesh*                   m_meshArray;

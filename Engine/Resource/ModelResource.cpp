@@ -333,6 +333,84 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 }
 
 
+memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl, 
+										PipelineStateDecl& pipelineState)
+{
+	memsize uVertexSize = 0;
+	PipelineStateDecl::InputBinding* bindings = pipelineState.inputBindings;
+	VertexElement* pElement = m_meshArray[m_uMeshCount].vertexElements;
+	uint32 elementOffset = GetModelDeclUVReusse(pShape, customFXDecl, pMaterial, pElement, uVertexSize);
+	bindings[0].Init(pElement);
+	bindings[0].uVertexSize = (uint32)uVertexSize;
+	pElement += elementOffset;
+	pipelineState.uInputBindingCount = 1;
+
+	// Missing attributes
+	{
+		uint32 uMissingItems = customFXDecl->GetAttribCount() - pipelineState.uInputBindingCount;
+		usg::ScratchRaw singleAttribScratch(uMissingItems * 16, 4);
+		uint8* pSingleAttribData = (uint8*)singleAttribScratch.GetRawData();
+		usg::VertexElement* pStaticElements = pElement;
+		uint32 uDataSize = 0;
+
+		if (pShape->singleAttributes_count != 0)
+		{
+			// Single attributes
+			for (size_t i = 0; i < pShape->singleAttributes_count; ++i)
+			{
+				if (!GetSingleAttributeDeclNamed(customFXDecl, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, pElement))
+					continue;
+
+				pElement++;
+
+				uint32 uElementSize = sizeof(float) * pShape->singleAttributes[i].columns;
+				memcpy(pSingleAttribData, &pShape->singleAttributes[i].value, uElementSize);
+				pSingleAttribData += uElementSize;
+				uDataSize += uElementSize;
+			}
+		}
+
+		// Effect defaults
+		for (uint32 i = 0; i < customFXDecl->GetAttribCount(); i++)
+		{
+			// Set up the vertex buffer for attributes without any vertex streams
+			const CustomEffectDecl::Attribute* attrib = customFXDecl->GetAttribute(i);
+			bool bFound = false;
+			// If we already have it we don't want another copy
+			for (const VertexElement* pCmpElement = m_meshArray[m_uMeshCount].vertexElements; pCmpElement < pElement; pCmpElement++)
+			{
+				if (pCmpElement->uAttribId == attrib->uIndex)
+				{
+					bFound = true;
+					break;
+				}
+			}
+
+			if (bFound)
+			{
+				continue;
+			}
+
+			GetSingleAttributeDeclDefault(attrib, uDataSize, pElement);
+			pElement++;
+
+			// We didn't have that attribute from the model, so hook it up
+			uint32 uElementSize = g_uConstantSize[attrib->eConstantType];
+			memcpy(pSingleAttribData, attrib->defaultData, uElementSize);
+			pSingleAttribData += uElementSize;
+			uDataSize += uElementSize;
+		}
+
+		*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
+		bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
+		m_meshArray[m_uMeshCount].vertexBuffer[1].Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
+		pipelineState.uInputBindingCount++;
+	}
+
+	return uVertexSize;
+}
+
+
 void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
 {
 	uint8* pT = reinterpret_cast<uint8*>( pHeader );
@@ -393,15 +471,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	pTransparentEffect = ResourceMgr::Inst()->GetEffect(pDevice, transparentPath.CStr());
 
 	ASSERT(uCount <= maxElements);
-	memsize uVertexSize;
-	PipelineStateDecl::InputBinding* bindings = pipelineState.inputBindings;
-	VertexElement* pElement = m_meshArray[m_uMeshCount].vertexElements;
-	uint32 elementOffset = GetModelDeclUVReusse(pShape, pDeferredEffect->GetCustomEffect(), pMaterial, pElement, uVertexSize);
-	bindings[0].Init(pElement);
-	bindings[0].uVertexSize = (uint32)uVertexSize;
-	pElement += elementOffset;
-	pipelineState.uInputBindingCount = 1;
 
+	memsize uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, pDeferredEffect->GetCustomEffect(), pipelineState);
 
 	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
@@ -445,69 +516,6 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	m_meshArray[m_uMeshCount].primitive.indexBuffer.InitSize(pDevice, pIndexStream, prim.indexStream.formatSize, prim.indexStream.indexNum, true, eVertGPULocation);
 	pIndexStream += prim.indexStream.sizeAligned + prim.adjacencyStream.sizeAligned;
 	
-	// Missing attributes
-	{
-		uint32 uMissingItems = fxRunTime.GetResource()->GetAttribCount() - pipelineState.uInputBindingCount;
-		usg::ScratchRaw singleAttribScratch(uMissingItems * 16, 4);
-		uint8* pSingleAttribData = (uint8*)singleAttribScratch.GetRawData();
-		usg::VertexElement* pStaticElements = pElement;
-		uint32 uDataSize = 0;
-
-		if (pShape->singleAttributes_count != 0)
-		{
-			// Single attributes
-			for (size_t i = 0; i < pShape->singleAttributes_count; ++i)
-			{
-				if (!GetSingleAttributeDeclNamed(fxRunTime, pShape->singleAttributes[i].usageHint, pShape->singleAttributes[i].columns, pElement))
-					continue;
-
-				pElement++;
-
-				uint32 uElementSize = sizeof(float)*pShape->singleAttributes[i].columns;
-				memcpy(pSingleAttribData, &pShape->singleAttributes[i].value, uElementSize);
-				pSingleAttribData += uElementSize;
-				uDataSize += uElementSize;
-			}
-		}
-
-		// FIXE: One declaration for each effect type?
-		CustomEffectResHndl& customEffectReq = pDeferredEffect->GetCustomEffect();
-		// Effect defaults
-		for (uint32 i = 0; i < customEffectReq->GetAttribCount(); i++)
-		{
-			// Set up the vertex buffer for attributes without any vertex streams
-			const CustomEffectDecl::Attribute* attrib = customEffectReq->GetAttribute(i);
-			bool bFound = false;
-			// If we already have it we don't want another copy
-			for (const VertexElement* pCmpElement = m_meshArray[m_uMeshCount].vertexElements; pCmpElement < pElement; pCmpElement++)
-			{
-				if (pCmpElement->uAttribId == attrib->uIndex)
-				{
-					bFound = true;
-					break;
-				}
-			}
-
-			if (bFound)
-			{
-				continue;
-			}
-			
-			GetSingleAttributeDeclDefault(attrib, uDataSize, pElement);
-			pElement++;
-
-			// We didn't have that attribute from the model, so hook it up
-			uint32 uElementSize = g_uConstantSize[attrib->eConstantType];
-			memcpy(pSingleAttribData, attrib->defaultData, uElementSize);
-			pSingleAttribData += uElementSize;
-			uDataSize += uElementSize;
-		}
-
-		*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
-		bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
-		m_meshArray[m_uMeshCount].vertexBuffer[1].Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
-		pipelineState.uInputBindingCount++;
-	}
 
 
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
@@ -899,9 +907,9 @@ bool ModelResource::GetSingleAttributeDeclDefault(const CustomEffectDecl::Attrib
 	return true;
 }
 
-bool ModelResource::GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime, const char* szName, uint32 uCount, VertexElement* pElement)
+bool ModelResource::GetSingleAttributeDeclNamed(const CustomEffectResHndl& fxRes, const char* szName, uint32 uCount, VertexElement* pElement)
 {
-	uint32 uBinding = runTime.GetResource()->GetAttribBinding(szName);
+	uint32 uBinding = fxRes->GetAttribBinding(szName);
 	if (uBinding != USG_INVALID_ID)
 	{
 		pElement->bNormalised = false;
