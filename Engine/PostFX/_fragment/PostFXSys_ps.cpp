@@ -181,7 +181,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, flags);
 	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, flags);
 
-	flags.uShaderReadFlags = 0;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 	flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR_0;
 
 	m_screenRT[TARGET_LDR_0_TRANSFER_SRC].InitRenderPass(pDevice, flags);

@@ -17,15 +17,11 @@ BUFFER_LAYOUT(1, UBO_CUSTOM_1_ID) uniform Instance1
     bool    bYAxisAlign;
 };
 
-in VertexData
-{
-    INT_LOC(0) vec4    vo_vColor;
-    INT_LOC(1) vec2    vo_vSize;
-    INT_LOC(2) float   vo_fRot;
-    INT_LOC(3) vec4    vo_vUVRange[2];
-    INT_LOC(5) vec3    vo_velocity;
-
-} vertexData[];
+ATTRIB_LOC(0) in vec4    vo_vColor[];
+ATTRIB_LOC(1) in vec2    vo_vSize[];
+ATTRIB_LOC(2) in float   vo_fRot[];
+ATTRIB_LOC(3) in vec4    vo_vUVRange[][2];
+ATTRIB_LOC(5) in vec3    vo_velocity[];
 
 
 out GeometryData
@@ -58,7 +54,7 @@ void CreateVertex(int ii, vec2 scale)
     vec2 uv;
     uv = scale - vec2(0.5, 0.5);
     uv -= vParticleCenter;
-    uv *= vertexData[ii].vo_vSize;
+    uv *= vo_vSize[ii];
 
     if(bYAxisAlign)
     {
@@ -70,7 +66,7 @@ void CreateVertex(int ii, vec2 scale)
     }
     else
     {
-        pos = ParticleRotation(vec4(uv, 0.0, 0.0), vertexData[ii].vo_fRot);
+        pos = ParticleRotation(vec4(uv, 0.0, 0.0), vo_fRot[ii]);
 
         if(bCustomMatrix)
         {
@@ -87,10 +83,10 @@ void CreateVertex(int ii, vec2 scale)
     pos += vec4(gl_in[ii].gl_Position.xyz, 0.0);
     pos.xyz += (vDirToEye * fCameraOffset);
     pos.w = 1.0;
-    geometryData.vo_vColor = vertexData[ii].vo_vColor;
+    geometryData.vo_vColor = vo_vColor[ii];
     // TODO: Multiple images in the same texture
-    geometryData.vo_vTexcoord[0] = (vec2(scale.x, 1.0 - scale.y) * vertexData[ii].vo_vUVRange[0].zw) + vertexData[ii].vo_vUVRange[0].xy;
-    geometryData.vo_vTexcoord[1] = (vec2(scale.x, 1.0 - scale.y) * vertexData[ii].vo_vUVRange[1].zw) + vertexData[ii].vo_vUVRange[1].xy;
+    geometryData.vo_vTexcoord[0] = (vec2(scale.x, 1.0 - scale.y) * vo_vUVRange[ii][0].zw) + vo_vUVRange[ii][0].xy;
+    geometryData.vo_vTexcoord[1] = (vec2(scale.x, 1.0 - scale.y) * vo_vUVRange[ii][1].zw) + vo_vUVRange[ii][1].xy;
 
     vec4 vEyePos    = pos * mViewMat;
 
