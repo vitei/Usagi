@@ -16,7 +16,7 @@ namespace usg
 {
 
 
-#define FADE_SPEED (1.0f/4.0f)		// 4 frames
+#define FADE_SPEED (1.0f/8.0f)		// 8 frames
 
 	static float sTime = 1.0f;
 	static int sFadeType = 0;
@@ -51,10 +51,12 @@ namespace usg
 			if (!m_bWipeLower && !upper)
 				return;
 
+			pContext->BeginGPUTag("Fader");
 			pContext->SetPipelineState(m_pipelineState);
 			pContext->SetDescriptorSet(&m_descriptorSet, 0);
 			pContext->SetVertexBuffer(&m_VertexBuffer);
 			pContext->DrawImmediate(6);
+			pContext->EndGPUTag();
 		}
 	}
 
@@ -102,13 +104,13 @@ namespace usg
 		usg::PositionVertex verts[6];
 
 
-		SetVertex(0, usg::Vector3f(-1.0f, -1.0f, 0.0f), verts[0]);
-		SetVertex(1, usg::Vector3f(1.0f, 1.0f, 0.0f), verts[1]);
-		SetVertex(2, usg::Vector3f(-1.0f, 1.0f, 0.0f), verts[2]);
+		SetVertex(0, usg::Vector3f(-1.0f, -1.0f, 0.5f), verts[0]);
+		SetVertex(1, usg::Vector3f(1.0f, 1.0f, 0.5f), verts[1]);
+		SetVertex(2, usg::Vector3f(-1.0f, 1.0f, 0.5f), verts[2]);
 
-		SetVertex(3, usg::Vector3f(1.0f, 1.0f, 0.0f), verts[3]);
-		SetVertex(4, usg::Vector3f(1.0f, -1.0f, 0.0f), verts[4]);
-		SetVertex(5, usg::Vector3f(-1.0f, -1.0f, 0.0f), verts[5]);
+		SetVertex(3, usg::Vector3f(1.0f, 1.0f, 0.5f), verts[3]);
+		SetVertex(4, usg::Vector3f(1.0f, -1.0f, 0.5f), verts[4]);
+		SetVertex(5, usg::Vector3f(-1.0f, -1.0f, 0.5f), verts[5]);
 
 		usg::Color overrideColor(0.0f, 0.0f, 0.0f, sfAlpha);
 		m_constants.Init(pDevice, g_fadeCBDecl);
@@ -176,17 +178,27 @@ namespace usg
 			}
 			else
 			{
-				sfAlpha = (usg::Math::Min((2.0f - (sTime*2.0f)), 1.0f));
+				if(sTime > 0.5f)
+				{
+					sfAlpha = sTime * 2.0f;
+				}
+				else
+				{
+					sfAlpha = 1.0f - ((sTime-0.5f)*2.f);
+				}
 			}
 
 			break;
 		}
 
-		FadeConstants* pConst = m_constants.Lock<FadeConstants>();
-		pConst->fFade = sfAlpha;
-		m_constants.Unlock();
-		m_constants.UpdateData(pDevice);
-		m_descriptorSet.UpdateDescriptors(pDevice);
+		if(sfAlpha > 0.0f)
+		{
+			FadeConstants* pConst = m_constants.Lock<FadeConstants>();
+			pConst->fFade = sfAlpha;
+			m_constants.Unlock();
+			m_constants.UpdateData(pDevice);
+			m_descriptorSet.UpdateDescriptors(pDevice);
+		}
 	}
 
 
