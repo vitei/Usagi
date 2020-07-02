@@ -140,9 +140,9 @@ void ShadowCascade::Update(const Camera& sceneCam)
         readData->mCascadeMtxVInv[i] = mInvView * m_cascadeCamera[i].GetViewMatrix() * m_cascadeCamera[i].GetProjection() * texBias;
     }
 
-	float fBiasMul = 100.0f;
+	float fBiasMul = 0.5f;
 
-    readData->vBias.Assign(-0.0000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
+    readData->vBias.Assign(-0.000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
 	readData->vSampleRange.Assign(3.0f, 2.5f, 2.0f, 0.5f);
 
 	float fadeDistances[MAX_CASCADES];
