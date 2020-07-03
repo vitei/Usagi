@@ -1704,6 +1704,11 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 
 	// TODO: We need a check to see if all verts use the same bone 
 	uint32 uMaxWeights = GetBlendWeightsAndIndices(cmdl, pNode, currMesh);
+	if (uMaxWeights > 0)
+	{
+		// Alignment and input issues if we don't have 4
+		uMaxWeights = uMaxWeights < 4 ? 4 : uMaxWeights;
+	}
 
 	for (uint32 uVert=0; uVert<m_activeVerts.size(); uVert++)
 	{
