@@ -44,7 +44,7 @@ namespace usg
 
 		static void RenderConvexMesh(physx::PxConvexMesh* pConvexMesh, const float fMeshScale, const Color& cColor, const physx::PxTransform& t)
 		{
-			physx::PxVec3 verts[256];
+			physx::PxVec3 verts[512];
 			physx::PxU32 nbVerts = pConvexMesh->getNbVertices();
 			const physx::PxVec3* convexVerts = pConvexMesh->getVertices();
 			const physx::PxU8* indexBuffer = pConvexMesh->getIndexBuffer();
