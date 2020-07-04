@@ -208,7 +208,7 @@ namespace usg
 				ASSERT(pRigidDynamic != nullptr);
 				return ToUsgVec3(pRigidDynamic->getAngularVelocity());
 			}
-			return V3F_ZERO;
+			return usg::Vector3f::ZERO;
 		}
 
 		template<typename T>
