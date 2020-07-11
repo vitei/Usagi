@@ -761,11 +761,11 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	if (uHeap == USG_INVALID_ID)
 	{
 		VkGPUHeap* pHeap = vnew(ALLOC_POOL) VkGPUHeap;
-		// First set to be either pool size or the object size (if it is larger)
-		memsize uSize = usg::Math::Max(g_sPoolAllocSize, (memsize)pAllocInOut->GetSize());
 		uint32 uHeapIdx = m_memoryProperites[0].memoryTypes[uMemType].heapIndex;
-		// Now clamp the size to 1/4 that pools physical properties (so we don't consume it all in one allocation)
-		uSize = usg::Math::Min(m_memoryProperites[0].memoryHeaps[uHeapIdx].size/4, uSize);
+		// Use the pool alloc size unless it's larger than 1/4 of the total memory
+		memsize uSize = usg::Math::Min(m_memoryProperites[0].memoryHeaps[uHeapIdx].size / 4, g_sPoolAllocSize);
+		// If this single object is larger, set it to that
+		uSize = usg::Math::Max(uSize, (memsize)pAllocInOut->GetSize());
 		pHeap->AllocData(m_vkDevice, uMemType, uSize, pAllocInOut->NeedsDynamicCPUMap());
 		uHeap = (uint32)(m_memoryPools[uMemType].heaps.size());
 		m_memoryPools[uMemType].heaps.push_back(pHeap);

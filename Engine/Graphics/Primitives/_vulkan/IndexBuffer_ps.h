@@ -7,6 +7,7 @@
 
 #include "Engine/Graphics/RenderConsts.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
 
 namespace usg {
 
@@ -29,9 +30,10 @@ class IndexBuffer_ps
 		VkIndexType		m_eIndexType;
 		uint32			m_uIndexSize;
 		VkBuffer 		m_buffer[GFX_NUM_DYN_BUFF];
-    	VkDeviceMemory	m_mem[GFX_NUM_DYN_BUFF];
+		VkMemAllocator	m_memoryAlloc;
 		uint32			m_uActiveIBO;
 		uint32			m_uBufferCount;
+		uint32			m_uBufferSize;
 };
 
 }
