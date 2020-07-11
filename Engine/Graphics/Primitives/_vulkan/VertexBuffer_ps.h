@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_PC_VERTEXBUFFER_H
 
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
 
 namespace usg {
 
@@ -27,7 +28,8 @@ public:
 	VkBuffer GetBuffer() const { return m_buffer[m_uActiveVBO]; }
 private:
     VkBuffer 					m_buffer[GFX_NUM_DYN_BUFF];
-    VkDeviceMemory				m_mem[GFX_NUM_DYN_BUFF];
+	VkDeviceSize				m_uBufferSize;
+	VkMemAllocator				m_memoryAlloc;
 	uint32						m_uActiveVBO;
 	uint32						m_uBufferCount;
 };
