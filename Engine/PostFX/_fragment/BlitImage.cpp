@@ -77,6 +77,8 @@ void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPas
 
 void BlitImage::CleanUp(GFXDevice* pDevice)
 {
+	m_fullScreenIB.CleanUp(pDevice);
+	m_fullScreenVB.CleanUp(pDevice);
 	m_material.Cleanup(pDevice);
 }
 
