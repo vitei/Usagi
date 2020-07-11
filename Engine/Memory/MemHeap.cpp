@@ -85,16 +85,6 @@ void MemHeap::Initialize(void* location, memsize uSize)
 }
 
 
-memsize MemHeap::AlignAddress(memsize uAddress, memsize uAlign)
-{
-	memsize uMask = uAlign-1;
-	memsize uMisAlignment = (uAddress & uMask);
-	memsize uAdjustment = uAlign - uMisAlignment;
-	
-	return uAddress + uAdjustment;
-}
-
-
 void* MemHeap::ReAlloc(void* pMem, memsize uNewSize)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);

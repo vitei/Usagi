@@ -28,7 +28,6 @@ public:
 	static void* Reallocate(void* pMem, memsize uNewSize);
 	static memsize GetAlignment(const void* const pMem);
 
-	memsize AlignAddress(memsize uAddress, memsize uAlign);
 	void CheckData();
 	void PrintUsage();
 	void PrintDynamicAllocTypes();

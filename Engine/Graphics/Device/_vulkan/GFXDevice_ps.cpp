@@ -764,8 +764,10 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 		uint32 uHeapIdx = m_memoryProperites[0].memoryTypes[uMemType].heapIndex;
 		// Use the pool alloc size unless it's larger than 1/4 of the total memory
 		memsize uSize = usg::Math::Min(m_memoryProperites[0].memoryHeaps[uHeapIdx].size / 4, g_sPoolAllocSize);
+		// Force the image size to be aligned up (re-using the render target memory atm which has this requirement)
+		memsize uImageSize = AlignSizeUp(pAllocInOut->GetSize(), pAllocInOut->GetAlign());
 		// If this single object is larger, set it to that
-		uSize = usg::Math::Max(uSize, (memsize)pAllocInOut->GetSize());
+		uSize = usg::Math::Max(uSize, uImageSize);
 		pHeap->AllocData(m_vkDevice, uMemType, uSize, pAllocInOut->NeedsDynamicCPUMap());
 		uHeap = (uint32)(m_memoryPools[uMemType].heaps.size());
 		m_memoryPools[uMemType].heaps.push_back(pHeap);

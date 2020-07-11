@@ -105,7 +105,7 @@ GPUHeap::BlockInfo* GPUHeap::PopList(BlockInfo** ppSrcList, BlockInfo** ppDstLis
 void GPUHeap::AddAllocator(MemAllocator* pAllocator)
 {
 	BlockInfo* pSmallest = NULL;
-	uint32 uSpace = pAllocator->GetSize() + pAllocator->GetAlign();
+	uint32 uSpace = (uint32)AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 
 	BlockInfo* pInfo = m_pFreeList;
 
@@ -114,7 +114,7 @@ void GPUHeap::AddAllocator(MemAllocator* pAllocator)
 		ASSERT(pInfo->bValid);
 
 		// Find the smallest 
-		if(pInfo->pAllocator == NULL && (pInfo->uSize > uSpace) )
+		if(pInfo->pAllocator == NULL && (pInfo->uSize >= uSpace) )
 		{
 			if(pSmallest == NULL || pInfo->uSize < pSmallest->uSize)
 			{
@@ -163,15 +163,6 @@ void GPUHeap::ReleaseAll()
 {
 	// Implement me
 	ASSERT(false);
-}
-
-memsize GPUHeap::AlignAddress(memsize uAddress, memsize uAlign)
-{
-	memsize uMask = uAlign-1;
-	memsize uMisAlignment = (uAddress & uMask);
-	memsize uAdjustment = uAlign - uMisAlignment;
-	
-	return uAddress + uAdjustment;
 }
 
 GPUHeap::BlockInfo* GPUHeap::FindUnusedBlock()
@@ -257,7 +248,7 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 
 bool GPUHeap::CanAllocate(MemAllocator* pAllocator)
 {
-	uint32 uSpace = pAllocator->GetSize() + pAllocator->GetAlign();
+	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 
 	BlockInfo* pInfo = m_pFreeList;
 
@@ -269,7 +260,7 @@ bool GPUHeap::CanAllocate(MemAllocator* pAllocator)
 		ASSERT(pInfo->bValid);
 		ASSERT(pInfo->pAllocator==NULL);
 		// Find the smallest 
-		if( pInfo->uSize > uSpace )
+		if( pInfo->uSize >= uSpace )
 		{
 			return true;
 		}

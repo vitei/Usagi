@@ -51,7 +51,6 @@ private:
 
 	void AllocMemory(BlockInfo* pInfo);
 	void FreeMemory(BlockInfo* pInfo);
-	memsize AlignAddress(memsize uAddress, memsize uAlign);
 	BlockInfo* FindUnusedBlock();
 
 	void*		m_pHeapMem;

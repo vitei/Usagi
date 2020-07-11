@@ -24,6 +24,11 @@ namespace usg
 		return size - uMisAlignment;
 	}
 
+	inline memsize AlignAddress(memsize size, memsize alignment)
+	{
+		return AlignSizeUp(size, alignment);
+	}
+
 }
 
 

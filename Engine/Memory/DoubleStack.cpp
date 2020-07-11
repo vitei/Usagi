@@ -43,15 +43,6 @@ DoubleStack::~DoubleStack()
 }
 
 
-memsize DoubleStack::AlignAddress(memsize uAddress, memsize uAlign)
-{
-	memsize uMask = uAlign-1;
-	memsize uMisAlignment = (uAddress & uMask);
-	memsize uAdjustment = uAlign - uMisAlignment;
-	
-	return uAddress + uAdjustment;
-}
-
 void* DoubleStack::AllocFront(MemAllocType eType, memsize uSize, memsize uAlign, bool bGPU)
 {
 	if(m_bFrozen)

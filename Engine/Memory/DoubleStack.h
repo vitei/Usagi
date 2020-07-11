@@ -38,8 +38,6 @@ public:
 
 private:
 
-	memsize	AlignAddress(memsize uAddress, memsize uAlign);
-
 #ifndef FINAL_BUILD
 	struct AllocInfo
 	{
