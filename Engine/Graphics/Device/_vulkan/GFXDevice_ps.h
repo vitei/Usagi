@@ -7,7 +7,7 @@
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/RenderNode.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 #ifdef DEBUG_BUILD
@@ -21,6 +21,8 @@ class RasterizerState;
 class DepthStencilState;
 class Viewport;
 class GFXDevice;
+class VkGPUHeap;
+class VkMemAllocator;
 
 void SetImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange, 
 	VkPipelineStageFlags srcFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dstFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
@@ -70,6 +72,10 @@ public:
 
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
 
+	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
+	bool AllocateMemory(VkMemAllocator* pAllocInOut);
+	void FreeMemory(VkMemAllocator* pAllocInOut);
+
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
@@ -86,6 +92,11 @@ private:
 		char					name[USG_MAX_PATH];
 		VkMemoryPropertyFlags	shaderType;
 		VkShaderModule			module;
+	};
+
+	struct MemoryPool
+	{
+		usg::vector<VkGPUHeap*> heaps;
 	};
 
 	VkFormat							m_colorFormats[CF_COUNT];
@@ -114,6 +125,8 @@ private:
 
 	DisplaySettings						m_diplayInfo[MAX_DISPLAY_COUNT];
 	uint32								m_uDisplayCount;
+
+	MemoryPool							m_memoryPools[VK_MAX_MEMORY_TYPES];
 
 	float		m_fGPUTime;
 };

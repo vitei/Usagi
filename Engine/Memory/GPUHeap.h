@@ -24,6 +24,7 @@ public:
 	void ReacquireAll();
 	void ReleaseAll();
 
+	// Note that this allocator must remain valid throughout the lifetime of the allocation
 	void AddAllocator(MemAllocator* pAllocator);
 	void RemoveAllocator(MemAllocator* pAllocator);
 	bool CanAllocate(MemAllocator* pAllocator);

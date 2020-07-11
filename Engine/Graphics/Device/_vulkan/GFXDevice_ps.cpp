@@ -6,6 +6,8 @@
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Graphics/Device, VkGPUHeap.h)
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
 #include API_HEADER(Engine/Oculus, OculusVKExport.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h" 
@@ -22,6 +24,10 @@
 #ifndef FINAL_BUILD
 #define USE_DEBUG_MARKERS
 #endif
+
+// 256MB per alloc is recommended
+// Sometimes this won't be big enough for a single allocation so pools larger than this are possible
+static const memsize g_sPoolAllocSize = 256 * 1024 * 1024;
 
 namespace usg {
 
@@ -713,6 +719,57 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 
 	ASSERT(false);
 	return USG_INVALID_ID;
+}
+
+bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
+{
+	uint32 uHeap = USG_INVALID_ID;
+	uint32 uMemType = pAllocInOut->GetPoolId();
+	
+	for(memsize i=0; i<m_memoryPools[uMemType].heaps.size(); i++)
+	{
+		if (pAllocInOut->NeedsDynamicCPUMap() == m_memoryPools[uMemType].heaps[i]->IsDynamic() && m_memoryPools[uMemType].heaps[i]->CanAllocate(pAllocInOut))
+		{
+			uHeap = (uint32)i;
+			break;
+		}
+	}
+
+	if (uHeap == USG_INVALID_ID)
+	{
+		VkGPUHeap* pHeap = vnew(ALLOC_POOL) VkGPUHeap;
+		// First set to be either pool size or the object size (if it is larger)
+		memsize uSize = usg::Math::Max(g_sPoolAllocSize, (memsize)pAllocInOut->GetSize());
+		uint32 uHeapIdx = m_memoryProperites[0].memoryTypes[uMemType].heapIndex;
+		// Now clamp the size to 1/4 that pools physical properties (so we don't consume it all in one allocation)
+		uSize = usg::Math::Min(m_memoryProperites[0].memoryHeaps[uHeapIdx].size/4, uSize);
+		pHeap->AllocData(m_vkDevice, uMemType, uSize, pAllocInOut->NeedsDynamicCPUMap());
+		uHeap = (uint32)(m_memoryPools[uMemType].heaps.size());
+		m_memoryPools[uMemType].heaps.push_back(pHeap);
+	}
+
+	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(pAllocInOut) )
+	{
+		m_memoryPools[uMemType].heaps[uHeap]->AddAllocator(pAllocInOut);
+		return true;
+	}
+
+	ASSERT(false);
+
+	return false;
+}
+
+void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
+{
+	uint32 uMemType = pAllocInOut->GetPoolId();
+	for (uint32 i = 0; i < m_memoryPools[uMemType].heaps.size(); i++)
+	{
+		if (m_memoryPools[uMemType].heaps[i]->GetMemory() == pAllocInOut->GetMemory())
+		{
+			m_memoryPools[uMemType].heaps[i]->RemoveAllocator(pAllocInOut);
+			return;
+		}
+	}
 }
 
 

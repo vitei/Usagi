@@ -10,6 +10,8 @@
 #include "Engine/Graphics/Effects/EffectVariables.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
+
 
 namespace usg {
 
@@ -66,7 +68,7 @@ private:
 	bool						m_bDataValid;
 
 	VkBuffer					m_buffer;
-	VkDeviceMemory				m_memory;
+	VkMemAllocator				m_memoryAlloc;
 
 	VariableData*				m_pVarData;
 	void*						m_pBoundGPUData;

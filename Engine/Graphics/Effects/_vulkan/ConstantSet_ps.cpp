@@ -52,7 +52,6 @@ ConstantSet_ps::ConstantSet_ps()
 	m_bDataValid	= false;
 	m_pOwner		= NULL;
 	m_buffer = VK_NULL_HANDLE;
-	m_memory		= nullptr;
 	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
 	m_uBufferCount = 0;
@@ -97,14 +96,13 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 	vkGetBufferMemoryRequirements(devicePS.GetVKDevice(), m_buffer, &memReqs);
 	memAlloc.allocationSize = memReqs.size;
 	memAlloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	eResult = vkAllocateMemory(devicePS.GetVKDevice(), &memAlloc, nullptr, &m_memory);
-	ASSERT(eResult == VK_SUCCESS);
 
+	m_memoryAlloc.Init(memAlloc.memoryTypeIndex, (uint32)memAlloc.allocationSize, usg::Math::Max((uint32)uPerBufferAlign, (uint32)memReqs.alignment), true);
+	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
-	eResult = vkMapMemory(devicePS.GetVKDevice(), m_memory, 0, VK_WHOLE_SIZE, 0, &m_pBoundGPUData);
-	ASSERT(eResult == VK_SUCCESS);
+	m_pBoundGPUData = m_memoryAlloc.GetMappedMemory();
 
-	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memory, 0);
+	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
 	ASSERT(eResult == VK_SUCCESS);
 
 	// Used for dynamic uniform buffers
@@ -137,11 +135,7 @@ void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 		m_pOwner = nullptr;
 	}
 
-	if (m_memory)
-	{
-		vkFreeMemory(devicePS.GetVKDevice(), m_memory, nullptr);
-		m_memory = nullptr;
-	}
+	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 }
 
 
@@ -206,6 +200,8 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 	if(!bDoubleUpdate)
 		m_uActiveBuffer = (m_uActiveBuffer+1)% m_uBufferCount;
 
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+
 	uint8* pCPUData = (uint8*)m_pOwner->GetCPUData();
 	uint32 uVarCount = m_pOwner->GetVarCount();
 	//const ShaderConstantDecl* pDecl = m_pOwner->GetDeclaration();
@@ -255,7 +251,6 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		}
 		pVarData++;
 	}
-
 
 	m_bDataValid = true;
 }
