@@ -7,6 +7,8 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Textures/ImageViewDef.h"
 #include <vulkan/vulkan.h>
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
+
 
 namespace usg {
 
@@ -82,7 +84,7 @@ private:
 	// FIXME: Refactor to pre-load these views
 	mutable usg::vector<CustomView>	m_customViews;
 	TexStaging		m_staging;
-	VkDeviceMemory	m_memory;
+	VkMemAllocator	m_memoryAlloc;
 	VkImage			m_image;
 	VkImageView		m_imageView;
 	VkImageLayout	m_imageLayout;

@@ -139,8 +139,7 @@ VkImageUsageFlags GetImageUsage(uint32 uUsage)
 
 
 Texture_ps::Texture_ps() :
-	  m_memory(VK_NULL_HANDLE)
-	, m_image(VK_NULL_HANDLE)
+	  m_image(VK_NULL_HANDLE)
 	, m_imageView(VK_NULL_HANDLE)
 	, m_imageLayout(VK_IMAGE_LAYOUT_UNDEFINED)
 	, m_uUpdateCount(0)
@@ -156,7 +155,6 @@ Texture_ps::Texture_ps() :
 
 Texture_ps::~Texture_ps()
 {
-	ASSERT(m_memory == nullptr);
 	ASSERT(m_staging.bValid == false);
 }
 
@@ -606,20 +604,14 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
 
 	if (bInitMemory)
 	{
-		if (m_memory)
-		{
-			vkFreeMemory(vKDevice, m_memory, nullptr);
-			m_memory = nullptr;
-		}
+		pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 
-		// Allocate memory
-		err = vkAllocateMemory(vKDevice, &mem_alloc, NULL,
-			&m_memory);
-		ASSERT(!err);
+		m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)mem_alloc.allocationSize, (uint32)mem_reqs.alignment, false);
+		pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 	}
 
     // Bind memory
-    err = vkBindImageMemory(vKDevice, m_image, m_memory, 0);
+    err = vkBindImageMemory(vKDevice, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
     ASSERT(!err);
 	m_uUpdateCount++;
 
@@ -651,11 +643,7 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 		m_image = VK_NULL_HANDLE;
 	}
 
-	if (m_memory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(vKDevice, m_memory, nullptr);
-		m_memory = VK_NULL_HANDLE;
-	}
+	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 }
 
 
@@ -811,8 +799,10 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		memAllocInfo.allocationSize = memReqs.size;
 		memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		res = vkAllocateMemory(device, &memAllocInfo, nullptr, &m_memory);
-		res = vkBindImageMemory(device, m_image, m_memory, 0);
+		m_memoryAlloc.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)memReqs.alignment, false);
+		pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
+
+		res = vkBindImageMemory(device, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
 
 		VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
