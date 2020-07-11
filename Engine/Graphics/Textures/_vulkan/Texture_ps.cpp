@@ -674,7 +674,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 	bool bReturn = true;
 	{
 		VkResult res;
-		mem::setConventionalMemManagement(true);
+		//mem::setConventionalMemManagement(true);
 		usg::File texFile(szFileName);
 		void* scratchMemory = NULL;
 		ScratchRaw::Init(&scratchMemory, texFile.GetSize(), 4);
@@ -845,7 +845,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		res = vkCreateImageView(device, &view, nullptr, &m_imageView);
 
 	}
-	mem::setConventionalMemManagement(false);
+	//mem::setConventionalMemManagement(false);
 	return bReturn;
 }
 

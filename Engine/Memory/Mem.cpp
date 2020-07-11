@@ -166,6 +166,7 @@ void* mem::Alloc(MemType eHeap, MemAllocType eType, memsize uSize, uint32 uAlign
 	else
 #endif
 	{
+#if 0
 		if (eType == ALLOC_DONT_USE)
 		{
 			void* pReturn = s_pNexBufferPointer;
@@ -178,6 +179,7 @@ void* mem::Alloc(MemType eHeap, MemAllocType eType, memsize uSize, uint32 uAlign
 			}
 			return pReturn;
 		}
+	#endif
 		return g_allocators.pAllocators[eHeap]->Alloc(eType, uSize, uAlign);
 	}
 }
@@ -254,7 +256,7 @@ const char* mem::GetAllocString(MemAllocType eType)
 
 }
 
-void* operator new(size_t size)
+void* operator new(size_t size) NEW_THROW
 {
 	return usg::mem::Alloc(usg::MEMTYPE_STANDARD, usg::ALLOC_DONT_USE, size, 4);
 }
