@@ -191,6 +191,11 @@ void GFXDevice::End()
 		m_pHMD->Update();
 	}
 	++m_uFrameCount;
+	if (m_uFrameCount == USG_INVALID_ID)
+	{
+		// It would wrap around but we want to leave -1 as a special ID
+		m_uFrameCount = 0;
+	}
 }
 
 void GFXDevice::FinishedStaticLoad()

@@ -19,7 +19,7 @@ void VkGPUHeap::AllocData(VkDevice device, uint32 uMemTypeIdx, VkDeviceSize size
 	if (eResult == VK_SUCCESS)
 	{
 		// FIXME: Hardcoding max allocations to 16k for now
-		Init(nullptr, size, 16384);
+		Init(nullptr, size, 16384, true);
 
 		if(bMapMemory)
 		{
@@ -47,9 +47,9 @@ void VkGPUHeap::FreeData(VkDevice device)
 }
 
 
-void VkGPUHeap::AddAllocator(VkMemAllocator* pAllocator)
+void VkGPUHeap::AddAllocator(GFXDevice* pDevice, VkMemAllocator* pAllocator)
 {
-	Inherited::AddAllocator(pAllocator);
+	Inherited::AddAllocator(pDevice, pAllocator);
 	uint8* pMemory = nullptr;
 	if (m_pMemoryMap)
 	{
@@ -58,9 +58,9 @@ void VkGPUHeap::AddAllocator(VkMemAllocator* pAllocator)
 	pAllocator->SetMemory(m_memory, (void*)pMemory);
 }
 
-void VkGPUHeap::RemoveAllocator(VkMemAllocator* pAllocator)
+void VkGPUHeap::RemoveAllocator(GFXDevice* pDevice, VkMemAllocator* pAllocator)
 {
-	Inherited::RemoveAllocator(pAllocator);
+	Inherited::RemoveAllocator(pDevice, pAllocator);
 	pAllocator->SetMemory(nullptr, nullptr);
 }
 

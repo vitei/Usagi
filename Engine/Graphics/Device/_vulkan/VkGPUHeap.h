@@ -13,6 +13,7 @@
 namespace usg {
 
 class VkMemAllocator;
+class GFXDevice;
 
 class VkGPUHeap : protected GPUHeap
 {
@@ -24,9 +25,9 @@ public:
 	void FreeData(VkDevice device);
 
 	// Override
-	void AddAllocator(VkMemAllocator* pAllocator);
-	void RemoveAllocator(VkMemAllocator* pAllocator);
-	bool CanAllocate(VkMemAllocator* pAllocator) { return Inherited::CanAllocate((MemAllocator*)pAllocator); }
+	void AddAllocator(GFXDevice* pDevice, VkMemAllocator* pAllocator);
+	void RemoveAllocator(GFXDevice* pDevice, VkMemAllocator* pAllocator);
+	bool CanAllocate(GFXDevice* pDevice, VkMemAllocator* pAllocator) { return Inherited::CanAllocate(pDevice, (MemAllocator*)pAllocator); }
 	bool IsDynamic() { return m_pMemoryMap != nullptr; }
 	VkDeviceMemory GetMemory() const { return m_memory; }
 private:

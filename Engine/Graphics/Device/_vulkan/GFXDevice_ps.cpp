@@ -795,7 +795,7 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	
 	for(memsize i=0; i<m_memoryPools[uMemType].heaps.size(); i++)
 	{
-		if (pAllocInOut->NeedsDynamicCPUMap() == m_memoryPools[uMemType].heaps[i]->IsDynamic() && m_memoryPools[uMemType].heaps[i]->CanAllocate(pAllocInOut))
+		if (pAllocInOut->NeedsDynamicCPUMap() == m_memoryPools[uMemType].heaps[i]->IsDynamic() && m_memoryPools[uMemType].heaps[i]->CanAllocate(m_pParent, pAllocInOut))
 		{
 			uHeap = (uint32)i;
 			break;
@@ -817,9 +817,9 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 		m_memoryPools[uMemType].heaps.push_back(pHeap);
 	}
 
-	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(pAllocInOut) )
+	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(m_pParent, pAllocInOut) )
 	{
-		m_memoryPools[uMemType].heaps[uHeap]->AddAllocator(pAllocInOut);
+		m_memoryPools[uMemType].heaps[uHeap]->AddAllocator(m_pParent, pAllocInOut);
 		return true;
 	}
 
@@ -872,7 +872,7 @@ void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
 	{
 		if (m_memoryPools[uMemType].heaps[i]->GetMemory() == pAllocInOut->GetMemory())
 		{
-			m_memoryPools[uMemType].heaps[i]->RemoveAllocator(pAllocInOut);
+			m_memoryPools[uMemType].heaps[i]->RemoveAllocator(m_pParent, pAllocInOut);
 			return;
 		}
 	}
