@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_SHADER_PS_
 #define _USG_GRAPHICS_PC_SHADER_PS_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/PakDecl.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
@@ -20,7 +20,7 @@ public:
 	~Shader_ps();
 
 	void Init(GFXDevice* pDevice, const char* szEffectName) { ASSERT(false); }
-	bool Init(GFXDevice* pDevice, PakFile* pakFile, const PakFileDecl::FileInfo* pFileHeader, const void* pData, uint32 uDataSize);
+	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData);
 	void CleanUp(GFXDevice* pDevice);
 
 	// PS

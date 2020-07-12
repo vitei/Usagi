@@ -5,7 +5,7 @@
 
 #ifndef __USG_STRING_FIXED_STRING_H__
 #define __USG_STRING_FIXED_STRING_H__
-#include "Engine/Common/Common.h"
+
 #include "String_Util.h"
 
 namespace usg

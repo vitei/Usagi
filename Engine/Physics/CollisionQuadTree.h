@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_PHYSICS_COLLISION_QUADTREE_H_
 #define _USG_PHYSICS_COLLISION_QUADTREE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/AABB.h"
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"

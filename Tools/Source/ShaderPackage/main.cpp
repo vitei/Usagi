@@ -6,14 +6,18 @@
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
+#include "../ResourceLib/MaterialDefinition/MaterialDefinitionExporter.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
-#include "../ResourcePak/ResourcePakExporter.h"
+#include "ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <algorithm>
 #include <fstream>
-#include <ShaderLang.h>
+#include "VulkanShaderCompiler.h"
+#include "OpenGLShaderCompiler.h"
 #include <pb.h>
+
+
 
 
 const char* g_szExtensions[] =
@@ -23,27 +27,38 @@ const char* g_szExtensions[] =
 	".geom"
 };
 
-struct EffectEntry : public ResourceEntry
+const char* g_szUsageStrings[] =
 {
-	virtual void* GetData() override { return nullptr; }
-	virtual uint32 GetDataSize() override { return 0; };
-	virtual void* GetCustomHeader() { return &entry; }
-	virtual uint32 GetCustomHeaderSize() { return sizeof(entry); }
-
-	usg::PakFileDecl::EffectEntry entry;
+	"vertex_shader",
+	"fragment_shader",
+	"geometry_shader"
 };
 
-struct ShaderEntry : public ResourceEntry
+
+	
+struct EffectEntry : public ResourceEntry
 {
-	virtual void* GetData() override { return binary; }
-	virtual uint32 GetDataSize() override { return binarySize; };
-	virtual void* GetCustomHeader() { return &entry; }
-	virtual uint32 GetCustomHeaderSize() {return sizeof(entry); }
+	virtual const void* GetData() override { return nullptr; }
+	virtual uint32 GetDataSize() override { return 0; };
+	virtual const void* GetCustomHeader() { return nullptr; }
+	virtual uint32 GetCustomHeaderSize() { return 0; }
 
-	usg::PakFileDecl::ShaderEntry entry;
+};
 
-	void* binary;
-	uint32 binarySize;
+
+
+struct CustomFXEntry : public ResourceEntry
+{
+	virtual const void* GetData() override { return materialDef.GetBinary(); }
+	virtual uint32 GetDataSize() override { return materialDef.GetBinarySize(); };
+	virtual const void* GetCustomHeader() { return &materialDef.GetHeader(); }
+	virtual uint32 GetCustomHeaderSize() { return materialDef.GetHeaderSize();  }
+	// We keep the data as it is, just fix up the pointers
+	virtual bool KeepDataAfterLoading() { return true; }
+
+	MaterialDefinitionExporter	materialDef;
+	uint64						definitionCRC;	// Rather than getting overly clever we just check for duplicates
+
 };
 
 
@@ -53,109 +68,23 @@ struct DefineSets
 	std::string defines;
 	std::string defineSetName;
 	std::string definesAsCRC;
+	std::string customFXName;
 	uint32		CRC[(uint32)usg::ShaderType::COUNT];
+	uint64		CustomFXCRC;
 };
 
 struct EffectDefinition
 {
 	std::string name;
+	std::string customFXName;
 	std::string prog[(uint32)usg::ShaderType::COUNT];
 
 	std::vector<DefineSets> sets;
 
 };
 
-bool ParseManually(const char* szFileName, const char* szDefines, const std::string& includes, std::string& fileOut, std::vector<std::string>& referencedFiles);
 
 
-bool CompileOGLShader(const std::string& inputFileName, const std::string& setDefines, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
-{
-	std::string shaderCode;
-	std::string defines = setDefines;
-	if(setDefines.size() > 0)
-		defines += " ";
-	defines += "PLATFORM_PC ";
-	defines += "API_OGL";
-	
-	if (ParseManually(inputFileName.c_str(), defines.c_str(), includes, shaderCode, referencedFiles))
-	{
-		shader.binary = new uint8[shaderCode.size()+1];
-		memcpy(shader.binary, shaderCode.data(), shaderCode.size()+1);
-		shader.binarySize = (uint32)shaderCode.size()+1;
-		return true;
-	}
-	return false;
-}
-
-bool CompileVulkanShader(const std::string& inputFileName, const std::string& setDefines, const std::string& tempFileName, const std::string& includes, ShaderEntry& shader, std::vector<std::string>& referencedFiles)
-{
-	// Get the input file name
-	std::string outputFileName = tempFileName;
-
-	std::string defines = "-DPLATFORM_PC -DAPI_VULKAN";
-	// TODO: Handle multiple include directories
-	std::string defineList = setDefines;
-	size_t nextDefine = std::string::npos;
-	while (!defineList.empty())
-	{
-		nextDefine = defineList.find_first_of(' ');
-		if (nextDefine != std::string::npos)
-		{
-			defines += std::string(" -D") + defineList.substr(0, nextDefine);
-			defineList = defineList.substr(nextDefine + 1);
-		}
-		else
-		{
-			// The last define
-			defines += std::string(" -D") + defineList;
-			defineList.clear();
-		}
-
-	} while (nextDefine != std::string::npos);
-
-	std::stringstream command;
-	// Delete the last instance of this file
-	DeleteFile(outputFileName.c_str());
-	std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
-	std::string outputDir = outputFileName.substr(0, outputFileName.find_last_of("\\/"));
-	CreateDirectory(outputDir.c_str(), NULL);
-
-	command << "glslc " << inputFileName.c_str() << " -o" << outputFileName.c_str() << " -MD -std=450 -Werror " << defines << " " << includes;
-	//glslang::TShader* shader = new glslang::TShader(g_glslLangLang[j]);
-	// FIXME: code for glslang natively, but for now it is cleaner to use the command line
-	system(command.str().c_str()); 
-
-	FILE* pFileOut = nullptr;
-	fopen_s(&pFileOut, outputFileName.c_str(), "rb");
-	// FIXME: Should do cleanup
-	if (!pFileOut)
-		return false;
-	fseek(pFileOut, 0, SEEK_END);
-	shader.binarySize = ftell(pFileOut);
-	fseek(pFileOut, 0, SEEK_SET);
-	shader.binary = new uint8[shader.binarySize];
-	fread(shader.binary, 1, shader.binarySize, pFileOut);
-
-
-	std::string depFileName = outputFileName + ".d";
-	std::ifstream depFile(depFileName);
-
-	std::string intermediateDep;
-	std::getline(depFile, intermediateDep, ':');
-	while (depFile >> intermediateDep)
-	{
-		std::replace(intermediateDep.begin(), intermediateDep.end(), '\\', '/');
-		if (std::find(referencedFiles.begin(), referencedFiles.end(), intermediateDep) == referencedFiles.end())
-		{
-			referencedFiles.push_back(intermediateDep);
-		}
-	}
-
-	fclose(pFileOut);
-	depFile.close();
-
-	return true;
-}
 
 
 bool CheckArgument(std::string& target, const std::string& argument)
@@ -171,9 +100,11 @@ bool CheckArgument(std::string& target, const std::string& argument)
 	}
 }
 
+IShaderCompiler* pCompiler = nullptr;
+
 int main(int argc, char *argv[])
 {
-	std::string inputFile; 
+	std::string inputFile;
 	std::string outBinary;
 	std::string shaderDir;
 	std::string tempDir;
@@ -216,6 +147,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (api == "vulkan")
+	{
+		pCompiler = new VulkanShaderCompiler;
+	}
+	else if (api == "ogl")
+	{
+		pCompiler = new OpenGLShaderCompiler;
+	}
+	else
+	{
+		printf("Invalid API");
+		return -1;
+	}
+	pCompiler->Init();
+
 	//dependencyFile = argv[6];
 	dependencyFile = outBinary + ".d";
 	
@@ -226,7 +172,8 @@ int main(int argc, char *argv[])
 
 	
 	YAML::Node mainNode = YAML::LoadFile(inputFile.c_str());
-	YAML::Node shaders = mainNode["Effects"];
+	YAML::Node yamlEffect = mainNode["Effects"];
+	YAML::Node customFX = mainNode["CustomEffects"];
 	std::map<uint32, ShaderEntry> requiredShaders[(uint32)usg::ShaderType::COUNT];
 	std::vector<EffectDefinition> effects;
 	std::vector<std::string> referencedFiles;
@@ -237,13 +184,16 @@ int main(int argc, char *argv[])
 		std::replace(formatted.begin(), formatted.end(), '\\', '/');
 		effectDependencies << formatted << ": ";
 	}
+
+	std::vector<CustomFXEntry> customFXEntries;
 	
-	for (YAML::const_iterator it = shaders.begin(); it != shaders.end(); ++it)
+	for (YAML::const_iterator it = yamlEffect.begin(); it != yamlEffect.end(); ++it)
 	{
 		EffectDefinition def;
 		def.name = (*it)["name"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
+		def.customFXName = (*it)["custom_effect"] ? (*it)["custom_effect"].as<std::string>() : "";
 		{
 			bool bHasDefault = true;
 			if ((*it)["has_default"])
@@ -258,6 +208,7 @@ int main(int argc, char *argv[])
 				set.defineSetName = "";
 				set.definesAsCRC = "";
 				set.defines = "";
+				set.customFXName = def.customFXName;
 				if ((*it)["geom"])
 				{
 					def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
@@ -272,6 +223,7 @@ int main(int argc, char *argv[])
 				{
 					// Package.Effect.DefineSet.fx
 					set.defineSetName = std::string(".") + (*defineIt)["name"].as<std::string>();
+					set.customFXName = def.customFXName;
 					set.name = intFileName + "." + def.name + set.defineSetName + ".fx";
 					set.defines = (*defineIt)["defines"].as<std::string>();
 					set.definesAsCRC = std::string(".") + std::to_string(utl::CRC32(set.defines.c_str()));
@@ -313,9 +265,37 @@ int main(int argc, char *argv[])
 
 		for (uint32 i = 0; i < def.sets.size(); i++)
 		{
+			def.sets[i].CustomFXCRC = 0;
+			MaterialDefinitionExporter* pDef = nullptr;
+			if (def.customFXName.size() > 0)
+			{
+				CustomFXEntry entry;
+				entry.materialDef.Load(customFX[def.customFXName], def.sets[i].defines);
+				entry.materialDef.InitBinaryData();
+				entry.materialDef.InitAutomatedCode();
+				uint64 uCustomFXCRC = entry.materialDef.GetCRC();
+				bool bFound = false;
+				for (int i = 0; i < customFXEntries.size(); i++)
+				{
+					if (customFXEntries[i].definitionCRC == uCustomFXCRC)
+					{
+						pDef = &customFXEntries[i].materialDef;
+						bFound = true;
+					}
+				}
+				if (!bFound)
+				{
+					std::string customFXName = intFileName + "." + def.customFXName + "." + std::to_string(customFXEntries.size()) + ".cfx";
+					entry.SetName(customFXName, usg::ResourceType::CUSTOM_EFFECT);
+					entry.definitionCRC = uCustomFXCRC;
+					customFXEntries.push_back(entry);
+					pDef = &customFXEntries.back().materialDef;
+				}
+				def.sets[i].CustomFXCRC = uCustomFXCRC;
+			}
 			for (uint32 j = 0; j < (uint32)usg::ShaderType::COUNT; j++)
 			{
-				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
+				std::string progName = intFileName + "." + def.prog[j] + def.sets[i].customFXName + def.sets[i].definesAsCRC + g_szExtensions[j] + ".SPV";
 				if (!def.prog[j].empty())
 				{
 					def.sets[i].CRC[j] = utl::CRC32(progName.c_str());
@@ -332,23 +312,12 @@ int main(int argc, char *argv[])
 						std::string inputFileName = def.prog[j] + g_szExtensions[j];
 						inputFileName = shaderDir + "/" + inputFileName;
 						ShaderEntry shader;
-						shader.name = progName;
+						shader.SetName(progName, usg::ResourceType::SHADER);
 						shader.entry.eShaderType = (usg::ShaderType)(j);
 						bool bSuccess = false;
-						if (api == "vulkan")
-						{
-							std::string tempFileName = intFileName + ".SPV";
-							tempFileName = tempDir + "/" + tempFileName;
-							bSuccess = CompileVulkanShader(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, referencedFiles);
-						}
-						else if (api == "ogl")
-						{
-							bSuccess = CompileOGLShader(inputFileName, def.sets[i].defines, includeDirs, shader, referencedFiles);
-						}
-						else
-						{
-							ASSERT(false);
-						}
+						std::string tempFileName = intFileName + ".SPV";
+						tempFileName = tempDir + "/" + tempFileName;
+						bSuccess = pCompiler->Compile(inputFileName, def.sets[i].defines, tempFileName, includeDirs, shader, pDef, referencedFiles, (usg::ShaderType)j);
 						if (!bSuccess)
 						{
 							return -1;
@@ -368,13 +337,37 @@ int main(int argc, char *argv[])
 
 	std::vector<ResourceEntry*> resources;
 	std::vector<EffectEntry> effectEntries;
+
 	for (auto& effectItr : effects)
 	{
 		for (auto& setItr : effectItr.sets)
 		{
 			EffectEntry effect;
-			effect.name = setItr.name;
-			memcpy(effect.entry.CRC, setItr.CRC, sizeof(effect.entry.CRC));
+			effect.SetName(setItr.name, usg::ResourceType::EFFECT);
+
+			for (uint32 i = 0; i < (uint32)usg::ShaderType::COUNT; i++)
+			{
+				if (setItr.CRC[i] != 0)
+				{
+					auto shaderEntry = requiredShaders[i].find(setItr.CRC[i]);
+					if (shaderEntry != requiredShaders[i].end())
+					{
+						effect.AddDependency((*shaderEntry).second.GetName(), g_szUsageStrings[i]);
+					}
+				}
+			}
+
+			if (setItr.CustomFXCRC != 0)
+			{
+				for (auto& customFX : customFXEntries)
+				{
+					if (customFX.definitionCRC == setItr.CustomFXCRC)
+					{
+						effect.AddDependency(customFX.GetName(), "CustomFX");
+						break;
+					}
+				}
+			}
 			effectEntries.push_back(effect);
 		} 
 	} 
@@ -391,6 +384,11 @@ int main(int argc, char *argv[])
 	for (auto& effectItr : effectEntries)
 	{
 		resources.push_back(&effectItr);
+	}
+
+	for (auto& customFX : customFXEntries)
+	{
+		resources.push_back(&customFX);
 	}
 
 	// Write out the file
@@ -415,6 +413,8 @@ int main(int argc, char *argv[])
 	depFile.clear();
 	depFile << effectDependencies.str();
 
+	pCompiler->CleanUp();
+	delete pCompiler;
 
 	return 0;
 }

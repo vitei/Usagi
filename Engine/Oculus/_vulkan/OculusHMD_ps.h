@@ -4,7 +4,7 @@
 *****************************************************************************/
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Oculus/OculusHMD.h"
 
 namespace usg

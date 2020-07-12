@@ -2,45 +2,25 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/global_3d.inc"
 
-// Input attributes
-ATTRIB_LOC(0) in vec3 ao_position;
-ATTRIB_LOC(1) in vec3 ao_normal;
-#ifdef HAS_SKELETON
-ATTRIB_LOC(3) in uvec4 ao_boneIndex;
-ATTRIB_LOC(4) in vec4 ao_boneWeight;
-#endif
-ATTRIB_LOC(5) in vec4 ao_color;
-ATTRIB_LOC(6) in vec2 ao_texCoord[4];
-
-#ifdef HAS_BUMP
-ATTRIB_LOC(2) in vec3 ao_tangent;
-ATTRIB_LOC(10) in vec3 ao_binormal;
-#endif
+// <<GENERATED_CODE>>
 
 #include "../includes/model_transform.inc"
 
-// FIXME: Seperate out into seperate vertex and pixel buffers
-BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
-{
-	// Materials
-	mat3x4	mTexMatrix[4];
-	int 	iBoneCount;
-	bool	bBumpMap;
-
-} uVSMaterial;
-
-
 // Output attributes
 ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
+#ifndef SHADOW_PASS
 ATTRIB_LOC(1) out vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) out vec4 vo_vColor;
 ATTRIB_LOC(3) out vec3 vo_vNormal;
+#endif
 #ifdef HAS_BUMP
 ATTRIB_LOC(4) out vec3 vo_vTangent;
 ATTRIB_LOC(5) out vec3 vo_vBinormal;
 #endif
+#ifndef OMNI_DEPTH
 ATTRIB_LOC(6) out vec3 vo_vWorldPos;
 ATTRIB_LOC(7) out vec3 vo_vViewDir;
+#endif
 
 
 
@@ -54,11 +34,12 @@ void main(void)
 	vTmp.xy = ao_texCoord[0];
 	vo_vTexCoord01.x = dot(uVSMaterial.mTexMatrix[0][0].xywz, vTmp);
 	vo_vTexCoord01.y = dot(uVSMaterial.mTexMatrix[0][1].xywz, vTmp);
-	
+
 	vTmp.xy = ao_texCoord[1];
 	vo_vTexCoord01.z = dot(uVSMaterial.mTexMatrix[1][0].xywz, vTmp);
 	vo_vTexCoord01.w = dot(uVSMaterial.mTexMatrix[1][1].xywz, vTmp);
 
+#ifndef SHADOW_PASS	
 	vTmp.xy = ao_texCoord[2];
 	vo_vTexCoord23.x = dot(uVSMaterial.mTexMatrix[2][0].xywz, vTmp);
 	vo_vTexCoord23.y = dot(uVSMaterial.mTexMatrix[2][1].xywz, vTmp);
@@ -67,6 +48,7 @@ void main(void)
 	vTmp.xy = ao_texCoord[3];
 	vo_vTexCoord23.z = dot(uVSMaterial.mTexMatrix[3][0].xywz, vTmp);
 	vo_vTexCoord23.w = dot(uVSMaterial.mTexMatrix[3][1].xywz, vTmp);
+#endif	
 	
 
 #ifndef SHADOW_PASS

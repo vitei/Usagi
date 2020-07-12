@@ -26,13 +26,18 @@ void EmissionSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	int maxParticles = 20;
 	usg::Vector2f vWindowPos(0.0f, 300.0f);
 	usg::Vector2f vWindowSize(320.f, 350.f);
-	m_window.Init("Emission", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Emission", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	//m_oneTimeCheckBox.Init("One shot", false);
 	m_emissionType.Init("Mode", g_szTypeStrings, 0);
+	m_emissionType.SetToolTip("Release timining (set period, infinite, all at once)");
 	m_maxParticles.Init("Max particles", &maxParticles, 1, 0, 2000 );
+	m_maxParticles.SetToolTip("The maximum number of particles to be active at one time");
 	m_sliders[SLIDER_RELEASE_INTERVAL].Init("Interval", 0.0f, 2.0f, 0.0f);
+	m_sliders[SLIDER_RELEASE_INTERVAL].SetToolTip("Time between releasing groups particles");
 	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].Init("Release random", 0.0f, 2.0f, 0.0f);
+	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].SetToolTip("Maximum randomness (in seconds) of release");
 	m_sliders[SLIDER_EMISSION_TIME].Init("Effect duration", 0.0f, 60.0f, 1.0f);
+	m_sliders[SLIDER_EMISSION_TIME].SetToolTip("Time until emission stops");
 
 
 	m_window.AddItem(&m_emissionType);

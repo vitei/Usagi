@@ -7,6 +7,8 @@
 #include "Bloom.h"
 #include "FXAA.h"
 #include "SMAA.h"
+#include "FilmGrain.h"
+#include "ASSAO.h"
 #include "LinearDepth.h"
 #include "DeferredShading.h"
 #include "SkyFog.h"
@@ -64,6 +66,8 @@ PostFXSys_ps::PostFXSys_ps()
 	m_uDefaultEffects = 0;
 	m_pFXAA = nullptr;
 	m_pSMAA = nullptr;
+	m_pFilmGrain = nullptr;
+	m_pSSAO = nullptr;
 	m_pBloom = nullptr;
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
@@ -75,6 +79,22 @@ PostFXSys_ps::~PostFXSys_ps()
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
 		vdelete m_pDefaultEffects[i];
+	}
+}
+
+void PostFXSys_ps::Update(Scene* pScene, float fElapsed)
+{
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
+	{
+		m_pDefaultEffects[i]->Update(pScene,fElapsed);
+	}
+}
+
+void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
+{
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
+	{
+		m_pDefaultEffects[i]->UpdateBuffer(pDevice);
 	}
 }
 
@@ -161,7 +181,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	m_screenRT[TARGET_LDR_0].InitRenderPass(pDevice, flags);
 	m_screenRT[TARGET_LDR_1].InitRenderPass(pDevice, flags);
 
-	flags.uShaderReadFlags = 0;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 	flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR_0;
 
 	m_screenRT[TARGET_LDR_0_TRANSFER_SRC].InitRenderPass(pDevice, flags);
@@ -265,6 +285,20 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pDeferredShading->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
 	}
+	if(uInitFlags & PostFXSys::EFFECT_FILM_GRAIN)
+	{
+		m_pFilmGrain = vnew(ALLOC_OBJECT) FilmGrain();
+		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
+		m_pFilmGrain->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pFilmGrain;
+	}
+	if(uInitFlags & PostFXSys::EFFECT_SSAO)
+	{
+		m_pSSAO = vnew(ALLOC_OBJECT) ASSAO();
+		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
+		m_pSSAO->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pSSAO;
+	}
 
 	EnableEffects(pDevice, uInitFlags);
 
@@ -320,6 +354,10 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pFXAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FXAA) != 0);
 	if(m_pSMAA)
 		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
+	if (m_pFilmGrain)
+		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
+	if (m_pSSAO)
+		m_pSSAO->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SSAO) != 0);
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 
@@ -370,6 +408,21 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
+	if(uEffectFlags & PostFXSys::EFFECT_SSAO)
+	{
+		if(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
+		{
+			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
+		}
+		else
+		{
+			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
+		}
+		// Don't change the destination
+		m_pSSAO->SetDestTarget(pDevice, pDst);
+		m_pFinalEffect = m_pSSAO;
+	}
+
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
 	{
 		m_pBloom->SetSourceTarget(pDevice, pDst);
@@ -396,6 +449,15 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pSMAA->SetDestTarget(pDevice, pDst);
 		m_renderPasses.SetRenderPass(m_pSMAA->GetLayer(), m_pSMAA->GetPriority(), pDst->GetRenderPass());
 		m_pFinalEffect = m_pSMAA;
+	}
+
+	if(uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN)
+	{
+		m_pFilmGrain->SetSourceTarget(pDevice, pDst);
+		pDst = GetLDRTargetForEffect(m_pFilmGrain, pDst);
+		m_pFilmGrain->SetDestTarget(pDevice, pDst);
+		m_renderPasses.SetRenderPass(m_pFilmGrain->GetLayer(), m_pFilmGrain->GetPriority(), pDst->GetRenderPass());
+		m_pFinalEffect = m_pFilmGrain;
 	}
 
 	m_renderPasses.UpdateEnd(pDevice);
@@ -563,6 +625,8 @@ PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, Reso
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.alphaState.SetColor0Only();
 
+	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
+
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineDecl.layout.descriptorSets[1] = multiDesc;
@@ -580,6 +644,8 @@ PipelineStateHndl PostFXSys_ps::GetGaussBlurPipeline(GFXDevice* pDevice, Resourc
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.alphaState.SetColor0Only();
+
+	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
 	DescriptorSetLayoutHndl multiDesc = pDevice->GetDescriptorSetLayout(g_multiSampleDescriptor);
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);

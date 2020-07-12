@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_BEHAVIOR_TREE_VARIABLE_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_VARIABLE_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"
 #include "Engine/AI/BehaviorTree/Variables.h"

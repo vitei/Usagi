@@ -7,9 +7,23 @@ import 'Engine/Graphics/Color.proto';
 
 package usg.Components;
 
+
+option (nanopb_fileopt).include = "Engine/Debug/DebugComponents.h";
+
+
 // Turns on debug rendering for any shapes attached to the entity
 message DebugRenderData
 {
 	required uint32 page = 1;
 	required Color color = 2;
+}
+
+message DebugCameraComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	// Internally has a debug camera and debug camera controller
+	required uint32 uPrevCamID = 1 [default=0];
 }

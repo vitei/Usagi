@@ -38,7 +38,7 @@ bool Mesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 		//const ConstantSet* GetConstantSet();
 
 		if(m_pszName)
-			pContext->BeginGPUTag(m_pszName);
+			pContext->BeginGPUTag(m_pszName, Color::Blue);
 
 		// FIXME: This has been removed from the render nodes
 #if 0

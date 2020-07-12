@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_MODEL_RENDER_NODES_H_
 #define _USG_GRAPHICS_SCENE_MODEL_RENDER_NODES_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Resource/ModelResource.h"

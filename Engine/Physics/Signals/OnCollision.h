@@ -2,7 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2016
 ****************************************************************************/
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/Component.h"
 #include "Engine/Framework/Signal.h"
 #include "Engine/Physics/Collision.pb.h"

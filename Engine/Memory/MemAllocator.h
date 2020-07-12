@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_MEMORY_MEM_ALLOCATOR_H_
 #define _USG_ENGINE_MEMORY_MEM_ALLOCATOR_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemUtil.h"
 
 // Heaps such as MEM1 and the foreground heap will be re-claimed by the 

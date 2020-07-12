@@ -10,6 +10,7 @@ bool Texture::m_sbTexIds[Texture::MAX_TEXTUTRE_IDS] = { false };
 static uint16 g_uLastValidId = 0;
 
 Texture::Texture(void)
+	: ResourceBase(StaticResType)
 {
 	// FIXME: Make this thread safe with a critical section
 	m_uBindingId = USG_INVALID_ID16;

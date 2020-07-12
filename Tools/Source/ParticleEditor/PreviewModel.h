@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_PREVIEW_MODEL_H_
 #define _USG_PARTICLE_EDITOR_PREVIEW_MODEL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/GUI/GuiWindow.h"
 #include "Engine/GUI/IMGuiRenderer.h"
@@ -23,12 +23,18 @@ public:
 	PreviewModel() { m_pModel = NULL;  }
 	~PreviewModel();
 
-	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer);
+	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene);
 	void Update(usg::GFXDevice* pDevice, float fElapsed);
+	void CleanUp(usg::GFXDevice* pDevice);
+
+	void AddToWindow(usg::GUIWindow* pWindow)
+	{
+		pWindow->AddItem(&m_window);
+	}
 private:
 
 	usg::Model*			  m_pModel;
-	
+
 
 	FileList<MAX_FILE_COUNT>	m_modelFileList;
 	usg::GUIComboBox			m_loadFilePaths;

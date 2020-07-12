@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="MaterialDefinition">
+      <UniqueIdentifier>{5445c476-3edb-41d5-aead-fda80bcf94d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MaterialDefinition\MaterialDefinitionExporter.cpp">
+      <Filter>MaterialDefinition</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MaterialDefinition\MaterialDefinitionExporter.h">
+      <Filter>MaterialDefinition</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcePakExporter.h" />
+  </ItemGroup>
+</Project>

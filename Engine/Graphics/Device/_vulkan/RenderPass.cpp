@@ -81,6 +81,14 @@ namespace usg
 		{
 			flagsOut |= VK_ACCESS_SHADER_READ_BIT;
 		}
+		if (uFlags & RenderPassDecl::AC_SHADER_WRITE_BIT)
+		{
+			flagsOut |= VK_ACCESS_SHADER_WRITE_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_TRANSFER_WRITE_BIT)
+		{
+			flagsOut |= VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
 
 		return flagsOut;
 	}

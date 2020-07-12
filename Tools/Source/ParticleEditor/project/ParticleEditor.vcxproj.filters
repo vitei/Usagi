@@ -24,9 +24,6 @@
     <ClCompile Include="..\BlendSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ColorSelection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ColorSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,15 +81,21 @@
     <ClCompile Include="..\main\_win\WinMain.cpp">
       <Filter>main</Filter>
     </ClCompile>
+    <ClCompile Include="..\PreviewWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmitterWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ParticlePreviewWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AlphaSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\BlendSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ColorSelection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ColorSettings.h">
@@ -150,6 +153,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\TextureSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PreviewWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticlePreviewWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,6 @@
+#include "Engine/Common/Common.h"
 #include "Animation.h"
-
 #include <string.h>
-
 #include "common.h"
 
 namespace exchange {

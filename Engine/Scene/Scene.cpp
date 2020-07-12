@@ -10,6 +10,7 @@
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Scene/ShadowContext.h"
+#include "Engine/Scene/OffscreenRenderNode.h"
 #include "Engine/Scene/OmniShadowContext.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Scene/Octree.h"
@@ -74,6 +75,8 @@ struct Scene::PIMPL
 	FastPool<ScTransformNode>	transformNodes;
 	List<SceneContext>			sceneContexts;
 	List<RenderGroup>			staticComponents;
+	usg::List<const Camera>		cameras;
+	usg::List<OffscreenRenderNode> offscreenNodes;
 	Debug3D						debug3D;
 	ProfilingTimer				profileTimers[TIMER_COUNT];
 };
@@ -103,7 +106,7 @@ Scene::~Scene()
 	vdelete m_pImpl;
 }
 
-void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
+void Scene::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const AABB& worldBounds, ParticleSet* pSet)
 {
 	for(FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.EmptyBegin(); !it.IsEnd(); ++it)
 	{
@@ -123,7 +126,7 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 	m_pImpl->octree.Init(worldBounds, 20, 1.2f);
 	m_pImpl->lightMgr.Init(pDevice, this);
 	m_pImpl->particleSystem.Init(pDevice, this, pSet);
-	m_pImpl->debug3D.Init(pDevice, this);
+	m_pImpl->debug3D.Init(pDevice, this, pResMgr);
 
 	m_debugStats.Init(&m_pImpl->debug3D, this);
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
@@ -132,6 +135,23 @@ void Scene::Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet)
 const RenderPassHndl& Scene::GetShadowRenderPass() const
 {
 	return m_pImpl->lightMgr.GetShadowPassHndl();
+}
+
+
+void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
+{
+	if (uViewContext > GetViewContextCount())
+		return;
+
+	for (List<const Camera>::Iterator it = m_pImpl->cameras.Begin(); !it.IsEnd(); ++it)
+	{
+		if ((*it)->GetID() == uCameraId)
+		{
+			GetViewContext(uViewContext)->SetCamera((*it));
+			GetViewContext(uViewContext)->SetRenderMask((*it)->GetRenderMask());
+			return;
+		}
+	}
 }
 
 
@@ -213,6 +233,16 @@ RenderGroup* Scene::CreateRenderGroup(const TransformNode* pTransform)
 	return pSceneComponent;
 }
 
+
+void Scene::RegisterOffscreenRenderNode(OffscreenRenderNode* pNode)
+{
+	m_pImpl->offscreenNodes.AddToEnd(pNode);
+}
+
+void Scene::DeregisterOffscreenRenderNode(OffscreenRenderNode* pNode)
+{
+	m_pImpl->offscreenNodes.Remove(pNode);
+}
 
 void Scene::UpdateMask(const TransformNode* pTransform, uint32 uMask)
 {
@@ -417,6 +447,15 @@ void Scene::PreUpdate()
 	m_pImpl->debug3D.Clear();
 }
 
+void Scene::PreDraw(GFXContext* pContext)
+{
+	m_pImpl->lightMgr.GlobalShadowRender(pContext, this);
+	for (auto itr = m_pImpl->offscreenNodes.Begin(); !itr.IsEnd(); ++itr)
+	{
+		(*itr)->Draw(pContext);
+	}
+}
+
 void Scene::Update(GFXDevice* pDevice)
 {
 	PerformVisibilityTesting(pDevice);
@@ -471,6 +510,27 @@ const Camera* Scene::GetSceneCamera(uint32 uIndex) const
 	}
 
 	return NULL;
+}
+
+void Scene::AddCamera(const Camera* pCamera)
+{
+	if (m_pImpl->cameras.GetSize() == 0)
+	{
+		for (FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.Begin(); !it.IsEnd(); ++it)
+		{
+			if (!(*it)->GetCamera())
+			{
+				(*it)->SetCamera(pCamera);
+				(*it)->SetRenderMask(pCamera->GetRenderMask());
+			}
+		}
+	}
+	m_pImpl->cameras.AddToEnd(pCamera);
+}
+
+void Scene::RemoveCamera(const Camera* pCamera)
+{
+	m_pImpl->cameras.Remove(pCamera);
 }
 
 LightMgr& Scene::GetLightMgr()

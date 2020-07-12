@@ -3,6 +3,7 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Memory/GPUHeap.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
 
 namespace usg {
 
@@ -18,9 +19,10 @@ GPUHeap::~GPUHeap()
 }
 
 
-void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs)
+void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs, bool bDelayFree)
 {
 	m_pHeapMem = pMem;
+	m_bDelayFree = bDelayFree;
 	m_memoryBlocks = (BlockInfo*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_SYSTEM, sizeof(BlockInfo)*uMaxAllocs, 4, false);
 	MemClear(m_memoryBlocks, sizeof(BlockInfo*)*uMaxAllocs);
 	m_uMaxAllocs = uMaxAllocs;
@@ -38,6 +40,7 @@ void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs)
 
 		pInfo->pNext	= NULL;	
 		pInfo->pPrev	= NULL;
+		pInfo->uFreeFrame = USG_INVALID_ID;
 	}
 
 	m_memoryBlocks[0].uSize		= uSize;
@@ -49,6 +52,27 @@ void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs)
 	m_pAllocList = NULL;
 	m_pFreeList = &m_memoryBlocks[0];
 	m_pUnusedList = &m_memoryBlocks[1];
+}
+
+bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
+{
+	if (!m_bDelayFree)
+	{
+		return true;
+	}
+
+	if ( (uFreeFrame+ GFX_NUM_DYN_BUFF) < uCurrentFrame )
+	{
+		return true;
+	}
+
+	// Wrapped around
+	if (uFreeFrame > uCurrentFrame)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void GPUHeap::SwitchList(BlockInfo* pInfo, BlockInfo** ppSrcList, BlockInfo** ppDstList)
@@ -102,10 +126,11 @@ GPUHeap::BlockInfo* GPUHeap::PopList(BlockInfo** ppSrcList, BlockInfo** ppDstLis
 	return pReturn;
 }
 
-void GPUHeap::AddAllocator(MemAllocator* pAllocator)
+void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
 	BlockInfo* pSmallest = NULL;
-	uint32 uSpace = pAllocator->GetSize() + pAllocator->GetAlign();
+	uint32 uSpace = (uint32)AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
+	uint32 uCurrentFrame = pDevice->GetFrameCount();
 
 	BlockInfo* pInfo = m_pFreeList;
 
@@ -114,7 +139,7 @@ void GPUHeap::AddAllocator(MemAllocator* pAllocator)
 		ASSERT(pInfo->bValid);
 
 		// Find the smallest 
-		if(pInfo->pAllocator == NULL && (pInfo->uSize > uSpace) )
+		if(CanAlloc(uCurrentFrame, pInfo->uFreeFrame) && pInfo->pAllocator == NULL && (pInfo->uSize >= uSpace) )
 		{
 			if(pSmallest == NULL || pInfo->uSize < pSmallest->uSize)
 			{
@@ -135,7 +160,7 @@ void GPUHeap::AddAllocator(MemAllocator* pAllocator)
 	ASSERT(false);
 }
 
-void GPUHeap::RemoveAllocator(MemAllocator* pAllocator)
+void GPUHeap::RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
 	BlockInfo* pInfo = m_pAllocList;
 	while(pInfo)
@@ -144,6 +169,9 @@ void GPUHeap::RemoveAllocator(MemAllocator* pAllocator)
 		{
 			FreeMemory(pInfo);
 			pInfo->pAllocator = NULL;
+			// Even if blocks got merged we keep the free frame from the current block as it will be newer
+			// This could only ever be a problem if we kept freeing neighboring allocations every frame
+			pInfo->uFreeFrame = pDevice->GetFrameCount();
 			return;
 		}
 		pInfo = pInfo->pListNext;
@@ -163,15 +191,6 @@ void GPUHeap::ReleaseAll()
 {
 	// Implement me
 	ASSERT(false);
-}
-
-memsize GPUHeap::AlignAddress(memsize uAddress, memsize uAlign)
-{
-	memsize uMask = uAlign-1;
-	memsize uMisAlignment = (uAddress & uMask);
-	memsize uAdjustment = uAlign - uMisAlignment;
-	
-	return uAddress + uAdjustment;
 }
 
 GPUHeap::BlockInfo* GPUHeap::FindUnusedBlock()
@@ -255,9 +274,10 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 	pAllocator->Released();
 }
 
-bool GPUHeap::CanAllocate(MemAllocator* pAllocator)
+bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
-	uint32 uSpace = pAllocator->GetSize() + pAllocator->GetAlign();
+	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
+	uint32 uCurrentFrame = pDevice->GetFrameCount();
 
 	BlockInfo* pInfo = m_pFreeList;
 
@@ -269,7 +289,7 @@ bool GPUHeap::CanAllocate(MemAllocator* pAllocator)
 		ASSERT(pInfo->bValid);
 		ASSERT(pInfo->pAllocator==NULL);
 		// Find the smallest 
-		if( pInfo->uSize > uSpace )
+		if( pInfo->uSize >= uSpace && CanAlloc(uCurrentFrame, pInfo->uFreeFrame) )
 		{
 			return true;
 		}

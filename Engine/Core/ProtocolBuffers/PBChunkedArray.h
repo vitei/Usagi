@@ -8,7 +8,7 @@
 #include <pb.h>
 #include <pb_decode.h>
 #include "Engine/Memory/Mem.h"
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/ProtocolBuffers/PBDecoderDelegate.h"
 
 namespace usg {

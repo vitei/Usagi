@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_MEMORY_SCRATCH_OBJ_H_
 #define _USG_MEMORY_SCRATCH_OBJ_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/Mem.h"
 #include "Engine/Memory/ScratchRaw.h"
 

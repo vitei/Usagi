@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_FRAGMENT_POSTFXSYS_PS_H_
 #define _USG_POSTFX_FRAGMENT_POSTFXSYS_PS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
@@ -35,6 +35,8 @@ public:
 
 	void Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
 	void CleanUp(GFXDevice* pDevice);
+	void Update(Scene* pScene, float fElapsed);
+	void UpdateGPU(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
@@ -111,6 +113,8 @@ protected:
 	class Bloom*			m_pBloom;
 	class FXAA*				m_pFXAA;
 	class SMAA*				m_pSMAA;
+	class FilmGrain*		m_pFilmGrain;
+	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
 	PostEffect*				m_pFinalEffect;

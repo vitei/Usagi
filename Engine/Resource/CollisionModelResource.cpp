@@ -17,7 +17,8 @@ namespace usg{
 
 
 
-	CollisionModelResource::CollisionModelResource()
+	CollisionModelResource::CollisionModelResource() :
+		ResourceBase(StaticResType)
 	{
 		m_pVertices = NULL;
 		m_pTriangleNormals = NULL;

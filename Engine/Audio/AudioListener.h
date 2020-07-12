@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_AUDIO_LISTENER_H__
 #define __USG_AUDIO_AUDIO_LISTENER_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include AUDIO_HEADER(Engine/Audio/,AudioListener_ps.h)
 
@@ -13,7 +13,7 @@ namespace usg{
 class AudioListener
 {
 public:	
-	AudioListener() { m_fCullRadius = 6.0f; m_vVelocity = V3F_ZERO; m_fSoundSpeed = 340.f; m_fSpeakerRadius = 1.0f; }
+	AudioListener() { m_fCullRadius = 6.0f; m_vVelocity = Vector3f::ZERO; m_fSoundSpeed = 340.f; m_fSpeakerRadius = 1.0f; }
 	~AudioListener() {}
 
 	void Init() { m_platform.Init(); }

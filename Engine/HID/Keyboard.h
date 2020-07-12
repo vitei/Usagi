@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_KEYBOARD__
 #define __USG_HID_KEYBOARD__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 
 namespace usg{

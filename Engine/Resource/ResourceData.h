@@ -6,7 +6,7 @@
 
 #ifndef USG_RESOURCE_RESOURCE_DATA_H
 #define USG_RESOURCE_RESOURCE_DATA_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 
 
@@ -60,15 +60,14 @@ public:
 	bool	m_bLoadAsStatic;
 };
 
-template <class ResourceType>
 class ResourceData : public ResourceDataBase
 {
 private:
 	struct ResourceInfo
 	{
-		ResourcePointer<const ResourceType>	resource;
-		uint32								uTag;
-		bool								bStatic;
+		BaseResHandle		resource;
+		uint32				uTag;
+		bool				bStatic;
 	};
 
 public:
@@ -88,7 +87,7 @@ public:
 				// Ensure it's not being used elsewhere
 				// FIXME: There is a memory leak going on so can't check in this assert yet
 				//ASSERT((*it)->resource.unique());
-				const_cast<ResourceType*>(val->resource.get())->CleanUp(pDevice);
+				const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
 				vdelete val->resource.get();
 				val->resource.reset();
 				it.RemoveElement();
@@ -101,7 +100,7 @@ public:
 		for (ResourceDynamicIter it = m_resources.BeginDynamic(); !it.IsEnd(); ++it)
 		{
 			ResourceInfo* val = *it;
-			const_cast<ResourceType*>(val->resource.get())->CleanUp(pDevice);
+			const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
 			vdelete val->resource.get();
 			val->resource.reset();
 			it.RemoveElement();
@@ -123,14 +122,18 @@ public:
 		}
 	}
 	 
-	ResourcePointer<const ResourceType> GetResourceHndl(const U8String& resName);
-	ResourcePointer<const ResourceType> AddResource(const ResourceType* pResource);
+	BaseResHandle GetResourceHndl(const U8String& resName, ResourceType eType);
+	BaseResHandle AddResource(const ResourceBase* pResource);
+	void AddResource(BaseResHandle resHndl);
 
 
 	uint32 GetResourceCount() const { return m_resources.Size(); }
 
 	// TODO: Remove this functions accessing the raw resource
-	const ResourceType* GetResource(const U8String &resName);
+	template <class ResourceType>
+	const ResourceType* GetResource(const U8String &resName, usg::ResourceType eType);
+	
+	template <class ResourceType>
 	const ResourceType* GetResource(uint32 uIndex) const
 	{
 		// Slow!!! Do not use outside of init
@@ -140,7 +143,7 @@ public:
 			
 		}
 		ASSERT(uIndex == 0);
-		return (*it)->resource.get();
+		return GetAs<ResourceType>((*it)->resource);
 	}
 
 
@@ -150,25 +153,22 @@ private:
 };
 
 
-template <class ResourceType>
-inline ResourceData<ResourceType>::ResourceData() : m_resources(50, true, true)
+inline ResourceData::ResourceData() : m_resources(50, true, true)
 {
 }
 
-template <class ResourceType>
-inline ResourceData<ResourceType>::~ResourceData()
+inline ResourceData::~ResourceData()
 {
 	ASSERT(m_resources.Size() == 0);
 }
 
 
-template <class ResourceType>
-inline ResourcePointer<const ResourceType> ResourceData<ResourceType>::AddResource(const ResourceType* pResource)
+inline BaseResHandle ResourceData::AddResource(const ResourceBase* pResource)
 {
 #ifdef DEBUG_RESOURCE_MGR
 	m_loadTimer.Stop();
 #endif
-	ResourcePointer<const ResourceType> ret;
+	BaseResHandle ret;
 	// TODO: Remove me from a final build
 	ResourceInfo* pInfo = m_resources.Alloc();
 	pInfo->resource = pResource;
@@ -179,8 +179,19 @@ inline ResourcePointer<const ResourceType> ResourceData<ResourceType>::AddResour
 	return ret;
 }
 
-template <class ResourceType>
-ResourcePointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(const U8String& resName)
+inline void ResourceData::AddResource(BaseResHandle resHandle)
+{
+#ifdef DEBUG_RESOURCE_MGR
+	m_loadTimer.Stop();
+#endif
+	ResourceInfo* pInfo = m_resources.Alloc();
+	pInfo->resource = resHandle;
+	pInfo->uTag = m_uTag;
+	pInfo->bStatic = m_bLoadAsStatic;
+}
+
+
+BaseResHandle ResourceData::GetResourceHndl(const U8String& resName, ResourceType eType)
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
 	NameHash nameHash = ResourceDictionary::calcNameHash( resName.CStr() );
@@ -191,8 +202,9 @@ ResourcePointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(
 #endif
 	for (typename FastPool<ResourceInfo>::Iterator it = m_resources.Begin(); !it.IsEnd(); ++it)
 	{
-		if( (*it)->resource->GetNameHash() == nameHash
+		if( ( (*it)->resource->GetNameHash() == nameHash
 			|| ((*it)->resource->GetDataHash() == dataHash && dataHash != 0 ) )
+			&& (*it)->resource->GetResourceType() == eType )
 		{
 #ifdef DEBUG_RESOURCE_MGR
 			m_findTimer.Stop();
@@ -205,13 +217,13 @@ ResourcePointer<const ResourceType> ResourceData<ResourceType>::GetResourceHndl(
 	m_findTimer.Stop();
 #endif
 
-	return ResourcePointer<const ResourceType>(nullptr);
+	return BaseResHandle(nullptr);
 }
 
 template <class ResourceType>
-const ResourceType* ResourceData<ResourceType>::GetResource(const U8String &resName)
+const ResourceType* ResourceData::GetResource(const U8String &resName, usg::ResourceType eType)
 {
-	return GetResourceHndl(resName).get();
+	return GetAs<ResourceType>(GetResourceHndl(resName, eType));
 }
 
 } // namespace usg

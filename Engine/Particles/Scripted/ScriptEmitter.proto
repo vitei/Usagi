@@ -39,7 +39,8 @@ enum TextureMode
 	TEX_MODE_FLIPBOOK_ONCE = 1;
 	TEX_MODE_FLIPBOOK_LOOP = 2;
 	TEX_MODE_RANDOM_IMAGE = 3;
-	TEX_MODE_COUNT = 4;
+	TEX_MODE_FIT_TO_TIME = 4;
+	TEX_MODE_COUNT = 5;
 };
 
 enum ParticleColorMode
@@ -76,7 +77,7 @@ message TextureAnimation
 {
 	required TextureMode  		  		eTexMode = 2 [default = TEX_MODE_NONE];
 	required bool					 	bRandomOffset = 3 [default = false];
-	repeated uint32						animIndex = 4  [(nanopb).max_count = 32];
+	repeated uint32						animIndex = 4  [(nanopb).max_count = 128];
 	required float						fAnimTimeScale = 5 [default = 30.0];
 }
 
@@ -167,7 +168,6 @@ message SortSettings
 	required uint32			uPriority = 2;
 	required bool			bWriteDepth = 3;
 	optional float 			fDepthOffset = 4;
-	// TODO: Optional depth sort of particles?
 }
 
 message EmitterEmission
@@ -175,6 +175,7 @@ message EmitterEmission
 	// Effect information
 	required usg.AlphaStateGroup	blend = 1;
 	required float 					fSoftFadeDistance = 32 [default = 0.0];
+	optional float 					fCameraOffset = 33 [default = 0.0];
 	required SortSettings			sortSettings = 29;
 	repeated TextureData			textureData = 2  [(nanopb).max_count = 2];
 	

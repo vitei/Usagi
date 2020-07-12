@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDFADE_H__
 #define __USG_AUDIO_SOUNDFADE_H__
-#include "Engine/Common/Common.h"
+
 #include "AudioDefs.h"
 
 namespace usg{
@@ -15,12 +15,12 @@ public:
 	SoundFade();
 	~SoundFade();
 
-	void Start(PLAY_STATE eTargetState, float fFrames, bool bFadeIn = false);
+	void Start(PLAY_STATE eTargetState, float fFrames);
 	float GetCurrentVolume() const { return m_fCurrent; }
 	bool IsActive() const { return m_bActive; }
 	PLAY_STATE GetTargetState() const { return m_eTargetState; }
 	bool Update(float fElapsed);
-	void Reset();
+	void Reset(float fStartVolume = 1.0f);
 
 private:
 

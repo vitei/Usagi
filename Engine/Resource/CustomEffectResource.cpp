@@ -30,13 +30,16 @@ namespace usg
 	};
 
 
-	CustomEffectResource::CustomEffectResource()
+	CustomEffectResource::CustomEffectResource() :
+		ResourceBase(StaticResType)
 	{
-		m_pHeader = NULL;
-		m_pConstantSets = NULL;
-		m_pBinary = NULL;
-		m_pSamplers = NULL;
-		m_pAttributes = NULL;
+		m_pConstantSets = nullptr;
+		m_pBinary = nullptr;
+		m_pVertexDecl = nullptr;
+		m_pAlloc = nullptr;
+		m_pSamplers = nullptr;
+		m_pAttributes = nullptr;
+		m_pShaderConstDecl = nullptr;
 		for (uint32 i = 0; i < MAX_CONSTANT_SETS; i++)
 		{
 			m_uConstDeclOffset[i] = 0;
@@ -45,12 +48,26 @@ namespace usg
 
 	CustomEffectResource::~CustomEffectResource()
 	{
-		if(m_pBinary)
+		if(m_pAlloc)
 		{
-			mem::Free(m_pBinary);
+			mem::Free(m_pAlloc);
+		}
+		// FIXME: These should be exported as part of the file rather that seperate allocations
+		if (m_pShaderConstDecl)
+		{
+			vdelete m_pShaderConstDecl;
+		}
+		if (m_pDescriptorDecl)
+		{
+			vdelete m_pDescriptorDecl;
+		}
+		if (m_pVertexDecl)
+		{
+			vdelete m_pVertexDecl;
 		}
 	}
 
+	// FIXME: Deprecate this; binding point now specified in the declaration
 	uint32 CustomEffectResource::GetBindingPoint(uint32 uSet)
 	{
 		const char* szName = m_pConstantSets[uSet].szName;
@@ -66,60 +83,127 @@ namespace usg
 
 	}
 
+	bool CustomEffectResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData)
+	{
+		m_header = *(PakFileDecl::GetCustomHeader<CustomEffectDecl::Header>(pFileHeader));
+		ASSERT(pFileHeader->uFileFlags & PakFileDecl::FILE_FLAG_KEEP_DATA);
+		
+		m_pBinary = pData;
+		FixUpPointers(pDevice);
+
+		return true;
+	}
+
+
 	void CustomEffectResource::Init(GFXDevice* pDevice, const char* szFileName)
 	{
 		SetupHash(szFileName);
 		File file(szFileName, FILE_ACCESS_READ );
 
-		m_pBinary = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, (uint32)file.GetSize(), FILE_READ_ALIGN);
-		file.Read(file.GetSize(), m_pBinary);
-		m_pHeader = (CustomEffectDecl::Header*)m_pBinary;
+		memsize uBinarySize = file.GetSize() - sizeof(m_header);
+		m_pAlloc = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uBinarySize, FILE_READ_ALIGN);
+		file.Read(sizeof(m_header), &m_header);
+		file.Read(uBinarySize, m_pAlloc);
+		m_pBinary = m_pAlloc;
+		FixUpPointers(pDevice);
+	}
 
-		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_pHeader->uAttributeOffset);
-		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_pHeader->uSamplerOffset);
+	void CustomEffectResource::FixUpPointers(GFXDevice* pDevice)
+	{
+		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_header.uAttributeOffset);
+		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_header.uSamplerOffset);
 
-		ASSERT(m_pHeader->uConstantSetCount < MAX_CONSTANT_SETS);
+		ASSERT(m_header.uConstantSetCount < MAX_CONSTANT_SETS);
 
-		m_pConstantSets = (CustomEffectDecl::ConstantSet*)(((uint8*)m_pBinary) + m_pHeader->uConstantSetDeclOffset);
+		m_pConstantSets = (CustomEffectDecl::ConstantSet*)(((uint8*)m_pBinary) + m_header.uConstantSetDeclOffset);
 
 		uint32 uTotalShaderConsts = 0;
 
-		for (uint32 uSet = 0; uSet < m_pHeader->uConstantSetCount; uSet++)
+		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
 		{
-			ShaderConstantDecl* pDecl = NULL;
+			ShaderConstantDecl* pDecl = nullptr;
 			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset;
-			
+
 			m_uConstDeclOffset[uSet] = uTotalShaderConsts;
 
 			uTotalShaderConsts += m_pConstantSets[uSet].uConstants + 1;
 		}
 
+		// FIXME: Place in the binary data
 		ShaderConstantDecl cap = SHADER_CONSTANT_END();
 		m_pShaderConstDecl = vnew(ALLOC_OBJECT)ShaderConstantDecl[uTotalShaderConsts];
-		for(uint32 uSet=0; uSet<m_pHeader->uConstantSetCount; uSet++)
+		for (uint32 uSet = 0; uSet < m_header.uConstantSetCount; uSet++)
 		{
 			ShaderConstantDecl* pDecl = &m_pShaderConstDecl[m_uConstDeclOffset[uSet]];
-			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary)+m_pConstantSets[uSet].uDeclOffset);
+			CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary) + m_pConstantSets[uSet].uDeclOffset);
 			uint32 uVar = 0;
-			for( ; uVar < m_pConstantSets[uSet].uConstants; uVar++ )
+			for (; uVar < m_pConstantSets[uSet].uConstants; uVar++)
 			{
 				str::Copy(pDecl[uVar].szName, pConstant[uVar].szName, USG_IDENTIFIER_LEN);
 				pDecl[uVar].eType = (ConstantType)pConstant[uVar].eConstantType;
 				pDecl[uVar].uiCount = pConstant[uVar].uiCount;
 				pDecl[uVar].uiOffset = pConstant[uVar].uiOffset;
 				pDecl[uVar].uiSize = 0;
-				pDecl[uVar].pSubDecl = NULL;
+				pDecl[uVar].pSubDecl = nullptr;
 			}
 			// Cap off this shader declaration
 			usg::MemCpy(&pDecl[uVar], &cap, sizeof(ShaderConstantDecl));
 
 		}
 
+		// FIXME: Place in the binary data
+		uint32 uDescDeclCount = m_header.uConstantSetCount + m_header.uSamplerCount + 1;
+		m_pDescriptorDecl = vnew(ALLOC_OBJECT)DescriptorDeclaration[uDescDeclCount];
+		DescriptorDeclaration* pDescDecl = m_pDescriptorDecl;
+		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
+		{
+			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			pDescDecl->uCount = 1;
+			pDescDecl->shaderType = usg::SHADER_FLAG_PIXEL;
+			pDescDecl->uBinding = m_pSamplers[i].uIndex;
+			pDescDecl++;
+		}
+
+		for (uint32 i = 0; i < m_header.uConstantSetCount; i++)
+		{
+			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_CONSTANT_BUFFER;
+			pDescDecl->uCount = 1;
+			pDescDecl->shaderType = (ShaderTypeFlags)m_pConstantSets[i].uShaderSets;
+			pDescDecl->uBinding = m_pConstantSets[i].uBinding;
+			pDescDecl++;
+		}
+
+		*pDescDecl = DESCRIPTOR_END();
+
+		// TODO: Once stable move this to the exporter side
+		uint32 uVertexElemCnt = m_header.uAttributeCount + 1;
+		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
+		VertexElement* pElement = m_pVertexDecl;
+		memsize uOffset = 0;
+		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+		{
+			// Keep the data aligned
+			uOffset = AlignSizeUp(uOffset, g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]);
+			pElement->uAttribId = m_pAttributes[i].uIndex;
+			pElement->uCount = g_veCountMapping[m_pAttributes[i].eConstantType] * m_pAttributes[i].uCount;
+			// FIXME: This is actually the constant type; need to remove the VE types (they should be interchangeable)
+			pElement->eType = g_veMapping[m_pAttributes[i].eConstantType];
+			pElement->bIntegerReg = false;
+			pElement->bNormalised = false;
+			pElement->uOffset = uOffset;
+			uOffset += pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType];
+			pElement++;
+		}
+		*pElement = VERTEX_DATA_END();
+
+		m_uVertexSize = AlignSizeUp(uOffset, 4);
+
+		m_descLayout = pDevice->GetDescriptorSetLayout(m_pDescriptorDecl);
 	}
 
 	uint32 CustomEffectResource::GetAttribBinding(const char* szAttrib) const
 	{
-		for(uint32 i=0; i<m_pHeader->uAttributeCount; i++)
+		for(uint32 i=0; i< m_header.uAttributeCount; i++)
 		{
 			if( str::Compare(szAttrib, m_pAttributes[i].hint) )
 			{
@@ -131,12 +215,12 @@ namespace usg
 
 	uint32 CustomEffectResource::GetAttribCount() const
 	{
-		return m_pHeader->uAttributeCount;
+		return m_header.uAttributeCount;
 	}
 
 	const CustomEffectDecl::Attribute* CustomEffectResource::GetAttribute(uint32 uIndex) const
 	{
-		if (uIndex >= m_pHeader->uAttributeCount)
+		if (uIndex >= m_header.uAttributeCount)
 		{
 			return nullptr;
 		}
@@ -145,7 +229,7 @@ namespace usg
 
 	uint32 CustomEffectResource::GetSamplerBinding(const char* szSampler) const
 	{
-		for(uint32 i=0; i<m_pHeader->uSamplerCount; i++)
+		for(uint32 i=0; i< m_header.uSamplerCount; i++)
 		{
 			if( str::Compare(szSampler, m_pSamplers[i].hint) )
 			{
@@ -158,18 +242,25 @@ namespace usg
 
 	uint32 CustomEffectResource::GetConstantSetCount() const
 	{
-		return m_pHeader->uConstantSetCount;
+		return m_header.uConstantSetCount;
 	}
+
+	uint32 CustomEffectResource::GetConstantSetBinding(uint32 uSet) const
+	{
+		ASSERT(uSet < m_header.uConstantSetCount);
+		return m_pConstantSets[uSet].uBinding;
+	}
+
 
 	uint32 CustomEffectResource::GetConstantCount(uint32 uSet) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		return m_pConstantSets[uSet].uConstants;	
 	}
 
 	const CustomEffectDecl::Constant* CustomEffectResource::GetConstant(uint32 uSet, uint32 uAttrib) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		CustomEffectDecl::Constant* pConstant = (CustomEffectDecl::Constant*)(((uint8*)m_pBinary)+m_pConstantSets[uSet].uDeclOffset);
 		ASSERT(uAttrib<m_pConstantSets[uSet].uConstants);
 		return &pConstant[uAttrib];
@@ -178,13 +269,13 @@ namespace usg
 
 	void* CustomEffectResource::GetDefaultData(uint32 uSet) const
 	{
-		ASSERT(uSet<m_pHeader->uConstantSetCount);
+		ASSERT(uSet< m_header.uConstantSetCount);
 		return ((uint8*)(m_pBinary) + m_pConstantSets[uSet].uDataOffset);
 	}
 
 	const char* CustomEffectResource::GetDefaultTexture(uint32 uSamplerBinding)
 	{
-		for (uint32 i = 0; i < m_pHeader->uSamplerCount; i++)
+		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
 		{
 			if (m_pSamplers[i].uIndex == uSamplerBinding)
 			{
@@ -196,27 +287,59 @@ namespace usg
 
 	const char* CustomEffectResource::GetEffectName() const
 	{
-		return m_pHeader->effectName;
+		return m_header.effectName;
 	}
 
 	const char* CustomEffectResource::GetDepthEffectName() const
 	{
-		return m_pHeader->shadowEffectName;
+		return m_header.shadowEffectName;
 	}
 
 	const char* CustomEffectResource::GetDeferredEffectName() const
 	{
-		return m_pHeader->deferredEffectName;
+		return m_header.deferredEffectName;
 	}
 
 	const char* CustomEffectResource::GetTransparentEffectName() const
 	{
-		return m_pHeader->transparentEffectName;
+		return m_header.transparentEffectName;
 	}
 
 	const char* CustomEffectResource::GetOmniDepthEffectName() const
 	{
-		return m_pHeader->omniShadowEffectName;
+		return m_header.omniShadowEffectName;
+	}
+
+	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const
+	{
+		memsize uOffsetBase = uVertexId * GetVertexSize();
+		bool bFound = false;
+		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+		{
+			if (str::Compare(szName, m_pAttributes[i].name))
+			{
+				uOffsetBase += m_pVertexDecl[i].uOffset;
+				if ((m_pVertexDecl[i].uCount * g_uConstantSize[m_pVertexDecl[i].eType]) < uSrcSize)
+				{
+					ASSERT(false);
+					return false;
+				}
+				bFound = true;
+				break;
+			}
+		}
+		if (!bFound)
+		{
+			ASSERT(false);
+			return false;
+		}
+
+		for (uint32 i = 0; i < uVertCount; i++)
+		{
+			usg::MemCpy((uint8*)(pVertData)+uOffsetBase, pSrc, uSrcSize);
+			uOffsetBase += GetVertexSize();
+		}
+		return true;
 	}
 
 }

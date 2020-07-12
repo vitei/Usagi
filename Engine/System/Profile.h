@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_SYSTEM_PROFILE_H_
 #define _USG_SYSTEM_PROFILE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include OS_HEADER(Engine/System/, Profile_ps.h)
 

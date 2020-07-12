@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_MODEL_RESOURCE_H_
 #define _USG_GRAPHICS_SCENE_MODEL_RESOURCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Resource/SkeletonResource.h"
 #include "Engine/Resource/ResourceBase.h"
@@ -48,16 +48,18 @@ public:
 	// Enable when done
 	const SkeletonResource* GetDefaultSkeleton() const {  return &m_defaultSkeleton; }
 
-	static uint32 GetInstanceDecl();
-	static uint32 GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectRuntime& runTime, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
+	static uint32 GetModelDeclUVReusse(const usg::exchange::Shape* pShape, const CustomEffectResHndl& customFXDecl, const exchange::Material* pMaterial, VertexElement elements[], memsize& sizeout);
 	static uint32 GetBoneIndexCount(const usg::exchange::Shape* pShape);
 	static bool HasAttribute(const usg::exchange::VertexStreamInfo* pInfo, exchange::VertexAttribute attrib, uint32 uCount);
 	static void GetSingleAttributeDecl( usg::exchange::VertexAttribute attr, uint32 uCount, VertexElement element[2] );
-	static bool GetSingleAttributeDeclNamed(const CustomEffectRuntime& runTime,const char* szName, uint32 uCount, VertexElement* pElement);
+	static bool GetSingleAttributeDeclNamed(const CustomEffectResHndl& fxRes, const char* szName, uint32 uCount, VertexElement* pElement);
 	static bool GetSingleAttributeDeclDefault(const CustomEffectDecl::Attribute* pAttib, uint32 uOffset, VertexElement* pElement);
 
 	const usg::vector<uint32>& GetRigidBoneIndices() const { return m_rigidBoneIndices; }
 	const usg::vector<uint32>& GetSmoothBoneIndices() const { return m_smoothBoneIndices; }
+
+	const static ResourceType StaticResType = ResourceType::MODEL;
+
 private:
 
 	void SetupMeshes(const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
@@ -65,6 +67,9 @@ private:
 	void SetupSkeleton( uint8* p );
 	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
+
+	memsize InitInputBindings(GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl,
+								int RenderState, PipelineStateDecl& pipelineState);
 
 	SkeletonResource		m_defaultSkeleton;
 	Mesh*                   m_meshArray;

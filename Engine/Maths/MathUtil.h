@@ -6,7 +6,7 @@
 
 #ifndef USG_MATHS_MATH_UTIL_H
 #define USG_MATHS_MATH_UTIL_H
-#include "Engine/Common/Common.h"
+
 #include API_HEADER(Engine/Maths, MathUtil_ps.h)
 
 namespace usg{
@@ -150,6 +150,25 @@ namespace Math
 	{
 		return Min( x < y ? x : y, z );
 	}	
+
+	inline float GetLerpValue(float fMin, float fMax, float fValue)
+	{
+		float fDiff = fMax - fMin;
+		return (fValue - fMin) / fDiff;
+	}
+
+	inline float RemapRange(float fMinInput, float fMaxInput, float fMinOutput, float fMaxOutput, float fInputValue)
+	{
+		float fLerp = GetLerpValue(fMinInput, fMaxInput, fInputValue);
+		return Lerp(fMinOutput, fMaxOutput, fLerp);
+	}
+
+	inline float RemapRangeClamped(float fMinInput, float fMaxInput, float fMinOutput, float fMaxOutput, float fInputValue)
+	{
+		float fLerp = Clamp(GetLerpValue(fMinInput, fMaxInput, fInputValue), 0.0f, 1.0f);
+		return Lerp(fMinOutput, fMaxOutput, fLerp);
+	}
+
 	
 	inline float AccelerateToValue(const float currentValue, const float desiredValue, const float maxChange)
 	{
@@ -229,6 +248,15 @@ namespace Math
 		x |= x >> 8;
 		x |= x >> 16;
 		return x+1;
+	}
+
+	// TODO: Move to a more general utility file? Not exclusive to maths
+	template<class VariableType>
+	static void Swap(VariableType& a, VariableType& b)
+	{
+		VariableType temp = b;
+		b = a;
+		a = temp;
 	}
 }
 

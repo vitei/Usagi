@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_POSTFXSYS_H_
 #define _USG_POSTFX_POSTFXSYS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
@@ -37,7 +37,9 @@ public:
 		EFFECT_MOTION_BLUR = (1 << 2),
 		EFFECT_DEFERRED_SHADING = (1 << 3),
 		EFFECT_SKY_FOG = (1 << 4),
-		EFFECT_SMAA = (1 << 5)
+		EFFECT_SMAA = (1 << 5),
+		EFFECT_FILM_GRAIN = (1<<6),
+		EFFECT_SSAO = (1<<7)
 	};
 
 	PostFXSys();
@@ -45,6 +47,9 @@ public:
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
 	void CleanUp(GFXDevice* pDevice);
+
+	void Update(Scene* pScene, float fElapsed) { m_platform.Update(pScene, fElapsed); }
+	void UpdateGPU(GFXDevice* pDevice) { m_platform.UpdateGPU(pDevice); }
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
 

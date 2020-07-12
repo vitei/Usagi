@@ -20,8 +20,15 @@ void SoundObject::Reset()
 	m_fScaledFileVolume = 1.0f;
 	m_fade.Reset();
 	m_platform.Reset();
+	m_bCustomData = false;
 }
 
+
+void SoundObject::SetCustomData(const struct StreamingSoundDef& def)
+{
+	m_bCustomData = true;
+	m_platform.SetCustomData(def);
+}
 
 void SoundObject::SetSoundFile(const SoundFile* pSoundFile)
 {
@@ -44,11 +51,12 @@ void SoundObject::Start(float fTime)
 	m_ePlayState = PLAY_STATE_PLAYING;
 	if (fTime == 0.0f)
 	{
-		m_fade.Reset();
+		m_fade.Reset(1.0f);
 	}
 	else
 	{
-		m_fade.Start(PLAY_STATE_NONE, fTime);
+		m_fade.Reset(0.0f);
+		m_fade.Start(PLAY_STATE_PLAYING, fTime);
 	}
 }
 
@@ -64,6 +72,7 @@ void SoundObject::Stop(float fTime)
 		m_fade.Start(PLAY_STATE_STOPPED, fTime);
 	}
 }
+
 
 void SoundObject::Pause(float fTime)
 {

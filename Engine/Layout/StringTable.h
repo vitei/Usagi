@@ -20,13 +20,20 @@ public:
 	StringTable();
 	virtual ~StringTable();
 
+	struct KeyString
+	{
+		const KeyStringDef* pStr;
+		const TextStyle* pStyle;
+	};
+
 	void Init(const char* szFilename, Region region, Language language);
-	Keystring* Find(const char* szKey) const;
-	Keystring* Find(uint32 crc) const;
+	KeyString Find(const char* szKey) const;
+	KeyString Find(uint32 crc) const;
 private:
 	void CreatePathToStringsFile(U8String& path, const char* szBasename,
 	                             Region region, Language language);
-	StringPointerHash<Keystring*> m_hashtable;
+	StringPointerHash<KeyStringDef*> m_hashtable;
+	StringPointerHash<TextStyle*> m_styleHashtable;
 	KeystringTable m_table;
 	uint32 m_keystringCount;
 };

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_PHYSICS_COLLISION_MATERIAL_HIT_RESULT_H_
 #define _USG_PHYSICS_COLLISION_MATERIAL_HIT_RESULT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 
 namespace usg

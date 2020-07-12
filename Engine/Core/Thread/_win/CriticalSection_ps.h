@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_THREAD_CRITICAL_SECTION_PS_H_
 #define	_USG_ENGINE_THREAD_CRITICAL_SECTION_PS_H_
-#include "Engine/Common/Common.h"
+
 #include <Synchapi.h>
 
 namespace usg
@@ -13,7 +13,7 @@ namespace usg
 class CriticalSection_ps
 {
 public:	
-	CriticalSection_ps() {  }
+	CriticalSection_ps() { InitializeCriticalSection(&m_cs); }
 	~CriticalSection_ps() {  }
 
 

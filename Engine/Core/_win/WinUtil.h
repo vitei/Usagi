@@ -3,7 +3,7 @@
 //	Author: Alex Barnfield
 //	Description: Windows specific hardware level functions
 *****************************************************************************/
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/Display.h"
 
 namespace WINUTIL

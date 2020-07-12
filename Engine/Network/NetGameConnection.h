@@ -4,7 +4,7 @@
 #ifndef NET_GAME_CONNECTION_H
 #define NET_GAME_CONNECTION_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Network/NetAvailableGames.h"
 
 namespace usg

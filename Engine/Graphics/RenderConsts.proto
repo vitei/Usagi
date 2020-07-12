@@ -59,7 +59,7 @@ enum RenderLayer
 	LAYER_POST_PROCESS = 9;
 	LAYER_OVERLAY = 10;
 	LAYER_COUNT = 11;
-};
+}; 
 
 enum RenderMask {
 	option (nanopb_enumopt).long_names = false;
@@ -76,7 +76,9 @@ enum RenderMask {
 	RENDER_MASK_SHADOW_CAST		= 0x00000080;
 	RENDER_MASK_CUSTOM			= 0x00000100;
 
-	// Have all be everything except the shadow casting geometry
+	// Useful predefines for cameras, everything except shadows
+	RENDER_MASK_CAMERA_INSIDE	= 0x0FFFFF3F;
+	RENDER_MASK_CAMERA_OUTSIDE	= 0x0FFFFF5F;
 	RENDER_MASK_ALL				= 0x0FFFFF7F;
 }
 

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_PC_DIRECTINPUT_JOYSTICK_H__
 #define __USG_HID_PC_DIRECTINPUT_JOYSTICK_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/IGamepad.h"
 #include <dinput.h>
 

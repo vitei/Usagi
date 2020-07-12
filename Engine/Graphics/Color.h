@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_COLOR_H_
 #define _USG_GRAPHICS_COLOR_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector4f.h"
 
 namespace usg {
@@ -84,6 +84,8 @@ public:
 	static const Color Green;
 	static const Color Blue;
 	static const Color Black;
+	static const Color Grey;
+	static const Color Yellow;
 	static const Color White;
 };
 

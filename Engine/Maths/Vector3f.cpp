@@ -10,6 +10,13 @@
 
 namespace usg{
 
+const Vector3f Vector3f::ZERO(0.0f, 0.0f, 0.0f);
+const Vector3f Vector3f::ONE(1.0f, 1.0f, 1.0f);
+const Vector3f Vector3f::X_AXIS(1.0f, 0.0f, 0.0f);
+const Vector3f Vector3f::Y_AXIS(0.0f, 1.0f, 0.0f);
+const Vector3f Vector3f::Z_AXIS(0.0f, 0.0f, 1.0f);
+
+
 Vector3f Vector3f::operator*( const Matrix4x4 &rhs ) const
 {
 	Vector3f	result;

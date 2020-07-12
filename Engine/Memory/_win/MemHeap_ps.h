@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_MEMORY_MEMTYPE_WIN_PS_H_
 #define _USG_ENGINE_MEMORY_MEMTYPE_WIN_PS_H_
-#include "Engine/Common/Common.h"
+
 
 // FIXME: Just a wrapper for new and delete at the moment
 
@@ -19,6 +19,7 @@ public:
 	void Init(void* location, memsize uSize);
 
 	void*	Alloc(memsize uSize, memsize uAlign, bool bGPUUse);
+	void*	ReAlloc(void* pData, memsize uSize);
 	void	Free(void*, memsize uAlign, bool bGPUUse);
 
 	uint32 GetSize() const { return (uint32)m_uSize; }

@@ -6,6 +6,7 @@
 #include "SockNetworkManager.h"
 #include <Engine/Network/NetDataCompressor.h>
 #include "Engine/Network/NetworkGame.h"
+#include "Engine/Core/String/String_Util.h"
 #include "../UsagiNetwork.h"
 
 namespace usg {
@@ -388,7 +389,7 @@ void SockNetworkManager::FillName(char* nameOut)
 	DWORD username_len = UNLEN + 1;
 	GetUserName(username, &username_len);
 
-	sprintf_s(nameOut, 32, "PC#%s", username);
+	str::ParseVariableArgsC(nameOut, 32, "PC#%s", username);
 #elif defined(PLATFORM_OSX)
 	const char* username = getenv("USER");
 	if (username == 0)

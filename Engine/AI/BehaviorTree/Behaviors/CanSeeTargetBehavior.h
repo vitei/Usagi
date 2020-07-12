@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_CAN_SEE_TARGET__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_CAN_SEE_TARGET__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 namespace usg
 {

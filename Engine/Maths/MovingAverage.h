@@ -6,7 +6,7 @@
 #ifndef USAGI_MA_H
 #define USAGI_MA_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 
 namespace usg

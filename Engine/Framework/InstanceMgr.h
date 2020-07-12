@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_FRAMEWORK_INSTANCE_MGR_
 #define _USG_FRAMEWORK_INSTANCE_MGR_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"

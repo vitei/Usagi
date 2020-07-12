@@ -11,23 +11,29 @@ const float g_fTrailSpeed = 20.f;
 
 PreviewModel::~PreviewModel()
 {
+	
+}
+
+void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
+{
 	if (m_pModel)
 	{
+		m_pModel->AddToScene(false);
+		m_pModel->GPUUpdate(pDevice);
+		m_pModel->CleanUp(pDevice);
 		vdelete m_pModel;
 	}
 }
 
-void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer)
+void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 {
 	usg::Vector2f vPos(0.0f, 130.0f);
 	usg::Vector2f vScale(340.f, 100.f);
-	m_window.Init("Preview Model", vPos, vScale, 20);
+	m_window.Init("Preview Model", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_visible.Init("Show", true);
-	m_visible.SetSameLine(false);
+	m_visible.SetSameLine(true);
 
-	pRenderer->AddWindow(&m_window);
-
-	m_modelFileList.Init("Models/particle_editor/", ".vmdc");
+	m_modelFileList.Init("Models", ".vmdf", true);
 	m_loadFilePaths.Init("Load Dir", m_modelFileList.GetFileNamesRaw(), 0);
 
 	m_loadButton.Init("Load");
@@ -42,6 +48,7 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiR
 
 	m_pScene = pScene;
 
+
 	//m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
 	//m_pModel->Load(pDevice, m_pScene, "particle_editor/Grandmaster.vmdc", false, usg::RenderMask::RENDER_MASK_ALL, true, true, NULL, NULL, false);
 }
@@ -51,11 +58,13 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
 	if(m_loadButton.GetValue())
 	{
-		usg::U8String modelName = "particle_editor/";
-		modelName += m_loadFilePaths.GetSelectedName();
+		usg::U8String modelName = m_loadFilePaths.GetSelectedName();
 	
 		if (m_pModel)
 		{
+			m_pModel->AddToScene(false);
+			m_pModel->GPUUpdate(pDevice);
+			m_pModel->CleanUp(pDevice);
 			vdelete m_pModel;
 		}
 
@@ -65,12 +74,18 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 	if (m_pModel)
 	{
 		m_pModel->AddToScene(m_visible.GetValue());
+		m_pModel->GPUUpdate(pDevice);
 		if (m_visible.GetValue())
 		{
 			usg::Matrix4x4 mat = usg::Matrix4x4::Identity();
 			mat.SetPos(m_position.GetValueV3());
-			m_pModel->GetSkeleton().GetBone(0)->SetTransform(mat);
-			m_pModel->GetSkeleton().GetBone(0)->UpdateConstants(pDevice);
+			m_pModel->SetTransform(mat);
+			for (uint32 i = 0; i < m_pModel->GetSkeleton().GetBoneCount(); i++)
+			{
+				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetBindMatrix(true) * mat;
+				m_pModel->GetSkeleton().GetBone(i)->SetTransform(mBoneMat);
+				m_pModel->GetSkeleton().GetBone(i)->UpdateConstants(pDevice);
+			}
 		}
 	}
 }

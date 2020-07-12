@@ -328,7 +328,7 @@ void SkyFog::MakeSphere(GFXDevice* pDevice, float fScale)
 
 bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	pContext->BeginGPUTag("Sky");
+	pContext->BeginGPUTag("Sky", Color::Green);
 
 	// Setting the destination target now handled outside
 	//pContext->SetRenderTarget(m_pDestTarget);

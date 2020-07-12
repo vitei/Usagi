@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_COMMON__
 #define __USG_AI_COMMON__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/Signal.h"
 #include "Engine/AI/INavigationContext.h"
 

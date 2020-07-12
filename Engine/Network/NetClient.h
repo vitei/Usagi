@@ -7,7 +7,7 @@
 #include "NetPacket.h"
 #include "NetMessage.h"
 #include "Engine/Core/Containers/Queue.h"
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/MessageWithHeader.h"
 
 #ifndef FINAL_BUILD

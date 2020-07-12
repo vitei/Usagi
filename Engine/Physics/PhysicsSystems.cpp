@@ -13,6 +13,8 @@
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Physics/PhysicsComponents.pb.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
+#include "Engine/Debug/GlobalDebugStats.h"
+#include "Engine/Debug/DebugStats.h"
 #include "Engine/Physics/PhysX.h"
 #include <limits>
 #include "Engine/Physics/PhysXVehicle/VehicleSceneQueryData.h"
@@ -251,7 +253,7 @@ namespace usg
 				}
 			}
 
-			static void PreSimulation(const Inputs& inputs, Outputs& outputs)
+			static void PreSimulation(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
 				mutableRtd.bSimulationRunning = true;
@@ -261,10 +263,10 @@ namespace usg
 				ProcessNewActors(inputs, outputs);
 				ProcessDirtyActors(inputs, outputs);
 				ClearCollisions(inputs, outputs);
-				VehicleUpdate(inputs, outputs);
+				VehicleUpdate(inputs, outputs, fDelta);
 			}
 
-			static void VehicleUpdate(const Inputs& inputs, Outputs& outputs)
+			static void VehicleUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				if (inputs.scene.GetRuntimeData().GetData().vehicleData.vehicleList.size() == 0)
 				{
@@ -288,7 +290,7 @@ namespace usg
 				{
 					mutableRtd.vehicleData.vehicleWheelQueryResults[i] = { &mutableRtd.vehicleData.wheelQueryResults[0] + PX_MAX_NB_WHEELS*i, vehicles[i]->mWheelsSimData.getNbWheels() };
 				}
-				PxVehicleUpdates(physics::GetTimeStep(), ToPhysXVec3(inputs.scene->vGravity), *mutableRtd.vehicleData.pFrictionPairs, uVehicleCount, vehicles, &mutableRtd.vehicleData.vehicleWheelQueryResults[0]);
+				PxVehicleUpdates(fDelta, ToPhysXVec3(inputs.scene->vGravity), *mutableRtd.vehicleData.pFrictionPairs, uVehicleCount, vehicles, &mutableRtd.vehicleData.vehicleWheelQueryResults[0]);
 			}
 
 			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
@@ -297,8 +299,8 @@ namespace usg
 				{
 					return;
 				}
-				PreSimulation(inputs, outputs);
-				inputs.scene.GetRuntimeData().GetData().pScene->simulate(physics::GetTimeStep());
+				PreSimulation(inputs, outputs, fDelta);
+				inputs.scene.GetRuntimeData().GetData().pScene->simulate(fDelta);// physics::GetTimeStep());
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const physics::details::Events::MarkShapeDirty& evt)
@@ -386,7 +388,8 @@ namespace usg
 #ifndef FINAL_BUILD
 				auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
 				mutableRtd.diagnostics.fFetchResultsTime.Add(timer.GetTotalMilliSeconds());
-				if (mutableRtd.diagnostics.bDebugRenderOnNextFrame)
+				bool bPhysicsDebug = DebugStats::Inst()->GetPage() == GlobalDebugStats::PAGE_PHYSICS;
+				if (mutableRtd.diagnostics.bDebugRenderOnNextFrame || bPhysicsDebug)
 				{
 					mutableRtd.diagnostics.bDebugRenderOnNextFrame = false;
 					physics::DebugRender(*inputs.visualScene.GetRuntimeData().pScene->GetSceneCamera(0));
@@ -497,6 +500,18 @@ namespace usg
 				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
 				ASSERT(pRigidDynamic != nullptr);
 				pRigidDynamic->setLinearVelocity(ToPhysXVec3(evt.vVelocity));
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const AddLinearVelocity& evt)
+			{
+				if (!inputs.rigidBody->bDynamic || inputs.rigidBody->bKinematic)
+				{
+					return;
+				}
+				ASSERT(inputs.rigidBody->bDynamic);
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(pRigidDynamic != nullptr);
+				pRigidDynamic->setLinearVelocity(ToPhysXVec3(evt.vVelocity) + pRigidDynamic->getLinearVelocity());
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetAngularVelocity& evt)

@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_EMITTER_H_
 #define _USG_PARTICLE_EMITTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Maths/Sphere.h"
 #include "Engine/Memory/Allocator.h"

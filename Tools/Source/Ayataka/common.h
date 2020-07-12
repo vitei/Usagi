@@ -9,7 +9,7 @@
 #define SAFE_DELETE_ARRAY( a ) if( a ) { vdelete [] a; a = NULL; }
 
 #include "common/debug.h"
-#include "Engine/Common/Common.h"
+
 
 static const uint32_t DEFAULT_ALIGNMENT = 16;
 

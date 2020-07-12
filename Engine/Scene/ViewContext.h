@@ -7,18 +7,17 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_SCENEVIEWCONTEXT_H_
 #define _USG_GRAPHICS_SCENE_SCENEVIEWCONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
-#include "Engine/Scene/LightingContext.h"
-#include "Engine/Graphics/Lights/LightMgr.h"
-#include "Engine/Graphics/Fog.h"
-#include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Scene/SceneContext.h"
 
 
 namespace usg{
 
 class SceneRenderPasses;
+class LightingContext;
+class Fog;
+class GFXContext;
 
 class ViewContext : public SceneContext
 {
@@ -32,22 +31,22 @@ public:
 
 	virtual void InitDeviceData(GFXDevice* pDevice) override;
 	virtual void Cleanup(GFXDevice* pDevice) override;
-	void Init(GFXDevice* pDevice, const Camera* pCamera, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderMask::RENDER_MASK_ALL);
+	void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, PostFXSys* pFXSys, uint32 uHighestLOD = 0, uint32 uRenderMask = RenderMask::RENDER_MASK_ALL);
 	virtual void Update(GFXDevice* pDevice);
 	virtual void ClearLists();
-	virtual const Camera* GetCamera() const override { return m_pCamera; }
-	virtual Octree::SearchObject& GetSearchObject() override { return m_searchObject; }
+	virtual const Camera* GetCamera() const override;
+	virtual Octree::SearchObject& GetSearchObject() override;
 
 	void SetHighestLOD(uint32 uLOD);
 	void SetLODBias(float fBias);
-	void SetCamera(const Camera* pCamera) { m_pCamera = pCamera; m_searchObject.SetFrustum(&pCamera->GetFrustum()); }
+	void SetCamera(const Camera* pCamera);
 
 
-	LightingContext& GetLightingContext() { return m_LightingContext; }
+	LightingContext& GetLightingContext();
 	// Each view has it's own fog as the camera may be located above/ below water, or simply
 	// have different draw distances
-	Fog& GetFog(uint32 uIndex=0) { ASSERT(uIndex<MAX_FOGS); return m_fog[uIndex]; }
-	PostFXSys* GetPostFXSys() { return m_pPostFXSys; }
+	Fog& GetFog(uint32 uIndex = 0);
+	PostFXSys* GetPostFXSys();
 	const SceneRenderPasses& GetRenderPasses() const;
 	SceneRenderPasses& GetRenderPasses();
 
@@ -63,26 +62,14 @@ private:
 		MAX_NODES_PER_LAYER = 500,
 		MAX_FOGS = 1
 	};
-	DescriptorSet			m_globalDescriptors[VIEW_COUNT];
-	DescriptorSet			m_globalDescriptorsWithDepth[VIEW_COUNT];
-	ConstantSet				m_globalConstants[VIEW_COUNT];
-	
-	const Camera*			m_pCamera;
-	SceneSearchFrustum		m_searchObject;
-	uint32					m_uHighestLOD;
+
+	struct PIMPL;
+	PIMPL*						m_pImpl;
+
 	float					m_fLODBias;
-	PostFXSys*				m_pPostFXSys;
-
-	// Arbitrarily assigning fog to the scene context
-	Fog						m_fog[MAX_FOGS];
 	Vector4f				m_shadowColor;
-	LightingContext			m_LightingContext;
-	ViewType				m_eActiveViewType;
-
-	RenderNode*				m_pVisibleNodes[RenderLayer::LAYER_COUNT][MAX_NODES_PER_LAYER];
-	uint32					m_uVisibleNodes[RenderLayer::LAYER_COUNT];
+	uint32					m_uHighestLOD;
 	bool					m_bFirstFrame;
-
 };
 
 }

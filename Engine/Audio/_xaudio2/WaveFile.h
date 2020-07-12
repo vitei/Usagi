@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_XAUDIO2_WAVEFILE_H__
 #define __USG_AUDIO_XAUDIO2_WAVEFILE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Audio/SoundFile.h"
 #include "Engine/Audio/Shared/WaveFileReader.h"
 #include <xaudio2.h>
@@ -21,6 +21,7 @@ namespace usg
 		~WaveFile();
 
 		virtual void Init(const SoundFileDef* pSoundFile, Audio* pAudio, const char* pszLocalizedSubdir = NULL);
+		virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio);
 		virtual void Cleanup(Audio* pAudio) {}
 		virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional);
 		BYTE* GetData() { return m_pData; }
@@ -33,6 +34,7 @@ namespace usg
 		void BindToSound(class SoundObject_ps* pSoundObject, uint32 uPriority);
 
 	private:
+		void ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName);
 		WAVEFORMATEX	m_format;
 		BYTE*			m_pData;
 		uint32			m_uSize;

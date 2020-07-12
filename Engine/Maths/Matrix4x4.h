@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_MATRIX4X4_H_
 #define	_USG_MATRIX4X4_H_
-#include "Engine/Common/Common.h"
+
 #include "Vector3f.h"
 #include "Vector4f.h"
 
@@ -26,6 +26,7 @@ public:
 				float r41, float r42, float r43, float r44 );
 
 	Matrix4x4(const Matrix4x3& in) { Assign(in); }
+	Matrix4x4(const Matrix3x3& in) { *this = in; }
 	Matrix4x4(const Quaternionf &quat)
 	{
 		*this = quat;
@@ -34,13 +35,14 @@ public:
 	~ Matrix4x4() {}
 
 	void LoadIdentity();
+	void Clear();
 
 	void Transpose();
 	void GetTranspose(Matrix4x4 &out) const;
 
 	inline Vector3f TransformVec3(const Vector3f& vec3, float w = 1.0f) const;
 
-	void Inverse();
+	const Matrix4x4& Inverse();
 	void GetInverse(Matrix4x4 &out) const;
 	void GetQuickInverse(Matrix4x4 &out) const;
 
@@ -51,8 +53,14 @@ public:
 	Matrix4x4& operator=(const Matrix4x3& in) { Assign(in); return *this; }
 	Matrix4x4& operator=(const Matrix3x3& in);
 
-	Matrix4x4 operator *= (Matrix4x4 matr);
-	bool operator == (const Matrix4x4 &mat) const;
+	Matrix4x4 operator *= (const Matrix4x4 matr);
+	bool operator == (const Matrix4x4 &mat) const; 
+
+	Matrix4x4 operator + (const Matrix4x4 rhs) const;
+	Matrix4x4& operator += (const Matrix4x4 rhs);
+
+	Matrix4x4 operator * (float fRhs) const;
+	Matrix4x4& operator *= (float fRhs);
 	
 	void MakeRotateX(float x);
 	void MakeRotateY(float y);
@@ -92,6 +100,7 @@ public:
 	void Translate( const Vector3f &translation );
 
 	void Translate( float x, float y, float z );
+	void Orthonormalize();
 
 	inline void SetTranslation( const Vector4f &pos );
 	inline void SetTranslation( const Vector3f &pos );

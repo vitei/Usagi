@@ -4,7 +4,7 @@
 #ifndef _COMPONENT_SYSTEM_INPUT_OUTPUTS_H
 #define _COMPONENT_SYSTEM_INPUT_OUTPUTS_H
 
-#include "Engine/Common/Common.h"
+
 #include "ComponentEntity.h"
 #include "Engine/Framework/SystemId.h"
 
@@ -15,7 +15,7 @@ static const size_t SYSTEM_DEFAULT_POOL_SIZE = 100;
 struct GenericInputOutputs : public HierearchyNode<GenericInputOutputs>
 {
 	GenericInputOutputs(void* inputs, void* outputs)
-		: genericInputs(inputs), genericOutputs(outputs) {}
+		: entity(nullptr), genericInputs(inputs), genericOutputs(outputs) {}
 	Entity      entity;
 	void* const genericInputs;
 	void* const genericOutputs;

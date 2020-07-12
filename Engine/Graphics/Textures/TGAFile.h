@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_TGAFILE_H
 #define _USG_GRAPHICS_TGAFILE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 
 // TODO: Add loading as a texture?
@@ -17,10 +17,14 @@ namespace usg
 		TGAFile();
 		~TGAFile();
 
-		void SetData(void* pData, usg::ColorFormat eFormat, uint32 uWidth, uint32 uHeight);
+		struct Header;
 
-		void Save(const char* szFileName);
-		bool Load(const char* szFileName);
+		void PrepareImage(const Header& header);
+		void SetData(void* pData, usg::ColorFormat eFormat, uint32 uWidth, uint32 uHeight);
+		void CopyData(const TGAFile* pSrc, const GFXBounds& srcBounds, const GFXBounds& dstBounds);
+
+		void Save(const char* szFileName, FILE_TYPE eFileType = FILE_TYPE_DEBUG_DATA);
+		bool Load(const char* szFileName, FILE_TYPE eFileType = FILE_TYPE_DEBUG_DATA);
 
 		void SetFlipImage(bool bFlipImage) { m_bFlipImage = bFlipImage; }
 
@@ -37,7 +41,6 @@ namespace usg
 			CMP_PALETTE = 0x100000,
 			CMP_4PASS = 0x100001
 		};
-
 
 		PACK(
 			struct Header {

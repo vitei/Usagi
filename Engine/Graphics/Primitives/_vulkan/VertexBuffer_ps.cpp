@@ -43,26 +43,34 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 	{
 		err = vkCreateBuffer(deviceVK, &buf_info, NULL, &m_buffer[i]);
 		ASSERT(!err);
-
-		vkGetBufferMemoryRequirements(deviceVK, m_buffer[i], &mem_reqs);
-		ASSERT(!err);
-
-		mem_alloc.allocationSize = mem_reqs.size;
-		mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
-		err = vkAllocateMemory(deviceVK, &mem_alloc, NULL, &m_mem[i]);
-		ASSERT(!err);
 	}
+
+	vkGetBufferMemoryRequirements(deviceVK, m_buffer[0], &mem_reqs);
+	ASSERT(!err);
+
+	mem_alloc.allocationSize = mem_reqs.size;
+	mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+	VkDeviceSize size = mem_alloc.allocationSize;
+	m_uBufferSize = AlignSizeUp(size, mem_reqs.alignment);
+	if (m_uBufferCount > 1)
+	{
+		size = m_uBufferSize * m_uBufferCount;
+	}
+
+	m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
+	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
 	if (pVerts)
 	{
 		SetContents(pDevice, pVerts, uDataSize);
 	}
 
+	VkDeviceSize uOffset = 0;
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
-		// FIXME: Don't have 3 buffers, just use the offset
-		err = vkBindBufferMemory(deviceVK, m_buffer[i], m_mem[i], 0);
+		err = vkBindBufferMemory(deviceVK, m_buffer[i], m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset() + uOffset);
+		uOffset += m_uBufferSize;
 	}
 }
 
@@ -73,26 +81,38 @@ void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
 
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
-		vkDestroyBuffer(deviceVK, m_buffer[i], nullptr);
-		vkFreeMemory(deviceVK, m_mem[i], nullptr);
+		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer[i]);
 	}
+
+	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
+
+	m_uBufferCount = 0;
 }
 
 
 void* VertexBuffer_ps::LockData(GFXDevice* pDevice, uint32 uSize)
 {
 	m_uActiveVBO = (m_uActiveVBO + 1) % m_uBufferCount;
-	VkResult err;
 	void* pData;
-	err = vkMapMemory(pDevice->GetPlatform().GetVKDevice(), m_mem[m_uActiveVBO], 0, uSize, 0, &pData);
-	ASSERT(!err);
+	if(m_uBufferCount > 1)
+	{
+		pData = ((uint8*)m_memoryAlloc.GetMappedMemory() + (m_uBufferSize * m_uActiveVBO));
+	}
+	else
+	{
+		VkResult err = vkMapMemory(pDevice->GetPlatform().GetVKDevice(), m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset(), uSize, 0, &pData);
+		ASSERT(!err);
+	}
 
 	return pData;
 }
 
 void VertexBuffer_ps::UnlockData(GFXDevice* pDevice, void* pData, uint32 uElements)
 {
-	vkUnmapMemory(pDevice->GetPlatform().GetVKDevice(), m_mem[m_uActiveVBO]);
+	if(m_uBufferCount == 1)
+	{
+		vkUnmapMemory(pDevice->GetPlatform().GetVKDevice(), m_memoryAlloc.GetMemory());
+	}
 }
 
 

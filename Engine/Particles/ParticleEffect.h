@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_EFFECT_H_
 #define _USG_PARTICLE_EFFECT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"

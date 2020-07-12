@@ -5,7 +5,7 @@
 #ifndef _USG_GRAPHICS_FONTS_TEXT_CONTEXT_H_
 #define _USG_GRAPHICS_FONTS_TEXT_CONTEXT_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector2f.h"
 
 // TODO: Rewrite Text.h so that it doesn't duplicate this data

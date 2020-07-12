@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_TEXTURE_SETTINGS_H_
 #define _USG_PARTICLE_EDITOR_TEXTURE_SETTINGS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/GUI/GuiWindow.h"
@@ -14,7 +14,7 @@ namespace usg
 	class IMGuiRenderer;
 }
 
-class TextureSettings : public EmitterModifier
+class TextureSettings : public EmitterModifier, public usg::GUICallbacks
 {
 public:
 	TextureSettings();
@@ -26,6 +26,8 @@ public:
 	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
 
 private:
+	virtual void MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results);
+
 	void UpdateAnimFrames(usg::GFXDevice* pDevice);
 	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData);
 	// Returns the aspect
@@ -33,7 +35,7 @@ private:
 	enum 
 	{
 		FRAME_BOXES = 8,
-		MAX_ANIM_FRAMES = 16
+		MAX_ANIM_FRAMES = 128
 	};
 
 	usg::TextureHndl		m_pTexture;
@@ -44,6 +46,7 @@ private:
 	usg::GUITexture			m_texture;
 	usg::GUITexture			m_animTextures[MAX_ANIM_FRAMES];
 	usg::GUIButton			m_previewButton;
+	usg::GUILoadButton		m_createFlipBook;
 	usg::GUITextInput		m_textInput;
 	usg::GUIIntInput		m_repeat;
 	usg::GUIComboBox		m_comboBox;

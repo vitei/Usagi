@@ -539,7 +539,7 @@ namespace usg
 		// The hex code below was generated thus: 0x<%= component_id('Processor.Merge').to_s(16) %>
 		if (hdr.id != 0x72c7824c)
 		{
-			ASSERT(false && "Couldn't read Merge component!\n");
+			ASSERT_MSG(false, "Couldn't read Merge component!\n");
 		}
 
 		Processor::Merge merge;

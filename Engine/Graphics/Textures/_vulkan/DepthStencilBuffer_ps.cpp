@@ -45,15 +45,6 @@ void DepthStencilBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 
 	
 	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices);
 
-	if (uSlices > 1)
-	{
-		ASSERT(m_pLayerViews == nullptr);
-		m_pLayerViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[uSlices];
-		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
-		{
-			m_pLayerViews[i] = m_texture.GetPlatform().CreateLayerImageView(pDevice, i);
-		}
-	}
 	InitLayerViews(pDevice);
 
 
@@ -96,7 +87,7 @@ void DepthStencilBuffer_ps::InitLayerViews(GFXDevice* pDevice)
 
 		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
 		{
-			m_pLayerViews[i] = m_texture.GetPlatform().CreateLayerImageView(pDevice, i);
+			m_pLayerViews[i] = m_texture.GetPlatform().CreateImageView(pDevice, i, 0);
 		}
 	}
 }

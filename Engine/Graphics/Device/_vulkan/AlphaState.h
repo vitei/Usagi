@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_PC_ALPHASTATE_H_
 #define _USG_GRAPHICS_DEVICE_PC_ALPHASTATE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Color.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)

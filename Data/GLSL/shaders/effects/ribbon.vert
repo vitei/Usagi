@@ -14,12 +14,9 @@ ATTRIB_LOC(0) in vec3 	ao_position;
 ATTRIB_LOC(1) in float 	ao_fCreateTime;
 ATTRIB_LOC(2) in float 	ao_fLength;	// The length of the line at the point this point was spawned
 
-out VertexData
-{
-    ATTRIB_LOC(0) vec3 	vo_viewPos;
-    ATTRIB_LOC(1) float vo_fCreateTime;
-    ATTRIB_LOC(2) float	vo_fPatternCoord;
-};
+ATTRIB_LOC(0) out vec3 	vo_viewPos;
+ATTRIB_LOC(1) out float vo_fCreateTime;
+ATTRIB_LOC(2) out float	vo_fPatternCoord;
 
 
 void main()

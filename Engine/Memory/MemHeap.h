@@ -6,7 +6,7 @@
 
 #ifndef USG_HEAP_H
 #define USG_HEAP_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/Mem.h"
 #include "Engine/Core/Thread/CriticalSection.h"
 #include OS_HEADER(Engine/Memory, MemHeap_ps.h)
@@ -18,14 +18,16 @@ struct AllocHeader;
 class MemHeap
 {
 public:
+	MemHeap();
     void Initialize(memsize uSize);
 	void Initialize(void* location, memsize uSize);
     
     void* Allocate(memsize bytes, memsize uAlign, uint8 uGroup, MemAllocType eType, bool bGpu = false);
+	void* ReAlloc(void* pData, memsize uNewSize);
     static void Deallocate(void* pMem);
+	static void* Reallocate(void* pMem, memsize uNewSize);
 	static memsize GetAlignment(const void* const pMem);
 
-	memsize AlignAddress(memsize uAddress, memsize uAlign);
 	void CheckData();
 	void PrintUsage();
 	void PrintDynamicAllocTypes();

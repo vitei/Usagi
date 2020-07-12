@@ -47,7 +47,7 @@ HeightMap::~HeightMap(void)
 }
 
 
-bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, uint32 uWidth, uint32 uHeight, uint32 uBpp, float scale, float offset, CollisionQuadTree& pCollisionQuadTree)
+bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, uint32 uWidth, uint32 uHeight, uint32 uBpp, float scale, float offset, CollisionQuadTree& pCollisionQuadTree)
 {
 	ASSERT(uBpp==8);	// Only implemented this so far
 
@@ -137,7 +137,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 	depthDecl.eStencilTest	= STENCIL_TEST_ALWAYS;
 	depthDecl.SetMask(0x0, STENCIL_MASK_GEOMETRY, STENCIL_GEOMETRY);    
 
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Heightmap");
+	pipeline.pEffect = pResMgr->GetEffect(pDevice, "Heightmap");
 
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_NORMAL_UV));
 	pipeline.uInputBindingCount = 1;
@@ -154,7 +154,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, 
 	SamplerDecl sampDecl(SF_LINEAR, SC_WRAP);
 	for(int i=0; i<TERRAIN_TEX_COUNT; i++)
 	{
-		m_mesh.GetDescriptorSet().SetImageSamplerPair(i, ResourceMgr::Inst()->GetTexture(pDevice, g_texNames[i]), pDevice->GetSampler(sampDecl) );
+		m_mesh.GetDescriptorSet().SetImageSamplerPair(i, pResMgr->GetTexture(pDevice, g_texNames[i]), pDevice->GetSampler(sampDecl) );
 	}
 
 	Matrix4x4 matTmp;

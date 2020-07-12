@@ -4,9 +4,11 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_SHADOWCONTEXT_H_
 #define _USG_GRAPHICS_SCENE_SHADOWCONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Scene/SceneContext.h"
+#include "Engine/Scene/SceneSearchObject.h"
+#include "Engine/Graphics/Device/DescriptorSet.h"
 
 namespace usg{
 

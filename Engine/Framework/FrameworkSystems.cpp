@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include OS_HEADER(Engine/Core/Timer, TimeTracker.h)
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Framework/Signal.h"
 #include "Engine/Framework/ComponentEntity.h"
@@ -155,6 +156,22 @@ namespace usg
 			}
 		};
 
+		class ToggleVisiblity : public System
+		{
+		public:
+			struct Outputs
+			{
+				Required<VisibilityComponent>      visibility;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_POST_GAMEPLAY)
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ToggleVisibility& evt)
+			{
+				outputs.visibility.Modify().bVisible = evt.bVisible;
+			}
+		};
+
 		class ConstructWorldMatrix : public System
 		{
 		public:
@@ -212,8 +229,6 @@ namespace usg
 				Required<usg::TurnableComponent>	turnable;
 				Required<usg::SimulationActive, FromParents> simactive;
 				Optional<usg::BoneComponent>		bone;
-
-				Required<usg::EventManagerHandle, FromSelfOrParents> eventManager;
 			};
 
 			struct Outputs
@@ -307,6 +322,24 @@ namespace usg
 				          inputs.eventManager->handle, setHealth.amount);
 			}
 		};
+
+
+		class UpdateSystemTime : public usg::System
+		{
+		public:
+			struct Outputs
+			{
+				Required<usg::SystemTimeComponent> sysTime;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_PRE_EARLY)
+
+			static void Run(const Inputs& in, Outputs& outputs, float dt)
+			{
+				outputs.sysTime.Modify().fSystemElapsed = outputs.sysTime.GetRuntimeData().pTimeTracker->GetDeltaTime();
+			}
+		};
+
 	}
 }
 

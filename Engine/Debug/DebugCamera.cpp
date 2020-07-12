@@ -24,51 +24,20 @@ void DebugCamera::Init()
 	m_bActive = false;
 	m_modelMat.LoadIdentity();
 	m_uSpeed = 0;
+	m_controller.Init();
 }
 
-
-bool DebugCamera::ReadButton(uint32 uButtonShift, ButtonState eState) const
-{
-	Gamepad* pGamepad = Input::GetGamepad(0);
-
-	bool bRet = pGamepad->GetButtonDown(uButtonShift, eState);
-
-#ifndef FINAL_BUILD
-	Gamepad* pGamepad1 = Input::GetGamepad(1);
-	if(pGamepad1)
-	{
-		bRet |= pGamepad1->GetButtonDown(uButtonShift, eState);
-	}
-#endif
-
-	return bRet;
-}
-
-float DebugCamera::ReadAxis(uint32 eAxis) const
-{
-	Gamepad* pGamepad = Input::GetGamepad(0);
-
-	float fRet = pGamepad->GetAxisValue(eAxis);
-
-#ifndef FINAL_BUILD
-	Gamepad* pGamepad1 = Input::GetGamepad(1);
-	if (pGamepad1)
-	{
-		fRet += pGamepad1->GetAxisValue(eAxis);
-	}
-#endif
-
-	return fRet;
-}
 
 
 void DebugCamera::Update(float dt)
 {
-	if (ReadButton(GAMEPAD_BUTTON_THUMB_R|GAMEPAD_BUTTON_RIGHT, BUTTON_STATE_PRESSED))
+	m_controller.Update(dt);
+
+	if (m_controller.GetBool(DebugCameraController::DEBUG_CAM_BOOL_INCR_SPEED))
 	{
 		m_uSpeed = (m_uSpeed + 1)%4;
 	}
-	if (ReadButton(GAMEPAD_BUTTON_LEFT, BUTTON_STATE_PRESSED))
+	if (m_controller.GetBool(DebugCameraController::DEBUG_CAM_BOOL_DECR_SPEED))
 	{
 		m_uSpeed = (m_uSpeed - 1)%4;
 	}
@@ -77,20 +46,13 @@ void DebugCamera::Update(float dt)
 	float fMoveSpeed = 15.0f*fSpeedMul;
 	float fRotSpeed = 2.0f;
 
-	float fRotateX = ReadAxis(GAMEPAD_AXIS_RIGHT_X) + ReadAxis(GAMEPAD_AXIS_POINTER_X);
-	float fRotateY = ReadAxis(GAMEPAD_AXIS_RIGHT_Y) + ReadAxis(GAMEPAD_AXIS_POINTER_Y);
-	float fMoveX = ReadAxis(GAMEPAD_AXIS_LEFT_X);
-	float fMoveY = ReadAxis(GAMEPAD_AXIS_LEFT_Y);
-	float fMoveZ = ReadButton(GAMEPAD_BUTTON_ZR, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
-	fMoveZ -= ReadButton(GAMEPAD_BUTTON_ZL, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+	float fRotateX = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_ROTATE_X);
+	float fRotateY = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_ROTATE_Y);
+	float fMoveX = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_MOVE_X);
+	float fMoveY = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_MOVE_Y);
+	float fMoveZ = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_MOVE_Z);
 
-	float fRotateZ = ReadButton(GAMEPAD_BUTTON_R, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
-	fRotateZ -= ReadButton(GAMEPAD_BUTTON_L, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
-
-	if(ReadButton(GAMEPAD_BUTTON_DOWN, BUTTON_STATE_HELD))
-		fMoveZ -= 1.0f;
-	if(ReadButton(GAMEPAD_BUTTON_UP, BUTTON_STATE_HELD))
-		fMoveZ += 1.0f;
+	float fRotateZ = m_controller.GetFloat(DebugCameraController::DEBUG_CAM_AXIS_ROTATE_Z);
 	
 	const Matrix4x4 &modelMat = m_modelMat;
 

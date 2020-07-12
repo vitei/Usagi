@@ -12,7 +12,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4305;4577;4595;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <TreatSpecificWarningsAsErrors>
@@ -35,7 +35,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4305;4577;4595;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <TreatSpecificWarningsAsErrors>
@@ -60,7 +60,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>false</ExceptionHandling>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <TreatSpecificWarningsAsErrors>
       </TreatSpecificWarningsAsErrors>
       <DisableSpecificWarnings>4305;4577;4595;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -86,7 +86,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <TreatSpecificWarningsAsErrors>
       </TreatSpecificWarningsAsErrors>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <DisableSpecificWarnings>4305;4577;4595;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>

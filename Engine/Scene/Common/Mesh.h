@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_MESH_H_
 #define _USG_GRAPHICS_SCENE_MESH_H_
-#include "Engine/common/common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"

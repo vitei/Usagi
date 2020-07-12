@@ -12,7 +12,7 @@
 #ifndef Usagi_xcode_FlagComponent_h
 #define Usagi_xcode_FlagComponent_h
 
-#include "Engine/Common/Common.h"
+
 
 struct FlagComponent
 {

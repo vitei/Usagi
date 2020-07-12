@@ -18,13 +18,13 @@
 
 namespace usg {
 
-DebugStats* DebugStats::ms_pDebugStats = NULL;
+DebugStats* DebugStats::ms_pDebugStats = nullptr;
 DebugStats::DebugStats()
 {
 	m_uActivePage	= 0;
 	m_uActiveType = 0;
 	
-	m_pRender = NULL;
+	m_pRender = nullptr;
 
 	ms_pDebugStats = this;
 

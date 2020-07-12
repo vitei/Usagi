@@ -153,15 +153,15 @@ bool ParticleEffect::Update(float fElapsed)
 
 void ParticleEffect::UpdateBuffers(GFXDevice* pDevice)
 {
+	if (m_constantSet.IsValid())
+	{
+		m_constantSet.UpdateData(pDevice);
+	}
+
 	for (List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
 	{
 		ParticleEmitter* pEmitter = (*it);
 		pEmitter->UpdateBuffers(pDevice);
-	}
-
-	if (m_pRenderGroup)
-	{
-		m_constantSet.UpdateData(pDevice);
 	}
 }
 

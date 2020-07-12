@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_FRAMEWORK_HIERARCHY_NODE_
 #define	_USG_FRAMEWORK_HIERARCHY_NODE_
-#include "Engine/Common/Common.h"
+
 
 namespace usg 
 {

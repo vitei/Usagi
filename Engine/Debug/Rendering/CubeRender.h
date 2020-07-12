@@ -4,7 +4,7 @@
  *****************************************************************************/
 #ifndef _USG_CUBERENDER_H_
 #define _USG_CUBERENDER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Scene/Common/Mesh.h"
@@ -24,7 +24,7 @@ public:
 	CubeRender(void);
 	~CubeRender(void);
     
-	bool    Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool bHideInside=false);
+	bool    Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, uint32 uMaxCubes, bool bHideInside=false);
 	void	Remove();
 	void	FreeAllocation();
 	void	Create(GFXDevice* pDevice, bool bHideInside = false);

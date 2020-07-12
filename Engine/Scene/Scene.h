@@ -5,7 +5,7 @@
 #pragma once
 #ifndef USG_GRAPHICS_SCENE_SCENE_H
 #define USG_GRAPHICS_SCENE_SCENE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Maths/Matrix4x4.h"
@@ -23,6 +23,7 @@ class RenderGroup;
 class ViewContext;
 class ShadowContext;
 class OmniShadowContext;
+class OffscreenRenderNode;
 class Camera;
 class LightMgr;
 class ParticleMgr;
@@ -38,7 +39,7 @@ public:
 	Scene();
 	~Scene();
 
-	void			Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet = nullptr);
+	void			Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const AABB& worldBounds, ParticleSet* pSet = nullptr);
 	void			Cleanup(GFXDevice* pDevice);
 	void			Reset();
 
@@ -75,7 +76,11 @@ public:
 
 	void			PreUpdate();
 	void			TransformUpdate(float fElapsed);
+	void			PreDraw(GFXContext* pContext);
 	void			Update(GFXDevice* pDevice);
+
+	void			RegisterOffscreenRenderNode(OffscreenRenderNode* pNode);
+	void			DeregisterOffscreenRenderNode(OffscreenRenderNode* pNode);
 
 	const Camera*	GetSceneCamera(uint32 uIndex) const;
 
@@ -104,6 +109,10 @@ public:
 	};
 
 	uint32 GetFrame() const { return m_uFrame; }
+
+	void SetActiveCamera(uint32 uCameraId, uint32 uViewContext);
+	void AddCamera(const Camera* pCamera);
+	void RemoveCamera(const Camera* pCamera);
 
 private:
 	void			PerformVisibilityTesting(GFXDevice* pDevice);

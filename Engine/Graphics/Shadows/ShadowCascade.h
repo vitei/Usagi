@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_SHADOWS_SHADOW_CASCADE_H_
 #define _USG_POSTFX_SHADOWS_SHADOW_CASCADE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/Camera/StandardCamera.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Shadows/DirectionalShadow.h"
@@ -15,6 +15,7 @@ namespace usg
 class ShadowContext;
 class GFXContext;
 class DirLight;
+class RenderTarget;
 
 #define RENDER_TO_LAYER 1
 

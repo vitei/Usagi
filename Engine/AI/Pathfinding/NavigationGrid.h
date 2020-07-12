@@ -6,7 +6,7 @@
 #ifndef __USG_AI_NAVIGATION_GRID__
 #define __USG_AI_NAVIGATION_GRID__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Maths/Vector3f.h"

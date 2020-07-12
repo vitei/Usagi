@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_STATE_ENUMS_H_
 #define _USG_GRAPHICS_DEVICE_STATE_ENUMS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 
 namespace usg {

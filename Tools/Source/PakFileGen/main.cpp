@@ -6,7 +6,7 @@
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/Utility.h"
-#include "../ResourcePak/ResourcePakExporter.h"
+#include "../ResourceLib/ResourcePakExporter.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <fstream>

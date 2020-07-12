@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_AGENT_NAVIGATION_UTIL__
 #define __USG_AI_AGENT_NAVIGATION_UTIL__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Framework/GameComponents.h"
 #include "Engine/AI/Targetting/Target.pb.h"

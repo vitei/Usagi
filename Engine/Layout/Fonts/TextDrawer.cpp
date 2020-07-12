@@ -38,6 +38,7 @@ namespace usg
 	TextDrawer::TextDrawer(Text* p) : m_pParent(p)
 	{
 		m_bufferValid = false;
+		m_bOriginTL = false;
 	}
 
 	TextDrawer::~TextDrawer()
@@ -45,7 +46,7 @@ namespace usg
 		ASSERT(m_bufferValid == false);
 	}
 
-	void TextDrawer::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
+	void TextDrawer::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
 		// Initialize vertices.
 		m_charVerts.Init(
@@ -73,17 +74,21 @@ namespace usg
 		alphaDecl.SetColor0Only();
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
+		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_MAX;
+		alphaDecl.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
+		alphaDecl.dstBlendAlpha = BLEND_FUNC_DST_ALPHA;
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.DistanceField");
+		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.DistanceField");
 		m_pipeline = pDevice->GetPipelineState(renderPass, pipelineState);
 		dsDecl.bDepthEnable = true;
 		dsDecl.eDepthFunc = DEPTH_TEST_LESS;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.Text3D");
+		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.Text3D");
 		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
 		pipelineState.layout.uDescriptorSetCount = 3;
-		m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
+		// FIXME: Need distance field on the 3D text
+		//m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
 		
 		m_bufferValid = true;
 	}
@@ -195,10 +200,53 @@ namespace usg
 
 		m_context.Init(m_pParent);
 
-		const U8String& u8Text = m_pParent->GetText();
+		U8String u8Text = m_pParent->GetText();
+		const FontHndl& font = m_pParent->GetFont();
+		float fTmpWidth = 0.0f;
+		char* szTxtTmp = u8Text.Data();
+		const float fWidthLimit = m_pParent->GetWidthLimit();
+
+		if(fWidthLimit > 0.0f)
+		{
+			// Insert fake newlines
+			while(*szTxtTmp != 0)
+			{
+				uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
+				U8Char thisChar(szTxtTmp, uByteCount);
+				if (uByteCount == 1 && *szTxtTmp == '\n')
+				{
+					fTmpWidth = 0.0f;
+				}
+				float fLeft, fRight, fTop, fBottom;
+				Vector2f vScale = m_context.GetScale() * m_pParent->GetFont()->GetDrawScale();
+				bool bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
+				Vector2f vDimensions = Vector2f(font->GetCharacterAspect(fLeft, fRight, fTop, fBottom), 1.0f);
+				vDimensions = vDimensions * vScale;
+				float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
+				fTmpWidth += fCharWidth;
+ 				if (fTmpWidth > fWidthLimit)
+				{
+					szTxtTmp--;
+					while (szTxtTmp > u8Text.CStr())
+					{
+						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
+						U8Char thisChar(szTxtTmp, uByteCount);
+						if (uByteCount == 1 && *szTxtTmp == ' ')
+						{
+							*szTxtTmp = '\n';
+							fTmpWidth = 0.0f;
+							break;
+						}
+						szTxtTmp--;
+					}
+				}
+		
+				szTxtTmp += uByteCount;
+			}
+		}
+
 		const char* szText = u8Text.CStr();
 		uint32 uCharCount = u8Text.CharCount();
-		const FontHndl& font = m_pParent->GetFont();
 		const usg::Color& color = m_context.GetColor();
 		const usg::Color& colorUpper = m_pParent->GetGradationStartColor();
 		const usg::Color& colorLower = m_pParent->GetGradationEndColor();
@@ -272,7 +320,14 @@ namespace usg
 
 			colorUpper.FillU8(pVert->cColUpper[0], pVert->cColUpper[1], pVert->cColUpper[2], pVert->cColUpper[3]);
 			colorLower.FillU8(pVert->cColLower[0], pVert->cColLower[1], pVert->cColLower[2], pVert->cColLower[3]);
-			pVert->vUVRange.Assign(fLeft, fBottom, fRight, fTop);
+			if (m_bOriginTL)
+			{
+				pVert->vUVRange.Assign(fLeft, fTop, fRight, fBottom);
+			}
+			else
+			{
+				pVert->vUVRange.Assign(fLeft, fBottom, fRight, fTop);
+			}
 			colorBg.FillU8(pVert->cColBg[0], pVert->cColBg[1], pVert->cColBg[2], pVert->cColBg[3]);
 			color.FillU8(pVert->cColFg[0], pVert->cColFg[1], pVert->cColFg[2], pVert->cColFg[3]);
 			pVert->fDepth = fZPos;
@@ -280,8 +335,9 @@ namespace usg
 			pVert++;
 
 			uCharsThisLine++;
-			fPosX += vDimensions.x + font->GetCharacterSpacing() * vScale.x;
-			fLineWidth += vDimensions.x;
+			float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
+			fPosX += fCharWidth;
+			fLineWidth += fCharWidth;
 			// We can't manage anymore
 			if (uFoundCharCount >= MAX_CHARS)
 				break;

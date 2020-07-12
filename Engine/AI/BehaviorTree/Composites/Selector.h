@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_SELECTOR__
 #define __USG_AI_SELECTOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Composite.h"
 
 namespace usg

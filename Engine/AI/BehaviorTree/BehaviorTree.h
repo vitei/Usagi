@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIOR_TREE__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIOR_TREE__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/ScratchRaw.h"
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #include "Engine/AI/BehaviorTree/Variables.h"

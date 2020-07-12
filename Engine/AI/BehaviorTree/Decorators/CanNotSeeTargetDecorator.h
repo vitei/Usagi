@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_DECORATORS_CAN_NOT_SEE_TARGET_DECORATOR__
 #define __USG_AI_BEHAVIOR_TREE_DECORATORS_CAN_NOT_SEE_TARGET_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 namespace usg
 {

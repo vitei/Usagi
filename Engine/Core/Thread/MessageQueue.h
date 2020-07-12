@@ -4,7 +4,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_THREAD_MESSAGE_QUEUE_H_
 #define	_USG_ENGINE_THREAD_MESSAGE_QUEUE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Thread/CriticalSection.h"
 
 namespace usg

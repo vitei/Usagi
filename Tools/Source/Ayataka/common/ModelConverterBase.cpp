@@ -1,3 +1,4 @@
+#include "Engine/Common/Common.h"
 #include "ModelConverterBase.h"
 #include "exchange/Skeleton.h"
 #include "common.h"
@@ -120,6 +121,9 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		pugi::xml_attribute parentName = bone.append_attribute("parent_name");
 		parentName.set_value(exBone.parentName);
 
+		pugi::xml_attribute neededRendering = bone.append_attribute("needed_rendering");
+		neededRendering.set_value(exBone.isNeededRendering ? "true" : "false" );
+
 		pugi::xml_attribute billboard = bone.append_attribute("billboard");
 		switch (pSkeleton->Bones()[i].billboardMode)
 		{
@@ -226,6 +230,44 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 
 			pugi::xml_attribute outer_angle = light.append_attribute("outer_angle");
 			outer_angle.set_value(pLight->spec.spot.fOuterAngle);
+		}
+	}
+
+	if (mCmdl.GetCameraNum() > 0)
+	{
+		//	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
+		pugi::xml_node cameraSet = hierarchyNode.append_child("camera_array");
+
+		pugi::xml_attribute cameraArrayLength = cameraSet.append_attribute("length");
+		cameraArrayLength.set_value((unsigned int)mCmdl.GetCameraNum());
+
+		for (uint32 i = 0; i < mCmdl.GetCameraNum(); i++)
+		{
+			pugi::xml_node camera = cameraSet.append_child("camera");
+			const Cmdl::Camera* pCamera = mCmdl.GetCamera(i);
+
+			pugi::xml_attribute name = camera.append_attribute("name");
+			name.set_value(pCamera->name.c_str());
+			pugi::xml_attribute parentName = camera.append_attribute("parent_name");
+			parentName.set_value(pCamera->parentBone.c_str());
+
+			char buff[100];
+			snprintf(buff, sizeof(buff), "%f %f %f", pCamera->position.x, pCamera->position.y, pCamera->position.z);
+			pugi::xml_attribute position = camera.append_attribute("position");
+			position.set_value(buff);
+
+			snprintf(buff, sizeof(buff), "%f %f %f", pCamera->rotate.x, pCamera->rotate.y, pCamera->rotate.z);
+			pugi::xml_attribute rotate = camera.append_attribute("rotate");
+			rotate.set_value(buff);
+
+			pugi::xml_attribute fov = camera.append_attribute("fov");
+			fov.set_value(pCamera->fov);
+
+			pugi::xml_attribute nearPlane = camera.append_attribute("near");
+			nearPlane.set_value(pCamera->nearPlane);
+
+			pugi::xml_attribute farPlane = camera.append_attribute("far");
+			farPlane.set_value(pCamera->farPlane);
 		}
 	}
 

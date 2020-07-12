@@ -2,7 +2,9 @@
 #include "Engine/GUI/IMGuiRenderer.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Maths/MathUtil.h"
+#include "Engine/Graphics/Textures/TGAFile.h"
 #include "TextureSettings.h"
+#include "gli/gli.hpp"
 
 
 static const char* g_szAnimationTiming[] =
@@ -11,6 +13,7 @@ static const char* g_szAnimationTiming[] =
 	"Flip book scaled",
 	"Flip book looped",
 	"Random image",
+	"Scaled to time",
 	NULL
 };
 
@@ -32,42 +35,53 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	usg::Vector2f vWindowSize(320.f, 240.f);
 	usg::Vector2f vTextureSize(64.f, 64.f);
 	int defaultRepeat[] = { 1, 1 };
-	m_window.Init("Texture", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Texture", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", true, usg::GPU_LOCATION_STANDARD);
 	vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 	m_texture.Init(pDevice, "Particle tex", vTextureSize, m_pTexture);
 	m_fileList.Init("Textures/particles/", ".dds");
 	m_fileListBox.Init("Texture Select", m_fileList.GetFileNamesRaw());
 	m_repeat.Init("Repeat X, Y", defaultRepeat, 2, 1, 32);
+	m_repeat.SetToolTip("Number of sub images in the image along X and Y");
 	m_comboBox.Init("Anim Mode", g_szAnimationTiming, 0);
+	m_comboBox.SetToolTip("How the sub images are to be animated");
 	m_checkBox.Init("Random offset", false);
+	m_checkBox.SetToolTip("Apply a random offset to the image to be displayed");
+
+	m_createFlipBook.Init("Create Flipbook");
+	m_createFlipBook.SetAllowMultiple(true);
+	m_createFlipBook.SetExtension("tga");
+	m_createFlipBook.AddFilter("Targa Image File", "*.tga");
+	m_createFlipBook.SetCallbacks(this);
 
 	usg::SamplerDecl samplerDecl(usg::SF_LINEAR, usg::SC_WRAP);
 	m_sampler = pDevice->GetSampler(samplerDecl);
 
 	m_previewButton.InitAsTexture(pDevice, "Preview", m_pTexture);
 
-	usg::Vector2f vAnimWindowSize(280.0f, 70.0f);
-	m_animFrameWindow.Init("Frames", vWindowPos, vAnimWindowSize, 16, usg::GUIWindow::WINDOW_TYPE_CHILD );
+	usg::Vector2f vAnimWindowSize(330.0f, 140.0f);
+	m_animFrameWindow.Init("Frames", vWindowPos, vAnimWindowSize, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	m_animFrameWindow.SetShowBorders(true);
 
 	char frameName[256];
 	for(uint32 i=0; i<MAX_ANIM_FRAMES; i++)
 	{
-		usg::Vector2f vFrameSize(54.f, 54.f);
+		usg::Vector2f vFrameSize(85.f, 85.f);
 		str::ParseVariableArgsC(frameName, 256, "Frame %d", i);
 		m_animTextures[i].Init(pDevice, frameName, vFrameSize, m_pTexture);
 		m_animTextures[i].SetSameLine((i%4)!=0);
+		m_animTextures[i].SetToolTip(frameName);
 		m_animTextures[i].SetVisible(false);
 		m_animFrameWindow.AddItem(&m_animTextures[i]);
 	}
 
 	m_animTitle.Init("Anim timings");
 	int frameCount = 1;
-	m_frameCount.Init("Frame count", &frameCount, 1, 1, 32);
+	m_frameCount.Init("Frame count", &frameCount, 1, 1, MAX_ANIM_FRAMES);
 
 	m_animTimeScale.Init("Anim time scale", 0.1f, 2.0f, 1.0f);
 
+	m_window.AddItem(&m_createFlipBook);
 	m_window.AddItem(&m_texture);
 	m_window.AddItem(&m_fileListBox);
 	m_window.AddItem(&m_repeat);
@@ -92,6 +106,74 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_window.AddItem(&m_previewButton);
 
 	//pRenderer->AddWindow(&m_window);
+}
+
+void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results)
+{
+	if (str::Compare(szName, "Create Flipbook"))
+	{
+		if (results.size() > 0)
+		{
+			usg::FileOpenPath::Filter filter;
+			filter.szDisplayName = "Targa";
+			filter.szExtPattern = "*.tga";
+			usg::FileOpenPath fileName;
+			fileName.szWindowTitle = "Flipbook";
+			fileName.szDefaultExt = "tga";
+			fileName.pFilters = &filter;
+			fileName.uFilterCount = 1;
+			fileName.szOpenDir = nullptr;
+
+			usg::vector<usg::TGAFile> files;
+			files.resize(results.size());
+
+			usg::FilePathResult result;
+			bool bSuccess = true;
+			if (usg::File::UserFileSavePath(fileName, result))
+			{
+				for (memsize i = 0; i < results.size(); i++)
+				{
+					if (!files[i].Load(results[i].szPath, usg::FILE_TYPE_RESOURCE))
+					{
+						FATAL_RELEASE(false, "Failed to load TGA file %s", results[i].szPath);
+						bSuccess = false;
+						break;
+					}
+
+					if (i != 0)
+					{
+						if (files[i].GetHeader().uWidth != files[0].GetHeader().uWidth
+							|| files[i].GetHeader().uHeight != files[0].GetHeader().uHeight
+							|| files[i].GetHeader().uDataTypeCode != files[0].GetHeader().uDataTypeCode)
+						{
+							FATAL_RELEASE(false, "Icompataible TGA files %s and %s", results[i].szRelativePath, results[0].szRelativePath);
+							bSuccess = false;
+							break;
+						}
+					}
+				}
+			}
+
+			if (bSuccess)
+			{
+				// Make the file
+				usg::TGAFile outFile;
+				// First calculate the size
+				sint iWidth = sqrt( results.size() + 1 );
+				sint iHeight = ((results.size() + iWidth - 1) / iWidth);
+
+				sint texWidth = files[0].GetHeader().uWidth * iWidth;
+				sint texHeight = files[0].GetHeader().uHeight * iHeight;
+
+				usg::TGAFile::Header hdr = files[0].GetHeader();
+				hdr.uWidth = texWidth;
+				hdr.uHeight = texHeight;
+				outFile.PrepareImage(files[0].GetHeader());
+				
+				outFile.Save("d:\\aaa\\test.tga", usg::FILE_TYPE_RESOURCE);
+			}
+		}
+	}
 }
 
 void TextureSettings::CleanUp(usg::GFXDevice* pDevice)
@@ -257,7 +339,7 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		m_fAnimTime = 0.0f;
 	}
 
-	float fElapsed = 1.0f/30.f;
+	float fElapsed = 1.0f/60.f;
 
 	m_previewButton.SetVisible(true);
 
@@ -271,6 +353,10 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 	case usg::particles::TEX_MODE_RANDOM_IMAGE:
 		patternIdx = usg::Math::Rand()%structData.textureData[0].textureAnim.animIndex_count;
 		break;
+	case usg::particles::TEX_MODE_FIT_TO_TIME:
+		patternIdx = (uint32)((m_fAnimTime / structData.life.frames[0].fValue)*( structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) );
+		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)(structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) - 1);
+		break;
 	case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
 		patternIdx = ((uint32)((30.f)*m_fAnimTime))%structData.textureData[0].textureAnim.animIndex_count;
 		fElapsed *= m_animTimeScale.GetValue(0);
@@ -281,12 +367,25 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		return;
 	}
 
-	patternIdx = structData.textureData[0].textureAnim.animIndex[ patternIdx ];
+	if (structData.textureData[0].textureAnim.eTexMode != usg::particles::TEX_MODE_FIT_TO_TIME)
+	{
+		patternIdx = structData.textureData[0].textureAnim.animIndex[patternIdx];
+	}
 
 	usg::Vector2f vMin, vMax;
 	float fAspect = GetUVCoords(patternIdx, vMin, vMax);
 	m_previewButton.SetTexture(pDevice, m_pTexture);
 	m_previewButton.SetUVs(vMin, vMax);
+
+	if (m_pTexture->GetWidth() > 350.0f)
+	{
+		float fScale = 350.0f / (float)(m_pTexture->GetWidth()/ m_repeat.GetValue()[0]);
+		m_previewButton.SetScale(usg::Vector2f(fScale, fScale));
+	}
+	else
+	{
+		m_previewButton.SetScale(usg::Vector2f(1.0f, 1.0f));
+	}
 
 	m_fAnimTime += fElapsed;
 }
@@ -310,9 +409,10 @@ void TextureSettings::UpdateAnimFrames(usg::GFXDevice* pDevice)
 		m_animTextures[uAnimId].SetVisible(true);
 		usg::Vector2f vFrameSize;
 		if(fAdjAspect > 1.0f)
-			vFrameSize.Assign(54.f, 54.f/fAdjAspect);
+			vFrameSize.Assign(65.f, 65.f/fAdjAspect);
 		else
-			vFrameSize.Assign(54.f*fAdjAspect, 54.f);
+			vFrameSize.Assign(65.f*fAdjAspect, 65.f);
+
 		m_animTextures[uAnimId].SetSize(vFrameSize);
 	}
 

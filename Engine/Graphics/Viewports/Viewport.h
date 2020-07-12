@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_VIEWPORT_H
 #define _USG_VIEWPORT_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/RenderConsts.h"
 
@@ -25,6 +25,7 @@ public:
 	~Viewport();
 
 	void		InitViewport( uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight);
+	void		InitViewportAspect(uint32 uWidth, uint32 uHeight, float fTargAspect);
 	void		SetPos(uint32 uLeft, uint32 uBottom);
 	void		SetSize(uint32 uWidth, uint32 uHeight);
 	//void		InitPerspective(float32 fFov, float32 fAspect, float32 fNearClip, float32 fFarClip);

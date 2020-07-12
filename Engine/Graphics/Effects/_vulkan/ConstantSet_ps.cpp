@@ -21,6 +21,7 @@ const uint32 g_uGPUFormatSize[CT_COUNT] =
 	sizeof(Vector2f),	// CT_VECTOR_2,
 	sizeof(float32),	// CT_FLOAT,
 	sizeof(sint32),		// CT_INT
+	sizeof(sint32)*2,	// CT_VECTOR2I
 	sizeof(sint32)*4,	// CT_VECTOR4I
 	sizeof(uint32)*4,	// CT_VECTOR4U
 	4,					// CT_BOOL
@@ -32,10 +33,11 @@ const uint32 g_uGPUAlignments[CT_COUNT] =
 	sizeof(float)*4,	// CT_MATRIX_44
 	sizeof(float)*4,	// CT_MATRIX_43
 	sizeof(float)*4,	// CT_VECTOR_4
-	sizeof(float)*3,	// CT_VECTOR_3
+	sizeof(float)*4,	// CT_VECTOR_3
 	sizeof(float)*2,	// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int)*2,		// CT_VECTOR2I
 	sizeof(int)*4,		// CT_VECTOR4I
 	sizeof(int) * 4,	// CT_VECTOR4U
 	4,					// CT_BOOL
@@ -94,14 +96,13 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 	vkGetBufferMemoryRequirements(devicePS.GetVKDevice(), m_buffer, &memReqs);
 	memAlloc.allocationSize = memReqs.size;
 	memAlloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	eResult = vkAllocateMemory(devicePS.GetVKDevice(), &memAlloc, nullptr, &m_memory);
-	ASSERT(eResult == VK_SUCCESS);
 
+	m_memoryAlloc.Init(memAlloc.memoryTypeIndex, (uint32)memAlloc.allocationSize, usg::Math::Max((uint32)uPerBufferAlign, (uint32)memReqs.alignment), true);
+	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
-	eResult = vkMapMemory(devicePS.GetVKDevice(), m_memory, 0, VK_WHOLE_SIZE, 0, &m_pBoundGPUData);
-	ASSERT(eResult == VK_SUCCESS);
+	m_pBoundGPUData = m_memoryAlloc.GetMappedMemory();
 
-	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memory, 0);
+	eResult = vkBindBufferMemory(devicePS.GetVKDevice(), m_buffer, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
 	ASSERT(eResult == VK_SUCCESS);
 
 	// Used for dynamic uniform buffers
@@ -125,14 +126,15 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 {
 	// Not valid if the owner isn't
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 	if (m_pOwner && m_buffer != VK_NULL_HANDLE)
 	{
-		GFXDevice_ps& devicePS = pDevice->GetPlatform();
-
-		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, nullptr);
+		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer);
 		m_buffer = VK_NULL_HANDLE;
 		m_pOwner = nullptr;
 	}
+
+	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 }
 
 
@@ -197,6 +199,8 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 	if(!bDoubleUpdate)
 		m_uActiveBuffer = (m_uActiveBuffer+1)% m_uBufferCount;
 
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+
 	uint8* pCPUData = (uint8*)m_pOwner->GetCPUData();
 	uint32 uVarCount = m_pOwner->GetVarCount();
 	//const ShaderConstantDecl* pDecl = m_pOwner->GetDeclaration();
@@ -220,7 +224,11 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		case CT_VECTOR_4:
 			WriteVector4((Vector4f*)(pCPUData+pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;
+		case CT_VECTOR_3:
+			WriteVector3((Vector3f*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
+			break;
 		case CT_VECTOR_2:
+		case CT_VECTOR2I:
 			WriteVector2((Vector2f*)(pCPUData + pVarData->uOffsetSrc), pVarData->uCount, pLoc);
 			break;
 		case CT_FLOAT:
@@ -242,7 +250,6 @@ void ConstantSet_ps::UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate)
 		}
 		pVarData++;
 	}
-
 
 	m_bDataValid = true;
 }

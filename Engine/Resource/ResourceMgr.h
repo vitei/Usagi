@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_RESOURCE_H_
 #define _USG_RESOURCE_RESOURCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
@@ -44,10 +44,6 @@ public:
 	CustomEffectResHndl			GetCustomEffectRes(GFXDevice* pDevice, const char* szFileName);
 
 	void LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName);
-
-	// For pre-loading
-	uint32 GetParticleEffectCount();
-	const ParticleEffectResource* GetParticleEffectByIndex(uint32 uIndex);
 
 	// We can't return this as const as we need to iterate through it
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);

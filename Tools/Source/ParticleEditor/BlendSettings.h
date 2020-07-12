@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_BLEND_SETTINGS_H_
 #define _USG_PARTICLE_EDITOR_BLEND_SETTINGS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/GUI/GuiWindow.h"
@@ -26,12 +26,12 @@ private:
 
 	enum
 	{
-		COMBO_BOX_RGB_SRC = 0,
+		COMBO_BOX_RGB_OP = 0,
+		COMBO_BOX_RGB_SRC,
 		COMBO_BOX_RGB_DST,
-		COMBO_BOX_RGB_OP,
+		COMBO_BOX_ALPHA_OP,
 		COMBO_BOX_ALPHA_SRC,
 		COMBO_BOX_ALPHA_DST,
-		COMBO_BOX_ALPHA_OP,
 		COMBO_BOX_ALPHA_TEST_OP,
 		COMBO_BOX_COUNT
 	};
@@ -40,6 +40,7 @@ private:
 	usg::GUIColorSelect		m_constColorSelect;
 	usg::GUISlider			m_alphaRef;
 	usg::GUISlider			m_softDistance;
+	usg::GUISlider			m_cameraOffset;
 	bool					m_bForceUpdate;
 };
 

@@ -1,8 +1,9 @@
+#include "Engine/Common/Common.h"
 #include <stdlib.h>
 #include "OwnSTLDecl.h"
 
 #include "fbx/FbxConverter.h"
-#include "MaterialDefinition/MaterialDefinitionExporter.h"
+#include "../ResourceLib/MaterialDefinition/MaterialDefinitionExporter.h"
 #include "Dependencies/DependencyTracker.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
 #include "./StringUtil.h"
@@ -123,6 +124,12 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 		pConverter->ExportStoredBinary(outputPath);
 		pConverter->ExportAnimations(settings.animPath);
 	}
+	else
+	{
+		if (settings.bLeftHand) {
+			pConverter->ReverseCoordinate();
+		}
+	}
 	pConverter->ExportBoneHierarchy( settings.skeletonPath );
 
 	SAFE_DELETE( pConverter );
@@ -134,7 +141,7 @@ int convertModelData(const aya::string& outputPath, const aya::string& inputPath
 int ConvertMaterialDefinition(aya::string outputPath, aya::string inputPath)
 {
 	MaterialDefinitionExporter exporter;
-	exporter.Load(inputPath.c_str());
+	exporter.Load(inputPath.c_str(), "");
 	exporter.ExportFile(outputPath.c_str());
 
 	return 0;

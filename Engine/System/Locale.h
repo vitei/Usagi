@@ -5,7 +5,7 @@
 #ifndef _USG_LOCALE_H_
 #define _USG_LOCALE_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/System/Localization.pb.h"
 #include OS_HEADER(Engine/System/, Locale_ps.h)
 

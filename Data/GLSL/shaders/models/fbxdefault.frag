@@ -14,41 +14,22 @@
 #endif
 
 
-BUFFER_LAYOUT(1, UBO_MATERIAL_1_ID) uniform Material1
-{
-	// Materials
-	vec4	emission;
-	vec4	diffuse;
-	vec4	specular;
-	float	reflectionfactor;
-	float 	specularpow;
-	float	alpha;
-	bool	bDiffuseMap;
-	bool	bBumpMap;
-	bool	bSpecMap;
-	bool 	bEmissiveMap;
-	bool 	bReflectionMap;
-} uMaterial;
-
-
-
-SAMPLER_LOC(1, 0) uniform sampler2D sampler0;
-SAMPLER_LOC(1, 1) uniform sampler2D sampler1;
-SAMPLER_LOC(1, 2) uniform sampler2D sampler2;
-SAMPLER_LOC(1, 3) uniform sampler2D sampler3;
-SAMPLER_LOC(1, 4) uniform samplerCube sampler4;
-
+// <<GENERATED_CODE>>
 
 ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
+#ifndef SHADOW_PASS
 ATTRIB_LOC(1) in vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) in vec4 vo_vColor;
 ATTRIB_LOC(3) in vec3 vo_vNormal;
+#endif
 #ifdef HAS_BUMP
 ATTRIB_LOC(4) in vec3 vo_vTangent;
 ATTRIB_LOC(5) in vec3 vo_vBinormal;
 #endif
+#ifndef OMNI_DEPTH
 ATTRIB_LOC(6) in vec3 vo_vWorldPos;
 ATTRIB_LOC(7) in vec3 vo_vViewDir;
+#endif
 
 #ifndef DEFERRED_SHADING
 #ifndef SHADOW_PASS
@@ -86,7 +67,8 @@ void main(void)
 	{
     	vEmissive = texture( sampler2, vo_vTexCoord01.xy ).rgb; 
 	}
-	//vEmissive *= uMaterial.emission.rgb;
+	
+	vEmissive += uMaterial.emission.rgb;
 
 #ifndef DEFERRED_SHADING
 	vec4 vFragPrimaryColor = vec4(0);

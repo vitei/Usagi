@@ -4,9 +4,9 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_PAK_FILE_DECL_H_
 #define _USG_RESOURCE_PAK_FILE_DECL_H_
-#include "Engine/Common/Common.h"
-#include "Engine/Graphics/RenderConsts.h"
 
+#include "Engine/Graphics/RenderConsts.h"
+	
 namespace usg
 {
 	namespace PakFileDecl
@@ -18,6 +18,14 @@ namespace usg
 		{
 			uint32 uVersionId;
 			uint32 uFileCount;
+			uint32 uTempDataOffset;
+			uint32 uResDataOffset;
+		};
+
+		enum FileFlags
+		{
+			FILE_FLAG_NONE = 0,
+			FILE_FLAG_KEEP_DATA = (1 << 0),
 		};
 
 		struct FileInfo
@@ -27,20 +35,18 @@ namespace usg
 			uint32			uTotalFileInfoSize;
 			uint32			uCustomHeaderSize;	// Straight after file info
 			uint32			uDependenciesCount;	// After custom header
-			uint32			uDataOffset;
+			// Data that is required for the lifetime of the resource
+			uint32			uDataOffset;	
 			uint32			uDataSize;
+			uint32			uResourceType;	// See ResourceBase
+			uint32			uFileFlags;
 		};
 
 		struct Dependency
 		{
-			char   szName[128];
 			uint32 FileCRC;
 			uint32 PakIndex;	// USG_INVALID_ID if not present in this pak file
-		};
-
-		struct EffectEntry
-		{
-			uint32		CRC[(uint32)usg::ShaderType::COUNT] = {};
+			uint32 UsageCRC;	// Hint to the resource how this is to be used
 		};
 
 		struct ShaderEntry

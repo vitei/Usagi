@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __CLR_USAGI_MODE_INIT_THREAD_H__
 #define __CLR_USAGI_MODE_INIT_THREAD_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Thread/Thread.h"
 #include "Engine/Game/Mode.h"
 

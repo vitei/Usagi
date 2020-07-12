@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _FADER_H
 #define _FADER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
@@ -41,11 +41,11 @@ namespace usg
 		bool IsBlackout();
 
 	private:
-
-		usg::Material		m_Material;
-		usg::ConstantSet	m_constants;
-		usg::VertexBuffer	m_VertexBuffer;
-		bool				m_bWipeLower;
+		usg::PipelineStateHndl	m_pipelineState;
+		usg::DescriptorSet		m_descriptorSet;
+		usg::ConstantSet		m_constants;
+		usg::VertexBuffer		m_VertexBuffer;
+		bool					m_bWipeLower;
 	};
 
 }

@@ -11,7 +11,8 @@
 
 namespace usg{
 
-	ParticleEmitterResource::ParticleEmitterResource()
+	ParticleEmitterResource::ParticleEmitterResource() :
+		ResourceBase(StaticResType)
     {
 
     }

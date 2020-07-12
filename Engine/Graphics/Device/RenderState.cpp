@@ -155,6 +155,7 @@ RasterizerStateDecl::RasterizerStateDecl()
 {
 	eCullFace = CULL_FACE_BACK;
 	fDepthBias	= 0.0f;
+	fLineWidth = 1.0f;
 	bUseDepthBias = false;
 	bMultisample = false;
 	bWireframe = false;

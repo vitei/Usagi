@@ -123,9 +123,12 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 		m_uShadowedDirLightIndex = (uint32)m_dirLights.GetActiveLights().size();
 	}
 
-	for (auto itr : m_dirLights.GetActiveLights())
+	if (pContext->GetCamera())
 	{
-		itr->UpdateCascade(*pContext->GetCamera(), 0);
+		for (auto itr : m_dirLights.GetActiveLights())
+		{
+			itr->UpdateCascade(*pContext->GetCamera(), 0);
+		}
 	}
 
 

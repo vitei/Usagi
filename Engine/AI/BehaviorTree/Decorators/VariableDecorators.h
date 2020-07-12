@@ -4,7 +4,7 @@
 
 #ifndef __USG_AI_VARIABLE_DECORATOR__
 #define __USG_AI_VARIABLE_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 
 namespace usg

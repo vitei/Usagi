@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_COLLISION_MODEL_RESOURCE_H_
 #define _USG_GRAPHICS_SCENE_COLLISION_MODEL_RESOURCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Resource/ResourceBase.h"
@@ -98,6 +98,9 @@ public:
 
 	BoneDataSource GetBoneData(const char* szBoneName) const;
 	BoneDataSource GetBoneData(const uint32 uBoneNameHash) const;
+
+	const static ResourceType StaticResType = ResourceType::COLLISION;
+
 private:
 	const SubmeshData* GetSubmeshData(const char* szName) const;
 	const SubmeshData* GetSubmeshData(const uint32 uMeshNameHash) const;

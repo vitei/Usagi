@@ -44,7 +44,7 @@ namespace usg
 
 		static void RenderConvexMesh(physx::PxConvexMesh* pConvexMesh, const float fMeshScale, const Color& cColor, const physx::PxTransform& t)
 		{
-			physx::PxVec3 verts[256];
+			physx::PxVec3 verts[512];
 			physx::PxU32 nbVerts = pConvexMesh->getNbVertices();
 			const physx::PxVec3* convexVerts = pConvexMesh->getVertices();
 			const physx::PxU8* indexBuffer = pConvexMesh->getIndexBuffer();
@@ -66,9 +66,9 @@ namespace usg
 					const auto tp1 = ToUsgVec3(t.transform(verts[physx::PxU16(offset)]));
 					const auto tp2 = ToUsgVec3(t.transform(verts[physx::PxU16(offset + j)]));
 					const auto tp3 = ToUsgVec3(t.transform(verts[physx::PxU16(offset + j - 1)]));
-					if (s_uFrameCount % 3 == 0) Debug3D::GetRenderer()->AddLine(tp1, tp2, cColor, 0.006f);
-					if (s_uFrameCount % 3 == 1) Debug3D::GetRenderer()->AddLine(tp2, tp3, cColor, 0.006f);
-					if (s_uFrameCount % 3 == 2) Debug3D::GetRenderer()->AddLine(tp3, tp1, cColor, 0.006f);
+					if (s_uFrameCount % 3 == 0) Debug3D::GetRenderer()->AddLine(tp1, tp2, cColor, 0.06f);
+					if (s_uFrameCount % 3 == 1) Debug3D::GetRenderer()->AddLine(tp2, tp3, cColor, 0.06f);
+					if (s_uFrameCount % 3 == 2) Debug3D::GetRenderer()->AddLine(tp3, tp1, cColor, 0.06f);
 				}
 				offset += face.mNbVerts;
 			}
@@ -109,9 +109,9 @@ namespace usg
 						const auto tp1 = ToUsgVec3(t.transform(pVerts[indexGetter(uTriangleIndex * 3 + 0)]));
 						const auto tp2 = ToUsgVec3(t.transform(pVerts[indexGetter(uTriangleIndex * 3 + 1)]));
 						const auto tp3 = ToUsgVec3(t.transform(pVerts[indexGetter(uTriangleIndex * 3 + 2)]));
-						if (s_uFrameCount % 3 == 0) Debug3D::GetRenderer()->AddLine(tp1, tp2, cColor, 0.01f);
-						if (s_uFrameCount % 3 == 1) Debug3D::GetRenderer()->AddLine(tp2, tp3, cColor, 0.01f);
-						if (s_uFrameCount % 3 == 2) Debug3D::GetRenderer()->AddLine(tp3, tp1, cColor, 0.01f);
+						if (s_uFrameCount % 3 == 0) Debug3D::GetRenderer()->AddLine(tp1, tp2, cColor, 0.1f);
+						if (s_uFrameCount % 3 == 1) Debug3D::GetRenderer()->AddLine(tp2, tp3, cColor, 0.1f);
+						if (s_uFrameCount % 3 == 2) Debug3D::GetRenderer()->AddLine(tp3, tp1, cColor, 0.1f);
 					}
 
 				}
@@ -254,7 +254,7 @@ namespace usg
 				Required<RigidBody, FromSelf> rb;
 				getter.GetComponent(e, rb);
 				const auto vRigidBodyPos = Vector4f(ToUsgVec3(rb.GetRuntimeData().pRigidActor->getGlobalPose().p),1);
-				if (camera.GetFrustum().ArePointsInFrustum(&vRigidBodyPos, 1) && vRigidBodyPos.v3().GetSquaredDistanceFrom(vCamPos) < VisibilityRadius*VisibilityRadius)
+				//if (camera.GetFrustum().ArePointsInFrustum(&vRigidBodyPos, 1) && vRigidBodyPos.v3().GetSquaredDistanceFrom(vCamPos) < VisibilityRadius*VisibilityRadius)
 				{
 					Optional<MeshCollider> meshCollider;
 					getter.GetComponent(e, meshCollider);

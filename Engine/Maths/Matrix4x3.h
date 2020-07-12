@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_MATRIX4X3_H_
 #define	_USG_MATRIX4X3_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemUtil.h"
 #include "Matrix4x4.h"
 

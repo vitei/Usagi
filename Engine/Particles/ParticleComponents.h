@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _ENGINE_PARTICLES_PARTICLE_COMPONENT_H_
 #define _ENGINE_PARTICLES_PARTICLE_COMPONENT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 #include "Engine/Particles/ParticleEffectHndl.h"
 

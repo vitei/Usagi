@@ -17,6 +17,7 @@ const VkCullModeFlagBits g_cullFaceMap[] =
 void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, uint32 uId)
 {
 	memset(&m_createInfo, 0, sizeof(m_createInfo));
+	memset(&m_lineState, 0, sizeof(m_lineState));
     m_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     m_createInfo.polygonMode = decl.bWireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
     m_createInfo.cullMode = g_cullFaceMap[decl.eCullFace];
@@ -24,7 +25,19 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
     m_createInfo.depthClampEnable = VK_FALSE;
     m_createInfo.rasterizerDiscardEnable = VK_FALSE;
     m_createInfo.depthBiasEnable = decl.bUseDepthBias;
-	m_createInfo.lineWidth = 1.0f;
+    m_createInfo.depthBiasConstantFactor = decl.fDepthBias;
+	m_createInfo.lineWidth = decl.fLineWidth;
+	//m_createInfo.lineWidth = 1.0f;
+
+#if 0
+	if (decl.bWireframe && decl.bLineSmooth)
+	{
+		m_createInfo.pNext = &m_lineState;
+		m_lineState.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT;
+		m_lineState.lineRasterizationMode = VK_LINE_RASTERIZATION_MODE_RECTANGULAR_SMOOTH_EXT;
+		m_lineState.stippledLineEnable = false;
+	}
+#endif
 }
 
 

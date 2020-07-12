@@ -4,14 +4,18 @@
 *****************************************************************************/
 #ifndef _USG_VECTOR2F_H_
 #define _USG_VECTOR2F_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 
 namespace usg{
 
+
 class Vector2f
 {
 public:
+	static const Vector2f ZERO;
+
+
 	Vector2f(void){ x = y = 0.0f; }
 	Vector2f(float32 inX, float32 inY){ x = inX; y = inY; }
 	~Vector2f(void){}
@@ -58,7 +62,7 @@ public:
 	bool TryNormalise();
 	void GetNormalised(Vector2f& out) const;
 	Vector2f GetNormalised() const;
-	Vector2f GetNormalisedIfNZero(const Vector2f &vDefault = Vector2f(0.f, 0.0f)) const;
+	Vector2f GetNormalisedIfNZero(const Vector2f &vDefault = ZERO) const;
 	float GetSquaredDistanceFrom(const Vector2f& vec) const;
 
 	float Magnitude() const
@@ -74,7 +78,6 @@ public:
 	float32 y;
 };
 
-static const Vector2f V2F_ZERO(0.0f, 0.0f);
 
 inline void Vector2f::operator +=( const Vector2f& vec )
 {

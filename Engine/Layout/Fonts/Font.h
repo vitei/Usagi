@@ -4,7 +4,7 @@
 #ifndef _USG_GRAPHICS_FONTS_FONT_H_
 #define _USG_GRAPHICS_FONTS_FONT_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
@@ -18,7 +18,7 @@ namespace usg
 		Font ();
 		virtual ~Font();
 
-		bool Load(GFXDevice* pDevice, const char* const filename);
+		bool Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* const filename);
 		virtual void CleanUp(GFXDevice* pDevice) override;
 
 
@@ -44,6 +44,8 @@ namespace usg
 
 		float GetBaseOffset() const { return m_fontDefinition.LowerOffset; }
 		float GetDrawScale() const { return m_fontDefinition.DrawScale; }	// There is padding and the lower part of the character to take into account
+
+		const static ResourceType StaticResType = ResourceType::FONT;
 	private:
 		TextureHndl		m_pTexture;
 		DescriptorSet	m_descriptor;

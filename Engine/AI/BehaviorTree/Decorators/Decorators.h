@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_DECORATORS__
 #define __USG_AI_DECORATORS__
-#include "Engine/Common/Common.h"
+
 #include "ControlDecorator.h"
 #include "HasTargetDecorator.h"
 #include "HasNoTargetDecorator.h"

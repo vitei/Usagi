@@ -5,7 +5,7 @@
 #ifndef _USG_LOCALE_PS_H_
 #define _USG_LOCALE_PS_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/System/Localization.pb.h"
 
 namespace usg

@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_PIPELINELAYOUT_BASE_H_
 #define _USG_GRAPHICS_DEVICE_PIPELINELAYOUT_BASE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/RenderState.h"
 
 namespace usg {

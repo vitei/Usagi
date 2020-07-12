@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_GFXCONTEXT_H_
 #define _USG_GRAPHICS_GFXCONTEXT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include API_HEADER(Engine/Graphics/Device, GFXContext_ps.h)
 
@@ -42,9 +42,11 @@ public:
 
 	void SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewport = NULL);
 	void SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer);
+	void SetRenderTargetMip(RenderTarget* pTarget, uint32 uMip);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags = 0);
 
 	void ClearRenderTarget(uint32 uFlags = RenderTarget::RT_FLAG_COLOR);
+	void ClearImage(const TextureHndl& texture, const Color& col);
 
 	
 	PipelineStateHndl	GetActivePipeline() { return m_activeStateGroup; }
@@ -61,7 +63,7 @@ public:
 	void DrawIndexed(const IndexBuffer* pBuffer);	
 	void DrawIndexedEx(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstanceCount = 1);
 
-	void BeginGPUTag(const char* szName);
+	void BeginGPUTag(const char* szName, const Color& color = Color::White);
 	void EndGPUTag();
 	void EnableProfiling(bool bProfile) { m_platform.EnableProfiling(bProfile); }
 
@@ -104,6 +106,11 @@ inline void GFXContext::ClearRenderTarget(uint32 uFlags)
 	m_platform.ClearRenderTarget(m_pActiveRT, uFlags);
 }
 
+inline void GFXContext::ClearImage(const TextureHndl& texture, const Color& col)
+{
+	m_platform.ClearImage(texture, col);
+}
+
 inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot=0)
 {
 #if !DISABLE_STATE_SHADOWING	
@@ -116,9 +123,9 @@ inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlo
 	}
 }
 
-inline void GFXContext::BeginGPUTag(const char* szName)
+inline void GFXContext::BeginGPUTag(const char* szName, const Color& color)
 {
-	m_platform.BeginGPUTag(szName);
+	m_platform.BeginGPUTag(szName, color);
 }
 
 inline void GFXContext::EndGPUTag()

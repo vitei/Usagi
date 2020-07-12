@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _FRAMEWORK_COMPONENT_LOAD_HANDLES_
 #define _FRAMEWORK_COMPONENT_LOAD_HANDLES_
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

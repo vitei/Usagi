@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDHANDLE_3D_PS_H__
 #define __USG_AUDIO_SOUNDHANDLE_3D_PS_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 
 namespace usg{

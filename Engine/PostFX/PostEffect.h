@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_POSTEFFECT_H_
 #define _USG_POSTFX_POSTEFFECT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/RenderNode.h"
 
 namespace usg {
@@ -24,6 +24,8 @@ public:
 	virtual void CleanUp(GFXDevice* pDevice) {}
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) {}
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
+	virtual void Update(Scene* pScene, float fElapsed) {}
+	virtual void UpdateBuffer(usg::GFXDevice* pDevice) {}
 	void SetEnabled(bool bEnabled);
 	bool GetEnabled() { return m_bEnabled; }
 

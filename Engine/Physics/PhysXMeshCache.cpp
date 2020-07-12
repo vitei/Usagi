@@ -187,10 +187,10 @@ namespace usg
 	physx::PxConvexMesh* PhysXMeshCache::GenerateCylinder(const Vector3f& vCenter, const Vector3f& vDir, float fRadius, float fHeight, uint32 uCircleVertices)
 	{
 		Vector3f vToCircle;
-		Vector3f vOtherVec = V3F_Z_AXIS;
-		if (DotProduct(vDir, V3F_Z_AXIS) > 0.99f)
+		Vector3f vOtherVec = Vector3f::Z_AXIS;
+		if (DotProduct(vDir, Vector3f::Z_AXIS) > 0.99f)
 		{
-			vOtherVec = V3F_X_AXIS;
+			vOtherVec = Vector3f::X_AXIS;
 		}
 		vToCircle = CrossProduct(vDir, vOtherVec).GetNormalised()*fRadius;
 

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_MATRIX3X3_H_
 #define	_USG_MATRIX3X3_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemUtil.h"
 #include "Vector3f.h"
 #include "Vector4f.h"
@@ -19,13 +19,13 @@ public:
 	Matrix3x3(	float r11, float r12, float r13,
 				float r21, float r22, float r23,
 				float r31, float r32, float r33 );
-				
+	Matrix3x3(const Matrix4x4& rhs) { *this = rhs; }
 	~ Matrix3x3() {}
 
 	void LoadIdentity();
 
 	void Transpose();
-
+	void Orthonormalize();
 
 	const Vector3f vRight() const	{ return Vector3f(_11, _12, _13); }
 	const Vector3f vUp() const		{ return Vector3f(_21, _22, _23); }
@@ -33,6 +33,7 @@ public:
 
 	Matrix3x3 operator*( const Matrix3x3 &rhs ) const;
 	const Matrix3x3& operator=( const Matrix3x3 &rhs );
+	const Matrix3x3& operator=(const Matrix4x4 &rhs);
 	Matrix3x3 operator*( const Matrix4x4 &rhs ) const;
 	void operator = (const Quaternionf &quat);
 

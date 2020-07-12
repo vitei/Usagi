@@ -3,7 +3,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_DESCRIPTOR_SET_LAYOUT_H_
 #define _USG_GRAPHICS_DEVICE_DESCRIPTOR_SET_LAYOUT_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include API_HEADER(Engine/Graphics/Device, DescriptorSetLayout_ps.h)

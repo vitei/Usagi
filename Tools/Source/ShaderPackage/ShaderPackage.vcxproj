@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C2A815D2-351E-4F7E-B71E-000E5B409F40}</ProjectGuid>
     <RootNamespace>ShaderPackage</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -88,6 +88,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,15 +102,17 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ResourceLib;$(ProjectDir)libshaderc_util\include;$(USAGI_DIR)\Engine\ThirdParty\shaderc\include\shaderc;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;freetype28d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;$(VK_SDK_PATH)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;freetype28d.lib;%(AdditionalDependencies);$(VK_SDK_PATH)\lib\shaderc_shared.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
+      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y
+xcopy $(VK_SDK_PATH)\bin\shaderc_shared.dll $(TargetDir)  /y
+xcopy $(VK_SDK_PATH)\bin\shaderc_shared.dll $(USAGI_DIR)\Tools\bin\  /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -132,26 +135,30 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\msdfgen;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\include;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ResourceLib;$(ProjectDir)libshaderc_util\include;$(USAGI_DIR)\Engine\ThirdParty\shaderc\include\shaderc;$(USAGI_DIR)\Engine\ThirdParty\msdfgen;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\include;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;$(VK_SDK_PATH)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies);$(VK_SDK_PATH)\lib\shaderc_shared.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
+      <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y
+xcopy $(VK_SDK_PATH)\bin\shaderc_shared.dll $(TargetDir)  /y
+xcopy $(VK_SDK_PATH)\bin\shaderc_shared.dll $(USAGI_DIR)\Tools\bin\  /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IShaderCompiler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="OpenGLShaderCompiler.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="VulkanShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\ThirdParty\msdfgen\Msdfgen.vcxproj">
@@ -184,9 +191,14 @@
     <ProjectReference Include="..\..\..\_build\projects\Engine\ThirdParty\ThirdParty.vcxproj">
       <Project>{491fe2ef-d449-4fdd-a3ce-9a1102aa2af4}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\ResourceLib\ResourceLib.vcxproj">
+      <Project>{5d046ed5-cc03-4e84-9bb6-292c0ffbe2fe}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ResourcePak\ResourcePakExporter.h" />
+    <ClInclude Include="IShaderCompiler.h" />
+    <ClInclude Include="OpenGLShaderCompiler.h" />
+    <ClInclude Include="VulkanShaderCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

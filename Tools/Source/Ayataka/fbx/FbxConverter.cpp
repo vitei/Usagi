@@ -1,5 +1,5 @@
+#include "Engine/Common/Common.h"
 #include "FbxConverter.h"
-
 #include "common.h"
 //#include "pugi_util.h"
 
@@ -80,18 +80,28 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	}
 
 	importer->Import(scene);
+	aya::string name = path;
+	std::size_t found = name.find_last_of("/\\");
+	name = name.substr(found + 1);
+	found = name.find_last_of(".");
+	name = name.substr(0, found);
 
 	FbxGeometryConverter converter(sdkManager);
+	scene->GetGlobalSettings().SetOriginalSystemUnit(FbxSystemUnit::m);
 	double scale = scene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
 	FbxAxisSystem axisSystem = scene->GetGlobalSettings().GetAxisSystem();
 	// To reduce complication I worked with the co-ordinate system from DefinaceIndustries exported models, any model not
 	// matching that system I convert. Ayataka always expected RH input which is manually turned to left-handed, the complexity
 	// could be reduced further by converting directly with the fbx sdk
-	AxisOverride axisOverride;
-	axisOverride.ConvertScene(scene);
+	//AxisOverride axisOverride;
+	//axisOverride.ConvertScene(scene);
+	//FbxRootNodeUtility::RemoveAllFbxRoots(scene);
+	FbxAxisSystem::OpenGL.ConvertScene(scene);
 	FbxSystemUnit::ConversionOptions options = FbxSystemUnit::DefaultConversionOptions;
 	// We don't use the FBX convert scene as it messes with scales rather than positions
-	//FbxSystemUnit::m.ConvertScene(scene);
+	FbxSystemUnit::m.ConvertScene(scene);
+
+	scene->SetName(name.c_str());
 
 	if (!bSkeletonOnly)
 	{
@@ -102,8 +112,9 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	FbxLoad fbxLoader;
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
-	fbxLoader.SetAppliedScale(scale);
-	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, pDependencies );
+	//fbxLoader.SetAppliedScale(scale);
+	fbxLoader.SetAttenScale(scale);	// The convert scene doesn't handle this
+	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies );
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
 	SetNameFromPath( path.c_str() );

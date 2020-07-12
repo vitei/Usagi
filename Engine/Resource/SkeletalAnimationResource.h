@@ -32,6 +32,8 @@ public:
 	bool IsLoop() const { return m_header.isLoop; }
 	uint32 GetFrameCount() const { return m_header.frameCount-1; }
 
+	const static ResourceType StaticResType = ResourceType::SKEL_ANIM;
+
 private:
 	const exchange::BoneAnimationFrame* GetAnimFrame(uint32 uReferenceIndex, uint32 uFrame) const;
 

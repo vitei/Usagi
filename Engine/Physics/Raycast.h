@@ -3,7 +3,7 @@
 ****************************************************************************/
 
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 
 namespace usg

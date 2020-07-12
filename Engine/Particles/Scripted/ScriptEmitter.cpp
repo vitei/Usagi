@@ -343,19 +343,13 @@ namespace usg
 		Particle::ScriptedParticleFragment* pFrag = m_fragConsts.Lock<Particle::ScriptedParticleFragment>();
 		pFrag->fAlphaRef  = res.blend.alphaTestFunc == usg::ALPHA_TEST_ALWAYS ? -1.0f : res.blend.alphaTestReference;
 		pFrag->fDepthFade = res.fSoftFadeDistance;
-		if (pFrag->fDepthFade > 0.0f)
-		{
-			pFrag->fDepthFade = 1.0f / pFrag->fDepthFade;
-		}
-		if (bEditor)
-		{
-			// Depth read not working yet and need to replace the editor anyway
-			pFrag->fDepthFade = 0.0f;
-		}
 		m_fragConsts.Unlock();
 		m_fragConsts.UpdateData(pDevice);
 
 		Particle::ScriptedParticleGSTrans* pFrame = m_gsTransform.Lock<Particle::ScriptedParticleGSTrans>();
+		pFrame->vParticleCenter = m_emissionDef.vParticleCenter;
+		pFrame->fDepthFadeDist = m_emissionDef.fSoftFadeDistance;
+		pFrame->fCameraOffset = m_emissionDef.has_fCameraOffset ? m_emissionDef.fCameraOffset : 0.0f;
 		pFrame->bCustomMatrix = m_emissionDef.eParticleType == particles::PARTICLE_TYPE_USER_ORIENTED;
 		pFrame->bYAxisAlign = m_emissionDef.eParticleType == particles::PARTICLE_TYPE_Y_AXIS_ALIGNED;
 		pFrame->mOrientation = Matrix4x4::Identity();
@@ -392,7 +386,7 @@ namespace usg
 		m_emission.Init(&m_emissionDef.emission.emissionRate);
 		const usg::particles::EmitterShapeDetails& shapeDef = m_pEmitterShape->GetDetails();
 		m_baseScale.Init(&m_emissionDef.particleScale.standardValue, 0.0f);
-		m_vVelocityOffset = V3F_ZERO;
+		m_vVelocityOffset = Vector3f::ZERO;
 		m_baseScale.SetMultiplier(m_fScale);
 
 		// Always on to silence warnings
@@ -571,6 +565,9 @@ namespace usg
 			case usg::particles::TEX_MODE_RANDOM_IMAGE:
 				patternIdx = Math::Rand();
 				break;
+			case usg::particles::TEX_MODE_FIT_TO_TIME:
+				patternIdx = (uint32)(((m_fEffectTime - pOut->fLifeStart) * pOut->fInvLife) * (texData.uPatternRepeatHor * texData.uPatternRepeatVer) );
+				break;
 			case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
 				patternIdx = ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale));
 				break;
@@ -579,7 +576,10 @@ namespace usg
 			}
 
 			patternIdx += pMetaData->uRandom[i];
-			patternIdx = texAnim.animIndex[ patternIdx % texAnim.animIndex_count ];
+			if (texAnim.eTexMode != usg::particles::TEX_MODE_FIT_TO_TIME)
+			{
+				patternIdx = texAnim.animIndex[patternIdx % texAnim.animIndex_count];
+			}
 
 			uint32 uNoX = patternIdx % texData.uPatternRepeatHor;
 			uint32 uNoY = (patternIdx / texData.uPatternRepeatHor);
@@ -753,6 +753,7 @@ namespace usg
 		vVelocityOut += vOmniVelocity;
 
 
+		float fVelocityMul = Math::RangedRandom(1.0f - m_emissionDef.fSpeedRandomness, 1.0f + m_emissionDef.fSpeedRandomness);
 		if(m_emissionDef.fVelocityDirConeDeg > 0.0f)
 		{	
 			float fRadAngle = Math::DegToRad(m_emissionDef.fVelocityDirConeDeg);
@@ -767,15 +768,16 @@ namespace usg
 			Quaternionf q;
 			Vector3f dir = m_emissionDef.vVelocityDir;
 			dir.TryNormalise();
-			q.MakeVectorRotation( V3F_Y_AXIS, dir );
+			q.MakeVectorRotation(Vector3f::Y_AXIS, dir );
 			vVelocity = vVelocity * q;
 
-			vVelocityOut = ( vVelocityOut + vVelocity * m_dirVelocity.GetValue() ) * m_emissionDef.fSpeedRandomness;
+			vVelocityOut = ( vVelocityOut + vVelocity * m_dirVelocity.GetValue() );
 		}
 		else
 		{
-			vVelocityOut += m_emissionDef.vVelocityDir * m_dirVelocity.GetValue();
+			vVelocityOut += (m_emissionDef.vVelocityDir * m_dirVelocity.GetValue()) ;
 		}
+		vVelocityOut *= fVelocityMul;
 
 
 		// Finally transform the position and the direction by the emitters matrix

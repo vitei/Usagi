@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include OS_HEADER(Engine/Core/Timer, TimeTracker.h)
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Framework/CacheableComponents.h"
 #include "Engine/Framework/SystemCoordinator.h"
@@ -28,6 +29,22 @@ template<>
 void OnDeactivate<usg::Components::ActiveDevice>(Component<usg::Components::ActiveDevice>& c, ComponentLoadHandles& handles)
 {
 	c.GetRuntimeData().pDevice = NULL;
+}
+
+template<>
+void OnActivate<usg::Components::SystemTimeComponent>(Component<usg::Components::SystemTimeComponent>& c)
+{
+	c.GetRuntimeData().pTimeTracker = vnew(ALLOC_OBJECT) TimeTracker;
+}
+
+template<>
+void OnDeactivate<usg::Components::SystemTimeComponent>(Component<usg::Components::SystemTimeComponent>& c, ComponentLoadHandles& handles)
+{
+	if (c.GetRuntimeData().pTimeTracker)
+	{
+		vdelete c.GetRuntimeData().pTimeTracker;
+		c.GetRuntimeData().pTimeTracker = NULL;
+	}
 }
 
 template<>

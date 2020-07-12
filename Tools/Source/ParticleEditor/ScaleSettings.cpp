@@ -18,15 +18,22 @@ void ScaleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	usg::Vector2f vWindowPos(340.0f, 600.0f);
 	usg::Vector2f vWindowSize(320.f, 300.f);
 
-	m_window.Init("Scaling", vWindowPos, vWindowSize, 1.0f, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
+	m_window.Init("Scaling", vWindowPos, vWindowSize, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_sliders[SLIDER_RANDOMNESS].Init("Randomise", 0.0f, 1.0f, 0.0f);
-	m_sliders[SLIDER_INITIAL].Init("Initial %", 0.0f, 5.0f, 0.0f);
-	m_sliders[SLIDER_INTERMEDIATE].Init("Intermediate %", 0.0f, 5.0f, 1.0f);
-	m_sliders[SLIDER_ENDING].Init("Ending %", 0.0f, 5.0f, 2.0f);
+	m_sliders[SLIDER_RANDOMNESS].SetToolTip("How much to randomize the particles base scale");
+	m_sliders[SLIDER_INITIAL].Init("Initial Frac", 0.0f, 5.0f, 0.0f);
+	m_sliders[SLIDER_INITIAL].SetToolTip("What fraction of the base size should the particle be at emission");
+	m_sliders[SLIDER_INTERMEDIATE].Init("Intermediate Frac", 0.0f, 5.0f, 1.0f);
+	m_sliders[SLIDER_INTERMEDIATE].SetToolTip("The standard multiplier for the particle");
+	m_sliders[SLIDER_ENDING].Init("Ending Frac", 0.0f, 5.0f, 2.0f);
+	m_sliders[SLIDER_ENDING].SetToolTip("The size of the particle at the end of its life");
 	m_sliders[SLIDER_BEGIN_SCALE_IN].Init("Begin scale in", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_BEGIN_SCALE_IN].SetToolTip("How long into the particles life (as a frac) to start scaling to it's standard size");
 	m_sliders[SLIDER_START_SCALE_OUT].Init("Start scale out", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_START_SCALE_OUT].SetToolTip("How long into the particles life (as a frac) to start scaling to it's final size");
 
 	m_baseScale.Init(&m_window, "Base scale value");
+	m_baseScale.SetToolTip("The base size of particles that will be emitted at a given time during emission");
 
 	for(uint32 i=0; i<SLIDER_COUNT; i++)
 	{
@@ -52,6 +59,8 @@ bool ScaleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmiss
 	bool bAltered = false;
 	usg::particles::ParticleScale& scaleVars = structData.particleScale;
 
+	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
+	m_baseScale.SetSingleOnly(bOneFrame);
 
 	bAltered |= Compare(scaleVars.fRandomness,m_sliders[SLIDER_RANDOMNESS].GetValue());
 	bAltered |= Compare(scaleVars.fInitial,m_sliders[SLIDER_INITIAL].GetValue());

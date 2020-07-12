@@ -4,7 +4,7 @@
 #ifndef __usg_graphics_text__
 #define __usg_graphics_text__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Layout/Fonts/TextDrawer.h"
 #include "Engine/Layout/Fonts/Font.h"
@@ -21,15 +21,17 @@ namespace usg
 		Text();
 		~Text();
 
-		void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
+		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
 		void CleanUp(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		bool Draw(GFXContext* context, bool b3D = false);
+		void SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC);
 		bool SetText(const char* str);
 		bool SetText(const U8String& u8Str);
 		bool SetFont(FontHndl pFont);
 		bool SetPosition(float x, float y, float z = 0.0f);
 		bool SetColor(const Color& color);
+		void SetOriginTL(bool bTL) { m_drawer.SetOriginTL(bTL); }
 		bool SetGradationStartColor(Color newcolor);
 		bool SetGradationEndColor(Color newcolor);
 		bool SetBackgroundColor(Color newColor);

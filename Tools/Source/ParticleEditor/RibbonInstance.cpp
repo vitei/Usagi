@@ -25,18 +25,16 @@ void RibbonInstance::CleanUp(usg::GFXDevice* pDevice)
 }
 
 
-void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pParent, uint32 uIndex, ColorSelection* pColorSelection)
+void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pParent, uint32 uIndex)
 {
 	usg::Vector2f vPos(0.0f, 0.0f);
 	usg::Vector2f vScale(300.f, 170.f);
 	usg::U8String name;
 	m_pParent = pParent;
 	name.ParseString("Ribbon %d", uIndex);
-	m_emitterWindow.Init(name.CStr(), vPos, vScale, 20, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	m_emitterWindow.Init(name.CStr(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
 	pParent->GetWindow().AddItem(&m_emitterWindow);
 	m_removeTrailButton.Init("Remove Trail");
-
-	m_pColorSelection = pColorSelection;
 
 	float fDefault0[] = { 0.0f, 0.0f, 0.0f };
 	float fDefault1[] = { 1.0f, 1.0f, 1.0f };
@@ -44,10 +42,15 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 	m_textureSelect.Init("Emitter", pParent->GetRibbonTexFileList().GetFileNamesRaw(), 0);
 
 	m_position.Init("Position", -20.0f, 20.0f, fDefault0, 3);
+	m_position.SetToolTip("Offset from emitter");
 	m_colors[COLOR_START].Init("Start Color");
+	m_colors[COLOR_START].SetToolTip("Color at emission time");
 	m_colors[COLOR_END].Init("End Color");
+	m_colors[COLOR_END].SetToolTip("Color at fade out time");
 	m_lifeTime.Init("Life Time", 0.0f, 5.0f, 0.5f);
+	m_lifeTime.SetToolTip("Time from emission to fade out in seconds");
 	m_scale.Init("Scale", 0.0f, 10.f, 0.15f);
+	m_scale.SetToolTip("Width in m");
 
 	m_emitterWindow.AddItem(&m_textureSelect);
 	m_emitterWindow.AddItem(&m_position);
@@ -59,7 +62,7 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 
 	const char * const p_string = "ribbon/trail";
 	str::Copy(m_emitterData.textureName, p_string, sizeof(m_emitterData.textureName));
-	m_emitterData.vPosition = usg::V3F_ZERO;
+	m_emitterData.vPosition = usg::Vector3f::ZERO;
 	m_emitterData.cStartColor.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 	m_emitterData.cEndColor.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 	m_emitterData.fLifeTime = 0.5f;
@@ -78,28 +81,6 @@ bool RibbonInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 	{
 		RemoveFromScene();
 		return false;
-	}
-
-	// FIXME: The color selection should have a function that does all this and we just pass in a button
-	usg::Color selectColor = m_pColorSelection->GetColor();
-	for(uint32 i=0; i<3; i++)
-	{
-		usg::Color prev = m_colors[i].GetValue();
-		if(m_colors[i].IsHovered())
-		{
-			if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED))
-			{
-				selectColor.a() = prev.a();
-				m_colors[i].SetValue( selectColor );
-				m_pColorSelection->SaveColor(m_colors[i].GetValue() );
-			}
-
-			if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_MIDDLE, usg::BUTTON_STATE_PRESSED))
-			{
-				m_pColorSelection->SetColor( pDevice, m_colors[i].GetValue() );
-			}
-		}
-		m_colors[i].SetHovered(false);
 	}
 
 	bool bAltered = false;
@@ -140,7 +121,7 @@ void RibbonInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonD
 		usg::U8String selectName = m_textureSelect.GetSelectedName();
 		selectName.TruncateExtension();
 		str::Copy(m_emitterData.textureName, selectName.CStr(), sizeof(m_emitterData.textureName));
-		m_emitterData.vPosition = usg::V3F_ZERO;
+		m_emitterData.vPosition = usg::Vector3f::ZERO;
 		m_emitterData.cStartColor.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 		m_emitterData.cEndColor.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 		m_emitterData.fLifeTime = 0.5f;

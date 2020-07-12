@@ -4,7 +4,7 @@
  *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_DECORATORS_IS_HEALTH_ABOVE_DECORATOR__
 #define __USG_AI_BEHAVIOR_TREE_DECORATORS_IS_HEALTH_ABOVE_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"
 namespace usg

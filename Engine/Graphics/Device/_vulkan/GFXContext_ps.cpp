@@ -44,6 +44,9 @@ namespace usg {
 		cmd.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmd.commandBufferCount = 1;
 
+		m_pfnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr(pDevice->GetPlatform().GetVKDevice(), "vkCmdDebugMarkerBeginEXT");
+		m_pfnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr(pDevice->GetPlatform().GetVKDevice(), "vkCmdDebugMarkerEndEXT");
+
 		err = vkAllocateCommandBuffers(pDevice->GetPlatform().GetVKDevice(), &cmd, &m_cmdBuff);
 		ASSERT(!err);
 
@@ -106,6 +109,30 @@ namespace usg {
 		pDisplay->Transfer(m_pParent, eye, pTarget);
 	}
 
+
+	void GFXContext_ps::SetRenderTargetMip(const RenderTarget* pTarget, uint32 uMip)
+	{
+		if (pTarget)
+		{
+			const RenderTarget_ps& rtPS = pTarget->GetPlatform();
+			uint32 uClearCount = pTarget->GetTargetCount();
+
+			VkRenderPassBeginInfo rp_begin;
+			rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			rp_begin.pNext = NULL;
+			rp_begin.renderPass = pTarget->GetRenderPass().GetContents()->GetPass();
+			rp_begin.framebuffer = rtPS.GetMipFrameBuffer(uMip);
+			rp_begin.renderArea.offset.x = 0;
+			rp_begin.renderArea.offset.y = 0;
+			rp_begin.renderArea.extent.width = pTarget->GetWidth(uMip);
+			rp_begin.renderArea.extent.height = pTarget->GetHeight(uMip);
+			rp_begin.clearValueCount = uClearCount;
+			rp_begin.pClearValues = rtPS.GetClearValues();
+
+			vkCmdBeginRenderPass(m_cmdBuff, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
+		}
+	}
+
 	void GFXContext_ps::SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayer)
 	{
 		if (pTarget)
@@ -166,6 +193,26 @@ namespace usg {
 	void GFXContext_ps::RenderToDisplay(Display* pDisplay, uint32 uClearFlags)
 	{
 		pDisplay->GetPlatform().SetAsTarget(m_cmdBuff);
+
+		if (uClearFlags & RenderTarget::RT_FLAG_COLOR_0)
+		{
+			uint32 uGlFlags = 0;
+			static VkClearAttachment clearAttachment = {};
+			VkClearValue clearVal = {};
+			clearAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			clearAttachment.clearValue = clearVal;
+			clearAttachment.colorAttachment = 0;
+
+			uint32 uWidth, uHeight;
+			pDisplay->GetActualDimensions(uWidth, uHeight, false);
+			VkClearRect clearRect = {};
+			clearRect.layerCount = 1;
+			clearRect.rect.offset = { 0, 0 };
+			clearRect.rect.extent = { uWidth, uHeight };
+
+			vkCmdClearAttachments(m_cmdBuff, 1, &clearAttachment, 1, &clearRect);
+
+		}
 	}
 
 	void GFXContext_ps::SetPipelineState(PipelineStateHndl& hndl, PipelineStateHndl& prev)
@@ -222,6 +269,27 @@ namespace usg {
 	void GFXContext_ps::SetBlendColor(const Color& blendColor)
 	{
 		vkCmdSetBlendConstants(m_cmdBuff, blendColor.m_rgba);
+	}
+
+	void GFXContext_ps::BeginGPUTag(const char* szName, const Color& color)
+	{
+		if (m_pfnCmdDebugMarkerBegin)
+		{
+			VkDebugMarkerMarkerInfoEXT markerInfo = {};
+			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+			memcpy(markerInfo.color, color.rgba(), sizeof(float) * 4);
+			markerInfo.pMarkerName = szName;
+			m_pfnCmdDebugMarkerBegin(m_cmdBuff, &markerInfo);
+		}
+	}
+
+	void GFXContext_ps::EndGPUTag()
+	{
+		if (m_pfnCmdDebugMarkerEnd)
+		{
+			m_pfnCmdDebugMarkerEnd(m_cmdBuff);
+
+		}
 	}
 
 	void GFXContext_ps::SetScissorRect(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds)
@@ -286,6 +354,30 @@ namespace usg {
 		{
 			vkCmdClearAttachments(m_cmdBuff, clearCount, clearAttachments, 1, &clearRect);
 		}
+	}
+
+
+	void GFXContext_ps::ClearImage(const TextureHndl& texture, const Color& col)
+	{
+		VkClearColorValue clear;
+		MemClear(&clear, sizeof(VkClearColorValue));
+
+		for (int i = 0; i < 4; i++)
+		{
+			// TODO: Only set the relevant one
+			clear.float32[i] = col.rgba()[i];
+			clear.int32[i] = (sint32)col.rgba()[i];
+			clear.uint32[i] = (uint32)col.rgba()[i];
+		}
+
+		VkImageSubresourceRange subRes = {};
+		subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subRes.layerCount = VK_REMAINING_ARRAY_LAYERS;
+		subRes.levelCount = VK_REMAINING_MIP_LEVELS;
+
+		SetImageLayout(texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subRes);
+		vkCmdClearColorImage(m_cmdBuff, texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clear, 1, &subRes);
+		SetImageLayout(texture->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, subRes);
 	}
 
 

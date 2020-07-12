@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_CUSTOM_EFFECT_RUNTIME_H_
 #define _USG_GRAPHICS_SCENE_CUSTOM_EFFECT_RUNTIME_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceDecl.h"
 
 namespace usg{
@@ -18,6 +18,7 @@ public:
 	CustomEffectRuntime();
 	~CustomEffectRuntime();
     
+	void Init(GFXDevice* pDevice, const CustomEffectResHndl& hndl);
 	void Init(GFXDevice* pDevice, const char* szName);
 	void Init(GFXDevice* pDevice, const CustomEffectRuntime* pCopy);
 	void CleanUp(GFXDevice* pDevice);

@@ -68,7 +68,10 @@ namespace usg {
 	void RenderTarget::Resize(usg::GFXDevice* pDevice)
 	{
 		m_platform.Resize(pDevice, m_uTargetCount, m_pColorBuffer, m_pDepth);
-		m_platform.RenderPassUpdated(pDevice, m_renderPass);
+		if(m_renderPass.IsValid())
+		{
+			m_platform.RenderPassUpdated(pDevice, m_renderPass);
+		}
 	}
 
 

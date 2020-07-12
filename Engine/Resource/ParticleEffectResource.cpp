@@ -6,7 +6,8 @@
 
 namespace usg{
 
-    ParticleEffectResource::ParticleEffectResource()
+	ParticleEffectResource::ParticleEffectResource() :
+		ResourceBase(StaticResType)
     {
     }
     ParticleEffectResource::~ParticleEffectResource()

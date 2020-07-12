@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_CORE_CONTAINERS_LIST_H_
 #define	_USG_CORE_CONTAINERS_LIST_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 #include "Engine/Memory/MemUtil.h"
 

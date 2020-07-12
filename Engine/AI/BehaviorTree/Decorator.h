@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_DECORATOR__
 #define __USG_AI_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Behavior.h"
 
 namespace usg

@@ -16,7 +16,7 @@ namespace usg
 {
 
 
-#define FADE_SPEED (1.0f/4.0f)		// 4 frames
+#define FADE_SPEED (1.0f/8.0f)		// 8 frames
 
 	static float sTime = 1.0f;
 	static int sFadeType = 0;
@@ -51,9 +51,12 @@ namespace usg
 			if (!m_bWipeLower && !upper)
 				return;
 
-			m_Material.Apply(pContext);
+			pContext->BeginGPUTag("Fader");
+			pContext->SetPipelineState(m_pipelineState);
+			pContext->SetDescriptorSet(&m_descriptorSet, 0);
 			pContext->SetVertexBuffer(&m_VertexBuffer);
 			pContext->DrawImmediate(6);
+			pContext->EndGPUTag();
 		}
 	}
 
@@ -74,10 +77,10 @@ namespace usg
 		pipeline.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
 		pipeline.uInputBindingCount = 1;
 
+		// Note fader assumes it is before/after any global drawing
 		usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-		pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-		pipeline.layout.descriptorSets[1] = matDescriptors;
-		pipeline.layout.uDescriptorSetCount = 2;
+		pipeline.layout.descriptorSets[0] = matDescriptors;
+		pipeline.layout.uDescriptorSetCount = 1;
 
 		usg::DepthStencilStateDecl& depth = pipeline.depthState;
 		depth.bDepthEnable = false;
@@ -94,36 +97,37 @@ namespace usg
 		alpha.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
 		pipeline.pEffect = usg::ResourceMgr::Inst()->GetEffect(pDevice, "PostProcess.Fader");
-		m_Material.Init(pDevice, pDevice->GetPipelineState(renderPass, pipeline), pDevice->GetDescriptorSetLayout(g_descriptorDecl));
+		m_pipelineState = pDevice->GetPipelineState(renderPass, pipeline);
+		m_descriptorSet.Init(pDevice, pDevice->GetDescriptorSetLayout(g_descriptorDecl));
 
 
 		usg::PositionVertex verts[6];
 
 
-		SetVertex(0, usg::Vector3f(-1.0f, -1.0f, 0.0f), verts[0]);
-		SetVertex(1, usg::Vector3f(1.0f, 1.0f, 0.0f), verts[1]);
-		SetVertex(2, usg::Vector3f(-1.0f, 1.0f, 0.0f), verts[2]);
+		SetVertex(0, usg::Vector3f(-1.0f, -1.0f, 0.5f), verts[0]);
+		SetVertex(1, usg::Vector3f(1.0f, 1.0f, 0.5f), verts[1]);
+		SetVertex(2, usg::Vector3f(-1.0f, 1.0f, 0.5f), verts[2]);
 
-		SetVertex(3, usg::Vector3f(1.0f, 1.0f, 0.0f), verts[3]);
-		SetVertex(4, usg::Vector3f(1.0f, -1.0f, 0.0f), verts[4]);
-		SetVertex(5, usg::Vector3f(-1.0f, -1.0f, 0.0f), verts[5]);
+		SetVertex(3, usg::Vector3f(1.0f, 1.0f, 0.5f), verts[3]);
+		SetVertex(4, usg::Vector3f(1.0f, -1.0f, 0.5f), verts[4]);
+		SetVertex(5, usg::Vector3f(-1.0f, -1.0f, 0.5f), verts[5]);
 
 		usg::Color overrideColor(0.0f, 0.0f, 0.0f, sfAlpha);
 		m_constants.Init(pDevice, g_fadeCBDecl);
-		m_Material.SetConstantSet(usg::SHADER_CONSTANT_MATERIAL, &m_constants);
+		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 		FadeConstants* pConst = m_constants.Lock<FadeConstants>();
 		pConst->fFade = sfAlpha;
 		m_constants.Unlock();
 		m_VertexBuffer.Init(pDevice, verts, sizeof(usg::PositionVertex), 6, "Fader");
 		m_constants.UpdateData(pDevice);
-		m_Material.UpdateDescriptors(pDevice);
+		m_descriptorSet.UpdateDescriptors(pDevice);
 	}
 
 	void Fader::CleanUpDeviceData(usg::GFXDevice* pDevice)
 	{
 		m_VertexBuffer.CleanUp(pDevice);
 		m_constants.CleanUp(pDevice);
-		m_Material.Cleanup(pDevice);
+		m_descriptorSet.CleanUp(pDevice);
 	}
 
 
@@ -174,17 +178,27 @@ namespace usg
 			}
 			else
 			{
-				sfAlpha = (usg::Math::Min((2.0f - (sTime*2.0f)), 1.0f));
+				if(sTime > 0.5f)
+				{
+					sfAlpha = sTime * 2.0f;
+				}
+				else
+				{
+					sfAlpha = 1.0f - ((sTime-0.5f)*2.f);
+				}
 			}
 
 			break;
 		}
 
-		FadeConstants* pConst = m_constants.Lock<FadeConstants>();
-		pConst->fFade = sfAlpha;
-		m_constants.Unlock();
-		m_constants.UpdateData(pDevice);
-		m_Material.UpdateDescriptors(pDevice);
+		if(sfAlpha > 0.0f)
+		{
+			FadeConstants* pConst = m_constants.Lock<FadeConstants>();
+			pConst->fFade = sfAlpha;
+			m_constants.Unlock();
+			m_constants.UpdateData(pDevice);
+			m_descriptorSet.UpdateDescriptors(pDevice);
+		}
 	}
 
 

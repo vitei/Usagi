@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_EMITTER_RESOURCE_H_
 #define _USG_PARTICLE_EMITTER_RESOURCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemHeap.h"
 #include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
@@ -30,6 +30,8 @@ public:
 	DescriptorSetLayoutHndl GetDescriptorLayout() const { return m_descriptorLayout;  }
 
 	static EffectHndl GetEffect(GFXDevice* pDevice, ::usg::particles::ParticleType eParticleType);
+
+	const static ResourceType StaticResType = ResourceType::PARTICLE_EMITTER;
 
 private:
 	void Load(GFXDevice* pDevice);

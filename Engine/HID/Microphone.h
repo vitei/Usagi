@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_MICROPHONE__
 #define __USG_HID_MICROPHONE__
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 #include OS_HEADER(Engine/HID, Microphone_ps.h)
 

@@ -93,6 +93,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSet& copy)
 			switch (pDecl->eDescriptorType)
 			{
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 			{
 				m_pData[uDataIndex].texData.tex = copy.m_pData[uDataIndex].texData.tex;
 				m_pData[uDataIndex].texData.sampler = copy.m_pData[uDataIndex].texData.sampler;
@@ -131,6 +132,7 @@ void DescriptorSet::UpdateTimeTags()
 			break;
 		}
 		case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+		case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 		{
 			if (m_pData[i].texData.tex.get() != nullptr)
 			{
@@ -159,6 +161,7 @@ bool DescriptorSet::IsUptoDate() const
 				break;
 			}
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 			{
 				if (!m_pData[i].texData.tex.get() || (m_pData[i].texData.tex->GetUpdateIdx() != m_pData[i].uLastUpdateIdx) )
 				{
@@ -173,7 +176,23 @@ bool DescriptorSet::IsUptoDate() const
 	return true;
 }
 
-void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
+void DescriptorSet::SetImage(uint32 uLayoutIndex, const TextureHndl& pTexture, const ImageViewDef& imageView)
+{
+	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
+	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
+
+	uint32 uResourceIndex = m_pLayoutDesc->GetResourceIndex(uLayoutIndex, 0);
+	ASSERT(pDecl->eDescriptorType == DESCRIPTOR_TYPE_STORAGE_IMAGE);
+	ASSERT(pTexture.get() != nullptr);
+
+	// I feel so dirty doing this but we know for a fact that we created this pointer and it saves a lot of extra hassle to get around it
+	m_pData[uResourceIndex].texData.tex = pTexture;
+	m_pData[uResourceIndex].texData.sampler = SamplerHndl();
+	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
+	m_pData[uResourceIndex].texData.imageView = imageView;
+}
+
+void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex, const ImageViewDef& imageView)
 {
 	ASSERT(uLayoutIndex < m_pLayoutDesc->GetDeclarationCount());
 	const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(uLayoutIndex);
@@ -186,6 +205,7 @@ void DescriptorSet::SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& 
 	m_pData[uResourceIndex].texData.tex = pTexture;
 	m_pData[uResourceIndex].texData.sampler = sampler;
 	m_pData[uResourceIndex].uLastUpdateIdx = USG_INVALID_ID;
+	m_pData[uResourceIndex].texData.imageView = imageView;
 }
 
 void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuffer, uint32 uSubIndex)
@@ -203,14 +223,29 @@ void DescriptorSet::SetConstantSet(uint32 uLayoutIndex, const ConstantSet* pBuff
 }
 
 
-void DescriptorSet::SetImageSamplerPairAtBinding(uint32 uBinding, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex)
+void DescriptorSet::SetImageAtBinding(uint32 uBinding, const TextureHndl& pTexture, const ImageViewDef& imageView)
+{
+	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
+	{
+		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
+		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_STORAGE_IMAGE && uBinding == pDecl->uBinding)
+		{
+			SetImage(i, pTexture, imageView);
+			return;
+		}
+	}
+	ASSERT(false);
+}
+
+
+void DescriptorSet::SetImageSamplerPairAtBinding(uint32 uBinding, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex, const ImageViewDef& imageView)
 {
 	for (uint32 i = 0; i < m_pLayoutDesc->GetDeclarationCount(); i++)
 	{
 		const DescriptorDeclaration* pDecl = m_pLayoutDesc->GetDeclaration(i);
 		if (pDecl->eDescriptorType == DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && uBinding == pDecl->uBinding)
 		{
-			SetImageSamplerPair(i, pTexture, sampler, uSubIndex);
+			SetImageSamplerPair(i, pTexture, sampler, uSubIndex, imageView);
 			return;
 		}
 	}

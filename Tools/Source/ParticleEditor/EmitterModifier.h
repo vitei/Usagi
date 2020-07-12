@@ -1,11 +1,12 @@
 #ifndef _USG_PARTICLE_EDITOR_EMITTER_MODIFIER_H_
 #define _USG_PARTICLE_EDITOR_EMITTER_MODIFIER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/GUI/GuiWindow.h"
+#include "Engine/GUI/GuiTab.h"
 #include "Engine/GUI/GuiItems.h"
 
 namespace usg
@@ -41,6 +42,11 @@ public:
 	bool CompareUnitVector(usg::Vector3f& vInOut, const usg::Vector3f newValue, const usg::Vector3f safetyValue);
 
 	void AddToWindow(usg::GUIWindow& parent)
+	{
+		parent.AddItem(&m_window);
+	}
+
+	void AddToTab(usg::GUITab& parent)
 	{
 		parent.AddItem(&m_window);
 	}

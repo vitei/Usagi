@@ -29,10 +29,7 @@ message Bone {
 	required string name = 1 [(nanopb).max_size = 40];
 	required string parentName = 2 [(nanopb).max_size = 40];
 	required uint32 parentIndex = 3 [default = 0xffffffff];
-	required uint32 isSegmentScaleCompensate = 4 [default = 0];
-	required uint32 isCompressible = 5 [default = 0];
 	required uint32 isNeededRendering = 6 [default = 0];
-	required uint32 hasSkinningMatrix = 7 [default = 0];
 	required uint32 billboardMode = 8 [default = 0];
 
 	required Vector3f scale = 9;

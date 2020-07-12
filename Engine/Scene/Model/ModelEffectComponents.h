@@ -5,7 +5,7 @@
 #ifndef __FADE_RUNTIEM_COMPONENT__
 #define __FADE_RUNTIEM_COMPONENT__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 
 namespace usg

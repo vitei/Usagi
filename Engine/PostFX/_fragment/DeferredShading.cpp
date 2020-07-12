@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Lights/PointLight.h"
 #include "Engine/Graphics/Lights/SpotLight.h"
 #include "Engine/Graphics/Lights/ProjectionLight.h"
+#include "Engine/Scene/LightingContext.h"
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -333,7 +334,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	// Set the textures for the G buffer to be read from
 	pContext->SetDescriptorSet(&m_readDescriptors, 1);
 
-	pContext->BeginGPUTag("DirLights");
+	pContext->BeginGPUTag("DirLights", Color::Green);
 	//if(uLightCount > 0)
 	{
 		// FIXME: We need to know if we need a shadow or not!!!
@@ -387,7 +388,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
  
  	// FIXME: All of this can be merged by moving the geometry and plane classification into the lights themselves
  	// Then we can iterate through all volume lights at once
-	pContext->BeginGPUTag("PointLights");
+	pContext->BeginGPUTag("PointLights", Color::Green);
 	mesh.pVB = &m_sphereVB;
 	mesh.pIB = &m_sphereIB;
 	
@@ -413,7 +414,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	}
 	pContext->EndGPUTag();
 
-	pContext->BeginGPUTag("SpotLights");
+	pContext->BeginGPUTag("SpotLights", Color::Green);
 	mesh.pVB = &m_coneVB;
 	mesh.pIB = &m_coneIB;
 
@@ -455,7 +456,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 {
 	ViewContext* pSceneCtxt = m_pSys->GetActiveViewContext();
-	pContext->BeginGPUTag("ProjLights");
+	pContext->BeginGPUTag("ProjLights", Color::Green);
 	MeshData 		mesh;
 	mesh.pVB = &m_frustumMesh;
 	mesh.pIB = &m_frustumIB;

@@ -170,6 +170,42 @@ void GFXContext::SetRenderTargetLayer(RenderTarget* pTarget, uint32 uLayer)
 	}
 }
 
+void GFXContext::SetRenderTargetMip(RenderTarget* pTarget, uint32 uMip)
+{
+	bool bHadDS = false;
+	if (m_pActiveRT)
+	{
+		m_platform.EndRTDraw(m_pActiveRT);
+		bHadDS = m_pActiveRT->GetDepthStencilBuffer() != NULL;
+		m_pActiveRT = NULL;
+	}
+
+	if (pTarget)
+	{
+		m_activeTargetBounds.x = 0;
+		m_activeTargetBounds.y = 0;
+		m_activeTargetBounds.width = pTarget->GetWidth();
+		m_activeTargetBounds.height = pTarget->GetHeight();
+
+		if (pTarget != m_pActiveRT)
+		{
+			bool bHasDS = pTarget->GetDepthStencilBuffer() != NULL;
+
+			m_platform.SetRenderTargetMip(pTarget, uMip);
+			m_pActiveRT = pTarget;
+
+
+			uint32 uRTMask = pTarget->GetTargetMask();
+			if (uRTMask != m_uRTMask)
+			{
+				m_uRTMask = uRTMask;
+			}
+		}
+
+		ApplyViewport(pTarget->GetViewport());
+	}
+}
+
 void GFXContext::End()
 {
 	if (m_pActiveRT || m_bRenderToDisplay)
@@ -218,7 +254,7 @@ void GFXContext::TransferToHMD(RenderTarget* pTarget, IHeadMountedDisplay* pDisp
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("Transfer");
+	BeginGPUTag("Transfer", Color::Green);
 	m_platform.TransferToHMD(pTarget, pDisplay, bLeftEye);
 	EndGPUTag();
 }
@@ -231,7 +267,7 @@ void GFXContext::Transfer(RenderTarget* pTarget, Display* pDisplay)
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("Transfer");
+	BeginGPUTag("Transfer", Color::Green);
 	m_platform.Transfer(pTarget, pDisplay);
 	EndGPUTag();
 }
@@ -244,14 +280,14 @@ void GFXContext::TransferRect(RenderTarget* pTarget, Display* pDisplay, const GF
 		m_platform.EndRTDraw(m_pActiveRT);
 		m_pActiveRT = nullptr;
 	}
-	BeginGPUTag("TransferRect");
+	BeginGPUTag("TransferRect", Color::Green);
 	m_platform.TransferRect(pTarget, pDisplay, srcBounds, dstBounds);
 	EndGPUTag();
 }
 
 void GFXContext::TransferSpectatorDisplay(IHeadMountedDisplay* pHMD, Display* pDisplay)
 {
-	BeginGPUTag("TransferSpectatorDisplay");
+	BeginGPUTag("TransferSpectatorDisplay", Color::Green);
 	m_platform.TransferSpectatorDisplay(pHMD, pDisplay);
 	EndGPUTag();
 }

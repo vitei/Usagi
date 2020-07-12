@@ -41,6 +41,7 @@ namespace usg {
 			{
 				pLayout->GetPlatform().FreeDescriptorSet(pDevice, m_descSet[i]);
 			}
+			m_bValid = false;
 		}
 	}
 
@@ -51,7 +52,7 @@ namespace usg {
 			m_uActiveSet = (m_uActiveSet + 1) % m_uBuffers;
 		}
 		vector<VkDescriptorImageInfo> images;
-		images.reserve(pLayout->GetNumberOfType(DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER));
+		images.reserve(pLayout->GetNumberOfType(DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) + pLayout->GetNumberOfType(DESCRIPTOR_TYPE_STORAGE_IMAGE));
 
 		vector<VkWriteDescriptorSet> writes;
 		writes.resize(pLayout->GetDeclarationCount());
@@ -93,8 +94,40 @@ namespace usg {
 				{
 					VkDescriptorImageInfo image = {};
 					image.sampler = pData[j].texData.sampler.GetContents()->GetSampler();
-					image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					if (pData[j].texData.imageView.IsDefault())
+					{
+						image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					}
+					else
+					{
+						const Texture_ps& texPlat = pData[j].texData.tex->GetPlatform();
+						image.imageView = texPlat.GetImageView(pDevice, pData[j].texData.imageView);
+					}
 					image.imageLayout = pData[j].texData.tex->GetPlatform().GetImageLayout();
+					images.push_back(image);
+				}
+
+				writes[i].pImageInfo = &images[uIndex];
+				break;
+			}
+			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			{
+				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				writes[i].dstBinding += SAMPLER_OFFSET;	// Share the offsets of standard samplers
+				size_t uIndex = images.size();
+				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				{
+					VkDescriptorImageInfo image = {};
+					if (pData[j].texData.imageView.IsDefault())
+					{
+						image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
+					}
+					else
+					{
+						const Texture_ps& texPlat = pData[j].texData.tex->GetPlatform();
+						image.imageView = texPlat.GetImageView(pDevice, pData[j].texData.imageView);
+					}
+					image.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 					images.push_back(image);
 				}
 

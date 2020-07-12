@@ -13,13 +13,13 @@ namespace usg{
 
 	}
 
-	void SoundFade::Start(PLAY_STATE eTargetState, float fFrames, bool bFadeIn)
+	void SoundFade::Start(PLAY_STATE eTargetState, float fFrames)
 	{
 		ASSERT(fFrames > 0.0f);
 		m_eTargetState = eTargetState;
 		m_fPerFrameFade = 1.0f/fFrames;
 		m_bActive = true;
-		m_bFadeIn = bFadeIn;
+		m_bFadeIn = eTargetState == PLAY_STATE_PLAYING;
 	}
 
 	bool SoundFade::Update(float fElapsed)
@@ -53,10 +53,10 @@ namespace usg{
 		return false;
 	}
 
-	void SoundFade::Reset()
+	void SoundFade::Reset(float fStartVolume)
 	{
 		m_fPerFrameFade = 0.0f;
-		m_fCurrent = 1.0f;
+		m_fCurrent = fStartVolume;
 		m_eTargetState = PLAY_STATE_NONE;
 		m_bActive = false;
 	}

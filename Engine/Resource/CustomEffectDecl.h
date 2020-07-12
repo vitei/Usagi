@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_RESOURCE_CUSTOM_EFFECT_DECL_H_
 #define _USG_RESOURCE_CUSTOM_EFFECT_DECL_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {
@@ -30,15 +30,18 @@ namespace usg
 		{
 			char 	hint[32];
 			char    texName[64];
+			uint32	eTexType;
 			uint32	uIndex;
 		};
 
 		struct Attribute
 		{
+			char	name[32];
 			char	hint[32];
 			uint8	defaultData[64];
 			uint32 	uIndex;
 			uint32	eConstantType;
+			uint32	uCount;
 		};
 
 		struct Constant
@@ -57,6 +60,8 @@ namespace usg
 			uint32	uDeclOffset;
 			uint32	uDataOffset;
 			uint32	uDataSize;
+			uint32	uShaderSets;
+			uint32  uBinding;
 		};
 
 	}

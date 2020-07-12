@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_RANDOM_POSITION_BEHAVIOR__
 #define __USG_AI_RANDOM_POSITION_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"

@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_CORE_CONTAINERS_RESOURCE_POINTER_H_
 #define	_USG_CORE_CONTAINERS_RESOURCE_POINTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/ArrayPool.h"
 
 
@@ -15,7 +15,7 @@ class ResourcePointer
 {
 public:
 	ResourcePointer();
-	~ResourcePointer();
+	virtual ~ResourcePointer();
 
 	ResourcePointer(PointerType* pData);
 
@@ -41,8 +41,6 @@ public:
 	uint32 use_count() const;
 
 private:
-	void init(PointerType* pType);
-	void copy(const ResourcePointer<PointerType>& copyData);
 	void removeRef();
 	void destroy(PointerType* pType);
 	void replacePointer(PointerType* pType, bool bPrev, bool bNext);
@@ -52,6 +50,10 @@ private:
 
 	ResourcePointer*	m_pNext;
 	ResourcePointer*	m_pPrev;
+
+protected:
+	void init(PointerType* pType);
+	void copy(const ResourcePointer<PointerType>& copyData);
 
 	PointerType*	m_pPointer;
 };
@@ -132,6 +134,8 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
 		pPtr = pPrev;
 	}
 
+	m_pPrev = nullptr;
+	m_pNext = nullptr;
 	m_pPointer = nullptr;
 }
 

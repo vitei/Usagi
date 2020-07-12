@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Physics/PhysX.h"
 
 namespace usg

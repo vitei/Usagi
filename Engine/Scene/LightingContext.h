@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_LIGHT_SCENE_LIGHTING_H_
 #define _USG_GRAPHICS_LIGHT_SCENE_LIGHTING_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Graphics/Lights/DirLight.h"
 #include "Engine/Graphics/Lights/PointLight.h"

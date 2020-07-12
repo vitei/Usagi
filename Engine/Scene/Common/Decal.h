@@ -5,7 +5,7 @@
 
 #ifndef USG_ENGINE_SCENE_DECALS
 #define USG_ENGINE_SCENE_DECALS
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"

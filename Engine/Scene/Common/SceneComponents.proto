@@ -3,13 +3,14 @@
 ****************************************************************************/
 import 'nanopb.proto';
 import "Engine/Maths/Maths.proto";
+import 'Engine/Graphics/RenderConsts.proto';
 import "Engine/Graphics/Lights/LightSpec.proto";
 
 package usg.Components;
 
 option (nanopb_fileopt).include = "Engine/Scene/Common/SceneComponents.h";
 
-message SceneComponent
+message SceneComponent 
 {
 	option (nanopb_msgopt).has_onactivate = true;
 	option (nanopb_msgopt).has_ondeactivate = true;
@@ -58,4 +59,32 @@ message ModelMgrComponent
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required float fDummy = 1 [default=1.0];
+}
+
+message CameraComponent
+{
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required float fFOV = 1 [default = 90.0];
+	required float fAspectRatio = 2 [default = 1.7777];
+	required float fNearPlaneDist = 3 [default = 0.1];
+	required float fFarPlaneDist = 4 [default = 1000.0];
+	required uint32 uRenderMask = 5 [default = 0x0FFFFF7F];
+	required uint32 uCamId = 6 [default = 0];
+	required bool bForceSwitch = 7 [default = false];
+}
+
+message HMDCameraComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required float fNearPlaneDist = 1 [default = 0.1];
+	required float fFarPlaneDist = 2 [default = 1000.0];
+	required uint32 uRenderMask = 3 [default = 0x0FFFFF7F];
+	required uint32 uCamId = 4 [default = 0];
 }

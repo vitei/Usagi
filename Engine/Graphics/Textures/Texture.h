@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_TEXTURE_H
 #define _USG_GRAPHICS_TEXTURE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include API_HEADER(Engine/Graphics/Textures, texture_ps.h)
 
@@ -23,7 +23,8 @@ public:
 	void UpdateTextureID();
 
 	// TODO: Have create raw pass a texture format. For now we just assume RGBA8
-	void CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels);
+	void CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels, bool bDynamic = false);
+	void SetRawData(GFXDevice* pDevice, GFXContext* pContext, void* pData) { m_platform.SetRawData(pDevice, pContext, pData); }
 	static bool FileExists(const char* szFileName) { return Texture_ps::FileExists(szFileName); }
 
 	void CleanUp(GFXDevice* pDevice);
@@ -37,18 +38,25 @@ public:
 	uint32 GetHeight() const;
 
 #ifdef DEBUG_BUILD
-	uint32 GetSizeInMemory() const { return m_platform.GetSizeInMemory(); }
+	uint32 GetSizeInMemory() const override { return m_platform.GetSizeInMemory(); }
 #endif
 
 	// For keeping track of resizing/ recreation
 	uint32 GetUpdateIdx() const { return m_platform.GetUpdateIdx(); }
 
+	ImageViewHndl GetImageViewHandle(GFXDevice* pDevice, const ImageViewDef& def) { return m_platform.GetImageView(pDevice, def); }
+	ImageViewHndl GetImageViewHandle() { return m_platform.GetImageView(); }
+
+	const static ResourceType StaticResType = ResourceType::TEXTURE;
+
 	enum 
 	{
 		MAX_TEXTUTRE_IDS = 4096
 	};
+
 private:
-	PRIVATIZE_COPY(Texture)
+	PRIVATIZE_RES_COPY(Texture)
+
 	static bool m_sbTexIds[MAX_TEXTUTRE_IDS];
 	Texture_ps m_platform;
 	U8String   m_name;
@@ -56,9 +64,9 @@ private:
 };
 
 // FIXME: Remove this when we only have one method of loading
-inline void Texture::CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels)
+inline void Texture::CreateRaw(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, void* pPixels, bool bDynamic)
 {
-	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels);
+	m_platform.Init(pDevice, eFormat, uWidth, uHeight, 1, pPixels, uHeight == 1 ? TD_TEXTURE1D : TD_TEXTURE2D, bDynamic ? TU_FLAG_SHADER_READ | TU_FLAG_TRANSFER_DST : TU_FLAG_SHADER_READ);
 	SetReady(true);
 }
 

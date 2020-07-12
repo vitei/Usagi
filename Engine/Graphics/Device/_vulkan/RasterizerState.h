@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_PC_RASTERIZERSTATE_H_
 #define _USG_GRAPHICS_DEVICE_PC_RASTERIZERSTATE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/RenderState.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
@@ -19,7 +19,8 @@ public:
 	const VkPipelineRasterizationStateCreateInfo& GetCreateInfo() { return m_createInfo; }
 
 private:
-	VkPipelineRasterizationStateCreateInfo m_createInfo;
+	VkPipelineRasterizationStateCreateInfo			m_createInfo;
+	VkPipelineRasterizationLineStateCreateInfoEXT	m_lineState;
 };
 
 }

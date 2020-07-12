@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_COLORBUFFER_H
 #define _USG_GRAPHICS_PC_COLORBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include <vulkan/vulkan.h>
 
@@ -27,15 +27,17 @@ public:
 	void SetActive(bool bActive) { }
 	void Resolve(GFXContext* pContext, bool bTex) {}
 
-	VkImageView GetLayerView(uint32 uLayer) { return m_pLayerViews[uLayer]; }
+	VkImageView GetViewEx(uint32 uLayer, uint32 uMip) { return m_pExtraViews[ (uLayer*m_uMips) + uMip ]; }
 
 private:
-	void InitLayerViews(GFXDevice* pDevice);
-	void FreeLayerViews(GFXDevice* pDevice);
+	void InitExViews(GFXDevice* pDevice);
+	void FreeExViews(GFXDevice* pDevice);
 
 	TextureHndl				m_texHndl;
 	Texture					m_texture;
-	VkImageView*			m_pLayerViews;
+
+	VkImageView*			m_pExtraViews;
+	uint32					m_uMips;
 };
 
 }

@@ -18,8 +18,8 @@ SoundActor::~SoundActor()
 
 void SoundActor::Init()
 {
-	m_position = V3F_ZERO;
-	m_vVelocity = V3F_ZERO;
+	m_position = Vector3f::ZERO;
+	m_vVelocity = Vector3f::ZERO;
 	m_platform3D.Init();
 	m_platform3D.SetPosition(m_position);
 }

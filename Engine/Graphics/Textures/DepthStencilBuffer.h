@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_DEPTH_STENCIL_BUFFER_H
 #define _USG_GRAPHICS_DEPTH_STENCIL_BUFFER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include API_HEADER(Engine/Graphics/Textures, DepthStencilBuffer_ps.h)

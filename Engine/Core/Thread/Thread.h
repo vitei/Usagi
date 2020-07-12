@@ -4,7 +4,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_THREAD_THREAD_H_
 #define	_USG_ENGINE_THREAD_THREAD_H_
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Core/Thread, Thread_ps.h)
 
 namespace usg
@@ -29,8 +29,8 @@ public:
 	void StartThread(uint32 uStackSize = Thread_ps::DEFAULT_THREAD_STACK_SIZE, int uPriority = Thread_ps::DEFAULT_THREAD_PRIORITY)
 	{
 		ASSERT( m_thread.IsValid() == false );
-		m_thread.StartThread( Thread::CallFromThread, this, uStackSize, uPriority );
 		m_bExec = true;
+		m_thread.StartThread( Thread::CallFromThread, this, uStackSize, uPriority );
 	}
 	
 
@@ -41,7 +41,7 @@ public:
 	
 	void JoinThread()
 	{
-		if( m_thread.IsValid() && !m_thread.IsAlive() )
+		if( m_thread.IsValid() /*&& !m_thread.IsAlive()*/ )
 		{
 			m_thread.Join();
 			m_thread.Finalize();
@@ -83,6 +83,8 @@ public:
 	static void Sleep( uint32 uMilliseconds ) { Thread_ps::Sleep( uMilliseconds ); }
 	
 protected:
+	bool		ExecEnabled() const { return m_bExec; }
+
 	uint32		m_uDelay;	// Hide a stutter
 
 private:

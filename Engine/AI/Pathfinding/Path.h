@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_PATHFINDING_PATH__
 #define __USG_AI_PATHFINDING_PATH__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector2f.h"

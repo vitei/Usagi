@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_FILE_H_
 #define _USG_FILE_H_
-#include "Engine/Common/Common.h"
+#include "Engine/Core/stl/vector.h"
 
 namespace usg{
 
@@ -41,6 +41,28 @@ enum FILE_STATUS
 	FILE_STATUS_NOT_FORMATTED,
 	FILE_STATUS_NO_FREE_SPACE,
 	FILE_STATUS_INVALID
+};
+
+
+struct FileOpenPath
+{
+	struct Filter
+	{
+		const char* szDisplayName;
+		const char* szExtPattern;
+	};
+	const char* szWindowTitle = nullptr;
+	const char* szDefaultExt = nullptr;
+	const char* szOpenDir = nullptr;
+	Filter* pFilters = nullptr;
+	uint32  uFilterCount = 0;
+	bool bAllowMulti = false;
+};
+
+struct FilePathResult
+{
+	char szRelativePath[260];
+	char szPath[260];
 };
 
 }
@@ -83,6 +105,8 @@ public:
 
 
 	static FILE_STATUS FileStatus(const char* szFileName, const FILE_TYPE eFileType = FILE_TYPE_RESOURCE) { return File_ps::FileStatus(szFileName, eFileType); }
+	static bool UserFileOpenPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result) { return File_ps::UserFileOpenPath(pathIn, result); }
+	static bool UserFileSavePath(FileOpenPath& pathInOut, FilePathResult& result) { return File_ps::UserFileSavePath(pathInOut, result); }
 	static bool CreateFileDirectory(const char* szDirName, FILE_TYPE eType = FILE_TYPE_SAVE_DATA)
 	{
 		ASSERT(eType!= FILE_TYPE_RESOURCE);
@@ -115,8 +139,7 @@ public:
 	static void Unmount(FILE_TYPE eMode, bool bSave) { File_ps::Unmount(eMode, bSave); }
 
 private:
-	File(const File& File) {};
-	const File& operator=(const File& src);
+	PRIVATIZE_COPY(File)
 
 	static FILE_INIT_RESULT m_sInitResult;
 

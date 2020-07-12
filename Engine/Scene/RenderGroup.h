@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_RENDER_GROUP_H_
 #define _USG_GRAPHICS_SCENE_RENDER_GROUP_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Scene/TransformNode.h"

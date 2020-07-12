@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_CONTEXT_INTERFACE_NAVIGATION__
 #define __USG_AI_BEHAVIOR_TREE_CONTEXT_INTERFACE_NAVIGATION__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/NavigationWrapper.h"
 namespace usg
 {

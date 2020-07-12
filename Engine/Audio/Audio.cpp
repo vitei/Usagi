@@ -92,6 +92,29 @@ Audio::~Audio()
 	m_archives.clear();
 }
 
+void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount)
+{
+#if !DISABLE_SOUND
+
+	Archive archive;
+	str::Copy(archive.name, pszArchiveName, USG_MAX_PATH);
+
+	archive.ppSoundFiles = vnew(ALLOC_AUDIO)SoundFile*[uCount];
+
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		const SoundFileDef* pDef = &pSounds[i].def;
+		archive.ppSoundFiles[i] = m_platform.CreateSoundFile(pDef);
+		ASSERT(archive.ppSoundFiles[i] != NULL);
+		archive.ppSoundFiles[i]->InitRaw(pDef, pSounds[i].pRawData, pSounds[i].rawDataSize, this);
+		ASSERT(m_soundHashes[pDef->crc] == NULL);
+		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
+	}
+#endif
+	archive.uFiles = uCount;
+	m_archives.push_back(archive);
+}
+
 void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName)
 {
 #if !DISABLE_SOUND
@@ -116,7 +139,7 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
 #endif
-
+	archive.uFiles = uCount;
 	m_archives.push_back(archive);
 }
 
@@ -228,7 +251,7 @@ void Audio::Update(float fElapsed)
 			SetMixParams(pSound->object.GetSoundActor().GetPosition(), pSound->object.GetSoundActor().GetVelocity(), &pSound->object );
 		}
 
-		if ( !(pSound->object.GetRequestedPlayState() == PLAY_STATE_PLAYING) || !(m_bPaused[pSound->object.GetSoundFile()->GetAudioType()]))
+		if ( !(pSound->object.GetRequestedPlayState() == PLAY_STATE_PLAYING) || !(m_bPaused[pSound->object.GetAudioType()]))
 		{
 			pSound->object.Update(fElapsed);
 			pSound->object.ClearRequestedPlayState();
@@ -266,6 +289,26 @@ float Audio::GetVolume(uint32 uSoundId)
 	}
 	//ASSERT(false);
 	return 0.0f;
+}
+
+SoundHandle Audio::PrepareCustomStream(const StreamingSoundDef& def, float fVolume)
+{
+#if !DISABLE_SOUND	
+	SoundActorHandle emptyHndl;
+	SoundHandle handle;
+
+	handle = CreateSound(emptyHndl);
+	if (handle.IsValid())
+	{
+		//DEBUG_PRINT("[Audio::PrepareSound] %s\n", m_ppSoundFiles[uSoundId]->GetName().CStr());
+		handle.GetObject()->SetCustomData(def);
+		handle.SetVolume(fVolume);
+	}
+	return handle;
+
+#else
+	return SoundHandle();
+#endif
 }
 
 SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
@@ -408,7 +451,7 @@ void Audio::StopAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType)
+		if ((*it)->object.GetAudioType() == eType)
 		{
 			(*it)->hndl.Stop(fTime);
 		}
@@ -420,7 +463,7 @@ void Audio::PauseAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType)
+		if ((*it)->object.GetAudioType() == eType)
 		{
 			(*it)->hndl.Pause(fTime);
 		}
@@ -432,7 +475,7 @@ void Audio::ResumeAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		if ((*it)->object.GetSoundFile()->GetAudioType() == eType && (*it)->object.IsPaused())
+		if ((*it)->object.GetAudioType() == eType && (*it)->object.IsPaused())
 		{
 			(*it)->hndl.Start(fTime);
 		}
@@ -670,7 +713,7 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			Vector3f vTransPos = (*it)->GetViewMatrix().TransformVec3(vPos, 1.0f);
 			Vector3f vTransNorm(vTransPos.x, 0.0f, vTransPos.z);
 			float fTransPosMag = vTransNorm.Magnitude();
-			vTransNorm = vTransNorm.GetNormalisedIfNZero(V3F_Z_AXIS);
+			vTransNorm = vTransNorm.GetNormalisedIfNZero(Vector3f::Z_AXIS);
 
 			float fAngle = acosf(vTransNorm.z) * Math::Sign(vTransNorm.x);
 			float fSpeakerRadius = (*it)->GetSpeakerRadius();

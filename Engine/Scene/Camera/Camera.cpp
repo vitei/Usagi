@@ -10,6 +10,8 @@ namespace usg{
 Camera::Camera(void)
 {
 	m_bRightHanded	= false;
+	m_uID = 0;
+	m_uRenderMask = usg::RENDER_MASK_ALL;
 }
 
 Camera::~Camera(void)

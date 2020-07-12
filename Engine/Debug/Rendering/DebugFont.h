@@ -2,7 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Core/File/File.h"
@@ -15,7 +15,7 @@ public:
 	DebugFont(void);
 	~DebugFont(void);
 
-	bool	Load(GFXDevice* pDevice, const char* szName);
+	bool	Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* szName);
 
 	float	GetStringWidth(const char* string, float height) const;
 

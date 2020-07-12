@@ -9,10 +9,13 @@ void FloatAnim::Init(usg::GUIWindow* pWindow, const char* szName)
 
 	usg::Vector2f vPos(0.0f, 0.0f);
 	usg::Vector2f vScale(270.f, 80.f);
-	m_childWindow.Init(szName, vPos, vScale, 11, usg::GUIWindow::WINDOW_TYPE_CHILD );
+	m_childWindow.Init(szName, vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	pWindow->AddItem(&m_childWindow);
 
 	m_title.Init(szName);
+	m_singleFloat.Init(szName, 0.0f, 10.f, 0.0f);
+	m_singleFloat.SetVisible(false);
+	pWindow->AddItem(&m_singleFloat);
 	m_childWindow.AddItem(&m_title);
 	m_childWindow.AddItem(&m_frameCount);
 	char szBoxName[USG_IDENTIFIER_LEN];
@@ -26,6 +29,8 @@ void FloatAnim::Init(usg::GUIWindow* pWindow, const char* szName)
 	}
 
 	m_frameInfo[0].SetVisible(true);
+
+	SetSingleOnly(false);
 }
 
 void FloatAnim::SetVisible(bool bVisible)
@@ -50,50 +55,85 @@ void FloatAnim::SetFromDefinition(usg::particles::FloatAnim &src)
 }
 
 
+void FloatAnim::SetToolTip(const char* szChar)
+{
+	m_childWindow.SetToolTip(szChar);
+	m_singleFloat.SetToolTip(szChar);
+}
+
+void FloatAnim::SetSingleOnly(bool bSingleOnly)
+{
+	if (bSingleOnly && !m_singleFloat.IsVisible())
+	{
+		m_singleFloat.SetVisible(true);
+		m_singleFloat.SetValue(m_frameInfo[0].GetValue(1));
+		m_childWindow.SetVisible(false);
+	}
+	else if(!bSingleOnly && m_singleFloat.IsVisible())
+	{
+		m_singleFloat.SetVisible(false);
+		m_frameInfo[0].SetValue(m_singleFloat.GetValue(), 1);
+		m_childWindow.SetVisible(true);
+	}
+}
+
 bool FloatAnim::Update(usg::particles::FloatAnim &src)
 {
 	bool bAltered = false;
 	int frameCount = m_frameCount.GetValue()[0];
 	usg::Math::Clamp(frameCount, 1, 10);
 	m_frameCount.SetValues(&frameCount);
-	if(frameCount != src.frames_count)
-	{
-		bAltered = true;
-		src.frames_count = frameCount;
-	}
 
-	int iFrameIndex = 0;
-	for(iFrameIndex = 0; iFrameIndex < frameCount; iFrameIndex++)
+	if (m_singleFloat.IsVisible())
 	{
-		if(m_frameInfo[iFrameIndex].GetValue(0) != src.frames[iFrameIndex].fTimeIndex 
-			|| m_frameInfo[iFrameIndex].GetValue(1) != src.frames[iFrameIndex].fValue )
+		if (m_singleFloat.GetValue() != src.frames[0].fValue)
 		{
+			src.frames[0].fValue = m_singleFloat.GetValue();
 			bAltered = true;
 		}
-		
-		{
-			if(iFrameIndex > 0)
-			{
-				if(src.frames[iFrameIndex-1].fTimeIndex > src.frames[iFrameIndex].fTimeIndex)
-				{
-					m_frameInfo[iFrameIndex].SetValue(src.frames[iFrameIndex-1].fTimeIndex);
-				}
-			}
-			else
-			{
-				m_frameInfo[iFrameIndex].SetValue(0.0f, 0);
-			}
-
-			src.frames[iFrameIndex].fTimeIndex = m_frameInfo[iFrameIndex].GetValue(0);
-			src.frames[iFrameIndex].fValue = m_frameInfo[iFrameIndex].GetValue(1);
-		}
-		m_frameInfo[iFrameIndex].SetVisible(true);
 	}
-
-	for(;iFrameIndex<MAX_FRAME_COUNT;iFrameIndex++)
+	else
 	{
-		m_frameInfo[iFrameIndex].SetVisible(false);
+		if (frameCount != src.frames_count)
+		{
+			bAltered = true;
+			src.frames_count = frameCount;
+		}
+
+		int iFrameIndex = 0;
+		for (iFrameIndex = 0; iFrameIndex < frameCount; iFrameIndex++)
+		{
+			if (m_frameInfo[iFrameIndex].GetValue(0) != src.frames[iFrameIndex].fTimeIndex
+				|| m_frameInfo[iFrameIndex].GetValue(1) != src.frames[iFrameIndex].fValue)
+			{
+				bAltered = true;
+			}
+
+			{
+				if (iFrameIndex > 0)
+				{
+					if (src.frames[iFrameIndex - 1].fTimeIndex > src.frames[iFrameIndex].fTimeIndex)
+					{
+						m_frameInfo[iFrameIndex].SetValue(src.frames[iFrameIndex - 1].fTimeIndex);
+					}
+				}
+				else
+				{
+					m_frameInfo[iFrameIndex].SetValue(0.0f, 0);
+				}
+
+				src.frames[iFrameIndex].fTimeIndex = m_frameInfo[iFrameIndex].GetValue(0);
+				src.frames[iFrameIndex].fValue = m_frameInfo[iFrameIndex].GetValue(1);
+			}
+			m_frameInfo[iFrameIndex].SetVisible(true);
+		}
+
+		for (; iFrameIndex < MAX_FRAME_COUNT; iFrameIndex++)
+		{
+			m_frameInfo[iFrameIndex].SetVisible(false);
+		}
 	}
+
 
 	return bAltered;
 }

@@ -43,13 +43,22 @@ const uint16	USG_INVALID_ID16 = 0xFFFF;
 typedef uint32 pb_size_t;
 typedef sint32 pb_ssize_t;
 
-#define PRIVATIZE_COPY(NameOfClass) 	NameOfClass(NameOfClass &rhs) { ASSERT(false); } \
-										NameOfClass& operator=(NameOfClass &rhs) { ASSERT(false); return *this; }
+#define PRIVATIZE_COPY(NameOfClass) 	NameOfClass(NameOfClass &rhs) { NameOfClass(); ASSERT(false); } \
+										NameOfClass& operator=(NameOfClass &rhs) { NameOfClass(); ASSERT(false); return *this; }
 
 #define UNUSED_VAR(var)      ((void)&var);
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #ifndef CCW_WINDING
 #define CCW_WINDING 1
+#endif
+
+#ifdef SUPPORTS_PRAGMA_ONCE
+#define HEADER_GUARD_OPEN(NAME)
+#define HEADER_GUARD_CLOSE
+#else
+#define HEADER_GUARD_OPEN(NAME)		#ifndef STRINGIFY(USG_/NAME/_HEADER)\
+									#define STRINGIFY(USG_/NAME/_HEADER)
+#define HEADER_GUARD_CLOSE #endif
 #endif
 
 #if !defined(DEPENDENT_TEMPLATE)
@@ -64,5 +73,9 @@ typedef sint32 pb_ssize_t;
 #include "Engine/Memory/Mem.h"
 #include "Engine/Core/stl/memory.h"
 #include "GameHandle.h"
+#include <pb.h>
+#include <Engine/Core/ProtocolBuffers.h>
+#include <Engine/Framework/ComponentProperties.h>
+#include <Engine/Framework/GameComponents.h>
 
 #endif // USG_COMMON

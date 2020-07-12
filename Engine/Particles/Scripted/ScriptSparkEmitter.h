@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLES_SCRIPT_SPARK_EMITTER_H_
 #define _USG_PARTICLES_SCRIPT_SPARK_EMITTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Particles/Scripted/ScriptEmitter.h"
 
 namespace usg{

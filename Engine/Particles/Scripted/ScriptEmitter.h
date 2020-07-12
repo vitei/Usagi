@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLES_SCRIPT_EMITTER_H_
 #define _USG_PARTICLES_SCRIPT_EMITTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Particles/SpriteEmitter.h"
 #include "Engine/Particles/Scripted/EmitterShapes.h"
 #include "Engine/Resource/ParticleEmitterResource.h"

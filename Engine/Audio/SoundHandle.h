@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDHANDLE_H__
 #define __USG_AUDIO_SOUNDHANDLE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/SafePointer.h"
 #include "SoundObject.h"
 
@@ -26,6 +26,8 @@ public:
 	float GetVolume() const;
 	bool IsValid() const { return GetPointer()!=NULL; }
 	void SetActiveTrack(uint32 uTrack, float fFadeTime);
+	void SubmitData(void* pData, memsize size);
+	uint64 GetSamplesPlayed() const;
 
 	SoundActorHandle GetSoundActor();
 
@@ -38,8 +40,6 @@ public:
 
 private:
 };
-
-
 
 inline void SoundHandle::Start(float fTime)
 {
@@ -119,6 +119,25 @@ inline bool SoundHandle::IsPlaying() const
 	return false;
 }
 
+inline uint64 SoundHandle::GetSamplesPlayed() const
+{
+	const SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		return pObject->GetSamplesPlayed();
+	}
+	return 0;
+}
+
+inline void SoundHandle::SubmitData(void* pData, memsize size)
+{
+	SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		pObject->SubmitData(pData, size);
+	}
+}
+
 inline void SoundHandle::SetActiveTrack(uint32 uTrack, float fTime)
 {
 	SoundObject* pObject = GetPointer();
@@ -139,6 +158,7 @@ inline SoundObject_ps* SoundHandle::GetPlatform()
 	}
 	return NULL;
 }
+
 
 inline SoundActorHandle SoundHandle::GetSoundActor()
 {

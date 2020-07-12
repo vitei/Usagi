@@ -10,6 +10,12 @@ message SetViewContextMask
 	required uint32 uDisableBits = 3[default=0];
 };
 
+message EnableCamera
+{
+	required uint32 uCameraID = 1;	
+	required uint32 uContext = 2 [default=0];
+};
+
 message CreateDecalEvent
 {
 	required usg.Vector3f  vStartPos = 1;
@@ -17,3 +23,19 @@ message CreateDecalEvent
 	required float		   fSize = 3 [default=3.0];
 	required uint32 	   uType = 4 [default=0];	// Anything over 0 is a special decal
 };
+
+message SetAspectRatio
+{
+	required float fAspectRatio = 1 [default = 1.777];
+}
+
+message SetFieldOfView
+{
+	required float fFOV = 1 [default = 40.0];
+}
+
+
+message SetRenderMask
+{
+	required uint32 uRenderMask = 1 [default = 0x0FFFFF7F];
+}

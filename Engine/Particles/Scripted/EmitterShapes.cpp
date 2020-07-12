@@ -214,28 +214,46 @@ namespace usg
 
 	void CubeEmitter::FillEmissionParamsInt(Vector3f& vPosOut, Vector3f& vVelocityOut) const
 	{
-		float32 fHollowFrac = usg::Math::Clamp(m_shapeDef.fHollowness, 0.0f, 0.999f);
+		uint32 uSide = Math::RangedRandomUInt(0, 3);
+		float fSign = Math::Sign(Math::RangedRandom(-1.f, 1.f));
 
-		Vector3f vRandLow(-1.0f, -1.0f, -1.0f);
-		Vector3f vRandHigh(1.0f, 1.0f, 1.0f);
-		if(fHollowFrac!=0.0f)
+		Vector3f vRandRang = Vector3f::RandomRange(Vector3f(-1.f), Vector3f(1.f));
+
+		if (uSide < 1)
 		{
-			// Pick a value in the range of the non hollow area
-			vPosOut = Vector3f::RandomRange(vRandLow, vRandHigh);
-			vPosOut *= (1.0f-m_shapeDef.fHollowness);
-			// Add the size of the hollow core
-			vPosOut += vPosOut.GetSign() * fHollowFrac;
-			vPosOut *= m_shapeDetails.vShapeExtents;
+			vPosOut.x = m_shapeDetails.vShapeExtents.x * vRandRang.x;
+			vPosOut.y = m_shapeDetails.vShapeExtents.y * vRandRang.y;
+			vPosOut.z = fSign * m_shapeDetails.vShapeExtents.z;
+
+		}
+		else if (uSide < 2)
+		{
+			vPosOut.x = m_shapeDetails.vShapeExtents.x * vRandRang.x;
+			vPosOut.y = fSign * m_shapeDetails.vShapeExtents.y;
+			vPosOut.z = m_shapeDetails.vShapeExtents.z * vRandRang.z;
 		}
 		else
 		{
-			vPosOut = Vector3f::RandomRange(vRandLow, vRandHigh) *  m_shapeDetails.vShapeExtents;
+			vPosOut.x = fSign * m_shapeDetails.vShapeExtents.x;
+			vPosOut.y = m_shapeDetails.vShapeExtents.y * vRandRang.y;
+			vPosOut.z = m_shapeDetails.vShapeExtents.z * vRandRang.z;
 		}
 
 		// Velocity
-		Vector3f vDir = vPosOut.GetNormalisedIfNZero();
-		vVelocityOut = vDir * m_shapeDef.fShapeExpandVel;
+		Vector3f vDir;
+		if (vPosOut.MagnitudeSquared() != 0.0f)
+		{
+			vPosOut.GetNormalised(vDir);
+		}
+		else
+		{
+			vDir = Vector3f::ZERO;
+		}
 
+		float fBaseVelocity = m_shapeDef.fShapeExpandVel;
+		vVelocityOut.x = vDir.x * fBaseVelocity;
+		vVelocityOut.y = vDir.y * fBaseVelocity;
+		vVelocityOut.z = vDir.z * fBaseVelocity;
 	}
 
 }

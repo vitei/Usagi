@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_MODEL_RESOURCE_MESH_H_
 #define _USG_GRAPHICS_SCENE_MODEL_RESOURCE_MESH_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Resource/SkeletonResource.h"
 #include "Engine/Resource/ResourceBase.h"
@@ -25,8 +25,15 @@ namespace usg{
 	{
 		enum
 		{
+			RS_DEFAULT = 0,
+			RS_DEFERRED,
+			RS_TRANSPARENT,
+			RS_DEPTH,
+			RS_OMNI_DEPTH,
+			RS_COUNT,
 			VERTEX_BUFFER_NUM = 1 + exchange::Shape::singleAttributes_max_count,
-			MAX_UV_STAGES = 7
+			MAX_UV_STAGES = 7,
+			MAX_VERT_ELEMENTS = MAX_VERTEX_ATTRIBUTES + 1 + (2 * exchange::Shape::singleAttributes_max_count)
 		};
 
 		struct Primitive
@@ -35,27 +42,26 @@ namespace usg{
 			usg::exchange::SkinningType eSkinningMode;
 			uint32					uRootIndex;
 		} primitive;
-		VertexBuffer			vertexBuffer[VERTEX_BUFFER_NUM];
+		VertexBuffer			vertexBuffer;
 		CustomEffectRuntime		effectRuntime;
 
-		struct PipelineGroup
+		struct RenderSet
 		{
-			PipelineStateDecl		defaultPipeline;
-			PipelineStateDecl		deferredPipeline;
-			PipelineStateDecl		transparentPipeline;
-			PipelineStateDecl		depthPassPipeline;
-			PipelineStateDecl		omniDepthPassPipeline;
-		} pipelines;
+			PipelineStateDecl		pipeline;
+			VertexBuffer			singleVerts;
+		} renderSets[RS_COUNT];
 
-		VertexElement vertexElements[MAX_VERTEX_ATTRIBUTES+1+(2*exchange::Shape::singleAttributes_max_count)];	// +1 for cap
+
+		VertexElement vertexElements[RS_COUNT][MAX_VERT_ELEMENTS];	// +1 for cap
 
 
 
 		void CleanUp(GFXDevice* pDevice)
 		{
-			for (auto& it : vertexBuffer)
+			vertexBuffer.CleanUp(pDevice);
+			for (auto& it : renderSets)
 			{
-				it.CleanUp(pDevice);
+				it.singleVerts.CleanUp(pDevice);
 			}
 			primitive.indexBuffer.CleanUp(pDevice);
 			effectRuntime.CleanUp(pDevice);

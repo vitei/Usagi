@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_SHADOWS_DIRSHADOW_H_
 #define _USG_POSTFX_SHADOWS_DIRSHADOW_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_SHAPE_SETTINGS_H_
 #define _USG_PARTICLE_EDITOR_SHAPE_SETTINGS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/GUI/GuiWindow.h"
@@ -28,10 +28,10 @@ public:
 private:
 	usg::GUIComboBox		m_shapeType;
 	usg::GUISlider			m_scale;
-	usg::GUISlider			m_rotation;
+	usg::GUIFloat			m_rotation;
 	usg::GUIFloat			m_position;
 	usg::GUIFloat			m_radius;
-	usg::GUISlider			m_sideLength;
+	usg::GUIFloat			m_sideLength;
 
 	usg::GUISlider			m_hollowness;
 	usg::GUIWindow			m_arcWindow;

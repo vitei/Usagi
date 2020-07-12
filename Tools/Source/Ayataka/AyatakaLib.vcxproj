@@ -44,7 +44,6 @@
     <ClInclude Include="lib\pugixml-1.2\src\pugiconfig.hpp" />
     <ClInclude Include="lib\pugixml-1.2\src\pugixml.hpp" />
     <ClInclude Include="LoaderCommon.h" />
-    <ClInclude Include="MaterialDefinition\MaterialDefinitionExporter.h" />
     <ClInclude Include="OwnSTLDecl.h" />
     <ClInclude Include="PbUtil.h" />
     <ClInclude Include="pb_system_vc.h" />
@@ -67,38 +66,37 @@
     <ClCompile Include="fbx\FbxConverter.cpp" />
     <ClCompile Include="fbx\FbxLoad.cpp" />
     <ClCompile Include="lib\pugixml-1.2\src\pugixml.cpp" />
-    <ClCompile Include="MaterialDefinition\MaterialDefinitionExporter.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{688218E8-B33E-47A4-B8DA-A54913A077E6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>AyatakaLib</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -155,9 +153,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;TOOL_BUILD_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(ProjectDir)..\ResourceLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>4291;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4291;4267;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -191,8 +189,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;TOOL_BUILD;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(ProjectDir)..\ResourceLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4291;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

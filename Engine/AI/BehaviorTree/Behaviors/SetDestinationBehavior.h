@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_SET_DESTINATION_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_SET_DESTINATION_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 #include "Engine/AI/BehaviorTree/BehaviorCommon.pb.h"
 #include "Engine/Maths/Vector3f.h"

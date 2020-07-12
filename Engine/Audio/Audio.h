@@ -5,7 +5,7 @@
 #ifndef __USG_AUDIO_AUDIO_H__
 #define __USG_AUDIO_AUDIO_H__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Singleton.h"
 #include "Engine/Audio/AudioListener.h"
 #include "Engine/Framework/ComponentEntity.h"
@@ -25,6 +25,15 @@ class SoundHandle;
 class Vector3f;
 class SoundFile;
 class IHeadMountedDisplay;
+class SoundCallbacks;
+
+struct StreamingSoundDef
+{
+	uint32 uChannels = 2;
+	uint32 uBitsPerSample = 16;
+	uint32 uSampleRate = 4800;
+	SoundCallbacks* pCallbacks = nullptr;
+};
 
 class Audio : public Singleton<Audio>
 {
@@ -35,6 +44,13 @@ public:
 		SoundObject		object;
 	};
 
+	struct CustomSound
+	{
+		SoundFileDef	def;
+		void*			pRawData;
+		size_t			rawDataSize;
+	};
+
 	Audio();
 	~Audio();
 
@@ -43,8 +59,12 @@ public:
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
 	void UnloadArchive(const char* pszArchiveName);
+
+	void LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount);
+
 	AudioType GetAudioType(uint32 uSoundId);
 	float GetVolume(uint32 uSoundId);
+	SoundHandle PrepareCustomStream(const StreamingSoundDef& def, float fVolume = 1.0f);
 	SoundHandle Prepare2DSound(uint32 crc, const float fVolume, bool bPlay=true );
 	SoundHandle Prepare3DSound(SoundActorHandle& actorHandle, uint32 crc, const float fVolume, bool bPlay = true);
 	// For when we want a one shot sound that isn't going to move with an actor

@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_SET_ANIMCOND__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_SET_ANIMCOND__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 #include "Engine/Scene/Model/ModelEvents.pb.h"
 #include "Engine/Framework/EventManager.h"

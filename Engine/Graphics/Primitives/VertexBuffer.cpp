@@ -32,7 +32,7 @@ void VertexBuffer::Lock::Init(GFXDevice* pDevice, VertexBuffer* pOwner, void* co
 	m_pOwner = pOwner;
 	m_pData = pData;
 	m_uSize = uSize;
-	m_pDevice = nullptr;
+	m_pDevice = pDevice;
 }
 
 void VertexBuffer::Lock::Invalidate()

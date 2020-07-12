@@ -6,7 +6,7 @@
 
 #ifndef USG_RENDERING_CONSTS
 #define USG_RENDERING_CONSTS
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.pb.h"
 
 namespace usg {
@@ -53,6 +53,7 @@ enum PrimitiveType
 	PT_LINES,
 	PT_TRIANGLES_ADJ,
 	PT_LINES_ADJ,
+	PT_LINE_STRIP,
 	PT_COUNT
 	//PT_TRIANGLESTRIPS,
 };
@@ -86,6 +87,8 @@ enum TextureUsageFlags
 	TU_FLAG_COLOR_ATTACHMENT = (1 << 3),
 	TU_FLAG_DEPTH_ATTACHMENT = (1 << 4),
 	TU_FLAG_USE_HI_Z = (1 << 5),	// Depth-stencil textures only
+	TU_FLAG_TRANSFER_DST = (1 << 6),	// Images updated via CPU, e.g. video images
+	TU_FLAG_STORAGE_BIT = (1 << 7),		// Images used for unordered access/reads (imageLoad/ imageStore) rather than colorOut 
 	TU_FLAGS_OFFSCREEN_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM,
 	TU_FLAGS_FINAL_COLOR = TU_FLAG_COLOR_ATTACHMENT | TU_FLAG_TRANSFER_SRC | TU_FLAG_FAST_MEM,
 	TU_FLAGS_DEPTH_BUFFER = TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_FAST_MEM | TU_FLAG_USE_HI_Z,
@@ -107,6 +110,7 @@ enum ColorFormat
 	CF_R_16F,
 	CF_RG_16F,
 	CF_R_8,
+	CF_RG_8,
 	CF_NORMAL,
 	CF_SRGBA,
 	CF_UNDEFINED,
@@ -169,6 +173,7 @@ enum ConstantType
 	CT_VECTOR_2,
 	CT_FLOAT,
 	CT_INT,
+	CT_VECTOR2I,
 	CT_VECTOR4I,
 	CT_VECTOR4U,
 	CT_BOOL,
@@ -198,6 +203,7 @@ enum DescriptorType
 	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 0,
 	DESCRIPTOR_TYPE_CONSTANT_BUFFER,
 	DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC,
+	DESCRIPTOR_TYPE_STORAGE_IMAGE,
 	DESCRIPTOR_TYPE_INVALID
 };
 
@@ -224,9 +230,45 @@ const uint32 g_uConstantSize[CT_COUNT] =
 	sizeof(float)*2,	// CT_VECTOR_2,
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int)*2,		// CT_VECTOR2I
 	sizeof(int)*4,		// CT_VECTOR4I
 	sizeof(uint32)*4,	// CT_VECTOR4U
 	sizeof(bool),		// CT_BOOL
+	(uint32)(-1),		// CT_STRUCT <- Size is invalid
+	// CT_COUNT,
+};
+
+const VertexElementType g_veMapping[CT_COUNT] =
+{
+	VE_FLOAT,	// CT_MATRIX_44 = 0,
+	VE_FLOAT,	// CT_MATRIX_43
+	VE_FLOAT,	// CT_VECTOR_4,
+	VE_FLOAT,	// CT_VECTOR_3,
+	VE_FLOAT,	// CT_VECTOR_2,
+	VE_FLOAT,	// CT_FLOAT
+	VE_INT,		// CT_INT
+	VE_INT,		// CT_VECTOR2I
+	VE_INT,		// CT_VECTOR4I
+	VE_UINT,	// CT_VECTOR4U
+	VE_INT,		// CT_BOOL
+	VE_INVALID	// CT_STRUCT
+	// CT_COUNT,
+};
+
+
+const uint32 g_veCountMapping[CT_COUNT] =
+{
+	16,	// CT_MATRIX_44 = 0,
+	12,	// CT_MATRIX_43
+	4,	// CT_VECTOR_4,
+	3,	// CT_VECTOR_3,
+	2,	// CT_VECTOR_2,
+	1,	// CT_FLOAT
+	1,	// CT_INT
+	2,	// CT_VECTOR2I
+	4,	// CT_VECTOR4I
+	4,	// CT_VECTOR4U
+	1,		// CT_BOOL
 	(uint32)(-1),		// CT_STRUCT <- Size is invalid
 	// CT_COUNT,
 };
@@ -240,10 +282,23 @@ const uint32 g_uConstantCPUAllignment[CT_COUNT] =
 	sizeof(float),		// CT_VECTOR_2
 	sizeof(float),		// CT_FLOAT
 	sizeof(int),		// CT_INT
+	sizeof(int),		// CT_VECTOR2I
 	sizeof(int),		// CT_VECTOR4I
 	sizeof(uint32),		// CT_VECTOR4U
 	1,					// CT_BOOL
 	sizeof(float) * 4	// CT_STRUCT (Not a valid size on it's own)
+};
+
+
+const uint32 g_uVertexElementSizes[VE_INVALID] =
+{
+	sizeof(sint8),  // VE_BYTE = 0,
+	sizeof(uint8),  // VE_UBYTE = 1,
+	sizeof(sint16), // VE_SHORT = 2,
+	sizeof(uint16), // VE_USHORT = 3,
+	sizeof(float),  // VE_FLOAT = 4,
+	sizeof(sint32), // VE_INT = 5,
+	sizeof(uint32) // VE_UINT = 6,
 };
 
 static_assert(ARRAY_SIZE(g_uConstantCPUAllignment) == CT_COUNT, "Entries in CPU alignment don't match the constant count in the ConstantType enum, has an extra value been added?");

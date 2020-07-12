@@ -6,7 +6,7 @@
 #ifndef __USG_AI_BEHAVIOR__
 #define __USG_AI_BEHAVIOR__
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

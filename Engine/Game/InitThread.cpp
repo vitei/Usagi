@@ -40,14 +40,14 @@ namespace usg
 		{
 			vdelete *m_ppLoadMode;
 			*m_ppLoadMode = NULL;
-			m_pDevice->ClearDynamicResources();
 			usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
+			m_pDevice->ClearDynamicResources();
 			mem::FreeToLastTag();
 		}
 
 		m_fnLoad(m_uNextMode, m_ppLoadMode);
 
-		(*m_ppLoadMode)->Init(m_pDevice);
+		(*m_ppLoadMode)->Init(m_pDevice, usg::ResourceMgr::Inst());
 	}
 
 	void InitThread::Exec()

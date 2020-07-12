@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_EFFECT_RESOURCE_H_
 #define _USG_PARTICLE_EFFECT_RESOURCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemHeap.h"
 #include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
@@ -27,6 +27,10 @@ public:
 	uint32 GetEmitterCount() const { return m_definition.emitters_count; }
 	uint32 GetRibbonCount() const { return m_definition.ribbons_count; }
 	const U8String& GetName() const { return m_name; }
+
+	const static ResourceType StaticResType = ResourceType::PARTICLE_EFFECT;
+
+
 protected:
 
 	U8String					m_name;

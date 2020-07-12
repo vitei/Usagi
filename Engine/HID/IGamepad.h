@@ -6,7 +6,7 @@
 
 #ifndef USG_HID_IGAMEPAD_H
 #define USG_HID_IGAMEPAD_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Modules/ModuleInterfaces.h"
 #include "Engine/HID/InputDefines.h"
 #include "Engine/Maths/Matrix4x4.h"

@@ -13,7 +13,7 @@
 #ifndef _USG_CORE_TUPLE_H_
 #define _USG_CORE_TUPLE_H_
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

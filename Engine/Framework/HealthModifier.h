@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef Usagi_xcode_HealthComponent_h
 #define Usagi_xcode_HealthComponent_h
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"

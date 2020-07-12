@@ -6,7 +6,7 @@
 #ifndef STRING_POINTER_HASH_H
 #define STRING_POINTER_HASH_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/MemHeap.h"
 #include "Engine/Core/String/StringCRC.h"
 

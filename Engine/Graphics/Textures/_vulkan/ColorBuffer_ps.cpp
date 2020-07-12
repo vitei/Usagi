@@ -14,9 +14,10 @@
 namespace usg {
 
 ColorBuffer_ps::ColorBuffer_ps()
-	: m_pLayerViews(nullptr)
+	: m_pExtraViews(nullptr)
 {
 	m_texHndl = &m_texture;
+	m_uMips = 1;
 }
 
 ColorBuffer_ps::~ColorBuffer_ps()
@@ -26,58 +27,67 @@ ColorBuffer_ps::~ColorBuffer_ps()
 
 void ColorBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags, uint32 uLoc, uint32 uMipmaps)
 {
+	m_uMips = uMipmaps;
 	m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uMipmaps, nullptr, TD_TEXTURE2D, uFlags);
+	if (uMipmaps > 1)
+	{
+		InitExViews(pDevice);
+	}
 }
 
 
 void ColorBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uBufferId, uint32 uWidth, uint32 uHeight, uint32 uSlices, ColorFormat eFormat, SampleCount eSamples, uint32 uFlags)
 {
+	m_uMips = 1;
 	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices);
 	if (uSlices > 1)
 	{
-		InitLayerViews(pDevice);
+		InitExViews(pDevice);
 	}
 
 }
 
-void ColorBuffer_ps::InitLayerViews(GFXDevice* pDevice)
+void ColorBuffer_ps::InitExViews(GFXDevice* pDevice)
 {
-	if (m_texture.GetPlatform().GetFaces() > 1)
+	if (m_texture.GetPlatform().GetFaces() > 1 || m_uMips > 1)
 	{
-		m_pLayerViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_texture.GetPlatform().GetFaces()];
+		m_pExtraViews = vnew(ALLOC_GFX_RENDER_TARGET) VkImageView[m_texture.GetPlatform().GetFaces() * m_uMips];
 
 		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
 		{
-			m_pLayerViews[i] = m_texture.GetPlatform().CreateLayerImageView(pDevice, i);
+			for(uint32 j=0; j<m_uMips; j++)
+			{
+				m_pExtraViews[(i*m_uMips)+j] = m_texture.GetPlatform().CreateImageView(pDevice, i, j);
+			}
 		}
 	}
 }
 
-void ColorBuffer_ps::FreeLayerViews(GFXDevice* pDevice)
+void ColorBuffer_ps::FreeExViews(GFXDevice* pDevice)
 {
-	if (m_pLayerViews)
+	if (m_pExtraViews)
 	{
-		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces(); i++)
+		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces() * m_uMips; i++)
 		{
-			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pLayerViews[i], nullptr);
+			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pExtraViews[i], nullptr);
 		}
 	}
 }
 
 void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
-	FreeLayerViews(pDevice);
+	FreeExViews(pDevice);
 	m_texture.GetPlatform().Resize(pDevice, uWidth, uHeight);
-	InitLayerViews(pDevice);
+	InitExViews(pDevice);
 
 }
 
 void ColorBuffer_ps::CleanUp(GFXDevice* pDevice)
 {
-	if (m_pLayerViews)
+	if (m_pExtraViews)
 	{
-		vdelete[] m_pLayerViews;
-		m_pLayerViews = nullptr;
+		vdelete[] m_pExtraViews;
+		m_pExtraViews = nullptr;
 	}
 	m_texture.CleanUp(pDevice);
 }

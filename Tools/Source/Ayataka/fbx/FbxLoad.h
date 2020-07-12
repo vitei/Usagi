@@ -1,5 +1,5 @@
-#ifndef FMDALOAD_H
-#define FMDALOAD_H
+#ifndef FBXLOAD_H
+#define FBXLOAD_H
 
 #include "cmdl/Cmdl.h"
 #include "exchange/Mesh.h"
@@ -10,12 +10,11 @@
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Scene/Model/SkeletalAnimation.pb.h"
-
 #include <fbxsdk.h>
 
-struct VertexElement
+struct FBXVertexElement
 {
-	VertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
+	FBXVertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
 	{
 		for (uint32 i = 0; i < 4; i++)
 		{
@@ -50,7 +49,7 @@ struct VertexElement
 		}
 	}
 
-	bool operator==(const VertexElement& rhs) const
+	bool operator==(const FBXVertexElement& rhs) const
 	{
 		if (type != rhs.type || uIndex != rhs.uIndex || uCount != rhs.uCount || eElementType != rhs.eElementType)
 		{
@@ -68,7 +67,7 @@ struct VertexElement
 		return true;
 	}
 
-	bool operator!=(const VertexElement& rhs) const
+	bool operator!=(const FBXVertexElement& rhs) const
 	{
 		return !(*this == rhs);
 	}
@@ -76,7 +75,7 @@ struct VertexElement
 
 struct TempVertex
 {
-	usg::vector<VertexElement> elements;
+	usg::vector<FBXVertexElement> elements;
 	union 
 	{
 		struct
@@ -90,7 +89,7 @@ struct TempVertex
 
 	void CalculateHash()
 	{
-		caluclatedHash = utl::CRC32(elements.data(), (uint32)(sizeof(VertexElement) * elements.size()));
+		caluclatedHash = utl::CRC32(elements.data(), (uint32)(sizeof(FBXVertexElement) * elements.size()));
 	}
 
 	bool operator==(const TempVertex& rhs) const
@@ -104,25 +103,27 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, DependencyTracker* pDependencies);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
+	void SetAttenScale(double fScale) { m_fAttenScale = fScale; }
 
 private:
-	void ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode);
+	void ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic);
 
 	// Skeleton
 	void ReadSkeleton(::exchange::Skeleton* pSkeleton, FbxNode* pRootNode);
-	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	void ReadBonesRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	void ReadLightsRecursive(Cmdl& cmdl, FbxNode* pNode);
+	void ReadCamerasRecursive(Cmdl& cmdl, FbxNode* pNode);
 	void ReadDeformersRecursive(::exchange::Skeleton* pSkeleton, FbxNode* pNode);
 	
 	// Mesh data
-	void AddMesh(Cmdl& cmdl, ::exchange::Shape*, FbxNode* pNode, FbxMesh* mesh);
-	void GetUV(FbxMesh* pMesh, int iVertexIndex, int iTexUVIndex, int iUVLayer, VertexElement& outUV);
-	bool GetColor(FbxMesh* pMesh, int iVertexIndex, int inColorId, VertexElement& outColor);
-	bool GetNormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outNormal);
-	bool GetBinormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outBinormal);
-	bool GetTangent(FbxMesh* pMesh, int iVertexIndex, int iVertex, VertexElement& outTangent);
+	void AddMesh(Cmdl& cmdl, ::exchange::Shape*, FbxNode* pNode, FbxMesh* mesh, bool bStatic);
+	void GetUV(FbxMesh* pMesh, int iVertexIndex, int iTexUVIndex, int iUVLayer, FBXVertexElement& outUV);
+	bool GetColor(FbxMesh* pMesh, int iVertexIndex, int inColorId, FBXVertexElement& outColor);
+	bool GetNormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outNormal);
+	bool GetBinormal(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outBinormal);
+	bool GetTangent(FbxMesh* pMesh, int iVertexIndex, int iVertex, FBXVertexElement& outTangent);
 	uint32 GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* currMesh); 	// Returns the maximum of bones weighting any one vertex
 	void RemoveDuplicateVertices();
 
@@ -137,7 +138,7 @@ private:
 	void AddMaterials(Cmdl& cmdl, FbxNode* pNode);
 	void AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pNewMaterial);
 	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);
-
+	
 
 	::exchange::Shape* NewShape(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Mesh* NewMesh(Cmdl& cmdl, FbxNode* pShapeNode);
@@ -147,14 +148,21 @@ private:
 	::exchange::Skeleton* NewSkeleton();
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
-	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, int iParentIdx);
+	bool IsIdentityBoneRequired(FbxNode* pRootNode);
+	int GetParentBoneCountRecursive(FbxNode* pRootNode, int Count);
+	void AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, bool bIsNeededRendering);
 	void AddLight(Cmdl& cmdl, FbxNode* pNode);
-	uint32 FindBone(Cmdl& cmdl, const char* szName);
+	void AddCamera(Cmdl& cmdl, FbxNode* pNode);
+	uint32 FindBone(::exchange::Skeleton& skel, const char* szName);
+	uint32 FindBoneRenderingId(Cmdl& cmdl, const char* szName);
 	void AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, FbxMesh* pCurrMesh);
 	bool SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pMaterial);
 	void SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName);
 	void SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMaterial* inMaterial, bool bTransparent) const;
-	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE);
+	FbxAMatrix GetCombinedMatrixForNode(FbxNode* pNode, FbxNode* pParent, FbxTime pTime = FBXSDK_TIME_INFINITE);
+	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
+	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
+	bool IsBone(FbxNode* pNode);
 
 	// Below here are custom tweaks for our own behaviour
 	// At this stage only used for culling duplicate bones used for the LOD system
@@ -203,8 +211,11 @@ private:
 	uint32					m_uMeshMaterialTmp;
 	bool					m_bHasNormalMap;
 	bool					m_bHasDefaultStaticBone;
+	bool					m_bCollisionMesh;
 	double					m_appliedScale;
-	FbxNode*				m_pLODRootMeshNode;
+	double					m_fAttenScale;
+	FbxNode*				m_pParentBoneNode;
+	FbxScene*				m_pScene;
 	usg::vector<uint32>		m_indicesTmp;
 	usg::vector<TempVertex>	m_activeVerts;
 	usg::vector<WeightingInfo> m_activeWeights;

@@ -17,8 +17,10 @@ message ActiveDevice
 	option (nanopb_msgopt).has_ondeactivate = true;
 }
 
+
 message TransformComponent
 {
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
 	required Vector3f position = 1;
 	required Quaternionf rotation = 2;
 	required bool bInheritFromParent = 3 [default = true, (usagi).doc_en = "Position and rotation are in local space if true, world space if false"];
@@ -31,6 +33,7 @@ message ScaleComponent
 
 message MatrixComponent
 {
+	// NOTE THESE VALUES ARE TIED TO PROCESS HIERARCHY.
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required Matrix4x4 matrix = 1;
@@ -156,4 +159,14 @@ message SimulationContext
 message TimeComponent
 {
 	required uint32 uFrameTime = 1 [default=0];
+}
+
+// If we want to pause or slow down game time this component can be used by systems that need to update in real world time
+// to get the true elapsed time
+message SystemTimeComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+
+	required float fSystemElapsed = 1;
 }

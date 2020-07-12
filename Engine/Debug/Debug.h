@@ -7,7 +7,7 @@
 #ifndef __USG_DEBUG_H__
 #define __USG_DEBUG_H__
 
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Debug, Debug_ps.h)
 #include "DebugMsgType.h"
 
@@ -29,9 +29,9 @@ void FatalInFinal(const char *file, int line, const char* func, const char *form
 #endif
 
 #ifndef FINAL_BUILD
-#define FATAL_RELEASE(in, ...) { if(in == false) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, __VA_ARGS__); } }
+#define FATAL_RELEASE(in, format, ...) { if(in == false) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, format, __VA_ARGS__); } }
 #else
-#define FATAL_RELEASE(in, ...) { if(in == false) { FatalInFinal(__FILE__, __LINE__, __FUNCTION__, __VA_ARGS__); } }
+#define FATAL_RELEASE(in, format, ...) { if(in == false) { FatalInFinal(__FILE__, __LINE__, __FUNCTION__, format, __VA_ARGS__); } }
 #endif
 
 #endif

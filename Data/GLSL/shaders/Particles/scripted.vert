@@ -19,6 +19,11 @@ const float two_pi = 6.28318530;
 const float one_over_2pi = 0.159154943;
 const float pi = 3.14159265;
 
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
+{
+    mat3x4  mModelMat;
+};
+
 BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
 {
     vec4    vGravityDir;
@@ -37,7 +42,7 @@ BUFFER_LAYOUT(1,  UBO_MATERIAL_ID) uniform Material
     bool    bLocalEffect;
 };
 
-BUFFER_LAYOUT(1,  UBO_CUSTOM_3_ID) uniform Custom0
+BUFFER_LAYOUT(1,  UBO_CUSTOM_3_ID) uniform Custom3
 {
     float   fEffectTime;
 };
@@ -53,15 +58,11 @@ ATTRIB_LOC(6) in vec3 ao_rotation;    // Particle rotation (x: start, y: speed, 
 
 
 
-out VertexData
-{
-    INT_LOC(0) vec4    vo_vColor;
-    INT_LOC(1) vec2    vo_vSize;
-    INT_LOC(2) float   vo_fRot;
-    INT_LOC(3) vec4    vo_vUVRange[2];
-    INT_LOC(5) vec3    vo_velocity;
-
-} vertexData;
+ATTRIB_LOC(0) out vec4    vo_vColor;
+ATTRIB_LOC(1) out vec2    vo_vSize;
+ATTRIB_LOC(2) out float   vo_fRot;
+ATTRIB_LOC(3) out vec4    vo_vUVRange[2];
+ATTRIB_LOC(5) out vec3    vo_velocity;
 
 // Calculate particle ratio.
 float CalcParticleRatio(float birth, float inv_life_time)
@@ -200,11 +201,11 @@ vec3 CalculatePosition(float fLifeTime)
 
     if(bLocalEffect)
     {
-        vertexData.vo_velocity  = vec4(normalize(mix(ao_velocity, vVelocity, fUpdatePosition)), 0.0f) * mModelMat;
+        vo_velocity  = vec4(normalize(mix(ao_velocity, vVelocity, fUpdatePosition)), 0.0f) * mModelMat;
     }   
     else
     {
-        vertexData.vo_velocity  = normalize(mix(ao_velocity, vVelocity, fUpdatePosition));
+        vo_velocity  = normalize(mix(ao_velocity, vVelocity, fUpdatePosition));
     }
 
     
@@ -232,11 +233,11 @@ void main(void)
     vColor = CalculateColor(ratio);
     vColor.a *= CalculateAlpha(ratio);
 
-    vertexData.vo_vColor = vColor;
+    vo_vColor = vColor;
 
-    vertexData.vo_vSize = CalculateScale(ratio);
+    vo_vSize = CalculateScale(ratio);
 
-    vertexData.vo_fRot = CalculateRotation(lifetime);
+    vo_fRot = CalculateRotation(lifetime);
 
 
     vec3 vPosition = CalculatePosition(lifetime);
@@ -247,8 +248,8 @@ void main(void)
        vWorldPos = vec4( vWorldPos * mModelMat, 1.0 );
     }   
 
-    vertexData.vo_vUVRange[0] = CalculateUVCoords(lifetime, 0);
-    vertexData.vo_vUVRange[1] = CalculateUVCoords(lifetime, 1);
+    vo_vUVRange[0] = CalculateUVCoords(lifetime, 0);
+    vo_vUVRange[1] = CalculateUVCoords(lifetime, 1);
 
     gl_Position = vWorldPos;
 }

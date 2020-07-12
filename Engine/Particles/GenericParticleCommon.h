@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_PARTICLE_GENERIC_PARTICLE_H_
 #define _USG_PARTICLE_GENERIC_PARTICLE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/RenderConsts.h"

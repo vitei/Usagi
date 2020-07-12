@@ -6,7 +6,7 @@
 
 #ifndef USG_CORE_SINGLETON
 #define	USG_CORE_SINGLETON
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 

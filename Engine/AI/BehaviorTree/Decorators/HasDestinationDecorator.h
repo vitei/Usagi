@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_BEHAVIOR_TREE_DECORATORS_HAS_DESTINATION_DECORATOR__
 #define __USG_AI_BEHAVIOR_TREE_DECORATORS_HAS_DESTINATION_DECORATOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Decorator.h"
 
 namespace usg

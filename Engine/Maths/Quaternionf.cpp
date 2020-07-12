@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Maths/Matrix3x3.h"
 #include "Quaternionf.h"
 
 namespace usg{
@@ -69,6 +70,58 @@ Quaternionf Quaternionf::GetNormalised() const
 	return qOut;
 }
 
+void Quaternionf::FillFromMatrix(const Matrix3x3& mat)
+{
+	int i, maxi;
+	float maxdiag, S, trace;
+	trace = mat.M[0][0] + mat.M[1][1] + mat.M[2][2] + 1.0f;
+	if (trace > Math::EPSILON)
+	{
+		x = (mat.M[1][2] - mat.M[2][1]) / (2.0f * sqrtf(trace));
+		y = (mat.M[2][0] - mat.M[0][2]) / (2.0f * sqrtf(trace));
+		z = (mat.M[0][1] - mat.M[1][0]) / (2.0f * sqrtf(trace));
+		w = sqrtf(trace) / 2.0f;
+		return;
+	}
+	maxi = 0;
+	maxdiag = mat.M[0][0];
+	for (i = 1; i < 3; i++)
+	{
+		if (mat.M[i][i] > maxdiag)
+		{
+			maxi = i;
+			maxdiag = mat.M[i][i];
+		}
+	}
+	switch (maxi)
+	{
+	case 0:
+		S = 2.0f * sqrtf(1.0f + mat.M[0][0] - mat.M[1][1] - mat.M[2][2]);
+		x = 0.25f * S;
+		y = (mat.M[0][1] + mat.M[1][0]) / S;
+		z = (mat.M[0][2] + mat.M[2][0]) / S;
+		w = (mat.M[1][2] - mat.M[2][1]) / S;
+		break;
+	case 1:
+		S = 2.0f * sqrtf(1.0f + mat.M[1][1] - mat.M[0][0] - mat.M[2][2]);
+		x = (mat.M[0][1] + mat.M[1][0]) / S;
+		y = 0.25f * S;
+		z = (mat.M[1][2] + mat.M[2][1]) / S;
+		w = (mat.M[2][0] - mat.M[0][2]) / S;
+		break;
+	case 2:
+		S = 2.0f * sqrtf(1.0f + mat.M[2][2] - mat.M[0][0] - mat.M[1][1]);
+		x = (mat.M[0][2] + mat.M[2][0]) / S;
+		y = (mat.M[1][2] + mat.M[2][1]) / S;
+		z = 0.25f * S;
+		w = (mat.M[0][1] - mat.M[1][0]) / S;
+		break;
+	}
+
+	// Getting slight rounding errors through
+	Normalise();
+}
+
 void Quaternionf::FillFromMatrix(const Matrix4x4 &mat)
 {
 	int i, maxi;
@@ -116,6 +169,9 @@ void Quaternionf::FillFromMatrix(const Matrix4x4 &mat)
 			w = ( mat.M[0][1] - mat.M[1][0] ) / S;
 		break;
 	}
+
+	// Getting slight rounding errors through
+	Normalise();
 }
 
 void Quaternionf::SetFromEuler(float yaw, float pitch, float roll)

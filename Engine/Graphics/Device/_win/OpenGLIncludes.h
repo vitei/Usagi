@@ -46,7 +46,7 @@ DECLARE_HANDLE(HGLRC);
 
 // We want OpenGL 2 support, for now we're using GLee on windows
 #include "GL/glew.h"
-#include "Engine/Common/Common.h"
+
 
 // Conflict with windows, remove windows.h again when confirmed all working
 #undef ERROR

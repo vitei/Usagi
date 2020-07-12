@@ -6,6 +6,7 @@
 #include "Engine/HID/Mouse.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Scene/Model/Model.h"
@@ -92,189 +93,69 @@ void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptE
 ParticleEditor::ParticleEditor()
 : GameInterface()
 {
-	m_bPaused = false;
 	g_spParticleEditor = this;
-	m_pDirLight = nullptr;
-	m_pViewportHack = nullptr;
 }
 
 
 
 void ParticleEditor::Init(usg::GFXDevice* pDevice)
 {
-	usg::AABB worldBounds;
-	worldBounds.SetCentreRadii(usg::Vector3f(0.0f, 0.0f, 0.0f), usg::Vector3f(512.0f, 512.0f, 512.0f));
+	uint32 uWidth;
+	uint32 uHeight;
 
-	uint32 uWidth = 750;
-	uint32 uHeight = 500;
-	float fAspect = (float)uWidth/(float)uHeight;
-	m_previewViewport.InitViewport(340, 600, uWidth, uHeight);
-
+	m_hwnd = pDevice->GetDisplay(0)->GetHandle();
 	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidth, uHeight, false);
 	
-	m_postFX.Init(pDevice, uWidth, uHeight, 0);
+	m_postFX.Init(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 0);
 
-	// Use the raw textures directly so artists can just place new ones in without having to rake
-	// Disabling for now as the directory structure has changed
-	//usg::ResourceMgr::Inst()->SetTextureDir("../../Data/Textures/");
-	//usg::ResourceMgr::Inst()->EnableReloadingOfDirtyAssets(true);
-
-	m_scene.Init(pDevice, worldBounds, NULL);
-	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
-	m_camera.Init(fAspect);
-	m_pSceneCtxt->Init(pDevice, &m_camera.GetCamera(), &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
-
-	m_pViewportHack = vnew(usg::ALLOC_OBJECT)ViewportHack;
-	m_pViewportHack->Init(pDevice, &m_scene, m_previewViewport);
-	
 	usg::Matrix4x4 mEffectMat;
 	mEffectMat.LoadIdentity();
-	m_effect.Init(pDevice, &m_scene, mEffectMat);
 
-	m_editorShapes.Init(pDevice, &m_scene);
-	m_previewModel.Init(pDevice, &m_scene, &m_guiRend);
-
-	m_emitter.Alloc(pDevice, &m_scene.GetParticleMgr(), "water_halo", true );
-	m_emitter.Init(pDevice, &m_effect);
-	m_variables = m_emitter.GetDefinition();
-	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
-	m_effect.AddEmitter(pDevice, &m_emitter);
-	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
-	m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
-
-	/*m_testWindow.Init("Test Window", usg::Vector2f(0.0f, 0.0f), usg::Vector2f(400.f, 200.f), 10);
-	m_testButton.Init("Test Button");
-	m_testColor.Init("Test color");
-	m_testWindow.AddItem(&m_testButton);
-	m_testWindow.AddItem(&m_testColor);*/
 	m_guiRend.Init();
-	m_guiRend.InitResources(pDevice, m_scene, uWidth, uHeight, 20000);
-	//m_guiRend.AddWindow(&m_testWindow);
-	usg::Vector2f vPos(350.0f, 460.0f);
-	usg::Vector2f vScale(340.f, 600.f);
-	m_emitterWindow.Init("Emitter", vPos, vScale, 20 );
+	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
 
-	vPos.Assign(700.0f, 460.0f);
-	m_effectWindow.Init("Effect", vPos, vScale, 20 );
+	usg::GUIMenuBar& bar = m_guiRend.GetMainMenuBar();
+	bar.SetVisible(true);
 
-	vPos.Assign(1450.0f, 0.0f);
-	vScale.Assign(340.f, 1100.f);
-	m_lifeMotionWindow.Init("Life and motion", vPos, vScale, 20);
+	m_windowMenu.Init("Window");
+	bar.AddItem(&m_windowMenu);
+	m_resetWindow.Init("Reset Layout");
+	m_increaseSize.Init("Increase Size");
+	m_decreaseSize.Init("Decrease Size");
+	m_decreaseSize.SetEnabled(false);
+	m_windowMenu.AddItem(&m_resetWindow);
+	m_windowMenu.AddItem(&m_increaseSize);
+	m_windowMenu.AddItem(&m_decreaseSize);
+	m_resetWindow.SetCallbacks(this);
+	m_increaseSize.SetCallbacks(this);
+	m_decreaseSize.SetCallbacks(this);
 
-	vPos.Assign(1100.0f, 200.0f);
-	vScale.Assign(340.f, 860);
-	m_particleAppearanceWindow.Init("Particle appearance", vPos, vScale, 20);
+	usg::Vector2f vPos(322.0f, 30.f);
+	m_effectPreview.Init(pDevice, &m_guiRend, "Effect Preview", vPos);
+	vPos.Assign(1132.0f, 30.0f);
+	m_emitterPreview.Init(pDevice, &m_guiRend, "Emitter Preview", vPos);
 
-	vPos.Assign(0.0f, 0.0f);
-	vScale.Assign(340.f, 120.f);
-	m_previewWindow.Init("Preview", vPos, vScale, 20);
+	m_editorShapes.Init(pDevice, &m_emitterPreview.GetScene());
+
+	m_emitter.Alloc(pDevice, &m_emitterPreview.GetScene().GetParticleMgr(), "water_halo", true );
+	m_emitter.Init(pDevice, &m_emitterPreview.GetEffect());
+	m_emitterWindow.GetVariables() = m_emitter.GetDefinition();
+	m_emitterWindow.Init(pDevice, &m_guiRend);
+
+	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
+	m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 
 	vPos.Assign(740.0f, 120.0f);
-	vScale.Assign(340.f, 100.f);
-	m_fileWindow.Init("File", vPos, vScale, 20, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
-	//m_loadFilePaths.Init("Load dir", m_fileNames, 0);
-	m_loadButton.Init("Load");
-	m_loadButton.SetSameLine(true);
-	m_saveFile.Init("Save Dir", "");
-	m_saveButton.Init("Save");
-	m_saveButton.SetSameLine(true);
-
-	//m_guiRend.AddWindow(&m_fileWindow);
-	m_fileWindow.AddItem(&m_loadFilePaths);
-	m_fileWindow.AddItem(&m_loadButton);
-	m_fileWindow.AddItem(&m_saveFile);
-	m_fileWindow.AddItem(&m_saveButton);
-
-	m_effectGroup.Init(pDevice, &m_scene, &m_guiRend, &m_colorSelection);
-
-	m_previewType.Init("Preview mode", g_szPreviewType, 0);
-	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play") );
-	m_previewButtons[BUTTON_PAUSE].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "pause") );
-	m_previewButtons[BUTTON_RESTART].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "backtostart") );
-	for(uint32 i=0; i<BUTTON_COUNT; i++)
-	{
-		m_previewButtons[i].SetSameLine(true);
-		m_previewWindow.AddItem(&m_previewButtons[i]);
-	}
-
-	m_repeat.Init("Repeat", true);
-	m_repeat.SetSameLine(true);
-	m_previewWindow.AddItem(&m_repeat);
-	m_clearColor.Init("Background");
-	usg::Color defaultCol(0.1f, 0.1f, 0.1f);
-	m_clearColor.SetValue(defaultCol);
-	m_previewWindow.AddItem(&m_clearColor);
-	m_previewWindow.AddItem(&m_previewType);
-
-	m_guiRend.AddWindow(&m_emitterWindow);
-	m_guiRend.AddWindow(&m_lifeMotionWindow);
-	m_guiRend.AddWindow(&m_particleAppearanceWindow);
-	m_guiRend.AddWindow(&m_effectWindow);
-	m_guiRend.AddWindow(&m_previewWindow);
-
-	m_emitterWindow.AddItem(&m_fileWindow);
-	m_shapeSettings.AddToWindow(m_emitterWindow);
-	m_emissionSettings.AddToWindow(m_emitterWindow);
-
-	m_particleSettings.AddToWindow(m_lifeMotionWindow);
-	m_motionParams.AddToWindow(m_lifeMotionWindow);
-	m_rotationSettings.AddToWindow(m_lifeMotionWindow);
+	usg::Vector2f vScale(340.f, 100.f);
 	
-	m_textureSettings.AddToWindow(m_particleAppearanceWindow);
-	m_colorSettings.AddToWindow(m_particleAppearanceWindow);
-	m_alphaSettings.AddToWindow(m_particleAppearanceWindow);
-	m_scaleSettings.AddToWindow(m_particleAppearanceWindow);
+	m_effectGroup.Init(pDevice, &m_effectPreview.GetScene(), &m_guiRend);
 
-	m_blendSettings.AddToWindow(m_effectWindow);
-	m_sortSettings.AddToWindow(m_effectWindow);
+	m_guiRend.AddWindow(&m_effectPreview.GetGUIWindow());
+	m_guiRend.AddWindow(&m_emitterPreview.GetGUIWindow());
 
-	m_modifiers.AddToEnd(&m_shapeSettings);
-	m_modifiers.AddToEnd(&m_emissionSettings);
-
-	m_modifiers.AddToEnd(&m_sortSettings);
-	m_modifiers.AddToEnd(&m_blendSettings);
-	m_modifiers.AddToEnd(&m_rotationSettings);
-	m_modifiers.AddToEnd(&m_colorSettings);
-	m_modifiers.AddToEnd(&m_alphaSettings);
-	m_modifiers.AddToEnd(&m_scaleSettings);
-	m_modifiers.AddToEnd(&m_motionParams);
-	m_modifiers.AddToEnd(&m_textureSettings);
-	m_modifiers.AddToEnd(&m_particleSettings);
 	
-	for(usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
-	{
-		(*it)->Init(pDevice, &m_guiRend);
-	}
+	m_emitterWindow.GetShapeSettings().SetShapeSettings(m_emitter.GetShapeDetails());
 
-	m_colorSettings.SetColorSelection(&m_colorSelection);
-
-	for(usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
-	{
-		(*it)->SetWidgetsFromDefinition(m_variables);
-	}
-	m_shapeSettings.SetShapeSettings(m_emitter.GetShapeDetails());
-
-	m_variables.blend.alphaTestFunc = usg::ALPHA_TEST_ALWAYS;
-	m_variables.blend.alphaTestReference = 0.0f;
-
-	m_fileList.Init("../../Data/Particle/Emitters/", ".vpb");
-	m_loadFilePaths.Init("Load Dir", m_fileList.GetFileNamesRaw(), 0);
-
-	m_colorSelection.Init(pDevice, m_scene);
-	m_colorSelection.SetPosition(1150.0f, 880.0f);
-	m_colorSelection.SetSize(240.f, 200.0f);
-
-
-	usg::DirLight* pDirLight = m_scene.GetLightMgr().AddDirectionalLight(pDevice, false);
-	usg::Color ambient(0.4f, 0.4f, 0.4f);
-	usg::Color diffuse(0.8f, 0.8f, 0.8f);
-	usg::Vector4f vDirection(0.4f, -1.0f, 0.4f, 0.0f);
-	vDirection.Normalise();
-	pDirLight->SetAmbient(ambient);
-	pDirLight->SetDiffuse(diffuse);
-	pDirLight->SetDirection(vDirection);
-	pDirLight->SwitchOn(true);
-	m_pDirLight = pDirLight;
 
 	m_bIsRunning = true;
 } 
@@ -284,22 +165,49 @@ void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
 	pDevice->WaitIdle();
 	m_effectGroup.CleanUp(pDevice);
 	m_emitter.CleanUp(pDevice);
-	m_effect.CleanUp(pDevice);
-	m_colorSelection.CleanUp(pDevice);
-	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
-	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
-	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
+	m_effectPreview.CleanUp(pDevice);
+	m_emitterPreview.CleanUp(pDevice);
+	m_emitterWindow.CleanUp(pDevice);
 	m_editorShapes.CleanUp(pDevice);
-	m_textureSettings.CleanUp(pDevice);
 	m_guiRend.CleanUp(pDevice);
-	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
-	m_scene.DeleteViewContext(m_pSceneCtxt);
-	m_scene.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()
 {
 	
+}
+
+extern uint32 g_uWindowWidth;
+extern uint32 g_uWindowHeight;
+
+void ParticleEditor::FileOption(const char* szName)
+{
+	if (strcmp("Reset Layout", szName) == 0)
+	{
+		m_guiRend.RequestWindowReset();
+	}
+	else if (strcmp("Increase Size", szName) == 0)
+	{
+		float fScale = m_guiRend.GetScale() + 0.25f;
+		if (fScale >= 2.0f)
+		{
+			m_increaseSize.SetEnabled(false);
+		}
+		m_decreaseSize.SetEnabled(true);
+		m_guiRend.SetGlobalScale(fScale);
+		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale,(g_uWindowHeight+20.f) * fScale, 0);
+	}
+	else if (strcmp("Decrease Size", szName) == 0)
+	{
+		float fScale = m_guiRend.GetScale() - 0.25f;
+		if (fScale <= 1.0f)
+		{
+			m_decreaseSize.SetEnabled(false);
+		}
+		m_increaseSize.SetEnabled(true);
+		m_guiRend.SetGlobalScale(fScale);
+		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale, (g_uWindowHeight + 20.f) * fScale, 0);
+	}
 }
 
 
@@ -309,158 +217,67 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	float fElapsed = m_timer.GetDeltaGameTime();
 	m_guiRend.PreUpdate(fElapsed);
 	m_guiRend.BufferUpdate(pDevice);
-	m_previewModel.Update(pDevice, fElapsed);
-	bool bRestart = m_previewButtons[BUTTON_RESTART].GetValue();
+	m_effectPreview.Update(pDevice, fElapsed);
+	m_emitterWindow.Update(pDevice, fElapsed);
+	m_emitterPreview.Update(pDevice, fElapsed);
 
-	if(m_previewButtons[BUTTON_PAUSE].GetValue())
-		m_bPaused = true;
+	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetPlaySpeed(), m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
-	if(m_previewButtons[BUTTON_PLAY].GetValue())
-		m_bPaused = false;
 
-	m_colorSelection.Update(pDevice, fElapsed);
 
-	m_camera.Update(fElapsed);
-	m_effectGroup.Update(pDevice, fElapsed, m_repeat.GetValue(), m_bPaused, bRestart);
-
-	if(m_previewType.GetSelected() == 0)
-	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM);
-		if (m_variables.has_cBackgroundColor && m_previewType.GetSelected() == 0)
-		{
-			m_clearColor.SetValue(m_variables.cBackgroundColor);
-		}
-	}
-	else
-	{
-		m_pSceneCtxt->SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM<<1);
-		m_clearColor.SetValue(m_effectGroup.GetBackgroundColor());
-	}
-
-	// Treating our particle effect seperately to a standard one managed by the particle mgr
-	if(m_previewType.GetSelected() == 0)
-	{
-		if(m_effect.IsAlive())
-		{
-			if(!m_bPaused)
-			{
-				m_effect.Update(fElapsed);
-			}
-		}
-		else
-		{
-			bRestart |= m_repeat.GetValue();
-		}
-	}
-
-	bool bLoad = m_loadButton.GetValue();
-	usg::U8String loadName;
-	if (m_effectGroup.LoadEmitterRequested(loadName))
-	{
-		loadName += ".vpb";
-		m_loadFilePaths.SetSelectedByName(loadName.CStr());
-		bLoad = true;
-	}
-	
+	bool bLoad = m_emitterWindow.GetLoaded();	
+	bool bRestart = m_emitterPreview.GetRestart() || (m_emitterPreview.GetRepeat() && !m_emitterPreview.GetEffect().IsAlive());
 	if(bLoad)
 	{
-		usg::U8String scriptName = "../../Data/Particle/Emitters/";
-		m_activeEdit = m_fileList.GetFileName(m_loadFilePaths.GetSelected());
-		scriptName += m_activeEdit;
-		m_saveFile.SetInput(m_fileList.GetFileName(m_loadFilePaths.GetSelected()));
-		usg::ProtocolBufferFile file(scriptName.CStr());
-		bool bReadSucceeded = file.Read(&m_variables);
-		m_emitter.SetDefinition(pDevice, m_variables);
-		if(m_variables.has_cBackgroundColor && m_previewType.GetSelected() == 0)
+		m_emitterPreview.SetReload();
+		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
+		if (m_emitterWindow.GetVariables().has_cBackgroundColor)
 		{
-			m_clearColor.SetValue(m_variables.cBackgroundColor);
+			m_effectGroup.SetBackgroundColor(m_emitterWindow.GetVariables().cBackgroundColor);
 		}
 
-		if(bReadSucceeded)
-		{
-			for(usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
-			{
-				(*it)->SetWidgetsFromDefinition(m_variables);
-			}
-		}
-
-		usg::particles::EmitterShapeDetails shapeDef;
-		bReadSucceeded = file.Read(&shapeDef);
-		m_shapeSettings.SetShapeSettings(shapeDef);
-		m_emitter.CreateEmitterShape(m_variables.eShape, shapeDef);
+		m_emitter.CreateEmitterShape(m_emitterWindow.GetVariables().eShape, *m_emitterWindow.GetShapeSettings().GetShapeDetails() );
 		bRestart = true;
 	}
+
 
 	if(bRestart)
 	{
 		usg::Matrix4x4 mEffectMat;
 		mEffectMat.LoadIdentity();
-		
+
 		//m_emitter.Init(&m_effect);
-		m_effect.Kill(true);
-		m_effect.Init(pDevice, &m_scene, mEffectMat);
+		m_emitterPreview.GetEffect().Kill(true);
+		m_emitterPreview.GetEffect().Init(pDevice, &m_emitterPreview.GetScene(), mEffectMat);
+
 		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
-		m_effect.AddEmitter(pDevice, &m_emitter);
-		
+		m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 	}
 
 	bool bUpdated = false;
-	for(usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
+	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)
 	{
-		bUpdated |= (*it)->Update(pDevice, m_variables, &m_emitter);
+		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(), &m_emitter);
 	}
 
 	if(bUpdated)
 	{
-		usg::U8String emitterName = m_activeEdit;
-		m_emitter.SetDefinition(pDevice, m_variables);
+		usg::U8String emitterName = m_emitterWindow.GetEditFileName();
+		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
 		if(emitterName.Length() > 0)
 		{
 			emitterName.TruncateExtension();
-			m_effectGroup.EmitterModified(pDevice, emitterName.CStr(), m_variables, *m_shapeSettings.GetShapeDetails());
-			if (m_previewType.GetSelected() == 1)
-			{
-				m_clearColor.SetValue(m_effectGroup.GetBackgroundColor());
-			}
+			m_effectGroup.EmitterModified(pDevice, emitterName.CStr(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
 		}
 	}
 	
-	static uint32 uFrame = 0;
-	if(uFrame > 33)
-	{
-		m_fileList.Update();
-		uFrame = 0;
-	}
-	uFrame++;
-
-	m_loadFilePaths.UpdateOptions(m_fileList.GetFileNamesRaw());
-
 	m_guiRend.PostUpdate(fElapsed);
 
-	if(m_saveButton.GetValue() && m_saveFile.GetInput()[0] != '\0')
-	{
-		usg::U8String scriptName = "../../Data/Particle/Emitters/";
-		m_activeEdit = m_saveFile.GetInput();
-		if(!m_activeEdit.HasExtension("vpb"))
-		{
-			m_activeEdit += ".vpb";
-		}
-		// TODO: If we saved as a different name to the file we were editing then re-load the existing effect group
-		// as the changes need to be discarded
-		scriptName += m_activeEdit;
-		usg::ProtocolBufferFile file(scriptName.CStr(), usg::FILE_ACCESS_WRITE);
-		bool bWritten  = file.Write(&m_variables);
-		ASSERT(bWritten);
-		bWritten = file.Write(m_shapeSettings.GetShapeDetails());
-		ASSERT(bWritten);
-	}
 
-	m_editorShapes.Update(pDevice, m_variables.eShape, m_shapeSettings.GetShapeDetails(), fElapsed);
+	m_editorShapes.Update(pDevice, m_emitterWindow.GetVariables().eShape, m_emitterWindow.GetShapeSettings().GetShapeDetails(), fElapsed);
+	m_editorShapes.Enable(m_emitterWindow.IsShapeTabOpen());
 
-	m_effect.UpdateBuffers(pDevice);
 	m_emitter.UpdateBuffers(pDevice);
-	m_scene.TransformUpdate(fElapsed);
-	m_scene.Update(pDevice);
 }
 
 void ParticleEditor::Draw(usg::GFXDevice* pDevice)
@@ -478,36 +295,22 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 
 	pGFXCtxt->ApplyDefaults();
 
+	m_effectPreview.Draw(pGFXCtxt);
+	m_emitterPreview.Draw(pGFXCtxt);
+
 	m_postFX.BeginScene(pGFXCtxt, usg::PostFXSys::TRANSFER_FLAGS_CLEAR);
 
 	bool bClearColorChanged = false;
-	if(m_clearColor.IsHovered())
-	{
-		if(usg::Input::GetMouse()->GetButton(usg::MOUSE_BUTTON_RIGHT, usg::BUTTON_STATE_PRESSED))
-		{
-			m_clearColor.SetValue( m_colorSelection.GetColor() );
-		}
-	}
-	if (m_previewType.GetSelected() == 0)
-	{
-		m_variables.cBackgroundColor = m_clearColor.GetValue();
-		m_variables.has_cBackgroundColor = true;
-	}
-	else
-	{
-		m_effectGroup.SetBackgroundColor(m_clearColor.GetValue());
-	}
 
-	m_postFX.GetInitialRT()->SetClearColor(m_clearColor.GetValue());
-	pGFXCtxt->ApplyViewport(m_previewViewport);
+	m_emitterWindow.GetVariables().cBackgroundColor = m_effectPreview.GetBackgroundColor();
+	m_emitterWindow.GetVariables().has_cBackgroundColor = true;
+
+	m_effectGroup.SetBackgroundColor(m_effectPreview.GetBackgroundColor());
+
+
+	m_postFX.GetInitialRT()->SetClearColor(m_effectPreview.GetBackgroundColor());
 	pGFXCtxt->ClearRenderTarget();
 
-	m_pSceneCtxt->PreDraw(pGFXCtxt, usg::VIEW_CENTRAL);
-	m_pSceneCtxt->DrawScene(pGFXCtxt);
-
-	pGFXCtxt->ApplyViewport(m_postFX.GetInitialRT()->GetViewport());
-	 //m_postFX.GetActiveRT()->SetClearColor(Color(1.f, 1.0f, 0.0f, 1.0f));
-	//pGFXCtxt->ClearRenderTarget( m_postFX.GetFinalRT(), RenderTarget::CLEAR_FLAG_COLOR_0 );
 	usg::RenderNode::RenderContext context;
 	context.pPostFX = &m_postFX;
 	context.eRenderPass = usg::RenderNode::RENDER_PASS_FORWARD;
@@ -516,7 +319,6 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	pGFXCtxt->RenderToDisplay(pDisplay);
 
 	m_guiRend.Draw(pGFXCtxt, context);
-	m_colorSelection.Draw(pGFXCtxt, &m_postFX);
 
 
 	if(pDisplayDRC)
@@ -545,6 +347,7 @@ void ParticleEditor::OnMessage(usg::GFXDevice* const pDevice, const uint32 messa
 		pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
 		pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
 		pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+		m_guiRend.Resize(pDevice, uWidth, uHeight);
 	}
 	break;
 	case 'WMIN':

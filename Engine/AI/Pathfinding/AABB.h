@@ -6,7 +6,7 @@
 #ifndef __USG_AI_AABB__
 #define __USG_AI_AABB__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector2f.h"
 
 namespace usg

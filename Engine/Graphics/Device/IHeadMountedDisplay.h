@@ -3,7 +3,7 @@
 //	Description: A the interface for a headmounted display
 *****************************************************************************/
 #pragma once
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Modules/ModuleInterfaces.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Maths/Quaternionf.h"

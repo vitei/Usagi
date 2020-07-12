@@ -17,6 +17,7 @@ in GeometryData
     INT_LOC(1) vec2    vo_vTexcoord[2];
     INT_LOC(3) vec2    vo_vScreenTex;
     INT_LOC(4) float   vo_fEyeDepth;
+    INT_LOC(5) float   vo_fDepthFadeClamp;
 
 } geometryData;
 
@@ -32,7 +33,9 @@ void main(void)
 	{
 		vec2 vScreenTex = clamp(vec2(0.5, 0.5) * geometryData.vo_vScreenTex.xy + vec2(0.5, 0.5), vec2(0.0, 0.0), vec2(1.0, 1.0));
 		float fDepthRead = texture(sampler14, vScreenTex).r;
-		zFade *= clamp((fDepthFade*vNearFar.y) * (fDepthRead - geometryData.vo_fEyeDepth), 0.0, 1.0);
+		float fBgDepth = (fDepthRead*vNearFar.y); 
+		float fDepthDist = min(fBgDepth - (geometryData.vo_fEyeDepth), geometryData.vo_fDepthFadeClamp);
+		zFade *= clamp( fDepthDist / fDepthFade, 0.0, 1.0);
 		//zFade *= clamp(fDepthFade * (geometryData.vo_fEyeDepth-vNearFar.z), 0.0, 1.0);
 	}
 

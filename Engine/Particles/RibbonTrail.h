@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_PARTICLES_RIBBON_TRAIL_H_
 #define _USG_ENGINE_PARTICLES_RIBBON_TRAIL_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"
@@ -25,7 +25,7 @@ public:
 	virtual void Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffect);
 	virtual void CleanUp(usg::GFXDevice* pDevice) override;
 	virtual bool Update(float fElapsed);
-	virtual bool Draw(usg::GFXContext* pContext, usg::PostFXSys* pPostFXSys);
+	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) override;
 	virtual bool ActiveParticles();
 	virtual void FreeFromPool();
 	virtual void UpdateBuffers(GFXDevice* pDevice);
@@ -33,9 +33,9 @@ public:
 	void SetDeclaration(GFXDevice* pDevice, const particles::RibbonData* pDecl);
 	uint32 GetMaxCount() { return m_uMaxLength; }
 	bool IsLargeEnough(const particles::RibbonData& decl) { return GetRequiredVerts(decl.fLifeTime) <= GetMaxCount();}
-	uint32  GetRequiredVerts(float fLifeTime) { return (uint32)(GetTargetFrameRate()*fLifeTime); }
-	float GetTargetFrameRate() { return 30.f;  }
-	float GetEmissionInterval() { return 1.f/30.f; }
+	uint32  GetRequiredVerts(float fLifeTime) { return Math::Max(2U, (uint32)(GetTargetFrameRate()*fLifeTime)); }
+	float GetTargetFrameRate() { return 60.f;  }
+	float GetEmissionInterval() { return 1.f/60.f; }
 
 	struct RibbonTrailVertex
 	{

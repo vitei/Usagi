@@ -17,12 +17,9 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 
 
 // Line adjacency so we should have 4 points
-in VertexData
-{
-    INT_LOC(0) vec3 	vo_viewPos;
-    INT_LOC(1) float 	vo_fCreateTime;
-    INT_LOC(2) float	vo_fLength;
-} vertexData[];
+ATTRIB_LOC(0) in vec3  vo_viewPos[];
+ATTRIB_LOC(1) in float vo_fCreateTime[];
+ATTRIB_LOC(2) in float vo_fLength[];
 
 
 out GeometryData
@@ -37,10 +34,10 @@ out GeometryData
 vec2 CalculateTexCoord()
 {
 	vec2 vCoord = vec2(0.0, 0.0);
-	if(vertexData[0].vo_fCreateTime < 0.0f)
+	if(vo_fCreateTime[0] < 0.0f)
 		vCoord.x = 1.0;
 
-	if(vertexData[3].vo_fCreateTime < 0.0f)
+	if(vo_fCreateTime[3] < 0.0f)
 		vCoord.y = 1.0;
 
 	return vCoord;
@@ -48,7 +45,7 @@ vec2 CalculateTexCoord()
 
 float CalculateRatio(in int vecId)
 {
-	float fTime = max(fElapsedTime - vertexData[vecId].vo_fCreateTime, 0.0);
+	float fTime = max(fElapsedTime - vo_fCreateTime[vecId], 0.0);
 	return 1.0f-min(fTime * fInvLinePersist, 1.0);
 }
 
@@ -67,8 +64,8 @@ void CreateVertex(vec3 vPos, vec4 vColor, vec2 vTexCoord)
 void CalculateForwardRight(in int firstVec, out vec3 vForward, out vec3 vRight )
 {
 	// vs stands for view space
-	vec3 vs_start = vertexData[firstVec].vo_viewPos;
-	vec3 vs_end = vertexData[firstVec+1].vo_viewPos;
+	vec3 vs_start = vo_viewPos[firstVec];
+	vec3 vs_end = vo_viewPos[firstVec+1];
 	vForward = normalize(vs_end - vs_start);
 	vec3 vToCamera = normalize(vs_start);
 	
@@ -77,8 +74,8 @@ void CalculateForwardRight(in int firstVec, out vec3 vForward, out vec3 vRight )
 
 void main(void)
 {
-	vec3 vs_start = vertexData[1].vo_viewPos;
-	vec3 vs_end = vertexData[2].vo_viewPos;
+	vec3 vs_start = vo_viewPos[1];
+	vec3 vs_end = vo_viewPos[2];
 
 	vec3 vForward, vRight, vRight2;
 	CalculateForwardRight(1, vForward, vRight);

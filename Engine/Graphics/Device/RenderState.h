@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_RENDERSTATE_H_
 #define _USG_GRAPHICS_DEVICE_RENDERSTATE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Resource/ResourceDecl.h"
@@ -54,6 +54,8 @@ public:
 
 	CullFace		eCullFace;
 	float			fDepthBias;
+	float			fLineWidth;
+	bool			bLineSmooth;
 	bool			bUseDepthBias;
 	bool			bMultisample;
 	bool			bWireframe;
@@ -83,7 +85,9 @@ public:
 		AC_MEMORY_READ = (1 << 0),
 		AC_COLOR_ATTACHMENT_READ = (1 << 1),
 		AC_COLOR_ATTACHMENT_WRITE = (1 << 2),
-		AC_SHADER_READ_BIT = (1<<3)
+		AC_SHADER_READ_BIT = (1<<3),
+		AC_SHADER_WRITE_BIT = (1<<4),	// Image store rather than write as attachment
+		AC_TRANSFER_WRITE_BIT = (1<<5)
 	};
 
 	enum AttachmentLoadOp

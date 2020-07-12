@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_RIBBON_INSTANCE_H_
 #define _USG_PARTICLE_EDITOR_RIBBON_INSTANCE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Particles/RibbonTrail.h"
 #include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Engine/GUI/GuiItems.h"
@@ -16,7 +16,7 @@ public:
 	RibbonInstance() {}
 	~RibbonInstance() {}
 
-	void Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pGroup, uint32 uIndex, ColorSelection* pSelection);
+	void Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pGroup, uint32 uIndex);
 	void CleanUp(usg::GFXDevice* pDevice);
 	bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	void AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonData* pInstance = NULL);
@@ -48,7 +48,6 @@ private:
 	usg::GUIFloat				m_scale;
 	
 	usg::GUIButton				m_removeTrailButton;
-	ColorSelection*				m_pColorSelection;
 	// TODO: Add the ribbon trail visualiser
 
 	usg::RibbonTrail			m_trail;

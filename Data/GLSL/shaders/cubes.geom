@@ -9,6 +9,11 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
 	float  vLighting;
 };
 
+BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
+{
+    mat3x4  mModelMat;
+};
+
 
 in VertexData {
     ATTRIB_LOC(0) vec3    vo_vScale;

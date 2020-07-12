@@ -6,6 +6,8 @@
 #include API_HEADER(Engine/Graphics/Device, AlphaState.h)
 #include API_HEADER(Engine/Graphics/Device, DepthStencilState.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
+#include API_HEADER(Engine/Graphics/Device, VkGPUHeap.h)
+#include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
 #include API_HEADER(Engine/Oculus, OculusVKExport.h)
 #include "Engine/Graphics/Device/GFXDevice.h" 
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h" 
@@ -14,6 +16,18 @@
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
 
+// Note disable for render doc builds, otherwise VK_EXT_validation_features extension will topple the replay
+#ifdef DEBUG_BUILD
+#define USE_VALIDATION
+#endif
+
+#ifndef FINAL_BUILD
+#define USE_DEBUG_MARKERS
+#endif
+
+// 256MB per alloc is recommended
+// Sometimes this won't be big enough for a single allocation so pools larger than this are possible
+static const memsize g_sPoolAllocSize = 256 * 1024 * 1024;
 
 namespace usg {
 
@@ -33,6 +47,7 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_R16_SFLOAT,						// CF_R_16F,
 	VK_FORMAT_R16G16_SFLOAT,					// CF_RG_16F,
 	VK_FORMAT_R8_UNORM,							// CF_R_8
+	VK_FORMAT_R8G8_UNORM,						// CF_RG_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
 	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
@@ -59,6 +74,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT },															// CF_R_16F,
 	{ VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },												// CF_RG_16F,
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
+	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
 	{ },																									// CF_SRGBA
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
@@ -203,6 +219,8 @@ GFXDevice_ps::~GFXDevice_ps()
 
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
+	// Cleanup any requested destroys before destroying the device
+	CleanupDestroyRequests();
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
 
@@ -213,6 +231,42 @@ GFXDevice_ps::~GFXDevice_ps()
 		m_pQueueProps = NULL;
 	}
 	
+}
+
+void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
+{	
+	// Handle case that we've wrapped around
+	uint32 uCurrentFrame = m_pParent->GetFrameCount();
+	
+	while(!m_destroyQueue.empty())
+	{
+		DestroyRequest& req = m_destroyQueue.front();
+		if (req.uDestroyReqFrame <= uMaxFrameId || req.uDestroyReqFrame > uCurrentFrame)
+		{
+			switch (req.eResourceType)
+			{
+				case RESOURCE_BUFFER:
+					vkDestroyBuffer(m_vkDevice, req.resource.buffer, nullptr);
+				break;
+				case RESOURCE_IMAGE_VIEW:
+					vkDestroyImageView(m_vkDevice, req.resource.imageView, nullptr);
+				break;
+				case RESOURCE_IMAGE:
+					vkDestroyImage(m_vkDevice, req.resource.image, nullptr);
+				break;
+				case RESOURCE_DESCRIPTOR_SET:
+					vkFreeDescriptorSets(m_vkDevice, req.resource.desc.pool, 1, &req.resource.desc.set);
+				break;
+				default:
+					ASSERT(false);
+			}
+			m_destroyQueue.pop();
+		}
+		else
+		{
+			break;
+		}
+	}
 }
 
 void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::ExtensionType eType, vector<const char*>& extensions)
@@ -295,21 +349,30 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Instance, extensions);
 
-#ifdef DEBUG_BUILD
-	int validationLayerCount = 1;
+	// initialize the VkInstanceCreateInfo structure
+	VkInstanceCreateInfo inst_info = {};
+	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#ifdef USE_VALIDATION
 	const char *validationLayerNames[] =
 	{
-		"VK_LAYER_LUNARG_standard_validation" /* Enable validation layers in debug builds to detect validation errors */
+		"VK_LAYER_KHRONOS_validation" /* Enable validation layers in debug builds to detect validation errors */
 	};
+	int validationLayerCount = ARRAY_SIZE(validationLayerNames);
+
+	VkValidationFeatureDisableEXT disabledValidation[] = { VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT, VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT };
+	VkValidationFeaturesEXT validation = {};
+	validation.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+	validation.disabledValidationFeatureCount = 2;
+	validation.pDisabledValidationFeatures = disabledValidation;
+
+	//extensions.push_back("VK_EXT_validation_features");
+	//inst_info.pNext = &validation;
+
 #else
 	int validationLayerCount = 0;
 	const char *validationLayerNames[1] = {};
 #endif
 
-	// initialize the VkInstanceCreateInfo structure
-	VkInstanceCreateInfo inst_info = {};
-	inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	inst_info.pNext = NULL;
 	inst_info.flags = 0;
 	inst_info.pApplicationInfo = &app_info;
 	inst_info.enabledExtensionCount = (uint32)extensions.size();
@@ -418,11 +481,34 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.textureCompressionBC = VK_TRUE;
 	enabledFeatures.fillModeNonSolid = VK_TRUE;
 	enabledFeatures.independentBlend = VK_TRUE;
+	enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
 
 
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
+#ifdef USE_DEBUG_MARKERS
+	
+	bool bExtensionPresent = false;
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, nullptr);
+	usg::vector<VkExtensionProperties> deviceExt(extensionCount);
+	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, deviceExt.data());
+	for (auto extension : deviceExt) {
+		if (strcmp(extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0) {
+			bExtensionPresent = true;
+			break;
+		}
+	}
+
+	if(bExtensionPresent)
+	{
+		extensions.push_back("VK_EXT_debug_marker");
+	}
+#endif
+
+	// Smooth lines are hugely helpful, but not online until 1.1.117
+	//extensions.push_back("VK_EXT_line_rasterization");
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
@@ -591,6 +677,12 @@ void GFXDevice_ps::Begin()
 		m_pParent->GetDisplay(i)->GetPlatform().SwapBuffers(m_pParent);
 	}
 
+	// Safe to take out resources older than max dynamic buffers
+	if(m_pParent->GetFrameCount() > GFX_NUM_DYN_BUFF)
+	{
+		CleanupDestroyRequests( m_pParent->GetFrameCount() - GFX_NUM_DYN_BUFF );
+	}
+
 	// TODO: Update GPU time
 }
 
@@ -638,43 +730,160 @@ const VkPhysicalDevice GFXDevice_ps::GetGPU(uint32 uIndex) const
 
 uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags properties, VkMemoryPropertyFlags prefferedProps) const
 {
+	uint32 uMemoryType = 0;
 	prefferedProps |= properties;
-	
-	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
-	{
-		if (((typeBits >> uMemoryType) && 1) == 1)
-		{
-			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
 
-			if ((type.propertyFlags & prefferedProps) == prefferedProps)
+	bool bFound = false;
+	bool bPrefferedFound = false;
+	uint32 uCurrentHeapSize = 0;
+
+	for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i)
+	{
+		if (typeBits & 0x1)
+		{
+			uint32 uHeapIdx = m_memoryProperites[0].memoryTypes[i].heapIndex;
+			uint32 uHeapSize = (uint32)m_memoryProperites[0].memoryHeaps[uHeapIdx].size;
+			bool bPreferred = ((m_memoryProperites[0].memoryTypes[i].propertyFlags & prefferedProps) == prefferedProps);
+
+			if ((m_memoryProperites[0].memoryTypes[i].propertyFlags & properties) == properties)
 			{
-				return uMemoryType;
+				if (!bFound)
+				{
+					uMemoryType = i;
+					bFound = true;
+					bPrefferedFound = (m_memoryProperites[0].memoryTypes[i].propertyFlags & prefferedProps) == prefferedProps;
+				}
+				else if ( !bPrefferedFound && bPreferred)
+				{
+					uMemoryType = i;
+					bPrefferedFound = true;
+				}
+				else
+				{
+					// Compare the size
+					if (uHeapSize > uCurrentHeapSize && (bPreferred || !bPrefferedFound) )
+					{
+						uMemoryType = i;
+						bPrefferedFound = bPreferred;
+					}
+
+				}
+
+				if (uMemoryType == i)
+				{
+					uCurrentHeapSize = uHeapSize;
+				}
 			}
 		}
+
+		typeBits >>= 1;
 	}
 
-
-	for (uint32 uMemoryType = 0; uMemoryType < VK_MAX_MEMORY_TYPES; ++uMemoryType)
+	if (bFound)
 	{
-		if ( ((typeBits >> uMemoryType) && 1) == 1)
-		{
-			const VkMemoryType& type = m_memoryProperites[0].memoryTypes[uMemoryType];
-
-			if ((type.propertyFlags & properties) == properties)
-			{
-				return uMemoryType;
-			}
-		}
+		return uMemoryType;
 	}
 
 	ASSERT(false);
-	return ~0U;
+	return USG_INVALID_ID;
+}
+
+bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
+{
+	uint32 uHeap = USG_INVALID_ID;
+	uint32 uMemType = pAllocInOut->GetPoolId();
+	
+	for(memsize i=0; i<m_memoryPools[uMemType].heaps.size(); i++)
+	{
+		if (pAllocInOut->NeedsDynamicCPUMap() == m_memoryPools[uMemType].heaps[i]->IsDynamic() && m_memoryPools[uMemType].heaps[i]->CanAllocate(m_pParent, pAllocInOut))
+		{
+			uHeap = (uint32)i;
+			break;
+		}
+	}
+
+	if (uHeap == USG_INVALID_ID)
+	{
+		VkGPUHeap* pHeap = vnew(ALLOC_POOL) VkGPUHeap;
+		uint32 uHeapIdx = m_memoryProperites[0].memoryTypes[uMemType].heapIndex;
+		// Use the pool alloc size unless it's larger than 1/4 of the total memory
+		memsize uSize = usg::Math::Min(m_memoryProperites[0].memoryHeaps[uHeapIdx].size / 4, g_sPoolAllocSize);
+		// Force the image size to be aligned up (re-using the render target memory atm which has this requirement)
+		memsize uImageSize = AlignSizeUp(pAllocInOut->GetSize(), pAllocInOut->GetAlign());
+		// If this single object is larger, set it to that
+		uSize = usg::Math::Max(uSize, uImageSize);
+		pHeap->AllocData(m_vkDevice, uMemType, uSize, pAllocInOut->NeedsDynamicCPUMap());
+		uHeap = (uint32)(m_memoryPools[uMemType].heaps.size());
+		m_memoryPools[uMemType].heaps.push_back(pHeap);
+	}
+
+	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(m_pParent, pAllocInOut) )
+	{
+		m_memoryPools[uMemType].heaps[uHeap]->AddAllocator(m_pParent, pAllocInOut);
+		return true;
+	}
+
+	ASSERT(false);
+
+	return false;
+}
+
+void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_BUFFER;
+	req.resource.buffer = buffer;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_IMAGE_VIEW;
+	req.resource.imageView = imageView;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyImage(VkImage image)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_IMAGE;
+	req.resource.image = image;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_SET;
+	req.resource.desc.set = set;
+	req.resource.desc.pool = pool;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
+{
+	uint32 uMemType = pAllocInOut->GetPoolId();
+	for (uint32 i = 0; i < m_memoryPools[uMemType].heaps.size(); i++)
+	{
+		if (m_memoryPools[uMemType].heaps[i]->GetMemory() == pAllocInOut->GetMemory())
+		{
+			m_memoryPools[uMemType].heaps[i]->RemoveAllocator(m_pParent, pAllocInOut);
+			return;
+		}
+	}
 }
 
 
 void GFXDevice_ps::WaitIdle()
 {
 	vkDeviceWaitIdle(m_vkDevice);
+	// Safe to clean up any destroy requests
+	CleanupDestroyRequests();
 }
 
 VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)

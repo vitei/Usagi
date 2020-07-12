@@ -3,11 +3,12 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_GFXDEVICE_
 #define _USG_GRAPHICS_PC_GFXDEVICE_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/RenderNode.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
+#include "Engine/Core/stl/queue.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 #ifdef DEBUG_BUILD
@@ -21,6 +22,8 @@ class RasterizerState;
 class DepthStencilState;
 class Viewport;
 class GFXDevice;
+class VkGPUHeap;
+class VkMemAllocator;
 
 void SetImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkImageSubresourceRange subresourceRange, 
 	VkPipelineStageFlags srcFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dstFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
@@ -70,15 +73,36 @@ public:
 
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
 
+	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
+	bool AllocateMemory(VkMemAllocator* pAllocInOut);
+	void FreeMemory(VkMemAllocator* pAllocInOut);
+
+	void ReqDestroyBuffer(VkBuffer buffer);
+	void ReqDestroyImageView(VkImageView buffer);
+	void ReqDestroyImage(VkImage image);
+	void ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set);
+
+
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
+	void CleanupDestroyRequests(uint32 uMaxFrameId = UINT_MAX);
+
 	enum
 	{
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
 		CALLBACK_COUNT = 2
 	};
+
+	enum ResourceType
+	{
+		RESOURCE_BUFFER = 0,
+		RESOURCE_IMAGE_VIEW,
+		RESOURCE_DESCRIPTOR_SET,
+		RESOURCE_IMAGE
+	};
+
 
 	// FIXME: Refactor to use the resource manager when we stop supporting platforms that precompile into one unit
 	struct Shader
@@ -88,6 +112,32 @@ private:
 		VkShaderModule			module;
 	};
 
+	struct MemoryPool
+	{
+		usg::vector<VkGPUHeap*> heaps;
+	};
+
+	struct DestroyRequest
+	{
+		ResourceType	eResourceType;
+		uint32			uDestroyReqFrame;
+
+		union Resource
+		{
+			VkBuffer	buffer;
+			VkImageView imageView;
+			VkImage		image;
+			struct Descriptor
+			{
+				// TODO: The device should probably own the pools
+				VkDescriptorPool pool;
+				VkDescriptorSet  set;
+			} desc;
+		} resource;
+	};
+
+
+	usg::queue<DestroyRequest>			m_destroyQueue;
 	VkFormat							m_colorFormats[CF_COUNT];
 
 	GFXDevice*							m_pParent;
@@ -114,6 +164,8 @@ private:
 
 	DisplaySettings						m_diplayInfo[MAX_DISPLAY_COUNT];
 	uint32								m_uDisplayCount;
+
+	MemoryPool							m_memoryPools[VK_MAX_MEMORY_TYPES];
 
 	float		m_fGPUTime;
 };

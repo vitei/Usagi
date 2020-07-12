@@ -38,6 +38,7 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 	vec4	vHemGroundColor;
 	vec4	vHemisphereDir;
 	vec4	vShadowColor;
+	float   fTargetAspect;
 };
 #elif defined(OMNI_DEPTH)
 BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
@@ -51,14 +52,6 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 {
 	mat4 	mProjMat;
 	mat4 	mViewMat;
-};
-#endif
-
-
-#ifndef OVERRIDE_TRANS
-BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
-{
-	mat3x4	mModelMat;
 };
 #endif
 

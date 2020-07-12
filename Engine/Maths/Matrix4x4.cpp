@@ -57,6 +57,11 @@ void Matrix4x4::LoadIdentity(void)
 	_11 = _22 = _33 = _44 = 1.0f;
 }
 
+void Matrix4x4::Clear()
+{
+	MemSet(&_11, 0, sizeof(Matrix4x4));
+}
+
 void Matrix4x4::Copy( const float* in )
 {
 	MemCpy(m, in, sizeof(float)*16);
@@ -150,11 +155,12 @@ void Matrix4x4::MakeRotateYPR(float yaw, float pitch, float roll)
 }
 
 
-void Matrix4x4::Inverse()
+const Matrix4x4& Matrix4x4::Inverse()
 {
 	Matrix4x4 mTmp;
 	GetInverse(mTmp);
 	*this = mTmp;
+	return *this;
 }
 
 float Matrix4x4::Determinant() const
@@ -166,6 +172,20 @@ float Matrix4x4::Determinant() const
 	Vector4f minor = CrossProduct4D(v1, v2, v3);
 
 	return - (_14 * minor.x + _24 * minor.y + _34 * minor.z + _44 * minor.w);
+}
+
+void Matrix4x4::Orthonormalize()
+{
+	usg::Matrix3x3 mRot = *this;
+	mRot.Orthonormalize();
+
+	for (uint32 i = 0; i < 3; i++)
+	{
+		for (uint32 j = 0; j < 3; j++)
+		{
+			M[i][j] = mRot.M[i][j];
+		}
+	}
 }
 
 void Matrix4x4::GetQuickInverse(Matrix4x4& out) const
@@ -337,6 +357,59 @@ void Matrix4x4::Scale( float x, float y, float z, float w )
     SetUp(vUp() * y);
     SetFace(vFace() * z);
     SetPos(vPos() * w);
+}
+
+
+Matrix4x4 Matrix4x4::operator + (const Matrix4x4 rhs) const
+{
+	Matrix4x4 tmpMatrix;
+
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			tmpMatrix[i][j] =(M[i][j] + rhs.M[i][j]);
+		}
+	}
+	return tmpMatrix;
+}
+
+Matrix4x4& Matrix4x4::operator += (const Matrix4x4 rhs)
+{
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			M[i][j] = (M[i][j] + rhs.M[i][j]);
+		}
+	}
+	return *this;
+}
+
+Matrix4x4 Matrix4x4::operator * (float fRhs) const
+{
+	Matrix4x4 tmpMatrix;
+
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			tmpMatrix[i][j] = (M[i][j] * fRhs);
+		}
+	}
+	return tmpMatrix;
+}
+
+Matrix4x4& Matrix4x4::operator *= (float fRhs)
+{
+	for (uint32 i = 0; i < 4; i++)
+	{
+		for (uint32 j = 0; j < 4; j++)
+		{
+			M[i][j] *= fRhs;
+		}
+	}
+	return *this;
 }
 
 Matrix4x4 Matrix4x4::operator *= ( Matrix4x4 rhs )

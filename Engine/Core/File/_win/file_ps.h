@@ -32,6 +32,8 @@ public:
 	memsize GetSize();
 
 	static FILE_STATUS FileStatus(const char* szName, const FILE_TYPE eFileType = FILE_TYPE_RESOURCE);
+	static bool UserFileOpenPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result);
+	static bool UserFileSavePath(const FileOpenPath& pathIn, FilePathResult& result);
 	static bool CreateFileDirectory(const char* szName, FILE_TYPE eFileType);
 	static bool Delete(const char* szName, FILE_TYPE eFileType);
 	// Note: The 'maximumFileCount' parameter is ignored on this platform
@@ -42,8 +44,8 @@ public:
 	static void Unmount(FILE_TYPE eMode, bool bSave) {  }
 
 private:
-	File_ps(const File_ps& File) {};
-	const File_ps& operator=(const File_ps& src);
+	PRIVATIZE_COPY(File_ps)
+
 	FILE*	m_pFile;
 
 };

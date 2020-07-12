@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_RENDERTARGET_H
 #define _USG_GRAPHICS_PC_RENDERTARGET_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
 #include "Engine/Graphics/Device/RenderState.h"
@@ -42,17 +42,20 @@ public:
 	const VkClearValue* GetClearValues() const { return m_colorClearValues; }
 	const VkFramebuffer& GetFrameBuffer() const { return m_framebuffer; }
 	const VkFramebuffer& GetLayerFrameBuffer(uint32 uLayer) const { return m_layerInfo[uLayer].frameBuffer;	}
+	const VkFramebuffer& GetMipFrameBuffer(uint32 uMip) const { return m_mipInfo[uMip].frameBuffer; }
 
 private:
+	void FreeFramebuffers(GFXDevice* pDevice);
 
-	struct LayerInfo
+	struct SubBufferInfo
 	{
 		VkFramebufferCreateInfo createInfo;
 		VkFramebuffer			frameBuffer;
 	};
 	// Color + depth for the clear
 	VkFramebufferCreateInfo m_fbCreateInfo;
-	vector<LayerInfo> m_layerInfo;
+	vector<SubBufferInfo> m_layerInfo;
+	vector<SubBufferInfo> m_mipInfo;
 	vector<VkImageView>	m_imageViews;
 	VkFramebuffer	m_framebuffer;
 	VkClearValue	m_colorClearValues[MAX_COLOR_TARGETS+1];

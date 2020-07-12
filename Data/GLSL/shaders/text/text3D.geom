@@ -16,6 +16,7 @@ ATTRIB_LOC(4) in vec4 vo_vColorUpper[];
 ATTRIB_LOC(5) in vec4 vo_vColorLower[];
 ATTRIB_LOC(6) in vec4 vo_vColorBg[];
 ATTRIB_LOC(7) in vec4 vo_vTexCoordRange[];
+ATTRIB_LOC(10) in vec4 vo_vColorFg[];
 
 // 3d position data
 ATTRIB_LOC(8) in float vo_fVisiblity[];
@@ -26,6 +27,7 @@ ATTRIB_LOC(0) out vec2 go_vPos;
 ATTRIB_LOC(1) out vec4 go_vColor;
 ATTRIB_LOC(2) out vec4 go_vBgColor;
 ATTRIB_LOC(3) out vec2 go_vTexCoord;
+ATTRIB_LOC(4) out vec4 go_vFgColor;
 
 void CreateVertex(vec3 vLayoutPos, vec2 vTexCoord, vec4 color)
 {
@@ -42,6 +44,7 @@ void CreateVertex(vec3 vLayoutPos, vec2 vTexCoord, vec4 color)
 	go_vColor 		= vColor;	
 	go_vTexCoord	= vTexCoord;
 	go_vBgColor = vo_vColorBg[0];
+	go_vFgColor = vo_vColorFg[0];
 
 	EmitVertex();
 }

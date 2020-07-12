@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef _USG_CORE_CONTAINERS_SAFE_POINTER_H_
 #define	_USG_CORE_CONTAINERS_SAFE_POINTER_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Memory/ArrayPool.h"
 
 

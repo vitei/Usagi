@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_PC_GFXCONTEXT_
 #define _USG_GRAPHICS_PC_GFXCONTEXT_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
@@ -45,6 +45,7 @@ public:
 	void DisableScissor(const RenderTarget* pActiveTarget, uint32 uLeft, uint32 uBottom, uint32 uWidth, uint32 uHeight, const GFXBounds& targetBounds);
 	void SetRenderTarget(const RenderTarget* pTarget);
 	void SetRenderTargetLayer(const RenderTarget* pTarget, uint32 uLayers);
+	void SetRenderTargetMip(const RenderTarget* pTarget, uint32 uMip);
 	void EndRTDraw(const RenderTarget* pTarget);
 	void RenderToDisplay(Display* pDisplay, uint32 uClearFlags);
 
@@ -52,6 +53,7 @@ public:
 	void SetDescriptorSet(const DescriptorSet* pSet, uint32 uIndex);
 
 	void ClearRenderTarget(RenderTarget* pRT, uint32 uFlags);
+	void ClearImage(const TextureHndl& texture, const Color& col);
 
 	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);
@@ -59,8 +61,8 @@ public:
 
 	void SetBlendColor(const Color& color);
 
-	void BeginGPUTag(const char* szName) {}
-	void EndGPUTag() {}
+	void BeginGPUTag(const char* szName, const Color& color);
+	void EndGPUTag();
 	void EnableProfiling(bool bProfile) {}
 	void UpdateDescriptors(const PipelineStateHndl& activePipeline, const DescriptorSet** pDescriptors, uint32 uDirtyFlags);
 
@@ -74,6 +76,9 @@ private:
 	GFXContext*			m_pParent;
 	VkCommandBuffer		m_cmdBuff;
 	VkPipelineLayout	m_pipelineLayout;
+
+	PFN_vkCmdDebugMarkerBeginEXT m_pfnCmdDebugMarkerBegin;
+	PFN_vkCmdDebugMarkerEndEXT m_pfnCmdDebugMarkerEnd;
 };
 
 }

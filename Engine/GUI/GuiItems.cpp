@@ -6,16 +6,32 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "GuiItems.h"
 #include "Engine/Core/String/String_Util.h"
+#include <commdlg.h>
 
 namespace usg
 {
 
-	GUIItem::GUIItem()
+	const float GUIItem::ms_fToolTipDelay = 1.0f;
+
+	usg::vector<usg::FileOpenPath::Filter> GetFiltersFromString(const usg::vector<usg::string>& string)
 	{
-		m_szName[0] = '\0';
-		m_bVisible = true;
-		m_bSameLine = false;
-		m_bHovered = false;
+		usg::vector<usg::FileOpenPath::Filter> filters;
+		filters.resize(string.size() / 2);
+		for (size_t i = 0; i < filters.size(); i++)
+		{
+			filters[i].szDisplayName = string[i * 2].c_str();
+			filters[i].szExtPattern = string[(i * 2) + 1].c_str();
+		}
+		return filters;
+	}
+
+	GUIItem::GUIItem()
+		: m_pCallbacks(nullptr)
+		, m_bSameLine(false)
+		, m_bHovered(false)
+		, m_bVisible(true)
+		, m_szName{}
+	{
 	}
 
 	GUIItem::~GUIItem()
@@ -25,7 +41,15 @@ namespace usg
 
 	void GUIItem::InitBase(const char* szName)
 	{
-		str::Copy(m_szName, szName, USG_IDENTIFIER_LEN);
+		str::Copy(m_szName, szName, sizeof(m_szName));
+	}
+
+	void GUIItem::CommonDraw()
+	{
+		if (m_toolTip.size() > 0 && m_bHovered && ((ImGui::GetTime() - m_fNewHoverTime) > ms_fToolTipDelay) )
+		{
+			ImGui::SetTooltip(m_toolTip.c_str());
+		}
 	}
 
 	void GUIItem::UpdateBase()
@@ -37,6 +61,7 @@ namespace usg
 	}
 
 	GUIButton::GUIButton()
+		: m_vScale(1.0f, 1.0f)
 	{
 		m_bHasTexture = false;
 		m_bTexDescValid = false;
@@ -96,13 +121,13 @@ namespace usg
 		}
 	}
 
-	bool GUIButton::UpdateAndAddToDrawList()
-	{
+	bool GUIButton::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bResult = false;
 		UpdateBase();
 		if(m_bHasTexture)
 		{
-			Vector2f vScale = m_vUVMax - m_vUVMin;
+			Vector2f vScale = (m_vUVMax - m_vUVMin) * m_vScale * ctxt.fScale;
 			ImVec2 vSize((float)m_pTexture->GetWidth()*vScale.x, (float)m_pTexture->GetHeight()*vScale.y);
 			ImVec2 vUVMin(m_vUVMin.x, m_vUVMin.y);
 			ImVec2 vUVMax(m_vUVMax.x, m_vUVMax.y);
@@ -117,10 +142,91 @@ namespace usg
 		return bResult;
 	}
 
+	void GUIMenuItem::Init(const char* szName, const char* szShortCut)
+	{
+		InitBase(szName);
+		if (szShortCut)
+		{
+			m_szShortCut = szShortCut;
+		}
+	}
+
+	void GUIMenuItem::Run()
+	{
+		if (m_pCallbacks)
+		{
+			m_pCallbacks->FileOption(m_szName);
+		}
+	}
+
+	bool GUIMenuItem::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
+		if (ImGui::MenuItem(GetName(), m_szShortCut.c_str(), false, m_bEnabled))
+		{
+			Run();
+		}
+		
+		return false;
+	}
+
+	void GUIMenuLoadSave::AddFilter(const char* szDisplay, const char* szPattern)
+	{
+		m_filterStrings.push_back(usg::string(szDisplay));
+		m_filterStrings.push_back(usg::string(szPattern));
+	}
+
+	void GUIMenuLoadSave::SetExtension(const char* szExt)
+	{
+		m_szExt = szExt;
+	}
+
+	void GUIMenuLoadSave::Run()
+	{
+		usg::vector<usg::FileOpenPath::Filter> filters = GetFiltersFromString(m_filterStrings);
+
+		FileOpenPath fileName;
+		fileName.szWindowTitle = m_szName;
+		fileName.szDefaultExt = m_szExt.size() > 0 ? m_szExt.c_str() : nullptr;
+		fileName.pFilters = filters.data();
+		fileName.uFilterCount = (uint32)filters.size();
+		fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
+
+		if (m_bSave)
+		{
+			FilePathResult result;
+			if (File::UserFileSavePath(fileName, result))
+			{
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->SaveCallback(m_szName, result.szPath, result.szRelativePath);
+				}
+			}
+		}
+		else
+		{
+			usg::vector<FilePathResult> result;
+			if (File::UserFileOpenPath(fileName, result))
+			{
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->LoadCallback(m_szName, result[0].szPath, result[0].szRelativePath);
+				}
+				m_lastResult.fileName = result[0].szPath;
+				m_lastResult.relFileName = result[0].szRelativePath;
+			}
+		}
+
+	}
+
 	void GUIText::Init(const char* szName)
 	{
 		InitBase(szName);
 		m_color.Assign(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	void GUIText::SetText(const char* szName)
+	{
+		InitBase(szName);
 	}
 
 	void GUIText::SetColor(const Color& color)
@@ -128,13 +234,74 @@ namespace usg
 		m_color = color;
 	}
 
-	bool GUIText::UpdateAndAddToDrawList()
+	bool GUIText::UpdateAndAddToDrawList(const GUIContext& ctxt)
 	{
+		UpdateBase();
+
 		const Color& col = GetColor();
 		ImVec4 imColor(col.r(), col.g(), col.b(), col.a());
 		ImGui::TextColored(imColor, GetName());
 
+		CommonDraw();
+
 		return false;
+	}
+
+	GUILoadButton::GUILoadButton()
+	{
+		m_bAllowMultiple = false;
+	}
+
+	GUILoadButton::~GUILoadButton()
+	{
+
+	}
+
+	void GUILoadButton::AddFilter(const char* szDisplay, const char* szPattern)
+	{
+		m_filterStrings.push_back(usg::string(szDisplay));
+		m_filterStrings.push_back(usg::string(szPattern));
+	}
+
+	bool GUILoadButton::UpdateAndAddToDrawList(const GUIContext& ctxt)
+	{
+		if (Inherited::UpdateAndAddToDrawList(ctxt))
+		{
+			auto filters = GetFiltersFromString(m_filterStrings);
+			FileOpenPath fileName;
+			usg::vector<FilePathResult> result;
+			fileName.szWindowTitle = m_szName;
+			fileName.szDefaultExt = m_szExt.size() > 0 ? m_szExt.c_str() : nullptr;
+			fileName.pFilters = filters.data();
+			fileName.uFilterCount = (uint32)filters.size();
+			fileName.szOpenDir = m_szPath.size() > 0 ? m_szPath.c_str() : nullptr;
+			fileName.bAllowMulti = m_bAllowMultiple;
+
+			if (File::UserFileOpenPath(fileName, result))
+			{
+				if (m_pCallbacks)
+				{
+					m_pCallbacks->LoadCallback(m_szName, result[0].szPath, result[0].szRelativePath);
+					if (m_bAllowMultiple)
+					{
+						m_pCallbacks->MultiLoadCallback(m_szName, result);
+					}
+				}
+				m_lastResult.fileName = result[0].szPath;
+				m_lastResult.relFileName = result[0].szRelativePath;
+			}
+			else
+			{
+				// Pretend this button wasn't pressed
+				SetValue(false);
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void GUIColorSelect::Init(const char* szName)
@@ -154,8 +321,8 @@ namespace usg
 		m_color[3] = color.a() *255.f;
 	}
 
-	bool GUIColorSelect::UpdateAndAddToDrawList()
-	{
+	bool GUIColorSelect::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
 		Color cReturn = GetValue();
 		bool bChanged = ImGui::ColorEdit4(GetName(), cReturn.m_rgba);
@@ -266,8 +433,8 @@ namespace usg
 		}
 	}
 
-	bool GUIComboBox::UpdateAndAddToDrawList()
-	{
+	bool GUIComboBox::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		int out = m_uSelected;
 		bool bChanged = false;
 		if(m_uItems == USG_INVALID_ID)
@@ -313,8 +480,8 @@ namespace usg
 		m_fMaxValue = fMax;
 	}
 
-	bool GUISlider::UpdateAndAddToDrawList()
-	{
+	bool GUISlider::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 
@@ -345,10 +512,11 @@ namespace usg
 		m_bValue = bDefault;
 	}
 	
-	bool GUICheckBox::UpdateAndAddToDrawList()
-	{
+	bool GUICheckBox::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
-		return ImGui::Checkbox(m_szName, &m_bValue);
+		bool bRet =  ImGui::Checkbox(m_szName, &m_bValue);
+		return bRet;
 	}
 
 	void GUIIntInput::Init(const char* szName, int* pDefaults, const uint32 uCount, const int iMin, const int iMax)
@@ -369,8 +537,8 @@ namespace usg
 		}
 	}
 	
-	bool GUIIntInput::UpdateAndAddToDrawList()
-	{
+	bool GUIIntInput::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 
@@ -398,7 +566,7 @@ namespace usg
 	}
 	GUITexture::GUITexture()
 	{
-		m_pTexture = NULL;
+		m_pTexture = nullptr;
 		m_bDescValid = false;
 		m_vUVMin.Assign(0.0f, 0.0f);
 		m_vUVMax.Assign(1.0f, 1.0f);
@@ -458,16 +626,18 @@ namespace usg
 		m_descriptor.UpdateDescriptors(pDevice);
 	}
 	
-	bool GUITexture::UpdateAndAddToDrawList()
-	{
+	bool GUITexture::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
-		ImVec2 vSize(m_vScale.x, m_vScale.y);
+		ImVec2 vSize(m_vScale.x * ctxt.fScale, m_vScale.y * ctxt.fScale);
 		ImVec2 vUV0(m_vUVMin.x, m_vUVMin.y);
 		ImVec2 vUV1(m_vUVMax.x, m_vUVMax.y);
 		ImVec4 vBorder(1.0f, 1.0f, 1.0f, 1.0f);
 		ImVec4 vTint(1.0f, 1.0f, 1.0f, 1.0f);
-		if(m_bDescValid)
+		if (m_bDescValid)
+		{
 			ImGui::Image((void*)&m_descriptor, vSize, vUV0, vUV1, vTint, vBorder);
+		}
 
 		return false;
 	}
@@ -495,16 +665,16 @@ namespace usg
 		str::Copy(m_input, szData, sizeof(m_input));
 	}
 
-	bool GUITextInput::UpdateAndAddToDrawList()
-	{
+	bool GUITextInput::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		UpdateBase();
 		m_bUpdated = ImGui::InputText(m_szName, m_input, sizeof(m_input));
 
 		return m_bUpdated;
 	}
 	
-	bool GUIFloat::UpdateAndAddToDrawList()
-	{
+	bool GUIFloat::UpdateAndAddToDrawList(const GUIContext& ctxt)
+{
 		bool bChanged = false;
 		UpdateBase();
 		switch(m_uCount)

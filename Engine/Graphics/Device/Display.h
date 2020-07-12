@@ -6,7 +6,7 @@
 
 #ifndef USG_GRAPHICS_DISPLAY_H
 #define USG_GRAPHICS_DISPLAY_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include API_HEADER(Engine/Graphics/Device, Display_ps.h)
 
@@ -45,11 +45,13 @@ public:
 	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
 
 	Display_ps& GetPlatform() { return m_platform; }
+	WindHndl GetHandle() const { return m_window; }
 
 private:
 	PRIVATIZE_COPY(Display)
 
 	Display_ps	m_platform;
+	WindHndl	m_window;
 };
 
 } // namespace usagi

@@ -9,6 +9,7 @@ layout (location = 2) in vec4 ao_uvRange;
 layout (location = 3) in vec4 ao_colUpper;
 layout (location = 4) in vec4 ao_colLower;
 layout (location = 5) in vec4 ao_colBg;
+layout (location = 6) in vec4 ao_colFg;
 
 
 // Output attributes
@@ -20,6 +21,7 @@ ATTRIB_LOC(4) out vec4 vo_vColorUpper;
 ATTRIB_LOC(5) out vec4 vo_vColorLower;
 ATTRIB_LOC(6) out vec4 vo_vColorBg;
 ATTRIB_LOC(7) out vec4 vo_vTexCoordRange;
+ATTRIB_LOC(10) out vec4 vo_vColorFg;
 
 // 3d position data
 ATTRIB_LOC(8) out float vo_fVisiblity;
@@ -37,6 +39,7 @@ void main(void)
 	vo_vColorUpper 		= ao_colUpper;	
 	vo_vColorLower 		= ao_colLower;	
 	vo_vColorBg			= ao_colBg;
+	vo_vColorFg			= ao_colFg;
 	
 	vo_vTexCoordRange.xy	= GetUV(ao_uvRange.xy);
 	vo_vTexCoordRange.zw	= GetUV(ao_uvRange.zw);

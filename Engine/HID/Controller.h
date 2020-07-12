@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef __USG_HID_CONTROLLER_H__
 #define __USG_HID_CONTROLLER_H__
-#include "Engine/Common/Common.h"
+
 #include "Input.h"
 
 namespace usg{

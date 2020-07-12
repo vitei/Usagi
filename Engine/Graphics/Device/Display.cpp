@@ -8,6 +8,7 @@ namespace usg {
 
 void Display::Initialise(usg::GFXDevice* pDevice, WindHndl hndl, struct DeviceResource& res)
 {
+	m_window = hndl;
 	m_platform.Initialise(pDevice, hndl);
 }
 

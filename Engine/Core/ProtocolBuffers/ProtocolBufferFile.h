@@ -10,7 +10,7 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/File/BufferedFile.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFields.h"
 
@@ -38,7 +38,7 @@ class ProtocolBufferFile : protected BufferedFile, public ResourceBase
 	typedef BufferedFile Inherited;
 public:
 	explicit ProtocolBufferFile(const char* szFileName, FILE_ACCESS_MODE eMode = FILE_ACCESS_READ, FILE_TYPE eFileType = FILE_TYPE_RESOURCE)
-		: BufferedFile(szFileName, eMode, eFileType)
+		: BufferedFile(szFileName, eMode, eFileType), ResourceBase(StaticResType)
 	{
 		if(IsOpen())
 		{
@@ -135,6 +135,7 @@ public:
 	// for simple delimiters, sizes, etc.
 	bool WriteRaw(uint8* pBuf, size_t bytes);
 
+	const static ResourceType StaticResType = ResourceType::PROTOCOL_BUFFER;
 
 private:
 	pb_istream_t m_istream;

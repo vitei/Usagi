@@ -4,7 +4,7 @@
 #ifndef STRING_CRC_H
 #define STRING_CRC_H
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Utility.h"
 #include "U8String.h"
 

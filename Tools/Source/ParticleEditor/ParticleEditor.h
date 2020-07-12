@@ -9,27 +9,21 @@
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/Debug/DebugStats.h"
 #include "Engine/Graphics/Lights/DirLight.h"
-#include "PreviewModel.h"
-#include "MayaCamera.h"
-#include "BlendSettings.h"
-#include "EmissionSettings.h"
-#include "RotationSettings.h"
-#include "ColorSettings.h"
-#include "AlphaSettings.h"
-#include "ScaleSettings.h"
-#include "MotionParameters.h"
+#include "Engine/GUI/GuiTab.h"
+#include "Engine/GUI/GuiTabBar.h"
 #include "TextureSettings.h"
 #include "ShapeSettings.h"
 #include "ParticleSettings.h"
 #include "SortSettings.h"
 #include "FileList.h"
+#include "EmitterWindow.h"
+#include "ParticlePreviewWindow.h"
 #include "EffectGroup.h"
-#include "ColorSelection.h"
 #include "EditorShapes.h"
 
 void ReloadEmitterFromFileOrGetActive(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName);
 
-class ParticleEditor : public usg::GameInterface
+class ParticleEditor : public usg::GameInterface, public usg::GUICallbacks
 {
 public:
 	ParticleEditor();
@@ -42,67 +36,38 @@ public:
 	virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters);
 	
 	void ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName);
+
+	// GUICallbacks
+	virtual void FileOption(const char* szName) override;
 private:
 
 	enum
 	{
-		BUTTON_PLAY = 0,
-		BUTTON_PAUSE,
-		BUTTON_RESTART,
-		BUTTON_COUNT,
 		MAX_FILE_COUNT = 512,
 		MAX_FILE_NAME_STRING = 8192
 	};
 
 	usg::Timer				m_timer;
 	usg::PostFXSys			m_postFX;
-	usg::Scene				m_scene;
-	usg::Viewport			m_previewViewport;
-	usg::ViewContext*		m_pSceneCtxt;
-	MayaCamera				m_camera;
 
 	usg::IMGuiRenderer		m_guiRend;
-	BlendSettings			m_blendSettings;
-	EmissionSettings		m_emissionSettings;
-	RotationSettings		m_rotationSettings;
-	ColorSettings			m_colorSettings;
-	AlphaSettings			m_alphaSettings;
-	ScaleSettings			m_scaleSettings;
-	MotionParameters		m_motionParams;
-	TextureSettings			m_textureSettings;
-	ShapeSettings			m_shapeSettings;
-	SortSettings			m_sortSettings;
-	ParticleSettings		m_particleSettings;
 	EditorShapes			m_editorShapes;
+
 	usg::DebugStats			m_debug;
-	PreviewModel			m_previewModel;
-	usg::DirLight*			m_pDirLight;
-	class ViewportHack*		m_pViewportHack;
+	PreviewWindow			m_effectPreview;
+	ParticlePreviewWindow	m_emitterPreview;
+	usg::GUIMenu			m_windowMenu;
+	usg::GUIMenuItem		m_resetWindow;
+	usg::GUIMenuItem		m_increaseSize;
+	usg::GUIMenuItem		m_decreaseSize;
 
-	usg::GUIWindow			m_emitterWindow;
-	usg::GUIWindow			m_lifeMotionWindow;
-	usg::GUIWindow			m_particleAppearanceWindow;
-	usg::GUIWindow			m_effectWindow;
-	usg::GUIWindow			m_previewWindow;
-	usg::GUIButton			m_previewButtons[BUTTON_COUNT];
-	usg::GUIWindow			m_fileWindow;
-	usg::GUIComboBox		m_loadFilePaths;
-	usg::GUIButton			m_loadButton;
-	usg::GUITextInput		m_saveFile;
-	usg::GUIButton			m_saveButton;
-	usg::GUICheckBox		m_repeat;
-	usg::GUIColorSelect		m_clearColor;
-	usg::GUIComboBox		m_previewType;
-	ColorSelection			m_colorSelection;
-	bool					m_bPaused;
-	FileList<MAX_FILE_COUNT> m_fileList;
+
 	EffectGroup				m_effectGroup;
-	usg::U8String			m_activeEdit;
+	EmitterWindow			m_emitterWindow;
 
-	usg::List<EmitterModifier>	m_modifiers;
-	usg::particles::EmitterEmission	m_variables;
-	usg::ScriptEmitter			m_emitter;
-	usg::ParticleEffect		m_effect;
+	usg::ScriptEmitter		m_emitter;
+	WindHndl				m_hwnd;
+
 };
 
 

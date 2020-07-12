@@ -26,7 +26,7 @@ inline void ASSERT(bool condition)
 	{
 		ShowCursor(TRUE);
 
-		__debugbreak();
+ 		__debugbreak();
 	}
 }
 
@@ -58,6 +58,8 @@ inline void ASSERT(bool condition)
 inline void FATAL_RELEASE_INT( const TCHAR* msg )
 {
 	MessageBox(0, msg, TEXT("FATAL"), 0);
+	ASSERT(false);
+	exit(-1);
 }
 
 inline void DEBUG_PRINT_INT( const TCHAR* msg )

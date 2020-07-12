@@ -6,7 +6,7 @@
 
 #ifndef USG_HID_GAMEPAD_H
 #define USG_HID_GAMEPAD_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/HID/InputDefines.h"
 #include "Engine/HID/InputStructs.h"
 #include "Engine/Maths/Matrix4x4.h"

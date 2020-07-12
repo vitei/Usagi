@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef __CLR_USAGI_MODE_H__
 #define __CLR_USAGI_MODE_H__
-#include "Engine/Common/Common.h"
+
 
 
 namespace usg
@@ -22,7 +22,7 @@ namespace usg
 		Mode() {}
 		virtual ~Mode() {}
 
-		virtual void Init(GFXDevice* pDevice) = 0;
+		virtual void Init(GFXDevice* pDevice, ResourceMgr* pResMgr) = 0;
 		virtual void CleanUp(GFXDevice* pDevice) = 0;
 		virtual bool Update(float fElapsed) = 0;
 

@@ -58,7 +58,6 @@ void AlphaState::Init(GFXDevice* pDevice, const AlphaStateDecl &decl, uint32 uId
 	for(int i=0; i<MAX_COLOR_TARGETS; i++)
 	{
 		m_attState[i].blendEnable = decl.bBlendEnable;
-
 		m_attState[i].colorBlendOp = g_blendEqMap[decl.blendEq];
 		m_attState[i].alphaBlendOp = g_blendEqMap[decl.blendEqAlpha];
 		m_attState[i].srcColorBlendFactor = g_blendFactorMap[decl.srcBlend];

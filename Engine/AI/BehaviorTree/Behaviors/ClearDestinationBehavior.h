@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AI_BEHAVIOR_TREE_BEHAVIORS_CLEAR_DESTINATION_BEHAVIOR__
 #define __USG_AI_BEHAVIOR_TREE_BEHAVIORS_CLEAR_DESTINATION_BEHAVIOR__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behavior.h"
 namespace usg
 {

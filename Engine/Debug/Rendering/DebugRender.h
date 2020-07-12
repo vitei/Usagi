@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_DEBUG_RENDER_H__
 #define __USG_DEBUG_RENDER_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"
@@ -22,7 +22,7 @@ public:
 	DebugRender();
 	~DebugRender();
 
-	void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
+	void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
 	void CleanUp(GFXDevice* pDevice);
 	void SetDrawArea(float fLeft, float fTop, float fWidth, float fHeight, float fLineSpacing = 1.25f);
 
@@ -42,11 +42,6 @@ public:
 private:
 
 	static DebugRender* 	m_psRenderer;
-	enum DEBUG_PAGES
-	{
-		PAGE_MAIN = 0,
-		PAGE_MEMORY
-	};
 
 	enum
 	{

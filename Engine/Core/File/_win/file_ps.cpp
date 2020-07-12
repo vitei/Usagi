@@ -4,9 +4,13 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/vector.h"
 #include "Engine/Memory/Mem.h"
 #include "File_ps.h"
 #include <stdio.h>
+#include <shobjidl.h> 
+#include <shlwapi.h>
+#include <commdlg.h>
 #include <errno.h>
 
 namespace usg {
@@ -44,21 +48,208 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
     return FILE_STATUS_NOT_FOUND;
 }
 
+usg::wstring StringToWString(const usg::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	if (len > 256)
+	{
+		ASSERT(false);
+		return L"";
+	}
+	wchar_t szBuff[256];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, szBuff, len);
+	usg::wstring r(szBuff);
+	return r;
+}
+
+usg::string WStringToString(const usg::wstring& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
+	if (len > 256)
+	{
+		ASSERT(false);
+		return "";
+	}
+	char szBuff[256];
+	WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, szBuff, len, 0, 0);
+	usg::string r(szBuff);
+	return r;
+}
+
+bool GetFileResult(const char* szPath, IShellItem* pShellItem, FilePathResult& path)
+{
+	LPWSTR str = nullptr;
+	pShellItem->GetDisplayName(SIGDN_FILESYSPATH, &str);
+	usg::string fileOut = WStringToString(str);
+	strcpy_s(path.szPath, fileOut.c_str());
+	PathRelativePathTo(path.szRelativePath, path.szPath, 0, szPath, FILE_ATTRIBUTE_DIRECTORY);
+	const char* szFileName = PathFindFileName(path.szPath);
+	if (strcmp(path.szRelativePath, ".\\") == 0)
+	{
+		strcpy_s(path.szRelativePath, szFileName);
+	}
+	else
+	{
+		strcat_s(path.szRelativePath, szFileName);
+	}
+
+	return true;
+}
+
+// Absolutely HIDEOUS Vita onwards file path code
+bool SelectPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result, bool bSave)
+{
+	char szPath[USG_MAX_PATH];
+	result.clear();
+
+	if (!pathIn.szOpenDir)
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+	}
+	else if (PathIsRelative(pathIn.szOpenDir))
+	{
+		GetCurrentDirectory(sizeof(szPath), szPath);
+		strcat_s(szPath, "\\");
+		strcat_s(szPath, pathIn.szOpenDir);
+	}
+	else
+	{
+		strcpy_s(szPath, pathIn.szOpenDir);
+	}
+
+	GetFullPathName(szPath, sizeof(szPath), szPath, nullptr);
+
+	usg::vector< COMDLG_FILTERSPEC> specs;
+	usg::vector< usg::wstring > strings;
+	strings.resize(pathIn.uFilterCount * 2);
+	for (uint32 i=0; i< pathIn.uFilterCount; i++)
+	{
+		COMDLG_FILTERSPEC spec;
+
+		usg::wstring szNameTmp = StringToWString(pathIn.pFilters[i].szDisplayName);
+
+		strings.push_back(szNameTmp);
+		spec.pszName = strings.back().data();
+
+		usg::wstring szPatternTmp = StringToWString(pathIn.pFilters[i].szExtPattern);
+
+		strings.push_back(szPatternTmp);
+		spec.pszSpec = strings.back().data();
+
+		specs.push_back(spec);
+	}
+
+	usg::wstring stemp = StringToWString(szPath);
+	LPCWSTR sw = stemp.c_str();
+
+	usg::string sext(pathIn.szDefaultExt ? pathIn.szDefaultExt : "");
+	usg::wstring sexttemp = StringToWString(sext.c_str());
+	LPCWSTR swext = sexttemp.c_str();
+
+	bool bFound = false;
+	IFileOpenDialog* pFileOpenDialog = NULL;
+	IFileSaveDialog* pFileSaveDialog = NULL;
+	IShellItem* pShellItem = NULL;
+
+	HRESULT hr;
+	if(!bSave)
+		hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileOpenDialog));
+	else
+		hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileSaveDialog));
+	
+	IFileDialog* pDialog = bSave ? (IFileDialog*)pFileSaveDialog : (IFileDialog*)pFileOpenDialog;
+
+	if (SUCCEEDED(hr))
+	{
+		IShellItem* psiFolder; //IShellItemFilter* psiFilter;
+		hr = pDialog->SetOptions(bSave ? FOS_PATHMUSTEXIST : pathIn.bAllowMulti ? FOS_ALLOWMULTISELECT|FOS_FILEMUSTEXIST : FOS_FILEMUSTEXIST);
+		ASSERT(!(bSave && pathIn.bAllowMulti));
+		hr = pDialog->SetDefaultExtension(swext);
+		//hr = pFileOpenDialog->SetFilter(psiFilter);
+		hr = pDialog->SetFileTypes((UINT)specs.size(), specs.data());
+		hr = SHCreateItemFromParsingName(sw, NULL, IID_PPV_ARGS(&psiFolder));
+		hr = pDialog->SetFolder(psiFolder);
+		hr = pDialog->Show(nullptr);
+		if (SUCCEEDED(hr))
+		{
+			if (bSave || !pathIn.bAllowMulti)
+			{
+				hr = pDialog->GetResult(&pShellItem);
+				
+				usg::FilePathResult tmp;
+				bFound = GetFileResult(szPath, pShellItem, tmp);
+				if (bFound)
+				{
+					result.push_back(tmp);
+				}
+			}
+			else
+			{
+				IShellItemArray* pShellItemArray = NULL;
+				DWORD numItems;
+
+				hr = pFileOpenDialog->GetResults(&pShellItemArray);
+
+				hr = pShellItemArray->GetCount(&numItems);
+				if (SUCCEEDED(hr))
+				{
+					for (DWORD i = 0; i < numItems; i++)
+					{
+						hr = pShellItemArray->GetItemAt(i, &pShellItem);
+						if (SUCCEEDED(hr))
+						{
+							result.push_back_uninitialized();
+							bFound = GetFileResult(szPath, pShellItem, result.back());
+						}
+					}
+				}
+
+
+				bFound = result.size() > 0;
+
+			}
+		
+		}
+	}
+	return bFound;
+}
+
+bool File_ps::UserFileOpenPath(const FileOpenPath& pathIn, usg::vector<FilePathResult>& result)
+{
+	return SelectPath(pathIn, result, false);
+}
+
+bool File_ps::UserFileSavePath(const FileOpenPath& pathIn, FilePathResult& result)
+{
+	usg::vector<FilePathResult> results;
+	bool bRet = SelectPath(pathIn, results, true);
+	if (results.size() > 0)
+	{
+		usg::MemCpy(&result, &results[0], sizeof(result));
+	}
+
+	return bRet;
+
+}
 
 bool File_ps::Delete(const char* szName, FILE_TYPE eFileType)
 {
-	U8String name(g_szFileDir[eFileType]);
+	usg::string name(g_szFileDir[eFileType]);
 	name += szName;
-	return ( remove(name.CStr()) == 0);
+	return ( remove(name.c_str()) == 0);
 }
 
 
 bool File_ps::CreateFileDirectory(const char* szName, FILE_TYPE eType)
 {
-	U8String path= g_szFileDir[eType];
+	usg::string path= g_szFileDir[eType];
 	path += szName;
 
-	return (CreateDirectory(path.CStr(), NULL) == TRUE);
+	return (CreateDirectory(path.c_str(), NULL) == TRUE);
 }
 
 size_t File_ps::NumberOfFilesInDirectory(const char* szDirName, FILE_TYPE eFileType,
@@ -94,12 +285,14 @@ FILE_INIT_RESULT File_ps::InitFileSystem()
 	CreateDirectory("..\\_savedata", 0);
 	CreateDirectory("..\\_dump", 0);
 
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED |COINIT_DISABLE_OLE1DDE);
+
 	return FILE_INIT_RESULT_SUCCESS;
 }
 
 File_ps::File_ps()
+	: m_pFile(nullptr)
 {
-	m_pFile = NULL;
 }
 
 File_ps::File_ps(const char* szFileName, FILE_ACCESS_MODE eMode, FILE_TYPE eFileType)
@@ -117,9 +310,9 @@ File_ps::~File_ps()
 bool File_ps::Open(const char* szFileName, FILE_ACCESS_MODE eMode, FILE_TYPE eFileType)
 {
     
-	U8String fullPath = g_szFileDir[eFileType];
+	usg::string fullPath = g_szFileDir[eFileType];
 	fullPath += szFileName;
-	fopen_s(&m_pFile, fullPath.CStr(), s_szAccessStrings[eMode]);
+	fopen_s(&m_pFile, fullPath.c_str(), s_szAccessStrings[eMode]);
 	
 	return (m_pFile!=NULL );
 }

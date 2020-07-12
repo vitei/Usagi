@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_STRING_H
 #define _USG_STRING_H
-#include "Engine/Common/Common.h"
+
 
 const int STRING_CHUNK_SIZE = 32;
 const int STRING_CMP_SIZE = STRING_CHUNK_SIZE/8;
@@ -61,6 +61,7 @@ public:
 	bool operator==( const char* szText ) const;
 
 	const char* CStr() const { return m_pszString != NULL ? m_pszString : ""; }
+	char* Data() { return m_pszString; }
 	uint16 Length() const { return m_uStringLen; }
 	uint16 CharCount() const;
 	U8Char GetUTF8CharAtIdx(uint32 p_idx) const;

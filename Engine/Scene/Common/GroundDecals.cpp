@@ -152,7 +152,7 @@ void GroundDecals::AddDecal( GFXDevice* pDevice, const CollisionMeshHitResult& h
 	vUp = vUp * rotMatrix;
 
 	Vector3f vRight = CrossProduct( vUp, viewDir );
-	vRight = vRight.GetNormalisedIfNZero(V3F_X_AXIS);
+	vRight = vRight.GetNormalisedIfNZero(Vector3f::X_AXIS);
 	vUp = CrossProduct( vRight, viewDir );
 
 	viewMatrix.CameraMatrix(

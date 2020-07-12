@@ -1,7 +1,7 @@
 #ifndef _USG_PHYSICS_PHYSICS_PHYSX_H_
 #define _USG_PHYSICS_PHYSICS_PHYSX_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Quaternionf.h"
 #include "Engine/Framework/Component.h"

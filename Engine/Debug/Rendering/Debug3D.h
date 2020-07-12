@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_DEBUG_RENDERING_DEBUG3D_H__
 #define __USG_DEBUG_RENDERING_DEBUG3D_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"
@@ -22,8 +22,8 @@ public:
 	Debug3D();
 	virtual ~Debug3D();
 
-	void Init(GFXDevice* pDevice, Scene* pScene);
-	void InitContextData(GFXDevice* pDevice, ViewContext* pContext);
+	void Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr);
+	void InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewContext* pContext);
 	void CleanUp(GFXDevice* pDevice);
 
 	void AddSphere(const Vector3f &vPos, float fRadius, const Color& color);

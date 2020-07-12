@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_POSTFX_SHADOWS_OMNISHADOW_H_
 #define _USG_POSTFX_SHADOWS_OMNISHADOW_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"

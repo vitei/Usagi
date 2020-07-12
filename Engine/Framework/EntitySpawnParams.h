@@ -1,6 +1,6 @@
 #ifndef ENTITY_SPAWN_PARAMS
 #define ENTITY_SPAWN_PARAMS
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/FrameworkComponents.pb.h"
 
 namespace usg

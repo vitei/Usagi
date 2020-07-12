@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_ENGINE_CRITICAL_SECTION_H_
 #define	_USG_ENGINE_CRITICAL_SECTION_H_
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Core/Thread, CriticalSection_ps.h)
 
 namespace usg

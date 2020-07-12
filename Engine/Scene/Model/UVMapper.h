@@ -5,7 +5,7 @@
 #ifndef _USG_GRAPHICS_SCENE_UVMAPPER_H_
 #define _USG_GRAPHICS_SCENE_UVMAPPER_H_
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Scene/Camera/Camera.h"
 #include "Engine/Graphics/Materials/Material.pb.h"
 #include "Engine/Scene/Common/CustomEffectRuntime.h"

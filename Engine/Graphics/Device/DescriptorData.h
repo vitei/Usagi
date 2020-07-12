@@ -3,7 +3,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_DEVICE_DESCRIPTOR_DATA_H_
 #define _USG_GRAPHICS_DEVICE_DESCRIPTOR_DATA_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Resource/ResourceDecl.h"
 
@@ -15,18 +15,19 @@ class ConstantSet;
 
 struct DescriptorData
 {
-	DescriptorType eDescType;
+	DescriptorType eDescType = DESCRIPTOR_TYPE_INVALID;
 
-	// We can't (shouldn't) unionise smart pointers
+	// We can't (shouldn't) unionize smart pointers
 	struct TexData
 	{
 		TextureHndl 		tex;
 		SamplerHndl			sampler;
+		ImageViewDef		imageView;
 	} texData;
 
-	const ConstantSet*		pConstBuffer;
+	const ConstantSet*		pConstBuffer = nullptr;
 
-	uint32					uLastUpdateIdx;
+	uint32					uLastUpdateIdx = USG_INVALID_ID;
 
 	
 	// Other types use a raw pointer to the appropriate type

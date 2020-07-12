@@ -4,7 +4,7 @@
 #ifndef __USG_HID_INPUT_STRUCTS_H__
 #define __USG_HID_INPUT_STRUCTS_H__
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Maths/Vector2f.h"
 #include "InputDefines.h"

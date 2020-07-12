@@ -86,7 +86,7 @@ namespace usg
 
 		m_bNothingVisible = m_pShadowContext->GetVisibleGroupCount() == 0;
 
-		pContext->BeginGPUTag("PointShadow");
+		pContext->BeginGPUTag("PointShadow", Color::Grey);
 
 		pContext->SetRenderTarget(&m_cubeTarget);
 		m_pShadowContext->DrawScene(pContext);

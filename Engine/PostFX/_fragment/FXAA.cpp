@@ -134,7 +134,7 @@ bool FXAA::Draw(GFXContext* pContext, RenderContext& renderContext)
 	if (!GetEnabled())
 		return false;
 
-	pContext->BeginGPUTag("FXAA");
+	pContext->BeginGPUTag("FXAA", Color::Green);
 
 	pContext->SetRenderTarget(m_pDestTarget);
 	m_material.Apply(pContext);

@@ -1,3 +1,4 @@
+#include "Engine/Common/Common.h"
 #include "Cmdl.h"
 
 #include "exchange/Mesh.h"
@@ -67,6 +68,11 @@ void Cmdl::AddLight(Light* p)
 	m_lightStream.push_back(p);
 }
 
+void Cmdl::AddCamera(Camera* p)
+{
+	m_cameraStream.push_back(p);
+}
+
 void Cmdl::SetSkeleton( ::exchange::Skeleton* p )
 {
 	ASSERT_MSG( m_pSkeleton == NULL, "overwrite!" );
@@ -83,6 +89,12 @@ void Cmdl::ReverseCoordinate()
 	size = m_lightStream.size();
 	for (size_t i = 0; i < size; ++i) {
 		ReverseCoordinateInt(m_lightStream.at(i));
+	}
+
+
+	size = m_cameraStream.size();
+	for (size_t i = 0; i < size; ++i) {
+		ReverseCoordinateInt(m_cameraStream.at(i));
 	}
 
 	if( m_pSkeleton ) {
@@ -146,8 +158,15 @@ uint32_t Cmdl::GetBoneIndexCount(int materialNum)
 
 void Cmdl::ReverseCoordinateInt(Light* pLight)
 {
-	pLight->position.z *= -1.0f;
-	pLight->spec.direction.z *= -1.0f;
+	pLight->position.x *= -1.0f;
+	pLight->spec.direction.x *= -1.0f;
+}
+
+void Cmdl::ReverseCoordinateInt(Camera* pCamera)
+{
+	pCamera->position.x *= -1.0f;
+	pCamera->rotate.y *= -1.0f;
+	pCamera->rotate.z *= -1.0f;
 }
 
 void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)
@@ -184,10 +203,10 @@ void Cmdl::ReverseCoordinateInt(::exchange::Shape* pShape)
 	// switch direction and exchange each other
 	Vector3 min = pShape->GetAABBMin();
 	Vector3 max = pShape->GetAABBMax();
-	float newMaxZ = min.z *= -1.0f;
-	float newMinZ = max.z *= -1.0f;
-	min.z = newMinZ;
-	max.z = newMaxZ;
+	float newMaxZ = min.z;
+	float newMinZ = max.z;
+	min.z = newMaxZ;
+	max.z = newMinZ;
 	pShape->SetAABB( min, max );
 
 	pShape->pb().boundingSphere.center.z *= -1.0f;
@@ -205,7 +224,7 @@ void Cmdl::ReverseCoordinateInt(::exchange::Stream& stream)
 		length /= step;
 
 		for( size_t i = 0; i < length; ++i ) {
-			p[(i * step) + 2] *= -1.0f;
+			p[(i * step) + 0] *= -1.0f;
 		}
 	}
 }

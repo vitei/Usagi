@@ -10,19 +10,18 @@ layout(triangle_strip, max_vertices = 4) out;
 BUFFER_LAYOUT(1, UBO_CUSTOM_1_ID) uniform Instance1
 {
     mat3x4  mUserMat;
+    vec2    vParticleCenter;
+    float   fDepthFadeDist;
+    float   fCameraOffset;
     bool    bCustomMatrix;
     bool    bYAxisAlign;
 };
 
-in VertexData
-{
-    INT_LOC(0) vec4    vo_vColor;
-    INT_LOC(1) vec2    vo_vSize;
-    INT_LOC(2) float   vo_fRot;
-    INT_LOC(3) vec4    vo_vUVRange[2];
-    INT_LOC(5) vec3    vo_velocity;
-
-} vertexData[];
+ATTRIB_LOC(0) in vec4    vo_vColor[];
+ATTRIB_LOC(1) in vec2    vo_vSize[];
+ATTRIB_LOC(2) in float   vo_fRot[];
+ATTRIB_LOC(3) in vec4    vo_vUVRange[][2];
+ATTRIB_LOC(5) in vec3    vo_velocity[];
 
 
 out GeometryData
@@ -31,6 +30,7 @@ out GeometryData
     INT_LOC(1) vec2    vo_vTexcoord[2];
     INT_LOC(3) vec2    vo_vScreenTex;
     INT_LOC(4) float   vo_fEyeDepth;
+    INT_LOC(5) float   vo_fDepthFadeClamp;  // TODO: On define
 
 } geometryData;
 
@@ -53,7 +53,8 @@ void CreateVertex(int ii, vec2 scale)
   
     vec2 uv;
     uv = scale - vec2(0.5, 0.5);
-    uv *= vertexData[ii].vo_vSize;
+    uv -= vParticleCenter;
+    uv *= vo_vSize[ii];
 
     if(bYAxisAlign)
     {
@@ -65,7 +66,7 @@ void CreateVertex(int ii, vec2 scale)
     }
     else
     {
-        pos = ParticleRotation(vec4(uv, 0.0, 0.0), vertexData[ii].vo_fRot);
+        pos = ParticleRotation(vec4(uv, 0.0, 0.0), vo_fRot[ii]);
 
         if(bCustomMatrix)
         {
@@ -77,25 +78,40 @@ void CreateVertex(int ii, vec2 scale)
         }
     }
 
+    vec3 vDirToEye = normalize(vEyePos.xyz - gl_in[ii].gl_Position.xyz);
+
     pos += vec4(gl_in[ii].gl_Position.xyz, 0.0);
+    pos.xyz += (vDirToEye * fCameraOffset);
     pos.w = 1.0;
-    geometryData.vo_vColor = vertexData[ii].vo_vColor;
+    geometryData.vo_vColor = vo_vColor[ii];
     // TODO: Multiple images in the same texture
-    geometryData.vo_vTexcoord[0] = (vec2(scale.x, 1.0 - scale.y) * vertexData[ii].vo_vUVRange[0].zw) + vertexData[ii].vo_vUVRange[0].xy;
-    geometryData.vo_vTexcoord[1] = (vec2(scale.x, 1.0 - scale.y) * vertexData[ii].vo_vUVRange[1].zw) + vertexData[ii].vo_vUVRange[1].xy;
+    geometryData.vo_vTexcoord[0] = (vec2(scale.x, 1.0 - scale.y) * vo_vUVRange[ii][0].zw) + vo_vUVRange[ii][0].xy;
+    geometryData.vo_vTexcoord[1] = (vec2(scale.x, 1.0 - scale.y) * vo_vUVRange[ii][1].zw) + vo_vUVRange[ii][1].xy;
 
     vec4 vEyePos    = pos * mViewMat;
 
     // Add the transparency for the fog
     geometryData.vo_vColor.w *= (1.0-CalculateLinearFog(-vEyePos.xyz));
     pos = vec4( vEyePos.xyz, 1.0 ) * mProjMat;
+    pos /= pos.w;
+
+    float fHalfDepthFade = fDepthFadeDist*0.5f;
+    float fZDepth = max(vEyePos.z - fHalfDepthFade, min(vNearFar.x, vEyePos.z + fHalfDepthFade));//min(vNearFar.x + 0.2f, vEyePos.z));
+
+    // Back pos - 
+    geometryData.vo_fDepthFadeClamp = fDepthFadeDist - ((vEyePos.z - fHalfDepthFade) - fZDepth);
+ 
+    vec4 vOffsetPos = vec4( vEyePos.xy, fZDepth, 1.0f) * mProjMat;
+    vOffsetPos /= vOffsetPos.w;
+
+
     pos.w *= gl_in[ii].gl_Position.w;
 
-    geometryData.vo_fEyeDepth = vEyePos.z/vNearFar.y;
+    geometryData.vo_fEyeDepth = fZDepth;
 
     geometryData.vo_vScreenTex = pos.xy / pos.ww;
 
-    gl_Position = pos;
+    gl_Position = vec4(pos.xy, vOffsetPos.z, 1.0f);
 
     EmitVertex();
 }

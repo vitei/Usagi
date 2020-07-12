@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5B69BE77-7562-4860-8394-3149EB141E2F}</ProjectGuid>
     <RootNamespace>ParticleEditor</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -113,17 +113,18 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;_DEBUG;NW_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+      <Command>call $(USAGI_DIR)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -175,20 +176,22 @@
   <ItemGroup>
     <ClCompile Include="..\AlphaSettings.cpp" />
     <ClCompile Include="..\BlendSettings.cpp" />
-    <ClCompile Include="..\ColorSelection.cpp" />
     <ClCompile Include="..\ColorSettings.cpp" />
     <ClCompile Include="..\EditorShapes.cpp" />
     <ClCompile Include="..\EffectGroup.cpp" />
     <ClCompile Include="..\EmissionSettings.cpp" />
     <ClCompile Include="..\EmitterInstance.cpp" />
     <ClCompile Include="..\EmitterModifier.cpp" />
+    <ClCompile Include="..\EmitterWindow.cpp" />
     <ClCompile Include="..\FloatAnim.cpp" />
     <ClCompile Include="..\main\_win\WinMain.cpp" />
     <ClCompile Include="..\MayaCamera.cpp" />
     <ClCompile Include="..\MotionParameters.cpp" />
     <ClCompile Include="..\ParticleEditor.cpp" />
+    <ClCompile Include="..\ParticlePreviewWindow.cpp" />
     <ClCompile Include="..\ParticleSettings.cpp" />
     <ClCompile Include="..\PreviewModel.cpp" />
+    <ClCompile Include="..\PreviewWindow.cpp" />
     <ClCompile Include="..\RibbonInstance.cpp" />
     <ClCompile Include="..\RotationSettings.cpp" />
     <ClCompile Include="..\ScaleSettings.cpp" />
@@ -199,7 +202,6 @@
   <ItemGroup>
     <ClInclude Include="..\AlphaSettings.h" />
     <ClInclude Include="..\BlendSettings.h" />
-    <ClInclude Include="..\ColorSelection.h" />
     <ClInclude Include="..\ColorSettings.h" />
     <ClInclude Include="..\EditorShapes.h" />
     <ClInclude Include="..\EffectGroup.h" />
@@ -211,8 +213,10 @@
     <ClInclude Include="..\MayaCamera.h" />
     <ClInclude Include="..\MotionParameters.h" />
     <ClInclude Include="..\ParticleEditor.h" />
+    <ClInclude Include="..\ParticlePreviewWindow.h" />
     <ClInclude Include="..\ParticleSettings.h" />
     <ClInclude Include="..\PreviewModel.h" />
+    <ClInclude Include="..\PreviewWindow.h" />
     <ClInclude Include="..\RibbonInstance.h" />
     <ClInclude Include="..\RotationSettings.h" />
     <ClInclude Include="..\ScaleSettings.h" />

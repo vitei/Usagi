@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_PHYSICS_PHYSICS_COMPONENTS_H_
 #define _USG_PHYSICS_PHYSICS_COMPONENTS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Physics/PhysX.h"
 #include "Engine/Framework/ComponentEntity.h"
@@ -158,7 +158,7 @@ namespace usg
 
 			inline Vector3f GetVelocityAtPosition(const RuntimeData<Components::RigidBody>& rbRtd, const Vector3f& vWorldPosition)
 			{
-				return rbRtd.pRigidActor->is<physx::PxRigidBody>() ? ToUsgVec3(physx::PxRigidBodyExt::getVelocityAtPos(*rbRtd.pRigidActor->is<physx::PxRigidBody>(), ToPhysXVec3(vWorldPosition))) : V3F_ZERO;
+				return rbRtd.pRigidActor->is<physx::PxRigidBody>() ? ToUsgVec3(physx::PxRigidBodyExt::getVelocityAtPos(*rbRtd.pRigidActor->is<physx::PxRigidBody>(), ToPhysXVec3(vWorldPosition))) : Vector3f::ZERO;
 			}
 
 			inline PhysXShapeRuntimeData* GetUserDataFromPhysXShape(physx::PxShape* pShape)
@@ -184,7 +184,7 @@ namespace usg
 				ASSERT(pRigidDynamic != nullptr);
 				return ToUsgVec3(pRigidDynamic->getLinearVelocity());
 			}
-			return V3F_ZERO;
+			return Vector3f::ZERO;
 		}
 
 		template<typename T>
@@ -196,7 +196,7 @@ namespace usg
 				ASSERT(pRigidDynamic != nullptr);
 				return ToUsgVec3(pRigidDynamic->getLinearVelocity());
 			}
-			return V3F_ZERO;
+			return Vector3f::ZERO;
 		}
 
 		template<typename T>
@@ -208,7 +208,7 @@ namespace usg
 				ASSERT(pRigidDynamic != nullptr);
 				return ToUsgVec3(pRigidDynamic->getAngularVelocity());
 			}
-			return V3F_ZERO;
+			return usg::Vector3f::ZERO;
 		}
 
 		template<typename T>

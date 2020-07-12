@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef _USG_MEM_UTIL_H_
 #define _USG_MEM_UTIL_H_
-#include "Engine/Common/Common.h"
+
 #include OS_HEADER(Engine/Memory, MemUtil_ps.h)
 
 namespace usg
@@ -22,6 +22,11 @@ namespace usg
 		memsize uMisAlignment = (size & uMask);
 
 		return size - uMisAlignment;
+	}
+
+	inline memsize AlignAddress(memsize size, memsize alignment)
+	{
+		return AlignSizeUp(size, alignment);
 	}
 
 }

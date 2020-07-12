@@ -5,7 +5,7 @@
 
 #ifndef __USG_AI_BEHAVIORS__
 #define __USG_AI_BEHAVIORS__
-#include "Engine/Common/Common.h"
+
 #include "Engine/AI/BehaviorTree/Behaviors/IsTargetAliveBehavior.h"
 #include "Engine/AI/BehaviorTree/Behaviors/IsTargetWithinDistanceBehavior.h"
 #include "Engine/AI/BehaviorTree/Behaviors/HasTargetBehavior.h"

@@ -6,7 +6,7 @@
 *****************************************************************************/
 #ifndef USAGI_MODE_TRANSITION_H__
 #define USAGI_MODE_TRANSITION_H__
-#include "Engine/Common/Common.h"
+
 #include "Mode.h"
 
 namespace usg
@@ -19,7 +19,7 @@ namespace usg
 		ModeTransition();
 		virtual ~ModeTransition();
 
-		virtual void Init(usg::GFXDevice* pDevice) override;
+		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
 		virtual void CleanUp(usg::GFXDevice* pDevice) override {};
 		void Reset() { m_uActiveFrames = 0; }
 		virtual bool Update(float fElapsed) override;

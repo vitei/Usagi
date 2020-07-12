@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/FrameworkComponents.pb.h"
 
 namespace usg

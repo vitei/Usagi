@@ -27,8 +27,10 @@ static const DescriptorDeclaration decl[] =
 static IMGuiRenderer* g_spGUIRenderer = NULL;
 static GFXDevice* g_pDevice = NULL;
 
-IMGuiRenderer::IMGuiRenderer() :
-	m_windows(2)
+IMGuiRenderer::IMGuiRenderer() 
+	: m_pIMGUIContext(nullptr)
+	, m_mainMenuBar(true)
+	, m_windows(2)
 {
 	g_spGUIRenderer = this;
 	m_vOffset.Assign(0.0f, 0.0f);
@@ -39,7 +41,9 @@ IMGuiRenderer::IMGuiRenderer() :
 
 IMGuiRenderer::~IMGuiRenderer()
 {
-	ImGui::Shutdown();
+	//ImGui::Shutdown();
+	ImGui::DestroyContext(m_pIMGUIContext);
+	m_pIMGUIContext = nullptr;
 	g_spGUIRenderer = NULL;
 	m_texHndl.reset();
 }
@@ -60,12 +64,12 @@ static const ShaderConstantDecl g_vertexConstantDecl[] =
 // If text or lines are blurry when integrating ImGui in your engine:
 // - in your Render function, try translating your projection matrix by (0.5f,0.5f) or (0.375f,0.375f)
 
-void RenderFunction(ImDrawList** const cmd_lists, int cmd_lists_count)
+void RenderFunction(ImDrawData* pDraw)
 {
-	g_spGUIRenderer->DrawInt(cmd_lists, cmd_lists_count);
+	g_spGUIRenderer->DrawInt(pDraw);
 }
 
-void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
+void IMGuiRenderer::DrawInt(ImDrawData* pDrawData)
 {
 	GFXContext* pContext = m_pContext; 
 	// Copy and convert all vertices into a single contiguous buffer
@@ -75,22 +79,23 @@ void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
 
 	float fZPos = 0.0f;
 	uint32 uVertCount = 0;
-	for (int n = 0; n < cmd_lists_count; n++)
+	for (int n = 0; n < pDrawData->CmdListsCount; n++)
 	{
-		const ImDrawList* cmd_list = cmd_lists[n];
-		for (uint32 i = 0; i < cmd_list->vtx_buffer.size(); i++)
+		const ImDrawList* cmd_list = pDrawData->CmdLists[n];
+		for (int i = 0; i < cmd_list->IdxBuffer.size(); i++)
 		{
-			pVert->u = cmd_list->vtx_buffer[i].uv.x;
-			pVert->v = 1.0f - cmd_list->vtx_buffer[i].uv.y;
+			const ImDrawVert& vert = cmd_list->VtxBuffer[cmd_list->IdxBuffer[i]];
+			pVert->u = vert.uv.x;
+			pVert->v = 1.0f - vert.uv.y;
 
-			pVert->c.AssignRGBA32(cmd_list->vtx_buffer[i].col);
-			pVert->x = cmd_list->vtx_buffer[i].pos.x;
-			pVert->y = cmd_list->vtx_buffer[i].pos.y;
+			pVert->c.AssignRGBA32(vert.col);
+			pVert->x = vert.pos.x;
+			pVert->y = vert.pos.y;
 			pVert->z = fZPos;
 
 			pVert++;
 		}
-		uVertCount += (uint32)cmd_list->vtx_buffer.size();
+		uVertCount += (uint32)cmd_list->IdxBuffer.size();
 	}
 	m_vertexBuffer.SetContents(g_pDevice, pVerts, uVertCount);
 
@@ -99,16 +104,16 @@ void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
 
 	// Render command lists
 	uint32 uScreenHeight = (uint32)pContext->GetActiveViewport().height;
-	int vtx_offset = 0;
-	for (int n = 0; n < cmd_lists_count; n++)
+	int Offset = 0;
+	for (int n = 0; n < pDrawData->CmdListsCount; n++)
 	{
-		const ImDrawList* cmd_list = cmd_lists[n];
-		for (size_t cmd_i = 0; cmd_i < cmd_list->commands.size(); cmd_i++)
+		const ImDrawList* cmd_list = pDrawData->CmdLists[n];
+		for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.size(); cmd_i++)
 		{
-			const ImDrawCmd* pcmd = &cmd_list->commands[cmd_i];
-			if (pcmd->user_callback)
+			const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+			if (pcmd->UserCallback)
 			{
-				pcmd->user_callback(cmd_list, pcmd);
+				pcmd->UserCallback(cmd_list, pcmd);
 			}
 			else
 			{
@@ -116,12 +121,12 @@ void IMGuiRenderer::DrawInt(ImDrawList** const cmd_lists, int cmd_lists_count)
 				//const D3D11_RECT r = { (LONG)pcmd->clip_rect.x, (LONG)pcmd->clip_rect.y, (LONG)pcmd->clip_rect.z, (LONG)pcmd->clip_rect.w };
 				//pContext->BindTexture(0, (Texture*)pcmd->texture_id, m_sampler);
 				pContext->SetDescriptorSet(&m_globalDescriptor, 0);
-				pContext->SetDescriptorSet((DescriptorSet*)pcmd->texture_id, 1);
-				pContext->SetScissorRect((uint32)pcmd->clip_rect.x, (uint32)(uScreenHeight - pcmd->clip_rect.w), (uint32)(pcmd->clip_rect.z - pcmd->clip_rect.x), (uint32)(pcmd->clip_rect.w - pcmd->clip_rect.y));
+				pContext->SetDescriptorSet((DescriptorSet*)pcmd->TextureId, 1);
+				pContext->SetScissorRect((uint32)pcmd->ClipRect.x, (uint32)(uScreenHeight - pcmd->ClipRect.w), (uint32)(pcmd->ClipRect.z - pcmd->ClipRect.x), (uint32)(pcmd->ClipRect.w - pcmd->ClipRect.y));
 				//g_pd3dDeviceContext->RSSetScissorRects(1, &r); 
-				pContext->DrawImmediate(pcmd->vtx_count, vtx_offset );
+				pContext->DrawImmediate(pcmd->ElemCount, pcmd->VtxOffset + Offset);
+				Offset += pcmd->ElemCount;
 			}
-			vtx_offset += pcmd->vtx_count;
 		}
 	}
 
@@ -138,6 +143,7 @@ void IMGuiRenderer::PostUpdate(float fElapsed)
 void IMGuiRenderer::BufferUpdate(GFXDevice* pDevice)
 {
 	m_constantSet.UpdateData(pDevice);
+	m_globalDescriptor.UpdateDescriptors(pDevice);
 	g_pDevice = pDevice;
 } 
 
@@ -146,6 +152,8 @@ bool IMGuiRenderer::Draw(GFXContext* pContext, RenderContext& renderContext)
 	m_pContext = pContext;
 
 	ImGui::Render();
+	ImDrawData* draw_data = ImGui::GetDrawData();
+	RenderFunction(draw_data);
 
 	m_bActive = false;
 
@@ -161,6 +169,7 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // Create DX11 texture
 	DescriptorSetLayoutHndl global = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors2D);
@@ -187,7 +196,13 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
     io.Fonts->ClearTexData();
 }
 
-void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
+void IMGuiRenderer::Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight)
+{
+	m_uScreenWidth = uWidth;
+	m_uScreenHeight = uHeight;
+}
+
+void IMGuiRenderer::InitResources(GFXDevice* pDevice, ResourceMgr* pResMgr, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
 {
 	m_uMaxVerts = uMaxVerts;
 	m_uScreenWidth = uWidth;
@@ -222,7 +237,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, usg::Scene& scene, uint32 
 		RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 		rasDecl.eCullFace	= CULL_FACE_NONE;
 	}
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
+	pipeline.pEffect = pResMgr->GetEffect(pDevice, "Debug.PosColUV");
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipeline.uInputBindingCount = 1;
 
@@ -253,6 +268,8 @@ void IMGuiRenderer::AddToScene(GFXDevice* pDevice, Scene* pScene)
 
 void IMGuiRenderer::Init()
 {
+	m_pIMGUIContext = ImGui::CreateContext();
+	ImGui::SetCurrentContext(m_pIMGUIContext);
 	ImGuiIO& io = ImGui::GetIO();
 
 #ifdef VK_TAB
@@ -285,7 +302,7 @@ void IMGuiRenderer::Init()
 	io.KeyMap[ImGuiKey_Escape] = GAMEPAD_BUTTON_B;
 #endif
     
-    io.RenderDrawListsFn = RenderFunction;
+    //io.RenderDrawListsFn = RenderFunction;
 }
 
 void IMGuiRenderer::CleanUp(GFXDevice* pDevice)
@@ -386,10 +403,13 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
     ImGui::NewFrame();
 	m_bActive = true;
 
+	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList(m_drawCtxt);
 	for(List<GUIWindow>::Iterator it = m_windows.Begin(); !it.IsEnd(); ++it)
 	{
-		bChanged = (*it)->UpdateAndAddToDrawList() || bChanged;
+		bChanged = (*it)->UpdateAndAddToDrawList(m_drawCtxt) || bChanged;
 	}
+	// Clear flags
+	m_drawCtxt.uFlags &= ~(RESET_LAYOUT_FLAG| RESET_SIZE_FLAG);
 	
 	/*
 	bool show_test_window = true;

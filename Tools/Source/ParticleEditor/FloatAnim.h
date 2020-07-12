@@ -1,6 +1,6 @@
 #ifndef _USG_PARTICLE_EDITOR_FLOAT_ANIM_H_
 #define _USG_PARTICLE_EDITOR_FLOAT_ANIM_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/StateEnums.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
@@ -24,6 +24,8 @@ public:
 	bool Update(usg::particles::FloatAnim &src);
 	void SetFromDefinition(usg::particles::FloatAnim &src);
 	void SetVisible(bool bVisible);
+	void SetToolTip(const char* szChar);
+	void SetSingleOnly(bool bSingleOnly);
 	
 private:
 	
@@ -33,6 +35,7 @@ private:
 		MAX_FRAME_COUNT = 10,
 	};
 
+	usg::GUIFloat			m_singleFloat;
 	usg::GUIText			m_title;
 	usg::GUIWindow			m_childWindow;
 	usg::GUIIntInput		m_frameCount;

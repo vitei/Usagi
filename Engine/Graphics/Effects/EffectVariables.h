@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_EFFECT_VARIABLES_H_
 #define _USG_GRAPHICS_EFFECT_VARIABLES_H_
-#include "Engine/Common/Common.h"
+
 
 namespace usg {
 
@@ -21,6 +21,14 @@ struct Vector4i
 	int		y;
 	int		z;
 	int		w;
+};
+
+struct Vector2i
+{
+	Vector2i() {}
+	Vector2i(int xIn, int yIn) { x = xIn; y = yIn; }
+	int		x;
+	int		y;
 };
 
 }

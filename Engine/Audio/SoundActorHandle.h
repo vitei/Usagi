@@ -4,7 +4,7 @@
 *****************************************************************************/
 #ifndef __USG_AUDIO_SOUNDACTORHANDLE_H__
 #define __USG_AUDIO_SOUNDACTORHANDLE_H__
-#include "Engine/Common/Common.h"
+
 #include "Engine/Core/Containers/SafePointer.h"
 #include "SoundActor.h"
 
@@ -52,7 +52,7 @@ inline Vector3f SoundActorHandle::GetPosition() const
 	{
 		return pActor->GetPosition();
 	}
-	return V3F_ZERO;
+	return Vector3f::ZERO;
 }
 
 inline Vector3f SoundActorHandle::GetVelocity() const
@@ -62,7 +62,7 @@ inline Vector3f SoundActorHandle::GetVelocity() const
 	{
 		return pActor->GetVelocity();
 	}
-	return V3F_ZERO;
+	return Vector3f::ZERO;
 }
 
 inline SoundActor_ps* SoundActorHandle::GetPlatform3D()

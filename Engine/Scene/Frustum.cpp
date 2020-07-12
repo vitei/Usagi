@@ -46,9 +46,20 @@ void Frustum::SetUpLR(const Matrix4x4 &projL, const Matrix4x4 &viewL, const Matr
 	m_absNormals[PLANE_LEFT].AssignAbsolute(m_planes[PLANE_LEFT].GetNormal());
 }
 
-void Frustum::InitFromMatrix(const Matrix4x4 &viewProj)
+void Frustum::InitFromMatrix(const Matrix4x4 &viewProjIn)
 {
 	float a, b, c, d;
+
+#ifdef USE_VULKAN
+	static const Matrix4x4 mToOgl = Matrix4x4(1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.5f, 0.0f,
+		0.0f, 0.0f, 0.5f, 1.0f).Inverse();
+
+	const Matrix4x4 viewProj = viewProjIn * mToOgl;
+#else
+	const Matrix4x4 viewProj = viewProjIn;
+#endif
 	
 	// Right
 	a = viewProj[0][3] - viewProj[0][0];
@@ -87,7 +98,7 @@ void Frustum::InitFromMatrix(const Matrix4x4 &viewProj)
 
 
 	// Near plane	
-#if Z_RANGE_0_TO_1
+#if Z_RANGE_0_TO_1 && !(defined USE_VULKAN)
 	a = viewProj[0][3];
 	b = viewProj[1][3];
 	c = viewProj[2][3];

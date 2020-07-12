@@ -3,7 +3,7 @@
 *****************************************************************************/
 #ifndef _USG_GRAPHICS_SCENE_CONSTANTSETS_H_
 #define _USG_GRAPHICS_SCENE_CONSTANTSETS_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Color.h"
 #include "Engine/Maths/Matrix4x3.h"

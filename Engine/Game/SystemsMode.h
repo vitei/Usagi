@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USAGI_SYSTEMS_MODE_H_
 #define _USAGI_SYSTEMS_MODE_H_
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/GameComponents.h"
 #include "Mode.h"
 
@@ -25,7 +25,7 @@ namespace usg
 		SystemsMode(RegisterSystemsFn fnGameSysRegister);
 		virtual ~SystemsMode();
 
-		virtual void Init(GFXDevice* pDevice) override;
+		virtual void Init(GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
 		virtual void CleanUp(GFXDevice* pDevice) override;
 		virtual bool Update(float fElapsed) override;
 

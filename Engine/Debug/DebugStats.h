@@ -6,7 +6,7 @@
 
 #ifndef USG_DEBUG_STATS_H
 #define USG_DEBUG_STATS_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Core/stl/Vector.h"
 #include API_HEADER(Engine/Debug, DebugStats_ps.h)

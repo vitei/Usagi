@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/Component.h"
 #include "Engine/Maths/AABB.h"
 

@@ -6,7 +6,7 @@
 
 #ifndef USG_GRAPHICS_SCENE_BONE_H
 #define USG_GRAPHICS_SCENE_BONE_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
@@ -52,6 +52,7 @@ public:
 	// frames matrix
 	const Matrix4x4& GetWorldMatrix() const { return m_pTransformNode->GetMatrix(); }
 	const Matrix4x4& GetInverseBindMatrix() const { return m_pResource->mInvBindMatrix;  }
+	Matrix4x4 GetBindMatrix(bool bIncludeParents) const;
 	const usg::Sphere& GetLocalColSphere() const { return m_pResource->cColSphere;  }
 	void AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod = 0, bool bDynamic = false);
 	void RemoveRenderNode(Scene* pScene, RenderNode* pNode);

@@ -58,7 +58,8 @@ void ShadowContext::Init(const Camera* pCamera)
 	SetRenderMask(RenderMask::RENDER_MASK_SHADOW_CAST);
 
 	m_pCamera = pCamera;
-	m_searchObject.Init(GetScene(), this, m_pCamera->GetFrustum(), RenderMask::RENDER_MASK_SHADOW_CAST);
+	m_searchObject.Init(GetScene(), this, RenderMask::RENDER_MASK_SHADOW_CAST);
+	m_searchObject.SetFrustum(&m_pCamera->GetFrustum());
 }
 
 void ShadowContext::ClearLists()

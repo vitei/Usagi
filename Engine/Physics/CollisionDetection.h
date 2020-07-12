@@ -5,7 +5,7 @@
 
 #ifndef USG_PHYSICS_COLLISION_DETECTION_H
 #define USG_PHYSICS_COLLISION_DETECTION_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Maths/Sphere.h"
 #include "Engine/Maths/AABB.h"
 

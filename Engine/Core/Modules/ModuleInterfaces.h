@@ -5,7 +5,7 @@
 #ifndef __USG_COMMON_USAGI_INTERFACE_H__
 #define __USG_COMMON_USAGI_INTERFACE_H__
 
-#include "Engine/Common/Common.h"
+
 
 namespace usg
 {

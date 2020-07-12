@@ -131,7 +131,7 @@ bool FileFactoryWin::LoadTGA(const char* szFileName)
 
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
-	pTexture->name = relativeNameNoExt + ".ktx";
+	pTexture->SetName(relativeNameNoExt + ".ktx", usg::ResourceType::TEXTURE);
 	bool bResult = gli::save_ktx(texture, pTexture->memory);
 	if (!bResult)
 	{
@@ -154,7 +154,7 @@ bool FileFactoryWin::LoadDDS(const char* szFileName)
 
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
-	pTexture->name = relativeNameNoExt + ".ktx";
+	pTexture->SetName(relativeNameNoExt + ".ktx", usg::ResourceType::TEXTURE);
 
 	bool bResult = gli::save_ktx(Texture, pTexture->memory);
 	if (!bResult)

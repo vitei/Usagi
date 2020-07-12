@@ -3,7 +3,7 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_COLORBUFFER_H
 #define _USG_GRAPHICS_COLORBUFFER_H
-#include "Engine/Common/Common.h"
+
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Graphics/Viewports/Viewport.h"
 #include "Engine/Resource/ResourceDecl.h"

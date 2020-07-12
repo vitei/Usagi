@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Common/Common.h"
+
 #include "Engine/Framework/SystemCoordinator.h"
 
 namespace usg
