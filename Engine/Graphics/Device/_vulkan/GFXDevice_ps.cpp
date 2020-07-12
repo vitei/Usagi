@@ -219,6 +219,8 @@ GFXDevice_ps::~GFXDevice_ps()
 
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
+	// Cleanup any requested destroys before destroying the device
+	CleanupDestroyRequests();
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
 
@@ -229,6 +231,42 @@ GFXDevice_ps::~GFXDevice_ps()
 		m_pQueueProps = NULL;
 	}
 	
+}
+
+void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
+{	
+	// Handle case that we've wrapped around
+	uint32 uCurrentFrame = m_pParent->GetFrameCount();
+	
+	while(!m_destroyQueue.empty())
+	{
+		DestroyRequest& req = m_destroyQueue.front();
+		if (req.uDestroyReqFrame <= uMaxFrameId || req.uDestroyReqFrame > uCurrentFrame)
+		{
+			switch (req.eResourceType)
+			{
+				case RESOURCE_BUFFER:
+					vkDestroyBuffer(m_vkDevice, req.resource.buffer, nullptr);
+				break;
+				case RESOURCE_IMAGE_VIEW:
+					vkDestroyImageView(m_vkDevice, req.resource.imageView, nullptr);
+				break;
+				case RESOURCE_IMAGE:
+					vkDestroyImage(m_vkDevice, req.resource.image, nullptr);
+				break;
+				case RESOURCE_DESCRIPTOR_SET:
+					vkFreeDescriptorSets(m_vkDevice, req.resource.desc.pool, 1, &req.resource.desc.set);
+				break;
+				default:
+					ASSERT(false);
+			}
+			m_destroyQueue.pop();
+		}
+		else
+		{
+			break;
+		}
+	}
 }
 
 void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::ExtensionType eType, vector<const char*>& extensions)
@@ -639,6 +677,12 @@ void GFXDevice_ps::Begin()
 		m_pParent->GetDisplay(i)->GetPlatform().SwapBuffers(m_pParent);
 	}
 
+	// Safe to take out resources older than max dynamic buffers
+	if(m_pParent->GetFrameCount() > GFX_NUM_DYN_BUFF)
+	{
+		CleanupDestroyRequests( m_pParent->GetFrameCount() - GFX_NUM_DYN_BUFF );
+	}
+
 	// TODO: Update GPU time
 }
 
@@ -784,6 +828,43 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	return false;
 }
 
+void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_BUFFER;
+	req.resource.buffer = buffer;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_IMAGE_VIEW;
+	req.resource.imageView = imageView;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyImage(VkImage image)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_IMAGE;
+	req.resource.image = image;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_SET;
+	req.resource.desc.set = set;
+	req.resource.desc.pool = pool;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
 void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
 {
 	uint32 uMemType = pAllocInOut->GetPoolId();
@@ -801,6 +882,8 @@ void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
 void GFXDevice_ps::WaitIdle()
 {
 	vkDeviceWaitIdle(m_vkDevice);
+	// Safe to clean up any destroy requests
+	CleanupDestroyRequests();
 }
 
 VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)

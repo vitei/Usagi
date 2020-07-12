@@ -621,11 +621,11 @@ void Texture_ps::ClearViews(GFXDevice* pDevice)
 {
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
-	vkDestroyImageView(vKDevice, m_imageView, nullptr);
+	pDevice->GetPlatform().ReqDestroyImageView(m_imageView);
 
 	for (auto& itr : m_customViews)
 	{
-		vkDestroyImageView(vKDevice, itr.view, nullptr);
+		pDevice->GetPlatform().ReqDestroyImageView(itr.view);
 	}
 	m_customViews.clear();
 }
@@ -639,7 +639,7 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 	FreeStaging(pDevice);
 	if (m_image)
 	{
-		vkDestroyImage(vKDevice, m_image, nullptr);
+		pDevice->GetPlatform().ReqDestroyImage(m_image);
 		m_image = VK_NULL_HANDLE;
 	}
 

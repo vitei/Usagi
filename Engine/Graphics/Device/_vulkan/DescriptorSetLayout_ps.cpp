@@ -98,7 +98,7 @@ namespace usg {
 		if (descAlloc.uPoolIndex < m_allocators.size())
 		{
 			Allocator* pAlloc = &m_allocators[descAlloc.uPoolIndex];
-			vkFreeDescriptorSets(pDevice->GetPlatform().GetVKDevice(), pAlloc->pool, 1, &descAlloc.descSet);
+			pDevice->GetPlatform().ReqDestroyDescriptorSet(pAlloc->pool, descAlloc.descSet);
 			descAlloc.uPoolIndex = USG_INVALID_ID;
 			descAlloc.descSet = nullptr;
 			ASSERT(pAlloc->uAllocations > 0);

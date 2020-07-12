@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Core/stl/list.h"
+#include "Engine/Core/stl/queue.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 #ifdef DEBUG_BUILD
@@ -76,15 +77,32 @@ public:
 	bool AllocateMemory(VkMemAllocator* pAllocInOut);
 	void FreeMemory(VkMemAllocator* pAllocInOut);
 
+	void ReqDestroyBuffer(VkBuffer buffer);
+	void ReqDestroyImageView(VkImageView buffer);
+	void ReqDestroyImage(VkImage image);
+	void ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set);
+
+
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
+	void CleanupDestroyRequests(uint32 uMaxFrameId = UINT_MAX);
+
 	enum
 	{
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
 		CALLBACK_COUNT = 2
 	};
+
+	enum ResourceType
+	{
+		RESOURCE_BUFFER = 0,
+		RESOURCE_IMAGE_VIEW,
+		RESOURCE_DESCRIPTOR_SET,
+		RESOURCE_IMAGE
+	};
+
 
 	// FIXME: Refactor to use the resource manager when we stop supporting platforms that precompile into one unit
 	struct Shader
@@ -99,6 +117,27 @@ private:
 		usg::vector<VkGPUHeap*> heaps;
 	};
 
+	struct DestroyRequest
+	{
+		ResourceType	eResourceType;
+		uint32			uDestroyReqFrame;
+
+		union Resource
+		{
+			VkBuffer	buffer;
+			VkImageView imageView;
+			VkImage		image;
+			struct Descriptor
+			{
+				// TODO: The device should probably own the pools
+				VkDescriptorPool pool;
+				VkDescriptorSet  set;
+			} desc;
+		} resource;
+	};
+
+
+	usg::queue<DestroyRequest>			m_destroyQueue;
 	VkFormat							m_colorFormats[CF_COUNT];
 
 	GFXDevice*							m_pParent;

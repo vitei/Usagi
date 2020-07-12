@@ -129,8 +129,7 @@ void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 	if (m_pOwner && m_buffer != VK_NULL_HANDLE)
 	{
-
-		vkDestroyBuffer(devicePS.GetVKDevice(), m_buffer, nullptr);
+		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer);
 		m_buffer = VK_NULL_HANDLE;
 		m_pOwner = nullptr;
 	}

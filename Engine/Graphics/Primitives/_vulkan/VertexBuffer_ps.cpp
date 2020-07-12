@@ -81,7 +81,7 @@ void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
 
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
-		vkDestroyBuffer(deviceVK, m_buffer[i], nullptr);
+		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer[i]);
 	}
 
 	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
