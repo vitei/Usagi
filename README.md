@@ -79,7 +79,7 @@ Getting up and running
 
 The build process has not been improved or significantly modified and currently has a number of dependencies which can not be directly included in an open source project.  Do *not* clone this project first as it should be checked out to a sub folder of a project which uses the engine.
 
-1. Install **Visual Studio 2017**.  
+1. Install **Visual Studio 2019**.  
    https://www.visualstudio.com/downloads/
 
 1. Install **Ruby 2.3.3**.  
@@ -137,11 +137,11 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
-Current Version 0.2.1
+Current Version 0.2.5
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
-v0.2.1 enables Vulkan validation and has addressed many of the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  
+v0.2.1 enabled Vulkan validation and has addressed many of the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  v0.2.5 tackled additional validation issues presented by the latest Vulkan SDK, added effect comprehensive effect definitions and significantly reduced buffer allocations which would present an issue in larger projects. It also dealt with timing issues surrounding releasing assets.  
 
 Since the code base is in a very early state the assumption is no one outside of the original developers are using the code base for anything other than reference; if you do attempt to make a project in Usagi be aware that you may periodically have to delete your build files (directories that begin with an underscore (such as _build) may periodically have to be deleted as the build system is altered.
 
