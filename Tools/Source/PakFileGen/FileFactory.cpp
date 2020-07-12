@@ -1,5 +1,5 @@
 #include "Engine/Common/Common.h"
-#include "../ResourcePak/ResourcePakExporter.h"
+#include "../ResourceLib/ResourcePakExporter.h"
 #include <algorithm>
 #include <fstream>
 #include "FileFactory.h"
@@ -52,6 +52,10 @@ bool FileFactory::LoadFile(const char* szFileName)
 	{
 		LoadRawFile(szFileName);
 	}
+	else if (HasExtension(szFileName, "yml"))
+	{
+		LoadYMLFile(szFileName);
+	}
 	else
 	{
 		return false;
@@ -69,7 +73,7 @@ bool FileFactory::LoadRawFile(const char* szFileName)
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->name = relativePath.c_str();
+	pFileEntry->SetName(relativePath.c_str(), usg::ResourceType::UNDEFINED);
 
 	FILE* pFileOut = nullptr;
 
@@ -119,7 +123,7 @@ bool FileFactory::LoadModel(const char* szFileName)
 
 	PureBinaryEntry* pModel = new PureBinaryEntry;
 	pModel->srcName = szFileName;
-	pModel->name = relativeNameNoExt + ".vmdl";
+	pModel->SetName(relativeNameNoExt + ".vmdl", usg::ResourceType::MODEL);
 
 	FILE* pFileOut = nullptr;
 
@@ -164,7 +168,7 @@ bool FileFactory::LoadModel(const char* szFileName)
 				if (HasExtension(findFileData.cFileName, ".vskla") && strncmp(findFileData.cFileName, baseName.c_str(), baseName.size()) == 0)
 				{
 					PureBinaryEntry* pAnim = new PureBinaryEntry;
-					pModel->name = relativePath + findFileData.cFileName;
+					pModel->SetName(relativePath + findFileData.cFileName, usg::ResourceType::SKEL_ANIM);
 
 					fopen_s(&pFileOut, tempFileName.c_str(), "rb");
 					if (!pFileOut)
@@ -193,6 +197,50 @@ bool FileFactory::LoadModel(const char* szFileName)
 	return true;
 }
 
+
+bool FileFactory::LoadYMLFile(const char* szFileName)
+{
+	std::stringstream command;
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	relativePath = RemoveFileName(relativePath) + "/";
+	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
+	std::string depFileName = tempFileName + ".d";
+
+
+	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF file" << depFileName.c_str() << "-d Data/Components/Defaults.yml" << szFileName;
+	system((std::string("mkdir ") + RemoveFileName(tempFileName)).c_str());
+
+	system(command.str().c_str());
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	m_resources.push_back(pFileEntry);
+
+	AddDependenciesFromDepFile(depFileName.c_str(), pFileEntry);
+
+	return true;
+}
+
+
 void FileFactory::AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry)
 {
 	std::ifstream depFile(szDepFileName);
@@ -209,11 +257,15 @@ void FileFactory::AddDependenciesFromDepFile(const char* szDepFileName, Resource
 			continue;
 		std::string depLower;
 		std::replace(intermediateDep.begin(), intermediateDep.end(), '\\', '/');
+
+		// This is for assets that the source might reference
+		#if 0
 		if (pEntry)
 		{
 			// Full path version for the build system
-			pEntry->dependencies.push_back(intermediateDep);
+			pEntry->AddDependency(intermediateDep, "");
 		}
+		#endif
 		
 		// Simplified case correct version relative directory for the builds purposes (need to map src to dest later)
 		depLower.resize(intermediateDep.size());

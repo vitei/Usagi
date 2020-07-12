@@ -101,12 +101,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;freetype28d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;freetype28d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>
@@ -132,14 +132,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\glslang\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\msdfgen;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\include;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\glslang\Public;$(USAGI_DIR)\Engine\ThirdParty\msdfgen;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\include;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(USAGI_DIR)\Engine\ThirdParty\nanopb;$(USAGI_DIR)\;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src\;$(USAGI_DIR)\Engine\ThirdParty\gli\external</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(UsagiLibDir);$(USAGI_DIR)\Engine\ThirdParty\FBX SDK\lib\vs2015\x64\debug;$(USAGI_DIR)\Engine\ThirdParty\msdfgen\lib;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(TargetPath) $(USAGI_DIR)\Tools\bin\ /y</Command>

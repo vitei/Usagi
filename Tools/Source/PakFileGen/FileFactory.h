@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Core/Utility.h"
-#include "../ResourcePak/ResourcePakExporter.h"
+#include "../ResourceLib/ResourcePakExporter.h"
 #include <sstream>
 #include <algorithm>
 
@@ -23,9 +23,9 @@ protected:
 		PureBinaryEntry();
 		virtual ~PureBinaryEntry();
 
-		virtual void* GetData() override { return binary; }
+		virtual const void* GetData() override { return binary; }
 		virtual uint32 GetDataSize() override { return binarySize; };
-		virtual void* GetCustomHeader() { return nullptr; }
+		virtual const void* GetCustomHeader() { return nullptr; }
 		virtual uint32 GetCustomHeaderSize() { return 0; }
 
 
@@ -39,6 +39,7 @@ protected:
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
 	bool LoadRawFile(const char* szFileName);
+	bool LoadYMLFile(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);
