@@ -39,7 +39,7 @@ Debug3D::~Debug3D()
 	m_psRenderer = NULL;
 }
 
-void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
+void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 {
 	int i, iC = MAX_SPHERES;
 	
@@ -68,7 +68,7 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene)
 	m_psRenderer = this;
 }
 
-void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
+void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewContext* pContext)
 {
 	RenderPassHndl rp = pContext->GetRenderPasses().GetRenderPass(*this);
 
@@ -89,7 +89,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.Sphere");
+	pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Debug.Sphere");
 	pipelineState.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineState.inputBindings[1].Init(g_instanceVertex, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
 	pipelineState.uInputBindingCount = 2;
@@ -103,7 +103,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ViewContext* pContext)
 	pipelineState.uInputBindingCount = 1;
 	// Initialize cubes
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
+	pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Debug.CubesOriented");
 	pipelineState.ePrimType = PT_POINTS;
 	// FIXME: Issue on Vulkan with this effect
 	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);

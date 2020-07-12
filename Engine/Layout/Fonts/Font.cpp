@@ -36,7 +36,7 @@ namespace usg
 		m_descriptor.CleanUp(pDevice);
 	}
 
-	bool Font::Load( GFXDevice* pDevice, const char* filename )
+	bool Font::Load( GFXDevice* pDevice, ResourceMgr* pResMgr, const char* filename )
 	{
 		m_name = filename;
 		SetupHash( m_name.CStr() );
@@ -55,7 +55,7 @@ namespace usg
 		ASSERT(bReadSucceeded);
 
 		szTemp.ParseString("%s", szFilename.CStr());
-		m_pTexture = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, szTemp.CStr());
+		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.CStr());
 		ASSERT(m_pTexture.get() != NULL);
 		SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
 		pointDecl.eAnisoLevel = SamplerDecl::ANISO_LEVEL_16;

@@ -46,7 +46,7 @@ namespace usg
 		ASSERT(m_bufferValid == false);
 	}
 
-	void TextDrawer::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
+	void TextDrawer::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
 		// Initialize vertices.
 		m_charVerts.Init(
@@ -79,11 +79,11 @@ namespace usg
 		alphaDecl.dstBlendAlpha = BLEND_FUNC_DST_ALPHA;
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.DistanceField");
+		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.DistanceField");
 		m_pipeline = pDevice->GetPipelineState(renderPass, pipelineState);
 		dsDecl.bDepthEnable = true;
 		dsDecl.eDepthFunc = DEPTH_TEST_LESS;
-		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Text.Text3D");
+		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.Text3D");
 		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
 		pipelineState.layout.uDescriptorSetCount = 3;

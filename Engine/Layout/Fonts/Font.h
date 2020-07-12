@@ -18,7 +18,7 @@ namespace usg
 		Font ();
 		virtual ~Font();
 
-		bool Load(GFXDevice* pDevice, const char* const filename);
+		bool Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* const filename);
 		virtual void CleanUp(GFXDevice* pDevice) override;
 
 

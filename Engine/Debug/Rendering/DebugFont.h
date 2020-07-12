@@ -15,7 +15,7 @@ public:
 	DebugFont(void);
 	~DebugFont(void);
 
-	bool	Load(GFXDevice* pDevice, const char* szName);
+	bool	Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* szName);
 
 	float	GetStringWidth(const char* string, float height) const;
 

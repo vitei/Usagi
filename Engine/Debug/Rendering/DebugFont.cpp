@@ -17,7 +17,7 @@ DebugFont::~DebugFont(void)
 }
 
 
-bool DebugFont::Load(GFXDevice* pDevice, const char* szName)
+bool DebugFont::Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* szName)
 {
 	// FIXME: Hardcoded, load from file
 	m_uChrPerLine	= 32;
@@ -28,7 +28,7 @@ bool DebugFont::Load(GFXDevice* pDevice, const char* szName)
 	m_fUVChrHeight	= (1.0f/32.0f) *m_fTexelHeight;
 	m_fOffsetY		= 3.0f;
 
-	m_pTexture = ResourceMgr::Inst()->GetTexture(pDevice, szName);
+	m_pTexture = pResMgr->GetTexture(pDevice, szName);
 
 	return true;
 }

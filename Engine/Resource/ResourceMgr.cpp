@@ -263,7 +263,7 @@ FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 		{
 			m_pImpl->resources.StartLoad();
 			Font* pNC = vnew(ALLOC_RESOURCE_MGR) Font;
-			pNC->Load(pDevice, u8Name.CStr());
+			pNC->Load(pDevice, this, u8Name.CStr());
 			pFont = m_pImpl->resources.AddResource(pNC);
 		}
 	}

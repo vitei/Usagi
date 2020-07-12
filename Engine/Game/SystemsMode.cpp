@@ -59,7 +59,7 @@ namespace usg
 		m_pImpl->pScene = scene.GetRuntimeData().pScene;
 	}
 
-	void SystemsMode::Init(GFXDevice* pDevice)
+	void SystemsMode::Init(GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 	{
 		m_pImpl->pDevice = pDevice;
 		m_pImpl->pComponentManager.reset(vnew(ALLOC_COMPONENT)ComponentManager(m_pImpl->pMessageDispatch.get(), m_registerSystemsFn));
@@ -69,7 +69,7 @@ namespace usg
 		GetComponent(GetRootEntity(), activeDevice);
 		ActiveDevice_init(activeDevice, pDevice);
 
-		m_pImpl->pComponentManager->RegisterResourceHandles(pDevice, usg::ResourceMgr::Inst(), m_pImpl->pScene);
+		m_pImpl->pComponentManager->RegisterResourceHandles(pDevice, pResMgr, m_pImpl->pScene);
 		
 	}
 

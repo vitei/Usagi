@@ -46,7 +46,7 @@ namespace usg
 		usg::physics::deinit();
 	}
 
-	void SimpleGameBase::Init(usg::GFXDevice* pDevice)
+	void SimpleGameBase::Init(usg::GFXDevice* pDevice, ResourceMgr* pResMgr)
 	{
 		m_transitionRenderPass = pDevice->GetDisplay(0)->GetRenderPass();
 
@@ -60,18 +60,18 @@ namespace usg
 		
 		m_eState = STATE_LOADING;
 
-		m_debugRender.Init(pDevice, m_transitionRenderPass);
+		m_debugRender.Init(pDevice, pResMgr, m_transitionRenderPass);
 		m_debugRender.SetDrawArea(0.0f, 0.0f, 1280.f, 720.f);
 		m_debug.Init(pDevice, &m_debugRender);
 		m_debug.RegisterCPUTimer(&m_cpuTimer);
 
-		m_pTransitionMode = CreateTransitionMode(pDevice);
+		m_pTransitionMode = CreateTransitionMode(pDevice, pResMgr);
 	}
 
-	usg::ModeTransition* SimpleGameBase::CreateTransitionMode(usg::GFXDevice* pDevice)
+	usg::ModeTransition* SimpleGameBase::CreateTransitionMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 	{
 		usg::ModeTransition* pTransition = vnew(ALLOC_OBJECT) usg::ModeTransition;
-		pTransition->Init(pDevice);
+		pTransition->Init(pDevice, pResMgr);
 		return pTransition;
 	}
 

@@ -22,7 +22,7 @@ public:
 	HeightMap(void);
 	~HeightMap(void);
 
-	bool Load(GFXDevice* pDevice, Scene* pScene, const char* szFileName, uint32 uWidth, uint32 uHeight, uint32 uBpp, float scale, float offset, CollisionQuadTree& pCollisionQuadTree);
+	bool Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, uint32 uWidth, uint32 uHeight, uint32 uBpp, float scale, float offset, CollisionQuadTree& pCollisionQuadTree);
 
 private:
 	enum

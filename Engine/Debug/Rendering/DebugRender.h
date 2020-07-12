@@ -22,7 +22,7 @@ public:
 	DebugRender();
 	~DebugRender();
 
-	void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
+	void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
 	void CleanUp(GFXDevice* pDevice);
 	void SetDrawArea(float fLeft, float fTop, float fWidth, float fHeight, float fLineSpacing = 1.25f);
 

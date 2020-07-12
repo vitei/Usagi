@@ -68,13 +68,13 @@ Model::~Model()
 	}
 }
 
-Model::Model(GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic)
+Model::Model(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, bool bDynamic)
 {
-	bool bLoad = Load(pDevice, pScene, szFileName, bDynamic);
+	bool bLoad = Load(pDevice, pScene, pResMgr, szFileName, bDynamic);
 	ASSERT(bLoad);
 }
 
-bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic, bool bFastMem, bool bAutoTransform, bool bPerBoneCulling)
+bool Model::Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, bool bDynamic, bool bFastMem, bool bAutoTransform, bool bPerBoneCulling)
 {
 	uint32 uRenderMask = RenderMask::RENDER_MASK_ALL;
 	// TODO: Support cleanup or reuse?
@@ -90,7 +90,6 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, boo
 #if defined(DEBUG_BUILD) && defined(MODEL_DEBUG)
 	DEBUG_PRINT( "Model::Load, %s\n", szFileName );
 #endif
-	ResourceMgr* pResMgr = ResourceMgr::Inst();
 	m_pResource = pResMgr->GetModel( pDevice, szFileName, bFastMem );
 
 	ASSERT(!m_pResource->IsInstanceModel());

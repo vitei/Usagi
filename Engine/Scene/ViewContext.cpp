@@ -177,14 +177,14 @@ namespace usg {
 		vdelete m_pImpl;
 	}
 
-	void ViewContext::Init(GFXDevice* pDevice, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
+	void ViewContext::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, PostFXSys* pFXSys, uint32 uHighestLOD, uint32 uRenderMask)
 	{
 		SetHighestLOD(uHighestLOD);
 		SetRenderMask(uRenderMask);
 		m_pImpl->pPostFXSys = pFXSys;
 
 		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask);
-		Debug3D::GetRenderer()->InitContextData(pDevice, this);
+		Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
 	}
 
 

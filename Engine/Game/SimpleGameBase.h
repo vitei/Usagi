@@ -21,7 +21,7 @@ namespace usg
 		explicit SimpleGameBase();
 		virtual ~SimpleGameBase();
 
-		virtual void Init(usg::GFXDevice* pDevice) override;
+		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
 		virtual void CleanUp(usg::GFXDevice* pDevice) override;
 		virtual void Update(usg::GFXDevice* pDevice) override;
 		virtual void Draw(usg::GFXDevice* pDevice) override;
@@ -34,7 +34,7 @@ namespace usg
 		virtual uint32 GetNextMode() const = 0;
 		virtual void ModeFinished() = 0;
 		virtual ModeLoadFunc GetLoadFunc() const = 0;
-		virtual usg::ModeTransition* CreateTransitionMode(usg::GFXDevice* pDevice);
+		virtual usg::ModeTransition* CreateTransitionMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr);
 		void FinishedStaticLoad(usg::GFXDevice* pDevice);
 
 		enum State

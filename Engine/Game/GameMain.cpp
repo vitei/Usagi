@@ -53,7 +53,7 @@ bool GameInit()
 	game = CreateGame();
 
 	Math::SeedRand();
-	game->Init(g_pGFXDevice);
+	game->Init(g_pGFXDevice, usg::ResourceMgr::Inst());
 
 	if (!game->IsRunning())
 	{
@@ -118,7 +118,7 @@ bool GameMain(const char** dllModules, uint32 uModuleCount)
 		{
 			//mem::FreezeStack(false);
 			game = CreateGame();
-			game->Init(g_pGFXDevice);
+			game->Init(g_pGFXDevice, usg::ResourceMgr::Inst());
 			//mem::FreezeStack(true);
 		}
 		if (OS::ShouldQuit())

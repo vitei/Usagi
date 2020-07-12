@@ -202,7 +202,7 @@ void IMGuiRenderer::Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight)
 	m_uScreenHeight = uHeight;
 }
 
-void IMGuiRenderer::InitResources(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
+void IMGuiRenderer::InitResources(GFXDevice* pDevice, ResourceMgr* pResMgr, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts)
 {
 	m_uMaxVerts = uMaxVerts;
 	m_uScreenWidth = uWidth;
@@ -237,7 +237,7 @@ void IMGuiRenderer::InitResources(GFXDevice* pDevice, uint32 uWidth, uint32 uHei
 		RasterizerStateDecl& rasDecl = pipeline.rasterizerState;
 		rasDecl.eCullFace	= CULL_FACE_NONE;
 	}
-	pipeline.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.PosColUV");
+	pipeline.pEffect = pResMgr->GetEffect(pDevice, "Debug.PosColUV");
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION_UV_COL));
 	pipeline.uInputBindingCount = 1;
 

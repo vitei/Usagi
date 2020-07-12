@@ -15,7 +15,7 @@ namespace usg
 	class GameView
 	{
 	public:
-		GameView(usg::GFXDevice* pDevice, usg::Scene& scene, usg::PostFXSys& postFXSys, const usg::GFXBounds& bounds, float32 fFov, float32 fNear, float32 fFar);
+		GameView(usg::GFXDevice* pDevice, usg::Scene& scene, ResourceMgr* pResMgr, usg::PostFXSys& postFXSys, const usg::GFXBounds& bounds, float32 fFov, float32 fNear, float32 fFar);
 		~GameView();
 
 		void CleanUp(usg::GFXDevice* pDevice, usg::Scene& scene);

@@ -21,7 +21,7 @@ namespace usg
 		TextDrawer(class Text* pOwner);
 		~TextDrawer();
 
-		void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
+		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
 		void CleanUp(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }

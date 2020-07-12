@@ -117,7 +117,7 @@ void CubeRender::AddCube(const Matrix4x4& mat, const Color& clr)
 }
 
 
-bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool bHideInside)
+bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, uint32 uMaxCubes, bool bHideInside)
 {
 	m_pScene = pScene;
 	m_pRenderGroup = NULL;
@@ -159,7 +159,7 @@ bool CubeRender::Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool 
     
 	AlphaStateDecl& alphaDecl = pipelineDecl.alphaState;
     
-	pipelineDecl.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, "Debug.CubesOriented");
+	pipelineDecl.pEffect = pResMgr->GetEffect(pDevice, "Debug.CubesOriented");
 	m_mesh.SetPipeline(pDevice->GetPipelineState(pScene->GetRenderPasses(0).GetRenderPass(RenderLayer::LAYER_OPAQUE, 0), pipelineDecl));
     
 	RenderNode* pNode = &m_mesh;

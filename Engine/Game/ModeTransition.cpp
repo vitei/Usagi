@@ -16,7 +16,7 @@ namespace usg
 
 	}
 
-	void ModeTransition::Init(GFXDevice* pDevice)
+	void ModeTransition::Init(GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 	{
 		m_uActiveFrames = 0;
 	}

@@ -39,7 +39,7 @@ public:
 	Scene();
 	~Scene();
 
-	void			Init(GFXDevice* pDevice, const AABB& worldBounds, ParticleSet* pSet = nullptr);
+	void			Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const AABB& worldBounds, ParticleSet* pSet = nullptr);
 	void			Cleanup(GFXDevice* pDevice);
 	void			Reset();
 

@@ -24,7 +24,7 @@ public:
 	CubeRender(void);
 	~CubeRender(void);
     
-	bool    Init(GFXDevice* pDevice, Scene* pScene, uint32 uMaxCubes, bool bHideInside=false);
+	bool    Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, uint32 uMaxCubes, bool bHideInside=false);
 	void	Remove();
 	void	FreeAllocation();
 	void	Create(GFXDevice* pDevice, bool bHideInside = false);

@@ -32,7 +32,7 @@ namespace usg
 			pModel = m_pool.Alloc();
 			if(pModel)
 			{
-				pModel->Load(m_pDevice, m_pScene, szModelName, bDynamic, true, m_bAutoTransform, bPerBoneCulling);
+				pModel->Load(m_pDevice, m_pScene, pResMgr, szModelName, bDynamic, true, m_bAutoTransform, bPerBoneCulling);
 			}
 			m_inUseList.AddToEnd(pModel);
 		}

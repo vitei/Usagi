@@ -27,7 +27,7 @@ namespace usg
 		// TODO: Generate additional vertex buffers as needed
 		void Init();
 		void CleanUp(GFXDevice* device);
-		void InitResources(GFXDevice* device, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts = 12000);
+		void InitResources(GFXDevice* device, ResourceMgr* pMgr, uint32 uWidth, uint32 uHeight, uint32 uMaxVerts = 12000);
 		void Resize(GFXDevice* device, uint32 uWidth, uint32 uHeight);
 		void AddWindow(GUIWindow* pWindow) { m_windows.AddToEnd(pWindow); }
 		// Can do this or simply call directly

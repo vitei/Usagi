@@ -21,7 +21,7 @@ namespace usg
 		Text();
 		~Text();
 
-		void Init(GFXDevice* pDevice, const RenderPassHndl& renderPass);
+		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
 		void CleanUp(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		bool Draw(GFXContext* context, bool b3D = false);

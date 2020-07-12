@@ -29,9 +29,9 @@ namespace usg
 	{
 	}
 
-	void Text::Init(GFXDevice* pDevice, const RenderPassHndl& renderPass)
+	void Text::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
-		m_drawer.Init(pDevice, renderPass);
+		m_drawer.Init(pDevice, pResMgr, renderPass);
 	}
 
 	void Text::SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC)

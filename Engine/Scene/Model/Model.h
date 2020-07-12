@@ -26,11 +26,11 @@ public:
 	};
 
 	Model();
-	Model(GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic);
+	Model(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, bool bDynamic);
 	virtual ~Model();
 
 	// bAutoTransform - Scene nodes are parented and automatically updated, set this to false when using the component system
-	bool Load( GFXDevice* pDevice, Scene* pScene, const char* szFileName, bool bDynamic = false, bool bFastMem = true, bool bAutoTransform = true, bool bPerBoneCulling = true );
+	bool Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, bool bDynamic = false, bool bFastMem = true, bool bAutoTransform = true, bool bPerBoneCulling = true );
 	void CleanUp(GFXDevice* pDevice);
 	void InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 uMesh);
 	// Note that AddToScene is dependent on a GPU update, to remove a model from the systems use ForceRemoveFromScene
