@@ -54,7 +54,18 @@ bool FileFactory::LoadFile(const char* szFileName)
 	}
 	else if (HasExtension(szFileName, "yml"))
 	{
-		LoadYMLFile(szFileName);
+		switch(GetYmlType(szFileName))
+		{
+		case YML_VPB:
+			LoadYMLVPBFile(szFileName);
+			break;
+		case YML_ENTITY:
+			LoadYMLEntityFile(szFileName);
+			break;
+		default:
+			ASSERT(false);
+		}
+
 	}
 	else
 	{
@@ -64,6 +75,34 @@ bool FileFactory::LoadFile(const char* szFileName)
 
 	AddDependency(szFileName);
 	return true;
+}
+
+FileFactory::YmlType FileFactory::GetYmlType(const char* szFileName)
+{
+	std::string path = RemoveFileName(szFileName);
+	while( path.size() > 0)
+	{
+		memsize lastPath = path.find_last_of("\\/");
+		if (lastPath == std::string::npos)
+		{
+			return YML_VPB;
+		}
+		std::string cmpPath = path.substr(lastPath + 1);
+		if (cmpPath == "Entities")
+		{
+			return YML_ENTITY;
+		}
+
+		lastPath = path.find_last_of("\\/");
+		if(lastPath == std::string::npos )
+		{
+			return YML_VPB;
+		}
+
+		path = path.substr(0, lastPath);
+	}
+
+	return YML_VPB;
 }
 
 
@@ -197,8 +236,55 @@ bool FileFactory::LoadModel(const char* szFileName)
 	return true;
 }
 
+bool FileFactory::LoadYMLEntityFile(const char* szFileName)
+{
+	std::stringstream command;
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	relativePath = RemoveFileName(relativePath) + "/";
+	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
+	std::string depFileName = tempFileName + ".d";
 
-bool FileFactory::LoadYMLFile(const char* szFileName)
+	command << "Usagi\\Tools\\ruby\\process_hierarchy.rb" 
+		<< " -IData/Entities" 
+		<< " -RUsagi/_build/ruby -R_build/ruby"
+		<< " -d Data/Components/Defaults.yml " 
+		<< "-o " << tempFileName.c_str()
+		<< " -m _romfiles/win/Models " 
+		<< "--MF " << depFileName.c_str() << " "
+		<< szFileName;
+	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
+
+	system(command.str().c_str());
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	m_resources.push_back(pFileEntry);
+
+	AddDependenciesFromDepFile(depFileName.c_str(), pFileEntry);
+
+	return true;
+}
+
+bool FileFactory::LoadYMLVPBFile(const char* szFileName)
 {
 	std::stringstream command;
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);

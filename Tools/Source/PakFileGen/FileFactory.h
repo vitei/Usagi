@@ -33,13 +33,21 @@ protected:
 		uint32 binarySize;
 	};
 
+	enum YmlType
+	{
+		YML_VPB = 0,
+		YML_ENTITY,
+	};
+
 	const char* GetExtension(const char* szFileName);
 	bool HasExtension(const char* szFileName, const char* szExt);
 	bool LoadModel(const char* szFileName);
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
 	bool LoadRawFile(const char* szFileName);
-	bool LoadYMLFile(const char* szFileName);
+	bool LoadYMLVPBFile(const char* szFileName);
+	bool LoadYMLEntityFile(const char* szFileName);
+	YmlType GetYmlType(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);

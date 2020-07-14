@@ -1,7 +1,6 @@
 # Usagi Engine, Copyright © Vitei, Inc. 2013
 require 'nokogiri'
-require 'Engine/Framework/FrameworkComponents.pb.rb'
-require 'Engine/Scene/Model/Skeleton.pb.rb'
+
 
 require_relative 'matrix_util.rb'
 
