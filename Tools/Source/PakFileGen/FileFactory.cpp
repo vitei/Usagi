@@ -207,9 +207,8 @@ bool FileFactory::LoadYMLFile(const char* szFileName)
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
 	std::string depFileName = tempFileName + ".d";
 
-
-	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF file" << depFileName.c_str() << "-d Data/Components/Defaults.yml" << szFileName;
-	system((std::string("mkdir ") + RemoveFileName(tempFileName)).c_str());
+	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
 
 	system(command.str().c_str());
 
