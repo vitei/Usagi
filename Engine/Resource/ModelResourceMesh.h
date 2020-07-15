@@ -43,10 +43,10 @@ namespace usg{
 			uint32					uRootIndex;
 		} primitive;
 		VertexBuffer			vertexBuffer;
-		CustomEffectRuntime		effectRuntime;
 
 		struct RenderSet
 		{
+			CustomEffectRuntime		effectRuntime;
 			PipelineStateDecl		pipeline;
 			VertexBuffer			singleVerts;
 		} renderSets[RS_COUNT];
@@ -62,9 +62,9 @@ namespace usg{
 			for (auto& it : renderSets)
 			{
 				it.singleVerts.CleanUp(pDevice);
+				it.effectRuntime.CleanUp(pDevice);
 			}
 			primitive.indexBuffer.CleanUp(pDevice);
-			effectRuntime.CleanUp(pDevice);
 		}
 
 

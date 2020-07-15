@@ -135,7 +135,7 @@ private:
 	void FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::BoneAnimationFrame* pFrame);
 
 	// Materials
-	void AddMaterials(Cmdl& cmdl, FbxNode* pNode);
+	void AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned);
 	void AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pNewMaterial);
 	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);
 	
@@ -143,8 +143,8 @@ private:
 	::exchange::Shape* NewShape(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Mesh* NewMesh(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Animation* FbxLoad::NewAnimation(Cmdl& cmdl, FbxAnimStack* layerNode);
-	::exchange::Material* NewMaterial(FbxSurfaceMaterial* pFBXMaterial);
-	::exchange::Material* DummyMaterial();
+	::exchange::Material* NewMaterial(FbxSurfaceMaterial* pFBXMaterial, bool bSkin);
+	::exchange::Material* DummyMaterial(bool bSkinned);
 	::exchange::Skeleton* NewSkeleton();
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);

@@ -19,11 +19,6 @@ namespace usg
 			uint32 uSamplerCount;
 			uint32 uConstantSetDeclOffset;
 			uint32 uConstantSetCount;
-			char   effectName[64];
-			char   shadowEffectName[64];
-			char   omniShadowEffectName[64];
-			char   deferredEffectName[64];
-			char   transparentEffectName[64];
 		};
 
 		struct Sampler

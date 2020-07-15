@@ -33,14 +33,17 @@ namespace exchange {
 		void SetStatic(bool bStatic) { m_bStatic = bStatic;  }
 
 		// For the custom effects
-		void InitCustomMaterial(const char* szName);
+		void InitCustomMaterial(const char* szPakName, const char* szEffectName, const std::vector<std::string>& defines);
 		
 		template <class VariableType>
 		void SetVariable(const char* szName, VariableType var, uint32 uIndex = 0)
 		{
-			for (uint32 i = 0; i < m_materialDef.GetConstantSetCount(); i++)
+			for (uint32 pass = 0; pass < usg::exchange::_Material_RenderPass_count; pass++)
 			{
-				m_materialDef.OverrideTyped(i, szName, GetConstantSetData(i), &var, 1, uIndex);
+				for (uint32 i = 0; i < m_materialDef[pass].GetConstantSetCount(); i++)
+				{
+					m_materialDef[pass].OverrideTyped(i, szName, GetConstantSetData(pass, i), &var, 1, uIndex);
+				}
 			}
 		}
 
@@ -58,21 +61,24 @@ namespace exchange {
 		template <class VariableType>
 		void SetVariableArray(const char* szName, VariableType* var, uint32 uCount=1, uint32 uIndex = 0)
 		{
-			for (uint32 i = 0; i < m_materialDef.GetConstantSetCount(); i++)
+			for(uint32 pass = 0; pass < usg::exchange::_Material_RenderPass_count; pass++)
 			{
-				m_materialDef.OverrideTyped(i, szName, GetConstantSetData(i), var, uCount, uIndex);
+				for (uint32 i = 0; i < m_materialDef[pass].GetConstantSetCount(); i++)
+				{
+					m_materialDef[pass].OverrideTyped(i, szName, GetConstantSetData(pass, i), var, uCount, uIndex);
+				}
 			}
 		}
 
-		MaterialDefinitionExporter& GetCustomFX() { return m_materialDef;  }
+		MaterialDefinitionExporter& GetCustomFX(uint32 uPass) { return m_materialDef[uPass];  }
 		bool IsCustomFX() { return m_bCustomFX;  }
 		void SetIsCustomFX(bool bFX) { m_bCustomFX = bFX; }
 private:
-	void AddConstantSet(const char* szName, uint32 uSize);
-	void* GetConstantSetData(uint32 uSet);
+	void AddConstantSet(const char* szName, uint32 uPass, uint32 uSize);
+	void* GetConstantSetData(uint32 uPass, uint32 uSet);
 	// For the information about the material
 	
-	MaterialDefinitionExporter	m_materialDef;
+	MaterialDefinitionExporter	m_materialDef[usg::exchange::_Material_RenderPass_count];
 	usg::exchange::Material		m_material;
 
 	bool	m_bStatic;

@@ -450,16 +450,6 @@ int MaterialDefinitionExporter::Load(YAML::Node& mainNode, const std::string& de
 
 	} while (nextDefine != std::string::npos);
 
-
-	if (mainNode["Shader"])
-	{
-		m_effectName = mainNode["Shader"]["name"].as<std::string>();
-		m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
-		m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
-		m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
-		m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
-	}
-
 	YAML::Node attributes = mainNode["Attributes"];
 	LoadAttributes(attributes);
 
@@ -478,6 +468,116 @@ int MaterialDefinitionExporter::Load(const char* path, const std::string& define
 {
 	YAML::Node mainNode = YAML::LoadFile(path);
 	return Load(mainNode, defines);
+
+}
+
+
+int MaterialDefinitionExporter::Load(const char* path, const char* effect, const std::vector<std::string>& defineSets)
+{
+	YAML::Node mainNode = YAML::LoadFile(path);
+	YAML::Node customFX = mainNode["CustomEffects"];
+	YAML::Node effects = mainNode["Effects"];
+	std::string defines;
+	YAML::Node effectNode;
+	YAML::Node customFXNode;
+
+	uint32 uMaxDefinesFound = 0;
+	for (YAML::iterator it = effects.begin(); it != effects.end(); ++it)
+	{
+		uint32 uFoundThisNode = 0;
+
+		if ((*it)["define_sets"])
+		{
+			YAML::Node defineNode = (*it)["define_sets"];
+			for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+			{
+				for (memsize i = 0; i < defineSets.size(); i++)
+				{
+					if (defineSets[i] == (*it)["name"].as<std::string>())
+					{
+						uFoundThisNode++;
+					}
+				}
+			}
+		}
+		if ((*it)["global_sets"])
+		{
+			YAML::Node defineNode = (*it)["global_sets"];
+			for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+			{
+				for (memsize i = 0; i < defineSets.size(); i++)
+				{
+					if (defineSets[i] == (*it)["name"].as<std::string>())
+					{
+						uFoundThisNode++;
+					}
+				}
+			}
+		}
+
+
+		if ((*it)["name"] && (*it)["name"].as<std::string>() == effect && ((uFoundThisNode > uMaxDefinesFound) || defineSets.size() == 0) )
+		{
+			uMaxDefinesFound = uFoundThisNode;
+			effectNode = (*it).as<YAML::Node>();
+		}
+	}
+	
+	if (effectNode.IsNull())
+	{
+		return -1;
+	}
+
+	if(effectNode["custom_effect"])
+	{
+		std::string customFXString = effectNode["custom_effect"].as<std::string>();
+		customFXNode = customFX[customFXString];
+	}
+	else
+	{
+		return -1;
+	}
+
+	if (effectNode["define_sets"])
+	{
+		YAML::Node defineNode = effectNode["defineSets"];
+		for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+		{
+			for (memsize i = 0; i < defineSets.size(); i++)
+			{
+				if (defineSets[i] == (*it)["name"].as<std::string>())
+				{
+					if (defines.size() > 0)
+					{
+						defines += "";
+					}
+					defines += (*it)["defines"].as<std::string>();
+				}
+			}
+		}
+	}
+	if (effectNode["global_sets"])
+	{
+		YAML::Node defineNode = effectNode["global_sets"];
+		for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+		{
+			for (memsize i = 0; i < defineSets.size(); i++)
+			{
+				if (defineSets[i] == (*it)["name"].as<std::string>())
+				{
+					if (defines.size() > 0)
+					{
+						defines += "";
+					}
+					defines += (*it)["defines"].as<std::string>();
+				}
+			}
+		}
+	}
+
+	Load(customFXNode, defines);
+
+	return 1;
 
 }
 
@@ -500,6 +600,16 @@ const char* MaterialDefinitionExporter::GetConstantSetName(uint32 uSet)
 void MaterialDefinitionExporter::CopyDefaultData(uint32 uSet, void* pDst)
 {
 	memcpy(pDst, m_constantSets[uSet].rawData.data(), m_constantSets[uSet].rawData.size());
+}
+
+bool MaterialDefinitionExporter::GetTextureIndex(uint32 uTex, uint32& indexOut)
+{
+	if (uTex < m_samplers.size())
+	{
+		indexOut = m_samplers[uTex].uIndex;
+		return true;
+	}
+	return false;
 }
 
 bool MaterialDefinitionExporter::GetTextureIndex(const char* szHint, uint32& indexOut)
@@ -675,14 +785,6 @@ void MaterialDefinitionExporter::InitBinaryData()
 		memcpy(pDst, m_constantSets[i].rawData.data(), m_constantSets[i].rawData.size());
 		pDst += m_constantSets[i].rawData.size();
 	}
-
-
-	// FIXME: Needs removing
-	strcpy_s(m_header.effectName, m_effectName.c_str());
-	strcpy_s(m_header.shadowEffectName, m_shadowEffectName.c_str());
-	strcpy_s(m_header.transparentEffectName, m_transparentEffectName.c_str());
-	strcpy_s(m_header.omniShadowEffectName, m_omniShadowEffectName.c_str());
-	strcpy_s(m_header.deferredEffectName, m_deferredEffectName.c_str());
 
 	m_uHeaderCRC = utl::CRC32(&m_header, sizeof(m_header));
 	m_uDataCRC = utl::CRC32(m_binary.data(), (uint32)m_binary.size());

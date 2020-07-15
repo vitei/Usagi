@@ -114,6 +114,15 @@ enum TextureCoordinator_MappingMethod {
 	CUBE_ENV = 2;
 	SPHERE_ENV = 3;
 }
+
+enum Material_RenderPass {
+	DEFAULT = 0;
+	DEFERRED = 1;
+	TRANSPARENT = 2;
+	DEPTH = 3;
+	OMNI_DEPTH = 4;
+}
+
 message TextureCoordinator {
 	required TextureCoordinator_MappingMethod method = 1 [default = UV_COORDINATE];
 	required uint32 sourceCoordinate = 2 [default = 0];
@@ -137,8 +146,15 @@ message MaterialAttribute {
 message ConstantData
 {
 	required string bufferName = 1 [(nanopb).max_size = 40];
-	required uint32 uOffset = 2;
-	required uint32 uSize = 3;
+	required uint32 uOffset = 2 [default = 0];
+	required uint32 uSize = 3  [default = 0];
+}
+
+message RenderPassData
+{
+	required string effectName = 1 [(nanopb).max_size = 64];
+	repeated ConstantData constants = 2 [(nanopb).max_count = 4, (nanopb).has_max_count = true];
+	required uint32 constants_count = 3 [default = 0];
 }
 
 message Material {
@@ -150,11 +166,9 @@ message Material {
 
 	required MaterialAttribute attribute = 7;
 
-	required string customEffectName = 9 [(nanopb).max_size = 40];
+	repeated RenderPassData renderPasses = 9 [(nanopb).max_count = 5, (nanopb).has_max_count = true];	// Max count must match number of passes
 
 	repeated sint32 constantIndexes = 13 [(nanopb).max_count = 6, (nanopb).has_max_count = true];
-
-	repeated ConstantData constants = 10 [(nanopb).max_count = 4];
-	repeated uint32 constantData = 12 [(nanopb).max_count = 256, (nanopb).has_max_count = true];
-
+	
+	repeated uint32 constantData =8 [(nanopb).max_count = 512, (nanopb).has_max_count = true];
 }

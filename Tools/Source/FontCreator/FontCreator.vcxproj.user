@@ -4,7 +4,7 @@
     <LocalDebuggerWorkingDirectory>$(USAGI_DIR)\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerEnvironment>PATH=%PATH%;$(LocalDebuggerWorkingDirectory)</LocalDebuggerEnvironment>
-    <LocalDebuggerCommandArguments>Data\Fonts\FontDef.yml _romfiles\win\Fonts\</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>Data\Fonts\VPB.yml _romfiles\win\VPB\</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(USAGI_DIR)\..\</LocalDebuggerWorkingDirectory>

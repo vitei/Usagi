@@ -52,12 +52,6 @@ namespace usg
 		void* GetDefaultData(uint32 uSet) const;
 		const char* GetDefaultTexture(uint32 uSampler);
 
-		const char* GetEffectName() const;
-		const char* GetDeferredEffectName() const;
-		const char* GetTransparentEffectName() const;
-		const char* GetDepthEffectName() const;
-		const char* GetOmniDepthEffectName() const;
-
 		// Utility functions for basic vertex setup (only suitable for small numbers, e.g. HUD)
 		bool SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVerCount = 1) const;
 		template <class VariableType>

@@ -187,7 +187,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ResourcePak\ResourcePakExporter.h" />
+    <ClInclude Include="..\..\..\_includes\Engine\Scene\Model\ModelComponents.pb.h" />
     <ClInclude Include="FileFactory.h" />
     <ClInclude Include="FileFactoryWin.h" />
   </ItemGroup>

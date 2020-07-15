@@ -12,6 +12,7 @@ public:
 	virtual ~MaterialDefinitionExporter();
 
 	int Load(const char* path, const std::string& defines);
+	int Load(const char* path, const char* effect, const std::vector<std::string>& defineSets);
 	int Load(YAML::Node& mainNode, const std::string& defines);
 	bool LoadAttributes(YAML::Node& attributeNode);
 	bool LoadSamplers(YAML::Node& attributeNode);
@@ -29,6 +30,7 @@ public:
 
 	// Utility functions for setting up the models which make use of these definitions
 	bool GetTextureIndex(const char* szHint, uint32& indexOut);
+	bool GetTextureIndex(uint32 uTex, uint32& indexOut);
 	bool GetAttributeIndex(const char* szHint, uint32& indexOut);
 	uint32 GetConstantSetCount();
 	// Returns the size of the constant set
@@ -66,11 +68,6 @@ private:
 
 	usg::CustomEffectDecl::Header m_header;
 
-	std::string m_effectName;
-	std::string m_deferredEffectName;
-	std::string m_transparentEffectName;
-	std::string m_shadowEffectName;
-	std::string m_omniShadowEffectName;
 	std::string m_automatedCode[(uint32)usg::ShaderType::COUNT];
 	std::vector<usg::CustomEffectDecl::Sampler> m_samplers;
 	std::vector<usg::CustomEffectDecl::Attribute> m_attributes;

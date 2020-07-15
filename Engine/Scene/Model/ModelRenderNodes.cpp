@@ -112,8 +112,8 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
 
 	// FIXME: Get the index from the custom fx declaration
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 
 	switch (pMesh->primitive.eSkinningMode)
 	{

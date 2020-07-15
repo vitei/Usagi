@@ -367,7 +367,7 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, bool bIsN
 		}
 		if (!nameUnique)
 		{
-			sprintf_s(name, "%s\.%03i", pNode->GetName(), ++loopIdx);
+			sprintf_s(name, "%s.%03i", pNode->GetName(), ++loopIdx);
 		}
 	} while (!nameUnique);
 
@@ -499,10 +499,10 @@ bool FbxLoad::GetTextureIndex(const FbxTexture& textureInfo, const char* szTexNa
 
 	if (!pMaterial->IsCustomFX())
 	{
-		return pMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex);
+		return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex);
 	}
 
-	return pMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex);
+	return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex);
 }
 
 
@@ -609,7 +609,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 void FbxLoad::SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName)
 {
 	uint32 uIndex;
-	if (pNewMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex))
+	if (pNewMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex))
 	{
 		if (pNewMaterial->pb().textures[uIndex].textureName[0] != '\0')
 		{
@@ -629,16 +629,18 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 	SetBoolBasedOnTexture(pMaterial, "EmissiveFactor", "bEmissiveMap");
 	SetBoolBasedOnTexture(pMaterial, "Reflection", "bReflectionMap");
 
-	for (uint32 i = 0; i < pMaterial->GetCustomFX().GetTextureCount(); i++)
+	for (uint32 i = 0; i < pMaterial->GetCustomFX(0).GetTextureCount(); i++)
 	{
-		if (pMaterial->pb().textures[i].textureName[0] == '\0')
+		uint32 uTexIndex = i;
+		pMaterial->GetCustomFX(0).GetTextureIndex(i, uTexIndex);
+		if (pMaterial->pb().textures[uTexIndex].textureName[0] == '\0')
 		{
 			// Add a dummy texture
-			const char* szTextName = pMaterial->GetCustomFX().GetDefaultTexName(i);
+			const char* szTextName = pMaterial->GetCustomFX(0).GetDefaultTexName(i);
 			int length = (int)(strlen(szTextName));
-			length = Math::Min(length, (int)sizeof(pMaterial->pb().textures[i].textureName));
-			memset(pMaterial->pb().textures[i].textureName, 0, sizeof(pMaterial->pb().textures[i].textureName));
-			strncpy(pMaterial->pb().textures[i].textureName, szTextName, length);
+			length = Math::Min(length, (int)sizeof(pMaterial->pb().textures[uTexIndex].textureName));
+			memset(pMaterial->pb().textures[uTexIndex].textureName, 0, sizeof(pMaterial->pb().textures[uTexIndex].textureName));
+			strncpy(pMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 		}
 	}
 
@@ -756,11 +758,12 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 }
 
 
-::exchange::Material* FbxLoad::NewMaterial(FbxSurfaceMaterial* pFBXMaterial)
+::exchange::Material* FbxLoad::NewMaterial(FbxSurfaceMaterial* pFBXMaterial, bool bSkin)
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
 	std::string effectName = "FBXDefault";
+	std::string effectSet = "Model";
 	FbxProperty p = pFBXMaterial->FindProperty("EffectName", false);
 	if (p.IsValid())
 	{
@@ -777,28 +780,60 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	const char* szUsagiPath = getenv("USAGI_DIR");
 	std::string emuPath = szUsagiPath;
 	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\CustomFX\\";
-	emuPath += effectName;
+	emuPath += "\\Data\\GLSL\\effects\\";
+	emuPath += effectSet;
 	emuPath += ".yml";
 	FILE* pFile = nullptr;
 	if (fopen_s(&pFile, emuPath.c_str(), "r") != 0)
 	{
-		fclose(pFile);
 		emuPath = szUsagiPath;
-		emuPath += "..\\Data\\CustomFX\\";
-		emuPath += effectName;
+		emuPath += "..\\Data\\GLSL\\effects\\";
+		emuPath += effectSet;
 		emuPath += ".yml";
 		if (!fopen_s(&pFile, emuPath.c_str(), "r"))
 		{
 			FATAL_RELEASE(false, "Could not find effect %s", effectName.c_str());
 			return nullptr;
 		}
+		fclose(pFile);
 	}
 	
 	pNewMaterial->SetIsCustomFX(false);
 
+	std::vector<std::string> defines;
+
+	uint32 uTexIndex = 0;
+	if (bSkin)
+	{
+		defines.push_back("skel");
+	}
+	if (pFBXMaterial->sNormalMap || pFBXMaterial->sBump)
+	{
+		FbxProperty property = pFBXMaterial->GetFirstProperty();
+
+		while (property.IsValid())
+		{
+			uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
+			const char* szName = property.GetNameAsCStr();
+			for (uint32 i = 0; i < uTextureCount; ++i)
+			{
+				FbxLayeredTexture* layeredTexture = property.GetSrcObject<FbxLayeredTexture>(i);
+
+				ASSERT_MSG((layeredTexture == nullptr), "Layered texture not supported");
+
+				FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(i);
+				if (pTexture && pTexture->GetName() == "NormalMap")
+				{
+					defines.push_back("bump");
+					break;
+				}
+			}
+			property = pFBXMaterial->GetNextProperty(property);
+		}
+	}
+
 	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str());
+	pNewMaterial->InitCustomMaterial(emuPath.c_str(), effectName.c_str(), defines);
 
 	// material name
 	const char* pMaterialName = pFBXMaterial->GetName();
@@ -814,7 +849,7 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 }
 
 
-::exchange::Material* FbxLoad::DummyMaterial()
+::exchange::Material* FbxLoad::DummyMaterial(bool bSkinned)
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
@@ -822,24 +857,32 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	const char* szUsagiPath = getenv("USAGI_DIR");
 	std::string emuPath = szUsagiPath;
 	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\CustomFX\\FBXDefault.yml";
+	emuPath += "\\Data\\GLSL\\effects\\Model.yml";
 	pNewMaterial->SetIsCustomFX(false);
 
+	std::vector<std::string> defines;
+	if (bSkinned)
+	{
+		defines.push_back("skel");
+	}
+
 	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str());
+	pNewMaterial->InitCustomMaterial(emuPath.c_str(), "FBXDefault", defines);
 
 	// material name
 	const char* pMaterialName = "Dummy";
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
 
-	for (uint32 i = 0; i < pNewMaterial->GetCustomFX().GetTextureCount(); i++)
+	for (uint32 i = 0; i < pNewMaterial->GetCustomFX(0).GetTextureCount(); i++)
 	{
 		// Set up the default textures first
-		const char* szTextName = pNewMaterial->GetCustomFX().GetDefaultTexName(i);
+		uint32 uTexIndex = i;
+		pNewMaterial->GetCustomFX(0).GetTextureIndex(i, uTexIndex);
+		const char* szTextName = pNewMaterial->GetCustomFX(0).GetDefaultTexName(i);
 		int length = (int)(strlen(szTextName));
-		length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[i].textureName));
-		memset(pNewMaterial->pb().textures[i].textureName, 0, sizeof(pNewMaterial->pb().textures[i].textureName));
-		strncpy(pNewMaterial->pb().textures[i].textureName, szTextName, length);
+		length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
+		memset(pNewMaterial->pb().textures[uTexIndex].textureName, 0, sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
+		strncpy(pNewMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 	}
 
 	pNewMaterial->SetVariable("ambient", Color::White);
@@ -1226,8 +1269,22 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic)
 				m_pParentBoneNode = bStatic ? nullptr : pParent;
 			}
 
+			// Materials need to know if they are skinned
+			bool bSkinned = false;
+			for (uint32 uAttribId = 0; uAttribId < (uint32)pNode->GetNodeAttributeCount(); uAttribId++)
+			{
+				if (pNode->GetNodeAttributeByIndex(uAttribId)->GetAttributeType() == FbxNodeAttribute::eMesh)
+				{
+					FbxMesh* pFbxMesh = (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId);
+					if (pFbxMesh->GetPolygonCount() > 0)
+					{
+						bSkinned |= pFbxMesh->GetDeformerCount(FbxDeformer::eSkin) > 0;
+					}
+				}
+			}
+
 			m_uMeshMaterialOffset = cmdl.GetMaterialNum();
-			AddMaterials(cmdl, pNode);
+			AddMaterials(cmdl, pNode, bSkinned);
 			
 			for (uint32 uAttribId = 0; uAttribId < (uint32)pNode->GetNodeAttributeCount(); uAttribId++)
 			{
@@ -2326,21 +2383,21 @@ void FbxLoad::RemoveDuplicateVertices()
 	// Should already be seperated into seperate meshes per material via the utilities
 }
 
-void FbxLoad::AddMaterials(Cmdl& cmdl, FbxNode* pNode)
+void FbxLoad::AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned)
 {
 	uint32 uMaterialCount = pNode->GetMaterialCount();
 	m_bHasNormalMap = false;
 	for (uint32 i = 0; i < uMaterialCount; ++i)
 	{
 		FbxSurfaceMaterial* surfaceMaterial = pNode->GetMaterial(i);
-		::exchange::Material* pNewMaterial = NewMaterial(surfaceMaterial);
+		::exchange::Material* pNewMaterial = NewMaterial(surfaceMaterial, bSkinned);
 		cmdl.AddMaterial(pNewMaterial);
 	}
 
 	if (uMaterialCount == 0)
 	{
 		// Create a dummy material
-		::exchange::Material* pNewMaterial = DummyMaterial();
+		::exchange::Material* pNewMaterial = DummyMaterial(bSkinned);
 		cmdl.AddMaterial(pNewMaterial);
 	}
 }

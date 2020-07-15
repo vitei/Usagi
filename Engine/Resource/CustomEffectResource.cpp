@@ -285,31 +285,6 @@ namespace usg
 		return nullptr;
 	}
 
-	const char* CustomEffectResource::GetEffectName() const
-	{
-		return m_header.effectName;
-	}
-
-	const char* CustomEffectResource::GetDepthEffectName() const
-	{
-		return m_header.shadowEffectName;
-	}
-
-	const char* CustomEffectResource::GetDeferredEffectName() const
-	{
-		return m_header.deferredEffectName;
-	}
-
-	const char* CustomEffectResource::GetTransparentEffectName() const
-	{
-		return m_header.transparentEffectName;
-	}
-
-	const char* CustomEffectResource::GetOmniDepthEffectName() const
-	{
-		return m_header.omniShadowEffectName;
-	}
-
 	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const
 	{
 		memsize uOffsetBase = uVertexId * GetVertexSize();

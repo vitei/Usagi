@@ -1,7 +1,11 @@
 #include "Engine/Common/Common.h"
 #include "../ResourceLib/ResourcePakExporter.h"
+#include "Engine/Scene/Model/Model.pb.h"
+#include "Engine/Graphics/Materials/Material.pb.h"
+#include "Engine/Audio/AudioBank.pb.h"
 #include <algorithm>
 #include <fstream>
+#include <yaml-cpp/yaml.h>
 #include "FileFactory.h"
 
 
@@ -41,8 +45,16 @@ void FileFactory::Init(const char* rootPath, const char* tempDir)
 	m_tempDir = tempDir;
 }
 
+bool FileFactory::LoadWavFile(const char* szFileName)
+{
+	return LoadRawFile(szFileName);
+}
+
+
 bool FileFactory::LoadFile(const char* szFileName)
 {
+	// Note we don't have .wav files here as the sound bank adds them
+	// For build times we don't want the pack file to be passed the raw files, but they are handled for testing, exception is Audio yaml as it's one file per pack and we need to parse
 	if (HasExtension(szFileName, "fbx"))
 	{
 		// Process the fbx file
@@ -61,6 +73,10 @@ bool FileFactory::LoadFile(const char* szFileName)
 			break;
 		case YML_ENTITY:
 			LoadYMLEntityFile(szFileName);
+			break;
+		case YML_AUDIO:
+			// Implicitly packages all wav files used by this sound bank
+			LoadYMLAudioFile(szFileName);
 			break;
 		default:
 			ASSERT(false);
@@ -91,6 +107,10 @@ FileFactory::YmlType FileFactory::GetYmlType(const char* szFileName)
 		if (cmpPath == "Entities")
 		{
 			return YML_ENTITY;
+		}
+		else if(cmpPath == "Audio")
+		{
+			return YML_AUDIO;
 		}
 
 		lastPath = path.find_last_of("\\/");
@@ -142,6 +162,51 @@ void FileFactory::AddDependency(const char* szFileName)
 	{
 		m_referencedFiles.push_back(intermediateDep);
 	}
+}
+
+
+bool FileFactory::LoadModelVMDL(const char* szFileName)
+{
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(relativePath.c_str(), usg::ResourceType::UNDEFINED);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>(pFileEntry->binary);
+	uint8* pT = reinterpret_cast<uint8*>(pHeader);
+	usg::exchange::Material* pInitialMaterial = reinterpret_cast<usg::exchange::Material*>(pT + pHeader->materialOffset);
+
+	for(uint32 i=0; i<pHeader->materialNum; i++)
+	{
+		usg::exchange::Material* pMaterial = &pInitialMaterial[i];
+		for(uint32 j=0; j< usg::exchange::Material::textures_max_count; j++)
+		{
+			if (pMaterial->textures[j].textureName[0] != '\0')
+			{
+				pFileEntry->AddDependency( RemoveFileName(szFileName) + pMaterial->textures[j].textureName, pMaterial->textures[j].textureHint );
+			}
+		}
+	}
+
+	m_resources.push_back(pFileEntry);
+	return true;
 }
 
 bool FileFactory::LoadModel(const char* szFileName)
@@ -263,7 +328,7 @@ bool FileFactory::LoadYMLEntityFile(const char* szFileName)
 
 	FILE* pFileOut = nullptr;
 
-	fopen_s(&pFileOut, szFileName, "rb");
+	fopen_s(&pFileOut, tempFileName.c_str(), "rb");
 	if (!pFileOut)
 	{
 		delete pFileEntry;
@@ -304,7 +369,7 @@ bool FileFactory::LoadYMLVPBFile(const char* szFileName)
 
 	FILE* pFileOut = nullptr;
 
-	fopen_s(&pFileOut, szFileName, "rb");
+	fopen_s(&pFileOut, tempFileName.c_str(), "rb");
 	if (!pFileOut)
 	{
 		delete pFileEntry;
@@ -324,6 +389,70 @@ bool FileFactory::LoadYMLVPBFile(const char* szFileName)
 
 	return true;
 }
+
+
+bool FileFactory::LoadYMLAudioFile(const char* szFileName)
+{
+	std::stringstream command;
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	relativePath = RemoveFileName(relativePath) + "/";
+	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
+	std::string depFileName = tempFileName + ".d";
+
+	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
+
+	system(command.str().c_str());
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, tempFileName.c_str(), "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	// FIXME: Should probably do with a protocol buffer file, but parsing the yml creates fewer dependencies
+	YAML::Node mainNode = YAML::LoadFile(szFileName);
+	YAML::Node soundFiles = mainNode["AudioBank"]["soundFiles"];
+	for (YAML::const_iterator it = soundFiles.begin(); it != soundFiles.end(); ++it)
+	{
+		if ((*it)["filename"].IsDefined())
+		{
+			bool bStream = false;
+			std::string fileName = RemoveFileName(szFileName) + (*it)["filename"].as<std::string>();
+			fileName += ".wav";
+			LoadWavFile(fileName.c_str());
+
+			if ((*it)["stream"].IsDefined())
+			{
+				bStream = (*it)["stream"].as<bool>();
+			}
+
+			pFileEntry->AddDependency(fileName, bStream ? "stream" : "loaded");
+		}
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	m_resources.push_back(pFileEntry);
+
+	AddDependenciesFromDepFile(depFileName.c_str(), pFileEntry);
+
+	return true;
+}
+
 
 
 void FileFactory::AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry)
