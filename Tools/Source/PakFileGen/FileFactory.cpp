@@ -193,6 +193,16 @@ bool FileFactory::LoadModelVMDL(const char* szFileName)
 	uint8* pT = reinterpret_cast<uint8*>(pHeader);
 	usg::exchange::Material* pInitialMaterial = reinterpret_cast<usg::exchange::Material*>(pT + pHeader->materialOffset);
 
+	const char* szPassNames[usg::exchange::_Material_RenderPass_count]
+	{
+		"forward",
+		"deferred",
+		"translucent",
+		"depth",
+		"omni_depth"
+	};
+
+
 	for(uint32 i=0; i<pHeader->materialNum; i++)
 	{
 		usg::exchange::Material* pMaterial = &pInitialMaterial[i];
@@ -202,6 +212,12 @@ bool FileFactory::LoadModelVMDL(const char* szFileName)
 			{
 				pFileEntry->AddDependency( RemoveFileName(szFileName) + pMaterial->textures[j].textureName, pMaterial->textures[j].textureHint );
 			}
+		}
+
+		for (uint32 i = 0; i < usg::exchange::_Material_RenderPass_count; i++)
+		{
+			std::string fileName = pMaterial->renderPasses[i].effectName + std::string(".fx");
+			pFileEntry->AddDependency(fileName.c_str(), szPassNames[i]);
 		}
 	}
 
