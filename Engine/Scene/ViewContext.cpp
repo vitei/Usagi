@@ -272,6 +272,7 @@ namespace usg {
 	void ViewContext::Update(GFXDevice* pDevice)
 	{
 		const Camera* pCamera = GetCamera();
+		SetRenderMask(pCamera->GetRenderMask());
 		const Scene* pScene = GetScene();
 		const uint32 uRenderMask = GetRenderMask();
 

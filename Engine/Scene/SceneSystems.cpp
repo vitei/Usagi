@@ -260,6 +260,7 @@ namespace usg
 				Matrix4x4 mtx;
 				mtx.LookAt(vPos, vPos + vForward, vUp);
 				cameraRtd.pCamera->SetUp(mtx, outputs.cam->fAspectRatio, outputs.cam->fFOV, outputs.cam->fNearPlaneDist, outputs.cam->fFarPlaneDist);
+				cameraRtd.pCamera->SetRenderMask(outputs.cam->uRenderMask);
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetAspectRatio& evt)
@@ -270,6 +271,11 @@ namespace usg
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetFieldOfView& evt)
 			{
 				outputs.cam.Modify().fFOV = evt.fFOV;
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::AddSubCameraRenderMask& evt)
+			{
+				outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
 			}
 
 		};
