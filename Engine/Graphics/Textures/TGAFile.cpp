@@ -44,13 +44,14 @@ namespace usg
 		m_header.uWidth = uWidth;
 		m_header.uHeight = uHeight;
 		uint32 uSrcOffset = eFormat == CF_RGBA_8888 ? 4 : 3;
+		uint32 uBpp = eFormat == CF_RGBA_8888 ? 4 : 3;
 		if (eFormat == CF_R_8)
 		{
 			uSrcOffset = 1;
 		}
-		m_header.uBitsPerPixel = 24;
+		m_header.uBitsPerPixel = eFormat == CF_RGBA_8888 ? 32 : 24;
 		ASSERT(eFormat == CF_RGBA_8888 || eFormat == CF_RGB_888 || eFormat == CF_R_8);
-		m_uFileSize = (memsize)(uWidth * uHeight * 3);
+		m_uFileSize = (memsize)(uWidth * uHeight * uBpp);
 
 		ASSERT(m_pData == NULL);
 		m_pData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_DEBUG, m_uFileSize);
@@ -66,6 +67,10 @@ namespace usg
 				m_pData[i+0] = pSrc[j+2];       //grab blue
 				m_pData[i+1] = pSrc[j+1];		//assign red to blue
 				m_pData[i+2] = pSrc[j+0];		//assign blue to red
+				if (uBpp > 3)
+				{
+					m_pData[i+3] = pSrc[j + 3];
+				}
 			}
 			else
 			{
@@ -74,7 +79,7 @@ namespace usg
 				m_pData[i + 2] = pSrc[j];
 			}
 
-			i += 3;     //skip to next blue byte
+			i += uBpp;     //skip to next blue byte
 			j += uSrcOffset;
 		}
 	}
