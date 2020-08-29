@@ -65,6 +65,7 @@ enum RenderMask {
 	option (nanopb_enumopt).long_names = false;
 	option (usagipb_enumopt).is_bitmask = true;
 
+	// 20 bits for engine
 	RENDER_MASK_NONE			= 0x00000000;
 	RENDER_MASK_WORLD			= 0x00000001;
 	RENDER_MASK_LIGHTING		= 0x00000002;
@@ -74,7 +75,11 @@ enum RenderMask {
 	RENDER_MASK_INSIDE			= 0x00000020;
 	RENDER_MASK_OUTSIDE			= 0x00000040;
 	RENDER_MASK_SHADOW_CAST		= 0x00000080;
-	RENDER_MASK_CUSTOM			= 0x00000100;
+	// 12 bits for game
+	RENDER_MASK_CUSTOM_0		= 0x00100000;
+	RENDER_MASK_CUSTOM_1		= 0x00200000;
+	RENDER_MASK_CUSTOM_2		= 0x00400000;
+	RENDER_MASK_CUSTOM_3		= 0x00800000;
 
 	// Useful predefines for cameras, everything except shadows
 	RENDER_MASK_CAMERA_INSIDE	= 0x0FFFFF3F;
