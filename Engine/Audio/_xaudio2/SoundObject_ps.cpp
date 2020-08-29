@@ -12,17 +12,17 @@ namespace usg{
 	class XAudioVoiceCallback : public IXAudio2VoiceCallback
 	{
 	public:
-		XAudioVoiceCallback(SoundCallbacks* pIn) { pCallbackInt = pIn; }
+		XAudioVoiceCallback(std::weak_ptr<SoundCallbacks> pIn) { pCallbackInt = pIn; }
 
-		void STDMETHODCALLTYPE OnStreamEnd() { pCallbackInt->StreamEnd(); }
-		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { pCallbackInt->PassedEnd(); }
+		void STDMETHODCALLTYPE OnStreamEnd() { if (auto spt = pCallbackInt.lock()) spt->StreamEnd(); }
+		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { if (auto spt = pCallbackInt.lock()) spt->PassedEnd(); }
 		void STDMETHODCALLTYPE OnVoiceProcessingPassStart(UINT32 samples) { }
-		void STDMETHODCALLTYPE OnBufferEnd(void * context) { pCallbackInt->BufferEnd(); }
-		void STDMETHODCALLTYPE OnBufferStart(void * context) { pCallbackInt->BufferStart(); }
-		void STDMETHODCALLTYPE OnLoopEnd(void * context) { pCallbackInt->LoopEnd(); }
+		void STDMETHODCALLTYPE OnBufferEnd(void * context) { if (auto spt = pCallbackInt.lock()) spt->BufferEnd(); }
+		void STDMETHODCALLTYPE OnBufferStart(void * context) { if (auto spt = pCallbackInt.lock()) spt->BufferStart(); }
+		void STDMETHODCALLTYPE OnLoopEnd(void * context) { if (auto spt = pCallbackInt.lock()) spt->LoopEnd(); }
 		void STDMETHODCALLTYPE OnVoiceError(void * context, HRESULT Error) {}
 
-		SoundCallbacks* pCallbackInt;
+		std::weak_ptr<SoundCallbacks> pCallbackInt;
 	};
 
 SoundObject_ps::SoundObject_ps()
@@ -104,7 +104,7 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 	format.nSamplesPerSec = def.uSampleRate;
 	format.nBlockAlign = format.wBitsPerSample / 8 * format.nChannels;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-	if (def.pCallbacks)
+	if (def.pCallbacks.use_count() > 0)
 	{
 		m_pCallback = vnew(ALLOC_AUDIO) XAudioVoiceCallback(def.pCallbacks);
 	}
@@ -159,7 +159,7 @@ void SoundObject_ps::Stop()
 		// FIXME: Reset the internal data
 		if (m_pCallback)
 		{
-			m_pCallback->pCallbackInt->Stopped();
+			if (auto spt = m_pCallback->pCallbackInt.lock()) spt->Stopped();
 		}
 	}
 }
