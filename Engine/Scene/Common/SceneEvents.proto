@@ -42,6 +42,7 @@ message SetRenderMask
 
 message AddSubCameraRenderMask
 {
-	required uint32 uAddMasks = 1 [default = 0];
-	required uint32 uSubMasks = 2 [default = 0];
+	required uint32 uCameraID = 1 [default = 0];
+	required uint32 uAddMasks = 2 [default = 0];
+	required uint32 uSubMasks = 3 [default = 0];
 }

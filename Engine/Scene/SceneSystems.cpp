@@ -275,7 +275,10 @@ namespace usg
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::AddSubCameraRenderMask& evt)
 			{
-				outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
+				if(evt.uCameraID == 0 || outputs.cam.GetRuntimeData().pCamera->GetID() == evt.uCameraID)
+				{
+					outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
+				}
 			}
 
 		};
