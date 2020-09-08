@@ -26,8 +26,9 @@ namespace usg
 		virtual void Update(usg::GFXDevice* pDevice) override;
 		virtual void Draw(usg::GFXDevice* pDevice) override;
 		virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) override;
-
+	
 	protected:
+		virtual bool DrawLoadingScreen() const { return true; }
 		virtual void PreModeUpdate(float fElapsed) {}
 		virtual void OverlayRender(usg::GFXContext* pImmContext, Display* pDisplay, IHeadMountedDisplay* pHMD) {}
 		void StartNextMode(usg::GFXDevice* pDevice);

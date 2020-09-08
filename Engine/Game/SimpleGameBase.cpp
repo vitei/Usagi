@@ -149,7 +149,10 @@ namespace usg
 				// DeInitHomeButtonDisabledAnimation();
 				m_eState = STATE_TRANSITION;
 				m_pTransitionMode->Reset();
-				usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+				if( DrawLoadingScreen() )
+				{
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+				}
 				usg::Audio::Inst()->StopAll(AUDIO_TYPE_SFX, 0.12f);
 			}
 			else
@@ -158,7 +161,7 @@ namespace usg
 			}
 			break;
 		case STATE_TRANSITION:
-			if (m_pTransitionMode->Update(fElapsed))
+			if (!DrawLoadingScreen() || m_pTransitionMode->Update(fElapsed))
 			{
 				StartNextMode(pDevice);
 				m_eState = STATE_LOADING;
@@ -166,18 +169,24 @@ namespace usg
 			}
 			break;
 		case STATE_LOADING:
-			m_pTransitionMode->Update(fElapsed);
+			if(DrawLoadingScreen())
+			{
+				m_pTransitionMode->Update(fElapsed);
+			}
 #ifdef USE_THREADED_LOADING
 			if (m_pInternalData->m_pInitThread->IsThreadEnd())
 #endif
 			{
 				m_pInternalData->m_pInitThread->JoinThread();	// Make sure to finalize so we can re-use it
 				m_eState = STATE_END_LOADING;
-				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+				if(DrawLoadingScreen())
+				{
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+				}
 			}
 			break;
 		case STATE_END_LOADING:
-			if (usg::Fader::Inst()->IsBlackout())
+			if (!DrawLoadingScreen() || usg::Fader::Inst()->IsBlackout())
 			{
 				m_eState = STATE_ACTIVE;
 				m_pActiveMode->Update(fElapsed);	// Run the update first so everything is valid
