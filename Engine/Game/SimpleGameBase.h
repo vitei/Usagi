@@ -29,6 +29,7 @@ namespace usg
 	
 	protected:
 		virtual bool DrawLoadingScreen() const { return true; }
+		virtual bool PauseCurrentMode() const { return false; }
 		virtual void PreModeUpdate(float fElapsed) {}
 		virtual void OverlayRender(usg::GFXContext* pImmContext, Display* pDisplay, IHeadMountedDisplay* pHMD) {}
 		void StartNextMode(usg::GFXDevice* pDevice);

@@ -106,11 +106,11 @@ namespace usg
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)
 	{
-		if (m_pActiveMode)
+		if (m_pActiveMode && !PauseCurrentMode())
 		{
 			m_pActiveMode->CleanUp(pDevice);
 		}
-		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode());
+		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode(), PauseCurrentMode());
 #ifdef USE_THREADED_LOADING
 		m_pInternalData->m_pInitThread->StartThread(4096 * 10);
 #else
@@ -126,7 +126,8 @@ namespace usg
 		m_timer.Update();
 		float fElapsed = m_timer.GetDeltaGameTime();
 		bool bFinished = true;
-		usg::Fader::Inst()->Update(pDevice);
+		usg::Fader::Inst()->Update(fElapsed);
+		usg::Fader::Inst()->GPUUpdate(pDevice);
 		m_debug.Update(fElapsed);
 
 		PreModeUpdate(fElapsed);
