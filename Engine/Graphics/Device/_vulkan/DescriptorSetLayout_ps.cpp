@@ -8,7 +8,7 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 
 
-const int g_allocGroupSize = 64;
+const int g_allocGroupSize = 128;
 
 namespace usg {
 
