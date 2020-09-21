@@ -153,10 +153,6 @@ Issues
 
 Only the more recent nVidia cards have been tested since switching to Vulkan
 
-If using one of the more recent versions of the Vulkan SDK validation needs to be disabled; in particular it is strict about unused input attributes.  
-
-The physics system currently assumes a fixed framerate of 60fps 
-
 Multiple Inherits[] inside a single yaml file will currently be ignored
 
 If there is not at least one child entity systems on the root entity will not be run  
