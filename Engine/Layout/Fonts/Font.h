@@ -28,6 +28,7 @@ namespace usg
 
 		bool	GetCharacterCoords(uint32 uChar, float& fLeft, float& fRight, float& fTop, float& fBottom) const;
 		float	GetCharacterWidth(uint32 uChar, float height) const;
+		bool	HasCharacter(uint32 uChar) const;
 		
 		const DescriptorSet& GetDescriptor() const { return m_descriptor; }
 		const U8String& GetName    () const{ return m_name; }

@@ -79,6 +79,22 @@ namespace usg
 		return totalWidth;
 	}
 
+	bool Font::HasCharacter(uint32 uChar) const
+	{
+		usg::text::CharDefinition* pChars = m_fontDefinition.Chars.Get().array;
+		for (uint32 i = 0; i < m_fontDefinition.Chars.Get().count; i++)
+		{
+			::usg::text::CharDefinition& ch = pChars[i];
+
+			if (ch.CharData == uChar)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool Font::GetCharacterCoords(uint32 uChar, float& fLeft, float& fRight, float& fTop, float& fBottom) const
 	{
 		bool bContains = false;
