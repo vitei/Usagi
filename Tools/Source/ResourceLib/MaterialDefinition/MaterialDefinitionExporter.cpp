@@ -42,6 +42,8 @@ static const Mapping g_shaderMappings[]
 	{ "VS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_VERTEX },
 	{ "GS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_GEOMETRY },
 	{ "PS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_PIXEL },
+	{ "TC", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_TCONTROL },
+	{ "TE", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_TEVAL },
 	{ nullptr, USG_INVALID_ID }
 };
 
@@ -60,7 +62,9 @@ static const uint32 g_shaderFlagMap[]
 {
 	usg::SHADER_FLAG_VERTEX,
 	usg::SHADER_FLAG_PIXEL,
-	usg::SHADER_FLAG_GEOMETRY
+	usg::SHADER_FLAG_GEOMETRY,
+	usg::SHADER_FLAG_TCONTROL,
+	usg::SHADER_FLAG_TEVAL
 };
 
 uint32 GetType(const char* szTypeName, const Mapping* pMapping)
