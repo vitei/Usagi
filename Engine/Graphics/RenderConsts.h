@@ -54,6 +54,7 @@ enum PrimitiveType
 	PT_TRIANGLES_ADJ,
 	PT_LINES_ADJ,
 	PT_LINE_STRIP,
+	PT_PATCH_LIST,
 	PT_COUNT
 	//PT_TRIANGLESTRIPS,
 };
@@ -74,8 +75,11 @@ enum class ShaderType : uint32
 	VS,
 	PS,
 	GS,
+	TC,
+	TE,
 	COUNT
 };
+
 
 
 enum TextureUsageFlags

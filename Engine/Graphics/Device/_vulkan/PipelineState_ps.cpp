@@ -16,16 +16,18 @@
 namespace usg
 {
 
-	static const VkPrimitiveTopology g_primTypeMapping[PT_COUNT] =
+	static const VkPrimitiveTopology g_primTypeMapping[] =
 	{
 		VK_PRIMITIVE_TOPOLOGY_POINT_LIST,					//PT_POINTS = 0,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,				//PT_TRIANGLES,
 		VK_PRIMITIVE_TOPOLOGY_LINE_LIST,					//PT_LINES,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY,	//PT_TRIANGLES_ADJ,
 		VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY,		//PT_LINES_ADJ,
-		VK_PRIMITIVE_TOPOLOGY_LINE_STRIP					//PT_LINE_STRIP
+		VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,					//PT_LINE_STRIP
+		VK_PRIMITIVE_TOPOLOGY_PATCH_LIST					//PT_PATCH_LIST
 	};
 	
+	static_assert(ARRAY_SIZE(g_primTypeMapping) == PT_COUNT, "Incorrect number of primitive defines");
 
 	static const VkSampleCountFlagBits  g_sampleCounts[SAMPLE_COUNT_INVALID] =
 	{

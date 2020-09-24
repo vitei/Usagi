@@ -11,21 +11,31 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 
-static uint32 g_usageCRC[] =
-{
-	utl::CRC32("vertex_shader"),
-	utl::CRC32("fragment_shader"),
-	utl::CRC32("geometry_shader")
-};
 
 namespace usg {
+
+	static uint32 g_usageCRC[] =
+	{
+		utl::CRC32("vertex_shader"),
+		utl::CRC32("fragment_shader"),
+		utl::CRC32("geometry_shader"),
+		utl::CRC32("tessellation_control_shader"),
+		utl::CRC32("tessellation_evaluation_shader"),
+	};
+
+	static_assert(ARRAY_SIZE(g_usageCRC) == (memsize)ShaderType::COUNT, "Incorrect number of shader stages defined");
 
 	static const VkShaderStageFlagBits g_shaderStages[]
 	{
 		VK_SHADER_STAGE_VERTEX_BIT,		// ShaderType::VS
 		VK_SHADER_STAGE_FRAGMENT_BIT,	// ShaderType::PS
-		VK_SHADER_STAGE_GEOMETRY_BIT	// ShaderType::GS
+		VK_SHADER_STAGE_GEOMETRY_BIT,	// ShaderType::GS
+		VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, // ShaderType::TC
+		VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT // ShaderType::TE
 	};
+	
+	static_assert(ARRAY_SIZE(g_shaderStages) == (memsize)ShaderType::COUNT, "Incorrect number of shader stages defined");
+
 
 	Effect_ps::Effect_ps()
 	{

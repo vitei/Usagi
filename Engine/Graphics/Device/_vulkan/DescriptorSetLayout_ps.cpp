@@ -29,6 +29,10 @@ namespace usg {
 			flagsOut |= VK_SHADER_STAGE_GEOMETRY_BIT;
 		if(eFlags & SHADER_FLAG_PIXEL)
 			flagsOut |= VK_SHADER_STAGE_FRAGMENT_BIT;
+		if(eFlags & SHADER_FLAG_TCONTROL)
+			flagsOut |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+		if(eFlags & SHADER_FLAG_TEVAL)
+			flagsOut |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
 
 		return flagsOut;
 
