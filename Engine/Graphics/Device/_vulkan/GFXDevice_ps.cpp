@@ -18,7 +18,7 @@
 
 // Note disable for render doc builds, otherwise VK_EXT_validation_features extension will topple the replay
 #ifdef DEBUG_BUILD
-//#define USE_VALIDATION
+#define USE_VALIDATION
 #endif
 
 #ifndef FINAL_BUILD
@@ -205,6 +205,14 @@ GFXDevice_ps::GFXDevice_ps()
 	m_fGPUTime = 0.0f;
 }
 
+void GFXDevice_ps::Cleanup(GFXDevice* pParent)
+{
+	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
+	vkDeviceWaitIdle(m_vkDevice);
+	// Cleanup any requested destroys before destroying the device
+	CleanupDestroyRequests();
+}
+
 GFXDevice_ps::~GFXDevice_ps()
 {
 	PFN_vkDestroyDebugReportCallbackEXT DestroyReportCallback = VK_NULL_HANDLE;
@@ -217,10 +225,6 @@ GFXDevice_ps::~GFXDevice_ps()
 	}
 #endif
 
-	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
-	vkDeviceWaitIdle(m_vkDevice);
-	// Cleanup any requested destroys before destroying the device
-	CleanupDestroyRequests();
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
 

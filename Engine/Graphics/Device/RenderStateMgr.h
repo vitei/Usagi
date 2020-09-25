@@ -19,6 +19,7 @@ class RenderStateMgr
 	friend class GFXDevice;
 public:
 	void					InitDefaults(GFXDevice* pDevice);
+	void					Cleanup(GFXDevice* pDevice);
 
 	// If NULL will return the default states
 	PipelineStateHndl		GetPipelineState(const RenderPassHndl& hndl, const PipelineStateDecl& decl, GFXDevice* pDevice);

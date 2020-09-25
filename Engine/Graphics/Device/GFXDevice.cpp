@@ -38,6 +38,9 @@ GFXDevice::GFXDevice()
 
 GFXDevice::~GFXDevice()
 {
+	// Platform specific version may need to cleanup first
+	m_pImpl->platform.Cleanup(this);
+
 	if (m_pHMD)
 	{
 		m_pHMD->Cleanup(this);
@@ -46,6 +49,9 @@ GFXDevice::~GFXDevice()
 	{
 		m_pDisplays[i]->Cleanup(this);
 	}
+
+	m_pImpl->renderStates.Cleanup(this);
+
 	vdelete m_pImpl;
 	m_pImpl = nullptr;
 }

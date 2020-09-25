@@ -35,6 +35,7 @@ public:
 	~GFXDevice_ps();
 
 	void Init(GFXDevice* pParent);
+	void Cleanup(GFXDevice* pParent);
 
 	uint32 GetHardwareDisplayCount();
 	const DisplaySettings* GetDisplayInfo(uint32 uIndex);

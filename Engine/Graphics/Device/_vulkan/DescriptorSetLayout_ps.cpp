@@ -40,7 +40,7 @@ namespace usg {
 
 	DescriptorSetLayout_ps::DescriptorSetLayout_ps()
 	{
-
+		m_layout = nullptr;
 	}
 
 	DescriptorSetLayout_ps::~DescriptorSetLayout_ps()
@@ -179,7 +179,8 @@ namespace usg {
 			vkDestroyDescriptorPool(pDevice->GetPlatform().GetVKDevice(), m_allocators[i].pool, pDevice->GetPlatform().GetAllocCallbacks());
 		}
 
-		vkDestroyDescriptorSetLayout(pDevice->GetPlatform().GetVKDevice(), m_layout, pDevice->GetPlatform().GetAllocCallbacks());
+		vkDestroyDescriptorSetLayout(pDevice->GetPlatform().GetVKDevice(), m_layout, nullptr);
+		m_layout = nullptr;
 		m_allocators.clear();
 	}
 
