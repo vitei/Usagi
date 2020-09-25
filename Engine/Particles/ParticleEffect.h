@@ -22,7 +22,7 @@ public:
     ~ParticleEffect();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, const Matrix4x4& mMat, const Vector3f& vVelocity = Vector3f(0.0f, 0.0f, 0.0f), float fScale = 1.0f);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	bool Update(float fElapsed);
 	void UpdateBuffers(GFXDevice* pDevice);
 	void AddEmitter(GFXDevice* pDevice, ParticleEmitter* pEmitter);	

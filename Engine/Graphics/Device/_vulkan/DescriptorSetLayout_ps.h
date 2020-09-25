@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include <vulkan/vulkan.h>
 #include "Engine/Core/stl/vector.h"
+#include "Engine/Core/stl/queue.h"
 
 namespace usg {
 
@@ -39,8 +40,11 @@ private:
 	struct Allocator
 	{
 		VkDescriptorPool pool;
+		queue<uint32>	 pendingDeleteFrames;
 		uint32			 uAllocations;
 	};
+
+	void UpdateFreeList(GFXDevice* pDevice, Allocator& allocator);
 
 	vector<Allocator> m_allocators;
 	

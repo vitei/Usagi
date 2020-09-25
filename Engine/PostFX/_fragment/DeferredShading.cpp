@@ -246,15 +246,15 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	MakeFrustum(pDevice);
 }
 
-void DeferredShading::CleanUp(GFXDevice* pDevice)
+void DeferredShading::Cleanup(GFXDevice* pDevice)
 {
-	m_readDescriptors.CleanUp(pDevice);
-	m_sphereVB.CleanUp(pDevice);
-	m_sphereIB.CleanUp(pDevice);
-	m_coneVB.CleanUp(pDevice);
-	m_coneIB.CleanUp(pDevice);
-	m_frustumMesh.CleanUp(pDevice);
-	m_frustumIB.CleanUp(pDevice);
+	m_readDescriptors.Cleanup(pDevice);
+	m_sphereVB.Cleanup(pDevice);
+	m_sphereIB.Cleanup(pDevice);
+	m_coneVB.Cleanup(pDevice);
+	m_coneIB.Cleanup(pDevice);
+	m_frustumMesh.Cleanup(pDevice);
+	m_frustumIB.Cleanup(pDevice);
 }
 
 

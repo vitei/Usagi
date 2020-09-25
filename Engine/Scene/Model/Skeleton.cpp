@@ -61,11 +61,11 @@ bool Skeleton::Load( GFXDevice* pDevice, Scene* pScene, Model* pModel, bool bAut
 	return true;
 }
 
-void Skeleton::CleanUp(GFXDevice* pDevice)
+void Skeleton::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < m_uBoneCount; i++)
 	{
-		m_pBones[i].CleanUp(pDevice);
+		m_pBones[i].Cleanup(pDevice);
 	}
 }
 

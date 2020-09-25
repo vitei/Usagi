@@ -38,7 +38,7 @@ public:
     void Alloc(GFXDevice* pDevice);
 	
 	virtual void Init(usg::GFXDevice* pDevice, const ParticleEffect* pParent);
-	virtual void CleanUp(GFXDevice* pDevice) {}
+	virtual void Cleanup(GFXDevice* pDevice) {}
 	virtual bool Update(float fElapsed);
 	virtual void UpdateBuffers(GFXDevice* pDevice) {}
 	

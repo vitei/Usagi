@@ -47,7 +47,7 @@ namespace usg {
 
 	}
 
-	void Effect_ps::CleanUp(GFXDevice* pDevice)
+	void Effect_ps::Cleanup(GFXDevice* pDevice)
 	{
 
 	}

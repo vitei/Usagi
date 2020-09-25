@@ -25,7 +25,7 @@ public:
 	void InitMRT(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
 	void RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass);
 
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void Resize(GFXDevice* pDevice, uint32 uCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth);
 	void SetClearColor(const Color& col, uint32 uTarget);
 

@@ -47,6 +47,7 @@ namespace usg {
 
 		// Set up the defaults
 		void Init(GFXDevice* pDevice, const PipelineInitData& decl, uint32 uID);
+		void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 
 		const AlphaStateHndl& GetAlphaHndl() const { return m_alphaState; }
 		const DepthStencilStateHndl& GetDepthStencilHndl() const { return m_depthStencilState; }

@@ -34,7 +34,7 @@ public:
 	~PostFXSys_ps();
 
 	void Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void Update(Scene* pScene, float fElapsed);
 	void UpdateGPU(GFXDevice* pDevice);
 

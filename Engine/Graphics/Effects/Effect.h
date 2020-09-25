@@ -24,7 +24,7 @@ public:
 	virtual ~Effect();
 
 	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData) override;
-	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
+	void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 	//void Apply() const;
 
 	Effect_ps& GetPlatform() { return m_platform; }

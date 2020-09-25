@@ -29,9 +29,9 @@ namespace usg {
 
 		}
 		virtual ~RenderNodeEx() {}
-		virtual void CleanUp(GFXDevice* pDevice)
+		virtual void Cleanup(GFXDevice* pDevice)
 		{
-			m_descriptorSet.CleanUp(pDevice);
+			m_descriptorSet.Cleanup(pDevice);
 		}
 
 
@@ -101,7 +101,7 @@ namespace usg {
 		virtual ~RenderMesh();
 
 		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth);
-		virtual void CleanUp(GFXDevice* pDevice);
+		virtual void Cleanup(GFXDevice* pDevice);
 		UVMapper* GetUVMapper(uint32 uIndex) { return &m_uVMapper[uIndex]; }
 		void SetOverrideConstant(uint32 uIndex, ConstantSet* pSet) { m_pOverridesConstants[uIndex] = pSet; }
 		void RequestOverride(uint8 uIndex) { m_uReqOverrides |= (1 << uIndex); }

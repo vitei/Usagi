@@ -196,23 +196,23 @@ namespace usg {
 	}
 
 
-	void SMAA::CleanUp(GFXDevice* pDevice)
+	void SMAA::Cleanup(GFXDevice* pDevice)
 	{
-		m_lumaColorEdgeDescriptorSet.CleanUp(pDevice);
-		m_depthEdgeDescriptorSet.CleanUp(pDevice);
-		m_blendWeightDescriptorSet.CleanUp(pDevice);
-		m_neighbourBlendDescriptorSet.CleanUp(pDevice);
-		m_resolveDescriptorSet.CleanUp(pDevice);
-		m_constantSet.CleanUp(pDevice);
+		m_lumaColorEdgeDescriptorSet.Cleanup(pDevice);
+		m_depthEdgeDescriptorSet.Cleanup(pDevice);
+		m_blendWeightDescriptorSet.Cleanup(pDevice);
+		m_neighbourBlendDescriptorSet.Cleanup(pDevice);
+		m_resolveDescriptorSet.Cleanup(pDevice);
+		m_constantSet.Cleanup(pDevice);
 
 		for (auto& it : m_colorBuffers)
 		{
-			it.CleanUp(pDevice);
+			it.Cleanup(pDevice);
 		}
 
 		for (auto& it : m_renderTargets)
 		{
-			it.CleanUp(pDevice);
+			it.Cleanup(pDevice);
 		}
 	}
 

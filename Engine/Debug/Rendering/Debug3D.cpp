@@ -109,13 +109,13 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewCont
 	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
 }
 
-void Debug3D::CleanUp(GFXDevice* pDevice)
+void Debug3D::Cleanup(GFXDevice* pDevice)
 {
-	m_sphereIB.CleanUp(pDevice);
-	m_sphereVB.CleanUp(pDevice);
-	m_cubeIB.CleanUp(pDevice);
-	m_cubeVB.CleanUp(pDevice);
-	m_transforms.CleanUp(pDevice);
+	m_sphereIB.Cleanup(pDevice);
+	m_sphereVB.Cleanup(pDevice);
+	m_cubeIB.Cleanup(pDevice);
+	m_cubeVB.Cleanup(pDevice);
+	m_transforms.Cleanup(pDevice);
 }
 
 Debug3D* Debug3D::GetRenderer()

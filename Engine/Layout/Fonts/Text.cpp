@@ -58,9 +58,9 @@ namespace usg
 		}
 	}
 
-	void Text::CleanUp(GFXDevice* pDevice)
+	void Text::Cleanup(GFXDevice* pDevice)
 	{
-		m_drawer.CleanUp(pDevice);
+		m_drawer.Cleanup(pDevice);
 	}
 
 

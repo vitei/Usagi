@@ -69,7 +69,7 @@ ShadowCascade::~ShadowCascade()
 
 void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_readConstants.CleanUp(pDevice);
+	m_readConstants.Cleanup(pDevice);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
 		if (m_pSceneContext[i])

@@ -17,7 +17,7 @@ public:
 	static T*	Create();
 	static T*	Inst();
 	// TODO: Register in list for automatic deletion
-	static void CleanUp() { if(m_pInstance) { delete m_pInstance; m_pInstance = nullptr; } }
+	static void Cleanup() { if(m_pInstance) { delete m_pInstance; m_pInstance = nullptr; } }
 
 protected:
 	Singleton() {}

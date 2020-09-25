@@ -24,7 +24,7 @@ namespace usg{
 		// This should really be private, but exposed for the benefit of the shape emitter
 		void CreateEmitterShape(particles::EmitterShape eShape, const particles::EmitterShapeDetails shapeDetails);
 		virtual void Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pParent);
-		virtual void CleanUp(GFXDevice* pDevice) override;
+		virtual void Cleanup(GFXDevice* pDevice) override;
 		virtual bool Update(float fElapsed);
 		virtual void UpdateBuffers(GFXDevice* pDevice);
 		virtual void CalculateMaxBoundingArea(usg::Sphere& sphereOut);

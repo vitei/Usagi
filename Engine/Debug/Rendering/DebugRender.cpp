@@ -169,16 +169,16 @@ void DebugRender::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPas
 }
 
 
-void DebugRender::CleanUp(GFXDevice* pDevice)
+void DebugRender::Cleanup(GFXDevice* pDevice)
 {
 	m_posColMaterial.Cleanup(pDevice);
-	m_posColConstants.CleanUp(pDevice);
+	m_posColConstants.Cleanup(pDevice);
 	m_textMaterial.Cleanup(pDevice);
-	m_textConstants.CleanUp(pDevice);
-	m_barVerts.CleanUp(pDevice);
-	m_charVerts.CleanUp(pDevice);
-	m_indices.CleanUp(pDevice);
-	m_textIndices.CleanUp(pDevice);
+	m_textConstants.Cleanup(pDevice);
+	m_barVerts.Cleanup(pDevice);
+	m_charVerts.Cleanup(pDevice);
+	m_indices.Cleanup(pDevice);
+	m_textIndices.Cleanup(pDevice);
 }
 
 DebugRender* DebugRender::GetRenderer()

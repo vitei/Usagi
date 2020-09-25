@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
 	depFile.clear();
 	depFile << effectDependencies.str();
 
-	pCompiler->CleanUp();
+	pCompiler->Cleanup();
 	delete pCompiler;
 
 	return 0;

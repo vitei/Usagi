@@ -107,6 +107,11 @@ namespace usg
 		ASSERT(result == VK_SUCCESS);
 	}
 
+	void PipelineState_ps::Cleanup(GFXDevice* pDevice)
+	{
+		vkDestroyPipeline(pDevice->GetPlatform().GetVKDevice(), m_pipeline, nullptr);
+	}
+
 
 }
 

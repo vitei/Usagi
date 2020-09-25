@@ -20,7 +20,7 @@ namespace usg
 		virtual ~ModeTransition();
 
 		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
-		virtual void CleanUp(usg::GFXDevice* pDevice) override {};
+		virtual void Cleanup(usg::GFXDevice* pDevice) override {};
 		void Reset() { m_uActiveFrames = 0; }
 		virtual bool Update(float fElapsed) override;
 		virtual void PreDraw(usg::GFXDevice* pDevice, usg::GFXContext* pImmContext) override;

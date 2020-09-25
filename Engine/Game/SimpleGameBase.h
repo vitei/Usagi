@@ -22,7 +22,7 @@ namespace usg
 		virtual ~SimpleGameBase();
 
 		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
-		virtual void CleanUp(usg::GFXDevice* pDevice) override;
+		virtual void Cleanup(usg::GFXDevice* pDevice) override;
 		virtual void Update(usg::GFXDevice* pDevice) override;
 		virtual void Draw(usg::GFXDevice* pDevice) override;
 		virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) override;

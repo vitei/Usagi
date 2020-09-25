@@ -64,10 +64,10 @@ void DepthStencilBuffer_ps::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 u
 	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
 }
 
-void DepthStencilBuffer_ps::CleanUp(GFXDevice* pDevice)
+void DepthStencilBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
 	FreeLayerViews(pDevice);
-	m_texture.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
 }
 
 void DepthStencilBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)

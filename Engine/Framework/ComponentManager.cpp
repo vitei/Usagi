@@ -83,7 +83,7 @@ namespace usg
 		ComponentLoadHandles handles;
 		FillComponentLoadHandles(handles, ComponentEntity::GetRoot());
 		m_systemCoordinator.Clear(handles);
-		m_systemCoordinator.CleanUp(handles);
+		m_systemCoordinator.Cleanup(handles);
 		GetEventManager().Clear();
 		ComponentEntity::Reset();
 		ComponentStats::Reset();

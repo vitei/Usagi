@@ -25,7 +25,7 @@ public:
 	~Bone();
 
 	void Init(GFXDevice* pDevice, Bone* pParent, const SkeletonResource::Bone* pBone);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetTransform(const Matrix4x4& mat, bool bUpdateConsts = true)
 	{
 		m_pTransformNode->SetMatrix(mat);

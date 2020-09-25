@@ -17,6 +17,7 @@ public:
 	~PipelineLayout();
 	
 	void Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, uint32 uId);
+	void Cleanup(GFXDevice* pDevice);
 	const VkPipelineLayout& GetVKLayout() const { return m_layout; }
 
 	uint32 GetDescSetCount() const { return m_uDescSetCount; }

@@ -33,7 +33,7 @@ public:
 	static DebugStats* Inst();
 
 	void Init(GFXDevice* pDevice, DebugRender* pRender);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void PreDraw(GFXDevice* pDevice);
 	void PostDraw(GFXDevice* pDevice);

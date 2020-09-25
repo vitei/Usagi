@@ -21,7 +21,7 @@ public:
     ~ParticleMgr();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, ParticleSet* pSet);
-	void CleanUp(GFXDevice* pDevice, Scene* pScene);
+	void Cleanup(GFXDevice* pDevice, Scene* pScene);
 	bool Update(float fElapsed);
 	void UpdateBuffers(usg::GFXDevice* pDevice);
 	void CreateInstances(GFXDevice* pDevice, uint32 uInstances=8);
@@ -49,7 +49,7 @@ protected:
 		~EmitterInstances();
 
 		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdatePreloadCount(ParticleMgr& mgr, uint32 uCount);
 		void ClearPreloadCount();
 		const U8String& GetName() { return m_name; }

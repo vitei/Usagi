@@ -93,6 +93,16 @@ public:
 
 	}
 
+	void ClearDynamicResources(usg::GFXDevice* pDevice)
+	{
+		for (uint32 i = m_uStaticPairs; i < m_uPairs; i++)
+		{
+			m_pairings[i].state->Cleanup(pDevice);
+		}
+		ClearDynamicResources();
+
+	}
+
 private:
 	HandleType			m_default;
 	Pairing				m_pairings[COUNT];
@@ -369,15 +379,15 @@ void RenderStateMgr::FinishedStaticLoad()
 }
 
 
-void RenderStateMgr::ClearDynamicResources()
+void RenderStateMgr::ClearDynamicResources(usg::GFXDevice* pDevice)
 {
 	m_pImpl->alphaStates.ClearDynamicResources();
 	m_pImpl->depthStates.ClearDynamicResources();
 	m_pImpl->rasterizerStates.ClearDynamicResources();
-	m_pImpl->samplers.ClearDynamicResources();
-	m_pImpl->pipelines.ClearDynamicResources();
-	m_pImpl->renderPasses.ClearDynamicResources();
-	m_pImpl->descriptorLayouts.ClearDynamicResources();
+	m_pImpl->samplers.ClearDynamicResources(pDevice);
+	m_pImpl->pipelines.ClearDynamicResources(pDevice);
+	m_pImpl->renderPasses.ClearDynamicResources(pDevice);
+	m_pImpl->descriptorLayouts.ClearDynamicResources(pDevice);
 	m_pImpl->pipelineLayouts.ClearDynamicResources();
 
 	for (uint32 i = m_pImpl->uDynamicBindingStart; i < m_pImpl->uInputBindings; i++)

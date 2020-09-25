@@ -52,7 +52,7 @@ namespace usg
 			InstanceType* pReturn = NULL;
 			for (typename List<InstanceType>::Iterator it = m_freeList.Begin(); !it.IsEnd(); ++it)
 			{
-				(*it)->CleanUp(pDevice);
+				(*it)->Cleanup(pDevice);
 			}
 		}
 

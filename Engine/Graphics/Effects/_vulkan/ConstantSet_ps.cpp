@@ -123,7 +123,7 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 	}
 }
 
-void ConstantSet_ps::CleanUp(GFXDevice* pDevice)
+void ConstantSet_ps::Cleanup(GFXDevice* pDevice)
 {
 	// Not valid if the owner isn't
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();

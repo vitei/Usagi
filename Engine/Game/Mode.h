@@ -23,7 +23,7 @@ namespace usg
 		virtual ~Mode() {}
 
 		virtual void Init(GFXDevice* pDevice, ResourceMgr* pResMgr) = 0;
-		virtual void CleanUp(GFXDevice* pDevice) = 0;
+		virtual void Cleanup(GFXDevice* pDevice) = 0;
 		virtual bool Update(float fElapsed) = 0;
 
 		virtual void PreDraw(GFXDevice* pDevice, GFXContext* pImmContext) {};

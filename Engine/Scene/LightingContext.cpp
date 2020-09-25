@@ -99,7 +99,7 @@ void LightingContext::Init(GFXDevice* pDevice)
 
 void LightingContext::Cleanup(GFXDevice* pDevice)
 {
-	m_lightingConstants.CleanUp(pDevice);
+	m_lightingConstants.Cleanup(pDevice);
 }
 
 void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)

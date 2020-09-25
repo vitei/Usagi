@@ -559,44 +559,44 @@ namespace usg
 		}
 	}
 
-	void ASSAO::CleanUp(GFXDevice* pDevice)
+	void ASSAO::Cleanup(GFXDevice* pDevice)
 	{
 		for(int i=0; i< DEPTH_COUNT; i++)
 		{
-			m_halfDepthTargets[i].CleanUp(pDevice);
+			m_halfDepthTargets[i].Cleanup(pDevice);
 		}
-		m_blurDescPing.CleanUp(pDevice);
-		m_blurDescPong.CleanUp(pDevice);
-		m_pingPongCB1.CleanUp(pDevice);
-		m_applyDesc.CleanUp(pDevice);
-		m_pingPongCB2.CleanUp(pDevice);
-		m_finalResultsCB.CleanUp(pDevice);
-		m_importanceMapCB.CleanUp(pDevice);
-		m_importanceMapPongCB.CleanUp(pDevice);
-		m_loadTargetCB.CleanUp(pDevice);
+		m_blurDescPing.Cleanup(pDevice);
+		m_blurDescPong.Cleanup(pDevice);
+		m_pingPongCB1.Cleanup(pDevice);
+		m_applyDesc.Cleanup(pDevice);
+		m_pingPongCB2.Cleanup(pDevice);
+		m_finalResultsCB.Cleanup(pDevice);
+		m_importanceMapCB.Cleanup(pDevice);
+		m_importanceMapPongCB.Cleanup(pDevice);
+		m_loadTargetCB.Cleanup(pDevice);
 
-		m_importanceMapDesc.CleanUp(pDevice);
-		m_importanceMapADesc.CleanUp(pDevice);
-		m_importanceMapBDesc.CleanUp(pDevice);
+		m_importanceMapDesc.Cleanup(pDevice);
+		m_importanceMapADesc.Cleanup(pDevice);
+		m_importanceMapBDesc.Cleanup(pDevice);
 
 
-		m_constants.CleanUp(pDevice);
-		m_prepareDepthDesc.CleanUp(pDevice);
+		m_constants.Cleanup(pDevice);
+		m_prepareDepthDesc.Cleanup(pDevice);
 		for(int i=0; i<MIP_COUNT-1; i++)
 		{
-			m_mipDesc[i].CleanUp(pDevice);
+			m_mipDesc[i].Cleanup(pDevice);
 		}
 
 		for (int i = 0; i < CONST_PASS_COUNT; i++)
 		{
-			m_passConstants[i].CleanUp(pDevice);
+			m_passConstants[i].Cleanup(pDevice);
 		}	
 		
 		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
 			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
 			{
-				m_genQDesc[i][uPass].CleanUp(pDevice);
+				m_genQDesc[i][uPass].Cleanup(pDevice);
 			}
 		}
 	}

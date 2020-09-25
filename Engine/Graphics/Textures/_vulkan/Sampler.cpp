@@ -94,7 +94,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	ASSERT(!err);
 }
 
-void Sampler::CleanUp(GFXDevice* pDevice)
+void Sampler::Cleanup(GFXDevice* pDevice)
 {
 	if (m_sampler)
 	{

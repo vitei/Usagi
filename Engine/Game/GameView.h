@@ -18,7 +18,7 @@ namespace usg
 		GameView(usg::GFXDevice* pDevice, usg::Scene& scene, ResourceMgr* pResMgr, usg::PostFXSys& postFXSys, const usg::GFXBounds& bounds, float32 fFov, float32 fNear, float32 fFar);
 		~GameView();
 
-		void CleanUp(usg::GFXDevice* pDevice, usg::Scene& scene);
+		void Cleanup(usg::GFXDevice* pDevice, usg::Scene& scene);
 		void AddDebugRender(usg::DebugRender* pDebugRender);
 
 		void Draw(usg::PostFXSys* pPostFXSys, usg::Display* pDisplay, usg::GFXContext* pImmContext, usg::GFXContext* pDeferredContext, usg::ViewType eType);

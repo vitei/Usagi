@@ -20,7 +20,7 @@ public:
 	~Effect_ps();
 
 	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData, uint32 uDataSize);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	uint32 GetStageCount() const { return m_uStageCount; }
 	const VkPipelineShaderStageCreateInfo* GetShaderStageCreateInfo() const { return m_stageCreateInfo; }

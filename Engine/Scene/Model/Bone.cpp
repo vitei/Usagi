@@ -34,9 +34,9 @@ void Bone::Init(GFXDevice* pDevice, Bone* pParent, const SkeletonResource::Bone*
 	m_boneConstants.Init(pDevice, SceneConsts::g_instanceCBDecl);
 }
 
-void Bone::CleanUp(GFXDevice* pDevice)
+void Bone::Cleanup(GFXDevice* pDevice)
 {
-	m_boneConstants.CleanUp(pDevice);
+	m_boneConstants.Cleanup(pDevice);
 }
 
 void Bone::CreateTransformNode(Scene* pScene, TransformNode* pRootNode)

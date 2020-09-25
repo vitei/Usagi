@@ -39,7 +39,7 @@ namespace usg {
 		m_bAgentHasTarget = false;
 	}
 
-	void SceneDebugStats::CleanUp(GFXDevice* pDevice)
+	void SceneDebugStats::Cleanup(GFXDevice* pDevice)
 	{
 	
 	}

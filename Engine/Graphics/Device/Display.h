@@ -34,7 +34,7 @@ public:
 	~Display() {}
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl, struct DeviceResource& res);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetDisplayDimensions(xOut, yOut, bOrient); }
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetActualDimensions(xOut, yOut, bOrient); }
 	void Present();

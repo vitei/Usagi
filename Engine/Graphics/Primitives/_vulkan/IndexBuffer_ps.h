@@ -20,7 +20,7 @@ class IndexBuffer_ps
 		~IndexBuffer_ps();
 
 		void Init(GFXDevice* pDevice, const void* pIndices, uint32 uCount, uint32 uIndexSize, bool bStatic, GPULocation eLocation);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void SetContents(GFXDevice* pDevice, const void* pData, uint32 uIndexCount);
 
 		const VkBuffer& GetBuffer() const { return m_buffer[m_uActiveIBO]; }

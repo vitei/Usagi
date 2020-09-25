@@ -23,7 +23,7 @@ public:
 	~DebugRender();
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetDrawArea(float fLeft, float fTop, float fWidth, float fHeight, float fLineSpacing = 1.25f);
 
 	// Values on the X range are a fraction of the debug draw area

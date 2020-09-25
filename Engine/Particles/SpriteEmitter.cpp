@@ -66,10 +66,10 @@ void SpriteEmitter::Init(usg::GFXDevice* pDevice, const ParticleEffect* pParent)
 	Inherited::Init(pDevice, pParent);
 }
 
-void SpriteEmitter::CleanUp(GFXDevice* pDevice)
+void SpriteEmitter::Cleanup(GFXDevice* pDevice)
 {
-	m_vertices.CleanUp(pDevice);
-	Inherited::CleanUp(pDevice);
+	m_vertices.Cleanup(pDevice);
+	Inherited::Cleanup(pDevice);
 }
 
 uint32 SpriteEmitter::EmitParticle(uint32 uCount)

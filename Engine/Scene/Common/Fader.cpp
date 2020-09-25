@@ -125,9 +125,9 @@ namespace usg
 
 	void Fader::CleanUpDeviceData(usg::GFXDevice* pDevice)
 	{
-		m_VertexBuffer.CleanUp(pDevice);
-		m_constants.CleanUp(pDevice);
-		m_descriptorSet.CleanUp(pDevice);
+		m_VertexBuffer.Cleanup(pDevice);
+		m_constants.Cleanup(pDevice);
+		m_descriptorSet.Cleanup(pDevice);
 	}
 
 

@@ -51,8 +51,8 @@ void OmniShadowContext::InitDeviceData(GFXDevice* pDevice)
 
 void OmniShadowContext::Cleanup(GFXDevice* pDevice)
 {
-	m_globalConstants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_globalConstants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 }
 
 void OmniShadowContext::Init(const Sphere* sphere)

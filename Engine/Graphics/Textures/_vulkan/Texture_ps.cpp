@@ -631,7 +631,7 @@ void Texture_ps::ClearViews(GFXDevice* pDevice)
 }
 
 
-void Texture_ps::CleanUp(GFXDevice* pDevice)
+void Texture_ps::Cleanup(GFXDevice* pDevice)
 {
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 

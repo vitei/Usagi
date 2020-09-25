@@ -400,14 +400,14 @@ namespace usg
 		ResetMatrix(shapeDef, m_fScale);
 	}
 
-	void ScriptEmitter::CleanUp(GFXDevice* pDevice)
+	void ScriptEmitter::Cleanup(GFXDevice* pDevice)
 	{
-		m_customConstants.CleanUp(pDevice);
-		m_gsTransform.CleanUp(pDevice);
-		m_materialConsts.CleanUp(pDevice);
-		m_fragConsts.CleanUp(pDevice);
+		m_customConstants.Cleanup(pDevice);
+		m_gsTransform.Cleanup(pDevice);
+		m_materialConsts.Cleanup(pDevice);
+		m_fragConsts.Cleanup(pDevice);
 		m_material.Cleanup(pDevice);
-		Inherited::CleanUp(pDevice);
+		Inherited::Cleanup(pDevice);
 	}
 
 	void ScriptEmitter::SetScale(float fScale)

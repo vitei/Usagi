@@ -79,7 +79,7 @@ void GameLoop()
 
 void GameCleanup()
 {
-	game->CleanUp(g_pGFXDevice);
+	game->Cleanup(g_pGFXDevice);
 	vdelete game;
 	game = nullptr;
 	ResourceMgr::Cleanup(g_pGFXDevice);
@@ -199,7 +199,7 @@ void EngineCleanup()
 	GFX::Reset();
 	U8String::CleanupPool();
 	ComponentSystemInputOutputsSharedBase::Cleanup();
-	usg::ModuleManager::Inst()->CleanUp();
+	usg::ModuleManager::Inst()->Cleanup();
 	mem::Cleanup();
 }
 

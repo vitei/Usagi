@@ -18,7 +18,7 @@ public:
 	~Display_ps();
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	void SetAsTarget(VkCommandBuffer& cmd);
 
 	void Present();

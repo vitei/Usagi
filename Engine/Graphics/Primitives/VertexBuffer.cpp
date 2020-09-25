@@ -6,9 +6,9 @@
 
 namespace usg {
 
-void VertexBuffer::CleanUp(GFXDevice* pDevice)
+void VertexBuffer::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 VertexBuffer::Lock::Lock()

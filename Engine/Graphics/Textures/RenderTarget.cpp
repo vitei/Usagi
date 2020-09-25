@@ -60,9 +60,9 @@ namespace usg {
 		m_platform.InitMRT(pDevice, uColCount, ppColorBuffer, pDepth);
 	}
 
-	void RenderTarget::CleanUp(GFXDevice* pDevice)
+	void RenderTarget::Cleanup(GFXDevice* pDevice)
 	{
-		m_platform.CleanUp(pDevice);
+		m_platform.Cleanup(pDevice);
 	}
 
 	void RenderTarget::Resize(usg::GFXDevice* pDevice)

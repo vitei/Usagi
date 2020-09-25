@@ -12,9 +12,9 @@ void Display::Initialise(usg::GFXDevice* pDevice, WindHndl hndl, struct DeviceRe
 	m_platform.Initialise(pDevice, hndl);
 }
 
-void Display::CleanUp(usg::GFXDevice* pDevice)
+void Display::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 

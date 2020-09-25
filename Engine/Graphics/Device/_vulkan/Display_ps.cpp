@@ -66,7 +66,7 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 	}
 }
 
-void Display_ps::CleanUp(usg::GFXDevice* pDevice)
+void Display_ps::Cleanup(usg::GFXDevice* pDevice)
 {
 	if (m_swapChain != VK_NULL_HANDLE)
 	{

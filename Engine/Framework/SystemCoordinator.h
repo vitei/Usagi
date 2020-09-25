@@ -33,7 +33,7 @@ public:
 
 	// Do this before registering systems.
 	void Init(EventManager* pEventManager, MessageDispatch* pMessageDispatch, LuaVM* pLuaVM);
-	void CleanUp(ComponentLoadHandles& handles);
+	void Cleanup(ComponentLoadHandles& handles);
 
 	template<typename SIGNAL> void RegisterSignal();
 	template<typename SYSTEM> void RegisterSystem();

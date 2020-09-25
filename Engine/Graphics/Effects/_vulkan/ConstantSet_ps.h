@@ -26,7 +26,7 @@ public:
 	~ConstantSet_ps();
 
 	void Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void UpdateBuffer(GFXDevice* pDevice, bool bDoubleUpdate);
 
 	// PS specific functions

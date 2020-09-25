@@ -18,7 +18,7 @@
 
 // Note disable for render doc builds, otherwise VK_EXT_validation_features extension will topple the replay
 #ifdef DEBUG_BUILD
-#define USE_VALIDATION
+//#define USE_VALIDATION
 #endif
 
 #ifndef FINAL_BUILD

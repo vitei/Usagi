@@ -98,9 +98,9 @@ void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, Ren
 	m_constantSet.UpdateData(pDevice);
 }
 
-void FXAA::CleanUp(GFXDevice* pDevice)
+void FXAA::Cleanup(GFXDevice* pDevice)
 {
-	m_constantSet.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
 	m_material.Cleanup(pDevice);
 }
 

@@ -31,9 +31,9 @@ namespace usg
 		
 	}
 
-	void Font::CleanUp(GFXDevice* pDevice)
+	void Font::Cleanup(GFXDevice* pDevice)
 	{
-		m_descriptor.CleanUp(pDevice);
+		m_descriptor.Cleanup(pDevice);
 	}
 
 	bool Font::Load( GFXDevice* pDevice, ResourceMgr* pResMgr, const char* filename )

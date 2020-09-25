@@ -227,11 +227,11 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 }
 
 
-void ModelResource::CleanUp(GFXDevice* pDevice)
+void ModelResource::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < m_uMeshCount; i++)
 	{
-		m_meshArray[i].CleanUp(pDevice);
+		m_meshArray[i].Cleanup(pDevice);
 	}
 }
 

@@ -49,8 +49,8 @@ void ShadowContext::InitDeviceData(GFXDevice* pDevice)
 
 void ShadowContext::Cleanup(GFXDevice* pDevice)
 {
-	m_globalConstants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_globalConstants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 }
 
 void ShadowContext::Init(const Camera* pCamera)

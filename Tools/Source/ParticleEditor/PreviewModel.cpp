@@ -14,13 +14,13 @@ PreviewModel::~PreviewModel()
 	
 }
 
-void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
+void PreviewModel::Cleanup(usg::GFXDevice* pDevice)
 {
 	if (m_pModel)
 	{
 		m_pModel->AddToScene(false);
 		m_pModel->GPUUpdate(pDevice);
-		m_pModel->CleanUp(pDevice);
+		m_pModel->Cleanup(pDevice);
 		vdelete m_pModel;
 	}
 }
@@ -64,7 +64,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 		{
 			m_pModel->AddToScene(false);
 			m_pModel->GPUUpdate(pDevice);
-			m_pModel->CleanUp(pDevice);
+			m_pModel->Cleanup(pDevice);
 			vdelete m_pModel;
 		}
 

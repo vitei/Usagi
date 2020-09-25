@@ -20,7 +20,7 @@ namespace usg
 		SetViewContext(*pContext);
 	}
 
-	void GameView::CleanUp(usg::GFXDevice* pDevice, usg::Scene& scene)
+	void GameView::Cleanup(usg::GFXDevice* pDevice, usg::Scene& scene)
 	{
 		if (m_pViewContext)
 		{

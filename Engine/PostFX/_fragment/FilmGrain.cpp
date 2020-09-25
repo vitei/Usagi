@@ -112,9 +112,9 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	m_constantSet.UpdateData(pDevice);
 }
 
-void FilmGrain::CleanUp(GFXDevice* pDevice)
+void FilmGrain::Cleanup(GFXDevice* pDevice)
 {
-	m_constantSet.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
 	m_material.Cleanup(pDevice);
 }
 

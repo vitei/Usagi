@@ -33,7 +33,7 @@ namespace usg {
 		m_bValid = true;
 	}
 
-	void DescriptorSet_ps::CleanUp(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
+	void DescriptorSet_ps::Cleanup(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
 	{
 		if (m_bValid)
 		{

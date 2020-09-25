@@ -65,8 +65,8 @@ void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 {
 	if (m_cascadeBuffer.GetWidth() != m_shadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
 	{
-		m_cascadeBuffer.CleanUp(pDevice);
-		m_cascadeTarget.CleanUp(pDevice);
+		m_cascadeBuffer.Cleanup(pDevice);
+		m_cascadeTarget.Cleanup(pDevice);
 		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uLayers, DF_DEPTH_32F);
 		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
@@ -78,14 +78,14 @@ void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 }
 
 
-void LightMgr::CleanUp(GFXDevice* pDevice)
+void LightMgr::Cleanup(GFXDevice* pDevice)
 {
-	m_dirLights.CleanUp(pDevice, m_pParent);
-	m_spotLights.CleanUp(pDevice, m_pParent);
-	m_pointLights.CleanUp(pDevice, m_pParent);
-	m_projLights.CleanUp(pDevice, m_pParent);
-	m_cascadeTarget.CleanUp(pDevice);
-	m_cascadeBuffer.CleanUp(pDevice);
+	m_dirLights.Cleanup(pDevice, m_pParent);
+	m_spotLights.Cleanup(pDevice, m_pParent);
+	m_pointLights.Cleanup(pDevice, m_pParent);
+	m_projLights.Cleanup(pDevice, m_pParent);
+	m_cascadeTarget.Cleanup(pDevice);
+	m_cascadeBuffer.Cleanup(pDevice);
 }
 
 

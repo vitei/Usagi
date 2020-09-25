@@ -72,9 +72,9 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	Add(false);
 }
 
-void EmitterInstance::CleanUp(usg::GFXDevice* pDevice)
+void EmitterInstance::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_emitter.CleanUp(pDevice);
+	m_emitter.Cleanup(pDevice);
 }
 
 

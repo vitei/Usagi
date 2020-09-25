@@ -165,12 +165,12 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	m_capVertex.fEmissionLength = -1.0f;
 }
 
-void RibbonTrail::CleanUp(usg::GFXDevice* pDevice) 
+void RibbonTrail::Cleanup(usg::GFXDevice* pDevice) 
 {
 	m_material.Cleanup(pDevice);
-	m_constantSet.CleanUp(pDevice);
-	m_vertices.CleanUp(pDevice);
-	m_indices.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
+	m_vertices.Cleanup(pDevice);
+	m_indices.Cleanup(pDevice);
 }
 
 

@@ -23,7 +23,7 @@ namespace usg
 		~SceneDebugStats();
 
 		void Init(Debug3D* pDebug3D, Scene* pScene);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void Update(float fElapsed) override;
 
 		void Draw(DebugRender* pRender) override;

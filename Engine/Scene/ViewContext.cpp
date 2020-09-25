@@ -166,9 +166,9 @@ namespace usg {
 
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
-			m_pImpl->globalConstants[i].CleanUp(pDevice);
-			m_pImpl->globalDescriptors[i].CleanUp(pDevice);
-			m_pImpl->globalDescriptorsWithDepth[i].CleanUp(pDevice);
+			m_pImpl->globalConstants[i].Cleanup(pDevice);
+			m_pImpl->globalDescriptors[i].Cleanup(pDevice);
+			m_pImpl->globalDescriptorsWithDepth[i].Cleanup(pDevice);
 		}
 	}
 

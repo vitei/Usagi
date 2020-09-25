@@ -142,16 +142,16 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 
-void Model::RenderMesh::CleanUp(GFXDevice* pDevice)
+void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
 	{
 		if (m_pOverridesConstants[i])
 		{
-			m_pOverridesConstants[i]->CleanUp(pDevice);
+			m_pOverridesConstants[i]->Cleanup(pDevice);
 		}
 	}
-	Inherited::CleanUp(pDevice);
+	Inherited::Cleanup(pDevice);
 }
 
 void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)

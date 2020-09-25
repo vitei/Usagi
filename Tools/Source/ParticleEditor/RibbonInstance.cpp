@@ -19,9 +19,9 @@ inline bool Compare(VariableType& inOut, const ComparisonType newValue)
 	}
 }
 
-void RibbonInstance::CleanUp(usg::GFXDevice* pDevice)
+void RibbonInstance::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_trail.CleanUp(pDevice);
+	m_trail.Cleanup(pDevice);
 }
 
 

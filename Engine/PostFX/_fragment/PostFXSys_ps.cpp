@@ -310,23 +310,23 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	}	
 }
 
-void PostFXSys_ps::CleanUp(GFXDevice* pDevice)
+void PostFXSys_ps::Cleanup(GFXDevice* pDevice)
 {
 	for (auto & colorBuffer : m_colorBuffer)
 	{
 		if (colorBuffer.IsValid())
 		{
-			colorBuffer.CleanUp(pDevice);
+			colorBuffer.Cleanup(pDevice);
 		}
 	}
 
-	m_depthStencil.CleanUp(pDevice);
+	m_depthStencil.Cleanup(pDevice);
 
 	for (auto & screenRT : m_screenRT)
 	{
 		if (screenRT.IsValid())
 		{
-			screenRT.CleanUp(pDevice);
+			screenRT.Cleanup(pDevice);
 		}
 	}
 
@@ -334,7 +334,7 @@ void PostFXSys_ps::CleanUp(GFXDevice* pDevice)
 	{
 		if (pPostEffect != nullptr)
 		{
-			pPostEffect->CleanUp(pDevice);
+			pPostEffect->Cleanup(pDevice);
 		}
 	}
 }

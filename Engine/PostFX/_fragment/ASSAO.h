@@ -23,7 +23,7 @@ public:
 	~ASSAO();
 
 	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc);

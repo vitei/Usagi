@@ -46,8 +46,8 @@ namespace usg
 
 	void OmniShadow::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	{
-		m_cubeBuffer.CleanUp(pDevice);
-		m_cubeTarget.CleanUp(pDevice);
+		m_cubeBuffer.Cleanup(pDevice);
+		m_cubeTarget.Cleanup(pDevice);
 		if (m_pShadowContext)
 		{
 			pScene->DeleteOmniShadowContext(m_pShadowContext);

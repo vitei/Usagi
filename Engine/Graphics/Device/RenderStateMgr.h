@@ -30,7 +30,7 @@ public:
 	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
 
 	void FinishedStaticLoad();
-	void ClearDynamicResources();
+	void ClearDynamicResources(usg::GFXDevice* pDevice);
 
 private:
 	AlphaStateHndl			GetAlphaState(const AlphaStateDecl* pDecl, GFXDevice* pDevice);

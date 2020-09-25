@@ -228,5 +228,10 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 }
 
 
+void RenderPass::Cleanup(GFXDevice* pDevice)
+{
+	vkDestroyRenderPass(pDevice->GetPlatform().GetVKDevice(), m_renderPass, nullptr);
+}
+
 }
 

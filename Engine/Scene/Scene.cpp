@@ -157,10 +157,10 @@ void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
 
 void Scene::Cleanup(GFXDevice* pDevice)
 {
-	m_pImpl->debug3D.CleanUp(pDevice);
-	m_debugStats.CleanUp(pDevice);
-	m_pImpl->particleSystem.CleanUp(pDevice, this);
-	m_pImpl->lightMgr.CleanUp(pDevice);
+	m_pImpl->debug3D.Cleanup(pDevice);
+	m_debugStats.Cleanup(pDevice);
+	m_pImpl->particleSystem.Cleanup(pDevice, this);
+	m_pImpl->lightMgr.Cleanup(pDevice);
 	ASSERT(m_pImpl->viewContexts.Size() == 0);
 	for (FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.EmptyBegin(); !it.IsEnd(); ++it)
 	{

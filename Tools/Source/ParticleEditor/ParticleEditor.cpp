@@ -160,16 +160,16 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_bIsRunning = true;
 } 
 
-void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
+void ParticleEditor::Cleanup(usg::GFXDevice* pDevice)
 {
 	pDevice->WaitIdle();
-	m_effectGroup.CleanUp(pDevice);
-	m_emitter.CleanUp(pDevice);
-	m_effectPreview.CleanUp(pDevice);
-	m_emitterPreview.CleanUp(pDevice);
-	m_emitterWindow.CleanUp(pDevice);
-	m_editorShapes.CleanUp(pDevice);
-	m_guiRend.CleanUp(pDevice);
+	m_effectGroup.Cleanup(pDevice);
+	m_emitter.Cleanup(pDevice);
+	m_effectPreview.Cleanup(pDevice);
+	m_emitterPreview.Cleanup(pDevice);
+	m_emitterWindow.Cleanup(pDevice);
+	m_editorShapes.Cleanup(pDevice);
+	m_guiRend.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()

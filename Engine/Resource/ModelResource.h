@@ -36,7 +36,7 @@ public:
 	virtual ~ModelResource();
 
 	bool Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem );
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	uint32 GetMeshCount() const { return m_uMeshCount; }
 	const Mesh* GetMesh(uint32 uMesh) const;
 	const usg::Sphere& GetBounds() const { return m_bounds;}

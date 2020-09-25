@@ -49,7 +49,7 @@ void DebugStats::Init(GFXDevice* pDevice, DebugRender* pRender)
 	m_platform.Init(pDevice);
 }
 
-void DebugStats::CleanUp(GFXDevice* pDevice)
+void DebugStats::Cleanup(GFXDevice* pDevice)
 {
 	if (m_pRender)
 	{

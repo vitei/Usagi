@@ -44,7 +44,7 @@ GFXDevice::~GFXDevice()
 	}
 	for (uint32 i = 0; i < m_uDisplayCount; i++)
 	{
-		m_pDisplays[i]->CleanUp(this);
+		m_pDisplays[i]->Cleanup(this);
 	}
 	vdelete m_pImpl;
 	m_pImpl = nullptr;
@@ -206,7 +206,7 @@ void GFXDevice::FinishedStaticLoad()
 
 void GFXDevice::ClearDynamicResources()
 {
-	m_pImpl->renderStates.ClearDynamicResources();
+	m_pImpl->renderStates.ClearDynamicResources(this);
 	m_pImpl->platform.ClearDynamicResources();
 }
 

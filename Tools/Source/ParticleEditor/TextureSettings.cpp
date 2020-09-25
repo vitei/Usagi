@@ -176,14 +176,14 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 	}
 }
 
-void TextureSettings::CleanUp(usg::GFXDevice* pDevice)
+void TextureSettings::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_previewButton.CleanUp(pDevice);
+	m_previewButton.Cleanup(pDevice);
 	for (uint32 i = 0; i < MAX_ANIM_FRAMES; i++)
 	{
-		m_animTextures[i].CleanUp(pDevice);
+		m_animTextures[i].Cleanup(pDevice);
 	}
-	m_texture.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
 }
 
 void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData)

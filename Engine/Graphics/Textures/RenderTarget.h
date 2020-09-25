@@ -51,7 +51,7 @@ public:
 	// Create the rneder pass
 	RenderPassHndl InitRenderPass(GFXDevice* pDevice, const RenderPassFlags& flags, const RenderPassDecl::Dependency* dependencies = RenderPassDecl::ExternalColorDependenciesInAndOut(), uint32 uDependiences = 2);
 
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void Resize(usg::GFXDevice* pDevice);
 	bool IsValid() const { return m_pDepth || m_uTargetCount; }
 

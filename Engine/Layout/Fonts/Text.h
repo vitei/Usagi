@@ -22,7 +22,7 @@ namespace usg
 		~Text();
 
 		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		bool Draw(GFXContext* context, bool b3D = false);
 		void SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC);

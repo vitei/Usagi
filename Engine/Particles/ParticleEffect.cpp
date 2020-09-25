@@ -110,9 +110,9 @@ void ParticleEffect::Init(GFXDevice* pDevice, Scene* pScene, const Matrix4x4& mM
 }
 
 
-void ParticleEffect::CleanUp(GFXDevice* pDevice)
+void ParticleEffect::Cleanup(GFXDevice* pDevice)
 {
-	m_constantSet.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
 }
 
 Vector4f ParticleEffect::GetPosition(float fLerp) const

@@ -107,13 +107,13 @@ void ProjectionLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShad
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void ProjectionLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void ProjectionLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		m_pShadow = nullptr;
 	}

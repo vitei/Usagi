@@ -56,15 +56,15 @@ namespace usg{
 
 
 
-		void CleanUp(GFXDevice* pDevice)
+		void Cleanup(GFXDevice* pDevice)
 		{
-			vertexBuffer.CleanUp(pDevice);
+			vertexBuffer.Cleanup(pDevice);
 			for (auto& it : renderSets)
 			{
-				it.singleVerts.CleanUp(pDevice);
-				it.effectRuntime.CleanUp(pDevice);
+				it.singleVerts.Cleanup(pDevice);
+				it.effectRuntime.Cleanup(pDevice);
 			}
-			primitive.indexBuffer.CleanUp(pDevice);
+			primitive.indexBuffer.Cleanup(pDevice);
 		}
 
 

@@ -33,16 +33,16 @@ void ParticleMgr::EmitterInstances::Init(GFXDevice* pDevice, ParticleMgr& mgr, c
 	m_resHndl = ResourceMgr::Inst()->GetParticleEmitter(pDevice, szName);
 }
 
-void ParticleMgr::EmitterInstances::CleanUp(GFXDevice* pDevice)
+void ParticleMgr::EmitterInstances::Cleanup(GFXDevice* pDevice)
 {
 	for (List<ScriptEmitter>::Iterator it = m_freeEmitters.Begin(); !it.IsEnd(); ++it)
 	{
-		(*it)->CleanUp(pDevice);
+		(*it)->Cleanup(pDevice);
 	}
 
 	for (List<ScriptEmitter>::Iterator it = m_activeEmitters.Begin(); !it.IsEnd(); ++it)
 	{
-		(*it)->CleanUp(pDevice);
+		(*it)->Cleanup(pDevice);
 	}
 }
 
@@ -173,7 +173,7 @@ void ParticleMgr::Init(GFXDevice* pDevice, Scene* pScene, ParticleSet* pSet)
 	m_pParticleSet = pSet;
 }
 
-void ParticleMgr::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void ParticleMgr::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
 	for (FastPool<EffectData>::DynamicIterator it = m_effects.BeginDynamic(); !it.IsEnd(); ++it)
 	{
@@ -183,23 +183,23 @@ void ParticleMgr::CleanUp(GFXDevice* pDevice, Scene* pScene)
 
 	for (FastPool<EffectData>::Iterator it = m_effects.EmptyBegin(); !it.IsEnd(); ++it)
 	{
-		(*it)->effect.CleanUp(pDevice);
+		(*it)->effect.Cleanup(pDevice);
 	}
 
 	for (FastPool<EmitterInstances>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
 	{
-		(*it)->CleanUp(pDevice);
+		(*it)->Cleanup(pDevice);
 	}
 
 
 	for (List<RibbonTrail>::Iterator it = m_freeRibbons.Begin(); !it.IsEnd(); ++it)
 	{
-		(*it)->CleanUp(pDevice);
+		(*it)->Cleanup(pDevice);
 	}
 
 	for (List<RibbonTrail>::Iterator it = m_activeRibbons.Begin(); !it.IsEnd(); ++it)
 	{
-		(*it)->CleanUp(pDevice);
+		(*it)->Cleanup(pDevice);
 	}
 
 

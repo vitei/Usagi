@@ -73,7 +73,7 @@ namespace usg
 		
 	}
 
-	void SystemsMode::CleanUp(GFXDevice* pDevice)
+	void SystemsMode::Cleanup(GFXDevice* pDevice)
 	{
 
 	}

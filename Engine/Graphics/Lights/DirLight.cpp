@@ -30,7 +30,7 @@ void DirLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void DirLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void DirLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
 	if (m_pShadowCascade)
 	{
@@ -38,7 +38,7 @@ void DirLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
 		vdelete m_pShadowCascade;
 		m_pShadowCascade = nullptr;
 	}
-	Light::CleanUp(pDevice, pScene);
+	Light::Cleanup(pDevice, pScene);
 }
 
 

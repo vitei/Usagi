@@ -24,7 +24,7 @@ public:
 	virtual bool IsRunning() const { return m_bIsRunning; }
 	virtual bool ResetReq() const { return m_bReqReset; }
 	virtual void Init(GFXDevice* pDevice, usg::ResourceMgr* pResMgr) = 0;
-	virtual void CleanUp(GFXDevice* pDevice) = 0;
+	virtual void Cleanup(GFXDevice* pDevice) = 0;
 	virtual void Update(GFXDevice* pDevice) = 0;
 	virtual void Draw(GFXDevice* pDevice) = 0;
 	virtual void OnMessage(GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) = 0;

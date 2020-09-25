@@ -21,7 +21,7 @@ public:
 	void Init(GFXDevice* pDevice, const CustomEffectResHndl& hndl);
 	void Init(GFXDevice* pDevice, const char* szName);
 	void Init(GFXDevice* pDevice, const CustomEffectRuntime* pCopy);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void GPUUpdate(GFXDevice* pDevice);
 	
 	// FIXME: Set variables by CRC instead of string

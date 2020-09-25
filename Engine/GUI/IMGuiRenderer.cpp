@@ -305,13 +305,13 @@ void IMGuiRenderer::Init()
     //io.RenderDrawListsFn = RenderFunction;
 }
 
-void IMGuiRenderer::CleanUp(GFXDevice* pDevice)
+void IMGuiRenderer::Cleanup(GFXDevice* pDevice)
 {
-	m_texture.CleanUp(pDevice);
-	m_globalDescriptor.CleanUp(pDevice);
-	m_texDescriptor.CleanUp(pDevice);
-	m_vertexBuffer.CleanUp(pDevice);
-	m_constantSet.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
+	m_globalDescriptor.Cleanup(pDevice);
+	m_texDescriptor.Cleanup(pDevice);
+	m_vertexBuffer.Cleanup(pDevice);
+	m_constantSet.Cleanup(pDevice);
 }
 
 

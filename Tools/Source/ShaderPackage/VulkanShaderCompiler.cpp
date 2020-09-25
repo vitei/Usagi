@@ -214,7 +214,7 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 }
 #endif
 
-void VulkanShaderCompiler::CleanUp()
+void VulkanShaderCompiler::Cleanup()
 {
 	shaderc_compiler_release(m_compiler);
 	shaderc_compile_options_release(m_compileOptions);

@@ -28,7 +28,7 @@ public:
 
 	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_OFFSCREEN_COLOR, uint32 uRTLoc = 0, uint32 uMipCount=1);
 	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, ColorFormat eFormat, SampleCount eSampleCount = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_OFFSCREEN_COLOR);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void			Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 

@@ -26,7 +26,7 @@ public:
 	~EffectGroup() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRenderer* pRenderer);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	void Update(usg::GFXDevice* pDevice, float fElapsed, float fPreviewSpeed, bool bRepeat, bool bPause, bool bRestart);
 	void EmitterModified(usg::GFXDevice* pDevice, const char* szName, const usg::particles::EmitterEmission& emitterData, const usg::particles::EmitterShapeDetails& shapeData);
 	usg::Color GetBackgroundColor() const;

@@ -10,7 +10,7 @@ public:
 	virtual ~ParticlePreviewWindow();
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos, uint32 uFlags = SHOW_PLAY_CONTROLS | SHOW_PREVIEW_MODEL) override;
-	virtual void CleanUp(usg::GFXDevice* pDevice) override;
+	virtual void Cleanup(usg::GFXDevice* pDevice) override;
 	virtual bool Update(usg::GFXDevice* pDevice, float fElapsed) override;
 	virtual void Draw(usg::GFXContext* pImmContext) override;
 

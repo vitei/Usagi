@@ -30,7 +30,7 @@ public:
 	virtual ~ParticleEditor();
 
 	virtual void Init(usg::GFXDevice* pDevice);
-	virtual void CleanUp(usg::GFXDevice* pDevice);
+	virtual void Cleanup(usg::GFXDevice* pDevice);
 	virtual void Update(usg::GFXDevice* pDevice);
 	virtual void Draw(usg::GFXDevice* pDevice);
 	virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters);

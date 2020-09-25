@@ -62,7 +62,7 @@ void LinearDepth::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pS
 #endif
 }
 
-void LinearDepth::CleanUp(GFXDevice* pDevice)
+void LinearDepth::Cleanup(GFXDevice* pDevice)
 {
 
 }

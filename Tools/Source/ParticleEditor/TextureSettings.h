@@ -21,7 +21,7 @@ public:
 	~TextureSettings();
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData);
 	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
 

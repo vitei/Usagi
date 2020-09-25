@@ -48,9 +48,9 @@ Texture::~Texture(void)
 	g_uLastValidId = m_uBindingId;
 }
 
-void Texture::CleanUp(GFXDevice* pDevice)
+void Texture::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 uint32 Texture::GetWidth() const

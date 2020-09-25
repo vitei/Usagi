@@ -28,7 +28,7 @@ public:
 	void Init(GFXDevice* pDevice, const uint32* const pIndices, uint32 uCount, bool bStatic = true, GPULocation eLocation = GPU_LOCATION_FASTMEM);
 
 	void InitSize(GFXDevice* pDevice, const void* const pIndices, uint32 uSize, uint32 uCount, bool bStatic = true, GPULocation eLocation = GPU_LOCATION_FASTMEM);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void SetContents(GFXDevice* pDevice, const void* const pData, uint32 uIndexCount = 0);
 

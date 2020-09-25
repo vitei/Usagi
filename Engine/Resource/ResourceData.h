@@ -87,7 +87,7 @@ public:
 				// Ensure it's not being used elsewhere
 				// FIXME: There is a memory leak going on so can't check in this assert yet
 				//ASSERT((*it)->resource.unique());
-				const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
+				const_cast<ResourceBase*>(val->resource.get())->Cleanup(pDevice);
 				vdelete val->resource.get();
 				val->resource.reset();
 				it.RemoveElement();
@@ -100,7 +100,7 @@ public:
 		for (ResourceDynamicIter it = m_resources.BeginDynamic(); !it.IsEnd(); ++it)
 		{
 			ResourceInfo* val = *it;
-			const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
+			const_cast<ResourceBase*>(val->resource.get())->Cleanup(pDevice);
 			vdelete val->resource.get();
 			val->resource.reset();
 			it.RemoveElement();

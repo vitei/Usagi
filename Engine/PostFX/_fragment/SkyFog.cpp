@@ -125,12 +125,12 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	m_linearSampl = pDevice->GetSampler(colorSamp);
 }
 
-void SkyFog::CleanUp(GFXDevice* pDevice)
+void SkyFog::Cleanup(GFXDevice* pDevice)
 {
 	m_materialFade.Cleanup(pDevice);
 	m_materialNoFade.Cleanup(pDevice);
-	m_vertexBuffer.CleanUp(pDevice);
-	m_indexBuffer.CleanUp(pDevice);
+	m_vertexBuffer.Cleanup(pDevice);
+	m_indexBuffer.Cleanup(pDevice);
 	m_bValid = false;
 }
 

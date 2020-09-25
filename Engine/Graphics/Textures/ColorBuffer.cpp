@@ -55,9 +55,9 @@ void ColorBuffer::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, ui
 	m_platform.InitArray(pDevice, 0, uWidth, uHeight, uSlices, eFormat, eSamples, uFlags);
 }
 
-void ColorBuffer::CleanUp(GFXDevice* pDevice)
+void ColorBuffer::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 void ColorBuffer::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)

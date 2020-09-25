@@ -21,7 +21,7 @@ public:
 	virtual ~DirLight();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 
 	void UpdateCascade(const usg::Camera& camera, uint32 uContextId);
 	void GPUUpdate(GFXDevice* pDevice) override;

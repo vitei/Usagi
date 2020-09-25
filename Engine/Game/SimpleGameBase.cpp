@@ -83,12 +83,12 @@ namespace usg
 		pDevice->FinishedStaticLoad();
 	}
 
-	void SimpleGameBase::CleanUp(usg::GFXDevice* pDevice)
+	void SimpleGameBase::Cleanup(usg::GFXDevice* pDevice)
 	{
 		if (m_pActiveMode)
 		{
 			pDevice->WaitIdle();
-			m_pActiveMode->CleanUp(pDevice);
+			m_pActiveMode->Cleanup(pDevice);
 			vdelete m_pActiveMode;
 			m_pActiveMode = nullptr;
 
@@ -99,8 +99,8 @@ namespace usg
 
 
 		usg::Fader::Inst()->CleanUpDeviceData(pDevice);
-		usg::Fader::CleanUp();
-		m_debugRender.CleanUp(pDevice);
+		usg::Fader::Cleanup();
+		m_debugRender.Cleanup(pDevice);
 	}
 
 	//----------------------------------------------------
@@ -108,7 +108,7 @@ namespace usg
 	{
 		if (m_pActiveMode && !PauseCurrentMode())
 		{
-			m_pActiveMode->CleanUp(pDevice);
+			m_pActiveMode->Cleanup(pDevice);
 		}
 		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode(), PauseCurrentMode());
 #ifdef USE_THREADED_LOADING

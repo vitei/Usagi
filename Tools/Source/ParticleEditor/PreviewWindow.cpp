@@ -118,17 +118,17 @@ void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 	m_postFX.EndScene();
 }
 
-void PreviewWindow::CleanUp(usg::GFXDevice* pDevice)
+void PreviewWindow::Cleanup(usg::GFXDevice* pDevice)
 {
 	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
 	m_pDirLight = nullptr;
-	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
-	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
-	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
-	m_previewModel.CleanUp(pDevice); 
+	m_previewButtons[BUTTON_PLAY].Cleanup(pDevice);
+	m_previewButtons[BUTTON_PAUSE].Cleanup(pDevice);
+	m_previewButtons[BUTTON_RESTART].Cleanup(pDevice);
+	m_previewModel.Cleanup(pDevice); 
 	m_scene.DeleteViewContext(m_pSceneCtxt);
-	m_postFX.CleanUp(pDevice);
-	m_texture.CleanUp(pDevice);
+	m_postFX.Cleanup(pDevice);
+	m_texture.Cleanup(pDevice);
 	m_scene.Cleanup(pDevice);
 
 }

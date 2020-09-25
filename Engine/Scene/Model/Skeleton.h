@@ -25,7 +25,7 @@ public:
 	~Skeleton();
 
 	bool Load( GFXDevice* pDevice, Scene* pScene, Model* pModel, bool bAutoTransform);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetInUse(Scene* pScene, Model* pModel, bool bInUse);
 	// TODO: Loading and processing of animations
 	//void SetAnimation()

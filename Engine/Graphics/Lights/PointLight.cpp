@@ -112,18 +112,18 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 }
 
 
-void PointLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void PointLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		vdelete m_pShadow;
 		m_pShadow = nullptr;
 	}
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
-	Light::CleanUp(pDevice, pScene);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
+	Light::Cleanup(pDevice, pScene);
 }
 
 

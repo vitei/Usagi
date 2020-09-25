@@ -22,7 +22,7 @@ namespace usg
 		~TextDrawer();
 
 		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }
 		bool Draw(GFXContext* context, bool b3D);

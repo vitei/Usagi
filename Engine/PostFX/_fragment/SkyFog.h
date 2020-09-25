@@ -28,7 +28,7 @@ public:
 	virtual ~SkyFog();
 
 	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice) override;
+	virtual void Cleanup(GFXDevice* pDevice) override;
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetTexture(GFXDevice* pDevice, const TextureHndl& skyTex, const TextureHndl& linDepth);

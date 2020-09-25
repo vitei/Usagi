@@ -106,13 +106,13 @@ void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void SpotLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void SpotLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		m_pShadow = nullptr;
 	}

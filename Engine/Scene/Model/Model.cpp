@@ -160,26 +160,26 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const
 }
 
 
-void Model::CleanUp(GFXDevice* pDevice)
+void Model::Cleanup(GFXDevice* pDevice)
 {
-	m_skinnedBones.CleanUp(pDevice);
-	m_staticBones.CleanUp(pDevice);
+	m_skinnedBones.Cleanup(pDevice);
+	m_staticBones.Cleanup(pDevice);
 	if (m_pSkeleton)
 	{
-		m_pSkeleton->CleanUp(pDevice);
+		m_pSkeleton->Cleanup(pDevice);
 	}
 
 	for (uint32 i = 0; i < m_uMeshCount; i++)
 	{
-		m_meshArray[i]->CleanUp(pDevice);
-		m_depthMeshArray[i]->CleanUp(pDevice);
+		m_meshArray[i]->Cleanup(pDevice);
+		m_depthMeshArray[i]->Cleanup(pDevice);
 	}
 
 	if (m_pOverrideMaterials)
 	{
 		for (uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++)
 		{
-			m_pOverrideMaterials[uMesh].customFX.CleanUp(pDevice);
+			m_pOverrideMaterials[uMesh].customFX.Cleanup(pDevice);
 		}
 	}
 

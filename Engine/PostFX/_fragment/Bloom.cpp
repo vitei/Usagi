@@ -193,35 +193,35 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 }
 
 
-void Bloom::CleanUp(GFXDevice* pDevice)
+void Bloom::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < PASS_COUNT; i++)
 	{
-		m_descriptors[i].CleanUp(pDevice);
+		m_descriptors[i].Cleanup(pDevice);
 	}
 
 	for (uint32 i = 0; i < PASS_COUNT; i++)
 	{
-		m_constants[i].CleanUp(pDevice);
+		m_constants[i].Cleanup(pDevice);
 	}
 
 	for (auto& it : m_bloomTex)
 	{
-		it.CleanUp(pDevice);
+		it.Cleanup(pDevice);
 	}
 
 	for (auto& it : m_bloomRT)
 	{
-		it.CleanUp(pDevice);
+		it.Cleanup(pDevice);
 	}
 
-	m_scaledSceneTex.CleanUp(pDevice);
-	m_brightPassTex.CleanUp(pDevice);
-	m_bloomSourceTex.CleanUp(pDevice);
+	m_scaledSceneTex.Cleanup(pDevice);
+	m_brightPassTex.Cleanup(pDevice);
+	m_bloomSourceTex.Cleanup(pDevice);
 
-	m_scaledSceneRT.CleanUp(pDevice);
-	m_brightPassRT.CleanUp(pDevice);
-	m_bloomSourceRT.CleanUp(pDevice);
+	m_scaledSceneRT.Cleanup(pDevice);
+	m_brightPassRT.Cleanup(pDevice);
+	m_bloomSourceRT.Cleanup(pDevice);
 }
 
 void Bloom::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)

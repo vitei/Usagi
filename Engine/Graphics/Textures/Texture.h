@@ -27,7 +27,7 @@ public:
 	void SetRawData(GFXDevice* pDevice, GFXContext* pContext, void* pData) { m_platform.SetRawData(pDevice, pContext, pData); }
 	static bool FileExists(const char* szFileName) { return Texture_ps::FileExists(szFileName); }
 
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	Texture_ps&       GetPlatform()       { return m_platform; }
 	const Texture_ps& GetPlatform() const { return m_platform; }

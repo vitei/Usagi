@@ -8,7 +8,7 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 
 
-const int g_allocGroupSize = 128;
+const int g_allocGroupSize = 64;
 
 namespace usg {
 
@@ -48,12 +48,37 @@ namespace usg {
 
 	}
 
+
+	void DescriptorSetLayout_ps::UpdateFreeList(GFXDevice* pDevice, DescriptorSetLayout_ps::Allocator& allocator)
+	{
+		uint32 uFrame = (int)pDevice->GetFrameCount();
+		uint32 uClearFrame = uFrame > GFX_NUM_DYN_BUFF ? uFrame - GFX_NUM_DYN_BUFF : UINT_MAX;
+
+		while (!allocator.pendingDeleteFrames.empty())
+		{
+			if (allocator.pendingDeleteFrames.front() < uClearFrame || allocator.pendingDeleteFrames.front() > uFrame)
+			{
+				allocator.pendingDeleteFrames.pop();
+				ASSERT(allocator.uAllocations > 0);
+				allocator.uAllocations--;
+			}
+			else
+			{
+				return;
+			}
+		}
+	}
+
 	DescriptorAlloc_ps DescriptorSetLayout_ps::AllocDescriptorSet(GFXDevice* pDevice)
 	{
 		VkResult eResult;
 		uint32 uAllocId = USG_INVALID_ID;
 		for (uint32 i = 0; i < m_allocators.size(); i++)
 		{
+			if (m_allocators[i].pendingDeleteFrames.size() > 0)
+			{
+				UpdateFreeList(pDevice, m_allocators[i]);
+			}
 			if (m_allocators[i].uAllocations < g_allocGroupSize)
 			{
 				uAllocId = i;
@@ -105,8 +130,7 @@ namespace usg {
 			pDevice->GetPlatform().ReqDestroyDescriptorSet(pAlloc->pool, descAlloc.descSet);
 			descAlloc.uPoolIndex = USG_INVALID_ID;
 			descAlloc.descSet = nullptr;
-			ASSERT(pAlloc->uAllocations > 0);
-			pAlloc->uAllocations--;
+			pAlloc->pendingDeleteFrames.push( pDevice->GetFrameCount() );
 		}
 	}
 

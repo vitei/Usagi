@@ -113,11 +113,11 @@ namespace usg
 		InitBase(szName);
 	}
 
-	void GUIButton::CleanUp(GFXDevice* pDevice)
+	void GUIButton::Cleanup(GFXDevice* pDevice)
 	{
 		if (m_bTexDescValid)
 		{
-			m_descriptor.CleanUp(pDevice);
+			m_descriptor.Cleanup(pDevice);
 		}
 	}
 
@@ -601,9 +601,9 @@ namespace usg
 		m_vScale = vSize;
 	}
 
-	void GUITexture::CleanUp(GFXDevice* pDevice)
+	void GUITexture::Cleanup(GFXDevice* pDevice)
 	{
-		m_descriptor.CleanUp(pDevice);
+		m_descriptor.Cleanup(pDevice);
 	}
 
 	void GUITexture::SetUVs(Vector2f vUVMin, Vector2f vUVMax)

@@ -38,7 +38,7 @@ public:
 	void			Init(GFXDevice* pDevice, Scene* pParent);
 	void			InitShadowCascade(GFXDevice* pDevice, uint32 uLayers);
 	void			SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution);
-	void			CleanUp(GFXDevice* pDevice);
+	void			Cleanup(GFXDevice* pDevice);
 	void			Update(float fDelta, uint32 uFrame);
 	void			GPUUpdate(GFXDevice* pDevice);
 	void			GlobalShadowRender(GFXContext* pContext, Scene* pScene);
@@ -90,19 +90,19 @@ private:
 			ASSERT(m_freeLights.empty());
 		}
 
-		void CleanUp(GFXDevice* pDevice, Scene* pScene)
+		void Cleanup(GFXDevice* pDevice, Scene* pScene)
 		{
 			ASSERT(m_allocatedLights.empty());
 			for (auto&& it : m_freeLights)
 			{
-				it->CleanUp(pDevice, pScene);
+				it->Cleanup(pDevice, pScene);
 				vdelete it;
 				it = nullptr;
 			}
 			m_freeLights.clear();
 			for (auto&& it : m_allocatedLights)
 			{
-				it->CleanUp(pDevice, pScene);
+				it->Cleanup(pDevice, pScene);
 				vdelete it;
 				it = nullptr;
 			}

@@ -142,7 +142,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass)
 {
-	CleanUp(pDevice);
+	Cleanup(pDevice);
 	m_fbCreateInfo.renderPass = renderPass.GetContents()->GetPass();
 
 	VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &m_fbCreateInfo, NULL, &m_framebuffer);
@@ -192,7 +192,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 }
 
 
-void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
+void RenderTarget_ps::Cleanup(GFXDevice* pDevice)
 {
 	FreeFramebuffers(pDevice);
 }

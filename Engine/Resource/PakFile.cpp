@@ -141,7 +141,7 @@ namespace usg
 		return nullptr;
 	}
 
-	void PakFile::CleanUp(GFXDevice* pDevice)
+	void PakFile::Cleanup(GFXDevice* pDevice)
 	{
 
 	}

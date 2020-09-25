@@ -31,7 +31,7 @@ public:
 	void InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices);
 	void InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices);
 	void InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	bool Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation);

@@ -21,7 +21,7 @@ public:
 	virtual ~PostEffect();
 
 	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst) {}
-	virtual void CleanUp(GFXDevice* pDevice) {}
+	virtual void Cleanup(GFXDevice* pDevice) {}
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) {}
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
 	virtual void Update(Scene* pScene, float fElapsed) {}

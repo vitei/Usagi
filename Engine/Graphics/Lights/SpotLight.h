@@ -28,7 +28,7 @@ public:
 	virtual ~SpotLight(void);
 
 	virtual void	Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	virtual void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	virtual void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 	virtual void	SetPosition(const Vector4f &position);
 	virtual void 	SetDirection(const Vector4f &direction);
 	void 	SetOuterCutoff(float fOuterCutoff);

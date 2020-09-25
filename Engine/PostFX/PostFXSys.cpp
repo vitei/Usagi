@@ -69,11 +69,11 @@ void PostFXSys::Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, 
 	m_platform.Init(this, pResource, pDevice, uInitFlags, uWidth, uHeight);
 }
 
-void PostFXSys::CleanUp(GFXDevice* pDevice)
+void PostFXSys::Cleanup(GFXDevice* pDevice)
 {
-	m_fullScreenIB.CleanUp(pDevice);
-	m_fullScreenVB.CleanUp(pDevice);
-	m_platform.CleanUp(pDevice);
+	m_fullScreenIB.Cleanup(pDevice);
+	m_fullScreenVB.Cleanup(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)

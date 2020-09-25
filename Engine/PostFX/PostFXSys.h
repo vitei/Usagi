@@ -46,7 +46,7 @@ public:
 	~PostFXSys();
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void Update(Scene* pScene, float fElapsed) { m_platform.Update(pScene, fElapsed); }
 	void UpdateGPU(GFXDevice* pDevice) { m_platform.UpdateGPU(pDevice); }

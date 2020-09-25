@@ -32,7 +32,7 @@ public:
 
 	virtual void	Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow);
 
-	virtual void	CleanUp(GFXDevice* pDevice, Scene* pScene) {};
+	virtual void	Cleanup(GFXDevice* pDevice, Scene* pScene) {};
 
 	void	SetDiffuse(const Color &diffuse);
 	void	SetAmbient(const Color& ambient);

@@ -93,9 +93,9 @@ namespace usg
 		m_bufferValid = true;
 	}
 
-	void TextDrawer::CleanUp(GFXDevice* pDevice)
+	void TextDrawer::Cleanup(GFXDevice* pDevice)
 	{
-		m_charVerts.CleanUp(pDevice);
+		m_charVerts.Cleanup(pDevice);
 		m_bufferValid = false;
 	}
 
