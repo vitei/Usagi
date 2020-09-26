@@ -219,11 +219,11 @@ int main(int argc, char *argv[])
 				}
 				if ((*it)["tesc"])
 				{
-					def.prog[(uint32)usg::ShaderType::GS] = (*it)["tesc"].as<std::string>();
+					def.prog[(uint32)usg::ShaderType::TC] = (*it)["tesc"].as<std::string>();
 				}
 				if ((*it)["tese"])
 				{
-					def.prog[(uint32)usg::ShaderType::GS] = (*it)["tese"].as<std::string>();
+					def.prog[(uint32)usg::ShaderType::TE] = (*it)["tese"].as<std::string>();
 				}
 				def.sets.push_back(set);
 			}

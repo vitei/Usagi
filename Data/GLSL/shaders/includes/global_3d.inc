@@ -38,6 +38,8 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 	vec4	vHemGroundColor;
 	vec4	vHemisphereDir;
 	vec4	vShadowColor;
+	vec4	vFrustumPlanes[6];
+	vec2	vViewportDim;
 	float   fTargetAspect;
 };
 #elif defined(OMNI_DEPTH)

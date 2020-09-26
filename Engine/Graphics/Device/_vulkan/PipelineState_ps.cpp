@@ -66,6 +66,10 @@ namespace usg
 		multisampleState.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleState.rasterizationSamples = g_sampleCounts[decl.eSampleCount];
 
+		VkPipelineTessellationStateCreateInfo tesselationState = {};
+		tesselationState.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+		tesselationState.patchControlPoints = decl.uPatchControlPoints;
+
 
 		const Effect* pEffect = decl.pEffect.get();
 
@@ -102,6 +106,11 @@ namespace usg
 		pipelineCreateInfo.pViewportState = &vp;	// Making this a dynamicall updated bit of info
 		pipelineCreateInfo.pDepthStencilState = &decl.depth.GetContents()->GetCreateInfo();
 		pipelineCreateInfo.pDynamicState = &dynamic_info;
+
+		if (decl.uPatchControlPoints)
+		{
+			pipelineCreateInfo.pTessellationState = &tesselationState;
+		}
 		
 		VkResult result = vkCreateGraphicsPipelines(pDevice->GetPlatform().GetVKDevice(), pDevice->GetPlatform().GetPipelineCache(), 1, &pipelineCreateInfo, nullptr, &m_pipeline);
 		ASSERT(result == VK_SUCCESS);

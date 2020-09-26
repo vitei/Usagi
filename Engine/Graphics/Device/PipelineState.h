@@ -22,6 +22,7 @@ namespace usg {
 		DepthStencilStateHndl		depth;
 		PrimitiveType				ePrimType;
 		SampleCount					eSampleCount;
+		uint32						uPatchControlPoints;
 
 		EffectHndl 					pEffect;
 		InputBindingHndl			pBinding;
@@ -35,7 +36,8 @@ namespace usg {
 		{
 			return (rhs.uCmpValue == uCmpValue 
 				&& renderPass == rhs.renderPass
-				&& pEffect == rhs.pEffect);
+				&& pEffect == rhs.pEffect
+				&& uPatchControlPoints == rhs.uPatchControlPoints);
 		}
 	};
 

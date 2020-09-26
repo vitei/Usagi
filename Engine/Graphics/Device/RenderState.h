@@ -59,6 +59,8 @@ public:
 	bool			bUseDepthBias;
 	bool			bMultisample;
 	bool			bWireframe;
+	// 0 indicates no tessellation
+	uint32			uPatchControlPoints;	
 };
 
 

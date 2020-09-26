@@ -44,6 +44,7 @@ public:
 	float GetDistance() const { return m_fDistance; }
 
 	float SignedDistance(const Vector3f &v) const;
+	Vector4f GetNormalAndDistanceV4() const { return Vector4f(m_normal, m_fDistance); }
 	
 private:
 	// Normal of the plane

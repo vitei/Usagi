@@ -159,6 +159,7 @@ RasterizerStateDecl::RasterizerStateDecl()
 	bUseDepthBias = false;
 	bMultisample = false;
 	bWireframe = false;
+	uPatchControlPoints = 0;
 }
 
 RasterizerStateDecl::~RasterizerStateDecl()
@@ -181,7 +182,8 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 
 	return ( eCullFace == rhs.eCullFace
 		&& bMultisample == rhs.bMultisample
-		&& bWireframe == rhs.bWireframe );
+		&& bWireframe == rhs.bWireframe
+		&& uPatchControlPoints == rhs.uPatchControlPoints );
 }
 
 RenderPassDecl::Attachment::Attachment()

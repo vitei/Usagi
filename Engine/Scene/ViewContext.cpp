@@ -59,6 +59,8 @@ namespace usg {
 		Vector4f	vHemGroundColor;
 		Vector4f	vHemisphereDir;
 		Vector4f	vShadowColor;
+		Vector4f	vFrustumPlanes[6];
+		Vector2f	vViewportDim;
 		float		fAspect;
 	};
 
@@ -80,6 +82,8 @@ namespace usg {
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemGroundColor,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemisphereDir,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vShadowColor,		CT_VECTOR_4, 1),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, vFrustumPlanes,	CT_VECTOR_4, 6),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, vViewportDim,		CT_VECTOR_2, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, fAspect,			CT_FLOAT, 1),
 		SHADER_CONSTANT_END()
 	};
@@ -337,10 +341,16 @@ namespace usg {
 			if (m_pImpl->pPostFXSys)
 			{
 				globalData->fAspect = m_pImpl->pPostFXSys->GetInitialRT()->GetWidth() / (float)m_pImpl->pPostFXSys->GetInitialRT()->GetHeight();
+				globalData->vViewportDim = Vector2f( (float)m_pImpl->pPostFXSys->GetFinalTargetWidth(), (float)m_pImpl->pPostFXSys->GetFinalTargetHeight() );
 			}
 			else
 			{
 				globalData->fAspect = 1.0f;
+			}
+			Frustum frustum = pCamera->GetFrustum();
+			for(uint32 uPlane = 0; uPlane < 6; uPlane++)
+			{
+				globalData->vFrustumPlanes[i] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
 			}
 			m_pImpl->globalConstants[i].Unlock();
 			m_pImpl->globalConstants[i].UpdateData(pDevice);
