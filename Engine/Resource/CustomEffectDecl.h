@@ -27,6 +27,7 @@ namespace usg
 			char    texName[64];
 			uint32	eTexType;
 			uint32	uIndex;
+			uint32	uShaderSets;
 		};
 
 		struct Attribute

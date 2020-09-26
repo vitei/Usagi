@@ -343,6 +343,17 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 		{
 			sampler.eTexType = usg::TD_TEXTURE2D;
 		}
+
+		if ((*it)["shaderType"])
+		{
+			std::string type = (*it)["shaderType"].as<std::string>();
+			sampler.uShaderSets = GetShaderType(type.c_str());
+		}
+		else
+		{
+			sampler.uShaderSets = usg::SHADER_FLAG_PIXEL;
+		}
+
 		m_samplers.push_back(sampler);
 	}
 
@@ -365,6 +376,10 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 		{
 			std::string type = (*setIt)["shaderType"].as<std::string>();
 			setData.set.uShaderSets = GetShaderType(type.c_str());
+		}
+		else
+		{
+			FATAL_RELEASE(false, "Missing shader message");
 		}
 		setData.set.uBinding = GetBufferMapping((*setIt)["binding"].as<std::string>().c_str());
 		YAML::Node variableDefs = (*setIt)["Variables"];

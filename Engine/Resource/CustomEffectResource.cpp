@@ -159,7 +159,7 @@ namespace usg
 		{
 			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			pDescDecl->uCount = 1;
-			pDescDecl->shaderType = usg::SHADER_FLAG_PIXEL;
+			pDescDecl->shaderType = (ShaderTypeFlags)m_pSamplers[i].uShaderSets;
 			pDescDecl->uBinding = m_pSamplers[i].uIndex;
 			pDescDecl++;
 		}
