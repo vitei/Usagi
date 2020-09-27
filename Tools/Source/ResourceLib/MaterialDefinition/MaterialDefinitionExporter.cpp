@@ -819,13 +819,20 @@ void MaterialDefinitionExporter::InitAutomatedCode()
 
 	char buffer[512];
 
-	for (const auto& sampler : m_samplers)
+	for (uint32 uShaderType = 0; uShaderType < (uint32)usg::ShaderType::COUNT; uShaderType++)
 	{
-		// TODO: When the custom effects are fully integrated we can start naming these
-		sprintf_s(buffer, sizeof(buffer), "SAMPLER_LOC(1, %d) uniform %s sampler%d;\n", sampler.uIndex, GetTextureMapping(sampler.eTexType), sampler.uIndex);
+		for (const auto& sampler : m_samplers)
+		{
+			if(sampler.uShaderSets & g_shaderFlagMap[uShaderType])
+			{
+				// TODO: When the custom effects are fully integrated we can start naming these
+				sprintf_s(buffer, sizeof(buffer), "SAMPLER_LOC(1, %d) uniform %s sampler%d;\n", sampler.uIndex, GetTextureMapping(sampler.eTexType), sampler.uIndex);
 
-		m_automatedCode[(uint32)usg::ShaderType::PS] += buffer;
+				m_automatedCode[uShaderType] += buffer;
+			}
+		}
 	}
+
 	m_automatedCode[(uint32)usg::ShaderType::VS] += "\n";
 
 	for (const auto& attrib : m_attributes)
