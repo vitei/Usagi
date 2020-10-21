@@ -91,7 +91,7 @@ Website: https://github.com/g-truc/gli
 Source Location: Engine\ThirdParty\gli  
 Licensed under: [Happy Bunny license](https://github.com/g-truc/gli/blob/master/manual.md#section0) 
 
-** Adaptive Screen Space Ambient Occlusion ** (source)  
+**Adaptive Screen Space Ambient Occlusion** (source)  
 Original Authors: Filip Strugar (Intel)  
 Website: https://github.com/GameTechDev/ASSAO  
 Source Location: Data\GLSL\shaders\ASSAO  
