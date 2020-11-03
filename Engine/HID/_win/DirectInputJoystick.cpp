@@ -94,7 +94,11 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 	{
 		m_bConnected = false;
 		m_bIsGamepad = pInput->IsGamepad(m_uInputId);
-
+		
+		if (m_bIsGamepad)
+		{
+			m_uCaps |= CAP_GAMEPAD;
+		}
 
 		if (m_pDevice)
 		{
@@ -120,20 +124,29 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			return;
 		}
 
-		DIDEVCAPS diCaps;
-
+		m_pDevice->Acquire();
 		SetDeadzone(0.05f);
 
-		if ( m_pDevice->GetCapabilities(&diCaps) >= 0 )
+		DIDEVCAPS diCaps;
+		diCaps.dwSize = sizeof(DIDEVCAPS);
+		HRESULT hr = m_pDevice->GetCapabilities(&diCaps);
+		if ( !FAILED(hr) )
 		{
+			if (diCaps.dwAxes > 1)
+			{
+				m_uCaps |= CAP_LEFT_STICK;
+			}
 			if (diCaps.dwAxes > 3)
 			{
 				m_uCaps |= CAP_RIGHT_STICK;
 			}
+			if (diCaps.dwPOVs > 0)
+			{
+				m_uCaps |= CAP_POV;
+			}
 			m_uNumAxes = diCaps.dwAxes;
 			m_uNumButtons = diCaps.dwButtons;
 		}
-		m_pDevice->Acquire();
 		m_bConnected = true;
 	}
 }

@@ -47,7 +47,9 @@ enum GamepadCaps
 	CAP_ACCELEROMETER = (1 << 1),
 	CAP_DUAL_HANDED = (1 << 2),
 	CAP_LEFT_STICK = (1<<3),
-	CAP_RIGHT_STICK = (1<<4)
+	CAP_RIGHT_STICK = (1<<4),
+	CAP_GAMEPAD = (1<<5),
+	CAP_POV = (1<<6)
 };
 
 }
