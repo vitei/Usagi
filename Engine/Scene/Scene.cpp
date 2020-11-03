@@ -23,7 +23,7 @@
 #include "Engine/Scene/Scene.h"
 #include <array>
 
-const int RENDER_GROUP_POOL_SIZE = 500;
+const int RENDER_GROUP_POOL_SIZE = 1000;
 const int TRANSFORM_NODE_POOL_SIZE = 1000;
 
 const int DEFAULT_VIEW_CONTEXTS = 2;
