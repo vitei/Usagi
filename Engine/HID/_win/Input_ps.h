@@ -11,9 +11,18 @@
 #include OS_HEADER(Engine/HID, XInputPad.h)
 #include OS_HEADER(Engine/HID, VirtualGamepad.h)
 #include OS_HEADER(Engine/HID, Keyboard_ps.h)
-#include OS_HEADER(Engine/HID, Mouse_ps.h)
 #include OS_HEADER(Engine/HID, DirectInput.h)
 #include OS_HEADER(Engine/HID, DirectInputJoystick.h)
+
+//#define USE_DIRECT_INPUT
+
+#ifdef USE_DIRECT_INPUT
+#include OS_HEADER(Engine/HID, DirectInputMouse.h)
+#include OS_HEADER(Engine/HID, DirectInputKeyboard.h)
+#else
+#include OS_HEADER(Engine/HID, Mouse_ps.h)
+#include OS_HEADER(Engine/HID, Keyboard_ps.h)
+#endif
 
 namespace usg{
 
@@ -62,9 +71,15 @@ private:
 	};
 
 	VirtualGamepad	m_virtualGamepad;
-	Keyboard_ps		m_keyboard;
 	// TODO: Have a mouse per display
+
+#ifdef USE_DIRECT_INPUT
+	DirectInputMouse m_mouse;
+	DirectInputKeyboard m_keyboard;
+#else
 	Mouse_ps		m_mouse;
+	Keyboard_ps		m_keyboard;
+#endif
 
 	XInputPad		m_xboxPad;
 	DirectInput*	m_pDirectInput;

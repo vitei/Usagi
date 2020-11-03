@@ -55,8 +55,14 @@ void Input_ps::Init()
 	{
 		m_pJoystick->Init(m_pDirectInput, 0);
 	}
+
+#ifdef USE_DIRECT_INPUT
+	m_keyboard.Init(this, m_pDirectInput);
+	m_mouse.Init(m_pDirectInput);
+#else
 	m_keyboard.Init(this);
 	m_mouse.Init(this);
+#endif
 	m_virtualGamepad.Init(&m_keyboard);
 	m_xboxPad.Init(0);
 }
@@ -122,7 +128,9 @@ void Input_ps::RegisterInputChar(char16 uChar)
 
 void Input_ps::RegisterHwnd(uint32 uDisplay, HWND hwnd)
 {
+#ifndef USE_DIRECT_INPUT
 	m_mouse.SetHWND(hwnd);
+#endif
 }
 
 
