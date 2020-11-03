@@ -12,7 +12,8 @@ enum AxisType
     AXIS_TYPE_ABSOLUTE = 0;
     AXIS_TYPE_POSITIVE = 1;
     AXIS_TYPE_NEGATIVE = 2;
-    AXIS_TYPE_NONE = 3;
+    AXIS_TYPE_ABSOLUTE_TO_POSITIVE = 3;
+    AXIS_TYPE_NONE = 4;
 };
 
 enum OutputType

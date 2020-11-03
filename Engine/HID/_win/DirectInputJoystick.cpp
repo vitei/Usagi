@@ -37,7 +37,7 @@ namespace usg{
 		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
 		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
 		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_RZ, 1.0f },
-		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_Z, -1.0f },
+		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_SLIDER(0), -1.0f },
 		{ GAMEPAD_AXIS_NONE,		0 }
 	};
 

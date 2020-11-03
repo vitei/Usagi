@@ -149,6 +149,8 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 				return ( fOutput > m_boolDeadZone );
 			case AXIS_TYPE_NEGATIVE:
 				return ( fOutput < -m_boolDeadZone );
+			case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
+				return (fOutput > m_boolDeadZone);
 			default:
 				ASSERT(false);
 			}
@@ -194,6 +196,7 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 						return fOutput;
 					}
 				case AXIS_TYPE_POSITIVE:
+				case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
 					return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
 				case AXIS_TYPE_NEGATIVE:
 					return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
@@ -225,6 +228,9 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 				break;
 			case AXIS_TYPE_NEGATIVE:
 				fOutput = Math::Abs(Math::Clamp( fOutput, -1.0f, 0.0f ));
+				break;
+			case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
+				fOutput = ((fOutput * fValue) + 1.0f)/2.0f;
 				break;
 			default:
 				ASSERT(false);
