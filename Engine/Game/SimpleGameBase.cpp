@@ -278,6 +278,7 @@ namespace usg
 				m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
 			}
 			m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+			m_pInternalData->m_pInitThread->NotifyResize(pDevice, 0, uWidth, uHeight);
 		}
 		break;
 		case 'WMIN':

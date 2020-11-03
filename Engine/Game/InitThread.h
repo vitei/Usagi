@@ -23,6 +23,7 @@ namespace usg
 
 		void Init(usg::GFXDevice* pDevice, ModeLoadFunc fnLoad);
 		void SetNextMode(usg::Mode** ppLoadMode, uint32 uNextMode, bool bPauseMode);
+		void NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight);
 		virtual void Exec();
 		void Run();
 

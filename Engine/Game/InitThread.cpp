@@ -40,6 +40,14 @@ namespace usg
 		m_bPauseMode = bPauseMode;
 	}
 
+	void InitThread::NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight)
+	{
+		for (auto itr : m_pausedModes)
+		{
+			itr.second->NotifyResize(pDevice, uDisplay, uWidth, uHeight);
+		}
+	}
+
 	void InitThread::Run()
 	{
 		if (*m_ppLoadMode)
