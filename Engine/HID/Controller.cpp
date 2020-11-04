@@ -60,7 +60,6 @@ m_boolDeadZone(0.15f)
 	m_pGamepad = Input::GetGamepad(uGamepadId);
 	m_pKeyboard = Input::GetKeyboard();
 	m_pMouse = Input::GetMouse();
-	m_uDetails = 0;
 }
 
 Controller::~Controller(void)
@@ -70,11 +69,7 @@ Controller::~Controller(void)
 
 void Controller::ResetDetails()
 {
-	for(uint32 i=0; i<MAX_CONTROL_DETAILS; i++)
-	{
-		//m_details[i].Reset();
-	}
-	m_uDetails = 0;
+	m_details.clear();
 }
 
 void Controller::ClearMappingSet(MappingOutput* pOutputs, uint32 uCount)
@@ -89,7 +84,7 @@ void Controller::Update( float timeDelta )
 {
 	m_pGamepad = Input::GetGamepad(m_uGamepadId);	// Update so we can connect mid game
 	m_sinceLastFrame = timeDelta;
-	for(uint32 i=0; i<m_uDetails; i++)
+	for(memsize i=0; i<m_details.size(); i++)
 	{
 		ControllerDetail& detail = m_details[i];
 		MappingOutput* pOutput = detail.pResult;
@@ -124,8 +119,28 @@ void Controller::Update( float timeDelta )
 	}
 }
 
+bool Controller::IsToggleValid(ControllerDetail& detail)
+{
+	switch (detail.toggleType)
+	{
+		case INPUT_TYPE_NONE:
+			return true;
+		case INPUT_TYPE_KEY:
+			return detail.bReverseToggle != m_pKeyboard->GetKey( detail.uInputToggle );
+		case INPUT_TYPE_BUTTON: 
+			return detail.bReverseToggle != m_pGamepad->GetButtonDown( detail.uInputToggle, usg::BUTTON_STATE_HELD );
+		case INPUT_TYPE_MOUSE_BUTTON:
+			return detail.bReverseToggle != m_pMouse->GetButton( (MouseButton)detail.uInputToggle, BUTTON_STATE_HELD );
+		default:
+			ASSERT(false);
+			return false;
+	}
+}
+
 bool Controller::GetValueAsBool( ControllerDetail &detail )
 {
+	if (!IsToggleValid(detail))
+		return false;
 	// Default to false if the controller detail is unset
 	switch( detail.deviceType )
 	{
@@ -175,6 +190,9 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 
 float Controller::GetValueAsFloat( ControllerDetail &detail )
 {
+	if (!IsToggleValid(detail))
+		return 0.0f;
+
 	float fValue = detail.bReverse ? -1.0f : 1.0f;
 
 	if(detail.pResult->fStickyRate != 0.0f)
@@ -289,7 +307,7 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 
 bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& output, ButtonState eInputState)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult		= &output;
 	output.eOutput		= OUTPUT_TYPE_BOOL;
 	output.Clear();
@@ -299,12 +317,14 @@ bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& output, Butt
 	detail.uInputIdB	= GAMEPAD_BUTTON_NONE;
 	detail.eInputState  = eInputState;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 bool Controller::CreateKeyMapping(uint8 uKey, MappingOutput& output, ButtonState eInputState)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult = &output;
 	output.eOutput = OUTPUT_TYPE_BOOL;
 	output.Clear();
@@ -314,13 +334,15 @@ bool Controller::CreateKeyMapping(uint8 uKey, MappingOutput& output, ButtonState
 	detail.uInputIdB = 0;
 	detail.eInputState = eInputState;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 
 bool Controller::CreateMouseButtonMapping(MouseButton eButton, MappingOutput& output, ButtonState eInputState)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult = &output;
 	output.eOutput = OUTPUT_TYPE_BOOL;
 	output.Clear();
@@ -330,12 +352,14 @@ bool Controller::CreateMouseButtonMapping(MouseButton eButton, MappingOutput& ou
 	detail.uInputIdB = (uint32)MOUSE_BUTTON_NONE;
 	detail.eInputState = eInputState;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 bool Controller::CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOutput& output, float fStickyRate, bool bReverse)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult		= &output;
 	detail.pResult->fStickyRate = fStickyRate;
 	output.eOutput		= OUTPUT_TYPE_FLOAT;
@@ -347,12 +371,14 @@ bool Controller::CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOut
 	detail.uInputIdA	= uAxis;
 	detail.uInputIdB	= _GamepadAxis_count;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 bool Controller::CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &output, float fStickyRate, bool bReverse)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult = &output;
 	detail.pResult->fStickyRate = fStickyRate;
 	output.eOutput = OUTPUT_TYPE_FLOAT;
@@ -364,13 +390,15 @@ bool Controller::CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, Mapping
 	detail.uInputIdA = uAxis;
 	detail.uInputIdB = MOUSE_BUTTON_NONE;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 
 bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, MappingOutput& output )
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult		= &output;
 	output.eOutput		= OUTPUT_TYPE_BOOL;
 	output.Clear();
@@ -380,12 +408,14 @@ bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, Mappi
 	detail.uInputIdA	= uAxis;
 	detail.uInputIdB	= _GamepadAxis_count;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 bool Controller::CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton uButtonB, MappingOutput& output, float fStickyRate, bool bReverse)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult		= &output;
 	detail.pResult->fStickyRate = fStickyRate;
 	output.eOutput		= OUTPUT_TYPE_FLOAT;
@@ -398,12 +428,14 @@ bool Controller::CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton 
 	detail.uInputIdA	= uButtonA;
 	detail.uInputIdB	= uButtonB;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& output, float fStickyRate, bool bReverse)
 {
-	ControllerDetail& detail = GetControllerDetail();
+	ControllerDetail detail;
 	detail.pResult = &output;
 	detail.pResult->fStickyRate = fStickyRate;
 	output.eOutput = OUTPUT_TYPE_FLOAT;
@@ -416,16 +448,38 @@ bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& 
 	detail.uInputIdA = (uint32)uKeyA;
 	detail.uInputIdB = (uint32)uKeyB;
 
+	m_details.push_back(detail);
+
 	return true;
 }
 
 
-Controller::ControllerDetail& Controller::GetControllerDetail()
+void Controller::AddPadToggleToPrev(GamepadButton eButton, bool bReverseToggle)
 {
-	ASSERT(m_uDetails < MAX_CONTROL_DETAILS);
-	ControllerDetail& out = m_details[m_uDetails];
-	m_uDetails++;
-	return out;
+	memsize index = m_details.size();
+	ASSERT(index > 0);
+	m_details[index - 1].toggleType = INPUT_TYPE_BUTTON;
+	m_details[index - 1].uInputToggle = (uint32)eButton;
+	m_details[index - 1].bReverseToggle = bReverseToggle;
 }
+
+void Controller::AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle)
+{
+	memsize index = m_details.size();
+	ASSERT(index > 0);
+	m_details[index - 1].toggleType = INPUT_TYPE_MOUSE_BUTTON;
+	m_details[index - 1].uInputToggle = (uint32)eButton;
+	m_details[index - 1].bReverseToggle = bReverseToggle;
+}
+
+void Controller::AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle)
+{
+	memsize index = m_details.size();
+	ASSERT(index > 0);
+	m_details[index - 1].toggleType = INPUT_TYPE_KEY;
+	m_details[index - 1].uInputToggle = (uint32)uKey;
+	m_details[index - 1].bReverseToggle = bReverseToggle;
+}
+
 
 }

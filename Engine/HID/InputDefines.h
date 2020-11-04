@@ -27,7 +27,7 @@ enum SampleRate
 };
 
 
-enum KeyboardToggles
+enum KeyboardToggle
 {
 	KEYBOARD_TOGGLE_SHIFT = 0,
 	KEYBOARD_TOGGLE_CTRL,

@@ -210,6 +210,35 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 	}
 }
 
+bool DirectInputJoystick::IsPovInRange(DWORD povVal, DWORD targVal)
+{
+	const int povButtonRange = 2000;
+
+	if (targVal < povButtonRange)
+	{
+		if (povVal <= (targVal + povButtonRange))
+		{
+			return true;
+		}
+		DWORD remainder = povButtonRange - targVal;
+		DWORD wrap = 36000 - remainder;
+		if (povVal >= wrap)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (povVal >= (targVal - povButtonRange)
+			&& povVal <= (targVal + povButtonRange))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 {
 	deviceStateOut.uButtonsPrevDown = deviceStateOut.uButtonsDown;
@@ -298,6 +327,35 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 			deviceStateOut.fAxisValues[g_axisMappingJoy[i].uAbstractID] = GetAxis(js, i);
 
+		}
+
+		if (m_uCaps & CAP_POV)
+		{
+			if (js.rgdwPOV[0] & 0xf0000000)
+			{
+				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = -1.0f;
+			}
+			else
+			{
+				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = ((float)js.rgdwPOV[0])/100.f;
+
+				if(IsPovInRange(js.rgdwPOV[0], 0))
+				{
+					deviceStateOut.uButtonsDown = (1<<JOYSTICK_BUTTON_POV_UP);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 9000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_RIGHT);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 18000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_DOWN);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 27000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_LEFT);
+				}
+			}
 		}
 	}
 }

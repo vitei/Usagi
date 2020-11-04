@@ -29,6 +29,7 @@ public:
 private:
 	void SetDeadzone(float fDeadZone);
 	float GetAxis(DIJOYSTATE2& js, int iAxis);
+	bool IsPovInRange(DWORD povVal, DWORD targVal);
 	struct Range
 	{
 		long min;

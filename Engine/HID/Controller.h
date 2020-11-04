@@ -42,19 +42,25 @@ protected:
 		void Reset()
 		{
 			deviceType = INPUT_TYPE_NONE;
+			toggleType = INPUT_TYPE_NONE;
 			eInputState = BUTTON_STATE_PRESSED;
 			axisType = AXIS_TYPE_NONE;
 			bReverse = false;
+			bReverseToggle = false;
 			uInputIdA = USG_INVALID_ID;
 			uInputIdB = USG_INVALID_ID;
 		}
 		InputType		deviceType;		// The type of device, e.g. button, axis, etc
+		InputType		toggleType;
 		AxisType		axisType;
 		bool			bReverse;
+		bool			bUseToggle;
+		bool			bReverseToggle;
 
 		// Should only have two inputs when mapping a button pair onto an axis
 		uint32			uInputIdA;
 		uint32			uInputIdB;
+		uint32			uInputToggle;
 
 		ButtonState		eInputState;		// If we are looking for pressed, released or down input state.
 		MappingOutput*	pResult;
@@ -75,6 +81,10 @@ protected:
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
 
+	void AddPadToggleToPrev(GamepadButton eButton, bool bReverseToggle);
+	void AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle);
+	void AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle);
+
 	uint32	GetGamepadId() { return m_uGamepadId; }
 	Gamepad* GetGamepad() { return m_pGamepad; }
 
@@ -84,15 +94,15 @@ private:
 		MAX_CONTROL_DETAILS = 40
 	};
 
-	ControllerDetail& GetControllerDetail();
-	ControllerDetail	m_details[MAX_CONTROL_DETAILS];
-	uint32				m_uDetails;
-	Gamepad*			m_pGamepad;
-	Keyboard*			m_pKeyboard;
-	Mouse*				m_pMouse;
-	uint32				m_uGamepadId;
-	float32				m_boolDeadZone;
-	float32				m_sinceLastFrame;
+	bool IsToggleValid(ControllerDetail& detail);
+
+	vector<ControllerDetail> m_details;
+	Gamepad*				m_pGamepad;
+	Keyboard*				m_pKeyboard;
+	Mouse*					m_pMouse;
+	uint32					m_uGamepadId;
+	float32					m_boolDeadZone;
+	float32					m_sinceLastFrame;
 };
 
 }
