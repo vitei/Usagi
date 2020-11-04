@@ -63,6 +63,23 @@ message MeshCollider
 	required float fMeshScale = 8 [default = 1];
 }
 
+message HeightFieldCollider
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string szAsset = 1 [(nanopb).max_size = 64];
+	required float fHeightScale = 2 [default = 1.0];
+	required float fColumnScale = 3 [default = 1.0];
+	required float fRowScale = 4 [default = 1.0];
+	required uint32 uColumns = 5 [default = 1024];
+	required uint32 uRows = 6 [default = 1024];
+	required PhysicMaterial material = 7;
+	required Vector3f vCenter = 8;
+	required bool bIsTrigger = 9 [default = false];	// Doesn't really make sense it ever would be, but needed for templated code
+}
+
 message ConeCollider
 {
 	option (nanopb_msgopt).has_onactivate = true;
