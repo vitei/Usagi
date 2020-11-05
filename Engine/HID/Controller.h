@@ -87,6 +87,7 @@ protected:
 
 	uint32	GetGamepadId() { return m_uGamepadId; }
 	Gamepad* GetGamepad() { return m_pGamepad; }
+	void SetGamepad(uint32 uGamepadId);
 
 private:
 	enum

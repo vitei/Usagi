@@ -62,6 +62,12 @@ m_boolDeadZone(0.15f)
 	m_pMouse = Input::GetMouse();
 }
 
+void Controller::SetGamepad(uint32 uGamepadId)
+{
+	m_uGamepadId = uGamepadId;
+	m_pGamepad = Input::GetGamepad(uGamepadId);
+}
+
 Controller::~Controller(void)
 {
 }
