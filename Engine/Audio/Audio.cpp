@@ -19,8 +19,8 @@ namespace usg
 
 Audio::Audio():
 m_listeners(5, false),
-m_actors(128, false),
-m_sounds(256, false)
+m_actors(256, false),
+m_sounds(512, false)
 {
 	// Speaker angle values for stereo sound
 	// Wrapped version of right, turned into a negative
