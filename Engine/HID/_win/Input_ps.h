@@ -66,7 +66,6 @@ private:
 	
 	enum
 	{
-		MOUSE_BUTTON_COUNT = 3,
 		MAX_EXTERNAL_PADS = 4
 	};
 
@@ -92,8 +91,8 @@ private:
 	uint32		m_uInputChars;
 	bool		m_keysDown[KEYBOARD_KEY_COUNT];
 	bool		m_keysThisFrame[KEYBOARD_KEY_COUNT];
-	bool		m_mouseButtonsDown[MOUSE_BUTTON_COUNT];
-	bool		m_mouseButtonsThisFrame[MOUSE_BUTTON_COUNT];
+	bool		m_mouseButtonsDown[MOUSE_BUTTON_NONE];
+	bool		m_mouseButtonsThisFrame[MOUSE_BUTTON_NONE];
 };
 
 inline bool Input_ps::GetKeyDown(uint8 uKey) const
@@ -105,7 +104,7 @@ inline bool Input_ps::GetKeyDown(uint8 uKey) const
 
 inline bool	Input_ps::GetMouseButtonDown(uint32 uButton) const
 {
-	ASSERT(uButton<MOUSE_BUTTON_COUNT);
+	ASSERT(uButton< MOUSE_BUTTON_NONE);
 	return m_mouseButtonsDown[uButton] | m_mouseButtonsThisFrame[uButton];
 }
 

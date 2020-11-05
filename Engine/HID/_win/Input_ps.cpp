@@ -101,7 +101,7 @@ void Input_ps::Update(GFXDevice* pDevice)
 
 	m_mouseWheel = 0;
 	memset(m_keysThisFrame, 0, KEYBOARD_KEY_COUNT*sizeof(bool));
-	memset(m_mouseButtonsThisFrame, 0, MOUSE_BUTTON_COUNT*sizeof(bool));
+	memset(m_mouseButtonsThisFrame, 0, MOUSE_BUTTON_NONE *sizeof(bool));
 	m_uInputChars = 0;
 }
 
