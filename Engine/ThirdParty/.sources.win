@@ -2,6 +2,7 @@
 _win/*.cpp
 nanopb/*.c
 imgui/*.cpp
+eastl/source/*.cpp
 lua-5.3.2/src/*.c
 -:lua-5.3.2/src/liolib.c
 -:lua-5.3.2/src/loslib.c
