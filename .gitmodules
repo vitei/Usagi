@@ -1,10 +1,6 @@
 [submodule "Engine/ThirdParty/imgui"]
 	path = Engine/ThirdParty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "Engine/ThirdParty/EASTL"]
-	path = Engine/ThirdParty/EASTL
-	url = https://github.com/electronicarts/EASTL.git
-	branch = master
 [submodule "Engine/ThirdParty/yaml-cpp"]
 	path = Engine/ThirdParty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
