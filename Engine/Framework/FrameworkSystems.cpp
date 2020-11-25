@@ -310,9 +310,9 @@ namespace usg
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const DecreaseHealthEvent& decreaseHealth)
 			{
 				if (!inputs.localSim.Exists())
-					return;
+					return;	
 				AddDamage(inputs.self->id, outputs.health.Modify(),
-				          inputs.eventManager->handle, decreaseHealth.amount);
+				          inputs.eventManager->handle, decreaseHealth.amount, decreaseHealth.uDamageCauserTeam, decreaseHealth.iDamageCauserNUID);
 			}
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetHealthEvent& setHealth)
 			{

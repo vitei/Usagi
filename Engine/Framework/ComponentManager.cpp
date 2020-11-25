@@ -519,6 +519,16 @@ namespace usg
 				}
 			}
 
+			if (spawnParams.HasTeam())
+			{
+				Required<usg::TeamComponent> team;
+				m_componentLoadHandles.GetComponent(e, team);
+				if (team.IsValid())
+				{
+					team.Modify().uTeam = spawnParams.GetTeam();
+				}
+			}
+
 			ComponentLoadHandles handles;
 			FillComponentLoadHandles(handles, parent);
 			RecursivelyCallOnLoaded(e, handles);

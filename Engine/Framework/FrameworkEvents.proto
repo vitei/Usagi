@@ -10,6 +10,8 @@ message DecreaseHealthEvent
 	option (usagi_msg).doc_jp = "ヘルスを減らす";
 
 	required float amount = 1;
+	required sint64 iDamageCauserNUID = 2 [default = 0];
+	required uint32 uDamageCauserTeam = 3 [default = 0];
 }
 
 
