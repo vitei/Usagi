@@ -14,6 +14,7 @@
 
 #define DISABLE_SOUND 0
 
+
 namespace usg
 {
 
@@ -22,20 +23,9 @@ m_listeners(5, false),
 m_actors(256, false),
 m_sounds(512, false)
 {
-	// Speaker angle values for stereo sound
-	// Wrapped version of right, turned into a negative
-	m_speakerInfo.fSpeakerHorAngles[0] = -Math::pi - Math::pi_over_2;
-	m_speakerInfo.fSpeakerHorAngles[1] = -Math::pi_over_2;
-	m_speakerInfo.fSpeakerHorAngles[2] = Math::pi_over_2;
-	// Wrapped version of left turned into a positive
-	m_speakerInfo.fSpeakerHorAngles[3] = Math::pi + Math::pi_over_2;
+	SetChannelConfig(CHANNEL_CONFIG_HEADPHONES);
 
-	m_speakerInfo.uChannelIndex[0] = SOUND_CHANNEL_RIGHT;
-	m_speakerInfo.uChannelIndex[1] = SOUND_CHANNEL_LEFT;
-	m_speakerInfo.uChannelIndex[2] = SOUND_CHANNEL_RIGHT;
-	m_speakerInfo.uChannelIndex[3] = SOUND_CHANNEL_LEFT;
-
-	m_speakerInfo.uSpeakerValues = 4;	// Only supporting stereo sound at the moment
+	//m_speakerInfo.uSpeakerValues = 4;	// Only supporting stereo sound at the moment
 
 	for (uint32 i = 0; i < _AudioType_count; i++)
 	{
@@ -57,6 +47,79 @@ m_sounds(512, false)
 		DEBUG_PRINT("Mostly inner: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
 	}
 #endif
+}
+
+
+void Audio::SetChannelConfig(ChannelConfig eChannelConfig)
+{
+	m_speakerInfo.clear();
+	switch(eChannelConfig)
+	{
+	case CHANNEL_CONFIG_2_0:
+	case CHANNEL_CONFIG_2_1:
+	{
+		// Speaker angle values for stereo sound
+		// Wrapped version of right, turned into a negative
+		m_speakerInfo.resize(4);
+		m_speakerInfo[1] = SpeakerInfo( Math::DegToRad(-30.f), SOUND_CHANNEL_FRONT_LEFT);
+		m_speakerInfo[2] = SpeakerInfo(Math::DegToRad(30.f), SOUND_CHANNEL_FRONT_RIGHT);
+
+		break;
+	}
+	case CHANNEL_CONFIG_HEADPHONES:
+	{
+		// Speaker angle values for stereo sound
+		// Wrapped version of right, turned into a negative
+		m_speakerInfo.resize(4);
+		m_speakerInfo[1] = SpeakerInfo(-Math::pi_over_2,		SOUND_CHANNEL_FRONT_LEFT);
+		m_speakerInfo[2] = SpeakerInfo(Math::pi_over_2,			SOUND_CHANNEL_FRONT_RIGHT);
+
+		break;
+	}
+	case CHANNEL_CONFIG_5_1:
+	{
+		// Speaker angle values for stereo sound
+		// Wrapped version of right, turned into a negative
+		m_speakerInfo.resize(7);
+		m_speakerInfo[1] = SpeakerInfo(Math::DegToRad(-110.f),  SOUND_CHANNEL_SIDE_LEFT);
+		m_speakerInfo[2] = SpeakerInfo(Math::DegToRad(-30.f),	SOUND_CHANNEL_FRONT_LEFT);
+		m_speakerInfo[3] = SpeakerInfo(Math::DegToRad(0.f),		SOUND_CHANNEL_CENTER);
+		m_speakerInfo[4] = SpeakerInfo(Math::DegToRad(30.f),	SOUND_CHANNEL_FRONT_RIGHT);
+		m_speakerInfo[5] = SpeakerInfo(Math::DegToRad(110.f),	SOUND_CHANNEL_SIDE_RIGHT);
+
+		break;
+	}
+	case CHANNEL_CONFIG_7_1:
+	{
+		// Speaker angle values for stereo sound
+		// Wrapped version of right, turned into a negative
+		m_speakerInfo.resize(9);
+		m_speakerInfo[1] = SpeakerInfo(Math::DegToRad(-150.f),	SOUND_CHANNEL_BACK_LEFT);
+		m_speakerInfo[2] = SpeakerInfo(Math::DegToRad(-90.f),	SOUND_CHANNEL_SIDE_LEFT);
+		m_speakerInfo[3] = SpeakerInfo(Math::DegToRad(-30.f),	SOUND_CHANNEL_FRONT_LEFT);
+		m_speakerInfo[4] = SpeakerInfo(Math::DegToRad(0.f),		SOUND_CHANNEL_CENTER);
+		m_speakerInfo[5] = SpeakerInfo(Math::DegToRad(30.f),	SOUND_CHANNEL_SIDE_RIGHT);
+		m_speakerInfo[6] = SpeakerInfo(Math::DegToRad(90.f),	SOUND_CHANNEL_SIDE_LEFT);
+		m_speakerInfo[7] = SpeakerInfo(Math::DegToRad(150.f),	SOUND_CHANNEL_SIDE_RIGHT);
+
+		break;
+	}
+	default:
+		ASSERT(false);
+	}
+
+	memsize last = m_speakerInfo.size() - 1;
+	memsize preWrap = m_speakerInfo.size() - 2;
+
+	m_speakerInfo[0].uChannelIndex = m_speakerInfo[preWrap].uChannelIndex;
+	float fWrapAngle = -Math::pi - (Math::pi - m_speakerInfo[preWrap].fSpeakerHorAngle);
+	m_speakerInfo[0].fSpeakerHorAngle = fWrapAngle;
+
+	m_speakerInfo[last].uChannelIndex = m_speakerInfo[1].uChannelIndex;
+	fWrapAngle = Math::pi + (Math::pi + m_speakerInfo[1].fSpeakerHorAngle);
+	m_speakerInfo[last].fSpeakerHorAngle = fWrapAngle;
+
+	m_eChannelConfig = eChannelConfig;
 }
 
 Audio::~Audio()
@@ -301,6 +364,7 @@ SoundHandle Audio::PrepareCustomStream(const StreamingSoundDef& def, float fVolu
 	if (handle.IsValid())
 	{
 		//DEBUG_PRINT("[Audio::PrepareSound] %s\n", m_ppSoundFiles[uSoundId]->GetName().CStr());
+		handle.GetObject()->SetChannelConfig(m_eChannelConfig);
 		handle.GetObject()->SetCustomData(def);
 		handle.SetVolume(fVolume);
 	}
@@ -328,6 +392,7 @@ SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
 		{
 			//DEBUG_PRINT("[Audio::PrepareSound] %s\n", m_ppSoundFiles[uSoundId]->GetName().CStr());
 			pSoundFile->BindToSoundObject(handle.GetObject(), false);
+			handle.GetObject()->SetChannelConfig(m_eChannelConfig);
 			handle.GetObject()->SetSoundFile(pSoundFile);
 			handle.GetObject()->ScaleVolumeBySystemVolume(
 				m_fVolume[pSoundFile->GetAudioType()]
@@ -538,16 +603,18 @@ void Audio::InitPanningData(float fAzimuthalAngle, PanningData& panning, float f
 		panning.fMatrix[i] = 0.0f;
 	}
 
+	panning.eConfig = m_eChannelConfig;
+
 	if(fDistance >= fSpeakerRadius)
 	{
 		// Treat as a point sound
-		for (uint32 i = 0; i < m_speakerInfo.uSpeakerValues-1; i++)
+		for (memsize i = 0; i < m_speakerInfo.size()-1; i++)
 		{
-			if (fAzimuthalAngle >= m_speakerInfo.fSpeakerHorAngles[i] &&
-				fAzimuthalAngle <= m_speakerInfo.fSpeakerHorAngles[i + 1])
+			if (fAzimuthalAngle >= m_speakerInfo[i].fSpeakerHorAngle &&
+				fAzimuthalAngle <= m_speakerInfo[i+1].fSpeakerHorAngle)
 			{
-				CalculatePanning(fAzimuthalAngle, m_speakerInfo.fSpeakerHorAngles[i], m_speakerInfo.fSpeakerHorAngles[i + 1],
-					panning.fMatrix[m_speakerInfo.uChannelIndex[i]], panning.fMatrix[m_speakerInfo.uChannelIndex[i + 1]]);
+				CalculatePanning(fAzimuthalAngle, m_speakerInfo[i].fSpeakerHorAngle, m_speakerInfo[i+1].fSpeakerHorAngle,
+					panning.fMatrix[m_speakerInfo[i].uChannelIndex], panning.fMatrix[m_speakerInfo[i+1].uChannelIndex]);
 				return;
 			}
 		}
@@ -651,10 +718,10 @@ void Audio::CalculateInnerPanning(float fAzimuthalAngle, PanningData& panning, f
 	uint32 uLeft = 0;
 	uint32 uRight = 0;
 
-	for (uint32 i = 1; i < m_speakerInfo.uSpeakerValues - 1; i++)
+	for (memsize i = 1; i < m_speakerInfo.size() - 1; i++)
 	{
-		uint32 uIndex = m_speakerInfo.uChannelIndex[i];
-		panning.fMatrix[uIndex] = GetInnerPanningForChannel(m_speakerInfo.fSpeakerHorAngles[i], m_speakerInfo.fSpeakerHorAngles[i - 1], m_speakerInfo.fSpeakerHorAngles[i + 1], fAzimuthalAngle, fFocusAngle);
+		uint32 uIndex = m_speakerInfo[i].uChannelIndex;
+		panning.fMatrix[uIndex] = GetInnerPanningForChannel(m_speakerInfo[i].fSpeakerHorAngle, m_speakerInfo[i-1].fSpeakerHorAngle, m_speakerInfo[i+1].fSpeakerHorAngle, fAzimuthalAngle, fFocusAngle);
 	}
 
 

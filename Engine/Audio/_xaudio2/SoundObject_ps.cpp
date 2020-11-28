@@ -8,6 +8,26 @@
 
 namespace usg{
 
+	static const uint32 g_suChannelCount[] =
+	{
+		2, // CHANNEL_CONFIG_2_0,
+		2, // CHANNEL_CONFIG_HEADPHONES,
+		3, // CHANNEL_CONFIG_2_1,
+		6, // CHANNEL_CONFIG_5_1,
+		8, // CHANNEL_CONFIG_7_1,
+	};
+
+	static const uint32 g_suChannelMapping[][SOUND_CHANNEL_COUNT] =
+	{
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_LOW_FREQ },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_BACK_LEFT, SOUND_CHANNEL_BACK_RIGHT, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
+	};
+
+	static_assert( ARRAY_SIZE(g_suChannelCount) == CHANNEL_CONFIG_COUNT, "Mismatched channel count" );
+
 
 	class XAudioVoiceCallback : public IXAudio2VoiceCallback
 	{
@@ -29,6 +49,7 @@ SoundObject_ps::SoundObject_ps()
 {
 	m_pSourceVoice = NULL;
 	m_uChannels = 0;
+	m_bPositional = false;
 	m_bValid = false;
 	m_bPaused = false;
 	m_bCustomData = false;
@@ -53,6 +74,7 @@ void SoundObject_ps::Reset()
 		m_pSourceVoice = NULL;
 		m_bValid = false;
 		m_bPaused = false;
+		m_bPositional = false;
 	}
 	if (m_pCallback)
 	{
@@ -104,6 +126,7 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 	format.nSamplesPerSec = def.uSampleRate;
 	format.nBlockAlign = format.wBitsPerSample / 8 * format.nChannels;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+	m_uChannels = format.nChannels;
 	if (def.pCallbacks.use_count() > 0)
 	{
 		m_pCallback = vnew(ALLOC_AUDIO) XAudioVoiceCallback(def.pCallbacks);
@@ -185,25 +208,28 @@ void SoundObject_ps::Update(const SoundObject* pParent)
 	if(!m_bValid)
 		return;
 
-	static float32 matrixCoefficients[2 * 8];
-	ZeroMemory(matrixCoefficients, sizeof(float)*2*8);
-	// Merging left and right channels of the sound
-	const int destChannels = 2;
-	uint32 uIndex = 0;
-	for (uint32 i = 0; i < destChannels; i++)
+	static float32 matrixCoefficients[SOUND_CHANNEL_COUNT * SOUND_CHANNEL_COUNT] = {};
+	
+	if(m_bPositional)
 	{
-		for (uint32 j = 0; j < m_uChannels; j++)
+		const usg::PanningData& panning = pParent->GetPanningData();
+		const uint32 destChannels = g_suChannelCount[panning.eConfig];
+		uint32 uIndex = 0;
+		for (uint32 i = 0; i < destChannels; i++)
 		{
-			matrixCoefficients[uIndex] = pParent->GetPanningData().fMatrix[SOUND_CHANNEL_LEFT + i];
-			uIndex++;
+			for (uint32 j = 0; j < m_uChannels; j++)
+			{
+				matrixCoefficients[uIndex] = panning.fMatrix[ g_suChannelMapping[panning.eConfig][i] ];
+				uIndex++;
+			}
 		}
+		m_pSourceVoice->SetOutputMatrix(NULL, m_uChannels, destChannels, matrixCoefficients);
 	}
 	
 	float fVolume = pParent->GetAdjVolume() * pParent->GetAttenMul();
 	//ASSERT(fVolume >= 0.0f && fVolume <= 1.0f);
 	m_pSourceVoice->SetVolume(pParent->GetAdjVolume() * pParent->GetAttenMul());
 	m_pSourceVoice->SetFrequencyRatio(pParent->GetPitch() * pParent->GetDopplerFactor());
-	m_pSourceVoice->SetOutputMatrix(NULL, m_uChannels, destChannels, matrixCoefficients);
 	// TODO: Would need interal handling
 	//m_pSourceVoice->SetPriority( pParent->GetPriority() );
 

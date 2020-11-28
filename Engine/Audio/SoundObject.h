@@ -59,6 +59,7 @@ public:
 	PLAY_STATE GetRequestedPlayState() const { return m_ePlayState; }
 	void ClearRequestedPlayState() { m_ePlayState = PLAY_STATE_NONE; }
 
+	void SetChannelConfig(ChannelConfig eConfig) { m_panningData.eConfig = eConfig; }
 	void SetPanningData(const PanningData& panningData) { m_panningData = panningData; }
 	const PanningData& GetPanningData() const { return m_panningData; }
 	float GetAttenMul() const { return m_fAtten; }

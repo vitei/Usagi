@@ -13,8 +13,8 @@ void SoundObject::Reset()
 	m_fAtten = 1.0f;
 	m_fPitch = 1.0f;
 	m_fDopplerFactor = 1.0f;
-	m_panningData.fMatrix[SOUND_CHANNEL_LEFT] = 0.75f;
-	m_panningData.fMatrix[SOUND_CHANNEL_RIGHT] = 0.75f;
+	m_panningData.fMatrix[SOUND_CHANNEL_FRONT_LEFT] = 0.75f;
+	m_panningData.fMatrix[SOUND_CHANNEL_FRONT_RIGHT] = 0.75f;
 	m_soundActor.RemoveRef();
 	m_fFileVolume = 1.0f;
 	m_fScaledFileVolume = 1.0f;

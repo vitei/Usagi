@@ -55,6 +55,7 @@ public:
 	~Audio();
 
 	void Init();
+	void SetChannelConfig(ChannelConfig eChannelConfig);
 	void Update(float fElapsed);
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
@@ -116,14 +117,17 @@ private:
 
 	struct SpeakerInfo
 	{
-		float	fSpeakerHorAngles[SOUND_CHANNEL_COUNT+2];	// +2 because we include the wrapped values
-		uint32	uChannelIndex[SOUND_CHANNEL_COUNT + 2];
-		uint32  uSpeakerValues;
+		SpeakerInfo() {}
+		SpeakerInfo(float fAngle, uint32 uIndex) { fSpeakerHorAngle = fAngle; uChannelIndex = uIndex; }
+		float fSpeakerHorAngle;	
+		uint32 uChannelIndex;		
 	};
 
-	SpeakerInfo	m_speakerInfo;
 
-	Audio_ps	m_platform;
+	usg::vector<SpeakerInfo>	m_speakerInfo; // 2 greater than the actual number of speakers because we include the wrapped values
+	ChannelConfig				m_eChannelConfig;
+
+	Audio_ps					m_platform;
 };
 
 }
