@@ -34,7 +34,7 @@ namespace usg
 		void BindToSound(class SoundObject_ps* pSoundObject, uint32 uPriority);
 
 	private:
-		void ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName);
+		void ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName, Audio* pAudio);
 		WAVEFORMATEX	m_format;
 		BYTE*			m_pData;
 		uint32			m_uSize;

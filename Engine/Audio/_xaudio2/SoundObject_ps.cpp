@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Audio/Audio.h"
 #include "Engine/Audio/SoundCallbacks.h"
+#include "AudioFilter_ps.h"
 #include "SoundObject_ps.h"
 
 namespace usg{
@@ -47,7 +48,8 @@ namespace usg{
 
 SoundObject_ps::SoundObject_ps()
 {
-	m_pSourceVoice = NULL;
+	m_pSourceVoice = nullptr;
+	m_pSoundFile = nullptr;
 	m_uChannels = 0;
 	m_bPositional = false;
 	m_bValid = false;
@@ -135,6 +137,7 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 
 	m_bValid = true;
 	m_bCustomData = true;
+	m_pSoundFile = nullptr;
 }
 
 void SoundObject_ps::SubmitData(void* pData, memsize size)
@@ -165,6 +168,11 @@ void SoundObject_ps::Start()
 {
 	if (m_bValid)
 	{
+		if (m_pSoundFile && m_pSoundFile->GetFilter())
+		{
+			AudioFilter_ps* pFilterPS = (AudioFilter_ps*)m_pSoundFile->GetFilter();
+			m_pSourceVoice->SetFilterParameters(&pFilterPS->GetParameters());
+		}
 		m_pSourceVoice->Start();
 		m_bPaused = false;
 	}

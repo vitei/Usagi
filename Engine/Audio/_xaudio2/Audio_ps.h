@@ -42,6 +42,7 @@ private:
 	bool	m_bInitialised;
 	IXAudio2* m_pXAudio2;
 	IXAudio2MasteringVoice* m_pMasteringVoice;
+	IXAudio2SubmixVoice*	m_pSubmixVoices[_AudioType_count];
 
 };
 

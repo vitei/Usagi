@@ -87,6 +87,9 @@ public:
 	float			GetDoppler(const AudioListener* pListener, const Vector3f& vScreenPos, const Vector3f &vVelocity, SoundObject* objectBase);
 	FastPool<SoundData>* GetPool() { return &m_sounds; }
 
+	AudioFilter* GetFilter(uint32 uCRC);
+	AudioEffect* GetEffect(uint32 uCRC);
+
 private:
 	bool ShouldPlay(Vector3f vPos, SoundFile* pSoundFile);
 	SoundHandle Play3DSoundInt(SoundActorHandle& actorHandle, SoundFile* pSoundFile, const float fVolume, bool bPlay);
@@ -109,6 +112,8 @@ private:
 	
 	usg::vector<Archive>			m_archives;
 	hash_map<uint32, SoundFile*>	m_soundHashes;
+	hash_map<uint32, AudioFilter*>	m_filterHashes;
+	hash_map<uint32, AudioEffect*>	m_effectHashes;
 	FastPool<AudioListener>			m_listeners;
 	FastPool<ActorData>				m_actors;
 	FastPool<SoundData>				m_sounds;

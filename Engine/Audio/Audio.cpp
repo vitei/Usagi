@@ -435,6 +435,17 @@ bool Audio::ShouldPlay(Vector3f vPos, SoundFile* pSoundFile)
 
 }
 
+
+AudioFilter* Audio::GetFilter(uint32 uCRC)
+{
+	return m_filterHashes[uCRC];
+}
+
+AudioEffect* Audio::GetEffect(uint32 uCRC)
+{
+	return m_effectHashes[uCRC];
+}
+
 SoundHandle Audio::Prepare3DSound(SoundActorHandle& actorHandle, uint32 crc, const float fVolume, bool bPlay)
 {
 #if !DISABLE_SOUND	

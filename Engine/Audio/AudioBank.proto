@@ -13,6 +13,21 @@ enum AudioType
 	AUDIO_TYPE_CUSTOM = 3;
 }
 
+enum AudioFilterType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	AUDIO_FILTER_LOW_PASS = 0;
+	AUDIO_FILTER_HIGH_PASS = 1;
+}
+
+enum AudioEffectType
+{
+	option (nanopb_enumopt).long_names = false;
+
+	AUDIO_EFFECT_REVERB = 0;
+}
+
 enum AudioFalloff
 {
 	option (nanopb_enumopt).long_names = false;
@@ -39,9 +54,48 @@ message SoundFileDef
 	optional string crossfade = 14 [(nanopb).max_size = 32];
 	required bool localized = 15 [default = false];
 	required uint32 crc = 16 [default = 0];
+	required uint32 filterCrc = 17 [default = 0];
+	repeated uint32 effectCrcs = 18 [(nanopb).max_count = 4];
+}
+
+message AudioFilterDef
+{
+	required string enumName = 1  [(nanopb).max_size = 32];
+	required uint32 crc = 2 [default = 0];
+	required AudioFilterType eFilter = 3 [default = AUDIO_FILTER_LOW_PASS];
+	required float fFrequency = 4 [default = 0.0];	// 0 to 1.0
+	required float fOneOverQ = 5 [default = 0.0];	// 0 to 1.5
+}
+
+message AudioEffectDef
+{
+	required AudioEffectType eEffectType = 1 [default = AUDIO_EFFECT_REVERB];
+	required string enumName = 2  [(nanopb).max_size = 32];
+	required uint32 crc = 3 [default = 0];
+};
+
+message ReverbEffectDef
+{
+	required AudioEffectDef effectDef = 1;
+
+	required float WetDryMix = 2 [default = 50];	// Percent output that is reverb
+	required int32 Room = 3 [default = -10];		// Attenuation -10000 to 0
+	required int32 RoomHF = 4 [default = -18]; 		// Attenuation of high frequence -10000 to 0
+	required float RoomRolloffFactor = 5 [default = 0];			// Rolloff factor 0 to 10
+	required float DecayTime = 6 [default = 1.49]; 	// Reverb decay time, 0.1 to 20.0
+	required float DecayHFRatio = 7 [default = 0.5]; 	// Ratio of decay time from high to low frequences 0.1 to 2.0
+	required int32 Reflections = 8 [default = -2470]; 	// Attenuation of early reflections relative to room -10000 to 1000
+	required float ReflectionsDelay = 9 [default = 0.179]; // Delay time of the first reflection relative to the direct path, 0.0 to 0.3 
+	required int32 Reverb = 10 [default = -1930]; 		// Attenuation of late reverb relative to room -10000 to 2000
+	required float ReverbDelay = 11 [default = 100.0];// Time limit between the early reflections and late reverb to time of first reflection
+	required float Diffusion = 12 [default = 21.0];	// Echo density in late reverb, percentage 0 to 100
+	required float Density = 13 [default = 100.0]; 	// Modal density in late reverb decay, 0 to 100
+	required float HFReference = 14 [default = 5000.0];// High frequency (20 to 20000)
 }
 
 message AudioBank
 {
 	repeated SoundFileDef soundFiles = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+	repeated AudioFilterDef filters = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+	repeated ReverbEffectDef reverbs = 3 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 }

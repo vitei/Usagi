@@ -9,9 +9,14 @@ namespace usg{
 
 Audio_ps::Audio_ps()
 {
-	m_pXAudio2 = NULL;
+	m_pXAudio2 = nullptr;
 	m_bInitialised = false;
-	m_pMasteringVoice = NULL;
+	m_pMasteringVoice = nullptr;
+
+	for (uint32 i = 0; i < _AudioType_count; i++)
+	{
+		m_pSubmixVoices[i] = nullptr;
+	}
 }
 
 Audio_ps::~Audio_ps()
@@ -20,7 +25,15 @@ Audio_ps::~Audio_ps()
 	{
 		m_pXAudio2->StopEngine();
 		m_pMasteringVoice->DestroyVoice();
-		m_pMasteringVoice = NULL;
+		m_pMasteringVoice = nullptr;
+		for (uint32 i = 0; i < _AudioType_count; i++)
+		{
+			if(m_pSubmixVoices[i])
+			{
+				m_pSubmixVoices[i]->DestroyVoice();
+				m_pSubmixVoices[i] = nullptr;
+			}
+		}
 		if(m_pXAudio2)
 		{
 			m_pXAudio2->Release();
@@ -48,6 +61,13 @@ void Audio_ps::Init()
 		CoUninitialize();
 		//ASSERT(false);
 		return;
+	}
+
+	for (uint32 i = 0; i < _AudioType_count; i++)
+	{
+		// FIXME: Before we can use these we need audio types to be converted to the right settings
+		HRESULT hr = m_pXAudio2->CreateSubmixVoice(&m_pSubmixVoices[i], 1, 44100);
+		ASSERT(hr==S_OK);
 	}
 
 	m_bInitialised = true;

@@ -25,7 +25,7 @@ WaveFile::~WaveFile()
 	}
 }
 
-void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName)
+void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName, Audio* pAudio)
 {
 	sint64 blockAlign = reader.GetChannelCount() * reader.GetDataSize() / 8;
 	sint64 totalNumBytes = reader.GetDataSize();
@@ -54,7 +54,7 @@ void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef,
 	}
 	m_uSize = (uint32)totalNumBytes;
 
-	InitInt(pDef, szName);
+	InitInt(pDef, szName, pAudio);
 }
 
 
@@ -63,7 +63,7 @@ void WaveFile::InitRaw(const SoundFileDef* pDef, const void* pData, size_t rawDa
 	WaveFileReader reader;
 	reader.Initialize(pData, rawDataSize);
 
-	ProcessWaveFile(reader, pDef, pDef->filename);
+	ProcessWaveFile(reader, pDef, pDef->filename, pAudio);
 
 }
 
@@ -80,7 +80,7 @@ void WaveFile::Init(const SoundFileDef* pDef, Audio* pAudio, const char* pszLoca
 
 	WaveFileReader reader(name.CStr());
 
-	ProcessWaveFile(reader, pDef, name.CStr());
+	ProcessWaveFile(reader, pDef, name.CStr(), pAudio);
 }
 
 void WaveFile::BindToSoundObject(class SoundObject* pSoundObject, bool bPositional)
