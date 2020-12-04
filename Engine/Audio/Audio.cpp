@@ -5,6 +5,8 @@
 #include "Engine/Core/Containers/List.h"
 #include "Engine/Audio/AudioComponents.pb.h"
 #include "Engine/Audio/SoundFile.h"
+#include "Engine/Audio/AudioFilter.h"
+#include "Engine/Audio/AudioEffect.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -23,35 +25,23 @@ m_listeners(5, false),
 m_actors(256, false),
 m_sounds(512, false)
 {
-	SetChannelConfig(CHANNEL_CONFIG_HEADPHONES);
-
 	//m_speakerInfo.uSpeakerValues = 4;	// Only supporting stereo sound at the moment
 
 	for (uint32 i = 0; i < _AudioType_count; i++)
 	{
 		m_bPaused[i] = false;
 	}
-
-#if 0
-	SoundObject::PanningData panning;
-	for (float fPan = -Math::pi; fPan < Math::pi; fPan += 0.2f)
-	{
-		DEBUG_PRINT("\n\n Pan: %f\n", fPan);
-		InitPanningData(fPan, panning, 1.0f, 1.0f);
-		DEBUG_PRINT("Far panning: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
-		InitPanningData(fPan, panning, 0.999999999f, 1.0f);
-		DEBUG_PRINT("Inner panning: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
-		InitPanningData(fPan, panning, 0.5f, 1.0f);
-		DEBUG_PRINT("Half inner: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
-		InitPanningData(fPan, panning, 0.25f, 1.0f);
-		DEBUG_PRINT("Mostly inner: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
-	}
-#endif
 }
 
 
 void Audio::SetChannelConfig(ChannelConfig eChannelConfig)
 {
+	for(int i=0; i<_AudioType_count; i++)
+	{
+		StopAll(AudioType(i), 0.0f);
+	}
+	Update(0.0f);	// Force an update to kill the sounds
+
 	m_speakerInfo.clear();
 	switch(eChannelConfig)
 	{
@@ -120,6 +110,7 @@ void Audio::SetChannelConfig(ChannelConfig eChannelConfig)
 	m_speakerInfo[last].fSpeakerHorAngle = fWrapAngle;
 
 	m_eChannelConfig = eChannelConfig;
+	m_platform.SetOutputChannelConfig(m_eChannelConfig);
 }
 
 Audio::~Audio()
@@ -155,10 +146,36 @@ Audio::~Audio()
 	m_archives.clear();
 }
 
+
+void Audio::EnableEffect(const AudioType eType, uint32 uEffectCRC)
+{
+	AudioEffect* pEffect = GetEffect(uEffectCRC);
+	if(pEffect)
+	{
+		m_platform.EnableEffect(eType, pEffect);
+	}
+	else
+	{
+		ASSERT(false);
+	}
+}
+
+void Audio::DisableEffect(const AudioType eType, uint32 uEffectCRC)
+{
+	AudioEffect* pEffect = GetEffect(uEffectCRC);
+	if (pEffect)
+	{
+		m_platform.DisableEffect(eType, pEffect);
+	}
+	else
+	{
+		ASSERT(false);
+	}
+}
+
 void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount)
 {
 #if !DISABLE_SOUND
-
 	Archive archive;
 	str::Copy(archive.name, pszArchiveName, USG_MAX_PATH);
 
@@ -173,9 +190,9 @@ void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, 
 		ASSERT(m_soundHashes[pDef->crc] == NULL);
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
-#endif
 	archive.uFiles = uCount;
 	m_archives.push_back(archive);
+#endif
 }
 
 void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName)
@@ -186,11 +203,15 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	bool bReadSucceeded = test_vpb.Read(&bank);
 
 	uint32 uCount = (uint32)bank.soundFiles.m_decoderDelegate.data.count;
+	uint32 uFilters = (uint32)bank.filters.m_decoderDelegate.data.count;
+	uint32 uEffects = (uint32)bank.reverbs.m_decoderDelegate.data.count;
 
 	Archive archive;
 	str::Copy(archive.name, pszArchiveName, USG_MAX_PATH);
 
-	archive.ppSoundFiles = vnew(ALLOC_AUDIO)SoundFile*[uCount];
+	archive.ppSoundFiles = uCount ? vnew(ALLOC_AUDIO)SoundFile*[uCount] : nullptr;
+	archive.ppAudioFilters = uFilters ? vnew(ALLOC_AUDIO)AudioFilter * [uFilters] : nullptr;
+	archive.ppAudioEffects = uEffects ? vnew(ALLOC_AUDIO)AudioEffect * [uEffects] : nullptr;
 
 	for (uint32 i = 0; i < uCount; i++)
 	{
@@ -201,9 +222,33 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 		ASSERT(m_soundHashes[pDef->crc] == NULL);
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
-#endif
 	archive.uFiles = uCount;
+
+	for (uint32 i = 0; i < uFilters; i++)
+	{
+		const AudioFilterDef* pDef = &bank.filters[i];
+		archive.ppAudioFilters[i] = m_platform.CreateAudioFilter(pDef);
+		ASSERT(archive.ppAudioFilters[i] != NULL);
+		archive.ppAudioFilters[i]->Init(pDef, this);
+		ASSERT(m_soundHashes[pDef->crc] == NULL);
+		m_filterHashes[pDef->crc] = archive.ppAudioFilters[i];
+	}
+	archive.uFilters = uFilters;
+
+	for (uint32 i = 0; i < uEffects; i++)
+	{
+		const ReverbEffectDef* pReverbDef = &bank.reverbs[i];
+		const AudioEffectDef* pDef = &pReverbDef->effectDef;
+		archive.ppAudioEffects[i] = m_platform.CreateAudioEffect(pDef);
+		ASSERT(archive.ppAudioEffects[i] != NULL);
+		archive.ppAudioEffects[i]->Init(pDef, this);
+		ASSERT(m_soundHashes[pDef->crc] == NULL);
+		m_effectHashes[pDef->crc] = archive.ppAudioEffects[i];
+	}
+	archive.uEffects = uEffects;
+
 	m_archives.push_back(archive);
+#endif
 }
 
 void Audio::UnloadArchive(const char* pszArchiveName)
@@ -256,6 +301,25 @@ void Audio::Init()
 	{
 		m_fVolume[i] = MAX_VOL;
 	}
+
+	SetChannelConfig(CHANNEL_CONFIG_HEADPHONES);
+#if 0
+	SoundObject::PanningData panning;
+	for (float fPan = -Math::pi; fPan < Math::pi; fPan += 0.2f)
+	{
+		DEBUG_PRINT("\n\n Pan: %f\n", fPan);
+		InitPanningData(fPan, panning, 1.0f, 1.0f);
+		DEBUG_PRINT("Far panning: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
+		InitPanningData(fPan, panning, 0.999999999f, 1.0f);
+		DEBUG_PRINT("Inner panning: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
+		InitPanningData(fPan, panning, 0.5f, 1.0f);
+		DEBUG_PRINT("Half inner: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
+		InitPanningData(fPan, panning, 0.25f, 1.0f);
+		DEBUG_PRINT("Mostly inner: %f %f\n", panning.fMatrix[SoundObject::SOUND_CHANNEL_LEFT], panning.fMatrix[SoundObject::SOUND_CHANNEL_RIGHT]);
+	}
+#endif
+
+
 #endif
 }
 

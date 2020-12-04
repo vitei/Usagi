@@ -55,7 +55,7 @@ public:
 	~Audio();
 
 	void Init();
-	void SetChannelConfig(ChannelConfig eChannelConfig);
+	void SetChannelConfig(ChannelConfig eChannelConfig);	// Note will stop all active sounds! 
 	void Update(float fElapsed);
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
@@ -72,6 +72,9 @@ public:
 	SoundHandle Play3DSound(const Vector3f& vPos, uint32 uSoundId, const float fVolume);
 	void SetVolume(const AudioType eType, const float fVolume);
 	float GetVolume(const AudioType eType);
+	void EnableEffect(const AudioType eType, uint32 uEffectCRC);
+	void DisableEffect(const AudioType eType, uint32 uEffectCRC);
+
 	void StopAll(AudioType eType, float fTime=0.2f);
 	void PauseAll(AudioType eType, float fTime = 0.2f);
 	void ResumeAll(AudioType eType, float fTime = 0.2f);
@@ -107,7 +110,11 @@ private:
 	{
 		char			name[USG_MAX_PATH];
 		SoundFile**		ppSoundFiles;
+		AudioFilter**	ppAudioFilters;
+		AudioEffect**	ppAudioEffects;
 		uint32			uFiles;
+		uint32			uFilters;
+		uint32			uEffects;
 	};
 	
 	usg::vector<Archive>			m_archives;

@@ -9,15 +9,6 @@
 
 namespace usg{
 
-	static const uint32 g_suChannelCount[] =
-	{
-		2, // CHANNEL_CONFIG_2_0,
-		2, // CHANNEL_CONFIG_HEADPHONES,
-		3, // CHANNEL_CONFIG_2_1,
-		6, // CHANNEL_CONFIG_5_1,
-		8, // CHANNEL_CONFIG_7_1,
-	};
-
 	static const uint32 g_suChannelMapping[][SOUND_CHANNEL_COUNT] =
 	{
 		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT },
@@ -26,8 +17,6 @@ namespace usg{
 		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
 		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_BACK_LEFT, SOUND_CHANNEL_BACK_RIGHT, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
 	};
-
-	static_assert( ARRAY_SIZE(g_suChannelCount) == CHANNEL_CONFIG_COUNT, "Mismatched channel count" );
 
 
 	class XAudioVoiceCallback : public IXAudio2VoiceCallback
@@ -87,7 +76,13 @@ void SoundObject_ps::Reset()
 
 void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 {
-	HRESULT result = Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat());
+	Audio_ps& audioPS = Audio::Inst()->GetPlatform();
+
+	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, audioPS.GetSubmixVoice(waveFile.GetAudioType()) };
+	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
+
+	HRESULT result = audioPS.GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat(),
+		0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr, &SFXSendList, NULL);
 	if( FAILED( result ) )
 	{
 		ASSERT(false);
@@ -121,6 +116,11 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 
 void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 {
+	Audio_ps& audioPS = Audio::Inst()->GetPlatform();
+	// TODO: Pass in audio type
+	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, audioPS.GetSubmixVoice(AUDIO_TYPE_CUSTOM) };
+	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
+
 	WAVEFORMATEX format = { 0 };
 	format.wFormatTag = WAVE_FORMAT_PCM;
 	format.nChannels = def.uChannels;
@@ -133,7 +133,7 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 	{
 		m_pCallback = vnew(ALLOC_AUDIO) XAudioVoiceCallback(def.pCallbacks);
 	}
-	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback);
+	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback, &SFXSendList);
 
 	m_bValid = true;
 	m_bCustomData = true;
@@ -221,7 +221,7 @@ void SoundObject_ps::Update(const SoundObject* pParent)
 	if(m_bPositional)
 	{
 		const usg::PanningData& panning = pParent->GetPanningData();
-		const uint32 destChannels = g_suChannelCount[panning.eConfig];
+		const uint32 destChannels = Audio_ps::GetChannelCount(panning.eConfig);
 		uint32 uIndex = 0;
 		for (uint32 i = 0; i < destChannels; i++)
 		{
