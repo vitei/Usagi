@@ -24,12 +24,12 @@ void SoundFile::InitInt(const SoundFileDef* pSoundFile, const string& strName, A
 	m_uPriority = pSoundFile->has_priority ? pSoundFile->priority : 128;
 	m_uCRC = pSoundFile->crc;
 
-	m_pFilter = pSoundFile->filterCrc ? pAudio->GetFilter(pSoundFile->filterCrc) : nullptr;
-	for (uint32 i = 0; i < pSoundFile->effectCrcs_count; i++)
+	m_pFilter = pSoundFile->filterCRC ? pAudio->GetFilter(pSoundFile->filterCRC) : nullptr;
+	for (uint32 i = 0; i < pSoundFile->effectCRCs_count; i++)
 	{
-		if(pSoundFile->effectCrcs[i])
+		if(pSoundFile->effectCRCs[i])
 		{
-			m_effects.push_back(pAudio->GetEffect(pSoundFile->effectCrcs[i]));
+			m_effects.push_back(pAudio->GetEffect(pSoundFile->effectCRCs[i]));
 		}
 	}
 }

@@ -54,8 +54,8 @@ message SoundFileDef
 	optional string crossfade = 14 [(nanopb).max_size = 32];
 	required bool localized = 15 [default = false];
 	required uint32 crc = 16 [default = 0];
-	required uint32 filterCrc = 17 [default = 0];
-	repeated uint32 effectCrcs = 18 [(nanopb).max_count = 4];
+	required uint32 filterCRC = 17 [default = 0];
+	repeated uint32 effectCRCs = 18 [(nanopb).max_count = 4];
 	required uint32 roomNameCRC = 19 [default = 0];
 }
 

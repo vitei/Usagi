@@ -33,19 +33,19 @@ namespace usg{
 		ReverbEffectDef* pReverb = (ReverbEffectDef*)pDef;
 		XAUDIO2FX_REVERB_I3DL2_PARAMETERS paramsIn;
 
-		paramsIn.DecayHFRatio = pReverb->DecayHFRatio;
-		paramsIn.DecayTime = pReverb->DecayTime;
-		paramsIn.Density = pReverb->Density;
-		paramsIn.Diffusion = pReverb->Diffusion;
-		paramsIn.HFReference = pReverb->HFReference;
-		paramsIn.Reflections = pReverb->Reflections;
-		paramsIn.ReflectionsDelay = pReverb->ReflectionsDelay;
-		paramsIn.Reverb = pReverb->Reverb;
-		paramsIn.ReverbDelay = pReverb->ReverbDelay;
-		paramsIn.Room = pReverb->Room;
-		paramsIn.RoomHF = pReverb->RoomHF;
-		paramsIn.RoomRolloffFactor = pReverb->RoomRolloffFactor;
-		paramsIn.WetDryMix = pReverb->WetDryMix;
+		paramsIn.DecayHFRatio = pReverb->decayHFRatio;
+		paramsIn.DecayTime = pReverb->decayTime;
+		paramsIn.Density = pReverb->density;
+		paramsIn.Diffusion = pReverb->diffusion;
+		paramsIn.HFReference = pReverb->hfReference;
+		paramsIn.Reflections = pReverb->reflections;
+		paramsIn.ReflectionsDelay = pReverb->reflectionsDelay;
+		paramsIn.Reverb = pReverb->reverb;
+		paramsIn.ReverbDelay = pReverb->reverbDelay;
+		paramsIn.Room = pReverb->room;
+		paramsIn.RoomHF = pReverb->roomHF;
+		paramsIn.RoomRolloffFactor = pReverb->roomRolloffFactor;
+		paramsIn.WetDryMix = pReverb->wetDryMix;
 
 		ReverbConvertI3DL2ToNative(&paramsIn, &m_params);
 	}
