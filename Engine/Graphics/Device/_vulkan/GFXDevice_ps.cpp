@@ -261,6 +261,12 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 				case RESOURCE_DESCRIPTOR_SET:
 					vkFreeDescriptorSets(m_vkDevice, req.resource.desc.pool, 1, &req.resource.desc.set);
 				break;
+				case RESOURCE_DESCRIPTOR_LAYOUT:
+					vkDestroyDescriptorSetLayout(m_vkDevice, req.resource.layout, nullptr);
+				break;
+				case RESOURCE_DESCRIPTOR_POOL:
+					vkDestroyDescriptorPool(m_vkDevice, req.resource.pool, nullptr);
+					break;
 				default:
 					ASSERT(false);
 			}
@@ -865,6 +871,24 @@ void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSe
 	req.eResourceType = RESOURCE_DESCRIPTOR_SET;
 	req.resource.desc.set = set;
 	req.resource.desc.pool = pool;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_LAYOUT;
+	req.resource.layout = layout;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSetPool(VkDescriptorPool pool)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_POOL;
+	req.resource.pool = pool;
 	req.uDestroyReqFrame = m_pParent->GetFrameCount();
 	m_destroyQueue.push(req);
 }

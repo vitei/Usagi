@@ -82,6 +82,8 @@ public:
 	void ReqDestroyImageView(VkImageView buffer);
 	void ReqDestroyImage(VkImage image);
 	void ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set);
+	void ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout);
+	void ReqDestroyDescriptorSetPool(VkDescriptorPool pool);
 
 
 private:
@@ -101,7 +103,9 @@ private:
 		RESOURCE_BUFFER = 0,
 		RESOURCE_IMAGE_VIEW,
 		RESOURCE_DESCRIPTOR_SET,
-		RESOURCE_IMAGE
+		RESOURCE_IMAGE,
+		RESOURCE_DESCRIPTOR_LAYOUT,
+		RESOURCE_DESCRIPTOR_POOL
 	};
 
 
@@ -125,9 +129,11 @@ private:
 
 		union Resource
 		{
-			VkBuffer	buffer;
-			VkImageView imageView;
-			VkImage		image;
+			VkBuffer				buffer;
+			VkImageView				imageView;
+			VkImage					image;
+			VkDescriptorPool		pool;
+			VkDescriptorSetLayout	layout;
 			struct Descriptor
 			{
 				// TODO: The device should probably own the pools

@@ -98,7 +98,7 @@ namespace usg {
 
 			Allocator alloc;
 			alloc.uAllocations = 0;
-			eResult = vkCreateDescriptorPool(pDevice->GetPlatform().GetVKDevice(), &poolCreateInfo, pDevice->GetPlatform().GetAllocCallbacks(), &alloc.pool);
+			eResult = vkCreateDescriptorPool(pDevice->GetPlatform().GetVKDevice(), &poolCreateInfo, nullptr, &alloc.pool);
 			ASSERT(eResult == VK_SUCCESS);
 			uAllocId = (uint32)m_allocators.size();
 			m_allocators.push_back(alloc);
@@ -176,10 +176,11 @@ namespace usg {
 	{
 		for (uint32 i = 0; i < m_allocators.size(); i++)
 		{
-			vkDestroyDescriptorPool(pDevice->GetPlatform().GetVKDevice(), m_allocators[i].pool, pDevice->GetPlatform().GetAllocCallbacks());
+			pDevice->GetPlatform().ReqDestroyDescriptorSetPool(m_allocators[i].pool);
+			m_allocators[i].pool = nullptr;
 		}
 
-		vkDestroyDescriptorSetLayout(pDevice->GetPlatform().GetVKDevice(), m_layout, nullptr);
+		pDevice->GetPlatform().ReqDestroyDescriptorSetLayout(m_layout);
 		m_layout = nullptr;
 		m_allocators.clear();
 	}
