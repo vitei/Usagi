@@ -19,6 +19,7 @@ struct FontDefinition
 	uint32		size;
 	double		spacing;
 	double		scale;
+	bool		fixedWidth;
 	bool		bold;
 	bool		underscore;
 };
@@ -50,9 +51,9 @@ bool GetFontInfo(const char* path, FontDefinition& defOut)
 	defOut.letterList = mainNode["LetterList"].as<std::string>();
 	defOut.size = mainNode["Size"].as<uint32>();
 	defOut.spacing = mainNode["Spacing"].as <double> ();
-//	defOut.scale = mainNode["Scale"].as <double>();
 	defOut.bold = mainNode["Bold"].as<bool>();
-	defOut.underscore = mainNode["Bold"].as<bool>();
+	defOut.underscore = mainNode["Underscore"].as<bool>();
+	defOut.fixedWidth = mainNode["FixedWidth"].as<bool>();
 
 	return true;
 }
@@ -300,6 +301,7 @@ int main(int argc, char *argv[])
 			AutoDetermineScale(trans, fontDef, font);
 			uint32 uChrCount = 0;
 			double maxBoundT = 0.0;
+			float maxWidth = 0.0;
 			// TODO: Handle non ASCI characters
 			while (*szLetter != '\0')
 			{
@@ -364,10 +366,30 @@ int main(int argc, char *argv[])
 					EncodeUVs(texDef, bounds, chrInfo[uChrCount]);
 					EncodeCharacter(texDef, msdf, sdf, protoDef);
 
+					if( szLetter[0] != ' ' )
+					{
+						maxWidth = usg::Math::Max(maxWidth, chrInfo[uChrCount].UV_BottomRight.x - chrInfo[uChrCount].UV_TopLeft.x);
+					}
+
 					chrInfo[uChrCount].CharData = thisChar.GetAsUInt32();
 					uChrCount++;
 				}
 				szLetter += uByteCount;
+			}
+
+			if (fontDef.fixedWidth)
+			{
+				for (uint32 i = 0; i < uChrCount; i++)
+				{
+					// Force all characters to the same bounds
+					float fChrWidth = chrInfo[i].UV_BottomRight.x - chrInfo[i].UV_TopLeft.x;
+					fChrWidth = maxWidth - fChrWidth;
+					if (fChrWidth > 0.0f)
+					{
+						chrInfo[i].UV_BottomRight.x += fChrWidth/2.0f;
+						chrInfo[i].UV_TopLeft.x -= fChrWidth / 2.0f;
+					}
+				}
 			}
 			protoDef.Chars.m_decoderDelegate.data.array = chrInfo;
 			protoDef.Chars.m_decoderDelegate.data.count = uChrCount;
