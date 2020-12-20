@@ -14,13 +14,18 @@
 #include OS_HEADER(Engine/HID, DirectInput.h)
 #include OS_HEADER(Engine/HID, DirectInputJoystick.h)
 
-//#define USE_DIRECT_INPUT
+#define USE_DIRECT_INPUT_KB
+//#define USE_DIRECT_INPUT_MOUSE
 
-#ifdef USE_DIRECT_INPUT
+#ifdef USE_DIRECT_INPUT_MOUSE
 #include OS_HEADER(Engine/HID, DirectInputMouse.h)
-#include OS_HEADER(Engine/HID, DirectInputKeyboard.h)
 #else
 #include OS_HEADER(Engine/HID, Mouse_ps.h)
+#endif
+
+#ifdef USE_DIRECT_INPUT_KB
+#include OS_HEADER(Engine/HID, DirectInputKeyboard.h)
+#else
 #include OS_HEADER(Engine/HID, Keyboard_ps.h)
 #endif
 
@@ -72,11 +77,15 @@ private:
 	VirtualGamepad	m_virtualGamepad;
 	// TODO: Have a mouse per display
 
-#ifdef USE_DIRECT_INPUT
+#ifdef USE_DIRECT_INPUT_MOUSE
 	DirectInputMouse m_mouse;
-	DirectInputKeyboard m_keyboard;
 #else
 	Mouse_ps		m_mouse;
+#endif
+
+#ifdef USE_DIRECT_INPUT_KB
+	DirectInputKeyboard m_keyboard;
+#else
 	Keyboard_ps		m_keyboard;
 #endif
 
