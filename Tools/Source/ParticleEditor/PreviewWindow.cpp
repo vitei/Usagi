@@ -52,10 +52,10 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	usg::AABB worldBounds;
 	worldBounds.SetCentreRadii(usg::Vector3f(0.0f, 0.0f, 0.0f), usg::Vector3f(512.0f, 512.0f, 512.0f));
 
-	m_scene.Init(pDevice, worldBounds, NULL);
+	m_scene.Init(pDevice, usg::ResourceMgr::Inst(), worldBounds, NULL);
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(vSize.x / vSize.y);
-	m_pSceneCtxt->Init(pDevice, &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
+	m_pSceneCtxt->Init(pDevice, usg::ResourceMgr::Inst(), &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
 	m_pSceneCtxt->SetCamera(&m_camera.GetCamera());
 
 	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play"));

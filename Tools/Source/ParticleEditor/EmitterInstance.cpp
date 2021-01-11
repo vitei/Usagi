@@ -67,7 +67,7 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_parameterWindow.AddItem(&m_removeEmitterButton);
 
 	m_emitter.Alloc(pDevice, &scene.GetParticleMgr(), "water_halo", true);
-	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM << 1);
+	m_emitter.SetRenderMask(usg::RenderMask::RENDER_MASK_CUSTOM_0 << 1);
 
 	Add(false);
 }

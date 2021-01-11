@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/HID/Gamepad.h"
 #include "Engine/HID/Input.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -69,7 +70,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 		}
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-		m_pModel->Load(pDevice, m_pScene, modelName.CStr(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
+		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.CStr(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
 	}
 	if (m_pModel)
 	{

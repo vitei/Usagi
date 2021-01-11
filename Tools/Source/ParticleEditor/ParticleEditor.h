@@ -29,7 +29,7 @@ public:
 	ParticleEditor();
 	virtual ~ParticleEditor();
 
-	virtual void Init(usg::GFXDevice* pDevice);
+	virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
 	virtual void Cleanup(usg::GFXDevice* pDevice);
 	virtual void Update(usg::GFXDevice* pDevice);
 	virtual void Draw(usg::GFXDevice* pDevice);

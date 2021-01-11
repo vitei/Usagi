@@ -104,7 +104,7 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	pRenderer->AddWindow(&m_emitterWindow);
 }
 
-void EmitterWindow::Cleanup(usg::GFXDevice* pDevice)
+void EmitterWindow::CleanUp(usg::GFXDevice* pDevice)
 {
 	m_textureSettings.Cleanup(pDevice);
 }

@@ -98,7 +98,7 @@ ParticleEditor::ParticleEditor()
 
 
 
-void ParticleEditor::Init(usg::GFXDevice* pDevice)
+void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 {
 	uint32 uWidth;
 	uint32 uHeight;
@@ -112,7 +112,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	mEffectMat.LoadIdentity();
 
 	m_guiRend.Init();
-	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
+	m_guiRend.InitResources(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 20000);
 
 	usg::GUIMenuBar& bar = m_guiRend.GetMainMenuBar();
 	bar.SetVisible(true);
@@ -167,7 +167,7 @@ void ParticleEditor::Cleanup(usg::GFXDevice* pDevice)
 	m_emitter.Cleanup(pDevice);
 	m_effectPreview.Cleanup(pDevice);
 	m_emitterPreview.Cleanup(pDevice);
-	m_emitterWindow.Cleanup(pDevice);
+	m_emitterWindow.CleanUp(pDevice);
 	m_editorShapes.Cleanup(pDevice);
 	m_guiRend.Cleanup(pDevice);
 }
