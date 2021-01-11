@@ -25,6 +25,7 @@ ConstantSet::~ConstantSet()
 	if(m_pCPUData)
 	{
 		mem::Free(MEMTYPE_STANDARD, m_pCPUData);
+		m_pCPUData = nullptr;
 	}
 }
 
