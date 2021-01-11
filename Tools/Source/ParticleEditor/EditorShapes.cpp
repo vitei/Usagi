@@ -61,7 +61,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 	alphaDecl.SetColor0Only();
-	alphaDecl.uColorTargets = 2;
+	alphaDecl.uColorTargets = 1;
 	alphaDecl.bBlendEnable = false;
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
