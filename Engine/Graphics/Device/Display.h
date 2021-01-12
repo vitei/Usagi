@@ -23,7 +23,8 @@ struct DisplaySettings
 	uint32		uWidth;
 	uint32		uHeight;
 	WindHndl	hardwareHndl;
-	bool		bWindowed;
+	bool		bWindowed = false;
+	bool		bMenu = false;
 	char		name[s_nameLength];
 };
 

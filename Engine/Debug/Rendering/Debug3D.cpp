@@ -35,7 +35,7 @@ Debug3D::Debug3D()
 
 Debug3D::~Debug3D()
 {
-	ASSERT(m_psRenderer == this);
+	ASSERT(m_psRenderer == this || m_psRenderer == nullptr);
 	m_psRenderer = NULL;
 }
 

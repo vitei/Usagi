@@ -225,6 +225,7 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdlin
 	usg::DisplaySettings settings;
 	settings.uX = 0; settings.uY = 0; settings.uWidth = g_uWindowWidth; settings.uHeight = g_uWindowHeight;
 	settings.bWindowed = !g_bFullScreen; settings.hardwareHndl = NULL;
+	settings.bMenu = true;
 	const char * const p_string = "Virtual Screen";
 	str::Copy(settings.name, p_string, sizeof(settings.name));
 	WindHndl hndl = WINUTIL::CreateDisplayWindow(WindowProc, "Usagi", &settings, false);

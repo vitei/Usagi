@@ -69,7 +69,11 @@ namespace WINUTIL
 		{
 			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 			// Forcefully disable sys menu so games don't pause when you press alt
-			dwStyle = WS_OVERLAPPEDWINDOW & (~WS_SYSMENU);
+			dwStyle = WS_OVERLAPPEDWINDOW;
+			if (!pDisplaySettings->bMenu)
+			{
+				dwStyle &= (~WS_SYSMENU);
+			}
 		}
 
 		// Setup a RECT to describe the requested client area size

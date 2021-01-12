@@ -170,6 +170,7 @@ void ParticleEditor::Cleanup(usg::GFXDevice* pDevice)
 	m_emitterWindow.CleanUp(pDevice);
 	m_editorShapes.Cleanup(pDevice);
 	m_guiRend.Cleanup(pDevice);
+	m_postFX.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()
