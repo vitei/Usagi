@@ -1605,10 +1605,10 @@ void FbxLoad::FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::
 
 	// FIXME: All of this functionality should be moved over to the reverse co-ordinate function
 	usg::Matrix4x4 mRot;
-	mRot.MakeRotate(Math::DegreesToRadians(-(float)rot[0]), Math::DegreesToRadians(-(float)rot[1]), Math::DegreesToRadians((float)rot[2]));
+	mRot.MakeRotate(Math::DegreesToRadians((float)rot[0]), Math::DegreesToRadians(-(float)rot[1]), -Math::DegreesToRadians((float)rot[2]));
 	pFrame->qRot = mRot;
 	// FIXME: Having to apply the scale here almost certainly means we are failing to apply a necessary transform
-	pFrame->vPos.Assign((float)(trans[0]* m_appliedScale), (float)(trans[1] * m_appliedScale), -(float)(trans[2] * m_appliedScale));
+	pFrame->vPos.Assign(-(float)(trans[0]* m_appliedScale), (float)(trans[1] * m_appliedScale), (float)(trans[2] * m_appliedScale));
 	pFrame->vScale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 }
 
