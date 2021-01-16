@@ -159,6 +159,14 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 		}
 		m_constants.Unlock();
 		m_constants.UpdateData(pDevice);
+		if (m_pShadow)
+		{
+			m_descriptorSetShadow.UpdateDescriptors(pDevice);
+		}
+		else
+		{
+			m_descriptorSet.UpdateDescriptors(pDevice);
+		}
 	}
 	if (m_pShadow)
 	{
