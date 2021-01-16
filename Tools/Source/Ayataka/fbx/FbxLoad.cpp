@@ -499,10 +499,10 @@ bool FbxLoad::GetTextureIndex(const FbxTexture& textureInfo, const char* szTexNa
 
 	if (!pMaterial->IsCustomFX())
 	{
-		return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex);
+		return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex) && pMaterial->pb().textures[uIndex].textureName[0] == '\0';
 	}
 
-	return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex);
+	return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex) && pMaterial->pb().textures[uIndex].textureName[0] == '\0';
 }
 
 
