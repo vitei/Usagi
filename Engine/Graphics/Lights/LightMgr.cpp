@@ -17,6 +17,14 @@
 
 namespace usg {
 
+static const uint32 g_uShadowResMap[] =
+{
+	1024,
+	1536,
+	2048,
+	4096
+};
+
 LightMgr::LightMgr(void):
 m_pParent(nullptr)
 {
@@ -27,7 +35,7 @@ m_pParent(nullptr)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
-	m_shadowMapRes = 2048;
+	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
 }
 
 LightMgr::~LightMgr(void)
@@ -49,13 +57,15 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 }
 
 
-void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution)
+void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& settings)
 {
 	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
-	m_shadowMapRes = uResolution;
+	m_qualitySettings = settings;
+	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
+
 	if (m_cascadeBuffer.GetSlices() > 1)
 	{
-		m_cascadeBuffer.Resize(pDevice, uResolution, uResolution);
+		m_cascadeBuffer.Resize(pDevice, m_uShadowMapRes, m_uShadowMapRes);
 		m_cascadeTarget.Resize(pDevice);
 	}
 }
@@ -63,11 +73,11 @@ void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution
 
 void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 {
-	if (m_cascadeBuffer.GetWidth() != m_shadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
+	if (m_cascadeBuffer.GetWidth() != m_uShadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
 	{
 		m_cascadeBuffer.Cleanup(pDevice);
 		m_cascadeTarget.Cleanup(pDevice);
-		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uLayers, DF_DEPTH_32F);
+		m_cascadeBuffer.InitArray(pDevice, m_uShadowMapRes, m_uShadowMapRes, uLayers, DF_DEPTH_32F);
 		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
@@ -202,7 +212,7 @@ void LightMgr::ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext
 
 DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow);	
+	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bDirectionalShadows);	
 	if(szName)
 		pLight->SetName(szName);
 	ASSERT(pLight);
@@ -225,7 +235,7 @@ void LightMgr::RemoveDirLight(DirLight* pLight)
 
 PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bPointShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;
@@ -239,7 +249,7 @@ void LightMgr::RemovePointLight(PointLight* pLight)
 
 SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;
@@ -253,7 +263,7 @@ void LightMgr::RemoveSpotLight(SpotLight* pLight)
 
 ProjectionLight* LightMgr::AddProjectionLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;	

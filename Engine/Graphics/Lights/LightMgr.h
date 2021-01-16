@@ -34,10 +34,19 @@ public:
 	LightMgr(void);
 	~LightMgr(void);
 
+	struct QualitySettings
+	{
+		bool	bDirectionalShadows = true;
+		bool	bSpotShadows = false;
+		bool	bPointShadows = false;
+		uint32	uShadowQuality = 2;	// 1-4
+	};
+
 	// TODO: Add names to these lights?
 	void			Init(GFXDevice* pDevice, Scene* pParent);
 	void			InitShadowCascade(GFXDevice* pDevice, uint32 uLayers);
-	void			SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution);
+	void			SetQualitySettings(GFXDevice* pDevice, const QualitySettings& settings);
+	const auto&		GetQualitySettings() const { return m_qualitySettings; }
 	void			Cleanup(GFXDevice* pDevice);
 	void			Update(float fDelta, uint32 uFrame);
 	void			GPUUpdate(GFXDevice* pDevice);
@@ -151,6 +160,7 @@ private:
 		usg::vector<LightType*>		m_allocatedLights;
 		usg::vector<LightType*>		m_freeLights;
 	};
+
 	LightInstances<DirLight>		m_dirLights;
 	LightInstances<PointLight>		m_pointLights;
 	LightInstances<SpotLight>		m_spotLights;
@@ -160,7 +170,6 @@ private:
 	// FIXME: These should be per ViewContext
 	DepthStencilBuffer		m_cascadeBuffer;
 	RenderTarget			m_cascadeTarget;
-	uint32					m_shadowMapRes;
 
 	Scene*					m_pParent;
 	Color					m_skyColor;
@@ -169,7 +178,9 @@ private:
 	uint32					m_uShadowedDirLights;
 	uint32					m_uShadowedDirLightIndex;
 	uint32					m_uActiveFrame;
+	uint32					m_uShadowMapRes;
 	float					m_hemipshereLerp;
+	QualitySettings			m_qualitySettings;
 };
 
 } // namespace
