@@ -291,10 +291,10 @@ namespace usg{
 		m_pVertices = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f)*header.uVertices, FILE_READ_ALIGN);
 		m_uVertices = header.uVertices;
 
-		if (header.uTriangles >= 32)
+		/*if (header.uTriangles >= 32)
 		{
 			DEBUG_PRINT("WARNING: using a very complex collision model (%s) with %u triangles, %u vertices.\n", szName, header.uTriangles, header.uVertices);
-		}
+		}*/
 
 		size_t uNextBlockSize = sizeof(TriangleIndices) * header.uTriangles;
 		usg::MemCpy(m_pTriangles, pRawData + uPos, uNextBlockSize);
