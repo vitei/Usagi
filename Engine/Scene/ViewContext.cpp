@@ -98,7 +98,7 @@ namespace usg {
 
 			for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 			{
-				uVisibleNodes[i] = 0;
+				pVisibleNodes[i].reserve(500);
 			}
 		}
 		DescriptorSet			globalDescriptors[VIEW_COUNT];
@@ -114,8 +114,7 @@ namespace usg {
 		// Arbitrarily assigning fog to the scene context
 		Fog						fog[MAX_FOGS];
 
-		RenderNode*				pVisibleNodes[RenderLayer::LAYER_COUNT][MAX_NODES_PER_LAYER];
-		uint32					uVisibleNodes[RenderLayer::LAYER_COUNT];
+		vector<RenderNode*>		pVisibleNodes[RenderLayer::LAYER_COUNT];
 	};
 
 
@@ -231,8 +230,7 @@ namespace usg {
 	{
 		for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 		{
-			//m_drawLists[i].Clear();
-			m_pImpl->uVisibleNodes[i] = 0;
+			m_pImpl->pVisibleNodes[i].clear();
 		}
 
 		m_pImpl->lightingContext.ClearLists();
@@ -391,8 +389,7 @@ namespace usg {
 					{
 						//m_drawLists[pNode->GetLayer()].AddToEnd(pNode);
 						uint32 uLayer = pNode->GetLayer();
-						m_pImpl->pVisibleNodes[uLayer][m_pImpl->uVisibleNodes[uLayer]] = pNode;
-						m_pImpl->uVisibleNodes[uLayer]++;
+						m_pImpl->pVisibleNodes[uLayer].push_back(pNode);
 					}
 				}
 			}
@@ -407,8 +404,7 @@ namespace usg {
 				{
 					//m_drawLists[pEffect->GetLayer()].AddToEnd(pEffect);
 					uint32 uLayer = pEffect->GetLayer();
-					m_pImpl->pVisibleNodes[uLayer][m_pImpl->uVisibleNodes[uLayer]] = pEffect;
-					m_pImpl->uVisibleNodes[uLayer]++;
+					m_pImpl->pVisibleNodes[uLayer].push_back(pEffect);
 				}
 			}
 		}
@@ -417,13 +413,16 @@ namespace usg {
 		// FIXME: This needs to be more intelligent, an insertion sort when adding/ removing a node
 		for (int uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
+			if(m_pImpl->pVisibleNodes[uLayer].size() == 0)
+				continue;
+
 			if (uLayer == RenderLayer::LAYER_TRANSLUCENT)
 			{
-				qsort(m_pImpl->pVisibleNodes[uLayer], m_pImpl->uVisibleNodes[uLayer], sizeof(RenderNode*), CompareSortedNodes);
+				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareSortedNodes);
 			}
 			else
 			{
-				qsort(m_pImpl->pVisibleNodes[uLayer], m_pImpl->uVisibleNodes[uLayer], sizeof(RenderNode*), CompareNodes);
+				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareNodes);
 			}
 		}
 
@@ -464,9 +463,9 @@ namespace usg {
 		{
 			pContext->BeginGPUTag(g_szLayerNames[uLayer]);
 			//for(List<RenderNode>::Iterator it = m_drawLists[uLayer].Begin(); !it.IsEnd(); ++it)
-			for (uint32 i = 0; i < m_pImpl->uVisibleNodes[uLayer]; i++)
+			for (auto itr = m_pImpl->pVisibleNodes[uLayer].begin(); itr != m_pImpl->pVisibleNodes[uLayer].end(); ++itr)
 			{
-				RenderNode* node = m_pImpl->pVisibleNodes[uLayer][i];
+				RenderNode* node = *itr;
 				node->Draw(pContext, renderContext);
 			}
 

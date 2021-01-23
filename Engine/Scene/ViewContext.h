@@ -59,7 +59,6 @@ public:
 private:
 	enum
 	{
-		MAX_NODES_PER_LAYER = 500,
 		MAX_FOGS = 1
 	};
 
