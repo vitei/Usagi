@@ -367,6 +367,11 @@ void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 }
 
 
+void GFXContext::Cleanup(GFXDevice* pDevice)
+{
+	m_platform.Cleanup(pDevice);
+}
+
 void GFXContext::DrawIndexed(const IndexBuffer* pBuffer)
 {
 	if (m_uDirtyDescSetFlags)

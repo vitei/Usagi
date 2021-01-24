@@ -49,6 +49,7 @@ public:
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
 	VkCommandPool& GetCommandPool() { return m_cmdPool;  }
+	VkCommandPool CreateCommandPool();
 	VkDevice& GetVKDevice() { return m_vkDevice;  }
 	VkInstance& GetVKInstance() { return m_instance;  }
 	uint32 GetQueueFamilyCount() const { return m_uQueueFamilyCount; }
@@ -69,7 +70,7 @@ public:
 
 	VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin);
 	void FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free);
-	VkQueue GetQueue() { return m_queue; }
+	VkQueue GetQueue() { return m_queue[QUEUE_TYPE_GRAPHICS]; }
 	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
@@ -96,6 +97,13 @@ private:
 		MAX_GPU_COUNT = 2,
 		MAX_DISPLAY_COUNT = 4,
 		CALLBACK_COUNT = 2
+	};
+
+	enum QueueType
+	{
+		QUEUE_TYPE_GRAPHICS = 0,
+		QUEUE_TYPE_TRANSFER,
+		QUEUE_TYPE_COUNT
 	};
 
 	enum ResourceType
@@ -164,7 +172,9 @@ private:
 	uint32								m_uGPUCount;
 	VkQueueFamilyProperties*			m_pQueueProps;
 	uint32								m_uQueueFamilyCount;
-	VkQueue								m_queue;
+	VkQueue								m_queue[QUEUE_TYPE_COUNT];
+	VkDeviceQueueCreateInfo				m_queueInfo;
+
 
 	VkPipelineCache						m_pipelineCache;
 	VkAllocationCallbacks				m_allocCallbacks;

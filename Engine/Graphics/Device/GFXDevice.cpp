@@ -39,6 +39,7 @@ GFXDevice::GFXDevice()
 GFXDevice::~GFXDevice()
 {
 	// Platform specific version may need to cleanup first
+	m_pImpl->immediateContext.Cleanup(this);
 	m_pImpl->platform.Cleanup(this);
 
 	if (m_pHMD)

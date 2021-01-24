@@ -36,11 +36,14 @@ namespace usg {
 
 	void GFXContext_ps::Init(GFXDevice* pDevice, GFXContext* pParent, bool bDeferred, uint32 uSizeMul)
 	{
+		// We want a different command pool per context as we may have them on seperate threads
+		m_cmdPool = pDevice->GetPlatform().CreateCommandPool();
+
 		VkResult err;
 		VkCommandBufferAllocateInfo cmd = {};
 		cmd.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		cmd.pNext = NULL;
-		cmd.commandPool = pDevice->GetPlatform().GetCommandPool();
+		cmd.commandPool = m_cmdPool;
 		cmd.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmd.commandBufferCount = 1;
 
@@ -52,6 +55,12 @@ namespace usg {
 
 		m_pParent = pParent;
 
+	}
+
+	void GFXContext_ps::Cleanup(GFXDevice* pDevice)
+	{
+		vkDestroyCommandPool(pDevice->GetPlatform().GetVKDevice(), m_cmdPool, NULL);
+		vkFreeCommandBuffers(pDevice->GetPlatform().GetVKDevice(), m_cmdPool, 1, &m_cmdBuff);
 	}
 
 	void GFXContext_ps::Begin(bool bApplyDefaults)

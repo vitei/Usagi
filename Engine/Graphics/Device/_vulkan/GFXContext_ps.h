@@ -28,6 +28,7 @@ public:
 	~GFXContext_ps();
 
 	void Init(GFXDevice* pDevice, GFXContext* pParent, bool bDeferred, uint32 uSizeMul);
+	void Cleanup(GFXDevice* pDevice);
 
 	void Begin(bool bApplyDefaults);
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);
@@ -75,6 +76,7 @@ private:
 
 	GFXContext*			m_pParent;
 	VkCommandBuffer		m_cmdBuff;
+	VkCommandPool		m_cmdPool;
 	VkPipelineLayout	m_pipelineLayout;
 
 	PFN_vkCmdDebugMarkerBeginEXT m_pfnCmdDebugMarkerBegin;

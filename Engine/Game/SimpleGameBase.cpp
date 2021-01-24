@@ -15,9 +15,9 @@
 #include "Engine/Network/UsagiInetCore.h"
 #include "SimpleGameBase.h"
 
-#ifdef PLATFORM_SWITCH
+//#ifdef PLATFORM_SWITCH
 #define USE_THREADED_LOADING
-#endif
+//#endif
 
 
 namespace usg

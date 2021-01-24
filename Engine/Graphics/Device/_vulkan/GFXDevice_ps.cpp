@@ -439,7 +439,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 
 	// Init the device
-	VkDeviceQueueCreateInfo queue_info = {};
+	memset(&m_queueInfo, 0, sizeof(m_queueInfo));
 
 	if (GetHMDPhysicalDeviceVKFn)
 	{
@@ -451,7 +451,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 
 	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, NULL);
-	ASSERT(m_uQueueFamilyCount >= 1);
+	FATAL_RELEASE(m_uQueueFamilyCount >= 1, "No queue families found");
 
 	m_pQueueProps = (VkQueueFamilyProperties*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, sizeof(VkQueueFamilyProperties)*m_uQueueFamilyCount);
 	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, m_pQueueProps);
@@ -461,21 +461,22 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	bool bFound = false;
 	for (unsigned int i = 0; i < m_uQueueFamilyCount; i++)
 	{
-		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		// TODO: We could use different queue families for the queues. The loading one only needs the transfer bit
+		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && m_pQueueProps[i].queueCount >= 2)
 		{
-			queue_info.queueFamilyIndex = i;
+			m_queueInfo.queueFamilyIndex = i;
 			bFound = true;
 			break;
 		}
 	}
 
-	ASSERT(bFound);
+	FATAL_RELEASE(bFound, "No valid queue family with enough queues");
 
-	float queue_priorities[1] = { 0.0 };	// The relative priority of work submitted to each of the queues
-	queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queue_info.pNext = NULL;
-	queue_info.queueCount = 1;
-	queue_info.pQueuePriorities = queue_priorities;
+	float queue_priorities[QUEUE_TYPE_COUNT] = { 0.0, 0.0 };	// The relative priority of work submitted to each of the queues
+	m_queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	m_queueInfo.pNext = NULL;
+	m_queueInfo.queueCount = QUEUE_TYPE_COUNT;
+	m_queueInfo.pQueuePriorities = queue_priorities;
 
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
@@ -526,7 +527,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_info.pNext = NULL;
 	device_info.queueCreateInfoCount = 1;
-	device_info.pQueueCreateInfos = &queue_info;
+	device_info.pQueueCreateInfos = &m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
 	device_info.ppEnabledExtensionNames = extensions.data();
 	device_info.enabledLayerCount = validationLayerCount;
@@ -537,17 +538,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	res = vkCreateDevice(m_primaryPhysicalDevice, &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
 	ASSERT(res == VK_SUCCESS);
 
-	// Create a command pool to allocate our command buffer from
-	VkCommandPoolCreateInfo cmd_pool_info = {};
-	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmd_pool_info.pNext = NULL;
-	cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
-	// We will have short lived cmd buffers (for file loading), and reuse them
-	// TODO: Perhaps we want multiple command pools?
-	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
-	ASSERT(res == VK_SUCCESS);
 
 	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -556,7 +547,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	EnumerateDisplays();
 
-	vkGetDeviceQueue(m_vkDevice, queue_info.queueFamilyIndex, 0, &m_queue);
+	m_cmdPool = CreateCommandPool();
+
+	for(int i=0; i<QUEUE_TYPE_COUNT; i++)
+	{
+		vkGetDeviceQueue(m_vkDevice, m_queueInfo.queueFamilyIndex, i, &m_queue[i]);
+	}
 
 	VkFenceCreateInfo fenceInfo;
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -595,6 +591,24 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 			}
 		}
 	}
+}
+
+VkCommandPool GFXDevice_ps::CreateCommandPool()
+{
+	// Create a command pool to allocate our command buffer from
+	VkCommandPoolCreateInfo cmd_pool_info = {};
+	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmd_pool_info.pNext = NULL;
+	cmd_pool_info.queueFamilyIndex = m_queueInfo.queueFamilyIndex;
+	// We will have short lived cmd buffers (for file loading), and reuse them
+	// TODO: Perhaps we want multiple command pools?
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+	VkCommandPool pool;
+	VkResult res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &pool);
+	ASSERT(res == VK_SUCCESS);
+
+	return pool;
 }
 
 
@@ -711,7 +725,7 @@ void GFXDevice_ps::End()
 	submitInfo.pWaitSemaphores = &m_pParent->GetDisplay(0)->GetPlatform().GetImageAcquired();
 	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
-	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, m_drawFence);
+	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
 }
 
@@ -958,9 +972,11 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	res = vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
+	res = vkQueueSubmit(m_queue[QUEUE_TYPE_TRANSFER], 1, &submitInfo, VK_NULL_HANDLE);
 	ASSERT(res == VK_SUCCESS);
-	res = vkQueueWaitIdle(m_queue);
+
+	// TODO: Remove these waits
+	res = vkQueueWaitIdle(m_queue[QUEUE_TYPE_TRANSFER]);
 	ASSERT(res == VK_SUCCESS);
 
 	if (free)
