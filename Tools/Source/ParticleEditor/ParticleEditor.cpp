@@ -100,6 +100,8 @@ ParticleEditor::ParticleEditor()
 
 void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 {
+	usg::Input::Init();
+
 	uint32 uWidth;
 	uint32 uHeight;
 

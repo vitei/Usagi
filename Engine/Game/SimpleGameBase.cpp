@@ -85,6 +85,9 @@ namespace usg
 		m_debug.RegisterCPUTimer(&m_cpuTimer);
 
 		m_pTransitionMode = CreateTransitionMode(pDevice, pResMgr);
+
+		// We delay this due to the time some of the direct input init code takes
+		Input::Init();
 	}
 
 	usg::ModeTransition* SimpleGameBase::CreateTransitionMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
@@ -147,7 +150,17 @@ namespace usg
 		bool bFinished = true;
 		usg::Fader::Inst()->Update(fElapsed);
 		usg::Fader::Inst()->GPUUpdate(pDevice);
-		m_debug.Update(fElapsed);
+
+		if(m_eState != STATE_SPLASH)
+		{
+			m_debug.Update(fElapsed);
+#ifdef PLATFORM_PC
+			if (usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
+			{
+				m_bIsRunning = false;
+			}
+#endif
+		}
 
 		PreModeUpdate(fElapsed);
 
@@ -237,13 +250,6 @@ namespace usg
 			usg::MusicManager::Inst()->Update(fElapsed);
 			usg::Audio::Inst()->Update(fElapsed);
 		}
-
-#ifdef PLATFORM_PC
-		if (usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
-		{
-			m_bIsRunning = false;
-		}
-#endif
 	}
 	//----------------------------------------------------
 	void SimpleGameBase::Draw(usg::GFXDevice* pDevice)

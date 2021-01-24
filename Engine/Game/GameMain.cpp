@@ -102,6 +102,16 @@ bool GameMain(const char** dllModules, uint32 uModuleCount)
 	if(!GameInit())
 		return false;
 
+#if 0
+	if (!InitInput())
+	{
+		return false;
+	}
+#endif
+
+	// Everything should be set up now, time to finalize any early load modules
+	usg::ModuleManager::Inst()->PostInit(g_pGFXDevice);
+
 	if (OS::ShouldQuit())
 	{
 		GameExit();
@@ -161,11 +171,6 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 		// We pre-load as some of these may need to be known about when initing gfx and input
 		usg::ModuleManager::Inst()->LoadModule(dllModules[i]);
 	}
-    
-    if(!InitInput())
-	{
-		return false;
-	}
 
 	g_pGFXDevice = GFX::Initialise();
 
@@ -183,9 +188,6 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 	//Audio::Create()->Init();
 
 	//physics::init();
-
-	// Everything should be set up now, time to finalize any early load modules
-	usg::ModuleManager::Inst()->PostInit(g_pGFXDevice);
 
 	return true;
 }
