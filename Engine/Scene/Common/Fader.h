@@ -41,6 +41,8 @@ namespace usg
 
 		bool IsBlackout();
 
+		void ForceAlpha(float fAlpha);
+
 	private:
 		usg::PipelineStateHndl	m_pipelineState;
 		usg::DescriptorSet		m_descriptorSet;

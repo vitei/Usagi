@@ -61,6 +61,12 @@ namespace usg
 	}
 
 
+	void Fader::ForceAlpha(float fAlpha)
+	{
+		sfAlpha = fAlpha;
+	}
+
+
 	static void SetVertex(int num, const usg::Vector3f &p, usg::PositionVertex& out)
 	{
 		out.x = p.x;

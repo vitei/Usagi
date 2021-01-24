@@ -37,7 +37,9 @@ namespace usg
 		virtual void ModeFinished() = 0;
 		virtual ModeLoadFunc GetLoadFunc() const = 0;
 		virtual usg::ModeTransition* CreateTransitionMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr);
+		virtual usg::Mode* CreateSplashMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) { return nullptr; }
 		void FinishedStaticLoad(usg::GFXDevice* pDevice);
+		virtual void PostSplashInit(usg::GFXDevice* pDevice, ResourceMgr* pResMgr);
 
 		enum State
 		{
@@ -45,7 +47,8 @@ namespace usg
 			STATE_FADE_OUT,
 			STATE_TRANSITION,
 			STATE_LOADING,
-			STATE_END_LOADING
+			STATE_END_LOADING,
+			STATE_SPLASH
 		};
 
 

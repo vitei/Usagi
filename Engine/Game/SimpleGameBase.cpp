@@ -50,15 +50,34 @@ namespace usg
 	{
 		m_transitionRenderPass = pDevice->GetDisplay(0)->GetRenderPass();
 
+		usg::Fader::Create()->Init(pDevice, m_transitionRenderPass);
+		usg::Audio::Create()->Init();
+
+		m_pActiveMode = CreateSplashMode(pDevice, pResMgr);
+		if(m_pActiveMode)
+		{
+			m_pActiveMode->Init(pDevice, pResMgr);
+			m_pActiveMode->Update(0.0f);
+			m_pActiveMode->PreDraw(pDevice, nullptr);
+			usg::Fader::Inst()->ForceAlpha(0.0f);
+			m_eState = STATE_SPLASH;
+		}
+		else
+		{
+			m_eState = STATE_LOADING;
+			PostSplashInit(pDevice, pResMgr);
+			StartNextMode(pDevice);
+		}
+	}
+
+	void SimpleGameBase::PostSplashInit(usg::GFXDevice* pDevice, ResourceMgr* pResMgr)
+	{
+		// A bunch of stuff to hide behind the splash screen
 		m_pInternalData->m_pInitThread.reset(vnew(usg::ALLOC_OBJECT)usg::InitThread());
 		m_pInternalData->m_pInitThread->Init(pDevice, GetLoadFunc());
 		m_pInternalData->m_pUsagiInetCore.reset(vnew(usg::ALLOC_NETWORK)usg::UsagiInetCore());
 		usg::physics::init();
-		usg::Fader::Create()->Init(pDevice, m_transitionRenderPass);
-		usg::Audio::Create()->Init();
 		usg::MusicManager::Create();
-		
-		m_eState = STATE_LOADING;
 
 		m_debugRender.Init(pDevice, pResMgr, m_transitionRenderPass);
 		m_debugRender.SetDrawArea(0.0f, 0.0f, 1280.f, 720.f);
@@ -186,6 +205,16 @@ namespace usg
 				}
 			}
 			break;
+		case STATE_SPLASH:
+			if (m_pActiveMode->Update(fElapsed))
+			{
+				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+				PostSplashInit(pDevice, usg::ResourceMgr::Inst());
+				//m_eState = STATE_LOADING;
+				m_eState = STATE_FADE_OUT;
+				ModeFinished();
+			}
+			break;
 		case STATE_END_LOADING:
 			if (!DrawLoadingScreen() || usg::Fader::Inst()->IsBlackout())
 			{
@@ -201,11 +230,13 @@ namespace usg
 			break;
 		}
 
-		m_debug.Draw();
-
-
-		usg::MusicManager::Inst()->Update(fElapsed);
-		usg::Audio::Inst()->Update(fElapsed);
+		// These things aren't ready yet
+		if(m_eState != STATE_SPLASH)
+		{
+			m_debug.Draw();
+			usg::MusicManager::Inst()->Update(fElapsed);
+			usg::Audio::Inst()->Update(fElapsed);
+		}
 
 #ifdef PLATFORM_PC
 		if (usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
