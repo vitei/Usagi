@@ -59,8 +59,8 @@ namespace usg {
 
 	void GFXContext_ps::Cleanup(GFXDevice* pDevice)
 	{
-		vkDestroyCommandPool(pDevice->GetPlatform().GetVKDevice(), m_cmdPool, NULL);
 		vkFreeCommandBuffers(pDevice->GetPlatform().GetVKDevice(), m_cmdPool, 1, &m_cmdBuff);
+		vkDestroyCommandPool(pDevice->GetPlatform().GetVKDevice(), m_cmdPool, NULL);
 	}
 
 	void GFXContext_ps::Begin(bool bApplyDefaults)
