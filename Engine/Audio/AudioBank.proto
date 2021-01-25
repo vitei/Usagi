@@ -79,19 +79,17 @@ message ReverbEffectDef
 {
 	required AudioEffectDef effectDef = 1;
 
-	required float wetDryMix = 2 [default = 50];	// Percent output that is reverb
-	required int32 room = 3 [default = -10];		// Attenuation -10000 to 0
-	required int32 roomHF = 4 [default = -18]; 		// Attenuation of high frequence -10000 to 0
-	required float roomRolloffFactor = 5 [default = 0];			// Rolloff factor 0 to 10
-	required float decayTime = 6 [default = 1.49]; 	// Reverb decay time, 0.1 to 20.0
-	required float decayHFRatio = 7 [default = 0.5]; 	// Ratio of decay time from high to low frequences 0.1 to 2.0
-	required int32 reflections = 8 [default = -2470]; 	// Attenuation of early reflections relative to room -10000 to 1000
-	required float reflectionsDelay = 9 [default = 0.179]; // Delay time of the first reflection relative to the direct path, 0.0 to 0.3 
-	required int32 reverb = 10 [default = -1930]; 		// Attenuation of late reverb relative to room -10000 to 2000
-	required float reverbDelay = 11 [default = 100.0];// Time limit between the early reflections and late reverb to time of first reflection
-	required float diffusion = 12 [default = 21.0];	// Echo density in late reverb, percentage 0 to 100
-	required float density = 13 [default = 100.0]; 	// Modal density in late reverb decay, 0 to 100
-	required float hfReference = 14 [default = 5000.0];// High frequency (20 to 20000)
+	required float wetDryMix = 2 [default = 100.0];			// 0 to 100 Percent output that is reverb
+	required int32 reflectionsDelay = 3 [default = 0];		// 0 to 300 milliseconds
+	required int32 reverbDelay = 4 [default = 85];  		// 0-85ms Delay of reverb from first reflection
+	required float roomFilterFreq = 5 [default = 20.0];  	// 20-20000 Corner frequency of the low pass filter for the room effect
+	required float roomFilterMain = 6 [default = 0.0];		// -100 to 0 
+	required float roomFilterHF = 7 [default = 0.0];		// -100 to 0 
+	required float reflectionsGain = 8 [default = 20.0];	// -100 to 20db Intensity of early reflections
+	required float reverbGain = 9 [default = 20.0];			// -100 to 20db Intensity of reverberations
+	required float decayTime = 10 [default = 1.0];	 		// 0.1 to FLT_MAX Reverb decay time
+	required float density = 11 [default = 100.0]; 			// 0 to 100 (0 is hollow)
+	required float roomSize = 12 [default = 100.0];			// 0 to 100feet
 }
 
 message AudioRoomDef
