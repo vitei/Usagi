@@ -727,28 +727,20 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 {
 	usg::exchange::Rasterizer& rRasterizer = pNewMaterial->pb().rasterizer;
 
-	// render state mode
-	rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_OPAQUE;
-
 	// cull face
 	rRasterizer.cullFace = usg::CULL_FACE_BACK;
 
 	// blend mode
-	rRasterizer.blendMode = ::usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
+	rRasterizer.blendEnabled = false;
 	rRasterizer.alphaState.rgbOp = BLEND_EQUATION_ADD;
 	rRasterizer.alphaState.alphaOp = BLEND_EQUATION_ADD;
 	if (bTransparent)
 	{
-		rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_TRANSLUCENT;
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR;
+		rRasterizer.blendEnabled = true;
 		rRasterizer.alphaState.rgbSrcFunc = BLEND_FUNC_SRC_ALPHA;
 		rRasterizer.alphaState.rgbDestFunc = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		rRasterizer.alphaState.alphaSrcFunc = BLEND_FUNC_ONE;
 		rRasterizer.alphaState.alphaDestFunc = BLEND_FUNC_ZERO;
-	}
-	else
-	{
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
 	}
 
 	// depth test
@@ -895,28 +887,20 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 
 	usg::exchange::Rasterizer& rRasterizer = pNewMaterial->pb().rasterizer;
 
-	// render state mode
-	rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_OPAQUE;
-
 	// cull face
 	rRasterizer.cullFace = usg::CULL_FACE_BACK;
 
 	// blend mode
-	rRasterizer.blendMode = ::usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
+	rRasterizer.blendEnabled = 0;
 	rRasterizer.alphaState.rgbOp = BLEND_EQUATION_ADD;
 	rRasterizer.alphaState.alphaOp = BLEND_EQUATION_ADD;
 	if (bTransparent)
 	{
-		rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_TRANSLUCENT;
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR;
+		rRasterizer.blendEnabled = 1;
 		rRasterizer.alphaState.rgbSrcFunc = BLEND_FUNC_SRC_ALPHA;
 		rRasterizer.alphaState.rgbDestFunc = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		rRasterizer.alphaState.alphaSrcFunc = BLEND_FUNC_ONE;
 		rRasterizer.alphaState.alphaDestFunc = BLEND_FUNC_ZERO;
-	}
-	else
-	{
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
 	}
 
 	// depth test

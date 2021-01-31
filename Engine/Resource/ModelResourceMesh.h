@@ -76,8 +76,6 @@ namespace usg{
 		SamplerHndl				samplers[MAX_UV_STAGES];
 		TextureCoordInfo		uvMapping[MAX_UV_STAGES];
 		uint32					uUVCount;
-		uint32					uFogIndex;
-		bool					bEnableFog;
 		bool					bCanFade;
 
 		uint32					singleAttributesNum;

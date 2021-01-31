@@ -43,24 +43,11 @@ message Texture {
 	required uint32 anisoLevel = 10 [default = 0];
 }
 
-enum Rasterizer_Mode {
-	MODE_CUSTOM = 0;
-	MODE_OPAQUE = 1;
-	MODE_MASK = 2;
-	MODE_TRANSLUCENT = 3;
-}
-
 enum Translucency_Type {
 	TRANSLUCENCY_OPAQUE = 0;
 	TRANSLUCENCY_TRANSLUCENT = 1;
 	TRANSLUCENCY_ADDITIVE = 2;
 	TRANSLUCENCY_SUBTRACTIVE = 3;
-}
-
-enum Rasterizer_BlendMode {
-	BLEND_MODE_NONE = 0;
-	BLEND_MODE_COLOR = 1;
-	BLEND_MODE_LOGIC = 2;
 }
 
 enum Rasterizer_Attribute {
@@ -79,18 +66,17 @@ message Rasterizer {
 
 	required uint32 depthTestFunc = 2  [default = 0];
 
-	required AlphaStateGroup alphaState = 3;
+	required uint32 blendEnabled = 3 [default = 0];
+	required AlphaStateGroup alphaState = 4;
 
-	required uint32 mode = 4 [default = 1];
 	required uint32 cullFace = 5 [default = 1];
-	required uint32 blendMode = 6 [default = 0];
 
-	required uint32 isPolygonOffsetEnable = 7 [default = 0];
-	required int32 polygonOffsetUnit = 8 [default = 0];
+	required uint32 isPolygonOffsetEnable = 6 [default = 0];
+	required int32 polygonOffsetUnit = 7 [default = 0];
 
-	required StencilTest stencilTest = 9;
+	required StencilTest stencilTest = 8;
 
-	required uint32 colorMask = 10 [default = 15]; // 0xF MASK_ALL
+	required uint32 colorMask = 9 [default = 15]; // 0xF MASK_ALL
 }
 
 
@@ -133,11 +119,8 @@ message TextureCoordinator {
 }
 
 message MaterialAttribute {
-	required uint32 isFogEnable = 1 [default = 0];
-	required uint32 fogIndex = 2 [default = 0];
 	
-	required uint32 translucencyKind = 3 [default = 0];
-	required uint32 lightSetIndex = 4 [default = 0];
+	required uint32 translucencyKind = 1 [default = 0];
 }
 
 

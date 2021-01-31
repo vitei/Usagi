@@ -95,7 +95,7 @@ void SetupAlphaStateDecl( AlphaStateDecl& decl, const exchange::Rasterizer& rast
 		decl.uAlphaRef = static_cast<uint8>( rasterizer.alphaState.alphaTestReference * UCHAR_MAX );
 	}
 
-	if( rasterizer.blendMode == exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR )
+	if( rasterizer.blendEnabled )
 	{
 		decl.bBlendEnable = true;
 		decl.srcBlend = static_cast<BlendFunc>( rasterizer.alphaState.rgbSrcFunc );
@@ -512,8 +512,6 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	depthDecl.SetMask(0x0, STENCIL_MASK_GEOMETRY, STENCIL_GEOMETRY);
 	depthDecl.SetOperation(STENCIL_OP_REPLACE, STENCIL_OP_KEEP, STENCIL_OP_KEEP);
 	depthDecl.bStencilEnable = true;
-	m_meshArray[m_uMeshCount].bEnableFog = pMaterial->attribute.isFogEnable != 0;
-	m_meshArray[m_uMeshCount].uFogIndex = pMaterial->attribute.fogIndex;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 	SetupAlphaStateDecl( alphaDecl, pMaterial->rasterizer );
