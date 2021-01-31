@@ -25,7 +25,6 @@ namespace usg {
 			m_pIndexBuffer = NULL;
 			SetPriority(128);	// Set the priority to middle level so we can easily tweak ordering
 			m_uVertexBuffers = 0;
-			m_bEnableFog = true;
 
 		}
 		virtual ~RenderNodeEx() {}
@@ -73,7 +72,6 @@ namespace usg {
 			uint32 uIndex;
 		};
 
-		bool					m_bEnableFog;
 		DescriptorSet			m_descriptorSet;
 		PipelineStateHndl		m_pipelineState;
 		PipelineStateHndl		m_omniDepthPipelineState;
