@@ -92,10 +92,6 @@ inline void setupMaterialIndex( ::exchange::Mesh** pMesh, const Cmdl& cmdl )
 		}
 	}
 
-	// TEMP: Sonar material HACK
-	if( pMaterial && pMaterial->pb().attribute.lightSetIndex == 2 ) {
-		SAFE_DELETE( *pMesh );
-	}
 }
 
 inline usg::Vector3f getVector3NodeAttribute( const pugi::xpath_node& node, const char* pChildNodeName ) {
