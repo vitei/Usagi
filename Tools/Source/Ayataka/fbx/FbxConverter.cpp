@@ -109,12 +109,18 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 		converter.SplitMeshesPerMaterial(scene, true);
 	}
 
+	aya::string overridePath = path;
+	found = overridePath.find_last_of(".");
+	overridePath = overridePath.substr(0, found);
+	overridePath += ".yml";
+	MaterialOverrides overrides;
+	overrides.Init(overridePath.c_str(), "Model", "FBXDefault", pDependencies);
 	FbxLoad fbxLoader;
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
 	//fbxLoader.SetAppliedScale(scale);
 	fbxLoader.SetAttenScale(scale);	// The convert scene doesn't handle this
-	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies );
+	fbxLoader.Load( mCmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies, &overrides);
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
 	SetNameFromPath( path.c_str() );

@@ -40,6 +40,8 @@ public:
 	uint32 GetTextureCount() const { return (uint32)m_samplers.size(); }
 	const char* GetDefaultTexName(uint32 uTex) { return m_samplers[uTex].texName; }
 
+	bool OverrideData(const char* szSetName, const char* szVariableName, const YAML::Node& node);
+
 	template <class VariableType>
 	void OverrideTyped(uint32 uSet, const char* szName, void* pDst, VariableType* pVar, uint32 uCount = 1, uint32 uStartId = 0)
 	{

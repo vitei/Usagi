@@ -46,3 +46,5 @@ Tools/Source/EnvironmentSetup/Release/
 Tools/Source/EnvironmentSetup/x64/
 Tools/Source/EnvironmentSetup/.vs/
 Platform/Tools/Source/ResPak/ResPak/x64/
+*.ipdb
+*.iobj

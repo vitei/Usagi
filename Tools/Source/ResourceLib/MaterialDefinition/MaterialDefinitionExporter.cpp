@@ -273,6 +273,25 @@ void SetDefaultData(usg::CustomEffectDecl::Attribute& attrib, const YAML::Node& 
 	SetDefaultData(attrib.eConstantType, 1, node, pData8);
 }
 
+bool MaterialDefinitionExporter::OverrideData(const char* szSetName, const char* szVariableName, const YAML::Node& node)
+{
+	for(int i=0; i<m_constantSets.size(); i++)
+	{
+		if (strcmp(m_constantSets[i].set.szName, szSetName) == 0)
+		{
+			for (int j = 0; j < m_constantSets[i].constants.size(); j++)
+			{
+				if (strcmp(m_constantSets[i].constants[j].szName, szVariableName) == 0)
+				{
+					SetDefaultData(m_constantSets[i].constants[j], node, m_constantSets[i].rawData.data());
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 MaterialDefinitionExporter::~MaterialDefinitionExporter()
 {
 

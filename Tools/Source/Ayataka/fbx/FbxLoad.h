@@ -9,6 +9,7 @@
 #include "Dependencies/DependencyTracker.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/stl/vector.h"
+#include "exchange/MaterialOverrides.h"
 #include "Engine/Scene/Model/SkeletalAnimation.pb.h"
 #include <fbxsdk.h>
 
@@ -103,7 +104,7 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies, MaterialOverrides* pOverrides);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
 	void SetAttenScale(double fScale) { m_fAttenScale = fScale; }
 
@@ -220,6 +221,7 @@ private:
 	usg::vector<TempVertex>	m_activeVerts;
 	usg::vector<WeightingInfo> m_activeWeights;
 	DependencyTracker*		m_pDependencies;
+	MaterialOverrides*		m_pOverrides;
 };
 
 #endif // FMDALOAD_H

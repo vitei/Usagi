@@ -754,42 +754,6 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
-	std::string effectName = "FBXDefault";
-	std::string effectSet = "Model";
-	FbxProperty p = pFBXMaterial->FindProperty("EffectName", false);
-	if (p.IsValid())
-	{
-		std::string nodeName = p.GetName();
-		EFbxType eType = p.GetPropertyDataType().GetType();
-		if (eType == eFbxString)
-		{
-			FbxString string = p.Get< FbxString >();
-			effectName = string;
-		}
-	}
-
-	// FIXME: Get custom effect definitions
-	const char* szUsagiPath = getenv("USAGI_DIR");
-	std::string emuPath = szUsagiPath;
-	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\GLSL\\effects\\";
-	emuPath += effectSet;
-	emuPath += ".yml";
-	FILE* pFile = nullptr;
-	if (fopen_s(&pFile, emuPath.c_str(), "r") != 0)
-	{
-		emuPath = szUsagiPath;
-		emuPath += "..\\Data\\GLSL\\effects\\";
-		emuPath += effectSet;
-		emuPath += ".yml";
-		if (!fopen_s(&pFile, emuPath.c_str(), "r"))
-		{
-			FATAL_RELEASE(false, "Could not find effect %s", effectName.c_str());
-			return nullptr;
-		}
-		fclose(pFile);
-	}
-	
 	pNewMaterial->SetIsCustomFX(false);
 
 	std::vector<std::string> defines;
@@ -824,12 +788,11 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 		}
 	}
 
-	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str(), effectName.c_str(), defines);
-
 	// material name
 	const char* pMaterialName = pFBXMaterial->GetName();
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
+
+	m_pOverrides->InitDefault(pNewMaterial->pb().materialName, defines, pNewMaterial);
 
 	AddMaterialTextures(pFBXMaterial, pNewMaterial);
 	bool bTransparent = SetDefaultMaterialVariables(pFBXMaterial, pNewMaterial);
@@ -912,8 +875,9 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies, MaterialOverrides* pOverrides)
 {
+	m_pOverrides = pOverrides;
 	m_pDependencies = pDependencies;
 	m_pScene = modelScene;
 	m_bCollisionMesh = bCollisionModel;
@@ -2165,6 +2129,14 @@ void FbxLoad::PostProcessing(Cmdl& cmdl)
 			pMaterial->SetVariable("bVertexAlpha", true);
 		}
 
+	}
+
+	uint32 uMaterialCount = cmdl.GetMaterialNum();
+	for (uint32 i = 0; i < uMaterialCount; i++)
+	{
+		::exchange::Material* pMaterial = cmdl.GetMaterialPtr(i);
+
+		m_pOverrides->ApplyOverrides(pMaterial->pb().materialName, pMaterial);
 	}
 
 	// Calculate adjacency

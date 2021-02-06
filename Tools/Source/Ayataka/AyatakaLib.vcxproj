@@ -34,6 +34,7 @@
     <ClInclude Include="exchange\Animation.h" />
     <ClInclude Include="exchange\LoaderUtil.h" />
     <ClInclude Include="exchange\Material.h" />
+    <ClInclude Include="exchange\MaterialOverrides.h" />
     <ClInclude Include="exchange\Mesh.h" />
     <ClInclude Include="exchange\Shape.h" />
     <ClInclude Include="exchange\Skeleton.h" />
@@ -61,6 +62,7 @@
     <ClCompile Include="Dependencies\DependencyTracker.cpp" />
     <ClCompile Include="exchange\Animation.cpp" />
     <ClCompile Include="exchange\Material.cpp" />
+    <ClCompile Include="exchange\MaterialOverrides.cpp" />
     <ClCompile Include="exchange\Mesh.cpp" />
     <ClCompile Include="exchange\Shape.cpp" />
     <ClCompile Include="fbx\FbxConverter.cpp" />
