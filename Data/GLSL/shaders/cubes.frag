@@ -1,10 +1,7 @@
 #include "includes/platformdefines.inc"
 
-in GeometryData
-{
-    ATTRIB_LOC(0) vec4 	vo_vColor;
-    
-} geometryData;
+
+ATTRIB_LOC(0) in vec4 	go_vColor;
 
 
 layout(location = 0) out vec4 colorOut;
@@ -20,5 +17,5 @@ void main(void)
     
     //OutputLinearDepth(geometryData.vo_vColor.w);
 
-	colorOut = geometryData.vo_vColor;
+	colorOut = go_vColor;
 }
