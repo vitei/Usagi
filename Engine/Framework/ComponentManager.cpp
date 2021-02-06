@@ -376,7 +376,7 @@ namespace usg
 							removedEntitites[uRemovedEntities] = e;
 							uRemovedEntities++;
 
-							if (uRemovedEntities > uMaxBatchSize)
+							if (uRemovedEntities >= uMaxBatchSize)
 							{
 								// Free this group
 								m_eventManager.RegisterEntitiesRemoved(removedEntitites, uRemovedEntities);
