@@ -5,6 +5,7 @@
 #include "Engine/Framework/SystemCategories.h"
 #include "Engine/Scene/Model/ModelComponents.pb.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
+#include "Engine/Framework/ExclusionCheck.h"
 #include "Engine/Resource/SkeletalAnimationResource.h"
 #include "Engine/Scene/Model/ModelAnimPlayer.h"
 #include "Engine/Scene/Model/Bone.h"
@@ -13,6 +14,7 @@
 #include "Engine/Scene/Model/UVMapper.h"
 #include "Engine/Scene/Model/ModelEvents.pb.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Core/stl/utility.h"
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Graphics/GPUUpdate.h"
@@ -237,9 +239,8 @@ namespace usg
 		public:
 			struct Inputs
 			{
-				Required<BoneComponent, FromSelf>					bone;
-				Required<ModelAnimComponent, FromSelfOrParents>		anim;
-				Required<ModelComponent, FromSelfOrParents>			model;	// FIXME: Remove, for testing purposes
+				Required<BoneComponent, FromSelf>								bone;
+				Required<ModelAnimComponent, FromUnderCompInc<ModelComponent> >	anim;
 		    };
 
 			struct Outputs
@@ -249,6 +250,7 @@ namespace usg
 		    };
 
 			DECLARE_SYSTEM(SYSTEM_POST_GAMEPLAY)
+
 		    static void	Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 		    {
 		    	if (inputs.anim.GetRuntimeData().pAnimPlayer->ControlsBone(inputs.bone->uIndex))

@@ -157,6 +157,35 @@ struct ComponentGetterInt< T, FromParentWith<ComponentType> >
 	}
 };
 
+template<typename T, typename ComponentType>
+struct ComponentGetterInt< T, FromUnderCompInc<ComponentType> >
+{
+	static Component<T>* GetComponent(Entity uEntity)
+	{
+		Component<T>* targetComponent = ComponentGetterInt<T, FromSelfOrParents>::GetComponent(uEntity);
+		if(!targetComponent)
+			return nullptr;
+		
+		if ( Component<ComponentType>* stopperComponent = ComponentGetterInt<ComponentType, FromSelfOrParents>::GetComponent(uEntity) )
+		{
+			// Confirm that the target component is in the same hierarchy
+			Entity target = targetComponent->GetEntity();
+			Entity stopper = stopperComponent->GetEntity();
+			while (target)
+			{
+				if (target == stopper)
+				{
+					return targetComponent;
+				}
+				target = target->GetParentEntity();
+			}
+			// The stopper must have come from further up in the hierarchy
+			return nullptr;
+		}
+		return targetComponent;
+	}
+};
+
 struct UnsafeComponentGetter
 {
 public:
