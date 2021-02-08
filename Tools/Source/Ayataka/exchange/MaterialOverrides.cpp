@@ -281,17 +281,6 @@ static const EnumTable g_wrapTable[]
 					{
 						if (pTextures[uTexIndex].textureName[0] == '\0')
 						{
-							// We previously had no texture, set up some defaults.
-							// TODO: Expose these settings
-							tex.wrapS = usg::SAMP_WRAP_CLAMP;
-							tex.wrapT = usg::SAMP_WRAP_CLAMP;
-							tex.magFilter = usg::SAMP_FILTER_LINEAR;
-							tex.mipFilter = usg::MIP_FILTER_LINEAR;
-							tex.minFilter = usg::SAMP_FILTER_LINEAR;
-							tex.lodBias = 0.0f;
-							tex.lodMinLevel = 0;
-							tex.anisoLevel = usg::ANISO_LEVEL_16;	// Assume max as nothing has been asked for
-
 							// FIXME: We aren't using these yet but when we do we need mapping
 							uint32 uCoordinatorIndex = pMatOut->pb().textureCoordinators_count;//uTexIndex;
 
