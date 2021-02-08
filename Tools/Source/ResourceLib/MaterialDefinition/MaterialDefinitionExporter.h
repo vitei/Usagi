@@ -7,6 +7,7 @@
 
 
 void GetSamplerOverrides(const YAML::Node& attributeNode, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip);
+void GetTexCoordMapperOverrides(const YAML::Node& attributeNode, uint32& uSourceCoord, usg::Vector2f& vTrans, usg::Vector2f& vScale, float& fRot);
 
 class MaterialDefinitionExporter
 {

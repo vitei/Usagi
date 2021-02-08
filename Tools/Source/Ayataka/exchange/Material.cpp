@@ -54,6 +54,7 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 	//	name = name.substr(uLast + 1, name.size() - 5 - uLast);
 		// FIXME: Pack name from input
 		sprintf_s(m_material.renderPasses[pass].effectName, "%s%s", "Model.", name.c_str());
+
 	}
 
 	for (uint32 i = 0; i < m_materialDef[0].GetTextureCount(); i++)
@@ -62,6 +63,13 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 
 		m_materialDef[0].GetTextureIndex(i, uDstIndex);
 		usg::exchange::Texture& tex = m_material.textures[uDstIndex];
+
+		usg::exchange::TextureCoordinator& texCo = m_material.textureCoordinators[i];
+		texCo.sourceCoordinate = 0;
+		texCo.scale.Assign(1.0f, 1.0f);
+		texCo.translate.Assign(0.0f, 0.0f);
+		texCo.rotate = 0.0f;
+		texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE;
 
 		m_materialDef[0].GetSamplerDefaults( i, tex.minFilter, tex.magFilter, tex.mipFilter, tex.anisoLevel, tex.lodBias, tex.lodMinLevel );
 	}

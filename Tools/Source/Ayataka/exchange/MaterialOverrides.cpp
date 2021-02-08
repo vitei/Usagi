@@ -273,6 +273,11 @@ static const EnumTable g_wrapTable[]
 			{
 				usg::exchange::Texture* pTextures = pMatOut->pb().textures;
 				uint32 uTexIndex = 0;
+				// FIXME: We aren't using these yet but when we do we need mapping
+				uint32 uCoordinatorIndex = pMatOut->pb().textureCoordinators_count;//uTexIndex;
+
+				// FIXME: Ordering of co-ordinators
+				usg::exchange::TextureCoordinator& texCo = pMatOut->pb().textureCoordinators[uCoordinatorIndex];
 
 				if (pMatOut->GetCustomFX(0).GetTextureIndex(hint.as<std::string>().c_str(), uTexIndex))
 				{
@@ -281,13 +286,8 @@ static const EnumTable g_wrapTable[]
 					{
 						if (pTextures[uTexIndex].textureName[0] == '\0')
 						{
-							// FIXME: We aren't using these yet but when we do we need mapping
-							uint32 uCoordinatorIndex = pMatOut->pb().textureCoordinators_count;//uTexIndex;
-
-							// FIXME: Ordering of co-ordinators
-							usg::exchange::TextureCoordinator& texCo = pMatOut->pb().textureCoordinators[uCoordinatorIndex];
 							texCo.sourceCoordinate = 0; // FIXME: More than one UV set
-							texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; // TODO: Support other UV types
+							texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; 
 							texCo.scale.Assign(1.0f, 1.0f);
 							texCo.translate.Assign(0.0f, 0.0f);
 							texCo.rotate = 0.0f;
@@ -297,7 +297,10 @@ static const EnumTable g_wrapTable[]
 						strcpy_s(pTextures[uTexIndex].textureName, texture.as<std::string>().c_str());
 					}
 
+					GetTexCoordMapperOverrides((*it), texCo.sourceCoordinate, texCo.translate, texCo.scale, texCo.rotate);
+
 					GetSamplerOverrides((*it), tex.minFilter, tex.magFilter, tex.mipFilter, tex.anisoLevel, tex.lodBias, tex.lodMinLevel );
+
 				}
 			}
 			else

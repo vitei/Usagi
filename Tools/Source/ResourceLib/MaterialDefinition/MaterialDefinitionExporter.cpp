@@ -401,6 +401,34 @@ void GetSamplerOverrides(const YAML::Node& attributeNode, uint32& uMinFilter, ui
 	}
 }
 
+void GetTexCoordMapperOverrides(const YAML::Node& attributeNode, uint32& uSourceCoord, usg::Vector2f& vTrans, usg::Vector2f& vScale, float& fRot)
+{
+	const YAML::Node coordNode = attributeNode["sourceUV"];
+	const YAML::Node transNode = attributeNode["trans"];
+	const YAML::Node scaleNode = attributeNode["scale"];
+	const YAML::Node rotateNode = attributeNode["rotate"];
+
+	if (coordNode)
+	{
+		uSourceCoord = coordNode.as<uint32>();
+	}
+	
+	if (transNode)
+	{
+		vTrans.Assign(transNode[0].as<float>(), transNode[1].as<float>());
+	}
+
+	if (scaleNode)
+	{
+		vTrans.Assign(scaleNode[0].as<float>(), scaleNode[1].as<float>());
+	}
+
+	if (rotateNode)
+	{
+		fRot = rotateNode.as<float>();
+	}
+}
+
 
 bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 {
