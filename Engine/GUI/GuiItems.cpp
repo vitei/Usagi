@@ -99,7 +99,7 @@ namespace usg
 				DESCRIPTOR_END()
 			};
 
-			SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+			SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 			m_sampler = pDevice->GetSampler(samplerDecl);
 
 			DescriptorSetLayoutHndl layout = pDevice->GetDescriptorSetLayout(decl);
@@ -586,7 +586,7 @@ namespace usg
 				DESCRIPTOR_END()
 			};
 
-			SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+			SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 			m_sampler = pDevice->GetSampler(samplerDecl);
 
 			DescriptorSetLayoutHndl layout = pDevice->GetDescriptorSetLayout(decl);

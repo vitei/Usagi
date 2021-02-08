@@ -133,28 +133,6 @@ enum DepthFormat
 	DF_INVALID
 };
 
-enum SamplerFilter
-{
-	SF_POINT = 0,
-	SF_LINEAR,
-	SF_COUNT
-};
-
-enum MipFilter
-{
-	MF_POINT = 0,
-	MF_LINEAR,
-	MF_COUNT
-};
-
-enum SamplerClamp
-{
-	SC_WRAP = 0,
-	SC_MIRROR,
-	SC_CLAMP,
-	SC_COUNT
-};
-
 
 enum CompareFunc
 {

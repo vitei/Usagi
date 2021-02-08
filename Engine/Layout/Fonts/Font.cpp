@@ -57,8 +57,8 @@ namespace usg
 		szTemp.ParseString("%s", szFilename.CStr());
 		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.CStr());
 		ASSERT(m_pTexture.get() != NULL);
-		SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
-		pointDecl.eAnisoLevel = SamplerDecl::ANISO_LEVEL_16;
+		SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
+		pointDecl.eAnisoLevel = usg::ANISO_LEVEL_16;
 
 		m_descriptor.SetImageSamplerPair(0, m_pTexture, pDevice->GetSampler(pointDecl));
 		m_descriptor.UpdateDescriptors(pDevice);

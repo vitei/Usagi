@@ -226,7 +226,7 @@ namespace usg
 		for (uint32 i = 0; i < m_emissionDef.textureData_count; i++)
 		{
 			SamplerDecl decl;
-			decl.SetClamp(SC_CLAMP);
+			decl.SetClamp(SAMP_WRAP_CLAMP);
 			pTextures[i] = ResourceMgr::Inst()->GetTexture(pDevice, m_emissionDef.textureData[i].name);
 			m_material.SetTexture(i, pTextures[i], pDevice->GetSampler(decl));
 		}

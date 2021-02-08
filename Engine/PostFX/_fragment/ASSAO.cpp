@@ -215,11 +215,11 @@ namespace usg
 		usg::ColorBuffer* pBuffers[4];
 
 
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-		SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+		SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 		m_pointSampler = pDevice->GetSampler(pointDecl);
-		pointDecl.SetClamp(SC_MIRROR);
+		pointDecl.SetClamp(SAMP_WRAP_MIRROR);
 		m_pointMirrorSampler = pDevice->GetSampler(pointDecl);
 		m_linearSampler = pDevice->GetSampler(linearDecl);
 

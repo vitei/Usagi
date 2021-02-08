@@ -73,8 +73,8 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	m_pSys = pSys;
 	m_pDestTarget = pDst;
 
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	SamplerDecl linearDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));

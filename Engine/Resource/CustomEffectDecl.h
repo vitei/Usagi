@@ -28,7 +28,17 @@ namespace usg
 			uint32	eTexType;
 			uint32	uIndex;
 			uint32	uShaderSets;
+
+			uint32	eFilterMin;
+			uint32	eFilterMag;
+			uint32	eFilterMip;
+
+			uint32	eAnisoLevel;
+
+			float32	LodBias;
+			uint32	LodMinLevel;
 		};
+
 
 		struct Attribute
 		{

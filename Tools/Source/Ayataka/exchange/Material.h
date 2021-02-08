@@ -73,9 +73,9 @@ namespace exchange {
 		MaterialDefinitionExporter& GetCustomFX(uint32 uPass) { return m_materialDef[uPass];  }
 		bool IsCustomFX() { return m_bCustomFX;  }
 		void SetIsCustomFX(bool bFX) { m_bCustomFX = bFX; }
+		void* GetConstantSetData(uint32 uPass, uint32 uSet);
 private:
 	void AddConstantSet(const char* szName, uint32 uPass, uint32 uSize);
-	void* GetConstantSetData(uint32 uPass, uint32 uSet);
 	// For the information about the material
 	
 	MaterialDefinitionExporter	m_materialDef[usg::exchange::_Material_RenderPass_count];

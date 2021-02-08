@@ -118,9 +118,9 @@ void Decal::Init(GFXDevice* pDevice, Scene* pScene, TextureHndl pTexture, uint32
 	m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL_1, &m_pixelConstants);
 
 	uint32 texIndex = 0;
-	SamplerDecl sampDecl( SF_LINEAR, SC_CLAMP );
-	sampDecl.eClampU = SC_CLAMP;
-	sampDecl.eClampV = SC_CLAMP;
+	SamplerDecl sampDecl( SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP );
+	sampDecl.eClampU = SAMP_WRAP_CLAMP;
+	sampDecl.eClampV = SAMP_WRAP_CLAMP;
 	sampDecl.bProjection = true;
 	m_sampler = pDevice->GetSampler(sampDecl);
 	SetTexture(pDevice, pTexture);

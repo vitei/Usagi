@@ -54,7 +54,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_createFlipBook.AddFilter("Targa Image File", "*.tga");
 	m_createFlipBook.SetCallbacks(this);
 
-	usg::SamplerDecl samplerDecl(usg::SF_LINEAR, usg::SC_WRAP);
+	usg::SamplerDecl samplerDecl(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_REPEAT);
 	m_sampler = pDevice->GetSampler(samplerDecl);
 
 	m_previewButton.InitAsTexture(pDevice, "Preview", m_pTexture);

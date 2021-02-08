@@ -61,6 +61,52 @@ enum RenderLayer
 	LAYER_COUNT = 11;
 }; 
 
+enum SamplerWrap
+{
+	option (nanopb_enumopt).long_names = false;
+
+	SAMP_WRAP_REPEAT = 0;
+	SAMP_WRAP_MIRROR = 1;
+	SAMP_WRAP_CLAMP = 2;
+	SAMP_WRAP_COUNT = 3;
+
+	SAMP_WRAP_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum Anisotropy
+{
+	option (nanopb_enumopt).long_names = false;
+
+	ANISO_LEVEL_1 = 0;
+	ANISO_LEVEL_2 = 1;
+	ANISO_LEVEL_4 = 2;
+	ANISO_LEVEL_8 = 3;
+	ANISO_LEVEL_16 = 4;
+};
+
+enum SamplerFilter
+{
+	option (nanopb_enumopt).long_names = false;
+
+	SAMP_FILTER_POINT = 0;
+	SAMP_FILTER_LINEAR = 1;
+	SAMP_FILTER_COUNT = 2;
+
+	SAMP_FILTER_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum MipFilter
+{
+	option (nanopb_enumopt).long_names = false;
+
+	MIP_FILTER_POINT = 0;
+	MIP_FILTER_LINEAR = 1;
+	MIP_FILTER_COUNT = 2;
+
+	MIP_FILTER_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+
 enum RenderMask {
 	option (nanopb_enumopt).long_names = false;
 	option (usagipb_enumopt).is_bitmask = true;

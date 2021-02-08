@@ -64,6 +64,17 @@ static const EnumTable g_alphaTestTable[]
 };
 
 
+// Generally no good reason to override what is coming in from the model
+#if 0
+static const EnumTable g_wrapTable[]
+{
+	{ "Repeat", usg::SAMP_WRAP_REPEAT },
+	{ "Mirror", usg::SAMP_WRAP_MIRROR },
+	{ "Clamp", usg::SAMP_WRAP_CLAMP },
+	{ nullptr, 0 }
+};
+#endif
+
 
 	MaterialOverrides::MaterialOverrides() :
 		m_pDependencies(nullptr)
@@ -258,16 +269,46 @@ static const EnumTable g_alphaTestTable[]
 			YAML::Node hint = (*it)["hint"];
 			YAML::Node texture = (*it)["texture"];
 
-			if (hint && texture)
+			if (hint)
 			{
 				usg::exchange::Texture* pTextures = pMatOut->pb().textures;
-				for(int i=0; i< usg::exchange::Material::textures_max_count; i++)
+				uint32 uTexIndex = 0;
+
+				if (pMatOut->GetCustomFX(0).GetTextureIndex(hint.as<std::string>().c_str(), uTexIndex))
 				{
-					if (strcmp(pTextures[i].textureHint, hint.as<std::string>().c_str()) == 0 )
+					usg::exchange::Texture& tex = pMatOut->pb().textures[uTexIndex];
+					if(texture)
 					{
-						strcpy_s(pTextures[i].textureName, texture.as<std::string>().c_str());
-						break;
+						if (pTextures[uTexIndex].textureName[0] == '\0')
+						{
+							// We previously had no texture, set up some defaults.
+							// TODO: Expose these settings
+							tex.wrapS = usg::SAMP_WRAP_CLAMP;
+							tex.wrapT = usg::SAMP_WRAP_CLAMP;
+							tex.magFilter = usg::SAMP_FILTER_LINEAR;
+							tex.mipFilter = usg::MIP_FILTER_LINEAR;
+							tex.minFilter = usg::SAMP_FILTER_LINEAR;
+							tex.lodBias = 0.0f;
+							tex.lodMinLevel = 0;
+							tex.anisoLevel = usg::ANISO_LEVEL_16;	// Assume max as nothing has been asked for
+
+							// FIXME: We aren't using these yet but when we do we need mapping
+							uint32 uCoordinatorIndex = pMatOut->pb().textureCoordinators_count;//uTexIndex;
+
+							// FIXME: Ordering of co-ordinators
+							usg::exchange::TextureCoordinator& texCo = pMatOut->pb().textureCoordinators[uCoordinatorIndex];
+							texCo.sourceCoordinate = 0; // FIXME: More than one UV set
+							texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; // TODO: Support other UV types
+							texCo.scale.Assign(1.0f, 1.0f);
+							texCo.translate.Assign(0.0f, 0.0f);
+							texCo.rotate = 0.0f;
+							pMatOut->pb().textureCoordinators_count++;// = usg::Math::Max(uTexIndex, pMatOut->pb().textureCoordinators_count);
+						}
+
+						strcpy_s(pTextures[uTexIndex].textureName, texture.as<std::string>().c_str());
 					}
+
+					GetSamplerOverrides((*it), tex.minFilter, tex.magFilter, tex.mipFilter, tex.anisoLevel, tex.lodBias, tex.lodMinLevel );
 				}
 			}
 			else
@@ -291,7 +332,17 @@ static const EnumTable g_alphaTestTable[]
 
 			for (uint32 i = 0; i < usg::exchange::_Material_RenderPass_count; i++)
 			{
-				pMatOut->GetCustomFX(i).OverrideData(set.as<std::string>().c_str(), var.as<std::string>().c_str(), value);
+				for (uint32 j = 0; j < pMatOut->GetCustomFX(i).GetConstantSetCount(); j++)
+				{
+					if (strcmp(pMatOut->GetCustomFX(i).GetConstantSetName(j), set.as<std::string>().c_str()) != 0)
+					{
+						continue;
+					}
+
+					void* pDst = pMatOut->GetConstantSetData(i, j);
+					pMatOut->GetCustomFX(i).OverrideData(j, var.as<std::string>().c_str(), value, pDst);
+				}
+				
 			}
 		}
 		

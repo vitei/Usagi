@@ -148,7 +148,7 @@ void DebugRender::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPas
 	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), textDescriptors);
 	m_textConstants.Init(pDevice, g_textConstantDef);
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
 	m_textMaterial.SetTexture(0, m_font.GetTexture(), pDevice->GetSampler(pointDecl));
 
 

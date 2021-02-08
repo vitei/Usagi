@@ -39,6 +39,7 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 			AddConstantSet(m_materialDef[pass].GetConstantSetName(i), pass, m_materialDef[pass].GetConstantSetSize(i));
 			m_materialDef[pass].CopyDefaultData(i, GetConstantSetData(pass, i));
 		}
+
 		std::string name;
 		name = szEffectName;
 		for (auto itr : passDefines)
@@ -53,6 +54,16 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 	//	name = name.substr(uLast + 1, name.size() - 5 - uLast);
 		// FIXME: Pack name from input
 		sprintf_s(m_material.renderPasses[pass].effectName, "%s%s", "Model.", name.c_str());
+	}
+
+	for (uint32 i = 0; i < m_materialDef[0].GetTextureCount(); i++)
+	{
+		uint32 uDstIndex;
+
+		m_materialDef[0].GetTextureIndex(i, uDstIndex);
+		usg::exchange::Texture& tex = m_material.textures[uDstIndex];
+
+		m_materialDef[0].GetSamplerDefaults( i, tex.minFilter, tex.magFilter, tex.mipFilter, tex.anisoLevel, tex.lodBias, tex.lodMinLevel );
 	}
 }
 

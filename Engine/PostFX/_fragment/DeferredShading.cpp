@@ -229,11 +229,11 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	m_projShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 
 
-	SamplerDecl samplerDecl(SF_POINT, SC_CLAMP);
+	SamplerDecl samplerDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 	// TODO: Move to the device!!
 	m_samplerHndl = pDevice->GetSampler(samplerDecl);
 
-	samplerDecl.SetFilter(SF_LINEAR);
+	samplerDecl.SetFilter(SAMP_FILTER_LINEAR);
 
 	m_linSamplerHndl = pDevice->GetSampler(samplerDecl);
 

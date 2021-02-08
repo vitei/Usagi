@@ -86,14 +86,14 @@ void ProjectionLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShad
 	DescriptorSetLayoutHndl desc = pDevice->GetDescriptorSetLayout(g_projLightDescDesc);
 	m_descriptorSet.Init(pDevice, desc);
 	m_descriptorSet.SetConstantSet(0, &m_constants);
-	SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(linearDecl);
 
 	if (bSupportsShadow)
 	{
 		m_pShadow = vnew(ALLOC_OBJECT) ProjectionShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		samp.bEnableCmp = true;
 		samp.eCmpFnc = CF_LESS;
 

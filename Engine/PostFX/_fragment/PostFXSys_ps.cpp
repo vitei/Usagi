@@ -223,8 +223,8 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	m_screenRT[TARGET_LDR_0].SetClearColor(clearCol, 0);
 	m_screenRT[TARGET_LDR_1].SetClearColor(clearCol, 0);
 
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 #if 0
 	PipelineStateDecl pipelineDecl;

@@ -5,6 +5,9 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
+
+void GetSamplerOverrides(const YAML::Node& attributeNode, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip);
+
 class MaterialDefinitionExporter
 {
 public:
@@ -17,6 +20,7 @@ public:
 	bool LoadAttributes(YAML::Node& attributeNode);
 	bool LoadSamplers(YAML::Node& attributeNode);
 	bool LoadConstantSets(YAML::Node& attributeNode);
+
 	void ExportFile( const char* path );
 	void InitBinaryData();
 	void InitAutomatedCode();
@@ -39,8 +43,10 @@ public:
 	void CopyDefaultData(uint32 uSet, void* pDst);
 	uint32 GetTextureCount() const { return (uint32)m_samplers.size(); }
 	const char* GetDefaultTexName(uint32 uTex) { return m_samplers[uTex].texName; }
+	void GetSamplerDefaults(uint32 uTex, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip);
 
-	bool OverrideData(const char* szSetName, const char* szVariableName, const YAML::Node& node);
+
+	bool OverrideData(uint32 uPass, const char* szVariableName, const YAML::Node& node, void* pDst);
 
 	template <class VariableType>
 	void OverrideTyped(uint32 uSet, const char* szName, void* pDst, VariableType* pVar, uint32 uCount = 1, uint32 uStartId = 0)

@@ -132,10 +132,10 @@ namespace usg {
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
 		const Scene* pScene = GetScene();
-		SamplerDecl shadowSamp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl shadowSamp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		shadowSamp.bEnableCmp = true;
 		shadowSamp.eCmpFnc = CF_LESS;
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
+		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 		SamplerHndl sampler = pDevice->GetSampler(pointDecl);
 		SamplerHndl shadowSampler = pDevice->GetSampler(shadowSamp);
 		TextureHndl dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");

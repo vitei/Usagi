@@ -102,11 +102,11 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	Material &mat = m_materialFade;
 	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
 
-	SamplerDecl sampDecl(SF_LINEAR, SC_CLAMP);	
-	sampDecl.eMipFilter = MF_POINT;
+	SamplerDecl sampDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);	
+	sampDecl.eMipFilter = MIP_FILTER_POINT;
 	SamplerHndl linear = pDevice->GetSampler(sampDecl);
-	sampDecl.SetFilter(SF_POINT);
-	sampDecl.SetClamp(SC_WRAP);
+	sampDecl.SetFilter(SAMP_FILTER_POINT);
+	sampDecl.SetClamp(SAMP_WRAP_REPEAT);
 	SamplerHndl point = pDevice->GetSampler(sampDecl);
 
 	Material &mat2 = m_materialNoFade;
@@ -118,9 +118,9 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	mat2.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
-	SamplerDecl depthSamp(SF_POINT, SC_WRAP);
-	SamplerDecl colorSamp(SF_LINEAR, SC_WRAP);
-	colorSamp.SetClamp(SC_CLAMP);
+	SamplerDecl depthSamp(SAMP_FILTER_POINT, SAMP_WRAP_REPEAT);
+	SamplerDecl colorSamp(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
+	colorSamp.SetClamp(SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 	m_linearSampl = pDevice->GetSampler(colorSamp);
 }

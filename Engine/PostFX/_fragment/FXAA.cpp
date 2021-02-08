@@ -56,7 +56,7 @@ void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, Ren
 	m_pSys = pSys;
 	m_pDestTarget = pDst;
 
-	SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));

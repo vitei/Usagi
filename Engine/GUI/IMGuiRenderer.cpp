@@ -182,7 +182,7 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
 
 
     // Create texture sampler   
-	SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
     m_sampler = pDevice->GetSampler(samplerDecl);
 	m_texHndl = &m_texture;
 	m_texDescriptor.SetImageSamplerPair(0, m_texHndl, m_sampler, 0);

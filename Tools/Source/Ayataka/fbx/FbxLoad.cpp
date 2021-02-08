@@ -506,16 +506,16 @@ bool FbxLoad::GetTextureIndex(const FbxTexture& textureInfo, const char* szTexNa
 }
 
 
-usg::exchange::Texture_Wrap GetWrap(FbxTexture::EWrapMode WrapMode)
+usg::SamplerWrap GetWrap(FbxTexture::EWrapMode WrapMode)
 {
 	switch (WrapMode)
 	{
 	case FbxTexture::EWrapMode::eRepeat:
-		return usg::exchange::Texture_Wrap_repeat;
+		return usg::SAMP_WRAP_REPEAT;
 	case FbxTexture::EWrapMode::eClamp:
-		return usg::exchange::Texture_Wrap_clamp_to_edge;
+		return usg::SAMP_WRAP_CLAMP;
 	default:
-		return usg::exchange::Texture_Wrap_repeat;
+		return usg::SAMP_WRAP_REPEAT;
 	}
 }
 
@@ -577,12 +577,14 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 
 					tex.wrapS = GetWrap(pTexture->WrapModeU);
 					tex.wrapT = GetWrap(pTexture->WrapModeV);
-					tex.magFilter = usg::exchange::Texture_Filter_linear;
-					tex.mipFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
-					tex.minFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
-					tex.lodBias = 0.0f;
-					tex.lodMinLevel = 0;
-					tex.anisoLevel = usg::exchange::Texture_Aniso_aniso_16;	// Assume max as nothing has been asked for
+
+					// Now relying on the custom effect for these values
+					//tex.magFilter = usg::SAMP_FILTER_LINEAR;
+					//tex.mipFilter = usg::MIP_FILTER_LINEAR;
+					//tex.minFilter = usg::SAMP_FILTER_LINEAR;
+					//tex.lodBias = 0.0f;
+					//tex.lodMinLevel = 0;
+					//tex.anisoLevel = usg::ANISO_LEVEL_16;	// Assume max as nothing has been asked for
 					strcpy_s(tex.textureHint, sizeof(tex.textureHint), property.GetNameAsCStr());
 
 					
@@ -594,7 +596,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					texCo.scale.Assign((float)pTexture->GetScaleU(), (float)pTexture->GetScaleV());
 					texCo.translate.Assign((float)pTexture->GetTranslationU(), (float)pTexture->GetTranslationV());
 					texCo.rotate = (float)pTexture->GetRotationU();
-					pNewMaterial->pb().textureCoordinators_count++;
+					pNewMaterial->pb().textureCoordinators_count++;// = Math::Max(uTexIndex, pNewMaterial->pb().textureCoordinators_count);
 				}
 			}
 		}

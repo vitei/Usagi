@@ -95,7 +95,7 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 		m_pShadow = vnew(ALLOC_OBJECT) OmniShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
 
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		samp.bEnableCmp = true;
 		samp.eCmpFnc = CF_LESS;
 

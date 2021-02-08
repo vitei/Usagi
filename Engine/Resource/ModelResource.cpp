@@ -124,39 +124,6 @@ void SetupDepthStencilStateDecl( DepthStencilStateDecl& decl, const exchange::St
 	}
 }
 
-SamplerFilter chooseMagFilter( exchange::Texture_Filter filter )
-{
-	return ( filter == exchange::Texture_Filter_nearest ? SF_POINT : SF_LINEAR );
-}
-
-SamplerFilter chooseMinFilter( exchange::Texture_Filter filter )
-{
-	if( filter == exchange::Texture_Filter_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_linear )
-	{
-		return SF_POINT;
-	}
-	else
-	{
-		return SF_LINEAR;
-	}
-}
-
-MipFilter chooseMipFilter( exchange::Texture_Filter filter )
-{
-	if( filter == exchange::Texture_Filter_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_nearest ||
-		filter == exchange::Texture_Filter_linear_mipmap_nearest )
-	{
-		return MF_POINT;
-	}
-	else
-	{
-		return MF_LINEAR;
-	}
-}
-
 ModelResource::ModelResource() :
 	ResourceBase(StaticResType)
 {
@@ -594,7 +561,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		m_meshArray[m_uMeshCount].pTextures[i] = NULL;
 	}
 
-	SamplerDecl sampDecl( SF_LINEAR, SC_WRAP );
+	SamplerDecl sampDecl( SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT );
 	for( int i = 0; i < exchange::Material_Constant_TEXTURE_NUM; ++i )
 	{
 		if( pMaterial->textures[i].textureName[0] != '\0' )
@@ -611,12 +578,12 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 				const char* pTextureName = &texture.textureName[0];
 				pathName += pTextureName;
 
-				sampDecl.eClampU = static_cast<SamplerClamp>(texture.wrapS);
-				sampDecl.eClampV = static_cast<SamplerClamp>(texture.wrapT);
-				sampDecl.eFilterMag = chooseMagFilter((exchange::Texture_Filter)texture.magFilter);
-				sampDecl.eFilterMin = chooseMinFilter((exchange::Texture_Filter)texture.minFilter);
-				sampDecl.eMipFilter = chooseMipFilter((exchange::Texture_Filter)texture.mipFilter);
-				sampDecl.eAnisoLevel = (SamplerDecl::Anisotropy)texture.anisoLevel;
+				sampDecl.eClampU = static_cast<SamplerWrap>(texture.wrapS);
+				sampDecl.eClampV = static_cast<SamplerWrap>(texture.wrapT);
+				sampDecl.eFilterMag = static_cast<SamplerFilter>(texture.magFilter);
+				sampDecl.eFilterMin = static_cast<SamplerFilter>(texture.minFilter);
+				sampDecl.eMipFilter = static_cast<MipFilter>(texture.mipFilter);
+				sampDecl.eAnisoLevel = (Anisotropy)texture.anisoLevel;
 				sampDecl.LodBias = texture.lodBias;
 				sampDecl.LodMinLevel = texture.lodMinLevel;
 

@@ -54,7 +54,7 @@ void SpriteEmitter::Alloc(GFXDevice* pDevice, uint32 uMaxCount, uint32 uVertexSi
 		m_pMetaData = NULL;
 	}
 
-	SamplerDecl depthSamp(SF_POINT, SC_WRAP);
+	SamplerDecl depthSamp(SAMP_FILTER_POINT, SAMP_WRAP_REPEAT);
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 }
 

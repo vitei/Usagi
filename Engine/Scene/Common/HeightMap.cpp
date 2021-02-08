@@ -151,7 +151,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, co
 	m_mesh.GetDescriptorSet().Init(pDevice, matDescriptors);
 
     
-	SamplerDecl sampDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl sampDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 	for(int i=0; i<TERRAIN_TEX_COUNT; i++)
 	{
 		m_mesh.GetDescriptorSet().SetImageSamplerPair(i, pResMgr->GetTexture(pDevice, g_texNames[i]), pDevice->GetSampler(sampDecl) );

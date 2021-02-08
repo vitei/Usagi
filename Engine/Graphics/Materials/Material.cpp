@@ -30,7 +30,7 @@ bool Material::Init(GFXDevice* pDevice, PipelineStateHndl pipelineState, const D
 {
 	m_pipelineState = pipelineState;
 
-	SamplerDecl samplerDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 	if (descriptorDecl.IsValid())
 	{

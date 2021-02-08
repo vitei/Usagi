@@ -135,7 +135,7 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 
 	m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_constantSet);
 
-	usg::SamplerDecl samp(usg::SF_LINEAR, usg::SC_MIRROR);	
+	usg::SamplerDecl samp(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_MIRROR);	
 	m_material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, szTexName), pDevice->GetSampler(samp) );
 	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, szPatternName), pDevice->GetSampler(samp));
 	m_material.UpdateDescriptors(pDevice);	// We've bound all our resources
@@ -194,7 +194,7 @@ void RibbonTrail::SetDeclaration(GFXDevice* pDevice, const particles::RibbonData
 	m_uDeclLength = GetRequiredVerts(pDecl->fLifeTime);
 	ASSERT(m_uDeclLength<=m_uMaxLength);
 
-	usg::SamplerDecl samp(usg::SF_LINEAR, usg::SC_MIRROR);
+	usg::SamplerDecl samp(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_MIRROR);
 	usg::U8String name = "ribbon/";
 	usg::U8String srcName = pDecl->textureName;
 	if (str::StartsWithToken(pDecl->textureName, "ribbon/"))

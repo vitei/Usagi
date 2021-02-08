@@ -67,6 +67,38 @@ static const uint32 g_shaderFlagMap[]
 	usg::SHADER_FLAG_TEVAL
 };
 
+
+struct EnumTable
+{
+	const char* szVarName;
+	uint32		uEnumValue;
+};
+
+// TODO: Filters and aniso should have defaults in the effect
+static const EnumTable g_filterTable[]
+{
+	{ "Linear", usg::SAMP_FILTER_LINEAR },
+	{ "Point", usg::SAMP_FILTER_POINT },
+	{ nullptr, 0 }
+};
+
+static const EnumTable g_mipFilterTable[]
+{
+	{ "Linear", usg::MIP_FILTER_LINEAR },
+	{ "Point", usg::MIP_FILTER_POINT },
+	{ nullptr, 0 }
+};
+
+static const EnumTable g_anisoTable[]
+{
+	{ "1", usg::ANISO_LEVEL_1 },
+	{ "2", usg::ANISO_LEVEL_2 },
+	{ "4", usg::ANISO_LEVEL_4 },
+	{ "8", usg::ANISO_LEVEL_8 },
+	{ "16", usg::ANISO_LEVEL_16 },
+	{ nullptr, 0 }
+};
+
 uint32 GetType(const char* szTypeName, const Mapping* pMapping)
 {
 	while(pMapping->szName)
@@ -273,20 +305,14 @@ void SetDefaultData(usg::CustomEffectDecl::Attribute& attrib, const YAML::Node& 
 	SetDefaultData(attrib.eConstantType, 1, node, pData8);
 }
 
-bool MaterialDefinitionExporter::OverrideData(const char* szSetName, const char* szVariableName, const YAML::Node& node)
+bool MaterialDefinitionExporter::OverrideData(uint32 uPass, const char* szVariableName, const YAML::Node& node, void* pDst)
 {
-	for(int i=0; i<m_constantSets.size(); i++)
+	for (int var = 0; var < m_constantSets[uPass].constants.size(); var++)
 	{
-		if (strcmp(m_constantSets[i].set.szName, szSetName) == 0)
+		if (strcmp(m_constantSets[uPass].constants[var].szName, szVariableName) == 0)
 		{
-			for (int j = 0; j < m_constantSets[i].constants.size(); j++)
-			{
-				if (strcmp(m_constantSets[i].constants[j].szName, szVariableName) == 0)
-				{
-					SetDefaultData(m_constantSets[i].constants[j], node, m_constantSets[i].rawData.data());
-					return true;
-				}
-			}
+			SetDefaultData(m_constantSets[uPass].constants[var], node, pDst);
+			return true;
 		}
 	}
 	return false;
@@ -332,6 +358,50 @@ bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 	return true;
 }
 
+void StringToValue(const EnumTable* pTable, YAML::Node node, uint32& uValOut)
+{
+	if (!node)
+	{
+		// This override wasn't specified
+		return;
+	}
+	std::string value = node.as<std::string>();
+	if (value.size() == 0)
+	{
+		RELEASE_WARNING("Invalid string for override\n");
+		return;
+	}
+	while (pTable->szVarName != nullptr)
+	{
+		if (strcmp(pTable->szVarName, value.c_str()) == 0)
+		{
+			uValOut = pTable->uEnumValue;
+			return;
+		}
+		pTable++;
+	}
+	RELEASE_WARNING("Invalid override semantic %s\n", value.c_str());
+
+}
+
+void GetSamplerOverrides(const YAML::Node& attributeNode, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip)
+{
+	// Filter values
+	StringToValue(g_filterTable, attributeNode["minFilter"], uMinFilter);
+	StringToValue(g_filterTable, attributeNode["magFilter"], uMagFilter);
+	StringToValue(g_mipFilterTable, attributeNode["mipFilter"], uMipFilter);
+	StringToValue(g_anisoTable, attributeNode["anisotropy"], uAniso);
+	if (attributeNode["lodBias"])
+	{
+		fLodBias = attributeNode["lodBias"].as<float>();
+	}
+	if (attributeNode["lodMinLevel"])
+	{
+		uBaseMip = attributeNode["lodMinLevel"].as<uint32>();
+	}
+}
+
+
 bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 {
 	for (YAML::const_iterator it = samplers.begin(); it != samplers.end(); ++it)
@@ -363,6 +433,16 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 			sampler.eTexType = usg::TD_TEXTURE2D;
 		}
 
+		sampler.eFilterMin = usg::SAMP_FILTER_LINEAR;
+		sampler.eFilterMag = usg::SAMP_FILTER_LINEAR;
+		sampler.eFilterMip = usg::SAMP_FILTER_LINEAR;
+		sampler.eAnisoLevel = usg::ANISO_LEVEL_16;
+
+		sampler.LodBias = 0.0f;
+		sampler.LodMinLevel = 0;
+
+		GetSamplerOverrides((*it), sampler.eFilterMin, sampler.eFilterMag, sampler.eFilterMip, sampler.eAnisoLevel, sampler.LodBias, sampler.LodMinLevel);
+
 		if ((*it)["shaderType"])
 		{
 			std::string type = (*it)["shaderType"].as<std::string>();
@@ -377,6 +457,16 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 	}
 
 	return true;
+}
+
+void MaterialDefinitionExporter::GetSamplerDefaults(uint32 uTex, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip)
+{
+	uMinFilter = m_samplers[uTex].eFilterMin;
+	uMagFilter = m_samplers[uTex].eFilterMag;
+	uMipFilter = m_samplers[uTex].eFilterMip;
+	uAniso = m_samplers[uTex].eAnisoLevel;
+	fLodBias = m_samplers[uTex].LodBias;
+	uBaseMip = m_samplers[uTex].LodMinLevel;
 }
 
 bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
