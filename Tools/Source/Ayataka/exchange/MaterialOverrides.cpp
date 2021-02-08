@@ -273,8 +273,7 @@ static const EnumTable g_wrapTable[]
 			{
 				usg::exchange::Texture* pTextures = pMatOut->pb().textures;
 				uint32 uTexIndex = 0;
-				// FIXME: We aren't using these yet but when we do we need mapping
-				uint32 uCoordinatorIndex = pMatOut->pb().textureCoordinators_count;//uTexIndex;
+				uint32 uCoordinatorIndex = uTexIndex;
 
 				// FIXME: Ordering of co-ordinators
 				usg::exchange::TextureCoordinator& texCo = pMatOut->pb().textureCoordinators[uCoordinatorIndex];
@@ -284,16 +283,6 @@ static const EnumTable g_wrapTable[]
 					usg::exchange::Texture& tex = pMatOut->pb().textures[uTexIndex];
 					if(texture)
 					{
-						if (pTextures[uTexIndex].textureName[0] == '\0')
-						{
-							texCo.sourceCoordinate = 0; // FIXME: More than one UV set
-							texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; 
-							texCo.scale.Assign(1.0f, 1.0f);
-							texCo.translate.Assign(0.0f, 0.0f);
-							texCo.rotate = 0.0f;
-							pMatOut->pb().textureCoordinators_count++;// = usg::Math::Max(uTexIndex, pMatOut->pb().textureCoordinators_count);
-						}
-
 						strcpy_s(pTextures[uTexIndex].textureName, texture.as<std::string>().c_str());
 					}
 

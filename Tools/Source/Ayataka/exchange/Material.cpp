@@ -73,6 +73,7 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 
 		m_materialDef[0].GetSamplerDefaults( i, tex.minFilter, tex.magFilter, tex.mipFilter, tex.anisoLevel, tex.lodBias, tex.lodMinLevel );
 	}
+	m_material.textureCoordinators_count = m_materialDef[0].GetTextureCount(); 
 }
 
 void Material::AddConstantSet(const char* szName, uint32 uPass, uint32 uSize)

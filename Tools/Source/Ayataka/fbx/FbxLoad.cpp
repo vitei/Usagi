@@ -590,13 +590,12 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 					
 					//tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
 
-					usg::exchange::TextureCoordinator& texCo = pNewMaterial->pb().textureCoordinators[uCoordinatorIndex];
+					usg::exchange::TextureCoordinator& texCo = pNewMaterial->pb().textureCoordinators[uTexIndex];
 					texCo.sourceCoordinate = 0; // FIXME: More than one UV set
 					texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; // TODO: Support other UV types
 					texCo.scale.Assign((float)pTexture->GetScaleU(), (float)pTexture->GetScaleV());
 					texCo.translate.Assign((float)pTexture->GetTranslationU(), (float)pTexture->GetTranslationV());
 					texCo.rotate = (float)pTexture->GetRotationU();
-					pNewMaterial->pb().textureCoordinators_count++;// = Math::Max(uTexIndex, pNewMaterial->pb().textureCoordinators_count);
 				}
 			}
 		}
