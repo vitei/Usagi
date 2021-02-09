@@ -67,44 +67,7 @@ namespace usg
 
 	void SkeletalAnimation::Update(float fElapsed)
 	{
-		if(!m_bActive)
-			return;
-
-		const float fAnimSpeed = m_pAnimResource->GetFrameRate();
-		bool bLoop = m_pAnimResource->IsLoop();
-		m_fActiveFrame += (fElapsed*m_fPlaybackSpeed*fAnimSpeed);
-		float fFrameCount = (float)m_pAnimResource->GetFrameCount();
-
-		// We've passed the end (playing the anim forward)
-		if (m_fActiveFrame > fFrameCount)
-		{
-			ASSERT(m_fPlaybackSpeed * fElapsed > 0.0f);
-			if (bLoop)
-			{
-				m_fActiveFrame = 0.0f;
-			}
-			else
-			{
-				m_fActiveFrame = fFrameCount;
-				m_bActive = false;
-			}
-		}
-
-		// We've passed the beginning (playing the anim backward)
-		if (m_fActiveFrame < 0.0f)
-		{
-			ASSERT(m_fPlaybackSpeed * fElapsed < 0.0f);
-			if (bLoop)
-			{
-				m_fActiveFrame = fFrameCount;
-			}
-			else
-			{
-				m_fActiveFrame = 0.0f;
-				m_bActive = false;
-			}
-		}
-
+		UpdateInt(fElapsed, m_pAnimResource->GetFrameRate(), (float)m_pAnimResource->GetFrameCount(), m_pAnimResource->IsLoop());
 	}
 
 	void SkeletalAnimation::GetTransform(uint32 uIndex, exchange::BoneAnimationFrame& transform) const

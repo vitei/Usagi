@@ -37,6 +37,45 @@ namespace usg
 		m_bActive = true;
 	}
 
+	void AnimationBase::UpdateInt(float fElapsed, float fFrameRate, float fFrameCount, bool bLoop)
+	{
+		if (!m_bActive)
+			return;
+
+		const float fAnimSpeed = fFrameRate;
+		m_fActiveFrame += (fElapsed * m_fPlaybackSpeed * fAnimSpeed);
+
+		// We've passed the end (playing the anim forward)
+		if (m_fActiveFrame > fFrameCount)
+		{
+			ASSERT(m_fPlaybackSpeed * fElapsed > 0.0f);
+			if (bLoop)
+			{
+				m_fActiveFrame = 0.0f;
+			}
+			else
+			{
+				m_fActiveFrame = fFrameCount;
+				m_bActive = false;
+			}
+		}
+
+		// We've passed the beginning (playing the anim backward)
+		if (m_fActiveFrame < 0.0f)
+		{
+			ASSERT(m_fPlaybackSpeed * fElapsed < 0.0f);
+			if (bLoop)
+			{
+				m_fActiveFrame = fFrameCount;
+			}
+			else
+			{
+				m_fActiveFrame = 0.0f;
+				m_bActive = false;
+			}
+		}
+	}
+
 
 
 }

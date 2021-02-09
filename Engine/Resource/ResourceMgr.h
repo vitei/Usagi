@@ -36,6 +36,7 @@ public:
 	ModelResHndl				GetModelAsInstance(GFXDevice* pDevice, const char* szModelName);
 	FontHndl					GetFont( GFXDevice* pDevice, const char* szFontName );
 	SkeletalAnimationResHndl	GetSkeletalAnimation( const char* szFileName );
+	MaterialAnimationResHndl	GetMaterialAnimation(const char* szFileName);
 	ParticleEffectResHndl		GetParticleEffect(const char* szFileName);
 	ParticleEmitterResHndl		GetParticleEmitter(GFXDevice* pDevice, const char* szFileName);
 	CollisionModelResHndl		GetCollisionModel(const char* szFileName);

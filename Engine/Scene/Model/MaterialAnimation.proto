@@ -1,0 +1,57 @@
+/****************************************************************************
+//	Usagi Engine, Copyright © Vitei, Inc. 2013
+****************************************************************************/
+import 'nanopb.proto';
+
+package usg.exchange;
+
+enum MaterialAnimationMemberType {
+	SCALE = 0;
+	ROTATE = 1;
+	TRANSLATE = 2;
+	COLOR_EMISSION = 3;
+	COLOR_AMBIENT = 4;
+	COLOR_DIFFUSE = 5;
+	COLOR_SPECULAR_0 = 6;
+}
+
+
+message AnimationHeader {
+	required float frameSize = 1 [default = 0];
+	required bool isLoop = 2 [default = false];
+	required bool isAdditive = 3 [default = false];
+
+	required int32 memberSetsNum = 4 [default = 0];
+}
+
+message AnimationMemberSet {
+	required int32 membersNum = 1 [default = 0];
+}
+
+message AnimationMember {
+	required int32 curveNum = 1 [default = 0];
+	required string targetName = 2 [(nanopb).max_size = 40];
+	required int32 targetID = 3 [default = 0];
+	required uint32 type = 4 [default = 0];
+}
+
+message AnimationCurve {
+	required int32 start = 1 [default = 0];
+	required int32 end = 2 [default = 0];
+	required int32 keyFrameNum = 3 [default = 0];
+	required int32 axis = 4 [default = 0];
+}
+
+enum CurveKeyFrameType {
+	LINEAR = 1;
+	HERMITE = 2;
+	STEP = 3;
+}
+
+message CurveKeyFrame {
+	required float frame = 1 [default = 0];
+	required uint32 type = 2 [default = 0];
+	required float value = 3 [default = 0];
+	required float inSlope = 4 [default = 0];
+	required float outSlope = 5 [default = 0];
+}

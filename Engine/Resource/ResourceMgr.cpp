@@ -13,6 +13,7 @@
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ModelResource.h"
 #include "Engine/Resource/SkeletalAnimationResource.h"
+#include "Engine/Resource/MaterialAnimationResource.h"
 #include "Engine/Resource/ParticleEffectResource.h"
 #include "Engine/Resource/ParticleEmitterResource.h"
 #include "Engine/Resource/CollisionModelResource.h"
@@ -322,6 +323,28 @@ ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 	}
 
 	return pEffect;
+}
+
+MaterialAnimationResHndl ResourceMgr::GetMaterialAnimation(const char* szFileName)
+{
+	U8String path = m_modelDir + szFileName;
+	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::MAT_ANIM);
+	if (!p)
+	{
+		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
+		{
+			m_pImpl->resources.StartLoad();
+			MaterialAnimationResource* pNC = vnew(ALLOC_RESOURCE_MGR) MaterialAnimationResource;
+
+			bool b = pNC->Load(path.CStr());
+			ASSERT(b);
+			p = m_pImpl->resources.AddResource(pNC);
+		}
+		else {
+			DEBUG_PRINT("!!!Material animation not found!!! %s\n", path.CStr());
+		}
+	}
+	return p;
 }
 
 SkeletalAnimationResHndl ResourceMgr::GetSkeletalAnimation( const char* szFileName )

@@ -32,6 +32,7 @@ public:
 
 
 protected:
+	void UpdateInt(float fElapsed, float fFrameRate, float fFrameCount, bool bLoop);
 
 	float								m_fWeighting;
 	float								m_fPlaybackSpeed;
