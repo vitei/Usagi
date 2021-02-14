@@ -6,6 +6,9 @@
 #include "OwnSTLDecl.h"
 #include "Engine/Scene/Model/MaterialAnimation.pb.h"
 
+namespace exchange
+{
+
 class MaterialAnimation
 {
 public:
@@ -54,13 +57,22 @@ public:
 
 	virtual ~MaterialAnimation() {}
 
+	void SetName(const char* p);
+	const char* GetName(void);
+
 	void AddMemberSet( void );
 	void AddMember( void );
 	void AddCurve( const MaterialAnimation::Curve& newCurve );
 	void AddKeyFrame( const usg::exchange::CurveKeyFrame& keyFrame );
 
+	void Export(const char* path);
+	void ReverseCoordinate(void);
+	void ReverseCurve(MaterialAnimation::Curve& curve);
+
 	void FinalizeParsing( void );
 	void Dump();
+
+	bool ValidAnim() const { return m_memberSets.size() > 0; }
 
 	usg::exchange::AnimationHeader& Header( void )
 	{
@@ -77,6 +89,11 @@ public:
 		return GetCurrentMember().data;
 	}
 
+	void InitTiming(uint32 uFrameCount, float fFrameRate);
+
+	uint32 GetFrameCount() const { return (uint32)m_header.frameCount; }
+
+
 private:
 	MemberSet& GetCurrentMemberSet( void );
 	Member& GetCurrentMember( void );
@@ -86,5 +103,7 @@ private:
 
 	MemberSetArray					m_memberSets;
 };
+
+}
 
 #endif // TexSrtAnim_h__

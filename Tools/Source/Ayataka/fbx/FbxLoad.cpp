@@ -1491,6 +1491,18 @@ FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxNode* pParent, F
 	return mGlobal * mGeometry;
 }
 
+::exchange::MaterialAnimation* FbxLoad::NewMaterialAnimation(Cmdl& cmdl, FbxAnimStack* animStack)
+{
+	::exchange::MaterialAnimation* pNewAnimation = vnew(ALLOC_OBJECT) ::exchange::MaterialAnimation();
+
+	pNewAnimation->SetName(animStack->GetName());
+	fbxsdk::FbxTime duration = animStack->GetLocalTimeSpan().GetDuration();
+	duration.SetGlobalTimeMode(FRAME_MODE);
+	pNewAnimation->InitTiming((uint32)duration.GetFrameCount() + 1, 30.0f);
+
+	return pNewAnimation;
+}
+
 ::exchange::Animation* FbxLoad::NewAnimation(Cmdl& cmdl, FbxAnimStack* animStack)
 {
 	::exchange::Animation* pNewAnimation = vnew(ALLOC_OBJECT) ::exchange::Animation();
@@ -1513,17 +1525,34 @@ void FbxLoad::ReadAnimations(Cmdl& cmdl, FbxScene* pScene)
 		std::string stackName = pAnimStack->GetName();
 
 		::exchange::Animation* pNewAnim = NewAnimation(cmdl, pAnimStack);
+		::exchange::MaterialAnimation* pMatAnim = NewMaterialAnimation(cmdl, pAnimStack);
 
 		pScene->SetCurrentAnimationStack(pAnimStack);
 
  		int nbAnimLayers = pAnimStack->GetMemberCount<FbxAnimLayer>();
 
-		// Assuming only one layer
 		ReadAnimationsRecursive(pAnimStack, pNewAnim, pScene->GetRootNode());
 		pNewAnim->AllocateAnimBones();
-		ReadAnimationKeyFramesRecursively(pAnimStack, pNewAnim, pScene->GetRootNode());
+		ReadAnimationKeyFramesRecursively(pAnimStack, pNewAnim, pMatAnim, pScene->GetRootNode());
 
-		cmdl.AddAnimation(pNewAnim);
+		if(pNewAnim->ValidAnim())
+		{
+			cmdl.AddAnimation(pNewAnim);
+		}
+		else
+		{
+			vdelete pNewAnim;
+		}
+
+		if (pMatAnim->ValidAnim())
+		{
+			cmdl.AddMaterialAnimation(pMatAnim);
+		}
+		else
+		{
+			vdelete pMatAnim;
+		}
+
 	}
 	pScene->SetCurrentAnimationStack(nullptr);
 }
@@ -1561,9 +1590,9 @@ void FbxLoad::FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::
 	pFrame->vScale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 }
 
-void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode)
+void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode)
 {
-	if (pAnim->GetBone(pNode->GetName()))
+	if (IsBone(pNode))
 	{
 		FbxLongLong start = pAnimStack->GetLocalTimeSpan().GetStart().GetFrameCount(FRAME_MODE);
 		FbxLongLong end = pAnimStack->GetLocalTimeSpan().GetStop().GetFrameCount(FRAME_MODE);
@@ -1576,9 +1605,35 @@ void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exch
 			FillOutAnimFrame(pNode, currTime, pFrame);
 		}
 	}
+
+	FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
+	for (int mat = 0; mat < pNode->GetMaterialCount(); mat++)
+	{
+		FbxSurfaceMaterial* pMat = pNode->GetMaterial(mat);
+
+		FbxProperty property = pMat->GetFirstProperty();
+
+		uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
+		for (uint32 tex = 0; tex < uTextureCount; tex++)
+		{
+			FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(tex);
+			if (pTexture)
+			{
+				FbxAnimCurve* pTrans = pTexture->Translation.GetCurve(pAnimLayer, false);
+				FbxAnimCurve* pRot = pTexture->Rotation.GetCurve(pAnimLayer, false);
+				FbxAnimCurve* pScale = pTexture->Scaling.GetCurve(pAnimLayer, false);
+
+				//usg::exchange::MaterialAn
+
+
+			}
+		}
+	}
+
+
 	for (int modelCount = 0; modelCount < pNode->GetChildCount(); modelCount++)
 	{
-		ReadAnimationKeyFramesRecursively(pAnimStack, pAnim, pNode->GetChild(modelCount));
+		ReadAnimationKeyFramesRecursively(pAnimStack, pAnim, pMatAnim, pNode->GetChild(modelCount));
 	}
 }
 

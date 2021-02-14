@@ -40,6 +40,8 @@ public:
 
 	void Export(aya::string path);
 
+	bool ValidAnim() const { return m_boneInfo.size() > 0; }
+
 private:
     usg::exchange::SkeletalAnimationHeader m_header;
 	

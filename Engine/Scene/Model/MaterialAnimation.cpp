@@ -40,6 +40,7 @@ namespace usg
 
 	}
 
+
 	void MaterialAnimation::Update(float fElapsed)
 	{
 		UpdateInt(fElapsed, m_pAnimResource->GetFrameRate(), (float)m_pAnimResource->GetFrameCount(), m_pAnimResource->IsLoop());
@@ -49,5 +50,24 @@ namespace usg
 	{
 		m_pAnimResource->ApplyAllMaterialAnimations(m_fActiveFrame, model);
 	}
+
+
+template<typename T>
+void StoreProtocolBuffer(FILE* pHandle, T* pPB, size_t pbSize, const pb_field_t pbFields[])
+{
+	void* pBuf = aya::Alloc(pbSize);
+
+	pb_ostream_t streamOut = pb_ostream_from_buffer((uint8_t*)pBuf, pbSize);
+	pb_encode(&streamOut, pbFields, pPB);
+	fwrite(pBuf, streamOut.bytes_written, 1, pHandle);
+
+	aya::Free(pBuf);
+}
+
+void StorePBDelimiter(FILE* pHandle, char delimiter)
+{
+	fwrite(&delimiter, 1, 1, pHandle);
+}
+
 
 }

@@ -3,6 +3,9 @@
 
 #include "MaterialAnimation.h"
 
+namespace exchange
+{
+
 class MaterialAnimationConverter
 {
 public:
@@ -18,11 +21,11 @@ public:
 
 		return ret;
 	}
-	void ExportFile( const char* path );
-	void ReverseCoordinate( void );
-	void ReverseCurve( MaterialAnimation::Curve& curve );
+
 private:
 	MaterialAnimation m_materialAnimation;
 };
+
+}
 
 #endif // MaterialAnimationConverter_h__

@@ -13,6 +13,7 @@ namespace exchange {
 	class Mesh;
 	class Skeleton;
 	class Animation;
+	class MaterialAnimation;
 }
 
 class Cmdl
@@ -44,6 +45,7 @@ public:
 	void AddMaterial( ::exchange::Material* p );
 	void AddMesh( ::exchange::Mesh* p );
 	void AddAnimation(::exchange::Animation* p);
+	void AddMaterialAnimation(::exchange::MaterialAnimation* p);
 	void AddStream( ::exchange::Stream* p );
 	void AddLight(Light* p);
 	void AddCamera(Camera* p);
@@ -54,6 +56,7 @@ public:
 	uint32_t GetMeshNum( void ) const { return (uint32_t)m_vectorMesh.size(); }
 	uint32_t GetStreamNum( void ) const { return (uint32_t)m_vectorStream.size(); }
 	uint32_t GetAnimationNum(void) const { return (uint32_t)m_vectorAnimation.size(); }
+	uint32_t GetMatAnimationNum(void) const { return (uint32_t)m_vectorMatAnimation.size(); }
 	uint32_t GetLightNum(void) const { return (uint32_t)m_lightStream.size(); }
 	uint32_t GetCameraNum(void) const { return (uint32_t)m_cameraStream.size(); }
 
@@ -67,6 +70,7 @@ public:
 	::exchange::Material*	GetMaterialPtr( int i ) const { return m_vectorMaterial.at(i); }
 	::exchange::Mesh*		GetMeshPtr( int i ) const { return m_vectorMesh.at(i); }
 	::exchange::Animation*	GetAnimation(int i) const { return m_vectorAnimation.at(i); }
+	::exchange::MaterialAnimation* GetMatAnimation(int i) const { return m_vectorMatAnimation.at(i); }
 	::exchange::Stream*		GetStreamPtr( int i ) const { return m_vectorStream.at( i ); }
 	::exchange::Skeleton*	GetSkeleton( void ) const { return m_pSkeleton; }
 	Light*					GetLight(int i) { return m_lightStream[i]; }
@@ -94,6 +98,7 @@ private:
 	std::vector< ::exchange::Material*, aya::Allocator< ::exchange::Material*> >	m_vectorMaterial;
 	std::vector< ::exchange::Mesh*, aya::Allocator< ::exchange::Mesh* > >			m_vectorMesh;
 	std::vector< ::exchange::Animation*, aya::Allocator< ::exchange::Animation* > >	m_vectorAnimation;
+	std::vector< ::exchange::MaterialAnimation*, aya::Allocator< ::exchange::MaterialAnimation* > >	m_vectorMatAnimation;
 	std::vector< ::exchange::Stream*, aya::Allocator< ::exchange::Stream* > >		m_vectorStream;
 	std::vector< Light*, aya::Allocator< Light* > >									m_lightStream;
 	std::vector< Camera*, aya::Allocator< Camera* > >								m_cameraStream;

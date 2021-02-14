@@ -6,6 +6,7 @@
 #include "exchange/Shape.h"
 #include "exchange/Material.h"
 #include "exchange/Skeleton.h"
+#include "exchange/MaterialAnimation.h"
 #include "Dependencies/DependencyTracker.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/stl/vector.h"
@@ -131,19 +132,19 @@ private:
 	// Animations
 	void ReadAnimations(Cmdl& cmdl, FbxScene* pScene);
 	void ReadAnimationsRecursive(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode);
-	void ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode);
+	void ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode);
 	bool GetAnimBoneInfluences(FbxAnimLayer* pAnimStack, FbxNode* pNode, bool& bTrans, bool& bRot, bool& bScale);
 	void FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::BoneAnimationFrame* pFrame);
 
 	// Materials
 	void AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned);
 	void AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pNewMaterial);
-	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);
-	
+	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);	
 
 	::exchange::Shape* NewShape(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Mesh* NewMesh(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Animation* FbxLoad::NewAnimation(Cmdl& cmdl, FbxAnimStack* layerNode);
+	::exchange::MaterialAnimation* FbxLoad::NewMaterialAnimation(Cmdl& cmdl, FbxAnimStack* layerNode);
 	::exchange::Material* NewMaterial(FbxSurfaceMaterial* pFBXMaterial, bool bSkin);
 	::exchange::Material* DummyMaterial(bool bSkinned);
 	::exchange::Skeleton* NewSkeleton();

@@ -22,11 +22,11 @@ public:
 
 	bool Load( const char* szName );
 
-	float GetFrameCount( void ) const { return m_header.frameSize; }
+	uint32 GetFrameCount( void ) const { return m_header.frameCount; }
 
 	bool IsLoop( void ) const {	return m_header.isLoop;	}
 
-	static float GetFrameRate() { return 30.0f; }
+	float GetFrameRate() const { return m_header.frameRate; }
 
 	int GetMemberSetNum() const { return m_header.memberSetsNum; }
 	int GetMemberCount(int iSet) const { return m_memberSets[iSet].data.membersNum; }

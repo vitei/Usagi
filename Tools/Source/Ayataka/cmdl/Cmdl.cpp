@@ -48,6 +48,11 @@ void Cmdl::AddAnimation(::exchange::Animation* p)
 	m_vectorAnimation.push_back( p );
 }
 
+void Cmdl::AddMaterialAnimation(::exchange::MaterialAnimation* p)
+{
+	m_vectorMatAnimation.push_back( p );
+}
+
 void Cmdl::AddMaterial(::exchange::Material* p)
 {
 	m_vectorMaterial.push_back( p );

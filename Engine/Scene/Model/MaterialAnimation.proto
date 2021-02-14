@@ -16,12 +16,15 @@ enum MaterialAnimationMemberType {
 }
 
 
-message AnimationHeader {
-	required float frameSize = 1 [default = 0];
-	required bool isLoop = 2 [default = false];
-	required bool isAdditive = 3 [default = false];
+message AnimationHeader
+{
+	required string name = 1 [(nanopb).max_size = 40];
+	required uint32 frameCount = 2 [default = 0];
+	required float frameRate = 3 [default = 30];
+	required bool isLoop = 4 [default = false];
+	required bool isAdditive = 5 [default = false];
 
-	required int32 memberSetsNum = 4 [default = 0];
+	required int32 memberSetsNum = 6 [default = 0];
 }
 
 message AnimationMemberSet {
