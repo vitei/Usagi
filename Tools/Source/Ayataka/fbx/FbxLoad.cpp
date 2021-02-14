@@ -4,6 +4,7 @@
 //#include "pugi_util.h"
 #include "Engine/Core/stl/map.h"
 #include "StringUtil.h"
+#include "exchange/MaterialAnimation.h"
 #include "exchange/Animation.h"
 #include "exchange/LoaderUtil.h"
 
@@ -1590,6 +1591,80 @@ void FbxLoad::FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::
 	pFrame->vScale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 }
 
+usg::exchange::CurveKeyFrameType FbxLoad::GetKeyFrameType(FbxAnimCurveDef::EInterpolationType eTypeIn)
+{
+	switch (eTypeIn)
+	{
+		case FbxAnimCurveDef::eInterpolationLinear:
+			return usg::exchange::CurveKeyFrameType_LINEAR;
+		case FbxAnimCurveDef::eInterpolationCubic:
+			return usg::exchange::CurveKeyFrameType_HERMITE;
+		case FbxAnimCurveDef::eInterpolationConstant:
+			return usg::exchange::CurveKeyFrameType_STEP;
+		default:
+			ASSERT(false);
+			return usg::exchange::CurveKeyFrameType_LINEAR;
+	}
+}
+
+bool FbxLoad::AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimation* pMatAnim, FbxPropertyT<FbxDouble3>& prop, usg::exchange::MaterialAnimationMemberType eType, const char* szName)
+{
+	FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
+
+	FbxLongLong start = pAnimStack->GetLocalTimeSpan().GetStart().GetFrameCount(FRAME_MODE);
+	FbxLongLong end = pAnimStack->GetLocalTimeSpan().GetStop().GetFrameCount(FRAME_MODE);
+
+	pMatAnim->AddMember();
+
+
+	usg::exchange::AnimationMember& member = pMatAnim->GetCurrentMemberData();
+	member.type = eType;
+	member.targetID = 0;
+	member.curveNum = 0;
+	strcpy(member.targetName, szName);
+
+	const char* szCurve[3] = { FBXSDK_CURVENODE_COMPONENT_X, FBXSDK_CURVENODE_COMPONENT_Y, FBXSDK_CURVENODE_COMPONENT_Z };
+
+	for(int i=0; i<3; i++)
+	{
+		FbxAnimCurve* pCurve = prop.GetCurve(pAnimLayer, szCurve[i]);
+
+
+		::exchange::MaterialAnimation::Curve curve;
+		curve.curve.axis = 0;
+		curve.curve.keyFrameNum = pCurve->KeyGetCount();
+		curve.curve.start = (sint32)start;
+		curve.curve.end = (sint32)end;
+
+		for (int i = 0; i <= curve.curve.keyFrameNum; ++i)
+		{
+			FbxAnimCurveKey fbxKey = pCurve->KeyGet(i);
+			if (pCurve)
+			{
+				usg::exchange::CurveKeyFrame frame;
+				frame.frame = (float)fbxKey.GetTime().GetSecondDouble();
+				frame.type = GetKeyFrameType(fbxKey.GetInterpolation());
+				// Confirm slopes match the original intention
+				frame.inSlope = fbxKey.GetDataFloat(FbxAnimCurveDef::eRightSlope);
+				frame.outSlope = fbxKey.GetDataFloat(FbxAnimCurveDef::eNextLeftSlope);
+				curve.keyFrames.push_back(frame);
+			}
+		}
+
+		member.curveNum++;
+
+		pMatAnim->AddCurve(curve);
+	}
+
+	if (member.curveNum == 0)
+	{
+		// Remove this member set
+		pMatAnim->PopMember();
+		return false;
+	}
+	return true;
+}
+
 void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode)
 {
 	if (IsBone(pNode))
@@ -1606,27 +1681,28 @@ void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exch
 		}
 	}
 
-	FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
 	for (int mat = 0; mat < pNode->GetMaterialCount(); mat++)
 	{
 		FbxSurfaceMaterial* pMat = pNode->GetMaterial(mat);
 
 		FbxProperty property = pMat->GetFirstProperty();
 
+		pMatAnim->AddMemberSet();
+		bool bValidAnim = false;
 		uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
 		for (uint32 tex = 0; tex < uTextureCount; tex++)
 		{
 			FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(tex);
 			if (pTexture)
 			{
-				FbxAnimCurve* pTrans = pTexture->Translation.GetCurve(pAnimLayer, false);
-				FbxAnimCurve* pRot = pTexture->Rotation.GetCurve(pAnimLayer, false);
-				FbxAnimCurve* pScale = pTexture->Scaling.GetCurve(pAnimLayer, false);
-
-				//usg::exchange::MaterialAn
-
-
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Translation, usg::exchange::MaterialAnimationMemberType_TRANSLATE, pMat->GetName());
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Rotation, usg::exchange::MaterialAnimationMemberType_ROTATE, pMat->GetName());
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Scaling, usg::exchange::MaterialAnimationMemberType_SCALE, pMat->GetName());
 			}
+		}
+		if (!bValidAnim)
+		{
+			pMatAnim->PopMemberSet();
 		}
 	}
 

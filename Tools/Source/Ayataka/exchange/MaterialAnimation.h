@@ -89,6 +89,16 @@ public:
 		return GetCurrentMember().data;
 	}
 
+	void PopMember()
+	{
+		GetCurrentMemberSet().members.pop_back();
+	}
+
+	void PopMemberSet()
+	{
+		m_memberSets.pop_back();
+	}
+
 	void InitTiming(uint32 uFrameCount, float fFrameRate);
 
 	uint32 GetFrameCount() const { return (uint32)m_header.frameCount; }

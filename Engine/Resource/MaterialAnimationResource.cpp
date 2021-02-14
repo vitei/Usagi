@@ -17,9 +17,11 @@ void MaterialAnimationResource::ApplyAllMaterialAnimations( float frame, Model& 
 		uint32 uRepeat = (uint32)(frame / m_header.frameSize);
 		frame -= ((float)uRepeat) * m_header.frameSize;
 	}
-	for( int setNo = 0; setNo < m_header.memberSetsNum; ++setNo ) {
+	for( int setNo = 0; setNo < m_header.memberSetsNum; ++setNo )
+	{
 		MemberSet& memberSet = m_memberSets[setNo];
-		for( int memberNo = 0; memberNo < memberSet.data.membersNum; ++memberNo ) {
+		for( int memberNo = 0; memberNo < memberSet.data.membersNum; ++memberNo )
+		{
 			Member* pMember = memberSet.member( memberNo );
 			ApplyAnimation( frame, model, pMember );
 		}
@@ -29,7 +31,8 @@ void MaterialAnimationResource::ApplyAllMaterialAnimations( float frame, Model& 
 
 void MaterialAnimationResource::ApplyAnimation( float frame, Model& model, Member* pMember ) const
 {
-	switch( pMember->data.type ) {
+	switch( pMember->data.type )
+	{
 		case exchange::MaterialAnimationMemberType_SCALE:
 			ApplyScale( frame, model, pMember );
 			break;
@@ -75,7 +78,8 @@ void MaterialAnimationResource::ApplyRotate( float frame, Model& model, Member* 
 	UVMapper* pMapper =
 		meshIndex != USG_INVALID_ID ? model.GetUVMapper( meshIndex, pMember->data.targetID ) : NULL;
 
-	if( pMapper ) {
+	if( pMapper )
+	{
 		ASSERT( pMember->data.curveNum > 0 );
 		const Curve* pCurve = pMember->curve( 0 );
 
@@ -90,7 +94,8 @@ void MaterialAnimationResource::ApplyTranslate( float frame, Model& model, Membe
 	UVMapper* pMapper =
 		meshIndex != USG_INVALID_ID ? model.GetUVMapper( meshIndex, pMember->data.targetID ) : NULL;
 
-	if( pMapper ) {
+	if( pMapper )
+	{
 		const int axisCount = 2; // XY
 		const Curve* pCurves[axisCount] = {};
 		CollectCurves( pCurves, axisCount, pMember );
@@ -110,10 +115,22 @@ void MaterialAnimationResource::ApplyColor(float frame, Model& model, Member* pM
 	const Curve* pCurves[axisCount] = {};
 	CollectCurves( pCurves, axisCount, pMember );
 
-	if( pCurves[0] ) { color.r() = Calc( frame, pCurves[0] ); }
-	if( pCurves[1] ) { color.g() = Calc( frame, pCurves[1] ); }
-	if( pCurves[2] ) { color.b() = Calc( frame, pCurves[2] ); }
-	if( pCurves[3] ) { color.a() = Calc( frame, pCurves[3] ); }
+	if( pCurves[0] )
+	{ 
+		color.r() = Calc( frame, pCurves[0] ); 
+	}
+	if( pCurves[1] )
+	{
+		color.g() = Calc( frame, pCurves[1] );
+	}
+	if( pCurves[2] )
+	{
+		color.b() = Calc( frame, pCurves[2] );
+	}
+	if( pCurves[3] )
+	{
+		color.a() = Calc( frame, pCurves[3] );
+	}
 	model.OverrideVariable(szName, color );
 }
 

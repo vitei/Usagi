@@ -12,6 +12,7 @@
 #include "Engine/Core/stl/vector.h"
 #include "exchange/MaterialOverrides.h"
 #include "Engine/Scene/Model/SkeletalAnimation.pb.h"
+#include "Engine/Scene/Model/MaterialAnimation.pb.h"
 #include <fbxsdk.h>
 
 struct FBXVertexElement
@@ -165,6 +166,8 @@ private:
 	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
 	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
 	bool IsBone(FbxNode* pNode);
+	usg::exchange::CurveKeyFrameType GetKeyFrameType(FbxAnimCurveDef::EInterpolationType eTypeIn);
+	bool AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimation* pMatAnim, FbxPropertyT<FbxDouble3>& prop, usg::exchange::MaterialAnimationMemberType eType, const char* szName);
 
 	// Below here are custom tweaks for our own behaviour
 	// At this stage only used for culling duplicate bones used for the LOD system
