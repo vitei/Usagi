@@ -1629,6 +1629,9 @@ bool FbxLoad::AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimati
 	{
 		FbxAnimCurve* pCurve = prop.GetCurve(pAnimLayer, szCurve[i]);
 
+		if(!pCurve)
+			continue;
+
 
 		::exchange::MaterialAnimation::Curve curve;
 		curve.curve.axis = 0;
@@ -1667,7 +1670,7 @@ bool FbxLoad::AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimati
 
 void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode)
 {
-	if (IsBone(pNode))
+	if (pAnim->GetBone(pNode->GetName()))
 	{
 		FbxLongLong start = pAnimStack->GetLocalTimeSpan().GetStart().GetFrameCount(FRAME_MODE);
 		FbxLongLong end = pAnimStack->GetLocalTimeSpan().GetStop().GetFrameCount(FRAME_MODE);
@@ -1683,12 +1686,30 @@ void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exch
 
 	for (int mat = 0; mat < pNode->GetMaterialCount(); mat++)
 	{
+		bool bValidAnim = false;
+		pMatAnim->AddMemberSet();
+
 		FbxSurfaceMaterial* pMat = pNode->GetMaterial(mat);
+		if (pMat->GetClassId().Is(FbxSurfaceLambert::ClassId))
+		{
+			FbxSurfaceLambert* pLamb = reinterpret_cast<FbxSurfaceLambert*>(pMat);
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Ambient, usg::exchange::MaterialAnimationMemberType_COLOR_AMBIENT, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Diffuse, usg::exchange::MaterialAnimationMemberType_COLOR_DIFFUSE, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Emissive, usg::exchange::MaterialAnimationMemberType_COLOR_EMISSION, pMat->GetName());
+
+			// One or the other so we try both in the same destination
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->VectorDisplacementColor, usg::exchange::MaterialAnimationMemberType_DISPLACEMENT, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->DisplacementColor, usg::exchange::MaterialAnimationMemberType_DISPLACEMENT, pMat->GetName());
+		}
+
+		if (pMat->GetClassId().Is(FbxSurfacePhong::ClassId))
+		{
+			FbxSurfacePhong* pPhong = reinterpret_cast<FbxSurfacePhong*>(pMat);
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pPhong->Specular, usg::exchange::MaterialAnimationMemberType_COLOR_SPECULAR_0, pMat->GetName());
+		}
 
 		FbxProperty property = pMat->GetFirstProperty();
 
-		pMatAnim->AddMemberSet();
-		bool bValidAnim = false;
 		uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
 		for (uint32 tex = 0; tex < uTextureCount; tex++)
 		{

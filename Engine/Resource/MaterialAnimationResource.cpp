@@ -14,8 +14,8 @@ void MaterialAnimationResource::ApplyAllMaterialAnimations( float frame, Model& 
 {
 	if(m_header.isLoop)
 	{
-		uint32 uRepeat = (uint32)(frame / m_header.frameSize);
-		frame -= ((float)uRepeat) * m_header.frameSize;
+		uint32 uRepeat = (uint32)(frame / m_header.frameCount);
+		frame -= ((float)uRepeat) * m_header.frameCount;
 	}
 	for( int setNo = 0; setNo < m_header.memberSetsNum; ++setNo )
 	{
@@ -42,7 +42,6 @@ void MaterialAnimationResource::ApplyAnimation( float frame, Model& model, Membe
 		case exchange::MaterialAnimationMemberType_TRANSLATE:
 			ApplyTranslate( frame, model, pMember );
 			break;
-
 		case exchange::MaterialAnimationMemberType_COLOR_EMISSION:
 			ApplyColor(frame, model, pMember, "emission");
 			break;
@@ -54,6 +53,9 @@ void MaterialAnimationResource::ApplyAnimation( float frame, Model& model, Membe
 			break;
 		case exchange::MaterialAnimationMemberType_COLOR_SPECULAR_0:
 			ApplyColor(frame, model, pMember, "specular");
+			break;
+		case exchange::MaterialAnimationMemberType_DISPLACEMENT:
+			ApplyColor(frame, model, pMember, "displacement");
 			break;
 		default:
 			ASSERT( 0 );

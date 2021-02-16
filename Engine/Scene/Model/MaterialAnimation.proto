@@ -13,6 +13,7 @@ enum MaterialAnimationMemberType {
 	COLOR_AMBIENT = 4;
 	COLOR_DIFFUSE = 5;
 	COLOR_SPECULAR_0 = 6;
+	DISPLACEMENT = 7;
 }
 
 
