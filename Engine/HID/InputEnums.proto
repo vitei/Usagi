@@ -157,6 +157,8 @@ enum GamepadButton
 
     // Screen touch
     GAMEPAD_BUTTON_TOUCH = 18;
+
+    GAMEPAD_BUTTON_COUNT = 19;
 };
 
 enum TouchType
