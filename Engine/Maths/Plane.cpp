@@ -62,4 +62,20 @@ Vector4f Plane::ReflectPoint(const Vector4f& point) const
 	return Vector4f( point.v3() + PA_proj_N * 2.0f, 1.0f );
 }
 
+bool Plane::GetLineIntersectionPoint(const Vector3f& vLineStart, const Vector3f& vLineEnd, Vector3f& vPointOut) const
+{
+	usg::Vector3f vLineDir = vLineEnd - vLineStart;
+	float fLineSize = vLineDir.Magnitude();
+	vLineDir /= fLineSize;
+	usg::Vector3f vPlanePos = m_normal * m_fDistance;
+
+	const float fLineDistance = DotProduct((vPlanePos - vLineStart), m_normal) / DotProduct(vLineDir, m_normal);
+	vPointOut = vLineStart + (vLineDir * fLineDistance);
+	if (fLineDistance < 0.0f || fLineDistance > fLineSize)
+	{
+		return false;
+	}
+	return true;
+}
+
 }
