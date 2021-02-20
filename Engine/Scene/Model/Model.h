@@ -49,7 +49,7 @@ public:
 		OverrideVariable(szVarName, (void*)&var, sizeof(VariableType), uIndex);
 	}
 	void UpdateDescriptors(GFXDevice* pDevice);
-	const Matrix4x4& GetTransform() const { return m_pTransformNode->GetMatrix(); }
+	const Matrix4x4& GetTransformMtx() const { return m_pTransformNode->GetMatrix(); }
 	TransformNode* GetTransform() { return m_pTransformNode; }
 	const ModelResHndl& GetResource() const { return m_pResource; }
 
