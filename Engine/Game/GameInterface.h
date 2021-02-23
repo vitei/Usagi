@@ -28,7 +28,7 @@ public:
 	virtual void Update(GFXDevice* pDevice) = 0;
 	virtual void Draw(GFXDevice* pDevice) = 0;
 	virtual void OnMessage(GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) = 0;
-
+	void Quit() { m_bIsRunning = false; }
 protected:
 	bool				m_bIsRunning;
 	bool				m_bReqReset;
