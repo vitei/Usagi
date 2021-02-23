@@ -213,6 +213,13 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		// FIXME: Use the correct indicies
 		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+		for (uint32 i = 0; i < ModelResource::Mesh::MAX_UV_STAGES; i++)
+		{
+			if (pMesh->pTextures[i])
+			{
+				descSet.SetImageSamplerPairAtBinding(i, pMesh->pTextures[i], pMesh->samplers[i]);
+			}
+		}
 		descSet.UpdateDescriptors(pDevice);
 		for (uint32 uTex = 0; uTex < ModelResource::Mesh::MAX_UV_STAGES; uTex++)
 		{
