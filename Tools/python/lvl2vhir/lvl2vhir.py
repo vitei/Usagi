@@ -1,7 +1,7 @@
 import sys, os, os.path, subprocess
 from optparse import Option, OptionParser
 
-import LevelEditor
+import LevelEditor.Game
 import Level2Yaml
 import Level2Instances
 import yaml

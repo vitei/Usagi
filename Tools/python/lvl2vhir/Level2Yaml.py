@@ -11,7 +11,7 @@ def createInstanceEntity( yamlPath, ext ):
     yamlData = yaml.load(f)
     f.close
 
-    if yamlData.has_key('ModelComponent'):
+    if 'ModelComponent' in yamlData:
         yamlData.pop('ModelComponent')
 
     return yamlData
@@ -43,7 +43,7 @@ def makeEntity( obj, format, isInst ):
         # Model
         uri = gobj.getURI()
         if uri == None:
-            print("GameObject (" + gobj.getName() + ") without URI found. Have you put a spawnpoint/item pop point, etc.. into Props?")
+            print(("GameObject (" + gobj.getName() + ") without URI found. Have you put a spawnpoint/item pop point, etc.. into Props?"))
             assert(False)
         path, ext = os.path.splitext(uri)
         if ext == '.yml':

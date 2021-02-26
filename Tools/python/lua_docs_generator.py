@@ -4,7 +4,8 @@
 '''Generate lua documentation from .proto definitions'''
 
 import sys
-reload(sys)
+import importlib
+importlib.reload(sys)
 sys.setdefaultencoding("utf-8")
 
 import zlib
@@ -82,7 +83,7 @@ def get_type_name(desc):
         FieldD.TYPE_UINT64:     '整数　正の数のみ',
         FieldD.TYPE_STRING:     '文字列'
     }
-    if datatypes.has_key(desc.type):
+    if desc.type in datatypes:
         return datatypes[desc.type]
     else:
         return '{{' + desc.type_name.encode('utf-8') + '}}'
@@ -180,9 +181,9 @@ exposed_events = list(read_from_files(filenames))
 receive_events = [e for e in exposed_events if e.lua_receive]
 for e in receive_events:
     e.package = 'OnEvent'
-print 'h4. 受信できるイベント'
-print '\n\n'.join(str(event) for event in receive_events)
+print('h4. 受信できるイベント')
+print('\n\n'.join(str(event) for event in receive_events))
 
 send_events = [e for e in exposed_events if e.lua_send]
-print 'h4. 送信できるイベント'
-print '\n\n'.join(str(event) for event in send_events)
+print('h4. 送信できるイベント')
+print('\n\n'.join(str(event) for event in send_events))

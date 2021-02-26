@@ -24,7 +24,7 @@ class EntityYaml:
 
     def traverseComponents(self, yamlData):
         self.compoName = ''
-        for key, value in yamlData.items():
+        for key, value in list(yamlData.items()):
             self.compoName = key
 
             if not value is None:
@@ -35,14 +35,14 @@ class EntityYaml:
             self.inherits = vals[0] # 'vals' should be a list instance.
         else:
             if (type(vals) is dict):
-                for valKey, valValue in vals.iteritems():
+                for valKey, valValue in vals.items():
                     if not isinstance( valValue, dict):
                         self.catchValue( valKey, valValue )
                     else:
                         pass
             elif (type(vals) is list):
                 for listItem in vals:
-                    for valKey, valValue in listItem.iteritems():
+                    for valKey, valValue in listItem.items():
                         if not isinstance( valValue, dict):
                             self.catchValue( valKey, valValue )
                         else:

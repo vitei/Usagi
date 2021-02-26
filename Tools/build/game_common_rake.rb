@@ -5,7 +5,7 @@ REGION          = ENV["region"]    || "JP"
 VERBOSITY       = ENV["verbosity"] || "normal"
 CORES           = ENV["cores"]
 
-PYTHON = "python"
+PYTHON = "python3"
 RUBY = "ruby"
 
 SKIP_USAGI_BUILD = ["cia"]
@@ -107,7 +107,7 @@ task :projects => :ninja do
 end
 
 task :docs do
-  event_docs = `find #{PROJECT} Usagi/Engine -name '*.proto' | grep -v ThirdParty/nanopb | xargs python Usagi/Tools/python/lua_docs_generator.py`
+  event_docs = `find #{PROJECT} Usagi/Engine -name '*.proto' | grep -v ThirdParty/nanopb | xargs python3 Usagi/Tools/python/lua_docs_generator.py`
   File.open('event_docs.txt', 'w') { |f| f.write event_docs }
 end
 

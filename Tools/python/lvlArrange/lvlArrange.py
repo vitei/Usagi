@@ -22,7 +22,7 @@ class BoundingBox:
         self.setup( cmdlPath )
 
     def setup( self, cmdlPath ):
-        print cmdlPath
+        print(cmdlPath)
         usagi_dir = os.getenv( 'USAGI_DIR' )
 
         fullPath = usagi_dir + '/Data/' + cmdlPath + '.cmdl'
@@ -110,7 +110,7 @@ class AIBlockingAreaGenerator:
             self.areas[uniqueName] = AIBlockingArea( self.cache[uri], trans, rot )
 
     def injectNewAreas(self, aiFolder):
-        for key, area in self.areas.items():
+        for key, area in list(self.areas.items()):
             newElem = etree.Element( '{gap}gameObject' )
 
             gobj = LevelEditor.Game.GameObject( newElem )
@@ -173,7 +173,7 @@ def arrangeForAI( lvl ):
             aiFolder = folder
 
     if aiFolder is None:
-        print 'ERROR: AI folder not found!!'
+        print('ERROR: AI folder not found!!')
         return False
 
     areaGen.injectNewAreas( aiFolder )

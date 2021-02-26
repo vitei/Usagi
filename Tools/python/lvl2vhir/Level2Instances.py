@@ -48,11 +48,11 @@ class InstancesConverter:
             blankData['Nodes'] = []
             return [ blankData ]
 
-        for key, values in self.hash.items():
+        for key, values in list(self.hash.items()):
             self.groupInstances( values )
 
         yamlTree = []
-        for key, values in self.hash.items():
+        for key, values in list(self.hash.items()):
             yamlTree.extend( self.createInstancesYaml( key, values ) )
 
         return yamlTree
@@ -67,14 +67,14 @@ class InstancesConverter:
             gobj = LevelEditor.Game.GameObject( obj )
             cmdlPath = EntityYaml.searchModelComponent( gobj.getURI() )
             cmdlPath = cmdlPath.replace( 'Models/', '' ) + '.vmdc'
-            if not self.hash.has_key( cmdlPath ):
+            if cmdlPath not in self.hash:
                 self.hash[cmdlPath] = {}
 
             self.hash[cmdlPath][gobj.getName()] = InstanceObject(gobj)#obj
 
     def groupInstances( self, objs ):
         indexA = 0
-        instances = objs.items()
+        instances = list(objs.items())
         for keyA, insObjA in instances:
 
             # Set group number initially
@@ -102,7 +102,7 @@ class InstancesConverter:
         for groupNo in range(groupNoNum):
             nodes = []
             #print modelPath
-            for key, insObj in objs.items():
+            for key, insObj in list(objs.items()):
                 if not insObj.groupNo == groupNo:
                     continue
 
