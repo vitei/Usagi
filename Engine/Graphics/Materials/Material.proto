@@ -1,6 +1,7 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
 import 'Engine/Maths/Maths.proto';
 import 'Engine/Graphics/Device/StateEnums.proto';
@@ -114,22 +115,22 @@ message ConstantData
 message RenderPassData
 {
 	required string effectName = 1 [(nanopb).max_size = 64];
-	repeated ConstantData constants = 2 [(nanopb).max_count = 4, (nanopb).has_max_count = true];
+	repeated ConstantData constants = 2 [(nanopb).max_count = 4, (nanopb).fixed_count = true];
 	required uint32 constants_count = 3 [default = 0];
 }
 
 message Material {
 	required string materialName = 1 [(nanopb).max_size = 40];
-	repeated Texture textures = 2 [(nanopb).max_count = 7, (nanopb).has_max_count = true];
+	repeated Texture textures = 2 [(nanopb).max_count = 7, (nanopb).fixed_count = true];
 
 	required Rasterizer rasterizer = 5;
 	repeated TextureCoordinator textureCoordinators = 6 [(nanopb).max_count = 7];
 
 	required MaterialAttribute attribute = 7;
 
-	repeated RenderPassData renderPasses = 9 [(nanopb).max_count = 5, (nanopb).has_max_count = true];	// Max count must match number of passes
+	repeated RenderPassData renderPasses = 9 [(nanopb).max_count = 5, (nanopb).fixed_count = true];	// Max count must match number of passes
 
-	repeated sint32 constantIndexes = 13 [(nanopb).max_count = 6, (nanopb).has_max_count = true];
+	repeated sint32 constantIndexes = 13 [(nanopb).max_count = 6, (nanopb).fixed_count = true];
 	
-	repeated uint32 constantData =8 [(nanopb).max_count = 512, (nanopb).has_max_count = true];
+	repeated uint32 constantData =8 [(nanopb).max_count = 512, (nanopb).fixed_count = true];
 }

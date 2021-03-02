@@ -1,9 +1,8 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
-
-import 'Engine/Maths/Maths.proto';
 import 'Engine/Graphics/Color.proto';
 
 package usg;

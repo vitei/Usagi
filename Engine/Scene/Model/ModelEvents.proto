@@ -1,6 +1,6 @@
+syntax = "proto2";
 import 'nanopb.proto';
 import "Engine/Maths/Maths.proto";
-import "Engine/Graphics/Color.proto";
 import "Engine/Graphics/RenderConsts.proto";
 
 package usg.Events;
@@ -29,14 +29,14 @@ message ScaleModel
 message OverrideModelVectorEvent
 {
 	// TODO: Replace material name with hash
-	required string varName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required string varName = 1 [(nanopb).max_size = 32, (nanopb).fixed_length = true];
 	required Vector4f vVector = 2;
 }
 
 message OverrideModelScalarEvent
 {
 	// TODO: Replace material name with hash
-	required string varName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required string varName = 1 [(nanopb).max_size = 32, (nanopb).fixed_length = true];
 	required float fScalar = 2;
 }
 
@@ -54,6 +54,6 @@ message UpdateModelRenderMask
 
 message SetMeshRenderLayer
 {
-	required string meshName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required string meshName = 1 [(nanopb).max_size = 32, (nanopb).fixed_length = true];
 	required RenderLayer eLayer = 2;
 }

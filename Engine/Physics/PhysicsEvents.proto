@@ -1,10 +1,8 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2016
 ****************************************************************************/
-import 'nanopb.proto';
-import 'Engine/Physics/Collision.proto';
+syntax = "proto2";
 import 'Engine/Physics/PhysicsEnums.proto';
-import 'Engine/Framework/EntityRef.proto';
 import "Engine/Maths/Maths.proto";
 
 package usg.Events;

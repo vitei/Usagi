@@ -59,8 +59,7 @@ using <xsl:value-of select="substring-before($ns,';')"/>;<!--
    <xsl:otherwise>
 using <xsl:value-of select="$ns"/>;
    </xsl:otherwise>
- </xsl:choose></xsl:if>
-using System;</xsl:template>
+ </xsl:choose></xsl:if></xsl:template>
   
   <xsl:template match="FileDescriptorSet">
     <xsl:if test="$help='true'">
@@ -120,7 +119,6 @@ using System;</xsl:template>
   
   <xsl:template match="FileDescriptorProto">
 // Generated from: <xsl:value-of select="name"/>
-using NoNamespace;
     
     <xsl:apply-templates select="dependency/string[.!='']"/>
     <xsl:variable name="namespace"><xsl:call-template name="PickNamespace">
@@ -136,6 +134,7 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
   
   <xsl:template match="FileDescriptorProto/dependency/string">
 // Note: requires additional types generated from: <xsl:value-of select="."/></xsl:template>
+
 
   <xsl:template name="camel">
     <xsl:param name="value" select="name"/>
@@ -200,8 +199,6 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
     <xsl:if test="$optionDataContract">[global::System.Runtime.Serialization.DataContract(Name=@"<xsl:value-of select="name"/>")]
     </xsl:if>
     <xsl:if test="$optionXml">[global::System.Xml.Serialization.XmlType(TypeName=@"<xsl:value-of select="name"/>")]
-    </xsl:if>
-    <xsl:if test="Metadata/NamedList/List/KeyValuePair[descendant::Key[text()='is_bitmask']]/Value = 'True'">[Flags]
     </xsl:if><!--
     -->public enum <xsl:call-template name="pascal"/>
     {
@@ -210,24 +207,17 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
   </xsl:template>
 
   <xsl:template match="EnumValueDescriptorProto">
-      <xsl:variable name="outputName">
-        <xsl:choose>
-          <xsl:when test="self::node()/../../Metadata/NamedList[descendant::Name[text()='NanoPBOptions']]/List/KeyValuePair[descendant::Key[text()='long_names']]/Value = 'True'"><xsl:value-of select="self::node()/../../name"/>_<xsl:value-of select="name"/>
-          </xsl:when>
-          <xsl:otherwise><xsl:value-of select="name"/></xsl:otherwise>
-        </xsl:choose>
-      </xsl:variable>
       <xsl:variable name="value"><xsl:choose>
         <xsl:when test="number"><xsl:value-of select="number"/></xsl:when>
         <xsl:otherwise>0</xsl:otherwise>
       </xsl:choose></xsl:variable>      
-      [global::ProtoBuf.ProtoEnum(Name=@"<xsl:value-of select="$outputName"/>", Value=<xsl:value-of select="$value"/>)]<!--
+      [global::ProtoBuf.ProtoEnum(Name=@"<xsl:value-of select="name"/>", Value=<xsl:value-of select="$value"/>)]<!--
       --><xsl:if test="$optionDataContract">
-      [global::System.Runtime.Serialization.EnumMember(Value=@"<xsl:value-of select="$outputName"/>")]</xsl:if><!--
+      [global::System.Runtime.Serialization.EnumMember(Value=@"<xsl:value-of select="name"/>")]</xsl:if><!--
       --><xsl:if test="$optionXml">
-      [global::System.Xml.Serialization.XmlEnum(@"<xsl:value-of select="$outputName"/>")]</xsl:if><!--
+      [global::System.Xml.Serialization.XmlEnum(@"<xsl:value-of select="name"/>")]</xsl:if><!--
       --><xsl:text disable-output-escaping="yes">
-      </xsl:text><xsl:call-template name="pascal"><xsl:with-param name="value" select="$outputName" /></xsl:call-template><xsl:text xml:space="preserve"> = </xsl:text><xsl:value-of select="$value"/><xsl:if test="position()!=last()">,
+      </xsl:text><xsl:call-template name="pascal"/><xsl:text xml:space="preserve"> = </xsl:text><xsl:value-of select="$value"/><xsl:if test="position()!=last()">,
       </xsl:if>
   </xsl:template>
 

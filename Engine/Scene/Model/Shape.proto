@@ -1,17 +1,15 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
 import 'Engine/Maths/Maths.proto';
 import 'Engine/Scene/Model/Model.proto';
-import 'Engine/Graphics/RenderConsts.proto';
 
 package usg.exchange;
 
 enum VertexAttribute
 {
-	option allow_alias = true;
-
 	NONE = 0;
 	POSITION = 1;
 	NORMAL = 2;
@@ -25,8 +23,6 @@ enum VertexAttribute
 
 enum SkinningType
 {
-	option allow_alias = true;	
-
 	NO_SKINNING = 0;
 	SMOOTH_SKINNING = 1;
 	RIGID_SKINNING = 2;

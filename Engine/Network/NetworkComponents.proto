@@ -1,5 +1,5 @@
+syntax = "proto2";
 import 'nanopb.proto';
-import 'Engine/Network/Network.proto';
 
 package usg.Components;
 

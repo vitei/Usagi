@@ -3,8 +3,7 @@
 //	This file contains definitions for events which are used by the
 //	physics system internally. User code should not generate these events.
 ****************************************************************************/
-import 'nanopb.proto';
-import "Engine/Maths/Maths.proto";
+syntax = "proto2";
 
 package usg.physics.details.Events;
 

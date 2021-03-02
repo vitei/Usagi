@@ -1,3 +1,4 @@
+syntax = "proto2";
 import 'nanopb.proto';
 import 'Engine/Core/usagipb.proto';
 import "Engine/Maths/Maths.proto";

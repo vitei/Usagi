@@ -1,0 +1,258 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "protogen/3.0.0-g": {
+        "dependencies": {
+          "Grpc.Net.Client": "2.33.1",
+          "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
+          "Microsoft.SourceLink.GitHub": "1.0.0",
+          "Nerdbank.GitVersioning": "3.3.37",
+          "System.Collections.Immutable": "5.0.0",
+          "protobuf-net": "1.0.0",
+          "protobuf-net.Grpc.Reflection": "1.0.123",
+          "protobuf-net.Reflection": "1.0.0"
+        },
+        "runtime": {
+          "protogen.dll": {}
+        }
+      },
+      "Grpc.Core.Api/2.33.1": {
+        "dependencies": {
+          "System.Memory": "4.5.3"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Grpc.Core.Api.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.33.1.0"
+          }
+        }
+      },
+      "Grpc.Net.Client/2.33.1": {
+        "dependencies": {
+          "Grpc.Net.Common": "2.33.1",
+          "Microsoft.Extensions.Logging.Abstractions": "3.0.3",
+          "System.Diagnostics.DiagnosticSource": "4.5.1"
+        },
+        "runtime": {
+          "lib/net5.0/Grpc.Net.Client.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.33.1.0"
+          }
+        }
+      },
+      "Grpc.Net.Common/2.33.1": {
+        "dependencies": {
+          "Grpc.Core.Api": "2.33.1"
+        },
+        "runtime": {
+          "lib/net5.0/Grpc.Net.Common.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.33.1.0"
+          }
+        }
+      },
+      "Microsoft.Build.Tasks.Git/1.0.0": {},
+      "Microsoft.Extensions.Logging.Abstractions/3.0.3": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "assemblyVersion": "3.0.3.0",
+            "fileVersion": "3.0.320.7202"
+          }
+        }
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {},
+      "Microsoft.SourceLink.Common/1.0.0": {},
+      "Microsoft.SourceLink.GitHub/1.0.0": {
+        "dependencies": {
+          "Microsoft.Build.Tasks.Git": "1.0.0",
+          "Microsoft.SourceLink.Common": "1.0.0"
+        }
+      },
+      "Nerdbank.GitVersioning/3.3.37": {},
+      "protobuf-net.Grpc/1.0.123": {
+        "dependencies": {
+          "Grpc.Core.Api": "2.33.1",
+          "System.Threading.Channels": "4.7.1",
+          "protobuf-net": "1.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/protobuf-net.Grpc.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.123.6646"
+          }
+        }
+      },
+      "protobuf-net.Grpc.Reflection/1.0.123": {
+        "dependencies": {
+          "protobuf-net": "1.0.0",
+          "protobuf-net.Core": "1.0.0",
+          "protobuf-net.Grpc": "1.0.123",
+          "protobuf-net.Reflection": "1.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/protobuf-net.Grpc.Reflection.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.123.6646"
+          }
+        }
+      },
+      "System.Collections.Immutable/5.0.0": {},
+      "System.Diagnostics.DiagnosticSource/4.5.1": {},
+      "System.Memory/4.5.3": {},
+      "System.Threading.Channels/4.7.1": {},
+      "protobuf-net/1.0.0": {
+        "dependencies": {
+          "protobuf-net.Core": "1.0.0"
+        },
+        "runtime": {
+          "protobuf-net.dll": {}
+        }
+      },
+      "protobuf-net.Core/1.0.0": {
+        "runtime": {
+          "protobuf-net.Core.dll": {}
+        }
+      },
+      "protobuf-net.Reflection/1.0.0": {
+        "dependencies": {
+          "protobuf-net.Core": "1.0.0"
+        },
+        "runtime": {
+          "protobuf-net.Reflection.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "protogen/3.0.0-g": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Grpc.Core.Api/2.33.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5uRHXXy0xJaiatd2b542jKemTkC5wR/27d2wVBBl0J5Nf/ubfZlrfCAX/hdQuLHoLPRnuYmf9iG2uXZfT2230w==",
+      "path": "grpc.core.api/2.33.1",
+      "hashPath": "grpc.core.api.2.33.1.nupkg.sha512"
+    },
+    "Grpc.Net.Client/2.33.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tXWH46j571C/GrXoinQIJj/Nh7SDSgJqFja7Xzob68BxI9u7OWi6S30Zzm1qsBldMob07LYm/wniLMrxvm7iyA==",
+      "path": "grpc.net.client/2.33.1",
+      "hashPath": "grpc.net.client.2.33.1.nupkg.sha512"
+    },
+    "Grpc.Net.Common/2.33.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-an95nn14XHfLsrEDwn3bzN0EcGx47I0sxrW7FvpBAuap/gBzsgLDNaWiPGKHeEWy08gIg4L2yn9Ze93H5LfA+w==",
+      "path": "grpc.net.common/2.33.1",
+      "hashPath": "grpc.net.common.2.33.1.nupkg.sha512"
+    },
+    "Microsoft.Build.Tasks.Git/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-z2fpmmt+1Jfl+ZnBki9nSP08S1/tbEOxFdsK1rSR+LBehIJz1Xv9/6qOOoGNqlwnAGGVGis1Oj6S8Kt9COEYlQ==",
+      "path": "microsoft.build.tasks.git/1.0.0",
+      "hashPath": "microsoft.build.tasks.git.1.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Logging.Abstractions/3.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-m2Jyi/MEn043WMI1I6J1ALuCThktZ93rd7eqzYeLmMcA0bdZC+TBVl0LuEbEWM01dWeeBjOoagjNwQTzOi2r6A==",
+      "path": "microsoft.extensions.logging.abstractions/3.0.3",
+      "hashPath": "microsoft.extensions.logging.abstractions.3.0.3.nupkg.sha512"
+    },
+    "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7D2TMufjGiowmt0E941kVoTIS+GTNzaPopuzM1/1LSaJAdJdBrVP0SkZW7AgDd0a2U1DjsIeaKG1wxGVBNLDMw==",
+      "path": "microsoft.netframework.referenceassemblies/1.0.0",
+      "hashPath": "microsoft.netframework.referenceassemblies.1.0.0.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.Common/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-G8DuQY8/DK5NN+3jm5wcMcd9QYD90UV7MiLmdljSJixi3U/vNaeBKmmXUqI4DJCOeWizIUEh4ALhSt58mR+5eg==",
+      "path": "microsoft.sourcelink.common/1.0.0",
+      "hashPath": "microsoft.sourcelink.common.1.0.0.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.GitHub/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-aZyGyGg2nFSxix+xMkPmlmZSsnGQ3w+mIG23LTxJZHN+GPwTQ5FpPgDo7RMOq+Kcf5D4hFWfXkGhoGstawX13Q==",
+      "path": "microsoft.sourcelink.github/1.0.0",
+      "hashPath": "microsoft.sourcelink.github.1.0.0.nupkg.sha512"
+    },
+    "Nerdbank.GitVersioning/3.3.37": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YlDKV/gSHQGDThWSGqVyPfKeNP/kx1fj/NPFFgGc/cxzgIbXv4jtYOcbFOz3ZIeAKtpCcSAmVNDOikBs3OxI/A==",
+      "path": "nerdbank.gitversioning/3.3.37",
+      "hashPath": "nerdbank.gitversioning.3.3.37.nupkg.sha512"
+    },
+    "protobuf-net.Grpc/1.0.123": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-F38a0IYmsXx7NChU/daoXvjz5veMqjqGjdHrJXew3XBKKQrtGOCSugokINylulJUt/2yWPE2T9IPFZTrYb6umw==",
+      "path": "protobuf-net.grpc/1.0.123",
+      "hashPath": "protobuf-net.grpc.1.0.123.nupkg.sha512"
+    },
+    "protobuf-net.Grpc.Reflection/1.0.123": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qZq926xheKtYM15fYmd+H8OtsAkH6TRss94Gwk+oJWJM7hdW9tbBxKSxw8kzrPTdyth60HTF7Ml8PEpNEnEEbQ==",
+      "path": "protobuf-net.grpc.reflection/1.0.123",
+      "hashPath": "protobuf-net.grpc.reflection.1.0.123.nupkg.sha512"
+    },
+    "System.Collections.Immutable/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FXkLXiK0sVVewcso0imKQoOxjoPAj42R8HtjjbSjVPAzwDfzoyoznWxgA3c38LDbN9SJux1xXoXYAhz98j7r2g==",
+      "path": "system.collections.immutable/5.0.0",
+      "hashPath": "system.collections.immutable.5.0.0.nupkg.sha512"
+    },
+    "System.Diagnostics.DiagnosticSource/4.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zCno/m44ymWhgLFh7tELDG9587q0l/EynPM0m4KgLaWQbz/TEKvNRX2YT5ip2qXW/uayifQ2ZqbnErsKJ4lYrQ==",
+      "path": "system.diagnostics.diagnosticsource/4.5.1",
+      "hashPath": "system.diagnostics.diagnosticsource.4.5.1.nupkg.sha512"
+    },
+    "System.Memory/4.5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA==",
+      "path": "system.memory/4.5.3",
+      "hashPath": "system.memory.4.5.3.nupkg.sha512"
+    },
+    "System.Threading.Channels/4.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6akRtHK/wab3246t4p5v3HQrtQk8LboOt5T4dtpNgsp3zvDeM4/Gx8V12t0h+c/W9/enUrilk8n6EQqdQorZAA==",
+      "path": "system.threading.channels/4.7.1",
+      "hashPath": "system.threading.channels.4.7.1.nupkg.sha512"
+    },
+    "protobuf-net/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "protobuf-net.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "protobuf-net.Reflection/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

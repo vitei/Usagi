@@ -1,5 +1,4 @@
-import 'nanopb.proto';
-import "Engine/Maths/Maths.proto";
+syntax = "proto2";
 import "Engine/Scene/Model/Fade.proto";
 
 package usg.Events;

@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 
+syntax = "proto2";
 import 'nanopb.proto';
 
 option (nanopb_fileopt).include = 'Engine/Framework/Script/LuaEventTriggers.h';

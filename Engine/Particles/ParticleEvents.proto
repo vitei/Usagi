@@ -1,4 +1,4 @@
-import "Engine/Maths/Maths.proto";
+syntax = "proto2";
 
 package usg.Events;
 

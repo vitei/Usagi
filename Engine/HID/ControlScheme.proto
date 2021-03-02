@@ -1,6 +1,7 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
 import 'Engine/HID/InputEnums.proto';
 

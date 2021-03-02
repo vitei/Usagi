@@ -1,6 +1,7 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
 
 package usg;
@@ -21,7 +22,7 @@ message NetSimplePlayerData
 	required uint32 active = 5;
 	required uint32 uType  = 6;
 
-	required string name   = 7 [(nanopb).max_size = 32, (nanopb).has_max_size=true];
+	required string name   = 7 [(nanopb).max_size = 32, (nanopb).fixed_length=true];
 }
 
 message HostListPair

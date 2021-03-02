@@ -37,7 +37,8 @@ module GeneratorUtil
 
     n.variable('protoc', config.protoc)
     n.variable('protoc_gen_c', config.protoc_gen_c)
-    n.variable('protoc_gen_cs', config.protoc_gen_cs)
+# FIXME: Disabling for now as we aren't using the level editor and are upgrading nanopb
+#    n.variable('protoc_gen_cs', config.protoc_gen_cs)
     n.variable('protoc_gen_lua', config.protoc_gen_lua)
     n.variable('protoc_gen_ruby', config.protoc_gen_ruby)
     n.variable('nanopb_proto_dir', config.nanopb_proto_dir)

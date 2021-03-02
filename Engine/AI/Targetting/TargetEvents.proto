@@ -1,4 +1,4 @@
-import 'nanopb.proto';
+syntax = "proto2";
 import 'Engine/Maths/Maths.proto';
 import 'Engine/Framework/EntityRef.proto';
 

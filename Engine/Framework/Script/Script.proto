@@ -1,6 +1,7 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
+syntax = "proto2";
 import 'nanopb.proto';
 
 package usg.Components;
@@ -9,5 +10,5 @@ message Script
 {
 	option (nanopb_msgopt).has_ondeactivate = true;
 	option (nanopb_msgopt).has_onloaded = true;
-	required string filename = 1 [(nanopb).max_size = 128, (nanopb).has_max_size = true];
+	required string filename = 1 [(nanopb).max_size = 128, (nanopb).fixed_length = true];
 }
