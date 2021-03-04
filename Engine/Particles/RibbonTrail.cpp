@@ -314,6 +314,13 @@ void RibbonTrail::UpdateBuffers(GFXDevice* pDevice)
 	m_material.UpdateDescriptors(pDevice);
 }
 
+
+void RibbonTrail::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl& renderPass, const SceneRenderPasses& passes)
+{
+	m_material.UpdateRenderPass(pDevice, renderPass);
+
+}
+
 bool RibbonTrail::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	if(m_uSetVerts > 1)
