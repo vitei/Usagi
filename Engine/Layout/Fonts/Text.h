@@ -60,6 +60,7 @@ namespace usg
 		int GetTabWidth() const;
 		const FontHndl& GetFont() const { return m_pFont; }
 		uint32 GetDirtyFlags() const { return m_dirtyFlags; }
+		void GetBounds( usg::Vector2f &vMin, usg::Vector2f& vMax ) const { m_drawer.GetBounds(vMin, vMax); }
 
 		void PrintDebugInfo() const;
 

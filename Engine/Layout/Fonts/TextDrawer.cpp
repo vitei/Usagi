@@ -206,6 +206,9 @@ namespace usg
 		char* szTxtTmp = u8Text.Data();
 		const float fWidthLimit = m_pParent->GetWidthLimit();
 
+		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
+		m_vMaxBounds.Assign(-FLT_MAX, -FLT_MAX);
+
 		if(fWidthLimit > 0.0f)
 		{
 			// Insert fake newlines
@@ -387,6 +390,13 @@ namespace usg
 
 
 		ApplyAlignment(lines, uLineCount, vOrigin, fMaxWidth);
+
+		for(uint32 i=0; i< uFoundCharCount; i++)
+		{
+			pVert = &m_textBufferTmp[i];
+			m_vMinBounds.Assign(Math::Min(m_vMinBounds.x, pVert->vPosRange.x), Math::Min(m_vMinBounds.y, pVert->vPosRange.y));
+			m_vMaxBounds.Assign(Math::Max(m_vMaxBounds.x, pVert->vPosRange.z), Math::Max(m_vMaxBounds.y, pVert->vPosRange.w));
+		}
 	
 
 		if (uFoundCharCount > 0)
@@ -409,6 +419,13 @@ namespace usg
 			return true;
 		}
 	}
+
+	void TextDrawer::GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const
+	{
+		vMin = m_vMinBounds;
+		vMax = m_vMaxBounds;
+	}
+
 
 	uint32 TextDrawer::GetMaxStringLength() const
 	{

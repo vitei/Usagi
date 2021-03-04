@@ -25,6 +25,7 @@ namespace usg
 		void Cleanup(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }
+		void GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const;
 		bool Draw(GFXContext* context, bool b3D);
 	
 		bool Resize(uint32 uStrLen);
@@ -75,6 +76,8 @@ namespace usg
 		uint32			m_uCharCount;
 
 		Vector2f		m_vPosition;
+		Vector2f		m_vMinBounds;
+		Vector2f		m_vMaxBounds;
 		int				m_alignFlags;
 		float			m_fWidthLimit;
 		bool			m_bufferValid;
