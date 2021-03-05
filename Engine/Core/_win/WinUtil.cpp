@@ -7,10 +7,16 @@
 #include "Engine/HID/Input.h"
 #include "Engine/HID/_win/Input_ps.h"
 
+namespace usg
+{
+	void GameMessage(const uint32 messageID, const void* const pParameters);
+}
+
 namespace WINUTIL
 {
 	static HINSTANCE g_hInst;
 	static WindHndl g_wndHndl = NULL;
+	static bool g_bInFocus = true;
 
 	bool Init(HINSTANCE hInst)
 	{
@@ -35,6 +41,48 @@ namespace WINUTIL
 		g_wndHndl = hndl;
 	}
 
+	void GetSettings(const usg::DisplayMode* pDisplaySettings, DWORD& dwStyle, DWORD& dwExStyle, RECT& mRcClient)
+	{
+		dwStyle &= (WS_VISIBLE| WS_DISABLED);	// Flags we need to continue to obey
+		if (!pDisplaySettings->bWindowed)
+		{
+			dwExStyle = WS_EX_APPWINDOW;
+			dwStyle |= WS_POPUP;
+			dwStyle &= ~WS_OVERLAPPEDWINDOW;
+		}
+		else
+		{
+			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+			// Forcefully disable sys menu so games don't pause when you press alt
+			dwStyle |= WS_OVERLAPPEDWINDOW;
+			if (!pDisplaySettings->bMenu)
+			{
+				dwStyle &= (~WS_SYSMENU);
+			}
+		}
+
+		dwStyle |= WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+
+		mRcClient.top = pDisplaySettings->screenDim.x;
+		mRcClient.left = pDisplaySettings->screenDim.y;
+		mRcClient.right = pDisplaySettings->screenDim.x + pDisplaySettings->screenDim.width;
+		mRcClient.bottom = pDisplaySettings->screenDim.y + pDisplaySettings->screenDim.height;
+
+		// Adjust rcClient for the window borders, given the window style
+		AdjustWindowRectEx(&mRcClient, dwStyle, FALSE, dwExStyle);
+
+		if (mRcClient.top < 0)
+		{
+			mRcClient.bottom -= mRcClient.top;
+			mRcClient.top = 0;
+		}
+		if (mRcClient.left < 0)
+		{
+			mRcClient.right -= mRcClient.left;
+			mRcClient.left = 0;
+		}
+	}
+
 	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplayMode* pDisplaySettings, bool bHidden)
 	{
 		WindHndl hndl;
@@ -57,48 +105,15 @@ namespace WINUTIL
 			return false;
 		}
 
-		DWORD dwStyle;
-		DWORD dwExStyle;
-
-		if (!pDisplaySettings->bWindowed)
-		{
-			dwExStyle = WS_EX_APPWINDOW;
-			dwStyle = WS_POPUP;
-		}
-		else
-		{
-			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-			// Forcefully disable sys menu so games don't pause when you press alt
-			dwStyle = WS_OVERLAPPEDWINDOW;
-			if (!pDisplaySettings->bMenu)
-			{
-				dwStyle &= (~WS_SYSMENU);
-			}
-		}
-
-		// Setup a RECT to describe the requested client area size
+		DWORD dwStyle = 0;
+		DWORD dwExStyle = 0;
 		RECT mRcClient;
-		mRcClient.top = pDisplaySettings->screenDim.x;
-		mRcClient.left = pDisplaySettings->screenDim.y;
-		mRcClient.right = pDisplaySettings->screenDim.x + pDisplaySettings->screenDim.width;   
-		mRcClient.bottom = pDisplaySettings->screenDim.y + pDisplaySettings->screenDim.height; 
 
-												// Adjust rcClient for the window borders, given the window style
-		AdjustWindowRectEx(&mRcClient, dwStyle, FALSE, dwExStyle);
-		if (mRcClient.top < 0)
-		{
-			mRcClient.bottom -= mRcClient.top;
-			mRcClient.top = 0;
-		}
-		if (mRcClient.left < 0)
-		{
-			mRcClient.right -= mRcClient.left;
-			mRcClient.left = 0;
-		}
+		GetSettings(pDisplaySettings, dwStyle, dwExStyle, mRcClient);
 
 		if (!(hndl = CreateWindowEx(dwExStyle, szName, // class
 			szName,	     // title
-			dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+			dwStyle,
 			mRcClient.left,
 			mRcClient.top,
 			mRcClient.right - mRcClient.left,
@@ -152,13 +167,132 @@ namespace WINUTIL
 			DevMode.dmBitsPerPel = 32;
 			DevMode.dmPelsWidth = pDisplaySettings->screenDim.width;   // X Resolution
 			DevMode.dmPelsHeight = pDisplaySettings->screenDim.height;  // Y Resolution
-			DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+			DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;// | DM_BITSPERPEL;
 			ChangeDisplaySettings(&DevMode, CDS_FULLSCREEN);
 		}
 
 		// We should really be caching all windows we own
 		SetWindow(hndl);
+		SetForegroundWindow(hndl);
+
 		return hndl;
+	}
+
+	void UpdateWindow(const usg::DisplayMode* pDisplaySettings)
+	{
+		HWND hwnd = GetWindow();
+		DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+
+		usg::GameMessage('ONSZ', nullptr);
+
+		DWORD dwExStyle = 0;
+		RECT mRcClient;
+
+		GetSettings(pDisplaySettings, dwStyle, dwExStyle, mRcClient);
+
+		if (!pDisplaySettings->bWindowed)
+		{
+			DEVMODE DevMode;
+			memset(&DevMode, 0, sizeof(DEVMODE));
+			DevMode.dmSize = sizeof(DEVMODE);
+			DevMode.dmBitsPerPel = 32;
+			DevMode.dmPelsWidth = pDisplaySettings->screenDim.width;   // X Resolution
+			DevMode.dmPelsHeight = pDisplaySettings->screenDim.height;  // Y Resolution
+			DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;// | DM_BITSPERPEL;
+			ChangeDisplaySettings(&DevMode, CDS_FULLSCREEN);
+
+			SetWindowLong(hwnd, GWL_STYLE, dwStyle);
+			SetWindowLong(hwnd, GWL_EXSTYLE, dwExStyle);
+
+			// FIXME: Second monitor would be offset
+			SetWindowPos(hwnd,
+				HWND_TOP,
+				mRcClient.left,
+				mRcClient.top,
+				mRcClient.right - mRcClient.left,
+				mRcClient.bottom - mRcClient.top,
+				(SWP_NOOWNERZORDER | SWP_FRAMECHANGED));
+		}
+		else
+		{
+
+			const UINT uFlags = SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
+			
+			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
+
+			SetWindowLong(hwnd, GWL_STYLE, dwStyle);
+			SetWindowLong(hwnd, GWL_EXSTYLE, dwExStyle);
+
+			SetWindowPos(hwnd, nullptr,
+				mRcClient.left,
+				mRcClient.right,
+				mRcClient.right - mRcClient.left,
+				mRcClient.bottom - mRcClient.top,
+				uFlags);
+		}
+
+		UpdateWindow(hwnd);
+		ShowWindow(hwnd, SW_SHOWNORMAL);
+		SetForegroundWindow(hwnd);
+
+
+		usg::GameMessage('WSZE', nullptr);
+
+	
+
+	}
+
+	void OnLostFocus()
+	{
+		HWND hwnd = GetWindow();
+		const DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+
+		if (dwStyle& WS_POPUP)
+		{
+			// If we were full screen minimise us and restore the resolution
+			ShowWindow(hwnd, SW_MINIMIZE);
+			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
+		}
+	}
+
+	void OnGainedFocus(uint32 uWidth, uint32 uHeight)
+	{
+		HWND hwnd = GetWindow();
+		const DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+
+		if (dwStyle & WS_POPUP)
+		{
+			const UINT uFlags = SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
+		
+			DEVMODE DevMode;
+			memset(&DevMode, 0, sizeof(DEVMODE));
+			DevMode.dmSize = sizeof(DEVMODE);
+			DevMode.dmBitsPerPel = 32;
+			DevMode.dmPelsWidth = uWidth;
+			DevMode.dmPelsHeight = uHeight;
+			DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;// | DM_BITSPERPEL;
+			ChangeDisplaySettings(&DevMode, CDS_FULLSCREEN);
+
+			SetWindowPos(hwnd, nullptr,
+				0,
+				0,
+				uWidth,
+				uHeight,
+				uFlags);
+
+			UpdateWindow(hwnd);
+			ShowWindow(hwnd, SW_SHOWNORMAL);
+			SetForegroundWindow(hwnd);
+		}
+	}
+
+	void SetInFocus(bool bInFocus)
+	{
+		g_bInFocus = bInFocus;
+	}
+	bool GetInFocus()
+	{
+		return g_bInFocus;
 	}
 
 };
