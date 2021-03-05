@@ -16,10 +16,19 @@ namespace usg
 		}
 
 
-		RECT screen;
+		RECT screen, client;
 		POINT mousePos;
 		GetCursorPos(&mousePos);
-		GetClientRect(m_hwnd, &screen);
+		GetClientRect(m_hwnd, &client);
+
+		GetWindowRect(m_hwnd, &screen);
+
+		screen.left += client.left;
+		screen.right += client.left;
+		screen.top += client.top;
+		screen.bottom += client.top;
+
+
 		// Per arnauds request release the buttons outside of the window
 		if(mousePos.x > screen.right || mousePos.x < screen.left
 			|| mousePos.y < screen.top || mousePos.y > screen.bottom)
