@@ -656,15 +656,46 @@ void GFXDevice_ps::EnumerateDisplays()
 				if (hm)
 				{
 					GetMonitorInfo(hm, &mi);
-					pSettings->uX = mi.rcMonitor.left;
-					pSettings->uY = mi.rcMonitor.top;
-					pSettings->uWidth = mi.rcMonitor.right - mi.rcMonitor.left;
-					pSettings->uHeight = Math::Abs(mi.rcMonitor.top - mi.rcMonitor.bottom);
-					pSettings->bWindowed = false;	// No meaning for init data
-					pSettings->hardwareHndl = NULL;	// This represents a display, so there is no parent window
+					pSettings->screenDim.x = mi.rcMonitor.left;
+					pSettings->screenDim.y = mi.rcMonitor.top;
+					pSettings->screenDim.width = mi.rcMonitor.right - mi.rcMonitor.left;
+					pSettings->screenDim.height = Math::Abs(mi.rcMonitor.top - mi.rcMonitor.bottom);
 					m_uDisplayCount++;
 				}
 			}
+
+			// Get other supported resolutions
+			DWORD iMode = 0;
+			bool bFound = false;
+			while(EnumDisplaySettingsEx(DispDev.DeviceName, iMode, &dm, 0))
+			{
+				if (DispDev.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
+				{
+					GFXBounds bounds;
+					bounds.x = 0;
+					bounds.y = 0;
+					bounds.width = dm.dmPelsWidth;
+					bounds.height = dm.dmPelsHeight;
+
+					bool bFound = false;
+					for (auto itr : pSettings->supportedResolutions)
+					{
+						if (itr.width == bounds.width && itr.height == bounds.height)
+						{
+							bFound = true;
+							break;
+						}
+					}
+
+					if(!bFound)
+					{
+						pSettings->supportedResolutions.push_back(bounds);
+					}
+				}
+
+				iMode++;
+
+			} while (bFound == true);
 		}
 	}
 }

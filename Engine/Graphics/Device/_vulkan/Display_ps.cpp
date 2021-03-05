@@ -18,6 +18,15 @@ extern bool	 g_bFullScreen;
 extern uint32 g_uWindowWidth;
 extern uint32 g_uWindowHeight;
 
+
+static VkPresentModeKHR g_presentMapping[] = 
+{
+	VK_PRESENT_MODE_IMMEDIATE_KHR,		// VSYNC_MODE_IMMEDIATE
+	VK_PRESENT_MODE_FIFO_KHR,			// VSYNC_MODE_QUEUE
+	VK_PRESENT_MODE_FIFO_RELAXED_KHR,	// VSYNC_MODE_QUEUE_RELAXED
+	VK_PRESENT_MODE_MAILBOX_KHR			// VSYNC_MODE_MAILBOX
+};
+
 namespace usg {
 
 
@@ -32,6 +41,7 @@ Display_ps::Display_ps()
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
 	m_bRTShouldLoad = false;
+	m_eVsync = VSYNC_MODE_MAILBOX;
 }
 
 
@@ -271,23 +281,17 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(IHeadMountedDisplay::GetModuleTypeNameStatic());
 	
 	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
-	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+	VkPresentModeKHR desiredSwapchainPresentMode = uHMDCount > 0 ? VK_PRESENT_MODE_IMMEDIATE_KHR : g_presentMapping[m_eVsync];
 
-	// If we have an HMD select a non blocking mode
-	if (uHMDCount > 0)
+	for (size_t i = 0; i < presentModeCount; i++)
 	{
-		swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-		// When using an HMD immediate is preferable, however according to the oculus SDK nvidia doesn't support it so may have to use mailbox 
-		for (size_t i = 0; i < presentModeCount; i++)
+		if (presentModes[i] == desiredSwapchainPresentMode)
 		{
-			if (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
-			{
-				swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-				break;
-			}
+			swapchainPresentMode = desiredSwapchainPresentMode;
+			break;
 		}
 	}
-
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to
 	// own only 1 image at a time, besides the images being displayed and
@@ -556,12 +560,23 @@ void Display_ps::RecreateSwapChain(GFXDevice* pDevice)
 
 void Display_ps::Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
-	m_uWidth = uWidth;
-	m_uHeight = uHeight;
+	if(m_uWidth != uWidth || m_uHeight != uHeight)
+	{
+		m_uWidth = uWidth;
+		m_uHeight = uHeight;
 
-	m_bWindowResized = true;
+		m_bWindowResized = true;
+	}
 }
 
+void Display_ps::SetVSyncMode(VSyncMode eVsync)
+{
+	if(m_eVsync != eVsync)
+	{
+		m_eVsync = eVsync;
+		m_bWindowResized = true;
+	}
+}
 
 void Display_ps::Resize(usg::GFXDevice* pDevice)
 {

@@ -15,6 +15,6 @@ namespace WINUTIL
 	WindHndl		GetWindow();
 	void			SetWindow(WindHndl hndl);
 
-	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden);
+	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplayMode* pDisplaySettings, bool bHidden);
 
 };

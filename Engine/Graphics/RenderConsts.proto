@@ -161,3 +161,12 @@ enum ShaderConstantType {
 	SHADER_CONSTANT_SHADOW = 8;
 	SHADER_CONSTANT_COUNT = 9;
 }
+
+enum VSyncMode {
+	option (nanopb_enumopt).long_names = false;
+
+	VSYNC_MODE_IMMEDIATE = 0;		// Tearing
+	VSYNC_MODE_QUEUE = 1;			// Low power usage, high latency
+	VSYNC_MODE_QUEUE_RELAXED = 2;	// Same as queue but don't block if missed a flip
+	VSYNC_MODE_MAILBOX = 3;			// Low latency, can result in discarded frames if running fast
+}

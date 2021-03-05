@@ -29,6 +29,7 @@ public:
 
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
     void Resize(usg::GFXDevice* pDevice);	
+	void SetVSyncMode(VSyncMode eVsync);
 	void Minimized(usg::GFXDevice* pDevice);
 	
 	// PS
@@ -56,6 +57,7 @@ private:
 	usg::RenderPassHndl	m_postCopyRenderPass;
 	VkFramebuffer*		m_pFramebuffers;
 	VkFramebuffer*		m_pFramebuffersNoCopy;
+	VSyncMode			m_eVsync;
 	HWND				m_hwnd;
 	HDC					m_hdc;
 	VkImage*			m_pSwapchainImages;

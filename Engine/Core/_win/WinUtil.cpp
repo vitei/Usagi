@@ -35,7 +35,7 @@ namespace WINUTIL
 		g_wndHndl = hndl;
 	}
 
-	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden)
+	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplayMode* pDisplaySettings, bool bHidden)
 	{
 		WindHndl hndl;
 		WNDCLASS		winclass;	// this will hold the class we create
@@ -78,10 +78,10 @@ namespace WINUTIL
 
 		// Setup a RECT to describe the requested client area size
 		RECT mRcClient;
-		mRcClient.top = pDisplaySettings->uY;
-		mRcClient.left = pDisplaySettings->uX;
-		mRcClient.right = pDisplaySettings->uWidth;   // client area width
-		mRcClient.bottom = pDisplaySettings->uHeight;   // client area height
+		mRcClient.top = pDisplaySettings->screenDim.x;
+		mRcClient.left = pDisplaySettings->screenDim.y;
+		mRcClient.right = pDisplaySettings->screenDim.x + pDisplaySettings->screenDim.width;   
+		mRcClient.bottom = pDisplaySettings->screenDim.y + pDisplaySettings->screenDim.height; 
 
 												// Adjust rcClient for the window borders, given the window style
 		AdjustWindowRectEx(&mRcClient, dwStyle, FALSE, dwExStyle);
@@ -150,8 +150,8 @@ namespace WINUTIL
 			memset(&DevMode, 0, sizeof(DEVMODE));
 			DevMode.dmSize = sizeof(DEVMODE);
 			DevMode.dmBitsPerPel = 32;
-			DevMode.dmPelsWidth = pDisplaySettings->uWidth;   // X Resolution
-			DevMode.dmPelsHeight = pDisplaySettings->uHeight;  // Y Resolution
+			DevMode.dmPelsWidth = pDisplaySettings->screenDim.width;   // X Resolution
+			DevMode.dmPelsHeight = pDisplaySettings->screenDim.height;  // Y Resolution
 			DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
 			ChangeDisplaySettings(&DevMode, CDS_FULLSCREEN);
 		}
