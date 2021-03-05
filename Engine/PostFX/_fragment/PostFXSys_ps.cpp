@@ -254,14 +254,12 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	// Register the default effects
 	if(uInitFlags & PostFXSys::EFFECT_FXAA)
 	{
-		ASSERT((uInitFlags & PostFXSys::EFFECT_SMAA) == 0);
 		m_pFXAA = vnew(ALLOC_OBJECT) FXAA();
 		m_pFXAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pFXAA;
 	}
 	if (uInitFlags & PostFXSys::EFFECT_SMAA)
 	{
-		ASSERT((uInitFlags & PostFXSys::EFFECT_FXAA) == 0);
 		m_pSMAA = vnew(ALLOC_OBJECT) SMAA();
 		m_pSMAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSMAA;

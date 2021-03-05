@@ -111,7 +111,6 @@ namespace usg {
 			}
 		}
 
-		ASSERT(false);
 		return RenderPassHndl();
 	}
 

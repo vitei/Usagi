@@ -74,6 +74,8 @@ void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, Ren
 	pipelineDecl.layout.uDescriptorSetCount = 2;
 	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
+	pipelineDecl.alphaState.SetColor0Only();
+
 	m_material.Init(pDevice, pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl), matDescriptors);
 
 	m_constantSet.Init(pDevice, g_fxaaConstantDef);
