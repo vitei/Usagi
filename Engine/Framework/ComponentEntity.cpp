@@ -61,6 +61,7 @@ void ComponentEntity::Reset()
 		mem::Free(g_mainMem);
 		g_mainMem = nullptr;
 	}
+	g_hierarchy = nullptr;
 	s_pNewEntities.reset(nullptr);
 	g_uNumSystemTypes = 0;
 	s_uEntityNum = 1;
