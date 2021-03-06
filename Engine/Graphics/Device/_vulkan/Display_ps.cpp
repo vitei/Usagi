@@ -533,6 +533,10 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 			RecreateSwapChain(pDevice);
 		}
 	}
+	else if (m_bWindowResized)
+	{
+		RecreateSwapChain(pDevice);
+	}
 	bFirst = false;
 
 	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_imageAcquired, (VkFence)nullptr, &m_uActiveImage);

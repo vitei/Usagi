@@ -36,6 +36,7 @@ namespace usg
 		m_pInternalData(vnew(usg::ALLOC_OBJECT)InternalData())
 	{
 		m_pActiveMode = NULL;
+		m_pTransitionMode = nullptr;
 	}
 
 	SimpleGameBase::~SimpleGameBase()
@@ -303,29 +304,35 @@ namespace usg
 		case 'WSZE':
 		{
 			usg::Display* const pDisplay = pDevice->GetDisplay(0);
-			uint32 uWidth, uHeight;
-			uint32 uWidthOld, uHeightOld;
+			if(pDisplay)
+			{
+				uint32 uWidth, uHeight;
+				uint32 uWidthOld, uHeightOld;
 
-			pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
-			pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
-			pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
-			// Could be an eroneous call if restoring from being minimized
-			if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
-			{
-				m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+				pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
+				pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
+				pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+				// Could be an eroneous call if restoring from being minimized
+				if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
+				{
+					m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+				}
+				if(m_pTransitionMode)
+				{
+					m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+				}
+				if(m_pInternalData->m_pInitThread)
+				{
+					m_pInternalData->m_pInitThread->NotifyResize(pDevice, 0, uWidth, uHeight);
+				}
 			}
-			if(m_pTransitionMode)
-			{
-				m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
-			}
-			m_pInternalData->m_pInitThread->NotifyResize(pDevice, 0, uWidth, uHeight);
 		}
 		break;
 		case 'WMIN':
 		{
 			usg::Display* const pDisplay = pDevice->GetDisplay(0);
-
-			pDisplay->Minimized(pDevice);
+			if(pDisplay)
+				pDisplay->Minimized(pDevice);
 
 		}
 		case 'ONSZ':

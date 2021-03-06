@@ -50,8 +50,6 @@ static GameInterface* game;
 
 bool GameInit()
 {
-	game = CreateGame();
-
 	Math::SeedRand();
 	game->Init(g_pGFXDevice, usg::ResourceMgr::Inst());
 
@@ -178,6 +176,10 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 	{
 		return false;
 	}
+
+	game = CreateGame();
+	game->PreGFXInit();
+
 #if (defined PLATFORM_PC)
 	g_pGFXDevice->InitDisplay(WINUTIL::GetWindow());
 #else
