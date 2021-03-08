@@ -81,7 +81,7 @@ The build process has not been improved or significantly modified and currently 
 1. Install **Visual Studio 2019**.  
    https://www.visualstudio.com/downloads/
 
-1. Install **Ruby 2.3.3**.  
+1. Install **Ruby 2.3.3 x64**.  
    Make sure that you select the option to add a path variable  
    Note that versions newer than 2.4 will not function with nokogiri  
    https://rubyinstaller.org/
