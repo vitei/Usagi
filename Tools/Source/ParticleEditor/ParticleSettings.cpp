@@ -70,6 +70,12 @@ bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEm
 	m_life.SetSingleOnly(bOneFrame);
 	bool bAltered = false;
 	bAltered = m_life.Update(structData.life);
+
+	if (m_particleType.GetSelected() == ::usg::particles::ParticleType::PARTICLE_TYPE_TRAIL)
+	{
+		m_particleType.SetSelected(::usg::particles::ParticleType::PARTICLE_TYPE_BILLBOARD);
+	}
+
 	bAltered |= Compare(structData.eParticleType, m_particleType.GetSelected());
 	bAltered |= Compare(structData.fLifeRandomness,m_lifeRandomness.GetValue(0));
 	bAltered |= Compare(structData.vParticleCenter,m_particleCenter.GetValueV2());

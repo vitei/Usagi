@@ -488,7 +488,8 @@ namespace usg
 					}
 				}
 
-				m_fAccumulator += m_emission.GetValue()*fElapsed;
+				m_fAccumulator += m_emission.GetValue() * fElapsed;
+				m_fAccumulator = usg::Math::Clamp(m_fAccumulator, 0.0f, (float)m_emissionDef.emission.uMaxParticles);
 				EmitParticle((uint32)m_fAccumulator);
 				m_fAccumulator -= floorf(m_fAccumulator);
 			}
