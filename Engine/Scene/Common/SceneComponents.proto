@@ -75,6 +75,7 @@ message CameraComponent
 	required uint32 uRenderMask = 5 [default = 0x0FFFFF7F];
 	required uint32 uCamId = 6 [default = 0];
 	required bool bForceSwitch = 7 [default = false];
+	required bool bActive = 8 [default = false];
 }
 
 message HMDCameraComponent

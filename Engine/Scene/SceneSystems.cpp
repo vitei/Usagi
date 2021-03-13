@@ -240,6 +240,7 @@ namespace usg
 		public:
 			struct Inputs
 			{
+				usg::Required<usg::CameraComponent> cam;
 				usg::Required<usg::MatrixComponent> mtx;
 			};
 
@@ -278,6 +279,18 @@ namespace usg
 				if(evt.uCameraID == 0 || outputs.cam.GetRuntimeData().pCamera->GetID() == evt.uCameraID)
 				{
 					outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
+				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::EnableCamera& evt)
+			{
+				if (evt.uCameraID == outputs.cam->uCamId)
+				{
+					outputs.cam.Modify().bActive = true;
+				}
+				else
+				{
+					outputs.cam.Modify().bActive = false;
 				}
 			}
 

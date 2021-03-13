@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Scene/Common/Decal.h"
 #include "Engine/Scene/Camera/HMDCamera.h"
+#include "Engine/Scene/ViewContext.h"
 #include "Engine/Scene/Common/GroundDecals.h"
 #include "Engine/Graphics/Lights/Light.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
@@ -168,6 +169,7 @@ namespace usg
 		{
 			handles.pScene->SetActiveCamera(p->uCamId, 0);
 		}
+		p.Modify().bActive = handles.pScene->GetViewContext(0)->GetCamera() == p.GetRuntimeData().pCamera;
 
 	}
 
