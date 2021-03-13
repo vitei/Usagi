@@ -147,7 +147,12 @@ namespace usg {
 			m_pImpl->globalDescriptors[i].SetConstantSet(0, &m_pImpl->globalConstants[i]);
 			m_pImpl->lightingContext.AddConstantsToDescriptor(m_pImpl->globalDescriptors[i], 1);
 			m_pImpl->globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_pImpl->globalDescriptors[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+			usg::TextureHndl shadowCascade = pScene->GetLightMgr().GetShadowCascadeImage();
+			if (pScene->GetLightMgr().GetShadowedDirLightCount() == 0)
+			{
+				shadowCascade = dummyDepth;
+			}
+			m_pImpl->globalDescriptors[i].SetImageSamplerPair(3, shadowCascade, shadowSampler, 0);
 
 			m_pImpl->globalDescriptors[i].UpdateDescriptors(pDevice);
 
@@ -155,7 +160,7 @@ namespace usg {
 			m_pImpl->globalDescriptorsWithDepth[i].SetConstantSet(0, &m_pImpl->globalConstants[i]);
 			m_pImpl->lightingContext.AddConstantsToDescriptor(m_pImpl->globalDescriptorsWithDepth[i], 1);
 			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(3, shadowCascade, shadowSampler, 0);
 
 			m_pImpl->globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
@@ -187,7 +192,10 @@ namespace usg {
 		m_pImpl->pPostFXSys = pFXSys;
 
 		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask);
-		Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
+		if(Debug3D::GetRenderer())
+		{
+			Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
+		}
 	}
 
 
