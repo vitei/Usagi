@@ -163,6 +163,13 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	flags.uLoadFlags = RenderTarget::RT_FLAG_DEPTH;
 	m_screenRT[TARGET_HDR_NO_LOAD].InitRenderPass(pDevice, flags);
 
+	m_screenRT[TARGET_HDR_MULTI_PASS].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
+	flags.uLoadFlags = RenderTarget::RT_FLAG_DEPTH;
+	flags.uClearFlags = 0;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
+	flags.uShaderReadFlags = 0;
+	m_screenRT[TARGET_HDR_MULTI_PASS].InitRenderPass(pDevice, flags);
+
 	// LDR target, no linear depth
 	m_screenRT[TARGET_LDR_0].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
 	m_screenRT[TARGET_LDR_0_TRANSFER_SRC].Init(pDevice, &m_colorBuffer[BUFFER_LDR_0], &m_depthStencil);
@@ -376,7 +383,14 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
 		m_pDeferredShading->SetSourceTarget(pDevice, pDst);
-		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR_NO_LOAD] : &m_screenRT[TARGET_LDR_0];
+		if(uEffectFlags & PostFXSys::EFFECT_SSAO && uEffectFlags & PostFXSys::EFFECT_BLOOM)
+		{
+			pDst = &m_screenRT[TARGET_HDR_MULTI_PASS];
+		}
+		else
+		{
+			pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR_NO_LOAD] : &m_screenRT[TARGET_LDR_0];
+		}
 		m_pDeferredShading->SetDestTarget(pDevice, pDst);
 		m_pFinalEffect = m_pDeferredShading;
 		m_renderPasses.SetRenderPass(m_pDeferredShading->GetLayer(), m_pDeferredShading->GetPriority(), pDst->GetRenderPass());
@@ -416,6 +430,9 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		{
 			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
 		}
+
+		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
+
 		// Don't change the destination
 		m_pSSAO->SetDestTarget(pDevice, pDst);
 		m_pFinalEffect = m_pSSAO;
