@@ -106,5 +106,5 @@ message AudioBank
 	repeated SoundFileDef soundFiles = 1 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 	repeated AudioFilterDef filters = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 	repeated ReverbEffectDef reverbs = 3 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
-	repeated ReverbEffectDef rooms = 4 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
+	repeated AudioRoomDef rooms = 4 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 }
