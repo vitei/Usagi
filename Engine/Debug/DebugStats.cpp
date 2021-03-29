@@ -118,7 +118,10 @@ void DebugStats::UpdatePageNumber(bool bForward, bool bBack)
 void DebugStats::Update(float fElapsed)
 {
 	Gamepad* pGamepad = Input::GetGamepad(0);
-	UpdatePageNumber(pGamepad->GetButtonDown(GAMEPAD_BUTTON_SELECT), false);
+	if(pGamepad)
+	{
+		UpdatePageNumber(pGamepad->GetButtonDown(GAMEPAD_BUTTON_SELECT), false);
+	}
 
 	usg::vector<IDebugStatGroup*>::iterator it;
 	for (it = m_debugStats.begin(); it != m_debugStats.end(); ++it)

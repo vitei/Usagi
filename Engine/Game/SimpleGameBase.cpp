@@ -156,7 +156,8 @@ namespace usg
 		{
 			m_debug.Update(fElapsed);
 #ifdef PLATFORM_PC
-			if (usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
+			if (usg::Input::GetGamepad(0) &&
+				usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
 			{
 				m_bIsRunning = false;
 			}

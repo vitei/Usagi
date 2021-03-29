@@ -31,6 +31,9 @@ void Input::Cleanup()
 
 void Input::RenumberGamepads()
 {
+	if(!g_bInitCalled)
+		return;
+
 	g_platform.RegisterDeviceChange();
 	usg::vector<IGamepad*> gamepads;
 	g_platform.GetActiveGamepads(gamepads);
