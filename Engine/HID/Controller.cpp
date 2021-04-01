@@ -178,7 +178,10 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 		}
 		break;
 	case INPUT_TYPE_BUTTON:
-		return m_pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState);
+		if(m_pGamepad)
+			return m_pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState);
+		else
+			return false;
 	case INPUT_TYPE_KEY:
 		return m_pKeyboard ? m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_MOUSE_BUTTON:
@@ -211,23 +214,27 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 	{
 	case INPUT_TYPE_BUTTON:
 		{
-			switch( detail.axisType )
+			if(m_pGamepad)
 			{
-				case AXIS_TYPE_ABSOLUTE:
-					{
-						float fOutput = m_pGamepad->GetButtonDown( detail.uInputIdB, BUTTON_STATE_HELD ) ? fValue : 0.0f;
-						fOutput += m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD ) ? -fValue : 0.0f;
-						return fOutput;
-					}
-				case AXIS_TYPE_POSITIVE:
-				case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
-					return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
-				case AXIS_TYPE_NEGATIVE:
-					return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
-				default:
-					ASSERT(false);
-				break;
+				switch( detail.axisType )
+				{
+					case AXIS_TYPE_ABSOLUTE:
+						{
+							float fOutput = m_pGamepad->GetButtonDown( detail.uInputIdB, BUTTON_STATE_HELD ) ? fValue : 0.0f;
+							fOutput += m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD ) ? -fValue : 0.0f;
+							return fOutput;
+						}
+					case AXIS_TYPE_POSITIVE:
+					case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
+						return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+					case AXIS_TYPE_NEGATIVE:
+						return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
+					default:
+						ASSERT(false);
+					break;
+				}
 			}
+			return false;
 		}
 	case INPUT_TYPE_AXIS:
 	case INPUT_TYPE_MOUSE_AXIS:
@@ -235,7 +242,10 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 			float fOutput = 0.0f;
 			if (detail.deviceType == INPUT_TYPE_AXIS)
 			{
-				fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+				if(m_pGamepad)
+				{
+					fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+				}
 			}
 			else
 			{
