@@ -36,7 +36,7 @@ public:
 	// Note that AddToScene is dependent on a GPU update, to remove a model from the systems use ForceRemoveFromScene
 	void AddToScene(bool bAdd);
 	void ForceRemoveFromScene();
-	const U8String& GetName() const;
+	const usg::string& GetName() const;
 	void SetInUse(bool bInUse);
 
 	void SetTransform(const Matrix4x4 &trans);

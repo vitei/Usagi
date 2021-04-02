@@ -327,21 +327,21 @@ ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 
 MaterialAnimationResHndl ResourceMgr::GetMaterialAnimation(const char* szFileName)
 {
-	U8String path = m_modelDir + szFileName;
-	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::MAT_ANIM);
+	usg::string path = m_modelDir + szFileName;
+	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::MAT_ANIM);
 	if (!p)
 	{
-		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
+		if (File::FileStatus(path.c_str()) == FILE_STATUS_VALID)
 		{
 			m_pImpl->resources.StartLoad();
 			MaterialAnimationResource* pNC = vnew(ALLOC_RESOURCE_MGR) MaterialAnimationResource;
 
-			bool b = pNC->Load(path.CStr());
+			bool b = pNC->Load(path.c_str());
 			ASSERT(b);
 			p = m_pImpl->resources.AddResource(pNC);
 		}
 		else {
-			DEBUG_PRINT("!!!Material animation not found!!! %s\n", path.CStr());
+			DEBUG_PRINT("!!!Material animation not found!!! %s\n", path.c_str());
 		}
 	}
 	return p;
@@ -349,21 +349,21 @@ MaterialAnimationResHndl ResourceMgr::GetMaterialAnimation(const char* szFileNam
 
 SkeletalAnimationResHndl ResourceMgr::GetSkeletalAnimation( const char* szFileName )
 {
-	U8String path = m_modelDir + szFileName;
-	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::SKEL_ANIM);
+	usg::string path = m_modelDir + szFileName;
+	SkeletalAnimationResHndl p = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::SKEL_ANIM);
 	if( !p )
 	{
-		if( File::FileStatus( path.CStr() ) == FILE_STATUS_VALID)
+		if( File::FileStatus( path.c_str() ) == FILE_STATUS_VALID)
 		{
 			m_pImpl->resources.StartLoad();
 			SkeletalAnimationResource* pNC = vnew(ALLOC_RESOURCE_MGR) SkeletalAnimationResource;
 
-			bool b = pNC->Load( path.CStr() );
+			bool b = pNC->Load( path.c_str() );
 			ASSERT( b );
 			p = m_pImpl->resources.AddResource( pNC );
 		}
 		else {
-			DEBUG_PRINT( "!!!Skeletal animation not found!!! %s\n", path.CStr() );
+			DEBUG_PRINT( "!!!Skeletal animation not found!!! %s\n", path.c_str() );
 		}
 	}
 	return p;
@@ -386,13 +386,13 @@ void ResourceMgr::ClearAllResources(GFXDevice* pDevice)
 
 ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName, bool bInstance, bool bFastMem)
 {
-	U8String u8Name = m_modelDir + szModelName;
-	ModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::MODEL);
+	usg::string u8Name = m_modelDir + szModelName;
+	ModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name.c_str(), ResourceType::MODEL);
 	if(!pModel)
 	{
 		m_pImpl->resources.StartLoad();
 		ModelResource* pNC = vnew(ALLOC_RESOURCE_MGR) ModelResource;
-		pNC->Load(pDevice, u8Name.CStr(), bInstance, bFastMem);
+		pNC->Load(pDevice, u8Name.c_str(), bInstance, bFastMem);
 		pModel = m_pImpl->resources.AddResource(pNC);
 	}
 	return pModel;

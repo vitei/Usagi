@@ -50,7 +50,7 @@ public:
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);
 
 	void SetModelDir(const char* szModelDir) { m_modelDir = szModelDir; }
-	const U8String& GetModelDir() const { return m_modelDir; }
+	const usg::string& GetModelDir() const { return m_modelDir; }
 	void SetTextureDir(const char* szTextureDir) { m_textureDir = szTextureDir; }
 	void SetEffectDir(const char* szEffectDir) { m_effectDir = szEffectDir; }
 	void SetFontDir( const char* szFontDir ) { m_fontDir = szFontDir; }
@@ -85,7 +85,7 @@ private:
 	struct PIMPL;
 	PIMPL*						m_pImpl;
 
-	U8String					m_modelDir;
+	usg::string					m_modelDir;
 	U8String					m_textureDir;
 	U8String					m_effectDir;
 	U8String					m_fontDir;

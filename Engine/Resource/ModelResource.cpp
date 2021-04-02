@@ -185,7 +185,7 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	}
 
 	m_name = szFileName;
-	SetupHash( m_name.CStr() );
+	SetupHash( m_name.c_str() );
 	SetupMeshes( path, pDevice, p, bFastMem );
 	SetupSkeleton( p );
 
@@ -571,8 +571,8 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 			if( uIndex != USG_INVALID_ID )
 			{
-				U8String pathName = m_name;
-				pathName.TruncateToPath();
+				usg::string pathName = m_name;
+				pathName = pathName.substr( 0, pathName.find_last_of("\\/") + 1);
 				//pathName = U8String("models/") + pathName; 
 				::usg::exchange::Texture& texture = pMaterial->textures[i];
 				const char* pTextureName = &texture.textureName[0];
@@ -589,7 +589,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 
 				// First check the models local textures
-				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.CStr(), false, eGPULocation);
+				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.c_str(), false, eGPULocation);
 				if (m_meshArray[m_uMeshCount].pTextures[uIndex].get() == nullptr)
 				{
 					// Fallback to absolute path, passing in true for replace missing texture just in case

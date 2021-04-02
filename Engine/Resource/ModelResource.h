@@ -40,7 +40,7 @@ public:
 	uint32 GetMeshCount() const { return m_uMeshCount; }
 	const Mesh* GetMesh(uint32 uMesh) const;
 	const usg::Sphere& GetBounds() const { return m_bounds;}
-	const U8String& GetName() const { return m_name; }
+	const usg::string& GetName() const { return m_name; }
 	bool IsInstanceModel() const { return m_bInstance; }
 
 	uint32 GetRequiredBoneNodeCount() const { return m_uBoneNodes; }
@@ -80,7 +80,7 @@ private:
 	usg::vector<uint32>		m_smoothBoneIndices;
 	bool					m_bNeedsRootNode;
 	uint32					m_uBoneNodes;
-	U8String				m_name;
+	usg::string				m_name;
 	bool					m_bInstance;
 };
 

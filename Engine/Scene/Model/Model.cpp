@@ -864,7 +864,7 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 	}
 }
 
-const U8String& Model::GetName() const
+const usg::string& Model::GetName() const
 {
 	return m_pResource->GetName();
 }

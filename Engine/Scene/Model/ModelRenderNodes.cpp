@@ -57,7 +57,7 @@ Model::RenderMesh::~RenderMesh()
 void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
 {
 	m_pMeshResource = pMesh;
-	const char* pszName = pModel->GetResource()->GetName().CStr();
+	const char* pszName = pModel->GetResource()->GetName().c_str();
 	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
 
