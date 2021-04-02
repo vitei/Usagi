@@ -23,7 +23,7 @@ namespace usg
 
 	Model* ModelMgr::GetModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling)
 	{
-		U8String cmpName = pResMgr->GetModelDir() + szModelName;
+		usg::string cmpName = pResMgr->GetModelDir() + szModelName;
 		Model* pModel = GetFreeInstance(cmpName);
 
 		if(!pModel)	// Handle creating a new instance
@@ -34,7 +34,7 @@ namespace usg
 			{
 				pModel->Load(m_pDevice, m_pScene, pResMgr, szModelName, bDynamic, true, m_bAutoTransform, bPerBoneCulling);
 			}
-			m_inUseList.AddToEnd(pModel);
+			m_inUseList.push_back(pModel);
 		}
 		else
 		{
