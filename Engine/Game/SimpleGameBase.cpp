@@ -207,10 +207,13 @@ namespace usg
 			if(DrawLoadingScreen())
 			{
 				m_pTransitionMode->Update(fElapsed);
+				m_pTransitionMode->SetNextModeReady(m_pInternalData->m_pInitThread->IsThreadEnd());
 			}
+			if (!m_pTransitionMode->ShouldHold()
 #ifdef USE_THREADED_LOADING
-			if (m_pInternalData->m_pInitThread->IsThreadEnd())
+					&& m_pInternalData->m_pInitThread->IsThreadEnd()
 #endif
+				)
 			{
 				m_pInternalData->m_pInitThread->JoinThread();	// Make sure to finalize so we can re-use it
 				m_eState = STATE_END_LOADING;
@@ -234,6 +237,7 @@ namespace usg
 			if (!DrawLoadingScreen() || usg::Fader::Inst()->IsBlackout())
 			{
 				m_eState = STATE_ACTIVE;
+				m_pActiveMode->Start();
 				m_pActiveMode->Update(fElapsed);	// Run the update first so everything is valid
 				usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
 				usg::File::ResetReadTime();

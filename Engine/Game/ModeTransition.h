@@ -21,12 +21,15 @@ namespace usg
 
 		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
 		virtual void Cleanup(usg::GFXDevice* pDevice) override {};
-		void Reset() { m_uActiveFrames = 0; }
+		virtual void Reset() { m_uActiveFrames = 0; }
 		virtual bool Update(float fElapsed) override;
 		virtual void PreDraw(usg::GFXDevice* pDevice, usg::GFXContext* pImmContext) override;
 		virtual void Draw(usg::Display* pDisplay, usg::IHeadMountedDisplay* pHMD, usg::GFXContext* pImmContext) override;
 		virtual void PostDraw(usg::GFXDevice* pDevice) override;
 		virtual bool FinalTargetIsDisplay() const { return true; }
+
+		virtual void SetNextModeReady(bool bReady) {}
+		virtual bool ShouldHold() const { return false; }
 
 	private:
 		uint32 m_uActiveFrames;
