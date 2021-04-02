@@ -218,7 +218,7 @@ namespace WINUTIL
 
 			const UINT uFlags = SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
 			
-			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
+//			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
 
 			SetWindowLong(hwnd, GWL_STYLE, dwStyle);
 			SetWindowLong(hwnd, GWL_EXSTYLE, dwExStyle);
