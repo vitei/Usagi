@@ -140,7 +140,7 @@ namespace usg
 
 			pContext->SetDescriptorSet(&desc, 1);
 			pContext->SetVertexBuffer(&m_charVerts);
-			pContext->DrawImmediate(m_uCharCount);
+			pContext->DrawImmediate((uint32)m_uCharCount);
 
 		}
 
@@ -200,10 +200,10 @@ namespace usg
 
 		m_context.Init(m_pParent);
 
-		U8String u8Text = m_pParent->GetText();
+		string u8Text = m_pParent->GetText();
 		const FontHndl& font = m_pParent->GetFont();
 		float fTmpWidth = 0.0f;
-		char* szTxtTmp = u8Text.Data();
+		char* szTxtTmp = u8Text.data();
 		const float fWidthLimit = m_pParent->GetWidthLimit();
 
 		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
@@ -230,7 +230,7 @@ namespace usg
  				if (fTmpWidth > fWidthLimit)
 				{
 					szTxtTmp--;
-					while (szTxtTmp > u8Text.CStr())
+					while (szTxtTmp > u8Text.c_str())
 					{
 						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
 						U8Char thisChar(szTxtTmp, uByteCount);
@@ -248,8 +248,8 @@ namespace usg
 			}
 		}
 
-		const char* szText = u8Text.CStr();
-		uint32 uCharCount = u8Text.CharCount();
+		const char* szText = u8Text.c_str();
+		uint32 uCharCount = (uint32)u8Text.size();
 		const usg::Color& color = m_context.GetColor();
 		const usg::Color& colorUpper = m_pParent->GetGradationStartColor();
 		const usg::Color& colorLower = m_pParent->GetGradationEndColor();
@@ -406,7 +406,7 @@ namespace usg
 		m_uCharCount = uFoundCharCount;
 	}
 
-	bool TextDrawer::Resize(uint32 uStrLen)
+	bool TextDrawer::Resize(memsize uStrLen)
 	{
 		if(uStrLen>MAX_CHARS)
 		{
@@ -427,7 +427,7 @@ namespace usg
 	}
 
 
-	uint32 TextDrawer::GetMaxStringLength() const
+	memsize TextDrawer::GetMaxStringLength() const
 	{
 		return MAX_CHARS;
 	}

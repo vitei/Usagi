@@ -28,8 +28,8 @@ namespace usg
 		void GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const;
 		bool Draw(GFXContext* context, bool b3D);
 	
-		bool Resize(uint32 uStrLen);
-		uint32 GetMaxStringLength() const;
+		bool Resize(memsize uStrLen);
+		memsize GetMaxStringLength() const;
 
 		struct Vertex
 		{
@@ -73,7 +73,7 @@ namespace usg
 		VertexBuffer			m_charVerts;
 
 		// # of characters currently being drawn
-		uint32			m_uCharCount;
+		memsize			m_uCharCount;
 
 		Vector2f		m_vPosition;
 		Vector2f		m_vMinBounds;
