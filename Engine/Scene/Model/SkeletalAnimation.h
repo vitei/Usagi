@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright ï¿½ Vitei, Inc. 2013
 //	Description: Maintains the mapping between an animation resource and a
 //	skeletons bone indices, also tracks the current frame
 *****************************************************************************/

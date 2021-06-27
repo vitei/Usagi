@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright ï¿½ Vitei, Inc. 2013
 //	Description: Base class for handling the state of an animation resource
 *****************************************************************************/
 #ifndef _USG_SCENE_MODEL_ANIMATION_BASE_H_
