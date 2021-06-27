@@ -25,6 +25,10 @@ public:
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	const TextureHndl& GetTexture() { return m_depthRT.GetColorTexture(); }
 
+	virtual bool ReadsTexture(Input eInput) const override { return true; }
+	virtual bool LoadsTexture(Input eInput) const override { return false;}
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override {}
+
 private:
 	PostFXSys*		m_pSys;
 

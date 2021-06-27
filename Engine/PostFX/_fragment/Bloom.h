@@ -29,6 +29,11 @@ public:
 	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+	virtual bool RequiresHDR() const override { return true; }
+
 private:
 	void GetOffsetsAndWeights(uint32 texSize, float fDeviation, float fMultiplier, float* pWeights, float* pOffsets);
 	void SetOffsetsHor(GFXDevice* pDevice, uint32 uWidth, float fDeviation, float fMultiplier);

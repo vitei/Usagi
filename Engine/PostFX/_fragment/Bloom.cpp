@@ -392,5 +392,34 @@ void Bloom::GetOffsetsAndWeights(uint32 texSize, float fDeviation, float fMultip
     }
 }
 
+
+
+bool Bloom::ReadsTexture(Input eInput) const
+{
+	switch (eInput)
+	{
+	case PostEffect::Input::Color:
+		return true;
+
+	default:
+		return false;
+
+	}
+}
+
+
+bool Bloom::LoadsTexture(Input eInput) const
+{
+	return false;
+}
+
+void Bloom::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	m_descriptors[PASS_4X4].SetImageSamplerPair(0, texture, m_linearSampler);
+	m_descriptors[PASS_FINAL].SetImageSamplerPair(0, texture, m_pointSampler);
+	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
+	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
+}
+
 }
 

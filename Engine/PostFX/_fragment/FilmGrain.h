@@ -28,6 +28,10 @@ public:
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+
 private:
 	PostFXSys*		m_pSys;
 

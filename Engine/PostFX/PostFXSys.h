@@ -39,7 +39,9 @@ public:
 		EFFECT_SKY_FOG = (1 << 4),
 		EFFECT_SMAA = (1 << 5),
 		EFFECT_FILM_GRAIN = (1<<6),
-		EFFECT_SSAO = (1<<7)
+		EFFECT_SSAO = (1<<7),
+		// This post effect is being used to create an intermediate target
+		EFFECT_OFFSCREEN_TARGET = (1<<8)
 	};
 
 	PostFXSys();

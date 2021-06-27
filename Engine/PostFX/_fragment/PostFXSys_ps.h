@@ -13,6 +13,7 @@
 #include "Engine/Graphics/Textures/ColorBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
+#include "Engine/Core/stl/vector.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/SceneRenderPasses.h"
 
@@ -72,12 +73,16 @@ protected:
 	void SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	void ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
+	void EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags);
+	void EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags);
+
 	PostEffect* GetFinalEffect();
 	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
 
-	enum COLOR_BUFFERS
+	enum COLOR_BUFFER
 	{
-		BUFFER_HDR = 0,
+		BUFFER_HDR_0= 0,
+		BUFFER_HDR_1,
 		BUFFER_NORMAL,
 		BUFFER_DIFFUSE,
 		BUFFER_LIN_DEPTH,
@@ -109,6 +114,9 @@ protected:
 		MAX_DEFAULT_EFFECTS = 20
 	};
 
+	COLOR_BUFFER GetColorTarget(uint32 uPostEffect, COLOR_BUFFER eCurrentTarget = BUFFER_COUNT);
+
+
 	PostFXSys*				m_pParent;
 	class SkyFog*			m_pSkyFog;
 	class Bloom*			m_pBloom;
@@ -118,6 +126,7 @@ protected:
 	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
+	vector<PostEffect*>		m_activeEffects;
 	PostEffect*				m_pFinalEffect;
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
@@ -126,6 +135,7 @@ protected:
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
 	RenderTarget			m_screenRT[TARGET_COUNT];
+	vector<RenderTarget*>	m_dynamicTargets;
 	RenderTarget*			m_pFinalTarget;
 	RenderTarget*			m_pInitialTarget;
 
@@ -137,6 +147,7 @@ protected:
 	SamplerHndl				m_pointSampler;
 
 	uint32					m_uLDRCount;
+	bool					m_bHDROut;
 };
 
 

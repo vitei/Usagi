@@ -125,6 +125,29 @@ void FXAA::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
 	m_material.UpdateDescriptors(pDevice);
 }
 
+bool FXAA::LoadsTexture(Input eInput) const
+{
+	return false;
+}
+
+bool FXAA::ReadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+	return false;
+}
+
+void FXAA::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		m_material.SetTexture(0, texture, m_sampler);
+		m_material.UpdateDescriptors(pDevice);
+	}
+}
+
 void FXAA::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	// The internal texture info has changed

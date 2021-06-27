@@ -22,6 +22,15 @@
 
 namespace usg {
 
+inline int CompareNodes(const void* a, const void* b) 
+{
+	const PostEffect* arg1 = *(const PostEffect**)(a);
+	const PostEffect* arg2 = *(const PostEffect**)(b);
+	if (*arg1 < *arg2) return -1;
+	if (*arg1 > *arg2) return 1;
+	return 0;
+}
+
 #define GAUSS_SAMPLE_COUNT			13
 #define DOWNSCALE44_SAMPLE_COUNT	4
 
@@ -72,6 +81,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
 	m_fPixelScale = 1.0f;
+	m_bHDROut = false;
 }
 
 PostFXSys_ps::~PostFXSys_ps()
@@ -102,15 +112,17 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 {
 	m_pParent = pParent;
 
+	uint32 uFinalTransferFlags = (uInitFlags & PostFXSys::EFFECT_OFFSCREEN_TARGET) != 0 ? TU_FLAG_SHADER_READ : TU_FLAG_TRANSFER_SRC;
 	bool bDeferred = (uInitFlags&PostFXSys::EFFECT_DEFERRED_SHADING)!=0;
 	SampleCount eSamples = SAMPLE_COUNT_1_BIT;			
 
-	m_colorBuffer[BUFFER_HDR].Init(pDevice, uWidth, uHeight, CF_RGB_HDR, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 0);
+	m_colorBuffer[BUFFER_HDR_0].Init(pDevice, uWidth, uHeight, CF_RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
+	m_colorBuffer[BUFFER_HDR_1].Init(pDevice, uWidth, uHeight, CF_RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
 	m_colorBuffer[BUFFER_LIN_DEPTH].Init(pDevice, uWidth, uHeight,  CF_R_16F, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 1);
 
 	// We don't have enough memory for 1080p if we put this in fast memory too
-	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAG_TRANSFER_SRC|TU_FLAGS_OFFSCREEN_COLOR);
-	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAG_TRANSFER_SRC|TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
 
 
 	m_depthStencil.Init(pDevice, uWidth, uHeight, DF_DEPTH_24_S8, eSamples, TU_FLAGS_DEPTH_BUFFER | ((uInitFlags&PostFXSys::EFFECT_SMAA) ? TU_FLAG_SHADER_READ : 0));
@@ -134,7 +146,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	}
 	
 	
-	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR], &m_colorBuffer[BUFFER_LIN_DEPTH] };
+	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_HDR_0], &m_colorBuffer[BUFFER_LIN_DEPTH] };
 	
 	// HDR target with linear depth
 	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, 2, pBuffers, &m_depthStencil);
@@ -156,14 +168,14 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	flags.uClearFlags = 0;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
-	m_screenRT[TARGET_HDR].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
+	m_screenRT[TARGET_HDR].Init(pDevice, &m_colorBuffer[BUFFER_HDR_0], &m_depthStencil);
 	m_screenRT[TARGET_HDR].InitRenderPass(pDevice, flags);
 
-	m_screenRT[TARGET_HDR_NO_LOAD].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
+	m_screenRT[TARGET_HDR_NO_LOAD].Init(pDevice, &m_colorBuffer[BUFFER_HDR_0], &m_depthStencil);
 	flags.uLoadFlags = RenderTarget::RT_FLAG_DEPTH;
 	m_screenRT[TARGET_HDR_NO_LOAD].InitRenderPass(pDevice, flags);
 
-	m_screenRT[TARGET_HDR_MULTI_PASS].Init(pDevice, &m_colorBuffer[BUFFER_HDR], &m_depthStencil);
+	m_screenRT[TARGET_HDR_MULTI_PASS].Init(pDevice, &m_colorBuffer[BUFFER_HDR_0], &m_depthStencil);
 	flags.uLoadFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uClearFlags = 0;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_DEPTH;
@@ -344,29 +356,84 @@ void PostFXSys_ps::Cleanup(GFXDevice* pDevice)
 	}
 }
 
-void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
+PostFXSys_ps::COLOR_BUFFER PostFXSys_ps::GetColorTarget(uint32 uPostEffect, COLOR_BUFFER eCurrentTarget)
+{
+	for (memsize i = uPostEffect; i < m_activeEffects.size(); i++)
+	{
+		if( m_activeEffects[i]->ReadsTexture(PostEffect::Input::Albedo) )
+		{
+			return BUFFER_DIFFUSE;
+		}
+		else if( m_activeEffects[i]->ReadsTexture(PostEffect::Input::Color) )
+		{
+			if(m_activeEffects[i]->RequiresHDR() )
+			{
+				return BUFFER_HDR_0;
+			}
+			else
+			{
+				if(eCurrentTarget == BUFFER_LDR_0 )
+				{
+					return BUFFER_LDR_1;
+				}
+				else
+				{
+					return BUFFER_LDR_0;
+				}
+			}
+		}
+	}
+	return eCurrentTarget == BUFFER_LDR_0 ? BUFFER_LDR_1 : BUFFER_LDR_0;
+}
+
+
+void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
+{
+	usg::RenderTarget::RenderPassFlags flags;
+
+	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_DIFFUSE], &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL], &m_colorBuffer[BUFFER_EMISSIVE], &m_colorBuffer[BUFFER_SPECULAR] };
+	uint32 uBufferCount = 4;
+	if ( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
+	{
+		// Start off without GBuffer
+		pBuffers[0] = &m_colorBuffer[GetColorTarget(0)];
+		uBufferCount = 2;
+	}
+	else
+	{
+		// We don't allow post process until deferred is finished at this time
+		m_activeEffects[0] = m_pDeferredShading;
+	}
+
+	//RenderTarget* NextTarget =  GetDynamicRenderTarget(flags);
+	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, uBufferCount, pBuffers, &m_depthStencil);
+
+	flags.Clear();
+	// Always clear the depth and linear depth on the first pass
+	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4 | RenderTarget::RT_FLAG_DS;
+	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
+	m_screenRT[TARGET_GBUFFER].InitRenderPass(pDevice, flags);
+
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
+	{
+		if (m_pDefaultEffects[i]->GetEnabled())
+		{
+			m_activeEffects.push_back(m_pDefaultEffects[i]);
+		}
+		qsort(&m_activeEffects[0], m_activeEffects.size(), sizeof(RenderNode*), CompareNodes);
+	}
+
+
+	for (memsize i = 0; i < m_activeEffects.size(); i++)
+	{
+		
+	}
+}
+
+void PostFXSys_ps::EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	RenderTarget* pDst = &m_screenRT[TARGET_LDR_LIN_DEPTH];
-	m_renderPasses.ClearAllPasses();
-	
-	if(m_pDeferredShading)
-		m_pDeferredShading->SetEnabled( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
-	if(m_pSkyFog)
-		m_pSkyFog->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SKY_FOG) != 0);
-	if(m_pBloom)
-		m_pBloom->SetEnabled((uEffectFlags & PostFXSys::EFFECT_BLOOM) != 0);
-	if(m_pFXAA)
-		m_pFXAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FXAA) != 0);
-	if(m_pSMAA)
-		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
-	if (m_pFilmGrain)
-		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
-	if (m_pSSAO)
-		m_pSSAO->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SSAO) != 0);
-
-	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
-
-	// Find
 
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
@@ -383,7 +450,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
 		m_pDeferredShading->SetSourceTarget(pDevice, pDst);
-		if(uEffectFlags & PostFXSys::EFFECT_SSAO && uEffectFlags & PostFXSys::EFFECT_BLOOM)
+		if (uEffectFlags & PostFXSys::EFFECT_SSAO && uEffectFlags & PostFXSys::EFFECT_BLOOM)
 		{
 			pDst = &m_screenRT[TARGET_HDR_MULTI_PASS];
 		}
@@ -420,9 +487,9 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
-	if(uEffectFlags & PostFXSys::EFFECT_SSAO)
+	if (uEffectFlags & PostFXSys::EFFECT_SSAO)
 	{
-		if(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
+		if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 		{
 			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
 		}
@@ -466,7 +533,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pFinalEffect = m_pSMAA;
 	}
 
-	if(uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN)
+	if (uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN)
 	{
 		m_pFilmGrain->SetSourceTarget(pDevice, pDst);
 		pDst = GetLDRTargetForEffect(m_pFilmGrain, pDst);
@@ -477,6 +544,32 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	m_renderPasses.UpdateEnd(pDevice);
 	m_pFinalTarget = pDst;
+}
+
+void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
+{
+	m_renderPasses.ClearAllPasses();
+	
+	if(m_pDeferredShading)
+		m_pDeferredShading->SetEnabled( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
+	if(m_pSkyFog)
+		m_pSkyFog->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SKY_FOG) != 0);
+	if(m_pBloom)
+		m_pBloom->SetEnabled((uEffectFlags & PostFXSys::EFFECT_BLOOM) != 0);
+	if(m_pFXAA)
+		m_pFXAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FXAA) != 0);
+	if(m_pSMAA)
+		m_pSMAA->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SMAA) != 0);
+	if (m_pFilmGrain)
+		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
+	if (m_pSSAO)
+		m_pSSAO->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SSAO) != 0);
+
+	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
+
+
+	EnableEffectsIntOld(pDevice, uEffectFlags);
+	//EnableEffectsIntNew(pDevice, uEffectFlags);
 
 }
 

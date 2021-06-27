@@ -32,6 +32,10 @@ public:
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+
 private:
 	void UpdateConstants(uint32 uWidth, uint32 uHeight, const usg::Camera* pCamera);
 	void UpdatePassConstants(uint32 uPass, uint32 uWidth, uint32 uHeight);

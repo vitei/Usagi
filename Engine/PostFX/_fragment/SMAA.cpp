@@ -321,4 +321,45 @@ namespace usg {
 		return true;
 	}
 
+
+	bool SMAA::LoadsTexture(Input eInput) const
+	{
+		if (eInput == PostEffect::Input::Color)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SMAA::ReadsTexture(Input eInput) const
+	{
+		if (eInput == PostEffect::Input::LinearDepth)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	void SMAA::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+	{
+		if (eInput == PostEffect::Input::Depth)
+		{
+			m_depthEdgeDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);	// FIXME: Use the linear depth
+		}
+		if (eInput == PostEffect::Input::Color)
+		{
+			m_lumaColorEdgeDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+			m_neighbourBlendDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+#if SMAA_REPROJECTION
+			m_resolveDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+#endif
+			m_lumaColorEdgeDescriptorSet.UpdateDescriptors(pDevice);
+			m_depthEdgeDescriptorSet.UpdateDescriptors(pDevice);
+
+			UpdateConstants(pDevice, texture->GetWidth(), texture->GetHeight());
+			UpdateDescriptors(pDevice);
+		}
+	}
+
 }

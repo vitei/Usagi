@@ -185,9 +185,8 @@ namespace usg
 	ASSAO::ASSAO()
 	{
 		SetRenderMask(RENDER_MASK_POST_EFFECT);
-		// Don't really care if before or after but going with after
 		SetLayer(LAYER_SKY);
-		SetPriority(2);
+		SetPriority(0);
 
 		m_pSys = nullptr;
 		m_pDest = nullptr;
@@ -935,5 +934,56 @@ namespace usg
 		return true;
 	}
 
+
+	bool ASSAO::ReadsTexture(Input eInput) const
+	{
+		switch(eInput)
+		{
+		case PostEffect::Input::Color:
+		case PostEffect::Input::Normal:
+		case PostEffect::Input::LinearDepth:
+			return true;
+
+		default:
+			return false;
+
+		}
+	}
+
+
+	bool ASSAO::LoadsTexture(Input eInput) const
+	{
+		if (eInput == PostEffect::Input::Color)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	void ASSAO::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+	{
+		if (eInput == PostEffect::Input::Depth && !m_bHasLinearDepth)
+		{
+			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
+			m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		}
+		if (eInput == PostEffect::Input::LinearDepth)
+		{
+			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
+			m_prepareDepthDesc.UpdateDescriptors(pDevice);
+			m_bHasLinearDepth = true;	
+		}
+		if (eInput == PostEffect::Input::Normal)
+		{
+			for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
+			{
+				for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
+				{
+					m_genQDesc[i][uPass].SetImageSamplerPair(1, texture, m_pointSampler);
+				}
+			}
+		}
+	}
 
 }

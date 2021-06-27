@@ -34,6 +34,7 @@ SkyFog::SkyFog(void)
 {
 	m_bValid = false;
 	SetLayer(RenderLayer::LAYER_SKY);
+	SetPriority(1);
 }
 
 SkyFog::~SkyFog(void)
@@ -344,6 +345,34 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 	
 	return true;
+}
+
+bool SkyFog::LoadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool SkyFog::ReadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::LinearDepth)
+	{
+		return true;
+	}
+	return false;
+}
+
+void SkyFog::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::LinearDepth)
+	{
+		m_materialFade.SetTexture(5, texture, m_samplerHndl);
+		m_materialFade.UpdateDescriptors(pDevice);
+	}
 }
 
 }

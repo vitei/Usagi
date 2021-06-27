@@ -821,6 +821,59 @@ void DeferredShading::MakeFrustum(GFXDevice* pDevice)
 	m_frustumIB.Init(pDevice, iIndices, uIndicies, PT_TRIANGLES);
 }
 
+
+bool DeferredShading::ReadsTexture(Input eInput) const
+{
+	switch (eInput)
+	{
+	case PostEffect::Input::Albedo:
+	case PostEffect::Input::Normal:
+	case PostEffect::Input::Specular:
+	case PostEffect::Input::Emissive:
+		return true;
+
+	default:
+		return false;
+
+	}
+}
+
+
+bool DeferredShading::LoadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void DeferredShading::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if(eInput == PostEffect::Input::LinearDepth)
+	{
+		m_readDescriptors.SetImageSamplerPairAtBinding(0, texture, m_samplerHndl);
+	}
+	else if (eInput == PostEffect::Input::Normal)
+	{
+		m_readDescriptors.SetImageSamplerPairAtBinding(1, texture, m_samplerHndl);
+	}
+	else if (eInput == PostEffect::Input::Albedo)
+	{
+		m_readDescriptors.SetImageSamplerPairAtBinding(2, texture, m_samplerHndl);
+	}
+	else if (eInput == PostEffect::Input::Emissive)
+	{
+		m_readDescriptors.SetImageSamplerPairAtBinding(3, texture, m_samplerHndl);
+	}
+	else if (eInput == PostEffect::Input::Specular)
+	{
+		m_readDescriptors.SetImageSamplerPairAtBinding(4, texture, m_samplerHndl);
+	}
+	m_readDescriptors.UpdateDescriptors(pDevice);
+}
+
 }
 
 

@@ -136,6 +136,31 @@ void FilmGrain::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), decl));
 	}
 }
+
+
+bool FilmGrain::ReadsTexture(Input eInput) const 
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+bool FilmGrain::LoadsTexture(Input eInput) const
+{
+	return false;
+}
+
+void FilmGrain::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		m_material.SetTexture(0, texture, m_sampler);
+		m_material.UpdateDescriptors(pDevice);
+	}
+}
  
 void FilmGrain::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
 {
