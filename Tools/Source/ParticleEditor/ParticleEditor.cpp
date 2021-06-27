@@ -198,7 +198,7 @@ void ParticleEditor::FileOption(const char* szName)
 		}
 		m_decreaseSize.SetEnabled(true);
 		m_guiRend.SetGlobalScale(fScale);
-		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale,(g_uWindowHeight+20.f) * fScale, 0);
+		SetWindowPos(m_hwnd, 0, 0, 0, (int)(g_uWindowWidth * fScale), int((g_uWindowHeight+20.f) * fScale), 0);
 	}
 	else if (strcmp("Decrease Size", szName) == 0)
 	{
@@ -318,7 +318,7 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	context.pPostFX = &m_postFX;
 	context.eRenderPass = usg::RenderNode::RENDER_PASS_FORWARD;
 
-	pGFXCtxt->Transfer(m_postFX.GetInitialRT(), pDisplay);
+	pGFXCtxt->Transfer(m_postFX.GetFinalRT(), pDisplay);
 	pGFXCtxt->RenderToDisplay(pDisplay);
 
 	m_guiRend.Draw(pGFXCtxt, context);

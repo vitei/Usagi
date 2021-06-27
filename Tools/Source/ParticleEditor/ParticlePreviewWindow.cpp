@@ -57,8 +57,3 @@ bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 
 	return true;
 }
-
-void ParticlePreviewWindow::Draw(usg::GFXContext* pImmContext)
-{
-	Inherited::Draw(pImmContext);
-}

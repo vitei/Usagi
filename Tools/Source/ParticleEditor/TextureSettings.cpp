@@ -159,8 +159,8 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 				// Make the file
 				usg::TGAFile outFile;
 				// First calculate the size
-				sint iWidth = sqrt( results.size() + 1 );
-				sint iHeight = ((results.size() + iWidth - 1) / iWidth);
+				sint iWidth = (sint)sqrt( results.size() + 1 );
+				sint iHeight = (sint)((results.size() + iWidth - 1) / iWidth);
 
 				sint texWidth = files[0].GetHeader().uWidth * iWidth;
 				sint texHeight = files[0].GetHeader().uHeight * iHeight;
