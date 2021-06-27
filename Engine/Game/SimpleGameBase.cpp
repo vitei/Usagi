@@ -135,7 +135,7 @@ namespace usg
 		}
 		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode(), PauseCurrentMode());
 #ifdef USE_THREADED_LOADING
-		m_pInternalData->m_pInitThread->StartThread(4096 * 10);
+		m_pInternalData->m_pInitThread->StartThread(4096 * 10, -10);
 #else
 		m_pInternalData->m_pInitThread->Run();
 #endif
