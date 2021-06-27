@@ -21,3 +21,4 @@
 [submodule "Engine/ThirdParty/EASTL"]
 	path = Engine/ThirdParty/EASTL
 	url = https://github.com/electronicarts/EASTL.git
+	fetchRecurseSubmodules = false
