@@ -106,6 +106,9 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 
 void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 {
+	m_scene.PreDraw(pImmContext);
+	m_scene.GetLightMgr().ViewShadowRender(pImmContext, &m_scene, m_pSceneCtxt);
+
 	m_postFX.BeginScene(pImmContext, 0);
 
 	m_postFX.SetActiveViewContext(m_pSceneCtxt);
