@@ -463,6 +463,24 @@ void PostFXSys_ps::EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_renderPasses.SetRenderPass(m_pDeferredShading->GetLayer(), m_pDeferredShading->GetPriority(), pDst->GetRenderPass());
 	}
 
+	if (uEffectFlags & PostFXSys::EFFECT_SSAO)
+	{
+		if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
+		{
+			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
+		}
+		else
+		{
+			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
+		}
+
+		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
+
+		// Don't change the destination
+		m_pSSAO->SetDestTarget(pDevice, pDst);
+		m_pFinalEffect = m_pSSAO;
+	}
+
 	if (uEffectFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
 		if ((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
@@ -487,23 +505,6 @@ void PostFXSys_ps::EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
 	}
 
-	if (uEffectFlags & PostFXSys::EFFECT_SSAO)
-	{
-		if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
-		{
-			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
-		}
-		else
-		{
-			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
-		}
-
-		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
-
-		// Don't change the destination
-		m_pSSAO->SetDestTarget(pDevice, pDst);
-		m_pFinalEffect = m_pSSAO;
-	}
 
 	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
 	{
