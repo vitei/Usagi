@@ -45,7 +45,7 @@ public:
 	bool IsInVolume(const Vector4f& vPos) const;
 
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();

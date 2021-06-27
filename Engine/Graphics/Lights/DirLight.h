@@ -25,7 +25,7 @@ public:
 
 	void UpdateCascade(const usg::Camera& camera, uint32 uContextId);
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	virtual void	SetDirection(const Vector4f &direction);
 	virtual const Vector4f&	GetDirection() const;

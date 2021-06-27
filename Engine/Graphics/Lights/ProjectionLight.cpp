@@ -170,12 +170,14 @@ void ProjectionLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void ProjectionLight::ShadowRender(GFXContext* pContext)
+bool ProjectionLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 

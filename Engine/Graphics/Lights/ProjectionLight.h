@@ -51,7 +51,7 @@ public:
 	const Matrix4x4& GetProjMatrix() const { return m_projMat; }
 	const Matrix4x4& GetViewMatrix() const { return m_viewMat; }
 
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();

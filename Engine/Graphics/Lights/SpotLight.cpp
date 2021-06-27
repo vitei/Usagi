@@ -151,12 +151,15 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void SpotLight::ShadowRender(GFXContext* pContext)
+bool SpotLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+
+	return false;
 }
 
 bool SpotLight::IsInRange(const AABB& testBox)

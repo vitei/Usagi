@@ -50,7 +50,7 @@ public:
 	bool HasAttenuation() const { return m_bAtten; }
 
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 	
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
 	const DescriptorSet* GetDescriptorSet(bool bWidthShadow) const;

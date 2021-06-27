@@ -175,12 +175,14 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void PointLight::ShadowRender(GFXContext* pContext)
+bool PointLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 bool PointLight::IsInRange(AABB& testBox)

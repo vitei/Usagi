@@ -53,7 +53,7 @@ public:
 	LightType GetType() const { return m_eType; }
 
 	virtual void GPUUpdate(GFXDevice* pDevice) {}
-	virtual void ShadowRender(GFXContext* pContext) {}
+	virtual bool ShadowRender(GFXContext* pContext) { return false; }
 
 	virtual void SetPosition(const Vector4f &position) { ASSERT(false); }
 	virtual void SetDirection(const Vector4f &direction) { ASSERT(false); }

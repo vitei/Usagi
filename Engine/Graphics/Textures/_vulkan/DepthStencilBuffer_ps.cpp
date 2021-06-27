@@ -43,7 +43,7 @@ void DepthStencilBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;
 	
-	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices);
+	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices, uFlags);
 
 	InitLayerViews(pDevice);
 

@@ -181,6 +181,7 @@ private:
 	uint32					m_uShadowMapRes;
 	float					m_hemipshereLerp;
 	QualitySettings			m_qualitySettings;
+	bool					m_bLightTexDirty;
 };
 
 } // namespace

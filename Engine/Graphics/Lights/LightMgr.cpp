@@ -6,6 +6,7 @@
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/ViewContext.h"
+#include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Graphics/Lights/LightSpec.pb.h"
@@ -35,6 +36,7 @@ m_pParent(nullptr)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
+	m_bLightTexDirty = false;
 	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
 }
 
@@ -47,13 +49,14 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 	m_pParent = pParent;
 
 	// Set up an initial dummy array for binding purposes
-	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
+	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DF_DEPTH_32F, SAMPLE_COUNT_1_BIT);//DF_DEPTH_32F); //DF_DEPTH_24
 	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 	usg::RenderTarget::RenderPassFlags flags;
 	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 	m_cascadeTarget.InitRenderPass(pDevice, flags);
+	m_bLightTexDirty = true;
 }
 
 
@@ -84,6 +87,7 @@ void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 		m_cascadeTarget.InitRenderPass(pDevice, flags);
+		m_bLightTexDirty = true;
 	}
 }
 
@@ -205,7 +209,20 @@ void LightMgr::ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext
 {
 	for (auto itr : m_dirLights.GetActiveLights())
 	{
-		itr->ShadowRender(pContext);
+		if(itr->ShadowRender(pContext))
+		{
+			m_bLightTexDirty = false;
+		}
+	}
+
+	if(m_bLightTexDirty)
+	{
+		// Clear the shadow texture (and resolve the input layout for vulkan)
+		for(uint32 i=0; i<m_cascadeBuffer.GetSlices(); i++ )
+		{
+			pContext->SetRenderTargetLayer(&m_cascadeTarget, i);
+			pContext->SetRenderTarget(NULL);
+		}
 	}
 }
 
@@ -230,7 +247,8 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 
 void LightMgr::RemoveDirLight(DirLight* pLight)
 {
-	return m_dirLights.Free(pLight);
+	// FIXME: Adjust shadowed lights
+	m_dirLights.Free(pLight);
 }
 
 PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)

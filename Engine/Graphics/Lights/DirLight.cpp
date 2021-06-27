@@ -59,12 +59,14 @@ void DirLight::GPUUpdate(GFXDevice* pDevice)
 	}
 }
 
-void DirLight::ShadowRender(GFXContext* pContext)
+bool DirLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadowCascade)
 	{
 		m_pShadowCascade->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 void DirLight::SetDirection(const Vector4f &direction)
