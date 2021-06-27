@@ -209,7 +209,7 @@ void ParticleEditor::FileOption(const char* szName)
 		}
 		m_increaseSize.SetEnabled(true);
 		m_guiRend.SetGlobalScale(fScale);
-		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale, (g_uWindowHeight + 20.f) * fScale, 0);
+		SetWindowPos(m_hwnd, 0, 0, 0, (int)(g_uWindowWidth * fScale), (int)((g_uWindowHeight + 20.f) * fScale), 0);
 	}
 }
 
