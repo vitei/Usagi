@@ -203,7 +203,7 @@ namespace usg
 		string u8Text = m_pParent->GetText();
 		const FontHndl& font = m_pParent->GetFont();
 		float fTmpWidth = 0.0f;
-		char* szTxtTmp = u8Text.data();
+		char* szTxtTmp = (char*)u8Text.data();	// Valid on new eastl, need to cast now we've gone back to the old one
 		const float fWidthLimit = m_pParent->GetWidthLimit();
 
 		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
