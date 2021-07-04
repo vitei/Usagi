@@ -824,7 +824,6 @@ void DeferredShading::MakeFrustum(GFXDevice* pDevice)
 bool DeferredShading::WritesTexture(PostEffect::Input eInput) const 
 {
 	if (eInput == Input::Color
-		|| eInput == Input::LinearDepth
 		|| eInput == Input::Depth)
 	{
 		return true;
@@ -852,11 +851,6 @@ bool DeferredShading::ReadsTexture(Input eInput) const
 
 bool DeferredShading::LoadsTexture(Input eInput) const
 {
-	if (eInput == PostEffect::Input::Color)
-	{
-		return true;
-	}
-
 	return false;
 }
 

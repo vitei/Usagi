@@ -44,7 +44,7 @@ public:
 	virtual bool ReadsTexture(Input eInput) const { return false; }
 	virtual bool LoadsTexture(Input eInput) const { return false; }
 	// Most post effects will have a final target of color only
-	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color); }
+	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color || eInput == Input::Depth); }
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) {}
 	virtual bool RequiresHDR() const { return false; }
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}

@@ -26,9 +26,17 @@ inline int CompareNodes(const void* a, const void* b)
 {
 	const PostEffect* arg1 = *(const PostEffect**)(a);
 	const PostEffect* arg2 = *(const PostEffect**)(b);
-	if (*arg1 < *arg2) return -1;
-	if (*arg1 > *arg2) return 1;
-	return 0;
+	if (arg1->GetLayer() > arg2->GetLayer()) return 1;
+	if (arg1->GetLayer() == arg2->GetLayer())
+	{
+		if( arg1->GetPriority() > arg2->GetPriority())
+			return 1;
+		if (arg1->GetPriority() < arg2->GetPriority())
+			return -1;
+
+		return 0;
+	}
+	return -1;
 }
 
 #define GAUSS_SAMPLE_COUNT			13
@@ -82,6 +90,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pDeferredShading = nullptr;
 	m_fPixelScale = 1.0f;
 	m_bHDROut = false;
+	m_bNewPassManagement = false;
 }
 
 PostFXSys_ps::~PostFXSys_ps()
@@ -354,36 +363,20 @@ void PostFXSys_ps::Cleanup(GFXDevice* pDevice)
 			pPostEffect->Cleanup(pDevice);
 		}
 	}
+
+	ClearDynamicTargets(pDevice);
 }
 
-PostFXSys_ps::COLOR_BUFFER PostFXSys_ps::GetColorTarget(uint32 uPostEffect, COLOR_BUFFER eCurrentTarget)
+
+void PostFXSys_ps::ClearDynamicTargets(GFXDevice* pDevice)
 {
-	for (memsize i = uPostEffect; i < m_activeEffects.size(); i++)
+	for(auto itr : m_dynamicTargets)
 	{
-		if( m_activeEffects[i]->ReadsTexture(PostEffect::Input::Albedo) )
-		{
-			return BUFFER_DIFFUSE;
-		}
-		else if( m_activeEffects[i]->ReadsTexture(PostEffect::Input::Color) )
-		{
-			if(m_activeEffects[i]->RequiresHDR() )
-			{
-				return BUFFER_HDR_0;
-			}
-			else
-			{
-				if(eCurrentTarget == BUFFER_LDR_0 )
-				{
-					return BUFFER_LDR_1;
-				}
-				else
-				{
-					return BUFFER_LDR_0;
-				}
-			}
-		}
+		itr->Cleanup(pDevice);
+		vdelete itr;
 	}
-	return eCurrentTarget == BUFFER_LDR_0 ? BUFFER_LDR_1 : BUFFER_LDR_0;
+
+	m_dynamicTargets.clear();
 }
 
 
@@ -391,44 +384,248 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	usg::RenderTarget::RenderPassFlags flags;
 
-	ColorBuffer* pBuffers[] = { &m_colorBuffer[BUFFER_DIFFUSE], &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL], &m_colorBuffer[BUFFER_EMISSIVE], &m_colorBuffer[BUFFER_SPECULAR] };
-	uint32 uBufferCount = 4;
-	if ( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
-	{
-		// Start off without GBuffer
-		pBuffers[0] = &m_colorBuffer[GetColorTarget(0)];
-		uBufferCount = 2;
-	}
-	else
-	{
-		// We don't allow post process until deferred is finished at this time
-		m_activeEffects[0] = m_pDeferredShading;
-	}
+	usg::vector<ColorBuffer*> pBuffers;
 
-	//RenderTarget* NextTarget =  GetDynamicRenderTarget(flags);
-	m_screenRT[TARGET_HDR_LIN_DEPTH].InitMRT(pDevice, uBufferCount, pBuffers, &m_depthStencil);
+	ClearDynamicTargets(pDevice);
 
-	flags.Clear();
-	// Always clear the depth and linear depth on the first pass
-	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
-	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4 | RenderTarget::RT_FLAG_DS;
-	flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
-	m_screenRT[TARGET_GBUFFER].InitRenderPass(pDevice, flags);
-
+	m_activeEffects.clear();
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
 		if (m_pDefaultEffects[i]->GetEnabled())
 		{
 			m_activeEffects.push_back(m_pDefaultEffects[i]);
 		}
-		qsort(&m_activeEffects[0], m_activeEffects.size(), sizeof(RenderNode*), CompareNodes);
 	}
+	qsort(&m_activeEffects[0], m_activeEffects.size(), sizeof(RenderNode*), CompareNodes);
+
+
+	// Max buffers
+	int iFinalHDRTarget = -1;	// TODO: Set to last if final target is HDR
+	int iGBufferPass = -1;
+	memsize hdrIdx = 0;
+	memsize ldrIdx = 0;
+	flags.uLoadFlags = 0;// RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+	flags.uStoreFlags = 0;
+	flags.uClearFlags = 0;
+
+	for (memsize i = 0; i < m_activeEffects.size(); i++)
+	{
+		RenderTarget* pTarget = vnew(ALLOC_OBJECT) RenderTarget();
+		if( m_activeEffects[i]->RequiresHDR() )
+		{
+			iFinalHDRTarget = Math::Max(iFinalHDRTarget, (int)i);
+		}
+	}
+
+
+	if ((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
+	{
+		// Start off without GBuffer
+		if(iFinalHDRTarget < 0)
+		{
+			pBuffers.push_back( &m_colorBuffer[BUFFER_LDR_0] );
+			ldrIdx++;
+		}
+		else
+		{
+			pBuffers.push_back(&m_colorBuffer[BUFFER_HDR_0]);
+			hdrIdx++;
+		}
+		pBuffers.push_back(&m_colorBuffer[BUFFER_LIN_DEPTH]);
+
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1;
+
+		if (uEffectFlags & PostFXSys::EFFECT_SSAO)
+		{
+			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
+		}
+	}
+	else
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_DIFFUSE]);
+		pBuffers.push_back(&m_colorBuffer[BUFFER_LIN_DEPTH]);
+		pBuffers.push_back(&m_colorBuffer[BUFFER_NORMAL]);
+		pBuffers.push_back(&m_colorBuffer[BUFFER_EMISSIVE]);
+		pBuffers.push_back(&m_colorBuffer[BUFFER_SPECULAR]);
+
+		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4 | RenderTarget::RT_FLAG_DS;
+		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
+
+		if (uEffectFlags & PostFXSys::EFFECT_SSAO)
+		{
+			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
+		}
+	}
+
+	// Always clear the depth and linear depth on the first pass
+	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
+
+	usg::RenderTarget* pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
+	pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), &m_depthStencil);
+
+	pTarget->InitRenderPass(pDevice, flags);
+
+	m_renderPasses.SetRenderPass(RenderLayer::LAYER_BACKGROUND, 0, pTarget->GetRenderPass());
+
+	m_dynamicTargets.push_back(pTarget);
 
 
 	for (memsize i = 0; i < m_activeEffects.size(); i++)
 	{
-		
+		flags.uLoadFlags = 0;
+		flags.uStoreFlags = 0;
+		flags.uShaderReadFlags = 0;
+		flags.uTransferSrcFlags = 0;
+		flags.uClearFlags = 0;			// We currently don't let an effect request a clear
+
+		GetRenderTargetBuffers(i, pBuffers, iFinalHDRTarget, hdrIdx, ldrIdx);
+
+		for (int iTarget =0; iTarget < (int)PostEffect::Input::Count; iTarget++)
+		{
+			PostEffect::Input eTarget = PostEffect::Input(iTarget);
+			if(m_activeEffects[i]->LoadsTexture(eTarget))
+			{
+				flags.uLoadFlags |= GetFlagForTarget(eTarget);
+			}
+
+			if (NeedsStoring(i, eTarget))
+			{
+				flags.uStoreFlags |= GetFlagForTarget(eTarget);
+			}
+
+			if(NeedsShaderRead(i, eTarget))
+			{
+				flags.uShaderReadFlags |= GetFlagForTarget(eTarget);
+			}
+		}
+
+		// The last render target needs to be used as a transfer source
+		if(i == m_activeEffects.size() - 1)
+		{
+			flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR_0;
+			flags.uShaderReadFlags |= RenderTarget::RT_FLAG_COLOR_0;
+			flags.uStoreFlags |= RenderTarget::RT_FLAG_COLOR_0;
+		}
+
+		usg::RenderTarget* pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
+		DepthStencilBuffer* pDS = m_activeEffects[i]->WritesTexture(PostEffect::Input::Depth) ? &m_depthStencil : nullptr;
+		pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), pDS);
+		pTarget->InitRenderPass(pDevice, flags);
+
+		m_activeEffects[i]->SetSourceTarget(pDevice, m_dynamicTargets.back());
+		m_activeEffects[i]->SetDestTarget(pDevice, pTarget);
+
+		m_renderPasses.SetRenderPass(m_activeEffects[i]->GetLayer(), m_activeEffects[i]->GetPriority(), pTarget->GetRenderPass());
+
+		m_dynamicTargets.push_back(pTarget);
+
 	}
+}
+
+void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx)
+{
+	// TODO: We could probably refactor to remove these dependencies so long as we keep the ordering ok
+	pBuffers.clear();
+
+	if(m_activeEffects[pass]->WritesTexture(PostEffect::Input::Albedo))
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_DIFFUSE]);
+		ASSERT(!m_activeEffects[pass]->WritesTexture(PostEffect::Input::Color));
+	}
+	else if(m_activeEffects[pass]->WritesTexture(PostEffect::Input::Color))
+	{	
+		// FIXME: OR HDR enabled at a system level
+		if(pass < iFinalHdr)
+		{	
+			pBuffers.push_back(&m_colorBuffer[BUFFER_HDR_0 + hdrIdx]);
+			hdrIdx = (hdrIdx + 1)%2;
+		}
+		else
+		{
+			pBuffers.push_back(&m_colorBuffer[BUFFER_LDR_0 + ldrIdx]);
+			ldrIdx = (ldrIdx + 1)%2;
+		}
+		ASSERT(!m_activeEffects[pass]->WritesTexture(PostEffect::Input::Albedo));
+	}
+
+	if (m_activeEffects[pass]->WritesTexture(PostEffect::Input::LinearDepth))
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_LIN_DEPTH]);
+	}
+
+	if (m_activeEffects[pass]->WritesTexture(PostEffect::Input::Normal))
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_NORMAL]);
+	}
+	
+	if (m_activeEffects[pass]->WritesTexture(PostEffect::Input::Emissive))
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_EMISSIVE]);
+	}
+
+	if (m_activeEffects[pass]->WritesTexture(PostEffect::Input::Specular))
+	{
+		pBuffers.push_back(&m_colorBuffer[BUFFER_SPECULAR]);
+	}
+}
+
+int PostFXSys_ps::GetFlagForTarget(PostEffect::Input eTarget)
+{
+	switch(eTarget)
+	{
+		case PostEffect::Input::Color:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_0;
+		case PostEffect::Input::LinearDepth:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_1;
+		case PostEffect::Input::Depth:
+			return RenderTarget::RTFlags::RT_FLAG_DS;
+		case PostEffect::Input::Albedo:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_0;
+		case PostEffect::Input::Normal:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_2;
+		case PostEffect::Input::Emissive:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_3;
+		case PostEffect::Input::Specular:
+			return RenderTarget::RTFlags::RT_FLAG_COLOR_4;
+		default:
+			ASSERT(false);
+	}
+	return 0;
+}
+
+bool PostFXSys_ps::NeedsShaderRead(memsize pass, PostEffect::Input eInput)
+{
+	for (memsize i = pass + 1; i < m_activeEffects.size(); i++)
+	{
+		// TODO: Optimise me, it's possible that a multi-pass effect would both read and write, so for now just set to true
+		if (m_activeEffects[i]->ReadsTexture(eInput))
+		{
+			return true;
+		}
+		else if (m_activeEffects[pass]->WritesTexture(eInput))
+		{
+			return false;
+		}
+	}
+	return false;
+}
+
+bool PostFXSys_ps::NeedsStoring(memsize pass, PostEffect::Input eInput)
+{
+	if(eInput == PostEffect::Input::Color 
+		|| ( (eInput == PostEffect::Input::Depth) && m_activeEffects[pass]->WritesTexture(eInput) ) )
+	{
+		return true;	// Always keep color
+	}
+	for (memsize i = pass+1; i < m_activeEffects.size(); i++)
+	{
+		if( m_activeEffects[i]->ReadsTexture(eInput) )
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void PostFXSys_ps::EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags)
@@ -568,9 +765,11 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 
-
-	EnableEffectsIntOld(pDevice, uEffectFlags);
-	//EnableEffectsIntNew(pDevice, uEffectFlags);
+	if(m_bNewPassManagement)
+		EnableEffectsIntNew(pDevice, uEffectFlags);
+	else
+		EnableEffectsIntOld(pDevice, uEffectFlags);
+	
 
 }
 
@@ -795,6 +994,30 @@ float PostFXSys_ps::GaussianDistribution( float x, float y, float rho ) const
     return g;
 }
 
+
+RenderTarget* PostFXSys_ps::GetInitialRT()
+{
+	if (m_bNewPassManagement)
+	{
+		return m_dynamicTargets.front();
+	}
+	else
+	{
+		return m_pInitialTarget;
+	}
+}
+
+RenderTarget* PostFXSys_ps::GetFinalRT()
+{
+	if (m_bNewPassManagement)
+	{
+		return m_dynamicTargets.back();
+	}
+	else
+	{
+		return m_pFinalTarget;
+	}
+}
 
 
 void PostFXSys_ps::SetupOffsets4x4(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight ) const

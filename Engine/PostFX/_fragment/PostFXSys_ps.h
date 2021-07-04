@@ -13,6 +13,7 @@
 #include "Engine/Graphics/Textures/ColorBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
+#include "Engine/PostFX/PostEffect.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/SceneRenderPasses.h"
@@ -63,8 +64,8 @@ public:
 
 	void UpdateRTSize(GFXDevice* pDevice, Display* pDisplay);
 
-	RenderTarget* GetInitialRT() { return m_pInitialTarget; }
-	RenderTarget* GetFinalRT() { return m_pFinalTarget;  }
+	RenderTarget* GetInitialRT();
+	RenderTarget* GetFinalRT();
 
 protected:
 	PRIVATIZE_COPY(PostFXSys_ps)
@@ -75,6 +76,11 @@ protected:
 
 	void EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags);
 	void EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags);
+	bool NeedsStoring(memsize pass, PostEffect::Input eInput);
+	bool NeedsShaderRead(memsize pass, PostEffect::Input eInput);
+	void GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx);
+	int GetFlagForTarget(PostEffect::Input eTarget);
+	void ClearDynamicTargets(GFXDevice* pDevice);
 
 	PostEffect* GetFinalEffect();
 	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
@@ -114,8 +120,6 @@ protected:
 		MAX_DEFAULT_EFFECTS = 20
 	};
 
-	COLOR_BUFFER GetColorTarget(uint32 uPostEffect, COLOR_BUFFER eCurrentTarget = BUFFER_COUNT);
-
 
 	PostFXSys*				m_pParent;
 	class SkyFog*			m_pSkyFog;
@@ -148,6 +152,9 @@ protected:
 
 	uint32					m_uLDRCount;
 	bool					m_bHDROut;
+
+	// FIXME: Remove when working
+	bool					m_bNewPassManagement;
 };
 
 

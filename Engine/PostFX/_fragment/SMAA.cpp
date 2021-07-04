@@ -334,7 +334,7 @@ namespace usg {
 
 	bool SMAA::ReadsTexture(Input eInput) const
 	{
-		if (eInput == PostEffect::Input::LinearDepth)
+		if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
 		{
 			return true;
 		}
