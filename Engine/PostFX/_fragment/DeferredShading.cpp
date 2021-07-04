@@ -58,8 +58,6 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 {
 	m_pSys = pSys;
 
-	U8String name;
-
 	// Directional lighting, test against the terrain stencil value of 2
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
@@ -100,8 +98,9 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	alphaDecl.dstBlend = BLEND_FUNC_ONE;
 	for (uint32 i = 0; i < MAX_EXTRA_DIR_LIGHTS; i++)
 	{
-		name.ParseString("Deferred.DirExtraShadow.%d", i + 1);
-		pipelineDecl.pEffect = pRes->GetEffect(pDevice, name.CStr());
+		char name[256];
+		sprintf_s(name, "Deferred.DirExtraShadow.%d", i + 1);
+		pipelineDecl.pEffect = pRes->GetEffect(pDevice, name);
 		m_additionalShadowPass[i] = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
 	}
 	alphaDecl.bBlendEnable = false;
@@ -819,6 +818,18 @@ void DeferredShading::MakeFrustum(GFXDevice* pDevice)
 
 	m_frustumMesh.Init(pDevice, verts, sizeof(PositionVertex), 8, "ProjLight", GPU_USAGE_STATIC);
 	m_frustumIB.Init(pDevice, iIndices, uIndicies, PT_TRIANGLES);
+}
+
+
+bool DeferredShading::WritesTexture(PostEffect::Input eInput) const 
+{
+	if (eInput == Input::Color
+		|| eInput == Input::LinearDepth
+		|| eInput == Input::Depth)
+	{
+		return true;
+	}
+	return false;
 }
 
 

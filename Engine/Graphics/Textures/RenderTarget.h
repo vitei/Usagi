@@ -38,11 +38,11 @@ public:
 	{
 		RenderPassFlags();
 		void Clear();
-		uint32 uLoadFlags;
-		uint32 uClearFlags;
-		uint32 uStoreFlags;
-		uint32 uShaderReadFlags;
-		uint32 uTransferSrcFlags;
+		uint32 uLoadFlags;			// Targets to load memory from
+		uint32 uClearFlags;			// Targets to clear
+		uint32 uStoreFlags;			// Targets to store for later use (either as RT or reading)
+		uint32 uShaderReadFlags;	// Targets that will next be read from by a shader
+		uint32 uTransferSrcFlags;	// Targets to be used for transfers at a later stage
 	};
 
 	void Init(usg::GFXDevice* pDevice, ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth = NULL);

@@ -28,7 +28,8 @@ public:
 		Albedo,
 		Normal,
 		Emissive,
-		Specular
+		Specular,
+		Count
 	};
 
 
@@ -42,9 +43,12 @@ public:
 	// Needed to figure out the correct render targets to pass in
 	virtual bool ReadsTexture(Input eInput) const { return false; }
 	virtual bool LoadsTexture(Input eInput) const { return false; }
+	// Most post effects will have a final target of color only
+	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color); }
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) {}
 	virtual bool RequiresHDR() const { return false; }
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
+	virtual void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget) {}
 
 	virtual void Update(Scene* pScene, float fElapsed) {}
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) {}

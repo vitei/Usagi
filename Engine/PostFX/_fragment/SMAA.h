@@ -24,7 +24,7 @@ public:
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
+	virtual void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 
 	virtual bool ReadsTexture(Input eInput) const override;
