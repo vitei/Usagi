@@ -324,10 +324,12 @@ namespace usg {
 
 	bool SMAA::LoadsTexture(Input eInput) const
 	{
+	#if 0
 		if (eInput == PostEffect::Input::Color)
 		{
 			return true;
 		}
+#endif
 
 		return false;
 	}

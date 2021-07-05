@@ -226,6 +226,7 @@ void Bloom::Cleanup(GFXDevice* pDevice)
 
 void Bloom::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
+	pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_finalPassEffect);
 	m_pDestTarget = pDst;
 }
 

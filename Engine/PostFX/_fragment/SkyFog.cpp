@@ -332,7 +332,7 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 	pContext->BeginGPUTag("Sky", Color::Green);
 
 	// Setting the destination target now handled outside
-	//pContext->SetRenderTarget(m_pDestTarget);
+	pContext->SetRenderTarget(m_pDestTarget);
 	m_materialFade.Apply(pContext);
 	pContext->SetVertexBuffer(&m_vertexBuffer);
 	pContext->DrawIndexed(&m_indexBuffer);
