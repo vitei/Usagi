@@ -252,6 +252,9 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 				case RESOURCE_BUFFER:
 					vkDestroyBuffer(m_vkDevice, req.resource.buffer, nullptr);
 				break;
+				case RESOURCE_FRAME_BUFFER:
+					vkDestroyFramebuffer(m_vkDevice, req.resource.frameBuffer, nullptr);
+				break;
 				case RESOURCE_IMAGE_VIEW:
 					vkDestroyImageView(m_vkDevice, req.resource.imageView, nullptr);
 				break;
@@ -881,6 +884,15 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	ASSERT(false);
 
 	return false;
+}
+
+void GFXDevice_ps::ReqDestroyFrameBuffer(VkFramebuffer frameBuffer)
+{
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_FRAME_BUFFER;
+	req.resource.frameBuffer = frameBuffer;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
 }
 
 void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)

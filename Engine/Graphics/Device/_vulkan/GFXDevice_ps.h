@@ -85,6 +85,7 @@ public:
 	void ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set);
 	void ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout);
 	void ReqDestroyDescriptorSetPool(VkDescriptorPool pool);
+	void ReqDestroyFrameBuffer(VkFramebuffer frameBuffer);
 
 
 private:
@@ -113,7 +114,8 @@ private:
 		RESOURCE_DESCRIPTOR_SET,
 		RESOURCE_IMAGE,
 		RESOURCE_DESCRIPTOR_LAYOUT,
-		RESOURCE_DESCRIPTOR_POOL
+		RESOURCE_DESCRIPTOR_POOL,
+		RESOURCE_FRAME_BUFFER
 	};
 
 
@@ -138,6 +140,7 @@ private:
 		union Resource
 		{
 			VkBuffer				buffer;
+			VkFramebuffer			frameBuffer;
 			VkImageView				imageView;
 			VkImage					image;
 			VkDescriptorPool		pool;

@@ -168,7 +168,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 {
 	if (m_framebuffer != VK_NULL_HANDLE)
 	{
-		vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_framebuffer, nullptr);
+		pDevice->GetPlatform().ReqDestroyFrameBuffer(m_framebuffer);
 		m_framebuffer = VK_NULL_HANDLE;
 	}
 
@@ -176,7 +176,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 	{
 		if (itr.frameBuffer != VK_NULL_HANDLE)
 		{
-			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), itr.frameBuffer, nullptr);
+			pDevice->GetPlatform().ReqDestroyFrameBuffer(itr.frameBuffer);
 			itr.frameBuffer = VK_NULL_HANDLE;
 		}
 	}
@@ -185,7 +185,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 	{
 		if (itr.frameBuffer != VK_NULL_HANDLE)
 		{
-			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), itr.frameBuffer, nullptr);
+			pDevice->GetPlatform().ReqDestroyFrameBuffer(itr.frameBuffer);
 			itr.frameBuffer = VK_NULL_HANDLE;
 		}
 	}
