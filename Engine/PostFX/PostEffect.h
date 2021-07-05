@@ -45,9 +45,11 @@ public:
 	virtual bool LoadsTexture(Input eInput) const { return false; }
 	// Most post effects will have a final target of color only
 	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color || eInput == Input::Depth); }
-	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) {}
 	virtual bool RequiresHDR() const { return false; }
+
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) {}
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
+	// FIXME: Remove and replace with SetTexture
 	virtual void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget) {}
 
 	virtual void Update(Scene* pScene, float fElapsed) {}

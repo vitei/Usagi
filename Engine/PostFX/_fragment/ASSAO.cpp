@@ -939,7 +939,7 @@ namespace usg
 	{
 		switch(eInput)
 		{
-		case PostEffect::Input::Color:
+		//case PostEffect::Input::Depth:
 		case PostEffect::Input::Normal:
 		case PostEffect::Input::LinearDepth:
 			return true;
