@@ -380,6 +380,51 @@ void PostFXSys_ps::ClearDynamicTargets(GFXDevice* pDevice)
 }
 
 
+bool PostFXSys_ps::CanReuseTarget(memsize pass)
+{
+	if(pass == 0)
+		return false;	// TODO: Handle re-using initial target
+
+	for (int iTarget = 0; iTarget < (int)PostEffect::Input::Count; iTarget++)
+	{
+		PostEffect::Input eTarget = PostEffect::Input(iTarget);
+		if( m_activeEffects[pass - 1]->WritesTexture(eTarget) != m_activeEffects[pass]->WritesTexture(eTarget) )
+		{
+			return false;
+		}
+
+		if (m_activeEffects[pass]->WritesTexture(eTarget) && m_activeEffects[pass]->ReadsTexture(eTarget))
+		{
+			return false;
+		}
+
+		if(NeedsStoring(pass, eTarget) != NeedsStoring(pass -1, eTarget))
+		{
+			return false;
+		}
+
+		if (NeedsShaderRead(pass, eTarget) != NeedsShaderRead(pass - 1, eTarget))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool PostFXSys_ps::IsLastTarget(memsize pass)
+{
+	memsize count = m_activeEffects.size();
+	for(memsize i = pass+1; i < count; i++)
+	{
+		if( !CanReuseTarget(i))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	usg::RenderTarget::RenderPassFlags flags;
@@ -501,24 +546,34 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 		}
 
 		// The last render target needs to be used as a transfer source
-		if(i == m_activeEffects.size() - 1)
+		if(IsLastTarget(i))
 		{
 			flags.uTransferSrcFlags = RenderTarget::RT_FLAG_COLOR_0;
 			flags.uShaderReadFlags |= RenderTarget::RT_FLAG_COLOR_0;
 			flags.uStoreFlags |= RenderTarget::RT_FLAG_COLOR_0;
 		}
 
-		usg::RenderTarget* pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
-		DepthStencilBuffer* pDS = m_activeEffects[i]->WritesTexture(PostEffect::Input::Depth) ? &m_depthStencil : nullptr;
-		pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), pDS);
-		pTarget->InitRenderPass(pDevice, flags);
 
-		m_activeEffects[i]->SetSourceTarget(pDevice, m_dynamicTargets.back());
+		usg::RenderTarget* pTarget = nullptr;
+		usg::RenderTarget* pSrc = m_dynamicTargets.back();
+		if(!CanReuseTarget(i))
+		{
+			pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
+			DepthStencilBuffer* pDS = m_activeEffects[i]->WritesTexture(PostEffect::Input::Depth) ? &m_depthStencil : nullptr;
+			pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), pDS);
+			pTarget->InitRenderPass(pDevice, flags);
+			m_dynamicTargets.push_back(pTarget);
+		}
+		else
+		{
+			pTarget = m_dynamicTargets.back();
+		}
+
+		m_activeEffects[i]->SetSourceTarget(pDevice, pSrc);
 		m_activeEffects[i]->SetDestTarget(pDevice, pTarget);
 
 		m_renderPasses.SetRenderPass(m_activeEffects[i]->GetLayer(), m_activeEffects[i]->GetPriority(), pTarget->GetRenderPass());
 
-		m_dynamicTargets.push_back(pTarget);
 
 	}
 }

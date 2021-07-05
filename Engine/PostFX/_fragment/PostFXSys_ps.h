@@ -81,6 +81,8 @@ protected:
 	void GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx);
 	int GetFlagForTarget(PostEffect::Input eTarget);
 	void ClearDynamicTargets(GFXDevice* pDevice);
+	bool CanReuseTarget(memsize pass);
+	bool IsLastTarget(memsize pass);
 
 	PostEffect* GetFinalEffect();
 	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
