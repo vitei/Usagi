@@ -76,7 +76,7 @@ void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewpor
 {
 	bool bHadDS = false;
 	m_bRenderToDisplay = false;
-	if(m_pActiveRT)
+	if(m_pActiveRT && m_pActiveRT != pTarget)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 		bHadDS = m_pActiveRT->GetDepthStencilBuffer()!=NULL;
