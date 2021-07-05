@@ -32,6 +32,7 @@ GFXDevice::GFXDevice()
 	: m_pHMD(nullptr) 
 	, m_uDisplayCount(0)
 	, m_uFrameCount(0)
+	, m_uAllocId(0)
 {
 	m_pImpl = vnew(ALLOC_OBJECT) PIMPL;
 }
@@ -209,12 +210,14 @@ void GFXDevice::FinishedStaticLoad()
 {
 	m_pImpl->renderStates.FinishedStaticLoad();
 	m_pImpl->platform.FinishedStaticLoad();
+	m_uAllocId = 1;
 }
 
 void GFXDevice::ClearDynamicResources()
 {
 	m_pImpl->renderStates.ClearDynamicResources(this);
 	m_pImpl->platform.ClearDynamicResources();
+	m_uAllocId = 0;
 }
 
 float GFXDevice::GetGPUTime() const

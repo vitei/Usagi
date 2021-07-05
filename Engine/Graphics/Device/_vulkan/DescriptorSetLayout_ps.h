@@ -42,6 +42,7 @@ private:
 		VkDescriptorPool pool;
 		queue<uint32>	 pendingDeleteFrames;
 		uint32			 uAllocations;
+		uint32			 uDeviceAllocId;
 	};
 
 	void UpdateFreeList(GFXDevice* pDevice, Allocator& allocator);

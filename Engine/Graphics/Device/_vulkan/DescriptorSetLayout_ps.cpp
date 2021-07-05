@@ -81,6 +81,7 @@ namespace usg {
 			}
 			if (m_allocators[i].uAllocations < g_allocGroupSize)
 			{
+				if(m_allocators[i].uDeviceAllocId == pDevice->GetAllocId())
 				uAllocId = i;
 				break;
 			}
@@ -98,6 +99,7 @@ namespace usg {
 
 			Allocator alloc;
 			alloc.uAllocations = 0;
+			alloc.uDeviceAllocId = pDevice->GetAllocId();
 			eResult = vkCreateDescriptorPool(pDevice->GetPlatform().GetVKDevice(), &poolCreateInfo, nullptr, &alloc.pool);
 			ASSERT(eResult == VK_SUCCESS);
 			uAllocId = (uint32)m_allocators.size();

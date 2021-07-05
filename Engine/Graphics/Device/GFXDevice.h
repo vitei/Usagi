@@ -67,6 +67,7 @@ public:
 	GFXDevice_ps&	GetPlatform();
 	GFXContext*		GetImmediateCtxt();
 	GFXContext*		CreateDeferredContext(uint32 uSizeMul);
+	uint32			GetAllocId() { return m_uAllocId; }
 
 private:
 	enum 
@@ -82,6 +83,7 @@ private:
 	IHeadMountedDisplay*	m_pHMD;
 	uint32					m_uDisplayCount;
 	uint32					m_uFrameCount;
+	uint32					m_uAllocId;	// Currently 0 = static, 1 = dynamic
 };
 
 inline Display* GFXDevice::GetDisplay(uint32 uIndex)
