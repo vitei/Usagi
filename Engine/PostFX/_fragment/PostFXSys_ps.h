@@ -78,8 +78,7 @@ protected:
 	void SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	void ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
-	void EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags);
-	void EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags);
+	void EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags);
 	bool NeedsStoring(memsize pass, PostEffect::Input eInput);
 	bool NeedsShaderRead(memsize pass, PostEffect::Input eInput);
 	void GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx);

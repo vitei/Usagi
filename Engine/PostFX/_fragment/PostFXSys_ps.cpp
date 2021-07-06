@@ -117,7 +117,7 @@ void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 		bool bEnabled = itr != m_activeEffects.end();
 		if (bEnabled != cfx->GetEnabled())
 		{
-			EnableEffectsIntNew(pDevice, m_pParent->GetEnabledEffectFlags());
+			EnableEffectsInt(pDevice, m_pParent->GetEnabledEffectFlags());
 			break;
 		}
 	}
@@ -481,7 +481,7 @@ void PostFXSys_ps::RemoveCustomEffect(PostEffect* pEffect)
 	m_customEffects.remove(pEffect);
 }
 
-void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
+void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	usg::RenderTarget::RenderPassFlags flags;
 
@@ -789,7 +789,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 
-	EnableEffectsIntNew(pDevice, uEffectFlags);
+	EnableEffectsInt(pDevice, uEffectFlags);
 	
 
 }
