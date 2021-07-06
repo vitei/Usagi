@@ -82,8 +82,10 @@ namespace usg {
 			if (m_allocators[i].uAllocations < g_allocGroupSize)
 			{
 				if(m_allocators[i].uDeviceAllocId == pDevice->GetAllocId())
-				uAllocId = i;
-				break;
+				{
+					uAllocId = i;
+					break;
+				}
 			}
 		}
 
