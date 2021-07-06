@@ -55,6 +55,9 @@ public:
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
 
+	void AddCustomEffect(PostEffect* pEffect) { m_platform.AddCustomEffect(pEffect); }
+	void RemoveCustomEffect(PostEffect* pEffect) { m_platform.RemoveCustomEffect(pEffect); }
+
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	// TODO: Remove passing in scene!!
@@ -87,6 +90,7 @@ public:
 	PostEffect* GetEffect(uint32 uEffectId);
 	void RegisterEffect(PostEffect* pEffect);
 	bool IsEffectEnabled(EffectFlags uFlag) { return (m_uEffectsEnabled & uFlag) != 0; }
+	uint32 GetEnabledEffectFlags() const { return m_uEffectsEnabled; }
 
 	// Platform specific implementations
 	void Copy(GFXContext* pContext, RenderTarget* pSrc, RenderTarget* pDst);

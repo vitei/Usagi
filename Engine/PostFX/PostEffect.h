@@ -12,6 +12,7 @@
 #define _USG_POSTFX_POSTEFFECT_H_
 
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Core/Callback.h"
 
 namespace usg {
 

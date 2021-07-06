@@ -111,6 +111,18 @@ void PostFXSys_ps::Update(Scene* pScene, float fElapsed)
 
 void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 {
+	// If effects get out of hand we might want to use callbacks, but this is fine for now
+	for (auto cfx : m_customEffects)
+	{
+		auto itr = eastl::find(m_activeEffects.begin(), m_activeEffects.end(), cfx);
+		bool bEnabled = itr != m_activeEffects.end();
+		if (bEnabled != cfx->GetEnabled())
+		{
+			EnableEffectsIntNew(pDevice, m_pParent->GetEnabledEffectFlags());
+			break;
+		}
+	}
+
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
 		m_pDefaultEffects[i]->UpdateBuffer(pDevice);
@@ -456,6 +468,20 @@ TextureHndl PostFXSys_ps::GetTexture(PostEffect::Input eInput, bool bHDR, memsiz
 	}
 }
 
+void PostFXSys_ps::AddCustomEffect(PostEffect* pEffect)
+{
+	auto itr = eastl::find(m_customEffects.begin(), m_customEffects.end(), pEffect);
+	if(itr == m_customEffects.end())
+	{
+		m_customEffects.push_back(pEffect);
+	}
+}
+
+void PostFXSys_ps::RemoveCustomEffect(PostEffect* pEffect)
+{
+	m_customEffects.remove(pEffect);
+}
+
 void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	usg::RenderTarget::RenderPassFlags flags;
@@ -472,6 +498,14 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 			m_activeEffects.push_back(m_pDefaultEffects[i]);
 		}
 	}
+	for(auto itr : m_customEffects)
+	{
+		if(itr->GetEnabled())
+		{
+			m_activeEffects.push_back(itr);
+		}
+	}
+
 	qsort(&m_activeEffects[0], m_activeEffects.size(), sizeof(RenderNode*), CompareNodes);
 
 

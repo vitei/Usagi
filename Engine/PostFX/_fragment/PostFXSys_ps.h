@@ -15,6 +15,7 @@
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/PostFX/PostEffect.h"
 #include "Engine/Core/stl/vector.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/SceneRenderPasses.h"
 
@@ -43,6 +44,9 @@ public:
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
+
+	void AddCustomEffect(PostEffect* pEffect);
+	void RemoveCustomEffect(PostEffect* pEffect);
 
 	const TextureHndl& GetLinearDepthTex() const;
 
@@ -134,6 +138,7 @@ protected:
 	class DeferredShading*	m_pDeferredShading;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
 	vector<PostEffect*>		m_activeEffects;
+	list<PostEffect*>		m_customEffects;
 	PostEffect*				m_pFinalEffect;
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
