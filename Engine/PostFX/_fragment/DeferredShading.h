@@ -33,10 +33,10 @@ public:
 	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 
 	virtual bool ReadsTexture(Input eInput) const override;
-	virtual bool LoadsTexture(Input eInput) const override;
 	virtual bool WritesTexture(Input eInput) const;
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
 	virtual void PassDataSet(GFXDevice* pDevice) override;
+	virtual bool LoadsTexture(Input eInput) const override;
 
 private:
 

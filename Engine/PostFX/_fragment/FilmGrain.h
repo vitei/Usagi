@@ -27,6 +27,7 @@ public:
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
+	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color); }
 	virtual bool ReadsTexture(Input eInput) const override;
 	virtual bool LoadsTexture(Input eInput) const override;
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;

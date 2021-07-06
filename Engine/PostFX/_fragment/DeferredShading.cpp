@@ -849,10 +849,9 @@ bool DeferredShading::ReadsTexture(Input eInput) const
 	}
 }
 
-
 bool DeferredShading::LoadsTexture(Input eInput) const
 {
-	return false;
+	return eInput == PostEffect::Input::Depth;
 }
 
 void DeferredShading::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)

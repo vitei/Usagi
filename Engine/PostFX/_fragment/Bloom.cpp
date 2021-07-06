@@ -403,7 +403,7 @@ bool Bloom::ReadsTexture(Input eInput) const
 
 bool Bloom::LoadsTexture(Input eInput) const
 {
-	return false;
+	return PostEffect::LoadsTexture(eInput);
 }
 
 void Bloom::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)

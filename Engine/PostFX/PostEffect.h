@@ -49,7 +49,7 @@ public:
 	
 	// Needed to figure out the correct render targets to pass in
 	virtual bool ReadsTexture(Input eInput) const { return false; }
-	virtual bool LoadsTexture(Input eInput) const { return false; }
+	virtual bool LoadsTexture(Input eInput) const { return eInput == Input::Depth; }
 	// Most post effects will have a final target of color only
 	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color || eInput == Input::Depth); }
 	virtual bool RequiresHDR() const { return false; }

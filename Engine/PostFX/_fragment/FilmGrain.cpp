@@ -150,7 +150,7 @@ bool FilmGrain::ReadsTexture(Input eInput) const
 
 bool FilmGrain::LoadsTexture(Input eInput) const
 {
-	return false;
+	return PostEffect::LoadsTexture(eInput);
 }
 
 void FilmGrain::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)

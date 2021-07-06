@@ -953,7 +953,7 @@ namespace usg
 
 	bool ASSAO::LoadsTexture(Input eInput) const
 	{
-		if (eInput == PostEffect::Input::Color)
+		if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
 		{
 			return true;
 		}
