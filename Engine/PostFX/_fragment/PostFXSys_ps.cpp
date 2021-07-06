@@ -593,17 +593,19 @@ void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*
 		// FIXME: OR HDR enabled at a system level
 		if(pass < iFinalHdr)
 		{	
-			pBuffers.push_back(&m_colorBuffer[BUFFER_HDR_0 + hdrIdx]);
 			// If it reads that texture as a source we need to swap the buffers
-			if(m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))
-				hdrIdx = (hdrIdx + 1)%2;
+			if (m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))
+				hdrIdx = (hdrIdx + 1) % 2;
+
+			pBuffers.push_back(&m_colorBuffer[BUFFER_HDR_0 + hdrIdx]);
 		}
 		else
 		{
-			pBuffers.push_back(&m_colorBuffer[BUFFER_LDR_0 + ldrIdx]);
 			// If it reads that texture as a source we need to swap the buffers
 			if (m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))
-				ldrIdx = (ldrIdx + 1)%2;
+				ldrIdx = (ldrIdx + 1) % 2;
+
+			pBuffers.push_back(&m_colorBuffer[BUFFER_LDR_0 + ldrIdx]);
 		}
 		ASSERT(!m_activeEffects[pass]->WritesTexture(PostEffect::Input::Albedo));
 	}
