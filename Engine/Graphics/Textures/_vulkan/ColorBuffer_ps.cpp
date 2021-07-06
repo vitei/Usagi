@@ -17,6 +17,7 @@ ColorBuffer_ps::ColorBuffer_ps()
 	: m_pExtraViews(nullptr)
 {
 	m_texHndl = &m_texture;
+	m_texture.SetReady(true);
 	m_uMips = 1;
 }
 
