@@ -574,6 +574,9 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 	usg::RenderTarget* pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
 	pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), &m_depthStencil);
 
+	// Linear depth needs to clear to 1
+	pTarget->SetClearColor(Color(1.0f, 0.f, 0.0f, 0.0f), 1);
+
 	pTarget->InitRenderPass(pDevice, flags);
 
 	m_renderPasses.SetRenderPass(RenderLayer::LAYER_BACKGROUND, 0, pTarget->GetRenderPass());
