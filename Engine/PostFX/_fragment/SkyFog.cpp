@@ -371,6 +371,13 @@ void SkyFog::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& tex
 	if (eInput == PostEffect::Input::LinearDepth)
 	{
 		m_materialFade.SetTexture(5, texture, m_samplerHndl);
+	}
+}
+
+void SkyFog::PassDataSet(GFXDevice* pDevice)
+{
+	if(m_bValid)
+	{
 		m_materialFade.UpdateDescriptors(pDevice);
 	}
 }

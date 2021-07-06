@@ -83,6 +83,7 @@ protected:
 	void ClearDynamicTargets(GFXDevice* pDevice);
 	bool CanReuseTarget(memsize pass);
 	bool IsLastTarget(memsize pass);
+	TextureHndl GetTexture(PostEffect::Input eInput, bool bHDR, memsize hdrIdx, memsize ldrIdx);
 
 	PostEffect* GetFinalEffect();
 	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);

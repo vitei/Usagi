@@ -36,6 +36,7 @@ public:
 	virtual bool LoadsTexture(Input eInput) const override;
 	virtual bool WritesTexture(Input eInput) const;
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+	virtual void PassDataSet(GFXDevice* pDevice) override;
 
 private:
 

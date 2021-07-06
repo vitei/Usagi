@@ -90,7 +90,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pDeferredShading = nullptr;
 	m_fPixelScale = 1.0f;
 	m_bHDROut = false;
-	m_bNewPassManagement = false;
+	m_bNewPassManagement = true;
 }
 
 PostFXSys_ps::~PostFXSys_ps()
@@ -425,6 +425,37 @@ bool PostFXSys_ps::IsLastTarget(memsize pass)
 	return true;
 }
 
+TextureHndl PostFXSys_ps::GetTexture(PostEffect::Input eInput, bool bHDR, memsize hdrIdx, memsize ldrIdx)
+{
+	switch(eInput)
+	{
+		case PostEffect::Input::Color:
+			if(bHDR)
+			{
+				return m_colorBuffer[BUFFER_HDR_0 + hdrIdx].GetTexture();
+			}
+			else
+			{
+				return m_colorBuffer[BUFFER_LDR_0 + ldrIdx].GetTexture();
+			}
+		case PostEffect::Input::LinearDepth:
+			return m_colorBuffer[BUFFER_LIN_DEPTH].GetTexture();
+		case PostEffect::Input::Depth:
+			return m_depthStencil.GetTexture();
+		case PostEffect::Input::Albedo:
+			return m_colorBuffer[BUFFER_DIFFUSE].GetTexture();
+		case PostEffect::Input::Normal:
+			return m_colorBuffer[BUFFER_NORMAL].GetTexture();
+		case PostEffect::Input::Emissive:
+			return m_colorBuffer[BUFFER_EMISSIVE].GetTexture();
+		case PostEffect::Input::Specular:
+			return m_colorBuffer[BUFFER_SPECULAR].GetTexture();
+		default:
+			ASSERT(false);
+			return nullptr;
+	}
+}
+
 void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 {
 	usg::RenderTarget::RenderPassFlags flags;
@@ -524,8 +555,6 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 		flags.uTransferSrcFlags = 0;
 		flags.uClearFlags = 0;			// We currently don't let an effect request a clear
 
-		GetRenderTargetBuffers(i, pBuffers, iFinalHDRTarget, hdrIdx, ldrIdx);
-
 		for (int iTarget =0; iTarget < (int)PostEffect::Input::Count; iTarget++)
 		{
 			PostEffect::Input eTarget = PostEffect::Input(iTarget);
@@ -543,7 +572,16 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 			{
 				flags.uShaderReadFlags |= GetFlagForTarget(eTarget);
 			}
+
+			if(m_activeEffects[i]->ReadsTexture(eTarget))
+			{
+				m_activeEffects[i]->SetTexture(pDevice, eTarget, GetTexture(eTarget, i<=iFinalHDRTarget, hdrIdx, ldrIdx));
+			}
+		
 		}
+
+		GetRenderTargetBuffers(i, pBuffers, iFinalHDRTarget, hdrIdx, ldrIdx);
+
 
 		// The last render target needs to be used as a transfer source
 		if(IsLastTarget(i))
@@ -569,8 +607,10 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 			pTarget = m_dynamicTargets.back();
 		}
 
-		m_activeEffects[i]->SetSourceTarget(pDevice, pSrc);
+		//m_activeEffects[i]->SetSourceTarget(pDevice, pSrc);
 		m_activeEffects[i]->SetDestTarget(pDevice, pTarget);
+
+		m_activeEffects[i]->PassDataSet(pDevice);
 
 		m_renderPasses.SetRenderPass(m_activeEffects[i]->GetLayer(), m_activeEffects[i]->GetPriority(), pTarget->GetRenderPass());
 

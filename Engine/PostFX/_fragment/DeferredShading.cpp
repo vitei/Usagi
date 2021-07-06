@@ -837,6 +837,7 @@ bool DeferredShading::ReadsTexture(Input eInput) const
 	switch (eInput)
 	{
 	case PostEffect::Input::Albedo:
+	case PostEffect::Input::LinearDepth:
 	case PostEffect::Input::Normal:
 	case PostEffect::Input::Specular:
 	case PostEffect::Input::Emissive:
@@ -876,6 +877,10 @@ void DeferredShading::SetTexture(GFXDevice* pDevice, Input eInput, const Texture
 	{
 		m_readDescriptors.SetImageSamplerPairAtBinding(4, texture, m_samplerHndl);
 	}
+}
+
+void DeferredShading::PassDataSet(GFXDevice* pDevice)
+{
 	m_readDescriptors.UpdateDescriptors(pDevice);
 }
 

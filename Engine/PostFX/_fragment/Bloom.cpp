@@ -416,8 +416,16 @@ bool Bloom::LoadsTexture(Input eInput) const
 
 void Bloom::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
 {
-	m_descriptors[PASS_4X4].SetImageSamplerPair(0, texture, m_linearSampler);
-	m_descriptors[PASS_FINAL].SetImageSamplerPair(0, texture, m_pointSampler);
+	if(eInput == PostEffect::Input::Color)
+	{
+		m_descriptors[PASS_4X4].SetImageSamplerPair(0, texture, m_linearSampler);
+		m_descriptors[PASS_FINAL].SetImageSamplerPair(0, texture, m_pointSampler);
+	}
+
+}
+
+void Bloom::PassDataSet(GFXDevice* pDevice)
+{
 	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
 	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
 }

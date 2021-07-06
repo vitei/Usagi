@@ -356,12 +356,15 @@ namespace usg {
 #if SMAA_REPROJECTION
 			m_resolveDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
 #endif
-			m_lumaColorEdgeDescriptorSet.UpdateDescriptors(pDevice);
-			m_depthEdgeDescriptorSet.UpdateDescriptors(pDevice);
-
 			UpdateConstants(pDevice, texture->GetWidth(), texture->GetHeight());
-			UpdateDescriptors(pDevice);
+
 		}
+	}
+
+	void SMAA::PassDataSet(GFXDevice* pDevice)
+	{
+		UpdateDescriptors(pDevice);
+
 	}
 
 }
