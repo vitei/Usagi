@@ -162,11 +162,6 @@ void FilmGrain::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& 
 	}
 }
  
-void FilmGrain::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-{
-	m_material.SetTexture(0, pTarget->GetColorTexture(), m_sampler);
-	m_material.UpdateDescriptors(pDevice);
-}
 
 void FilmGrain::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {

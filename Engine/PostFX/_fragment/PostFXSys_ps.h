@@ -148,8 +148,6 @@ protected:
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
 	RenderTarget			m_screenRT[TARGET_COUNT];
 	vector<RenderTarget*>	m_dynamicTargets;
-	RenderTarget*			m_pFinalTarget;
-	RenderTarget*			m_pInitialTarget;
 
 //	PipelineStateHndl		m_downscale4x4Effect;
 //	PipelineStateHndl		m_downscale2x2Effect;
@@ -160,9 +158,6 @@ protected:
 
 	uint32					m_uLDRCount;
 	bool					m_bHDROut;
-
-	// FIXME: Remove when working
-	bool					m_bNewPassManagement;
 };
 
 

@@ -57,8 +57,6 @@ public:
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) {}
 	virtual void PassDataSet(GFXDevice* pDevice) {}	// Called when dest and sources have ben set
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst) {}
-	// FIXME: Remove and replace with SetTexture
-	virtual void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget) {}
 
 	virtual void Update(Scene* pScene, float fElapsed) {}
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) {}

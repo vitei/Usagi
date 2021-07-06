@@ -256,14 +256,6 @@ void Bloom::Resize(GFXDevice* pDevice, uint32 uScrWidth, uint32 uSrcHeight)
 	}
 }
 
-void Bloom::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-{
-	m_descriptors[PASS_4X4].SetImageSamplerPair(0, pTarget->GetColorTexture(0), m_linearSampler);
-	m_descriptors[PASS_FINAL].SetImageSamplerPair(0, pTarget->GetColorTexture(0), m_pointSampler);
-	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
-	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
-}
-
 
 bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 {

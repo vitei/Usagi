@@ -119,12 +119,6 @@ void FXAA::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	}
 }
 
-void FXAA::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-{
-	m_material.SetTexture(0, pTarget->GetColorTexture(), m_sampler);
-	m_material.UpdateDescriptors(pDevice);
-}
-
 bool FXAA::LoadsTexture(Input eInput) const
 {
 	return false;

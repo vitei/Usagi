@@ -90,7 +90,6 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pDeferredShading = nullptr;
 	m_fPixelScale = 1.0f;
 	m_bHDROut = false;
-	m_bNewPassManagement = true;
 }
 
 PostFXSys_ps::~PostFXSys_ps()
@@ -768,121 +767,6 @@ bool PostFXSys_ps::NeedsStoring(memsize pass, PostEffect::Input eInput)
 	return false;
 }
 
-void PostFXSys_ps::EnableEffectsIntOld(GFXDevice* pDevice, uint32 uEffectFlags)
-{
-	RenderTarget* pDst = &m_screenRT[TARGET_LDR_LIN_DEPTH];
-
-	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
-	{
-		pDst = &m_screenRT[TARGET_GBUFFER];
-	}
-	else if (uEffectFlags & PostFXSys::EFFECT_SKY_FOG)
-	{
-		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR_LIN_DEPTH] : &m_screenRT[TARGET_LDR_LIN_DEPTH];
-	}
-
-	m_pInitialTarget = pDst;
-	m_renderPasses.SetRenderPass(RenderLayer::LAYER_BACKGROUND, 0, m_pInitialTarget->GetRenderPass());
-
-	if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
-	{
-		m_pDeferredShading->SetSourceTarget(pDevice, pDst);
-		if (uEffectFlags & PostFXSys::EFFECT_SSAO && uEffectFlags & PostFXSys::EFFECT_BLOOM)
-		{
-			pDst = &m_screenRT[TARGET_HDR_MULTI_PASS];
-		}
-		else
-		{
-			pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR_NO_LOAD] : &m_screenRT[TARGET_LDR_0];
-		}
-		m_pDeferredShading->SetDestTarget(pDevice, pDst);
-		m_pFinalEffect = m_pDeferredShading;
-		m_renderPasses.SetRenderPass(m_pDeferredShading->GetLayer(), m_pDeferredShading->GetPriority(), pDst->GetRenderPass());
-	}
-
-	if (uEffectFlags & PostFXSys::EFFECT_SSAO)
-	{
-		if (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
-		{
-			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
-		}
-		else
-		{
-			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
-		}
-
-		pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
-
-		// Don't change the destination
-		m_pSSAO->SetDestTarget(pDevice, pDst);
-		m_pFinalEffect = m_pSSAO;
-	}
-
-	if (uEffectFlags & PostFXSys::EFFECT_SKY_FOG)
-	{
-		if ((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0)
-		{
-			pDst = uEffectFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
-		}
-		m_pSkyFog->SetDestTarget(pDevice, pDst);
-		m_renderPasses.SetRenderPass(m_pSkyFog->GetLayer(), m_pSkyFog->GetPriority(), pDst->GetRenderPass());
-		m_pFinalEffect = m_pSkyFog;
-	}
-
-	// If not using deferred shading the destination target will be overridden when doing the transparency pass
-	// (to allow us to use linear depth for the sky, particles etc)
-	if (pDst == &m_screenRT[TARGET_HDR_LIN_DEPTH])
-	{
-		pDst = &m_screenRT[TARGET_HDR];
-		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
-	}
-	if (pDst == &m_screenRT[TARGET_LDR_LIN_DEPTH])
-	{
-		pDst = &m_screenRT[TARGET_LDR_0];
-		m_renderPasses.SetRenderPass(RenderLayer::LAYER_TRANSLUCENT, 0, pDst->GetRenderPass());
-	}
-
-
-	if (uEffectFlags & PostFXSys::EFFECT_BLOOM)
-	{
-		m_pBloom->SetSourceTarget(pDevice, pDst);
-		pDst = GetLDRTargetForEffect(m_pBloom, pDst);
-		m_pBloom->SetDestTarget(pDevice, pDst);
-		m_renderPasses.SetRenderPass(m_pBloom->GetLayer(), m_pBloom->GetPriority(), pDst->GetRenderPass());
-
-		m_pFinalEffect = m_pBloom;
-	}
-
-	if (uEffectFlags & PostFXSys::EFFECT_FXAA)
-	{
-		m_pFXAA->SetSourceTarget(pDevice, pDst);
-		pDst = GetLDRTargetForEffect(m_pFXAA, pDst);
-		m_pFXAA->SetDestTarget(pDevice, pDst);
-		m_renderPasses.SetRenderPass(m_pFXAA->GetLayer(), m_pFXAA->GetPriority(), pDst->GetRenderPass());
-		m_pFinalEffect = m_pFXAA;
-	}
-
-	if (uEffectFlags & PostFXSys::EFFECT_SMAA)
-	{
-		m_pSMAA->SetSourceTarget(pDevice, pDst);
-		pDst = GetLDRTargetForEffect(m_pSMAA, pDst);
-		m_pSMAA->SetDestTarget(pDevice, pDst);
-		m_renderPasses.SetRenderPass(m_pSMAA->GetLayer(), m_pSMAA->GetPriority(), pDst->GetRenderPass());
-		m_pFinalEffect = m_pSMAA;
-	}
-
-	if (uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN)
-	{
-		m_pFilmGrain->SetSourceTarget(pDevice, pDst);
-		pDst = GetLDRTargetForEffect(m_pFilmGrain, pDst);
-		m_pFilmGrain->SetDestTarget(pDevice, pDst);
-		m_renderPasses.SetRenderPass(m_pFilmGrain->GetLayer(), m_pFilmGrain->GetPriority(), pDst->GetRenderPass());
-		m_pFinalEffect = m_pFilmGrain;
-	}
-
-	m_renderPasses.UpdateEnd(pDevice);
-	m_pFinalTarget = pDst;
-}
 
 void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 {
@@ -905,10 +789,7 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 
-	if(m_bNewPassManagement)
-		EnableEffectsIntNew(pDevice, uEffectFlags);
-	else
-		EnableEffectsIntOld(pDevice, uEffectFlags);
+	EnableEffectsIntNew(pDevice, uEffectFlags);
 	
 
 }
@@ -1137,26 +1018,12 @@ float PostFXSys_ps::GaussianDistribution( float x, float y, float rho ) const
 
 RenderTarget* PostFXSys_ps::GetInitialRT()
 {
-	if (m_bNewPassManagement)
-	{
-		return m_dynamicTargets.front();
-	}
-	else
-	{
-		return m_pInitialTarget;
-	}
+	return m_dynamicTargets.front();
 }
 
 RenderTarget* PostFXSys_ps::GetFinalRT()
 {
-	if (m_bNewPassManagement)
-	{
-		return m_dynamicTargets.back();
-	}
-	else
-	{
-		return m_pFinalTarget;
-	}
+	return m_dynamicTargets.back();
 }
 
 
