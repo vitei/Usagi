@@ -210,14 +210,13 @@ void GFXDevice::FinishedStaticLoad()
 {
 	m_pImpl->renderStates.FinishedStaticLoad();
 	m_pImpl->platform.FinishedStaticLoad();
-	m_uAllocId = 1;
 }
 
 void GFXDevice::ClearDynamicResources()
 {
 	m_pImpl->renderStates.ClearDynamicResources(this);
 	m_pImpl->platform.ClearDynamicResources();
-	m_uAllocId = 0;
+	m_uAllocId = m_uAllocId ? 0 : 1;
 }
 
 float GFXDevice::GetGPUTime() const
