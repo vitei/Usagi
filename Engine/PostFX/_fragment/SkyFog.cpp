@@ -349,7 +349,7 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 bool SkyFog::LoadsTexture(Input eInput) const
 {
-	if (eInput == PostEffect::Input::Color)
+	if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
 	{
 		return true;
 	}
