@@ -653,6 +653,8 @@ void PostFXSys_ps::EnableEffectsIntNew(GFXDevice* pDevice, uint32 uEffectFlags)
 
 
 	}
+	m_renderPasses.UpdateEnd(pDevice);
+
 }
 
 void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx)
