@@ -89,7 +89,6 @@ protected:
 	TextureHndl GetTexture(PostEffect::Input eInput, bool bHDR, memsize hdrIdx, memsize ldrIdx);
 
 	PostEffect* GetFinalEffect();
-	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
 
 	enum COLOR_BUFFER
 	{
@@ -103,22 +102,6 @@ protected:
 		BUFFER_LDR_0,
 		BUFFER_LDR_1,
 		BUFFER_COUNT
-	};
-
-	enum RENDER_TARGETS
-	{
-		TARGET_GBUFFER,
-		TARGET_HDR_NO_LOAD,
-		TARGET_HDR,
-		TARGET_HDR_MULTI_PASS,
-		TARGET_HDR_LIN_DEPTH,
-		TARGET_LDR_LIN_DEPTH,
-		TARGET_LDR_0,
-		TARGET_LDR_1,
-		TARGET_LDR_0_POST_DEPTH,	// After depth, maintain load color without acting on it
-		TARGET_LDR_0_TRANSFER_SRC,	// Final target to be transfered to the screen
-		TARGET_LDR_1_TRANSFER_SRC,  // Final target to be transfered to the screen
-		TARGET_COUNT
 	};
 
 	enum
@@ -145,17 +128,11 @@ protected:
 	SceneRenderPasses		m_renderPasses;
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
-	RenderTarget			m_screenRT[TARGET_COUNT];
 	vector<RenderTarget*>	m_dynamicTargets;
-
-//	PipelineStateHndl		m_downscale4x4Effect;
-//	PipelineStateHndl		m_downscale2x2Effect;
-//	PipelineStateHndl		m_gaussBlur5x5Effect;
 
 	SamplerHndl				m_linearSampler;
 	SamplerHndl				m_pointSampler;
 
-	uint32					m_uLDRCount;
 	bool					m_bHDROut;
 };
 
