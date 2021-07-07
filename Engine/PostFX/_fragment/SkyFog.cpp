@@ -43,17 +43,16 @@ SkyFog::~SkyFog(void)
 }
 
 
-void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 {
 	m_bUseDepthTex = true;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
 	MakeSphere(pDevice, 1.0f);
 	//MakeCube(pDevice);
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
@@ -101,7 +100,8 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	pipeline.pEffect = pResource->GetEffect(pDevice, "PostProcess.FogSphere");
 
 	Material &mat = m_materialFade;
-	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
+	mat.SetDescriptorLayout(pDevice, matDescriptorsFade);
+	m_pipelineFadeDecl = pipeline;
 
 	SamplerDecl sampDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);	
 	sampDecl.eMipFilter = MIP_FILTER_POINT;
@@ -116,7 +116,8 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
 	alphaDecl.bBlendEnable = false;
-	mat2.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
+	m_pipelineNoFadeDecl = pipeline;
+	mat2.SetDescriptorLayout(pDevice, matDescriptors);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
 	SamplerDecl depthSamp(SAMP_FILTER_POINT, SAMP_WRAP_REPEAT);
@@ -140,8 +141,8 @@ void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (pDst != m_pDestTarget)
 	{
 		m_pDestTarget = pDst;
-		m_materialFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
-		m_materialNoFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+		m_materialFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineFadeDecl));
+		m_materialNoFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineNoFadeDecl));
 	}
 }
 

@@ -236,13 +236,10 @@ PipelineStateHndl RenderStateMgr::GetPipelineState(const RenderPassHndl& renderP
 	PipelineLayoutHndl layout = GetPipelineLayout(&decl.layout, pDevice);
 
 #ifdef DEBUG_BUILD
-//	ASSERT(decl.layout.uDescriptorSetCount > 0);
 	for (uint32 i = 0; i < decl.layout.uDescriptorSetCount; i++)
 	{
 		ASSERT(decl.layout.descriptorSets[i].IsValid());
 	}
-	// TODO: Re-add me when the render pass stuff is ready to go
-	//ASSERT(decl.renderPass.IsValid());
 #endif
 
 	// Replace the pointers with our own internal ones so we don't end up creating additional PSOs

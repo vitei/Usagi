@@ -22,7 +22,7 @@ public:
 	ASSAO();
 	~ASSAO();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys) override;
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -119,10 +119,10 @@ private:
 	PipelineStateHndl	m_genImportanceMap;
 	PipelineStateHndl	m_importanceMapA;
 	PipelineStateHndl	m_importanceMapB;
-	PipelineStateHndl	m_applyEffect;
-	PipelineStateHndl	m_nonSmartApplyEffect;
-	PipelineStateHndl	m_nonSmartHalfApplyEffect;
-
+	Pipeline			m_applyEffect;
+	Pipeline			m_nonSmartApplyEffect;
+	Pipeline			m_nonSmartHalfApplyEffect;
+		
 	DescriptorSet		m_applyDesc;
 	DescriptorSet		m_prepareDepthDesc;
 	DescriptorSet		m_mipDesc[MIP_COUNT-1];

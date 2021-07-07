@@ -22,7 +22,7 @@ public:
 	Bloom();
 	~Bloom();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
@@ -62,7 +62,7 @@ private:
 
 	PipelineStateHndl	m_bloomEffect;
 	PipelineStateHndl	m_brightPassEffect;
-	PipelineStateHndl	m_finalPassEffect;
+	Pipeline			m_finalPassEffect;
 	PipelineStateHndl	m_gaussBlurPipeline;
 	PipelineStateHndl	m_downscalePipeline;
 

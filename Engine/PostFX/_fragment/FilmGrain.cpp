@@ -68,10 +68,10 @@ void FilmGrain::UpdateBuffer(usg::GFXDevice* pDevice)
 	m_material.UpdateDescriptors(pDevice); 
 }
 
-void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 {
 	m_pSys = pSys;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
 	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
@@ -93,7 +93,8 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	pipelineDecl.layout.uDescriptorSetCount = 2;
 	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl), matDescriptors);
+	m_pipelineDecl = pipelineDecl;
+	m_material.SetDescriptorLayout(pDevice, matDescriptors);
 
 	m_constantSet.Init(pDevice, g_filmGrainConstantDef);
 	
@@ -124,16 +125,13 @@ void FilmGrain::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (m_pDestTarget != pDst)
 	{
 		m_pDestTarget = pDst;
-		PipelineStateDecl decl;
-		RenderPassHndl hndlTmp;
 		
 		FilmGrainConstants* pConsts = m_constantSet.Lock<FilmGrainConstants>();
 		pConsts->vResolution.x = (float)pDst->GetWidth();
 		pConsts->vResolution.y = (float)pDst->GetHeight();
 		m_constantSet.Unlock();
 
-		pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl, hndlTmp);
-		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), decl));
+		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineDecl));
 	}
 }
 

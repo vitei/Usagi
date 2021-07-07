@@ -80,10 +80,10 @@ Bloom::~Bloom()
 
 }
 
-void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
+void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 {
 	m_pSys = pSys;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
 	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
@@ -139,7 +139,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 	m_brightPassEffect	= pDevice->GetPipelineState(m_brightPassRT.GetRenderPass(), pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomFinal");
 	pipelineDecl.layout.descriptorSets[1] = desc2Tex;
-	m_finalPassEffect = pDevice->GetPipelineState(m_pDestTarget->GetRenderPass(), pipelineDecl);
+	m_finalPassEffect.decl = pipelineDecl;
 
 	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, pRes, m_bloomSourceRT.GetRenderPass());
 	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, pRes, m_scaledSceneRT.GetRenderPass());
@@ -226,7 +226,7 @@ void Bloom::Cleanup(GFXDevice* pDevice)
 
 void Bloom::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
-	pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_finalPassEffect);
+	m_finalPassEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_finalPassEffect.decl);
 	m_pDestTarget = pDst;
 }
 
@@ -303,7 +303,7 @@ bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 	// Perform the vertical bloom, transferring into a non HDR destination RT
 	pContext->SetRenderTarget(m_pDestTarget);
 	pContext->SetDescriptorSet(&m_descriptors[PASS_FINAL], 1);
-	pContext->SetPipelineState(m_finalPassEffect);
+	pContext->SetPipelineState(m_finalPassEffect.state);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	pContext->EndGPUTag();

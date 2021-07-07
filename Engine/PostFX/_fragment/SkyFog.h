@@ -27,7 +27,7 @@ public:
 	SkyFog();
 	virtual ~SkyFog();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys) override;
 	virtual void Cleanup(GFXDevice* pDevice) override;
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -45,6 +45,8 @@ private:
 	PRIVATIZE_COPY(SkyFog)
 
 	// FIXME: We should be grabbing effects and textures from a resource manager
+	PipelineStateDecl		m_pipelineNoFadeDecl;
+	PipelineStateDecl		m_pipelineFadeDecl;
 	RenderTarget*			m_pDestTarget;
 	Material				m_materialNoFade;
 	Material 				m_materialFade;

@@ -39,11 +39,17 @@ public:
 		Count
 	};
 
+	struct Pipeline
+	{
+		PipelineStateDecl decl;
+		PipelineStateHndl state;
+	};
+
 
 	PostEffect();
 	virtual ~PostEffect();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst) {}
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys) {}
 	virtual void Cleanup(GFXDevice* pDevice) {}
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) {}
 	

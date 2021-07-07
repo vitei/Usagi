@@ -54,7 +54,7 @@ DeferredShading::~DeferredShading()
 }
 
 
-void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
+void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 {
 	m_pSys = pSys;
 
@@ -62,8 +62,6 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
-
-	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 
 	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineDecl.layout.descriptorSets[1] = pDevice->GetDescriptorSetLayout(g_descriptorGBuffer);
@@ -89,7 +87,7 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	rasDecl.eCullFace = CULL_FACE_NONE;
 
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.DirBase");
-	m_baseDirPass = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_baseDirPass.decl = pipelineDecl;
 
 	
 	alphaDecl.bBlendEnable = true;
@@ -101,7 +99,7 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 		char name[256];
 		sprintf_s(name, "Deferred.DirExtraShadow.%d", i + 1);
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, name);
-		m_additionalShadowPass[i] = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+		m_additionalShadowPass[i].decl = pipelineDecl;
 	}
 	alphaDecl.bBlendEnable = false;
 	
@@ -129,13 +127,13 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	pipelineDecl.layout.uDescriptorSetCount = 3;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.ProjectionPos");
-	m_projShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pStencilWriteEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointPos");
-	m_sphereShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pStencilWriteEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.SpotPos");;
-	m_spotShaders.pStencilWriteEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pStencilWriteEffect.decl = pipelineDecl;
 
 	// Lighting when not intersecting far plane
 	depthDecl.bDepthWrite		= false;
@@ -161,31 +159,31 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point");
-	m_sphereShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingEffect.decl = pipelineDecl;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointNoSpec");
-	m_sphereShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadow");
-	m_sphereShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingShadowEffect.decl = pipelineDecl;
 
 	// Fixme no spec versions
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
-	m_spotShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
-	m_spotShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pLightingEffect.decl = pipelineDecl;
+	m_spotShaders.pLightingNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadow");
-	m_spotShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pLightingShadowEffect.decl = pipelineDecl;
 
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
-	m_projShaders.pLightingEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingEffect.decl = pipelineDecl;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
-	m_projShaders.pLightingNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadow");
-	m_projShaders.pLightingShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingShadowEffect.decl = pipelineDecl;
 
 	// Front face
 	rasDecl.eCullFace = CULL_FACE_BACK;
@@ -201,31 +199,31 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point");
-	m_sphereShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingFarPlaneEffect.decl = pipelineDecl;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.PointNoSpec");
-	m_sphereShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingFarPlaneNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(PointLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadow");
-	m_sphereShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_sphereShaders.pLightingFarPlaneShadowEffect.decl = pipelineDecl;
 
 	// Fixme no spec versions
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
-	m_spotShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pLightingFarPlaneEffect.decl = pipelineDecl;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
-	m_spotShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pLightingFarPlaneNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadow");
-	m_spotShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_spotShaders.pLightingFarPlaneShadowEffect.decl = pipelineDecl;
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
-	m_projShaders.pLightingFarPlaneEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingFarPlaneEffect.decl = pipelineDecl;
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection");
-	m_projShaders.pLightingFarPlaneNoSpecEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingFarPlaneNoSpecEffect.decl = pipelineDecl;
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadow");
-	m_projShaders.pLightingFarPlaneShadowEffect = pDevice->GetPipelineState(renderPassHndl, pipelineDecl);
+	m_projShaders.pLightingFarPlaneShadowEffect.decl = pipelineDecl;
 
 
 	SamplerDecl samplerDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
@@ -281,40 +279,43 @@ void DeferredShading::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 		RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 		// This is obviously not ideal, but it shouldn't normally happen. You'd have to be turning off bloom at run time.
 		// If it does happen we can cache all the combinations we see
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_baseDirPass);
+		m_baseDirPass.state = pDevice->GetPipelineState(renderPassHndl, m_baseDirPass.decl);
 
 		for (uint32 i = 0; i < MAX_EXTRA_DIR_LIGHTS; i++)
 		{
-			pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_additionalShadowPass[i]);
+			m_baseDirPass.state = pDevice->GetPipelineState(renderPassHndl, m_baseDirPass.decl);
+
+			m_additionalShadowPass[i].state = pDevice->GetPipelineState(renderPassHndl, m_additionalShadowPass[i].decl);
 		}
 
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pStencilWriteEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pStencilWriteEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pStencilWriteEffect);
+
+		m_projShaders.pStencilWriteEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pStencilWriteEffect.decl);
+		m_sphereShaders.pStencilWriteEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pStencilWriteEffect.decl);
+		m_spotShaders.pStencilWriteEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pStencilWriteEffect.decl);
+
+		m_projShaders.pLightingFarPlaneEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingFarPlaneEffect.decl);
+		m_sphereShaders.pLightingFarPlaneEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingFarPlaneEffect.decl);
+		m_spotShaders.pLightingFarPlaneEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingFarPlaneEffect.decl);
 		
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneEffect);
+		m_projShaders.pLightingEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingEffect.decl);
+		m_sphereShaders.pLightingEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingEffect.decl);
+		m_spotShaders.pLightingEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingEffect.decl);
 
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingEffect);
+		m_projShaders.pLightingFarPlaneNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingFarPlaneNoSpecEffect.decl);
+		m_sphereShaders.pLightingFarPlaneNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingFarPlaneNoSpecEffect.decl);
+		m_spotShaders.pLightingFarPlaneNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingFarPlaneNoSpecEffect.decl);
 
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneNoSpecEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneNoSpecEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneNoSpecEffect);
+		m_projShaders.pLightingFarPlaneShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingFarPlaneShadowEffect.decl);
+		m_sphereShaders.pLightingFarPlaneShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingFarPlaneShadowEffect.decl);
+		m_spotShaders.pLightingFarPlaneShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingFarPlaneShadowEffect.decl);
 
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingFarPlaneShadowEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingFarPlaneShadowEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingFarPlaneShadowEffect);
+		m_projShaders.pLightingNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingNoSpecEffect.decl);
+		m_sphereShaders.pLightingNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingNoSpecEffect.decl);
+		m_spotShaders.pLightingNoSpecEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingNoSpecEffect.decl);
 
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingNoSpecEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingNoSpecEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingNoSpecEffect);
-
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_projShaders.pLightingShadowEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_sphereShaders.pLightingShadowEffect);
-		pDevice->ChangePipelineStateRenderPass(renderPassHndl, m_spotShaders.pLightingShadowEffect);
+		m_projShaders.pLightingShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingShadowEffect.decl);
+		m_sphereShaders.pLightingShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingShadowEffect.decl);
+		m_spotShaders.pLightingShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingShadowEffect.decl);
 
 		m_pDestTarget = pDst;
 	}
@@ -337,7 +338,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	//if(uLightCount > 0)
 	{
 		// FIXME: We need to know if we need a shadow or not!!!
-		PipelineStateHndl& effect = m_baseDirPass;
+		PipelineStateHndl& effect = m_baseDirPass.state;
 
 		// We're not using the standard material system for directional lights as we need to bind multiple buffers
 		pContext->SetPipelineState(effect);
@@ -360,7 +361,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 			{
 				if (uShadowIndex > 0)
 				{
-					PipelineStateHndl& effect = m_additionalShadowPass[uLightIndex-1];
+					PipelineStateHndl& effect = m_additionalShadowPass[uLightIndex-1].state;
 					//(*it)->GetCascade()->PrepareRender(pContext);
 					pContext->SetPipelineState(effect);
 					m_pSys->DrawFullScreenQuad(pContext);
@@ -501,7 +502,7 @@ void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular, bool bShadow)
 {
 	// Fill the stencil buffer for the back faces
-	pContext->SetPipelineState(shaders.pStencilWriteEffect);
+	pContext->SetPipelineState(shaders.pStencilWriteEffect.state);
 	pContext->SetDescriptorSet(mesh.pDescriptorSet, 2);
 	DrawMesh(pContext, mesh);
 	
@@ -509,15 +510,15 @@ void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh
 	// Perform the lighting pass
 	if (bShadow)
 	{
-		pContext->SetPipelineState(shaders.pLightingShadowEffect);
+		pContext->SetPipelineState(shaders.pLightingShadowEffect.state);
 	}
 	else if (bSpecular)
 	{
-		pContext->SetPipelineState(shaders.pLightingEffect);
+		pContext->SetPipelineState(shaders.pLightingEffect.state);
 	}
 	else
 	{
-		pContext->SetPipelineState(shaders.pLightingNoSpecEffect);
+		pContext->SetPipelineState(shaders.pLightingNoSpecEffect.state);
 	}
 	pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 
@@ -530,16 +531,16 @@ void DeferredShading::DrawLightVolumeFarPlane(GFXContext* pContext, const MeshDa
 
 	if (bShadow)
 	{
-		pContext->SetPipelineState(shaders.pLightingFarPlaneShadowEffect);
+		pContext->SetPipelineState(shaders.pLightingFarPlaneShadowEffect.state);
 		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 	}
 	else if (bSpecular)
 	{
-		pContext->SetPipelineState(shaders.pLightingFarPlaneEffect);
+		pContext->SetPipelineState(shaders.pLightingFarPlaneEffect.state);
 	}
 	else
 	{
-		pContext->SetPipelineState(shaders.pLightingFarPlaneNoSpecEffect);
+		pContext->SetPipelineState(shaders.pLightingFarPlaneNoSpecEffect.state);
 	}
 
 	pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);

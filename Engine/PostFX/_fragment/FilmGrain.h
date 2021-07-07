@@ -19,7 +19,7 @@ public:
 	FilmGrain();
 	~FilmGrain();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -35,6 +35,7 @@ public:
 private:
 	PostFXSys*		m_pSys;
 
+	PipelineStateDecl		m_pipelineDecl;
 	RenderTarget*			m_pDestTarget;
 	usg::SamplerHndl		m_sampler;
 	ConstantSet				m_constantSet;

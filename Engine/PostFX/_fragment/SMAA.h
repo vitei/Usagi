@@ -20,7 +20,7 @@ public:
 	SMAA();
 	~SMAA();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -59,8 +59,9 @@ private:
 	PipelineStateHndl		m_lumaEdgeDetectEffect;
 	PipelineStateHndl		m_colorEdgeDetectEffect;
 	PipelineStateHndl		m_blendWeightEffect;
-	PipelineStateHndl		m_neighbourBlendEffect;
+	Pipeline				m_neighbourBlendEffect;
 	PipelineStateHndl		m_resolveEffect;
+
 
 	SamplerHndl				m_pointSampler;
 	SamplerHndl				m_linearSampler;

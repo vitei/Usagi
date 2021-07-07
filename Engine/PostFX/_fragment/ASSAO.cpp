@@ -200,7 +200,7 @@ namespace usg
 
 	}
 
-	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
+	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 	{
 		m_pSys = pSys;
 		// Get the handles for the various descriptor layouts
@@ -223,8 +223,8 @@ namespace usg
 		m_linearSampler = pDevice->GetSampler(linearDecl);
 
 		Vector2i halfSize;
-		halfSize.x = (pDst->GetWidth() + 1) / 2;
-		halfSize.y = (pDst->GetHeight() + 1) / 2;
+		halfSize.x = (pSys->GetFinalTargetWidth() + 1) / 2;
+		halfSize.y = (pSys->GetFinalTargetHeight() + 1) / 2;
 		Vector2i quarterSize;
 		quarterSize.x = (halfSize.x + 1) / 2;
 		quarterSize.y = (halfSize.y + 1) / 2;
@@ -426,15 +426,15 @@ namespace usg
 
 		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartApply");
-		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_nonSmartApplyEffect.decl = pipelineDecl;
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.Apply");
 
 
-		m_applyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_applyEffect.decl =pipelineDecl;
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartHalfApply");
-		m_nonSmartHalfApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_nonSmartHalfApplyEffect.decl = pipelineDecl;
 	}
 
 
@@ -602,9 +602,9 @@ namespace usg
 
 	void ASSAO::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	{
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartApplyEffect);
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_applyEffect);
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect);
+		m_nonSmartApplyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_nonSmartApplyEffect.decl);
+		m_applyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_applyEffect.decl);
+		m_nonSmartHalfApplyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect.decl);
 
 		m_pDest = pDst;
 
@@ -916,15 +916,15 @@ namespace usg
 
 		if (m_settings.QualityLevel < 0)
 		{
-			pContext->SetPipelineState(m_nonSmartHalfApplyEffect);
+			pContext->SetPipelineState(m_nonSmartHalfApplyEffect.state);
 		}
 		else if (m_settings.QualityLevel == 0)
 		{
-			pContext->SetPipelineState(m_nonSmartApplyEffect);
+			pContext->SetPipelineState(m_nonSmartApplyEffect.state);
 		}
 		else
 		{
-			pContext->SetPipelineState(m_applyEffect);
+			pContext->SetPipelineState(m_applyEffect.state);
 		}
 		m_pSys->DrawFullScreenQuad(pContext);
 

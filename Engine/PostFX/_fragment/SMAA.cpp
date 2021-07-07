@@ -96,10 +96,10 @@ namespace usg {
 
 	}
 
-	void SMAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+	void SMAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 	{
 		m_pSys = pSys;
-		m_pDestTarget = pDst;
+		m_pDestTarget = nullptr;
 
 		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 		SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
@@ -159,7 +159,7 @@ namespace usg {
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[1] = neighborHoodBlendDescriptors;
 		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
-		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_neighbourBlendEffect.decl = pipelineDecl;
 
 #if SMAA_REPROJECTION
 		// Resolve
@@ -169,8 +169,6 @@ namespace usg {
 #endif
 
 		m_constantSet.Init(pDevice, g_smaaConstantDef);
-
-		UpdateConstants(pDevice, pDst->GetWidth(), pDst->GetHeight());
 
 
 		m_lumaColorEdgeDescriptorSet.Init(pDevice, colorLumaEdgeDescriptors);
@@ -220,11 +218,7 @@ namespace usg {
 	{
 		if (pDst != m_pDestTarget)
 		{
-			// Need to update the pipeline state if the destination changes
-			PipelineStateDecl decl;
-			RenderPassHndl rpOut;
-			pDevice->GetPipelineDeclaration(m_neighbourBlendEffect, decl, rpOut);
-			m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), decl);
+			m_neighbourBlendEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_neighbourBlendEffect.decl);
 
 			m_pDestTarget = pDst;
 		}
@@ -312,7 +306,7 @@ namespace usg {
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->SetRenderTarget(m_pDestTarget);
-		pContext->SetPipelineState(m_neighbourBlendEffect);
+		pContext->SetPipelineState(m_neighbourBlendEffect.state);
 		pContext->SetDescriptorSet(&m_neighbourBlendDescriptorSet, 1);
 		m_pSys->DrawFullScreenQuad(pContext);
 

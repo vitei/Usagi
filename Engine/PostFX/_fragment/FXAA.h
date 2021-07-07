@@ -19,7 +19,7 @@ public:
 	FXAA();
 	~FXAA();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -30,12 +30,15 @@ public:
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
 
 private:
-	PostFXSys*		m_pSys;
+	PostFXSys*				m_pSys;
 
 	RenderTarget*			m_pDestTarget;
 	usg::SamplerHndl		m_sampler;
 	ConstantSet				m_constantSet;
 	Material				m_material;
+
+	PipelineStateDecl		m_decl;
+
 };
 
 }

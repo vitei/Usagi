@@ -294,46 +294,43 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	if(uInitFlags & PostFXSys::EFFECT_FXAA)
 	{
 		m_pFXAA = vnew(ALLOC_OBJECT) FXAA();
-		m_pFXAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
+		m_pFXAA->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pFXAA;
 	}
 	if (uInitFlags & PostFXSys::EFFECT_SMAA)
 	{
 		m_pSMAA = vnew(ALLOC_OBJECT) SMAA();
-		m_pSMAA->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_1]);
+		m_pSMAA->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSMAA;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_BLOOM)
 	{
 		m_pBloom = vnew(ALLOC_OBJECT) Bloom();
-		m_pBloom->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pBloom->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pBloom;
 	}
 	if (uInitFlags & PostFXSys::EFFECT_SKY_FOG)
 	{
 		m_pSkyFog = vnew(ALLOC_OBJECT) SkyFog();
-		m_pSkyFog->Init(pDevice, pResMgr, pParent, uInitFlags&PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0]);
+		m_pSkyFog->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSkyFog;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
 	{
 		m_pDeferredShading = vnew(ALLOC_OBJECT) DeferredShading();
-		RenderTarget* pDst = uInitFlags & PostFXSys::EFFECT_BLOOM ? &m_screenRT[TARGET_HDR] : &m_screenRT[TARGET_LDR_0];
-		m_pDeferredShading->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pDeferredShading->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_FILM_GRAIN)
 	{
 		m_pFilmGrain = vnew(ALLOC_OBJECT) FilmGrain();
-		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
-		m_pFilmGrain->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pFilmGrain->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pFilmGrain;
 	}
 	if(uInitFlags & PostFXSys::EFFECT_SSAO)
 	{
 		m_pSSAO = vnew(ALLOC_OBJECT) ASSAO();
-		RenderTarget* pDst = &m_screenRT[TARGET_LDR_0];
-		m_pSSAO->Init(pDevice, pResMgr, pParent, &m_screenRT[TARGET_LDR_0]);
+		m_pSSAO->Init(pDevice, pResMgr, pParent);
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSSAO;
 	}
 
