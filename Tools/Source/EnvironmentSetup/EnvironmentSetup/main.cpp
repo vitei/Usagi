@@ -114,12 +114,10 @@ int main(int argc, const char* argv[])
 		printf("OculusSDK not found in ../../OculusSdk, need to manually set OCULUS_SDK_DIR\n");
 	}
 
-	if (std::experimental::filesystem::exists("..\\..\\PhysX-3.4\\PhysX_3.4"))
+	if (std::experimental::filesystem::exists("Engine\\ThirdParty\\PhysX\\physx"))
 	{
 		std::string s1(currPath);
-		s1 = s1.substr(0, s1.find_last_of("\\"));
-		s1 = s1.substr(0, s1.find_last_of("\\"));
-		s1 += "\\PhysX-3.4\\PhysX_3.4";
+		s1 += "\\Engine\\ThirdParty\\PhysX\\physx";
 
 		if (RegSetValueEx(keyHandle, "PHYSX_DIR", 0, REG_SZ, (LPBYTE)s1.c_str(), (DWORD)s1.length() + 1) != ERROR_SUCCESS)
 		{
@@ -132,7 +130,7 @@ int main(int argc, const char* argv[])
 	}
 	else
 	{
-		printf("PhysX not found in ../../PhysX-3.4, need to manually set PHYSX_DIR\n");
+		printf("PhysX not found in ../../PhysX, need to manually set PHYSX_DIR\n");
 	}
 
 	if (RegSetValueEx(keyHandle, "USAGI_DIR", 0, REG_SZ, (LPBYTE)currPath, strlen(currPath) + 1) != ERROR_SUCCESS)
