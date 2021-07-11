@@ -57,7 +57,6 @@ public:
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
 	uint32 GetFinalTargetHeight(bool bOrient) { return m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
 	float GetFinalTargetAspect() { return  (float)m_colorBuffer[BUFFER_LDR_0].GetWidth() / (float)m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
-	void DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects);
 
 	// For setting up pipelines, will need the render pass in future
 	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& renderPass) const;
@@ -118,6 +117,7 @@ protected:
 	class FilmGrain*		m_pFilmGrain;
 	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
+	class SetSceneTarget*	m_pSetNoDepthTarget;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
 	vector<PostEffect*>		m_activeEffects;
 	list<PostEffect*>		m_customEffects;

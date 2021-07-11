@@ -480,10 +480,6 @@ namespace usg {
 			if (uLayer == RenderLayer::LAYER_OPAQUE_UNLIT)
 			{
 				renderContext.eRenderPass = RenderNode::RENDER_PASS_FORWARD;
-				if (m_pImpl->pPostFXSys)
-				{
-					m_pImpl->pPostFXSys->SetPostDepthDescriptors(pContext);
-				}
 				pContext->SetDescriptorSet(&m_pImpl->globalDescriptorsWithDepth[m_pImpl->eActiveViewType], 0);
 				renderContext.pGlobalDescriptors = &m_pImpl->globalDescriptorsWithDepth[m_pImpl->eActiveViewType];
 			}

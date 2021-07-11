@@ -111,10 +111,6 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 	return pTarget;
 }
 
-void PostFXSys::SetPostDepthDescriptors(GFXContext* pCtxt)
-{
-	m_platform.DepthWriteEnded(pCtxt, m_uEffectsEnabled);
-}
 
 void PostFXSys::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl)
 {

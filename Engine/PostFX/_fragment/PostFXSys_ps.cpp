@@ -10,6 +10,7 @@
 #include "FilmGrain.h"
 #include "ASSAO.h"
 #include "LinearDepth.h"
+#include "SetSceneTarget.h"
 #include "DeferredShading.h"
 #include "SkyFog.h"
 #include "Engine/Scene/SceneConstantSets.h"
@@ -88,6 +89,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pBloom = nullptr;
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
+	m_pSetNoDepthTarget = nullptr;
 	m_fPixelScale = 1.0f;
 	m_bHDROut = false;
 }
@@ -212,6 +214,12 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pDeferredShading = vnew(ALLOC_OBJECT) DeferredShading();
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
 	}
+	else
+	{
+		m_pSetNoDepthTarget = vnew(ALLOC_OBJECT) SetSceneTarget();
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pSetNoDepthTarget;
+	}
+
 	if(uInitFlags & PostFXSys::EFFECT_FILM_GRAIN)
 	{
 		m_pFilmGrain = vnew(ALLOC_OBJECT) FilmGrain();
@@ -657,6 +665,8 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	
 	if(m_pDeferredShading)
 		m_pDeferredShading->SetEnabled( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
+	if(m_pSetNoDepthTarget)
+		m_pSetNoDepthTarget->SetEnabled((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0);
 	if(m_pSkyFog)
 		m_pSkyFog->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SKY_FOG) != 0);
 	if(m_pBloom)
@@ -782,18 +792,6 @@ void PostFXSys_ps::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& tex)
 	}
 }
 
-
-void PostFXSys_ps::DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects)
-{
-	if (uActiveEffects & PostFXSys::EFFECT_DEFERRED_SHADING)
-	{
-		// Nothing to do, depth write ended
-		return;
-	}
-		
-	// FIXME: Need an intermediate target
-	ASSERT(false);
-}
 
 
 PipelineStateHndl PostFXSys_ps::GetDownscale4x4Pipeline(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass) const

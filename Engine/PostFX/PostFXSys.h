@@ -74,7 +74,6 @@ public:
 
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	void UpdateRTSize(GFXDevice* pDevice, Display* pDisplay);
-	void SetPostDepthDescriptors(GFXContext* pCtxt);
 
 	uint32 GetFinalTargetWidth(bool bOrient = true) { return m_platform.GetFinalTargetWidth(bOrient); }
 	uint32 GetFinalTargetHeight(bool bOrient = true) { return m_platform.GetFinalTargetHeight(bOrient); }
