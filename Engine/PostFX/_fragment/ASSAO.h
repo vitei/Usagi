@@ -26,8 +26,8 @@ public:
 	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc);
-	void SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc, ColorBuffer* pNorm);
+	void SetDepthSource();
+	void SetLinearDepthSource();
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;

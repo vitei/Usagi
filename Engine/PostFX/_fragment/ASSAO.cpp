@@ -613,8 +613,11 @@ namespace usg
 
 	void ASSAO::Update(Scene* pScene, float fElapsed)
 	{
-		const Camera* pCamera = pScene->GetViewContext(0)->GetCamera();
-		UpdateConstants(m_pDest->GetWidth(), m_pDest->GetHeight(), pCamera);
+		if(m_pDest)
+		{
+			const Camera* pCamera = pScene->GetViewContext(0)->GetCamera();
+			UpdateConstants(m_pDest->GetWidth(), m_pDest->GetHeight(), pCamera);
+		}
 	}
 	
 	void ASSAO::UpdateBuffer(usg::GFXDevice* pDevice)
@@ -688,26 +691,15 @@ namespace usg
 	}
 
 
-	void ASSAO::SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc)
+	void ASSAO::SetDepthSource()
 	{
-		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
-		m_prepareDepthDesc.UpdateDescriptors(pDevice);
 		m_bHasLinearDepth = false;
 	}
 
-	void ASSAO::SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc, ColorBuffer* pNorm)
+	void ASSAO::SetLinearDepthSource()
 	{
-		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
-		m_prepareDepthDesc.UpdateDescriptors(pDevice);
 		m_bHasLinearDepth = true;
 
-		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
-		{
-			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
-			{
-				m_genQDesc[i][uPass].SetImageSamplerPair(1, pNorm->GetTexture(), m_pointSampler);
-			}
-		}
 	}
 
 
@@ -939,10 +931,12 @@ namespace usg
 	{
 		switch(eInput)
 		{
-		//case PostEffect::Input::Depth:
+		case PostEffect::Input::Depth:
+			return !m_bHasLinearDepth;
 		case PostEffect::Input::Normal:
-		case PostEffect::Input::LinearDepth:
 			return true;
+		case PostEffect::Input::LinearDepth:
+			return m_bHasLinearDepth;
 
 		default:
 			return false;
@@ -968,11 +962,10 @@ namespace usg
 			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
 			m_prepareDepthDesc.UpdateDescriptors(pDevice);
 		}
-		if (eInput == PostEffect::Input::LinearDepth)
+		if (eInput == PostEffect::Input::LinearDepth && m_bHasLinearDepth)
 		{
 			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
 			m_prepareDepthDesc.UpdateDescriptors(pDevice);
-			m_bHasLinearDepth = true;	
 		}
 		if (eInput == PostEffect::Input::Normal)
 		{

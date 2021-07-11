@@ -79,7 +79,7 @@ protected:
 
 	void EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags);
 	bool NeedsStoring(memsize pass, PostEffect::Input eInput);
-	bool NeedsShaderRead(memsize pass, PostEffect::Input eInput);
+	bool NeedsShaderRead(sint32 pass, PostEffect::Input eInput);
 	void GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx);
 	int GetFlagForTarget(PostEffect::Input eTarget);
 	void ClearDynamicTargets(GFXDevice* pDevice);

@@ -126,7 +126,10 @@ void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
-		m_pDefaultEffects[i]->UpdateBuffer(pDevice);
+		if(m_pDefaultEffects[i]->GetEnabled())
+		{
+			m_pDefaultEffects[i]->UpdateBuffer(pDevice);
+		}
 	}
 }
 
@@ -305,7 +308,7 @@ bool PostFXSys_ps::CanReuseTarget(memsize pass)
 			return false;
 		}
 
-		if (NeedsShaderRead(pass, eTarget) != NeedsShaderRead(pass - 1, eTarget))
+		if (NeedsShaderRead((int)pass, eTarget) != NeedsShaderRead((int)(pass) - 1, eTarget))
 		{
 			return false;
 		}
@@ -424,21 +427,23 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 		if(iFinalHDRTarget < 0)
 		{
 			pBuffers.push_back( &m_colorBuffer[BUFFER_LDR_0] );
-			ldrIdx++;
 		}
 		else
 		{
 			pBuffers.push_back(&m_colorBuffer[BUFFER_HDR_0]);
-			hdrIdx++;
 		}
 		pBuffers.push_back(&m_colorBuffer[BUFFER_LIN_DEPTH]);
 
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
-		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1;
+		flags.uShaderReadFlags = 0;
+		if( NeedsShaderRead(-1, PostEffect::Input::Color)  )
+			flags.uShaderReadFlags |= RenderTarget::RT_FLAG_COLOR_0;
+		if (NeedsShaderRead(-1, PostEffect::Input::LinearDepth))
+			flags.uShaderReadFlags |= RenderTarget::RT_FLAG_COLOR_1;
 
 		if (uEffectFlags & PostFXSys::EFFECT_SSAO)
 		{
-			m_pSSAO->SetDepthSource(pDevice, &m_depthStencil);
+			m_pSSAO->SetDepthSource();
 		}
 	}
 	else
@@ -454,7 +459,7 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 
 		if (uEffectFlags & PostFXSys::EFFECT_SSAO)
 		{
-			m_pSSAO->SetLinearDepthSource(pDevice, &m_colorBuffer[BUFFER_LIN_DEPTH], &m_colorBuffer[BUFFER_NORMAL]);
+			m_pSSAO->SetLinearDepthSource();
 		}
 	}
 
@@ -495,7 +500,7 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 				flags.uStoreFlags |= GetFlagForTarget(eTarget);
 			}
 
-			if(NeedsShaderRead(i, eTarget))
+			if(NeedsShaderRead((int)i, eTarget))
 			{
 				flags.uShaderReadFlags |= GetFlagForTarget(eTarget);
 			}
@@ -624,16 +629,16 @@ int PostFXSys_ps::GetFlagForTarget(PostEffect::Input eTarget)
 	return 0;
 }
 
-bool PostFXSys_ps::NeedsShaderRead(memsize pass, PostEffect::Input eInput)
+bool PostFXSys_ps::NeedsShaderRead(sint32 pass, PostEffect::Input eInput)
 {
-	for (memsize i = pass + 1; i < m_activeEffects.size(); i++)
+	for (int i = pass + 1; i < (int)m_activeEffects.size(); i++)
 	{
 		// TODO: Optimise me, it's possible that a multi-pass effect would both read and write, so for now just set to true
 		if (m_activeEffects[i]->ReadsTexture(eInput))
 		{
 			return true;
 		}
-		else if (m_activeEffects[pass]->WritesTexture(eInput))
+		else if (m_activeEffects[i]->WritesTexture(eInput))
 		{
 			return false;
 		}
