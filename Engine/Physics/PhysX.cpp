@@ -7,6 +7,7 @@
 #include "Engine/Physics/Raycast.h"
 #include "PhysX.h"
 #include "PhysXMeshCache.h"
+
 #include "Engine/Physics/CollisionData.pb.h"
 #include "Engine/Physics/Signals/OnTrigger.h"
 #include "Engine/Physics/Signals/OnCollision.h"
@@ -68,11 +69,11 @@ namespace usg
 		void init()
 		{
 			ASSERT(!s_bInitialized);
-			s_physXInit.pFoundation = PxCreateFoundation(PX_FOUNDATION_VERSION, s_physXAllocator, s_physXErrorCallback);
+			s_physXInit.pFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, s_physXAllocator, s_physXErrorCallback);
 			s_physXInit.pPhysics = PxCreateBasePhysics(PX_PHYSICS_VERSION, *s_physXInit.pFoundation, physx::PxTolerancesScale(), false);
 			s_physXInit.pCPUDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 			auto cookingParams = physx::PxCookingParams(physx::PxTolerancesScale());
-			cookingParams.skinWidth = 0.05f;
+			//cookingParams.skinWidth = 0.05f;
 			cookingParams.areaTestEpsilon = 0.02f;
 			PxRegisterHeightFields(*s_physXInit.pPhysics);
 			s_physXInit.pCooking = PxCreateCooking(PX_PHYSICS_VERSION, *s_physXInit.pFoundation, cookingParams);
@@ -418,8 +419,9 @@ namespace usg
 		
 		// PhysX Scene
 		physx::PxSceneDesc sceneDesc(rtd.pPhysics->getTolerancesScale());
-		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_KINEMATIC_STATIC_PAIRS;
-		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_KINEMATIC_PAIRS;
+		sceneDesc.staticKineFilteringMode = physx::PxPairFilteringMode::eKEEP;
+		sceneDesc.kineKineFilteringMode = physx::PxPairFilteringMode::eKEEP;
+
 		sceneDesc.flags |= physx::PxSceneFlag::eENABLE_CCD;
 		sceneDesc.gravity = ToPhysXVec3(p->vGravity);
 		sceneDesc.cpuDispatcher = physics::s_physXInit.pCPUDispatcher;
