@@ -236,10 +236,10 @@ namespace usg{
 	{
 		static const uint32 AyatakaMagicNumber = utl::CRC32("AyatakaCollisionModel");
 
-		U8String tmpString;
-		tmpString.ParseString("Models/%s", szName);
+		char name[256];
+		str::ParseVariableArgsC(name, 256, "Models/%s", szName);
 
-		File dataFile(tmpString.CStr());
+		File dataFile(name);
 
 		ScratchRaw dataBuffer;
 		const size_t uFileSize = dataFile.GetSize();
