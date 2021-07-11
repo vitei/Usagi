@@ -82,6 +82,13 @@ void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	ASSERT(bSupport);
 	if (bSupport && m_uEffectsEnabled != uEffectFlags)
 	{
+		if( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0
+		&& (uEffectFlags & PostFXSys::EFFECT_SSAO) != 0 )
+		{
+			DEBUG_PRINT("Disabling SSAO, not currently suported without deferred");
+			uEffectFlags &= ~PostFXSys::EFFECT_SSAO;
+		}
+
 		m_platform.EnableEffects(pDevice, uEffectFlags);
 		m_uEffectsEnabled = uEffectFlags;
 	}
