@@ -160,7 +160,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;TOOL_BUILD_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(ProjectDir)..\ResourceLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4291;4267;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -196,7 +196,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;TOOL_BUILD;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\Ayataka;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(FBXSDK_DIR)\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\include;$(USAGI_DIR)\Engine\ThirdParty\EASTL\vitei\include;$(ProjectDir)..\ResourceLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4291;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>

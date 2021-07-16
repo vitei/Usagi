@@ -161,7 +161,7 @@
       <ForcedIncludeFiles>Forced.h</ForcedIncludeFiles>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -216,7 +216,7 @@ ruby.exe post_build.rb "$(TargetPath)" "$(TargetDir)\libfbxsdk.dll"</Command>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
