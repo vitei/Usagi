@@ -188,7 +188,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	case WM_MOUSEWHEEL:
 	{
-		Input::GetPlatform().RegisterMouseWheel(wparam);
+		Input::GetPlatform().RegisterMouseWheel((long)wparam);
 	}
 	break;
 
