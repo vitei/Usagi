@@ -106,7 +106,10 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	if (!bSkeletonOnly)
 	{
 		converter.Triangulate(scene, true);
-		converter.SplitMeshesPerMaterial(scene, true);
+		if(!bAsCollisionModel)
+		{
+			converter.SplitMeshesPerMaterial(scene, true);
+		}
 	}
 
 	aya::string overridePath = path;

@@ -1050,7 +1050,7 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 		info.elementType = m_activeVerts[0].elements[i].eElementType;
 		info.scaling = 1.0f;
 		info.attribute = m_activeVerts[0].elements[i].type;
-		strcpy_s(info.usageHint, sizeof(info.usageHint), m_activeVerts[0].elements[i].hint.c_str());
+		strcpy_s(info.usageHint, sizeof(info.usageHint), m_activeVerts[0].elements[i].hint);
 		info.columns = uColumnNum;
 		info.refIndex = cmdl.GetStreamNum() - 1;
 
@@ -1850,7 +1850,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 			for (int k = 0; k < uUVCount; ++k)
 			{
 				GetUV(currMesh, iVertexIndex, currMesh->GetTextureUVIndex(uTriangle, uTriangleVert), k, UV);
-				UV.hint = uvNames[k];
+				strcpy_s(UV.hint, uvNames[k]);
 				vertexOut.elements.push_back(UV);
 			}
 

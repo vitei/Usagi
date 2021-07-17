@@ -23,13 +23,15 @@ struct FBXVertexElement
 		{
 			elements[i] = 0.0f;
 		}
-		hint = inHint;
+		strcpy_s(hint, inHint.c_str());
 		type = inType;
 		uIndex = inIndex;
 		uCount = inCount;
 		eElementType = eInElementType;
 	}
-	std::string hint;
+
+	// Only raw types allowed as we CRC the contents
+	char hint[32];
 	usg::exchange::VertexAttribute type;
 	usg::VertexElementType eElementType;
 	uint32	uIndex;
@@ -86,7 +88,7 @@ struct TempVertex
 			uint32 controlPointIndex;
 			uint32 caluclatedHash;
 		};
-		uint64 cmpValue;
+		uint64 cmpValue = 0;
 	};
 	
 
