@@ -19,6 +19,7 @@ struct FBXVertexElement
 {
 	FBXVertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
 	{
+		memset(hint, 0, sizeof(hint));
 		for (uint32 i = 0; i < 4; i++)
 		{
 			elements[i] = 0.0f;
