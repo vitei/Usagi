@@ -99,7 +99,6 @@ The build process has not been improved or significantly modified and currently 
 
 1. **Optional** Install and build the **Oculus SDK for Windows**.  
    Not necessary to run, but required if you want to make a VR app  
-   Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
 1. From a command window run **Setup.bat**  
