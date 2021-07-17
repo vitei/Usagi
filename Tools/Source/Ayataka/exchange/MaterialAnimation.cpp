@@ -59,16 +59,16 @@ void MaterialAnimation::AddKeyFrame( const usg::exchange::CurveKeyFrame& keyFram
 
 void MaterialAnimation::FinalizeParsing( void )
 {
-	m_header.memberSetsNum = m_memberSets.size();
+	m_header.memberSetsNum = (int)m_memberSets.size();
 
 	for( auto& set : m_memberSets )
 	{
 		for( auto& member : set.members )
 		{
-			member.data.curveNum = member.curves.size();
+			member.data.curveNum = (int)member.curves.size();
 			for( auto& curve : member.curves )
 			{
-				curve.curve.keyFrameNum = curve.keyFrames.size();
+				curve.curve.keyFrameNum = (int)curve.keyFrames.size();
 			}
 		}
 	}
@@ -153,7 +153,7 @@ void MaterialAnimation::Export(const char* path)
 	for (auto set : m_memberSets)
 	{
 		usg::exchange::AnimationMemberSet memberSet;
-		memberSet.membersNum = set.members.size();
+		memberSet.membersNum = (int)set.members.size();
 		StoreProtocolBuffer(handle, &memberSet,
 			AnimationMemberSet_size,
 			usg::exchange::AnimationMemberSet_fields);
