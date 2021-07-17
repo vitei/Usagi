@@ -75,7 +75,7 @@ Getting up and running
 
 The build process has not been improved or significantly modified and currently has a number of dependencies which can not be directly included in an open source project.  Do *not* clone this project first as it should be checked out to a sub folder of a project which uses the engine.
 
-1. Install **Visual Studio 2017**.  
+1. Install **Visual Studio 2019**.  
    https://www.visualstudio.com/downloads/
 
 1. Install **Ruby 2.3.3**.  
@@ -87,16 +87,13 @@ The build process has not been improved or significantly modified and currently 
    Make sure that you select the option to add a path variable  
    https://www.python.org/downloads/
 
-1. Clone the **PhysX repository 3.4**.  
-   Requires accepting a EULA  
-   https://developer.nvidia.com/physx-source-github  
+1. Clone an Usagi based Project  
+   For example [UsagiTest](https://github.com/vitei/UsagiTest)  
+   Always clone Usagi repos recursively as we make heavy use of submodules  
+   **OR**  
+   [Create a new one](https://github.com/vitei/Usagi/wiki/Creating-a-New-Project)  
 
-1. Build the PhysX binaries  
-   [**PhysX Checkout Dir**]\PhysX_3.4\Source\compiler\vc15win64\PhysX.sln and compile for both debug and release  
-   Use the project located in Source\compiler\vc15win64  
-   Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
-
-1. **Optional** Install the **FBX SDK 2019.0 VS2015**.  
+1. **Optional** Install the **FBX SDK 2020.0.1 VS2017**.  
    Not necessary to run, but required to build the model converter (Ayataka)
    https://www.autodesk.com/products/fbx/overview
 
@@ -105,37 +102,27 @@ The build process has not been improved or significantly modified and currently 
    Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
    https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
-1. Clone an Usagi based Project  
-   For example [UsagiTest](https://github.com/vitei/UsagiTest)  
-   Always clone Usagi repos recursively as we make heavy use of submodules  
-   **OR**  
-   [Create a new one](https://github.com/vitei/Usagi/wiki/Creating-a-New-Project)  
-
 1. From a command window run **Setup.bat**  
    If gems fail to install confirm your ruby version  
    If python packages fail to install confirm your python version  
    Pay attention to which environmet variables EnvironmentSetup.exe failed to set  
    Note you must run environment setup whenever you switch to running a different Usagi project in order to set the correct USAGI_DIR env variable  
 
-1. Add the following environment variables either manually or by running EnvironmentSetup.exe  
-   MSBUILD_DIR -> [**Visual Studio Install Dir**]\MSBuild\15.0\Bin  
-   FBXSDK_DIR -> [**FBX SDK Install Dir**]\2019.0  
-   USAGI_DIR -> [**This checkout**]  
-
-1. Manually add the following environment variables  
-   EnvironmentSetup.exe may have been able to automatically find and add them if they were in ../../PhysX-3.4 and ../../OculusSDK  
-   PHYSX_DIR -> [**PhysX Checkout Dir**]\PhysX_3.4  
+1. **Optional** If you installed the oculus sdk manually add the following environment variable 
+   EnvironmentSetup.exe may have been able to automatically find and add them if they were in ../../OculusSDK  
    OCULUS_SDK_DIR -> [**Oculus SDK directory**]  
 
 1. Reset to ensure environment variable changes take effect  
 
 1. Follow the instructions in that projects README.md  
 
-Current Version 0.2.1
+Current Version 0.2.3
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
 v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.
+v0.2.2 enables per project post process effects
+v0.2.3 upgrades to PhysX 4.0 and simplifies installation
 
 
 Issues
@@ -164,4 +151,5 @@ License
 ----------------------
 
 Usagi its self is available under the MIT licence (see [LICENSE](LICENSE) in this repository). We would appreciate you letting us know if you make use of any part of the code or the design; but there is no requirement to do so.  
-Third party software falls under the MIT, Modified BSD and zLib licenses, the specifics of which are detailed in [Documents/License.md](Documents/License.md)
+It requires PhysX to run, any project making use of this project will need to be aware of this.
+Third party software falls under the PhysX, MIT, Modified BSD and zLib licenses, the specifics of which are detailed in [Documents/License.md](Documents/License.md)
