@@ -144,6 +144,11 @@ bool GFXDevice::ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, 
 	return true;
 }
 
+uint32 GFXDevice::GetColorTargetCount(RenderPassHndl pass)
+{
+	return m_pImpl->renderStates.GetColorTargetCount(pass);
+}
+
 RenderPassHndl GFXDevice::GetRenderPass(const RenderPassDecl& decl)
 {
 	return m_pImpl->renderStates.GetRenderPass(decl, this);

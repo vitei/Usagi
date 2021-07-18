@@ -71,12 +71,14 @@ namespace usg
 		
 		AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 		alphaDecl.bBlendEnable = true;
-		alphaDecl.SetColor0Only();
+		alphaDecl.SetColor0Only(); 
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_MAX;
 		alphaDecl.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlendAlpha = BLEND_FUNC_DST_ALPHA;
+
+		alphaDecl.uColorTargets = pDevice->GetColorTargetCount(renderPass);
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
 		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.DistanceField");

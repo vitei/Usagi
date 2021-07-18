@@ -56,6 +56,7 @@ public:
 	DescriptorSetLayoutHndl GetDescriptorSetLayout(const DescriptorDeclaration* pDecl);
 
 	void GetPipelineDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
+	uint32 GetColorTargetCount(RenderPassHndl pass);
 
 	void PostUpdate();
 	bool Is3DEnabled() const;

@@ -392,6 +392,23 @@ void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipelin
 }
 
 
+uint32 RenderStateMgr::GetColorTargetCount(const RenderPassHndl pass)
+{
+	uint32 uCount = 0;
+	const RenderPassInitData* pInit = m_pImpl->renderPasses.GetDeclaration(pass);
+	if (pInit)
+	{
+		for (uint32 i = 0; i < pInit->GetDecl().uAttachments; i++)
+		{
+			if( pInit->GetDecl().pAttachments[i].eAttachType == RenderPassDecl::ATTACH_COLOR )
+			{
+				uCount++;
+			}
+		}
+	}
+	return uCount;
+}
+ 
 void RenderStateMgr::FinishedStaticLoad()
 {
 	m_pImpl->alphaStates.FinishedStaticLoad();

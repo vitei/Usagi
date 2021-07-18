@@ -29,9 +29,11 @@ public:
 	bool					UsesBlendColor(AlphaStateHndl hndl);
 
 	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
+	uint32 GetColorTargetCount(const RenderPassHndl pass);
 
 	void FinishedStaticLoad();
 	void ClearDynamicResources(usg::GFXDevice* pDevice);
+
 
 private:
 	AlphaStateHndl			GetAlphaState(const AlphaStateDecl* pDecl, GFXDevice* pDevice);
