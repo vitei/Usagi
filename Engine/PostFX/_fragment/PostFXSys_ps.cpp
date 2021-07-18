@@ -507,7 +507,7 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 
 			if(m_activeEffects[i]->ReadsTexture(eTarget))
 			{
-				m_activeEffects[i]->SetTexture(pDevice, eTarget, GetTexture(eTarget, i<=iFinalHDRTarget, hdrIdx, ldrIdx));
+				m_activeEffects[i]->SetTexture(pDevice, eTarget, GetTexture(eTarget, (int)i<=iFinalHDRTarget, hdrIdx, ldrIdx));
 			}
 		
 		}
