@@ -565,7 +565,7 @@ void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*
 	else if(m_activeEffects[pass]->WritesTexture(PostEffect::Input::Color))
 	{	
 		// FIXME: OR HDR enabled at a system level
-		if(pass < iFinalHdr)
+		if((int)pass < iFinalHdr)
 		{	
 			// If it reads that texture as a source we need to swap the buffers
 			if (m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))
