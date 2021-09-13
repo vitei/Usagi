@@ -147,6 +147,7 @@ void DebugRender::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPas
 	pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Debug.Text");
 	m_textMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), textDescriptors);
 	m_textConstants.Init(pDevice, g_textConstantDef);
+	m_global2DConsts.Init(pDevice, g_global2DCBDecl);
 	m_textMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);//SF_MIN_MAG_POINT, SC_CLAMP);
 	m_textMaterial.SetTexture(0, m_font.GetTexture(), pDevice->GetSampler(pointDecl));
@@ -163,6 +164,9 @@ void DebugRender::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPas
 	m_posColMaterial.Init(pDevice, pDevice->GetPipelineState(renderPass, pipelineState), solidDescriptors);
 	m_posColMaterial.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_textConstants);
 
+	m_globalDescriptors.Init(pDevice, globalDesc);
+	m_globalDescriptors.SetConstantSetAtBinding(SHADER_CONSTANT_GLOBAL, &m_global2DConsts);
+
 	ASSERT(m_psRenderer==NULL);
 
 	m_psRenderer = this;
@@ -175,6 +179,7 @@ void DebugRender::Cleanup(GFXDevice* pDevice)
 	m_posColConstants.Cleanup(pDevice);
 	m_textMaterial.Cleanup(pDevice);
 	m_textConstants.Cleanup(pDevice);
+	m_global2DConsts.Cleanup(pDevice);
 	m_barVerts.Cleanup(pDevice);
 	m_charVerts.Cleanup(pDevice);
 	m_indices.Cleanup(pDevice);
@@ -208,6 +213,10 @@ void DebugRender::SetDrawArea(float fLeft, float fTop, float fWidth, float fHeig
 	pTxtConsts->vCharSize = vCharSize * pTxtConsts->mProj;
 	pTxtConsts->vTexCoordRng.Assign(0.0f, 0.0f, (1.0f/32.0f) * 8.0f, -((1.0f/256.0f)*6.0f));
 	m_textConstants.Unlock();
+
+	Global2DConstants* pGlobal2D = m_global2DConsts.Lock<Global2DConstants>();
+	pGlobal2D->mProjMat.Orthographic(fLeft, fLeft + fWidth, fTop + fHeight, fTop, 0.0f, 10.0f);
+	m_global2DConsts.Unlock();
 }
 
 // Values on the X range are a fraction of the debug draw area
@@ -329,9 +338,11 @@ void DebugRender::Updatebuffers(GFXDevice* pDevice)
 	}
 
 	
-	bool bUpdated = m_textConstants.UpdateData(pDevice);
-	if (bUpdated)
+	bool bUpdate = m_textConstants.UpdateData(pDevice);
+	m_global2DConsts.UpdateData(pDevice);
+	if(bUpdate)
 	{
+		m_globalDescriptors.UpdateDescriptors(pDevice);
 		m_textMaterial.UpdateDescriptors(pDevice);
 		m_posColMaterial.UpdateDescriptors(pDevice);
 	}
@@ -339,6 +350,11 @@ void DebugRender::Updatebuffers(GFXDevice* pDevice)
 
 void DebugRender::Draw(GFXContext* pContext)
 {
+	if(!m_uBarCount && !m_uCharCount)
+		return; 
+
+	pContext->SetDescriptorSet(&m_globalDescriptors, 0);
+
 	pContext->BeginGPUTag("DebugRender");
 	if(m_uBarCount)
 	{
