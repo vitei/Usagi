@@ -180,6 +180,7 @@ void DebugRender::Cleanup(GFXDevice* pDevice)
 	m_textMaterial.Cleanup(pDevice);
 	m_textConstants.Cleanup(pDevice);
 	m_global2DConsts.Cleanup(pDevice);
+	m_globalDescriptors.Cleanup(pDevice);
 	m_barVerts.Cleanup(pDevice);
 	m_charVerts.Cleanup(pDevice);
 	m_indices.Cleanup(pDevice);
