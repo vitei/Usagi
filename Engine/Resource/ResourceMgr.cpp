@@ -81,21 +81,21 @@ void ResourceMgr::Cleanup(usg::GFXDevice* pDevice)
 
 void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName)
 {
-	U8String name = szPath;
+	usg::string name = szPath;
 	name += szName;
 	name += ".pak";
-	ResourcePakHndl hndl = m_pImpl->resources.GetResourceHndl(name.CStr(), ResourceType::PAK_FILE);
+	ResourcePakHndl hndl = m_pImpl->resources.GetResourceHndl(name.c_str(), ResourceType::PAK_FILE);
 	// Only load if we don't already have one
 	if (!hndl)
 	{
-		if (File::FileStatus(name.CStr()) == FILE_STATUS_VALID)
+		if (File::FileStatus(name.c_str()) == FILE_STATUS_VALID)
 		{
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			ProfilingTimer loadTimer;
 			loadTimer.Start();
 #endif
 			PakFile* pakFile = vnew(ALLOC_OBJECT)PakFile;
-			pakFile->Load(pDevice, name.CStr());
+			pakFile->Load(pDevice, name.c_str());
 			usg::map<uint32, BaseResHandle>& resources = pakFile->GetResources();
 			for (auto& itr : resources)
 			{
@@ -105,7 +105,7 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 			m_pImpl->resources.AddResource(pakFile);
 #ifdef DEBUG_SHOW_PAK_LOAD_TIME
 			loadTimer.Stop();
-			DEBUG_PRINT("Loaded %s in %f milliseconds\n", name.CStr(), loadTimer.GetTotalMilliSeconds());
+			DEBUG_PRINT("Loaded %s in %f milliseconds\n", name.c_str(), loadTimer.GetTotalMilliSeconds());
 #endif
 		}
 	}
@@ -115,14 +115,13 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 
 EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 {
-	U8String u8Name = szEffectName;
 	usg::string stringName = szEffectName;
 
 	string packageName = stringName.substr(0, stringName.find_first_of("."));
-	LoadPackage(pDevice, m_effectDir.CStr(), packageName.c_str());
-	u8Name += ".fx";
+	LoadPackage(pDevice, m_effectDir.c_str(), packageName.c_str());
+	stringName += ".fx";
 
-	EffectHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::EFFECT);
+	EffectHndl pEffect = m_pImpl->resources.GetResourceHndl(stringName, ResourceType::EFFECT);
 
 	return pEffect;
 
@@ -131,7 +130,7 @@ EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 
 CollisionModelResHndl ResourceMgr::GetCollisionModel(const char* szFileName)
 {
-	U8String u8Name = szFileName;
+	usg::string u8Name = szFileName;
 	CollisionModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::COLLISION);
 
 	// TODO: Remove from the final build, should load in blocks
@@ -149,7 +148,7 @@ CollisionModelResHndl ResourceMgr::GetCollisionModel(const char* szFileName)
 
 CustomEffectResHndl ResourceMgr::GetCustomEffectRes(GFXDevice* pDevice, const char* szFileName)
 {
-	U8String u8Name = szFileName;
+	usg::string u8Name = szFileName;
 	CustomEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::CUSTOM_EFFECT);
 
 	// TODO: Remove from the final build, should load in blocks
@@ -167,7 +166,7 @@ CustomEffectResHndl ResourceMgr::GetCustomEffectRes(GFXDevice* pDevice, const ch
 
 ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 {
-	U8String u8Name = szFileName;
+	usg::string u8Name = szFileName;
 	ProtocolBufferFile* pFile = const_cast<ProtocolBufferFile*>(m_pImpl->resources.GetResource<ProtocolBufferFile>(u8Name, ResourceType::PROTOCOL_BUFFER));
 
 	if(!pFile)
@@ -188,7 +187,7 @@ ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 
 TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex, GPULocation eGPULocation)
 {
-	U8String u8Name = szTextureName;
+	usg::string u8Name = szTextureName;
 	TextureHndl	pTexture = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::TEXTURE);
 
 	// TODO: Remove from the final build, should load in blocks
@@ -233,8 +232,8 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 
 TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation)
 {
-	U8String path = m_textureDir + szTextureName;
-	return GetTextureAbsolutePath(pDevice, path.CStr(), true, eLocation);
+	usg::string path = m_textureDir + szTextureName;
+	return GetTextureAbsolutePath(pDevice, path.c_str(), true, eLocation);
 }
 
 
@@ -252,7 +251,7 @@ ModelResHndl ResourceMgr::GetModelAsInstance(GFXDevice* pDevice, const char* szM
 
 FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 {
-	U8String u8Name = m_fontDir + szFontName;
+	usg::string u8Name = m_fontDir + szFontName;
 	FontHndl pFont = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::FONT);
 	if( !pFont )
 	{
@@ -264,7 +263,7 @@ FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 		{
 			m_pImpl->resources.StartLoad();
 			Font* pNC = vnew(ALLOC_RESOURCE_MGR) Font;
-			pNC->Load(pDevice, this, u8Name.CStr());
+			pNC->Load(pDevice, this, u8Name.c_str());
 			pFont = m_pImpl->resources.AddResource(pNC);
 		}
 	}
@@ -275,24 +274,24 @@ FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 
 ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const char* szFileName)
 {
-	U8String path = "Particle/";
+	usg::string path = "Particle/";
 	path += szFileName;
 	path += ".pem";
-	ParticleEmitterResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::PARTICLE_EMITTER);
+	ParticleEmitterResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::PARTICLE_EMITTER);
 	if (!pEffect)
 	{
-		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
+		if (File::FileStatus(path.c_str()) == FILE_STATUS_VALID)
 		{
 			m_pImpl->resources.StartLoad();
 			ParticleEmitterResource* pResPtr = vnew(ALLOC_RESOURCE_MGR) ParticleEmitterResource;
 
-			bool b = pResPtr->Load(pDevice, path.CStr());
+			bool b = pResPtr->Load(pDevice, path.c_str());
 			ASSERT(b);
 			pEffect = m_pImpl->resources.AddResource(pResPtr);
 		}
 		else
 		{
-			DEBUG_PRINT("Particle emitter not found!!! %s\n", path.CStr());
+			DEBUG_PRINT("Particle emitter not found!!! %s\n", path.c_str());
 		}
 	}
 
@@ -302,23 +301,23 @@ ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const
 
 ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 {
-	U8String path = "Particle/";
+	usg::string path = "Particle/";
 	path += szFileName;
 	path += ".pfx";
-	ParticleEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.CStr(), ResourceType::PARTICLE_EFFECT);
+	ParticleEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::PARTICLE_EFFECT);
 	if (!pEffect)
 	{
-		if (File::FileStatus(path.CStr()) == FILE_STATUS_VALID)
+		if (File::FileStatus(path.c_str()) == FILE_STATUS_VALID)
 		{
 			m_pImpl->resources.StartLoad();
 			ParticleEffectResource* pNC = vnew(ALLOC_RESOURCE_MGR) ParticleEffectResource;
-			bool b = pNC->Load(path.CStr());
+			bool b = pNC->Load(path.c_str());
 			ASSERT(b);
 			pEffect = m_pImpl->resources.AddResource(pNC);
 		}
 		else
 		{
-			DEBUG_PRINT("Particle effect not found!!! %s\n", path.CStr());
+			DEBUG_PRINT("Particle effect not found!!! %s\n", path.c_str());
 		}
 	}
 

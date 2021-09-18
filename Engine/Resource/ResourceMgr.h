@@ -86,9 +86,9 @@ private:
 	PIMPL*						m_pImpl;
 
 	usg::string					m_modelDir;
-	U8String					m_textureDir;
-	U8String					m_effectDir;
-	U8String					m_fontDir;
+	usg::string					m_textureDir;
+	usg::string					m_effectDir;
+	usg::string					m_fontDir;
 	bool						m_bReloadIfDirty;
 	bool						m_bUseLODs;
 
