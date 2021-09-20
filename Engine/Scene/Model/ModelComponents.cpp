@@ -15,6 +15,7 @@ namespace usg
 	void InitModel(Component<ModelComponent>& p, ComponentLoadHandles& handles)
 	{
 		auto pModelMgr = handles.pModelMgr;
+		ASSERT(pModelMgr);
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(handles.pResourceMgr, p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);

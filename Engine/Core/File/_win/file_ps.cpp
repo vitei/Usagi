@@ -3,7 +3,7 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Core/File/File.h"
-#include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/string.h"
 #include "Engine/Core/stl/vector.h"
 #include "Engine/Memory/Mem.h"
 #include "File_ps.h"
@@ -36,9 +36,9 @@ FILE_STATUS File_ps::FileStatus(const char* szName, const FILE_TYPE eFileType)
 {
     
 	FILE *file;
-	U8String name(g_szFileDir[eFileType]);
+	usg::string name(g_szFileDir[eFileType]);
 	name += szName;
-	fopen_s(&file, name.CStr(), "rb");
+	fopen_s(&file, name.c_str(), "rb");
     if( (file!=NULL) )
     {
         fclose(file);
@@ -257,10 +257,10 @@ size_t File_ps::NumberOfFilesInDirectory(const char* szDirName, FILE_TYPE eFileT
 {
 	WIN32_FIND_DATA findFileData;
 	HANDLE hFind;
-	U8String fullPath = g_szFileDir[eFileType];
+	usg::string fullPath = g_szFileDir[eFileType];
 	fullPath += szDirName;
 	fullPath += "/*";
-	hFind = FindFirstFile(fullPath.CStr(), &findFileData);
+	hFind = FindFirstFile(fullPath.c_str(), &findFileData);
 	ASSERT(hFind != INVALID_HANDLE_VALUE);
 	size_t entryCount = 0;
 

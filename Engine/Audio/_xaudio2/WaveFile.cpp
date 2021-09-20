@@ -69,7 +69,7 @@ void WaveFile::InitRaw(const SoundFileDef* pDef, const void* pData, size_t rawDa
 
 void WaveFile::Init(const SoundFileDef* pDef, Audio* pAudio, const char* pszLocalizedSubdir)
 {
-	U8String name = "Audio/";
+	string name = "Audio/";
 	if (pDef->localized && pszLocalizedSubdir != NULL)
 	{
 		name += pszLocalizedSubdir;
@@ -78,9 +78,9 @@ void WaveFile::Init(const SoundFileDef* pDef, Audio* pAudio, const char* pszLoca
 	name += pDef->filename;
 	name += ".wav";
 
-	WaveFileReader reader(name.CStr());
+	WaveFileReader reader(name.c_str());
 
-	ProcessWaveFile(reader, pDef, name.CStr(), pAudio);
+	ProcessWaveFile(reader, pDef, name.c_str(), pAudio);
 }
 
 void WaveFile::BindToSoundObject(class SoundObject* pSoundObject, bool bPositional)

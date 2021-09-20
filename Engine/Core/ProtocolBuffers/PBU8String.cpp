@@ -5,7 +5,7 @@
 
 #include "Engine/Common/Common.h"
 #include "PBU8String.h"
-#include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/string.h"
 #include <pb_decode.h>
 #include <pb_encode.h>
 
@@ -15,7 +15,7 @@ namespace usg
 	struct PBU8String<BUFFER_SIZE>::WorkingData
 	{
 		ScratchRaw m_scratch;
-		U8String m_string;
+		usg::string m_string;
 	};
 
 	template<int BUFFER_SIZE>
@@ -37,7 +37,7 @@ namespace usg
 			if (!success) { return false; }
 
 			// copy what we've read...
-			pData->m_string += U8String((char*)pScratch);
+			pData->m_string += usg::string((char*)pScratch);
 			// and prepare the buffer for the next interation
 			memset(pScratch, 0, readSize);
 		}
@@ -52,7 +52,7 @@ namespace usg
 		bool success = false;
 		if (pb_encode_tag_for_field(stream, field))
 		{
-			success = pb_encode_string(stream, (uint8_t*)self->Get().CStr(), self->Get().Length());
+			success = pb_encode_string(stream, (uint8_t*)self->Get().c_str(), self->Get().length());
 		}
 
 		return success;
@@ -66,13 +66,13 @@ namespace usg
 	}
 
 	template<int BUFFER_SIZE>
-	U8String& PBU8String<BUFFER_SIZE>::Get()
+	usg::string& PBU8String<BUFFER_SIZE>::Get()
 	{
 		return m_data->m_string;
 	}
 
 	template<int BUFFER_SIZE>
-	const U8String& PBU8String<BUFFER_SIZE>::Get() const
+	const usg::string& PBU8String<BUFFER_SIZE>::Get() const
 	{
 		return m_data->m_string;
 	}

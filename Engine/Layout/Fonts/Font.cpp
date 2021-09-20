@@ -41,21 +41,20 @@ namespace usg
 		m_name = filename;
 		SetupHash( m_name.CStr() );
 		
-		U8String szFilename = filename;
+		usg::string szFilename = filename;
 
 		m_descriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(m_sDescriptorDecl));
 
 
-		U8String szTemp = "";
-		szTemp.ParseString("%s.vpb", szFilename.CStr());
+		usg::string szTemp = szFilename + ".vpb";
 
 		// @todo it may actually not be so hot to use usg::text::FontDefinition at runtime. investigate.
-		ProtocolBufferFile viteifont(szTemp.CStr());
+		ProtocolBufferFile viteifont(szTemp.c_str());
 		bool bReadSucceeded = viteifont.Read(&m_fontDefinition);
 		ASSERT(bReadSucceeded);
 
-		szTemp.ParseString("%s", szFilename.CStr());
-		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.CStr());
+		szTemp = szFilename;
+		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.c_str());
 		ASSERT(m_pTexture.get() != NULL);
 		SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		pointDecl.eAnisoLevel = usg::ANISO_LEVEL_16;

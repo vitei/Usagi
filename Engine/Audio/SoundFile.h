@@ -9,7 +9,6 @@
 #include "Engine/Audio/AudioBank.pb.h"
 #include "Engine/Core/stl/string.h"
 #include "Engine/Core/stl/vector.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg
 {
