@@ -7,7 +7,6 @@
 
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg {
 

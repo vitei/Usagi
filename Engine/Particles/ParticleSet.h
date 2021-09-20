@@ -8,7 +8,6 @@
 
 namespace usg
 {
-	class U8String;
 	class ParticleEffect;
 	class GFXDevice;
 

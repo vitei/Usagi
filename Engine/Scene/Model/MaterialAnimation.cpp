@@ -26,10 +26,10 @@ namespace usg
 
 	bool MaterialAnimation::Init(const char* szAnimName)
 	{
-		U8String fileName = szAnimName;
+		string fileName = szAnimName;
 		fileName += +".vmata";
 		m_name = szAnimName;
-		m_pAnimResource = ResourceMgr::Inst()->GetMaterialAnimation(fileName.CStr());
+		m_pAnimResource = ResourceMgr::Inst()->GetMaterialAnimation(fileName.c_str());
 		if (!m_pAnimResource)
 			return false;
 

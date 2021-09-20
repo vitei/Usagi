@@ -86,8 +86,8 @@ private:
 	uint32					m_uFileNameCount;
 	bool					m_bSubDirectories;
 
-	usg::U8String			m_cmpExt;
-	usg::U8String			m_directory;
+	usg::string				m_cmpExt;
+	usg::string				m_directory;
 	
 };
 

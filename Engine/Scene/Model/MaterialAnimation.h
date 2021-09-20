@@ -30,13 +30,13 @@ public:
 	
 	void Update(float fElapsed);
 
-	const U8String& GetName() { return m_name; }
+	const string& GetName() { return m_name; }
 
 	void ApplyToModel(Model& model);
 
 private:
-	U8String							m_name;
-	MaterialAnimationResHndl			m_pAnimResource;
+	string							m_name;
+	MaterialAnimationResHndl		m_pAnimResource;
 };
 
 }

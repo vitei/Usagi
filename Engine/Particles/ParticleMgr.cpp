@@ -264,9 +264,9 @@ void ParticleMgr::CreateInstances(GFXDevice* pDevice, uint32 uInstances)
 				usg::string srcName = ribbon.textureName;
 				if (str::StartsWithToken(ribbon.textureName, "ribbon/"))
 				{
-					srcName.RemovePath();	// FIXME: Hack for old particle data
+					str::RemovePath(srcName);	// FIXME: Hack for old particle data
 				}
-				srcName = U8String("ribbon/") + srcName;
+				srcName = usg::string("ribbon/") + srcName;
 				usg::ResourceMgr::Inst()->GetTexture(pDevice, srcName.CStr());
 			}
 		}

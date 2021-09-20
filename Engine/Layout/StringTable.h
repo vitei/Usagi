@@ -8,7 +8,6 @@
 
 #include "Engine/Core/Containers/StringPointerHash.h"
 #include "Engine/Core/Singleton.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Layout/Keystrings.pb.h"
 #include "Engine/System/Localization.pb.h"
 
@@ -30,7 +29,7 @@ public:
 	KeyString Find(const char* szKey) const;
 	KeyString Find(uint32 crc) const;
 private:
-	void CreatePathToStringsFile(U8String& path, const char* szBasename,
+	void CreatePathToStringsFile(usg::string& path, const char* szBasename,
 	                             Region region, Language language);
 	StringPointerHash<KeyStringDef*> m_hashtable;
 	StringPointerHash<TextStyle*> m_styleHashtable;

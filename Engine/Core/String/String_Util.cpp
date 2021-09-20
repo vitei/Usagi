@@ -191,7 +191,7 @@ namespace str
 		}
 	}
 
-	void TruncateExtention(usg::string& string)
+	void TruncateExtension(usg::string& string)
 	{
 		for (memsize i = string.length(); i > 0; i--)
 		{
@@ -213,6 +213,20 @@ namespace str
 				break;
 			}
 		}
+	}
+
+	uint32 GetByteCount(const char* szText)
+	{
+		// Assume the first character is a starter
+		szText++;
+		uint32 uCount = 1;
+		// Add characters where it isn't
+		while ((*szText & 0x80) != 0 && (*szText & 0xc0) != 0xc0 && *szText != '\0')
+		{
+			szText++;
+			uCount++;
+		}
+		return uCount;
 	}
 
 }

@@ -8,7 +8,6 @@
 #include "Engine/Scene/Model/MaterialAnimation.pb.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Core/Utility.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg {
 

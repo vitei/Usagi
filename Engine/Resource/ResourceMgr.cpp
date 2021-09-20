@@ -435,14 +435,14 @@ void ResourceMgr::ReportMemoryUsage()
 	qsort(pReports, uCount, sizeof(Report), CompareResources);
 
 	File fileOut("FileUsage.txt", FILE_ACCESS_WRITE, FILE_TYPE_DEBUG_DATA);
-	U8String textOut;
+	string textOut;
 	for(uint32 i=0; i<uCount; i++)
 	{
-		U8String text;
-		text.ParseString("%s: %u\n", pReports[i].name, pReports[i].uSize);
+		string text;
+		text = str::ParseString("%s: %u\n", pReports[i].name, pReports[i].uSize);
 		textOut += text;
 	}
-	fileOut.Write(textOut.Length() + 1, (void*)textOut.CStr());
+	fileOut.Write(textOut.length() + 1, (void*)textOut.c_str());
 }
 
 void ResourceMgr::DebugPrintTimings()

@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Core/String/U8String.h"
 #include "Engine/Layout/Fonts/Text.h" 
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXContext.h"

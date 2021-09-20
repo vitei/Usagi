@@ -146,10 +146,10 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	m_uBoneNodes = 0;
 
 	m_bInstance = false;// bInstance;
-	U8String path = szFileName;
-	path.TruncateToPath();
+	string path = szFileName;
+	str::TruncateToPath(path);
 
-	ResourceMgr::Inst()->LoadPackage(pDevice, path.CStr(), "resources.pak");
+	ResourceMgr::Inst()->LoadPackage(pDevice, path.c_str(), "resources.pak");
 
 	File modelFile(szFileName, FILE_ACCESS_READ );
 	
@@ -203,7 +203,7 @@ void ModelResource::Cleanup(GFXDevice* pDevice)
 }
 
 
-void ModelResource::SetupMeshes( const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
+void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
 {
 	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>( p );
 
@@ -388,7 +388,7 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 }
 
 
-void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
+void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
 {
 	uint8* pT = reinterpret_cast<uint8*>( pHeader );
 
@@ -573,7 +573,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 			{
 				usg::string pathName = m_name;
 				pathName = pathName.substr( 0, pathName.find_last_of("\\/") + 1);
-				//pathName = U8String("models/") + pathName; 
+
 				::usg::exchange::Texture& texture = pMaterial->textures[i];
 				const char* pTextureName = &texture.textureName[0];
 				pathName += pTextureName;
@@ -624,9 +624,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	pipelineState.layout.descriptorSets[0] = globalDescriptors;
 
 	// FIXME: Render set per type
-	U8String effectPath = pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEPTH].effectName;
+	string effectPath = pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEPTH].effectName;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.c_str());
 
 	alphaDecl.bBlendEnable = false;
 	uint32 uRenderMask = alphaDecl.uColorMask[0];
@@ -638,9 +638,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEPTH, pipelineState);
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEPTH].pipeline = pipelineState;
 
-	U8String omniDepthName = pMaterial->renderPasses[usg::exchange::Material_RenderPass_OMNI_DEPTH].effectName;
+	string omniDepthName = pMaterial->renderPasses[usg::exchange::Material_RenderPass_OMNI_DEPTH].effectName;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.CStr());
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.c_str());
 
 	globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_omniShadowGlobalDescriptorDecl);
 	pipelineState.layout.descriptorSets[0] = globalDescriptors;

@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include "Engine/Core/String/String_Util.h"
 #include "Engine/HID/Mouse.h"
 #include "Engine/HID/Input.h"
 #include "EffectGroup.h"
@@ -29,10 +30,10 @@ void RibbonInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGrou
 {
 	usg::Vector2f vPos(0.0f, 0.0f);
 	usg::Vector2f vScale(300.f, 170.f);
-	usg::U8String name;
+	usg::string name;
 	m_pParent = pParent;
-	name.ParseString("Ribbon %d", uIndex);
-	m_emitterWindow.Init(name.CStr(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	name = str::ParseString("Ribbon %d", uIndex);
+	m_emitterWindow.Init(name.c_str(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
 	pParent->GetWindow().AddItem(&m_emitterWindow);
 	m_removeTrailButton.Init("Remove Trail");
 
@@ -91,14 +92,14 @@ bool RibbonInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 	bAltered |= Compare(m_emitterData.fLifeTime, m_lifeTime.GetValue(0));
 	bAltered |= Compare(m_emitterData.fLineWidth, m_scale.GetValue(0));
 
-	usg::U8String emitterName = m_emitterData.textureName;
+	usg::string emitterName = m_emitterData.textureName;
 	emitterName += ".dds";
 	if(emitterName != m_textureSelect.GetSelectedName())
 	{
 		m_pParent->GetEffect().RemoveEmitter(&m_trail);
 		emitterName = m_textureSelect.GetSelectedName();
-		emitterName.TruncateExtension();
-		str::Copy(m_emitterData.textureName, emitterName.CStr(), sizeof(m_emitterData.textureName));
+		str::TruncateExtension(emitterName);
+		str::Copy(m_emitterData.textureName, emitterName.c_str(), sizeof(m_emitterData.textureName));
 		m_pParent->Reset(pDevice);
 		UpdateInstanceMatrix(pDevice);
 	}
@@ -118,9 +119,9 @@ void RibbonInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonD
 {
 	if(pInstance==NULL)
 	{
-		usg::U8String selectName = m_textureSelect.GetSelectedName();
-		selectName.TruncateExtension();
-		str::Copy(m_emitterData.textureName, selectName.CStr(), sizeof(m_emitterData.textureName));
+		usg::string selectName = m_textureSelect.GetSelectedName();
+		str::TruncateExtension(selectName);
+		str::Copy(m_emitterData.textureName, selectName.c_str(), sizeof(m_emitterData.textureName));
 		m_emitterData.vPosition = usg::Vector3f::ZERO;
 		m_emitterData.cStartColor.Assign(1.0f, 1.0f, 1.0f, 1.0f);
 		m_emitterData.cEndColor.Assign(0.0f, 0.0f, 0.0f, 0.0f);

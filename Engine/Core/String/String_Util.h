@@ -11,6 +11,7 @@ namespace str
 {
 	char ToUpper(char src);
 	char ToLower(char src);
+	uint32 GetByteCount(const char* szText);
 	void ParseVariableArgs(char* pszDest, uint32 uMaxLen, const char* szSrc, va_list& args );
 	int ReadVariableArgs(const char* pszSrc, const char* szFormat, va_list& args);
 	void ParseVariableArgsC(char* pszDest, uint32 uMaxLen, const char* szSrc, ...);
@@ -29,8 +30,9 @@ namespace str
 
 	usg::string ParseString(const char* szSrc, ...);
 	void TruncateToPath(usg::string &dest);
-	void TruncateExtention(usg::string& string);
+	void TruncateExtension(usg::string& string);
 	void RemovePath(usg::string& string);
+
 }
 
 

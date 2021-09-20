@@ -158,7 +158,6 @@ bool InitInput()
 bool InitEngine(const char** dllModules, uint32 uModuleCount)
 {
 	mem::InitialiseDefault();
-	U8String::InitPool();
 	InitListMemory();
 	File::InitFileSystem();
 
@@ -201,7 +200,6 @@ void EngineCleanup()
 	Input::Cleanup();
 	File::FinalizeFileSystem();
 	GFX::Reset();
-	U8String::CleanupPool();
 	ComponentSystemInputOutputsSharedBase::Cleanup();
 	usg::ModuleManager::Inst()->Cleanup();
 	mem::Cleanup();

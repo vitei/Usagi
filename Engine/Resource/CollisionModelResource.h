@@ -10,7 +10,6 @@
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Maths/AABB.h"
 #include "Engine/Core/stl/vector.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace vmdc {
 struct Header;

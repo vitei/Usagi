@@ -3,6 +3,7 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/HID/Input.h"
+#include "Engine/Core/String/String_Util.h"
 #include "Engine/HID/Mouse.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Device/GFXContext.h"
@@ -265,12 +266,12 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 
 	if(bUpdated)
 	{
-		usg::U8String emitterName = m_emitterWindow.GetEditFileName();
+		usg::string emitterName = m_emitterWindow.GetEditFileName();
 		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
-		if(emitterName.Length() > 0)
+		if(emitterName.length() > 0)
 		{
-			emitterName.TruncateExtension();
-			m_effectGroup.EmitterModified(pDevice, emitterName.CStr(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
+			usg::str::TruncateExtension(emitterName);
+			m_effectGroup.EmitterModified(pDevice, emitterName.c_str(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
 		}
 	}
 	

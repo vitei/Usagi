@@ -2,6 +2,7 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/ViewContext.h"
+#include "Engine/Core/String/String_Util.h"
 #include "EffectGroup.h"
 #include "EmitterInstance.h"
 #include "ParticleEditor.h"
@@ -24,10 +25,10 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 {
 	usg::Vector2f vPos(0.0f, 0.0f);
 	usg::Vector2f vScale(300.f, 190.f);
-	usg::U8String name;
+	usg::string name;
 	m_pParent = pParent;
-	name.ParseString("Effect %d", uIndex);
-	m_emitterWindow.Init(name.CStr(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
+	name = str::ParseString("Effect %d", uIndex);
+	m_emitterWindow.Init(name.c_str(), vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD);
 	pParent->GetWindow().AddItem(&m_emitterWindow);
 	m_removeEmitterButton.Init("Remove Emitter");
 	m_loadEmitterButton.Init("Load");
@@ -103,7 +104,7 @@ bool EmitterInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 
 	m_emitterWindow.SetSize(m_parameterWindow.GetCollapsed() ? usg::Vector2f(300.f, 60.f) : usg::Vector2f(300.f, 220.f));
 
-	usg::U8String emitterName = m_emitterData.emitterName;
+	usg::string emitterName = m_emitterData.emitterName;
 	emitterName += ".vpb";
 	if(m_changeAssetButton.GetValue())
 	{
@@ -118,8 +119,8 @@ void EmitterInstance::LoadEmitter(usg::GFXDevice* pDevice, const char* szEmitter
 {
 	m_pParent->GetEffect().RemoveEmitter(&m_emitter);
 	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, szEmitterName);
-	usg::U8String emitterName = szEmitterName;
-	emitterName.TruncateExtension();
+	usg::string emitterName = szEmitterName;
+	str::TruncateExtension(emitterName);
 	str::Copy(m_emitterData.emitterName, emitterName.CStr(), sizeof(m_emitterData.emitterName));
 	m_emitterName.SetText(szEmitterName);
 	m_pParent->Reset(pDevice);
@@ -130,9 +131,9 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 {
 	if(pInstance==NULL)
 	{
-		usg::U8String selectName = m_emitterName.GetName();
-		selectName.TruncateExtension();
-		str::Copy(m_emitterData.emitterName, selectName.CStr(), sizeof(m_emitterData.emitterName));
+		usg::string selectName = m_emitterName.GetName();
+		str::TruncateExtension(selectName);
+		str::Copy(m_emitterData.emitterName, selectName.c_str(), sizeof(m_emitterData.emitterName));
 		m_emitterData.vPosition = usg::Vector3f::ZERO;
 		m_emitterData.vRotation = usg::Vector3f::ZERO;
 		m_emitterData.vScale = usg::Vector3f::ONE;

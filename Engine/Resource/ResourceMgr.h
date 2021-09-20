@@ -10,7 +10,6 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg{
 

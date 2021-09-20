@@ -632,7 +632,7 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 	ASSERT(m_bDynamic);
 	ASSERT(pOverrideTex.get()!=NULL);
 
-	U8String texNameU8(szTextureName);
+	string texNameU8(szTextureName);
 
 	bool bFound = false;
 	UNUSED_VAR(bFound);
@@ -646,8 +646,8 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 			if(pOrigTex.get() != NULL)
 			{
 				SamplerHndl origSamp = pSrcMesh->samplers[uTex];
-				U8String cmpName = pOrigTex->GetName().c_str();
-				cmpName.RemovePath();
+				string cmpName = pOrigTex->GetName().c_str();
+				str::RemovePath(cmpName);
 				if ((cmpName == texNameU8))
 				{
 					pMaterial->SetImageSamplerPairAtBinding(uTex, pOverrideTex, origSamp);

@@ -193,9 +193,9 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 	m_fileList.Update();
 	for(uint32 i=0; i<m_fileList.GetFileCount(); i++)
 	{
-		usg::U8String name = "particles/";
+		usg::string name = "particles/";
 		name += m_fileList.GetFileName(i);
-		name.TruncateExtension();
+		str::TruncateExtension(name);
 		if(name == textureVars.name)
 		{
 			m_fileListBox.SetSelected(i);
@@ -252,10 +252,10 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 	{
 		m_textureName = m_fileList.GetFileName(m_fileListBox.GetSelected());
 		usg::Vector2f vTextureSize(64.f, 64.f);
-		usg::U8String texName = "particles/";
+		usg::string texName = "particles/";
 		texName += m_fileList.GetFileName(m_fileListBox.GetSelected());
 		// The resource manager adds the extension
-		texName.TruncateExtension();
+		texName = str::TruncateExtension();
 		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.CStr(), usg::GPU_LOCATION_STANDARD);
 		vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 		m_texture.SetTexture(pDevice, m_pTexture);
