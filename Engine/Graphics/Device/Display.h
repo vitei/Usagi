@@ -56,6 +56,7 @@ public:
 	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
 
 	void SetVSyncMode(VSyncMode eVsync) { m_platform.SetVSyncMode(eVsync); }
+	bool HasHDRSupport() const { return m_platform.HasHDRSupport(); }
 
 	Display_ps& GetPlatform() { return m_platform; }
 	WindHndl GetHandle() const { return m_window; }

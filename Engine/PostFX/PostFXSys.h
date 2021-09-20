@@ -41,7 +41,8 @@ public:
 		EFFECT_FILM_GRAIN = (1<<6),
 		EFFECT_SSAO = (1<<7),
 		// This post effect is being used to create an intermediate target
-		EFFECT_OFFSCREEN_TARGET = (1<<8)
+		EFFECT_OFFSCREEN_TARGET = (1<<8),
+		EFFECT_FINAL_TARGET_HDR = (1 << 9)
 	};
 
 	PostFXSys();

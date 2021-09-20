@@ -74,6 +74,7 @@ public:
 	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
+	ColorFormat GetUSGFormat(VkFormat eFormat);
 
 	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
 	bool AllocateMemory(VkMemAllocator* pAllocInOut);

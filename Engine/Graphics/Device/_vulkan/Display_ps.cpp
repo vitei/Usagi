@@ -41,6 +41,7 @@ Display_ps::Display_ps()
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
 	m_bRTShouldLoad = false;
+	m_bHDR = false;
 	m_eVsync = VSYNC_MODE_MAILBOX;
 }
 
@@ -182,7 +183,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	rpDecl.uAttachments = 1;
 	rpDecl.uSubPasses = 1;
 	rpDecl.pSubPasses = &subPass;
-	attach.format.eColor = CF_RGBA_8888;	// FIXME: Match the true format
+	attach.format.eColor = m_eSwapChainFormat;	// FIXME: Match the true format
 	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
 
 	attach.eLoadOp = usg::RenderPassDecl::LOAD_OP_LOAD_MEMORY;
@@ -191,6 +192,7 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 
 	InitFrameBuffers(pDevice);
 }
+
 
 void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 {
@@ -239,14 +241,40 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	// the surface has no preferred format.  Otherwise, at least one
 	// supported format will be returned.
 	VkFormat eFormat;
+	VkColorSpaceKHR colorSpace;
 	if (formatCount == 1 && surfFormats[0].format == VK_FORMAT_UNDEFINED)
 	{
 		eFormat = VK_FORMAT_B8G8R8A8_UNORM;
+		colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 	}
 	else
 	{
-		ASSERT(formatCount >= 1);
-		eFormat = surfFormats[0].format;
+		int iBestFormat = 0;
+		#if 0
+		m_bHDR = false;
+		for (uint32 i = 0; i < formatCount; i++)
+		{
+			if (devicePS.GetUSGFormat(surfFormats[i].format) == CF_INVALID)
+			{
+				continue;
+			}
+			if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+			{
+				iBestFormat = i;
+				m_bHDR = true;
+			}
+			else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT &&
+				(iBestFormat == i) ||  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+			{
+				iBestFormat = i;
+				m_bHDR = true;
+			}
+		}
+		#endif
+		eFormat = surfFormats[iBestFormat].format;
+		colorSpace = surfFormats[iBestFormat].colorSpace;
+		m_eSwapChainFormat = devicePS.GetUSGFormat(eFormat);
+
 	}
 
 	VkSurfaceCapabilitiesKHR surfCapabilities;
@@ -327,7 +355,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	swap_chain.presentMode = swapchainPresentMode;
 	swap_chain.oldSwapchain = NULL;
 	swap_chain.clipped = true;
-	swap_chain.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+	swap_chain.imageColorSpace = colorSpace;
 	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	swap_chain.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swap_chain.queueFamilyIndexCount = 0;
@@ -346,6 +374,34 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	ASSERT(res == VK_SUCCESS);
 
 	m_swapChainImageFormat = eFormat;
+
+	#if 0
+	VkHdrMetadataEXT metadata = {};
+	metadata.sType = VK_STRUCTURE_TYPE_HDR_METADATA_EXT;
+	metadata.displayPrimaryRed.x = 0.708f;
+	metadata.displayPrimaryRed.y = 0.292f;
+	metadata.displayPrimaryGreen.x = 0.170f;
+	metadata.displayPrimaryGreen.y = 0.797f;
+	metadata.displayPrimaryBlue.x = 0.131f;
+	metadata.displayPrimaryBlue.y = 0.046f;
+	metadata.whitePoint.x = 0.003127f;
+	metadata.whitePoint.y = 0.0003290f;
+	metadata.maxLuminance = 1000.0f;
+	metadata.minLuminance = 0.001f;
+	metadata.maxContentLightLevel = 2000.0f;
+	metadata.maxFrameAverageLightLevel = 500.0f;
+
+	//vkSetHdrMetadataEXT(devicePS.GetVKDevice(), 1, &m_swapChain, &metadata);
+
+	PFN_vkSetHdrMetadataEXT setHDRMetadata = VK_NULL_HANDLE;
+	setHDRMetadata = (PFN_vkSetHdrMetadataEXT)vkGetDeviceProcAddr(devicePS.GetVKDevice(), "vkSetHdrMetadataEXT");
+
+	if (setHDRMetadata)
+	{
+		setHDRMetadata(devicePS.GetVKDevice(), 1, &m_swapChain, &metadata);
+	}
+	#endif
+
 }
 
 void Display_ps::CreateSwapChainImageViews(GFXDevice* pDevice)

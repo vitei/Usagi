@@ -39,8 +39,8 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_B4G4R4A4_UNORM_PACK16,			// CF_RGBA_4444,
 	VK_FORMAT_R8G8B8_UNORM,						// CF_RGB_888,
 	VK_FORMAT_R32_SFLOAT,						// CF_SHADOW,
-	VK_FORMAT_R16_SFLOAT,						// CF_RGBA_16F
-	VK_FORMAT_B10G11R11_UFLOAT_PACK32,			// CF_RGB_HDR,
+	VK_FORMAT_R16G16B16A16_SFLOAT,				// CF_RGBA_16F
+	VK_FORMAT_A2B10G10R10_UNORM_PACK32,			// CF_RGB_HDR,
 	VK_FORMAT_R32_SFLOAT,						// CF_R_32F,
 	VK_FORMAT_R32_UINT,							// CF_R_32,
 	VK_FORMAT_R32G32_SFLOAT,					// CF_RG_32F,
@@ -49,7 +49,7 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_R8_UNORM,							// CF_R_8
 	VK_FORMAT_R8G8_UNORM,						// CF_RG_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
-	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA
+	VK_FORMAT_B8G8R8A8_SRGB,					// CF_SRGBA
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -66,7 +66,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// CF_RGBA_4444,
 	{ VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },							// CF_RGB_888,
 	{ VK_FORMAT_R32_UINT },																					// CF_SHADOW,
-	{ VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },						// CF_RGBA_16F
+	{  },																									// CF_RGBA_16F
 	{ VK_FORMAT_B10G11R11_UFLOAT_PACK32, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },	// CF_RGB_HDR,
 	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_SFLOAT },									// CF_R_32F,
 	{ VK_FORMAT_R32_SFLOAT },																				// CF_R_32,
@@ -76,7 +76,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
-	{ },																									// CF_SRGBA
+	{ VK_FORMAT_R8G8B8A8_SRGB },																									// CF_SRGBA
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -306,6 +306,19 @@ void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::Ext
 	}
 }
 
+
+ColorFormat GFXDevice_ps::GetUSGFormat(VkFormat eFormat)
+{
+	for (int i = 0; i < CF_COUNT; i++)
+	{
+		if (m_colorFormats[i] == eFormat)
+		{
+			return (ColorFormat)i;
+		}
+	}
+
+	return CF_INVALID;
+}
 
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {

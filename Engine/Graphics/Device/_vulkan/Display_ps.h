@@ -38,6 +38,7 @@ public:
 	void SwapBuffers(GFXDevice* pDevice);
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
+	bool HasHDRSupport() const { return m_bHDR; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -47,6 +48,7 @@ private:
 	void RecreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChainImageViews(GFXDevice* pDevice);
+	ColorFormat GetColorFormat(VkFormat eFormat);
 
 	enum 
 	{
@@ -71,8 +73,10 @@ private:
 	uint32				m_uWidth;
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
+	ColorFormat			m_eSwapChainFormat;
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
+	bool				m_bHDR;
 };
 
 inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)

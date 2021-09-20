@@ -411,6 +411,11 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 	flags.uStoreFlags = 0;
 	flags.uClearFlags = 0;
 
+	if(uEffectFlags & PostFXSys::EFFECT_FINAL_TARGET_HDR)
+	{
+		iFinalHDRTarget = (int)m_activeEffects.size();
+	}
+
 	for (memsize i = 0; i < m_activeEffects.size(); i++)
 	{
 		RenderTarget* pTarget = vnew(ALLOC_OBJECT) RenderTarget();
