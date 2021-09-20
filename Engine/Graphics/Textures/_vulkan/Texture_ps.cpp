@@ -855,12 +855,12 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 #if 0
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
-	U8String tmp = szFileName;
+	usg::string tmp = szFileName;
 	tmp += ".ktx";
 	File file;
 
 	VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
-	file.Open(tmp.CStr());
+	file.Open(tmp.c_str());
 
 	ScratchRaw rawData;
 	rawData.Init(file.GetSize(), FILE_READ_ALIGN);

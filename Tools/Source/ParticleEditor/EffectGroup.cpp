@@ -148,7 +148,7 @@ void EffectGroup::Cleanup(usg::GFXDevice* pDevice)
 	m_effect.Cleanup(pDevice);
 }
 
-bool EffectGroup::LoadEmitterRequested(usg::U8String& name)
+bool EffectGroup::LoadEmitterRequested(usg::string& name)
 {
 	for (uint32 i = 0; i < MAX_INSTANCES; i++)
 	{

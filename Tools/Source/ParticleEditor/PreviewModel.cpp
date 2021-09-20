@@ -59,7 +59,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
 	if(m_loadButton.GetValue())
 	{
-		usg::U8String modelName = m_loadFilePaths.GetSelectedName();
+		usg::string modelName = m_loadFilePaths.GetSelectedName();
 	
 		if (m_pModel)
 		{
@@ -70,7 +70,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 		}
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.CStr(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
+		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.c_str(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
 	}
 	if (m_pModel)
 	{

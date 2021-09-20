@@ -1,8 +1,8 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Memory/MemUtil.h"
+#include "Engine/Core/String/String_Util.h"
 #include "Engine/Memory/ScratchRaw.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Core/File/BufferedFile.h"
 #include "LuaVM.h"
 #include <errno.h>
@@ -427,9 +427,9 @@ const char* LuaVM::Read(lua_State *L, void *data, size_t *size)
 
 int LuaVM::Import(lua_State *L)
 {
-	U8String filename;
-	filename.ParseString("Scripts/%s.lua", luaL_checkstring(L, -1));
-	const char* szFilename = filename.CStr();
+	usg::string filename;
+	filename = str::ParseString("Scripts/%s.lua", luaL_checkstring(L, -1));
+	const char* szFilename = filename.c_str();
 
 	File luaFile(szFilename);
 	int result = lua_load(L, LuaVM::Read, &luaFile, szFilename, NULL);

@@ -127,16 +127,16 @@ namespace usg {
 
 	void GlobalDebugStats::AppendWarnings(usg::string& string)
 	{
-		usg::U8String warningString;
+		usg::string warningString;
 		if (m_warnings[WARNING_CPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
-			warningString.ParseString("CPU %f ms", m_fCPUTime);
-			string += warningString.CStr();
+			warningString = str::ParseString("CPU %f ms", m_fCPUTime);
+			string += warningString.c_str();
 		}
 		if (m_warnings[WARNING_GPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
-			warningString.ParseString("GPU %f ms", m_fGPUTime);
-			string += warningString.CStr();
+			warningString = str::ParseString("GPU %f ms", m_fGPUTime);
+			string += warningString.c_str();
 		}
 
 		if (m_warnings[WARNING_MEMORY].fTimeSinceActive < 1.5f)
@@ -144,12 +144,12 @@ namespace usg {
 			MemHeap* pHeap = mem::GetMainHeap();
 			float fSize = static_cast<float>(pHeap->GetSize());
 			float fUsed = static_cast<float>(pHeap->GetSize() - pHeap->GetFreeSize());
-			U8String str;
+			usg::string str;
 			float fMemMB = ((float)fUsed) / (1024.f * 1024.f);
 			float fSizeMB = ((float)fSize) / (1024.f * 1024.f);
 
-			warningString.ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
-			string += warningString.CStr();
+			warningString = str::ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
+			string += warningString.c_str();
 		}
 	}
 

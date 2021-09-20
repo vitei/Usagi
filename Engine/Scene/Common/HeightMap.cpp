@@ -4,7 +4,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/File/File.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Graphics/MeshUtility.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -55,8 +54,8 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, co
 	uint8* heightData = NULL;
 	ScratchObj<uint8> scratchHeight(heightData, uWidth*uHeight, FILE_READ_ALIGN);
 
-	U8String fileAndPath = U8String("Terrain/") + szFileName;
-	File heightFile(fileAndPath.CStr(), FILE_ACCESS_READ);
+	string fileAndPath = string("Terrain/") + szFileName;
+	File heightFile(fileAndPath.c_str(), FILE_ACCESS_READ);
 	
 	if(!heightFile.IsOpen())
 	{

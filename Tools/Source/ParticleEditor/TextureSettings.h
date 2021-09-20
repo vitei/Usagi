@@ -51,7 +51,7 @@ private:
 	usg::GUIIntInput		m_repeat;
 	usg::GUIComboBox		m_comboBox;
 	usg::GUIComboBox		m_fileListBox;
-	usg::U8String			m_textureName;
+	usg::string				m_textureName;
 	usg::GUISlider			m_animTimeScale;
 	usg::GUICheckBox		m_checkBox;
 	usg::GUIText			m_animTitle;

@@ -133,9 +133,9 @@ void RibbonInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonD
 	}
 
 
-	usg::U8String emitterName = m_emitterData.textureName;
+	usg::string emitterName = m_emitterData.textureName;
 	emitterName += ".dds";
-	m_textureSelect.SetSelectedByName(emitterName.CStr());
+	m_textureSelect.SetSelectedByName(emitterName.c_str());
 
 	m_position.SetValue(m_emitterData.vPosition);
 	m_colors[COLOR_START].SetValue(m_emitterData.cStartColor);

@@ -37,7 +37,7 @@ public:
 	usg::GUIWindow&				GetWindow() { return m_window; }
 	usg::ParticleEffect&		GetEffect() { return m_effect; }
 	void						Reset(usg::GFXDevice* pDevice);
-	bool						LoadEmitterRequested(usg::U8String& name);
+	bool						LoadEmitterRequested(usg::string& name);
 	
 	// GUI Callbacks
 	virtual void LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath) override;

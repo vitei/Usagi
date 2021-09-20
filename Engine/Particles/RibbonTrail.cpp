@@ -195,14 +195,14 @@ void RibbonTrail::SetDeclaration(GFXDevice* pDevice, const particles::RibbonData
 	ASSERT(m_uDeclLength<=m_uMaxLength);
 
 	usg::SamplerDecl samp(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_MIRROR);
-	usg::U8String name = "ribbon/";
-	usg::U8String srcName = pDecl->textureName;
+	usg::string name = "ribbon/";
+	usg::string srcName = pDecl->textureName;
 	if (str::StartsWithToken(pDecl->textureName, "ribbon/"))
 	{
-		srcName.RemovePath();	// FIXME: Hack for old particle data
+		str::RemovePath(srcName);	// FIXME: Hack for old particle data
 	}
 	name += srcName;
-	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, name.CStr()), pDevice->GetSampler(samp) );
+	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, name.c_str()), pDevice->GetSampler(samp) );
 }
 
 void RibbonTrail::Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffect)

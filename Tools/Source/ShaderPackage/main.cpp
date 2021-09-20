@@ -1,6 +1,5 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"

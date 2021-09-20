@@ -72,9 +72,9 @@ void ReloadEmitterFromFileOrGetActive(usg::GFXDevice* pDevice, usg::ScriptEmitte
 
 void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName)
 {
-	usg::U8String scriptName = "../../Data/Particle/Emitters/";
+	usg::string scriptName = "../../Data/Particle/Emitters/";
 	scriptName += szScriptName;
-	usg::ProtocolBufferFile file(scriptName.CStr());
+	usg::ProtocolBufferFile file(scriptName.c_str());
 	usg::particles::EmitterEmission variables;
 	bool bReadSucceeded = file.Read(&variables);
 	if (bReadSucceeded)
@@ -260,7 +260,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	bool bUpdated = false;
 	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)
 	{
-		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(), &m_emitter);
+		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(),  &m_emitter);
 	}
 
 	if(bUpdated)

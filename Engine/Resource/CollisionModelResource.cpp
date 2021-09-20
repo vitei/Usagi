@@ -248,7 +248,7 @@ namespace usg{
 		dataFile.Read(uFileSize, dataBuffer.GetRawData());
 
 		m_name = szName;
-		SetupHash(m_name.CStr());
+		SetupHash(m_name.c_str());
 
 		uint32* pData = reinterpret_cast<uint32*>(dataBuffer.GetRawData());
 		const uint32 uMagicNumber = pData[0];

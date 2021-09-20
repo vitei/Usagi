@@ -10,7 +10,6 @@
 namespace usg {
 
 class DebugRender;
-class U8String;
 class GFXDevice;
 class DebugStats;
 class string;

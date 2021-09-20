@@ -153,11 +153,11 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 	else 
 		m_startTime.SetValue(0.0f);
 
-	usg::U8String emitterName = m_emitterData.emitterName;
+	usg::string emitterName = m_emitterData.emitterName;
 	emitterName += ".vpb";
-	m_emitterName.SetText(emitterName.CStr());
+	m_emitterName.SetText(emitterName.c_str());
 
-	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, emitterName.CStr());
+	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, emitterName.c_str());
 	m_pParent->Reset(pDevice);
 	UpdateInstanceMatrix();
 

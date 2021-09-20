@@ -5,7 +5,7 @@
 *****************************************************************************/
 #ifndef _USG_STRING_UTIL_H
 #define _USG_STRING_UTIL_H
-
+#include "Engine/Core/stl/string.h"
 
 namespace str
 {
@@ -26,6 +26,11 @@ namespace str
 	void StringCat(char* szDst, const char* szAdd, uint32 uMaxLen);
 	const char* FindLineNumber(const char* szSrc, uint32 uLine);
 	const char* Find(const char* szSrc, const char* szCmp);
+
+	usg::string ParseString(const char* szSrc, ...);
+	void TruncateToPath(usg::string &dest);
+	void TruncateExtention(usg::string& string);
+	void RemovePath(usg::string& string);
 }
 
 

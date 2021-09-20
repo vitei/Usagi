@@ -4,7 +4,6 @@
 *****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Color.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
@@ -152,20 +151,20 @@ namespace usg {
 		float fProfileOffset = 0.3f;
 		float fSpikeProfileOffset = 0.5f;
 
-		U8String tmpString;
+		usg::string tmpString;
 
 		// name
 		pRender->AddString(m_timers[i].szName, m_timers[i].fOffset, fPos, m_timers[i].color);
 
 		// msec
 		float fAverage = m_timers[i].pTimer->GetTotalMilliSeconds();
-		tmpString.ParseString("%.2fms", fAverage);
-		pRender->AddString(tmpString.CStr(), fProfileOffset, fPos, m_timers[i].color);
+		tmpString = str::ParseString("%.2fms", fAverage);
+		pRender->AddString(tmpString.c_str(), fProfileOffset, fPos, m_timers[i].color);
 
 		// spike msec
 		float fAverageSpike = m_timers[i].fMaxFrame;
-		tmpString.ParseString("%.2fms", fAverageSpike);
-		pRender->AddString(tmpString.CStr(), fSpikeProfileOffset, fPos, m_timers[i].color);
+		tmpString = str::ParseString("%.2fms", fAverageSpike);
+		pRender->AddString(tmpString.c_str(), fSpikeProfileOffset, fPos, m_timers[i].color);
 
 		Color backGroundCol = m_timers[i].color;
 		backGroundCol.a() = 0.35f;
@@ -186,13 +185,13 @@ namespace usg {
 
 		float fPos = 2.0f;
 		pRender->AddString("Scene Info", 0.0f, 0.0f, cTitleCol);
-		U8String tmpString;
+		usg::string tmpString;
 
 		List<SceneContext>& sceneContexts = m_pScene->GetSceneContexts();
 
 		uint32 uContextCount = sceneContexts.GetSize();
-		tmpString.ParseString("Number of scenes: %d", uContextCount);
-		pRender->AddString(tmpString.CStr(), 0.0f, fPos, cTextCol);
+		tmpString = str::ParseString("Number of scenes: %d", uContextCount);
+		pRender->AddString(tmpString.c_str(), 0.0f, fPos, cTextCol);
 
 		fPos += 2.0f;
 		uint32 uContext = 0;
@@ -200,8 +199,8 @@ namespace usg {
 		{
 			if ((*it)->IsActive())
 			{
-				tmpString.ParseString("Scene Context: %d showing %d / %d cullable items", uContext, (*it)->GetVisiblePVSCount(), m_pScene->GetPVSCount());
-				pRender->AddString(tmpString.CStr(), 0.0f, fPos, cStatCol);
+				tmpString = str::ParseString("Scene Context: %d showing %d / %d cullable items", uContext, (*it)->GetVisiblePVSCount(), m_pScene->GetPVSCount());
+				pRender->AddString(tmpString.c_str(), 0.0f, fPos, cStatCol);
 				fPos += 1.0f;
 			}
 			uContext++;
@@ -219,30 +218,30 @@ namespace usg {
 		Color cPosCol(0.0f, 1.0f, 0.0f, 0.5f);
 		Color cDestinationCol(0.0f, 0.0f, 1.0f, 0.5f);
 
-		U8String tmp;
+		string tmp;
 		float fLine = 1.0f;
-		tmp.ParseString("Pos: %.2f, %.2f, %.2f", m_vAgentPos.x, m_vAgentPos.y, m_vAgentPos.z);
-		pRender->AddString(tmp.CStr(), 0.0f, fLine++, cPosColText);
-		tmp.ParseString("Destination Pos: %.2f, %.2f, %.2f", m_vAgentTargetPos.x, m_vAgentTargetPos.y, m_vAgentTargetPos.z);
-		pRender->AddString(tmp.CStr(), 0.0f, fLine++, cDestinationColText);
+		tmp = str::ParseString("Pos: %.2f, %.2f, %.2f", m_vAgentPos.x, m_vAgentPos.y, m_vAgentPos.z);
+		pRender->AddString(tmp.c_str(), 0.0f, fLine++, cPosColText);
+		tmp = str::ParseString("Destination Pos: %.2f, %.2f, %.2f", m_vAgentTargetPos.x, m_vAgentTargetPos.y, m_vAgentTargetPos.z);
+		pRender->AddString(tmp.c_str(), 0.0f, fLine++, cDestinationColText);
 
 		if (m_bAgentHasTarget)
 		{
-			tmp.ParseString("Enemy Target: %.2f, %.2f, %.2f", m_vTarget.x, m_vTarget.y, m_vTarget.z);
+			tmp = str::ParseString("Enemy Target: %.2f, %.2f, %.2f", m_vTarget.x, m_vTarget.y, m_vTarget.z);
 			m_pDebug3D->AddSphere(m_vTarget, 3.0f, cTargetCol);
 		}
 		else
 		{
-			tmp.ParseString("Enemy Target: None");
+			tmp = str::ParseString("Enemy Target: None");
 		}
 
-		pRender->AddString(tmp.CStr(), 0.0f, fLine++, cTargetColText);
+		pRender->AddString(tmp.c_str(), 0.0f, fLine++, cTargetColText);
 
 		m_pDebug3D->AddSphere(m_vAgentPos, 3.0f, cPosCol);
 		m_pDebug3D->AddSphere(m_vAgentTargetPos, 2.0f, cDestinationCol);
 
-		tmp.ParseString("CanSeeTarget: %s", m_bCanSeeTarget ? "Yes" : "No");
-		pRender->AddString(tmp.CStr(), 0.0f, fLine++, cTargetColText);
+		tmp = str::ParseString("CanSeeTarget: %s", m_bCanSeeTarget ? "Yes" : "No");
+		pRender->AddString(tmp.c_str(), 0.0f, fLine++, cTargetColText);
 
 		for (uint32 i = 0; i < m_uBehaviorCounter; i++)
 		{
