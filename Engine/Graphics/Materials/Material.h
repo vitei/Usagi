@@ -13,7 +13,6 @@
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Color.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg {
 
@@ -54,7 +53,7 @@ public:
 
 	PipelineStateHndl GetPipelineStateHndl() const { return m_pipelineState; }
 
-	const U8String& GetName() const { return m_name; }
+	const usg::string& GetName() const { return m_name; }
 	const usg::Color GetBlendColor() const { return m_blendColor; }
 
 
@@ -67,7 +66,7 @@ private:
 
 	PipelineStateHndl		m_pipelineState;
 
-	U8String				m_name;
+	usg::string				m_name;
 };
 
 

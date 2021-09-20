@@ -375,7 +375,7 @@ void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionL
 
 Light* LightMgr::FindLight(const char* szName)
 {
-	U8String name(szName);
+	usg::string name(szName);
 	for (auto it : m_pointLights.GetActiveLights() )
 	{
 		if( it->GetName() == name )

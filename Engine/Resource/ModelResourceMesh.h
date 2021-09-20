@@ -69,8 +69,8 @@ namespace usg{
 
 
 		DescriptorSetLayoutHndl	defaultPipelineDescLayout;
-		U8String				name;
-		U8String				matName;
+		usg::string				name;
+		usg::string				matName;
 
 		TextureHndl				pTextures[MAX_UV_STAGES];
 		SamplerHndl				samplers[MAX_UV_STAGES];

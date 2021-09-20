@@ -472,7 +472,7 @@ void Model::ForceRemoveFromScene()
 
 Model::RenderMesh* Model::GetRenderMesh(const char* szMaterialName)
 {
-	U8String matNameU8(szMaterialName);
+	usg::string matNameU8(szMaterialName);
 	//ASSERT(m_bDynamic);
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
@@ -506,13 +506,13 @@ Model::RenderMesh* Model::GetRenderMesh(uint32 uMeshId)
 void Model::SetTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType)
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -554,7 +554,7 @@ uint32 Model::GetMeshIndex(const char* szName, IdentifierType eNameType) const
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if(cmpName == szName)
 		{
 			return uMesh;
@@ -567,13 +567,13 @@ uint32 Model::GetMeshIndex(const char* szName, IdentifierType eNameType) const
 void Model::AddTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType)
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string& cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -590,12 +590,12 @@ void Model::AddTextureTranslate(const char* szName, uint32 uTexId, float fX, flo
 void Model::SetTextureScale( const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType /*= IDENTIFIER_MATERIAL */ )
 {
 	ASSERT( m_bDynamic );
-	U8String matNameU8( szName );
+	usg::string matNameU8( szName );
 
 	for( uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++ ) {
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh( uMesh );
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if( matNameU8.Length() == 0 || cmpName == matNameU8 ) {
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if( matNameU8.length() == 0 || cmpName == matNameU8 ) {
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper( uTexId );
 			if( pMapper ) {
 				Vector2f scale( fX, fY );
@@ -608,13 +608,13 @@ void Model::SetTextureScale( const char* szName, uint32 uTexId, float fX, float 
 void Model::AddTextureRotation( const char* szName, uint32 uTexId, float fRot, IdentifierType eNameType )
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -646,7 +646,7 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 			if(pOrigTex.get() != NULL)
 			{
 				SamplerHndl origSamp = pSrcMesh->samplers[uTex];
-				U8String cmpName = pOrigTex->GetName();
+				U8String cmpName = pOrigTex->GetName().c_str();
 				cmpName.RemovePath();
 				if ((cmpName == texNameU8))
 				{

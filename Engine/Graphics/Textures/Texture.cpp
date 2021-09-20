@@ -68,7 +68,7 @@ uint32 Texture::GetHeight() const
 bool Texture::Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLocation)
 {
 	m_name = szFilename;
-	SetupHash(m_name.CStr());
+	SetupHash(m_name.c_str());
 	bool bLoaded = m_platform.Load(pDevice, szFilename, eLocation);
 	SetReady(true);
 	return bLoaded;

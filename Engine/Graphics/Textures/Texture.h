@@ -3,8 +3,6 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_TEXTURE_H
 #define _USG_GRAPHICS_TEXTURE_H
-
-#include "Engine/Core/String/U8String.h"
 #include API_HEADER(Engine/Graphics/Textures, texture_ps.h)
 
 #include "Engine/Resource/ResourceBase.h"
@@ -31,7 +29,7 @@ public:
 
 	Texture_ps&       GetPlatform()       { return m_platform; }
 	const Texture_ps& GetPlatform() const { return m_platform; }
-	const U8String&   GetName    () const { return m_name; }
+	const usg::string&   GetName    () const { return m_name; }
 	uint16            GetId      () const { return m_uBindingId; }
 
 	uint32 GetWidth () const;
@@ -57,10 +55,10 @@ public:
 private:
 	PRIVATIZE_RES_COPY(Texture)
 
-	static bool m_sbTexIds[MAX_TEXTUTRE_IDS];
-	Texture_ps m_platform;
-	U8String   m_name;
-	uint16     m_uBindingId;
+	static bool		m_sbTexIds[MAX_TEXTUTRE_IDS];
+	Texture_ps		m_platform;
+	usg::string		m_name;
+	uint16			m_uBindingId;
 };
 
 // FIXME: Remove this when we only have one method of loading

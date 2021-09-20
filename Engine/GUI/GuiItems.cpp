@@ -358,7 +358,7 @@ namespace usg
 	{
 		m_szNames = NULL;
 		m_szZeroSepNames = szZeroSeperatedString;
-		if(m_selectedName.Length() > 0)
+		if(m_selectedName.length() > 0)
 		{
 			const char* index = szZeroSeperatedString;
 			uint32 uIndex = 0;

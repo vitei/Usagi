@@ -2,7 +2,6 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -651,18 +650,18 @@ void Texture_ps::Cleanup(GFXDevice* pDevice)
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
-	U8String filename = szFileName;
+	usg::string filename = szFileName;
 
-	U8String tmp = filename + ".ktx";
+	usg::string tmp = filename + ".ktx";
 
-	if (File::FileStatus(tmp.CStr()) == FILE_STATUS_VALID)
+	if (File::FileStatus(tmp.c_str()) == FILE_STATUS_VALID)
 	{
-		return LoadWithGLI(pDevice, tmp.CStr());
+		return LoadWithGLI(pDevice, tmp.c_str());
 	}
 	else
 	{
 		tmp = filename + ".dds";
-		return LoadWithGLI(pDevice, tmp.CStr());
+		return LoadWithGLI(pDevice, tmp.c_str());
 	}
 
 	m_uUpdateCount++;
@@ -1054,14 +1053,14 @@ uint32 Texture_ps::GetFaces() const
 
 bool Texture_ps::FileExists(const char* szFileName)
 {
-	U8String file(szFileName);
+	usg::string file(szFileName);
 	file += ".dds";
-	if (File::FileStatus(file.CStr()) == FILE_STATUS_VALID)
+	if (File::FileStatus(file.c_str()) == FILE_STATUS_VALID)
 		return true;
 
 	file = szFileName;
 	file += ".ktx";
-	return File::FileStatus(file.CStr()) == FILE_STATUS_VALID;
+	return File::FileStatus(file.c_str()) == FILE_STATUS_VALID;
 }
 
 }

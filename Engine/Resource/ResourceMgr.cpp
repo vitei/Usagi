@@ -427,7 +427,7 @@ void ResourceMgr::ReportMemoryUsage()
 		const Texture* pRes = m_pImpl->resources.GetResource<Texture>(i);
 		if (pRes && pRes->GetSizeInMemory() > 0)
 		{
-			str::Copy(pReports[i].name, pRes->GetName().CStr(), 64);
+			str::Copy(pReports[i].name, pRes->GetName().c_str(), 64);
 			pReports[i].uSize = pRes->GetSizeInMemory();
 		}
 	}

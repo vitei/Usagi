@@ -55,7 +55,7 @@ namespace usg{
 
 	const SkeletonResource::Bone* SkeletonResource::GetBone(const char* szName) const
 	{
-		U8String cmp(szName);
+		usg::string cmp(szName);
 		for(uint32 i=0; i<m_uBoneCount; i++)
 		{
 			if(m_pBones[i].name == szName)
@@ -69,7 +69,7 @@ namespace usg{
 
 	uint32 SkeletonResource::GetBoneIndex(const char* szName) const
 	{
-		U8String cmp(szName);
+		usg::string cmp(szName);
 		for(uint32 i=0; i<m_uBoneCount; i++)
 		{
 			if(m_pBones[i].name == szName)

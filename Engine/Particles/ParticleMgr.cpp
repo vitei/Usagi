@@ -62,7 +62,7 @@ ScriptEmitter* ParticleMgr::EmitterInstances::GetInstance(GFXDevice* pDevice, Pa
 	if (!pEmitter)
 	{
 		pEmitter = vnew(ALLOC_PARTICLES) ScriptEmitter();
-		pEmitter->Alloc(pDevice, &mgr, m_name.CStr());
+		pEmitter->Alloc(pDevice, &mgr, m_name.c_str());
 	}
 	m_activeEmitters.AddToFront(pEmitter);
 
@@ -82,7 +82,7 @@ void ParticleMgr::EmitterInstances::PreloadInstances(GFXDevice* pDevice, Particl
 		for (uint32 i = 0; i < m_uPreloadCount; i++)
 		{
 			ScriptEmitter* pEmitter = vnew(ALLOC_PARTICLES) ScriptEmitter();
-			pEmitter->Alloc(pDevice, &mgr, m_name.CStr());
+			pEmitter->Alloc(pDevice, &mgr, m_name.c_str());
 			m_freeEmitters.AddToFront(pEmitter);
 		}
 	}
@@ -261,7 +261,7 @@ void ParticleMgr::CreateInstances(GFXDevice* pDevice, uint32 uInstances)
 			{
 				const particles::RibbonData& ribbon = definition.ribbons[i];
 				ASSERT(ribbon.fLifeTime < fMaxRibbonTime);
-				U8String srcName = ribbon.textureName;
+				usg::string srcName = ribbon.textureName;
 				if (str::StartsWithToken(ribbon.textureName, "ribbon/"))
 				{
 					srcName.RemovePath();	// FIXME: Hack for old particle data
@@ -384,7 +384,7 @@ void ParticleMgr::FreeRibbon(RibbonTrail* pRibbon)
 
 ParticleMgr::EffectResources* ParticleMgr::GetEffectResource(GFXDevice* pDevice, const char* szName)
 {
-	U8String name = szName;
+	usg::string name = szName;
 	for (FastPool<EffectResources>::Iterator it = m_effectResources.Begin(); !it.IsEnd(); ++it)
 	{
 		if ((*it)->GetName() == name)
@@ -400,7 +400,7 @@ ParticleMgr::EffectResources* ParticleMgr::GetEffectResource(GFXDevice* pDevice,
 
 ParticleMgr::EmitterInstances* ParticleMgr::GetEmitterInstance(GFXDevice* pDevice, const char* szName)
 {
-	U8String name = szName;
+	usg::string name = szName;
 	for (FastPool<EmitterInstances>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
 	{
 		if ((*it)->GetName() == name)

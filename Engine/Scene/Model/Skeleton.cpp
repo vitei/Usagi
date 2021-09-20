@@ -49,9 +49,9 @@ bool Skeleton::Load( GFXDevice* pDevice, Scene* pScene, Model* pModel, bool bAut
 		for(uint32 i=0; i<m_uBoneCount; i++)
 		{
 			Bone* pParent = NULL;
-			if(m_pResource->GetBoneByIndex(i)->parentName.Length() > 0)
+			if(m_pResource->GetBoneByIndex(i)->parentName.length() > 0)
 			{
-				uint32 uIndex = m_pResource->GetBoneIndex(m_pResource->GetBoneByIndex(i)->parentName.CStr());
+				uint32 uIndex = m_pResource->GetBoneIndex(m_pResource->GetBoneByIndex(i)->parentName.c_str());
 				pParent = &m_pBones[uIndex];
 			}
 			m_pBones[i].Init(pDevice, pParent, m_pResource->GetBoneByIndex(i));
@@ -106,7 +106,7 @@ const Bone* Skeleton::GetBone(uint32 uIndex) const
 	return &m_pBones[uIndex];
 }
 
-Bone* Skeleton::GetBone(const U8String& name)
+Bone* Skeleton::GetBone(const usg::string& name)
 {
 	for(uint32 i=0; i<m_uBoneCount; i++)
 	{
@@ -120,7 +120,7 @@ Bone* Skeleton::GetBone(const U8String& name)
 }
 
 
-const Bone* Skeleton::GetBone(const U8String& name) const
+const Bone* Skeleton::GetBone(const usg::string& name) const
 {
 	for(uint32 i=0; i<m_uBoneCount; i++)
 	{

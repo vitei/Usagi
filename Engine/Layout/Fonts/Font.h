@@ -4,8 +4,6 @@
 #ifndef _USG_GRAPHICS_FONTS_FONT_H_
 #define _USG_GRAPHICS_FONTS_FONT_H_
 
-
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
@@ -31,7 +29,7 @@ namespace usg
 		bool	HasCharacter(uint32 uChar) const;
 		
 		const DescriptorSet& GetDescriptor() const { return m_descriptor; }
-		const U8String& GetName    () const{ return m_name; }
+		const usg::string& GetName    () const{ return m_name; }
 
 		static const DescriptorDeclaration m_sDescriptorDecl[];
 
@@ -53,7 +51,7 @@ namespace usg
 
 		usg::text::FontDefinition m_fontDefinition;
 
-		U8String m_name;
+		usg::string m_name;
 	};
 }
 

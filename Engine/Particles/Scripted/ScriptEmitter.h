@@ -39,7 +39,7 @@ namespace usg{
 
 		virtual void FreeFromPool();
 
-		const U8String& GetScriptName() { return m_scriptName; }
+		const usg::string& GetScriptName() { return m_scriptName; }
 
 		const usg::particles::EmitterShapeDetails& GetShapeDetails() const;
 
@@ -128,7 +128,7 @@ namespace usg{
 		FloatAnimation				m_initialSpeed;
 		FloatAnimation				m_dirVelocity;
 		FloatAnimation				m_emission;
-		U8String					m_scriptName;
+		usg::string					m_scriptName;
 		bool						m_bRequiredCPUUpdate;
 		Matrix4x4					m_definitionMatrix;
 		Matrix4x4					m_effectLocalMatrix;

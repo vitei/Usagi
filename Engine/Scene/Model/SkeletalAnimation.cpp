@@ -39,7 +39,7 @@ namespace usg
 	{
 		m_name = szAnimName;
 		m_name += ".vskla";
-		m_pAnimResource = ResourceMgr::Inst()->GetSkeletalAnimation(m_name.CStr());
+		m_pAnimResource = ResourceMgr::Inst()->GetSkeletalAnimation(m_name.c_str());
 		if (!m_pAnimResource)
 			return false;
 	
@@ -51,7 +51,7 @@ namespace usg
 		for (uint32 i = 0; i < m_uBoneCount; i++)
 		{
 			const SkeletonResource::Bone* pBone = pSkeleton->GetBoneByIndex(i);
-			m_pBoneInfo[i].sBoneRefIndex = m_pAnimResource->GetBoneReference(pBone->name.CStr());
+			m_pBoneInfo[i].sBoneRefIndex = m_pAnimResource->GetBoneReference(pBone->name.c_str());
 			m_pBoneInfo[i].transform.vPos = pBone->vTranslate;
 			m_pBoneInfo[i].transform.vScale = pBone->vScale;
 			Matrix4x4 mRot = Matrix4x4::Identity();

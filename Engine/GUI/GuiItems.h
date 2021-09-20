@@ -239,11 +239,11 @@ namespace usg
 		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt);
 
 		virtual GuiItemType GetItemType() const { return GuiItemType::COMBO_BOX; }
-		const char* GetSelectedName() { return m_selectedName.CStr(); }
+		const char* GetSelectedName() { return m_selectedName.c_str(); }
 	private:
 		const char*	m_szZeroSepNames;
 		const char** m_szNames;
-		U8String	m_selectedName;
+		usg::string	m_selectedName;
 		uint32		m_uItems;
 		uint32		m_uSelected;
 	};

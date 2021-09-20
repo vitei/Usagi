@@ -39,7 +39,7 @@ namespace usg
 	bool Font::Load( GFXDevice* pDevice, ResourceMgr* pResMgr, const char* filename )
 	{
 		m_name = filename;
-		SetupHash( m_name.CStr() );
+		SetupHash( m_name.c_str() );
 		
 		usg::string szFilename = filename;
 

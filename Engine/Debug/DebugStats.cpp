@@ -61,7 +61,7 @@ void DebugStats::Draw()
 {
 	m_debugStats[m_uActiveType]->Draw(m_pRender);
 
-	U8String warningString;
+	usg::string warningString;
 	Color warningCol(1.0f, 0.2f, 0.2f, 1.0);
 	float fLineNo = 0.0f;
 	
@@ -70,9 +70,9 @@ void DebugStats::Draw()
 		(*it)->AppendWarnings(warningString);
 	}
 
-	if (warningString.Length() > 0)
+	if (warningString.length() > 0)
 	{
-		m_pRender->AddString(warningString.CStr(), 0.8f, fLineNo, warningCol);
+		m_pRender->AddString(warningString.c_str(), 0.8f, fLineNo, warningCol);
 	}
 
 

@@ -36,8 +36,8 @@ public:
 
 	Bone* GetBone(uint32 uIndex);
 	const Bone* GetBone(uint32 uIndex) const;
-	const Bone* GetBone(const U8String& name) const;
-	Bone* GetBone(const U8String& name);
+	const Bone* GetBone(const usg::string& name) const;
+	Bone* GetBone(const usg::string& name);
 
 private:
 	PRIVATIZE_COPY(Skeleton)

@@ -4,7 +4,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Scene/Model/Model.h"
 #include "Engine/Resource/ModelResource.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "ModelMgr.h"
 

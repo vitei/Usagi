@@ -4,7 +4,6 @@
 #ifndef _USG_GRAPHICS_PC_GFXDEVICE_
 #define _USG_GRAPHICS_PC_GFXDEVICE_
 
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Core/stl/list.h"

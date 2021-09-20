@@ -125,18 +125,18 @@ namespace usg {
 		m_warnings[WARNING_MEMORY].bActive = ((float)mem::GetMainHeap()->GetFreeSize() / (float)mem::GetMainHeap()->GetSize()) < 0.05f;
 	}
 
-	void GlobalDebugStats::AppendWarnings(U8String& string)
+	void GlobalDebugStats::AppendWarnings(usg::string& string)
 	{
 		usg::U8String warningString;
 		if (m_warnings[WARNING_CPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
 			warningString.ParseString("CPU %f ms", m_fCPUTime);
-			string += warningString;
+			string += warningString.CStr();
 		}
 		if (m_warnings[WARNING_GPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
 			warningString.ParseString("GPU %f ms", m_fGPUTime);
-			string += warningString;
+			string += warningString.CStr();
 		}
 
 		if (m_warnings[WARNING_MEMORY].fTimeSinceActive < 1.5f)
@@ -149,7 +149,7 @@ namespace usg {
 			float fSizeMB = ((float)fSize) / (1024.f * 1024.f);
 
 			warningString.ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
-			string += warningString;
+			string += warningString.CStr();
 		}
 	}
 

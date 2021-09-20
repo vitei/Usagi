@@ -4,7 +4,6 @@
 #ifndef _USG_GRAPHICS_PC_GFXCONTEXT_
 #define _USG_GRAPHICS_PC_GFXCONTEXT_
 
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)

@@ -28,7 +28,7 @@ namespace usg
 		void PostDraw(GFXDevice* pDevice) override;
 
 		uint32 GetPageCount() const { return PAGE_COUNT; }
-		void AppendWarnings(U8String& string) override;
+		void AppendWarnings(usg::string& string) override;
 
 		void SetThreadActivity(int iIdx, const char* szActivitys);
 		void RegisterCPUTimer(const ProfilingTimer* pTimer) { m_pCpuTimer = pTimer; }

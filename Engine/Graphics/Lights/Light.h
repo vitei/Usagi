@@ -38,7 +38,7 @@ public:
 	void	SetAmbient(const Color& ambient);
 	void	SetSpecularColor(const Color& specular);
 	void	SetName(const char* szName) { m_name = szName; }
-	const U8String& GetName() { return m_name; }
+	const usg::string& GetName() { return m_name; }
 
 	const Color&	GetSpecular() const { return m_specular; }
 	const Color&	GetDiffuse() const	{ return m_colour; }
@@ -65,7 +65,7 @@ public:
 	uint32 GetVisibleFrame() { return m_uVisibleFrame; }
 protected:
 
-	U8String		m_name;
+	usg::string		m_name;
 	uint32			m_uVisibleFrame;
 	// RGB, specular power
 	Color			m_colour;

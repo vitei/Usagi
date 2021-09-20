@@ -4,7 +4,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/File/File.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Memory/Mem.h"

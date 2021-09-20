@@ -52,13 +52,13 @@ protected:
 		void Cleanup(GFXDevice* pDevice);
 		void UpdatePreloadCount(ParticleMgr& mgr, uint32 uCount);
 		void ClearPreloadCount();
-		const U8String& GetName() { return m_name; }
+		const usg::string& GetName() { return m_name; }
 		ScriptEmitter* GetInstance(GFXDevice* pDevice, ParticleMgr& mgr);
 		void FreeInstance(ScriptEmitter* pInstance);
 		void PreloadInstances(GFXDevice* pDevice, ParticleMgr& mgr);
 	private:
 		ParticleEmitterResHndl		m_resHndl;
-		U8String					m_name;
+		usg::string					m_name;
 		List<ScriptEmitter>			m_activeEmitters;
 		List<ScriptEmitter>			m_freeEmitters;
 		uint32						m_uPreloadCount;
@@ -72,11 +72,11 @@ protected:
 
 		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
 		void UpdatePreloadCount(ParticleMgr& mgr);
-		const U8String& GetName() const { return m_name;  }
+		const usg::string& GetName() const { return m_name;  }
 		void AddEmitters(GFXDevice* pDevice, ParticleMgr& mgr, ParticleEffect& effect);
 		ParticleEffectResHndl& GetResHndl() { return m_resHndl; }
 	private:
-		U8String				m_name;
+		usg::string				m_name;
 		uint32					m_uPreloadCount;
 		ParticleEffectResHndl	m_resHndl;
 		EmitterInstances*		m_pInstanceGroups[particles::EffectGroup::emitters_max_count];
