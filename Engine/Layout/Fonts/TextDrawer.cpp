@@ -40,6 +40,10 @@ namespace usg
 	{
 		m_bufferValid = false;
 		m_bOriginTL = false;
+		m_bDirty = false;
+		m_fWidthLimit = FLT_MAX;
+		m_alignFlags = 0;
+		m_uCharCount = 0;
 	}
 
 	TextDrawer::~TextDrawer()
