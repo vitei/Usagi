@@ -7,12 +7,9 @@
 #define _USG_STRING_H
 
 
-const int STRING_CHUNK_SIZE = 32;
-const int STRING_CMP_SIZE = STRING_CHUNK_SIZE/8;
-
 namespace usg{
 
-// TODO: Move me into my own clas
+// TODO: Move me into my own class
 class U8Char
 {
 public:

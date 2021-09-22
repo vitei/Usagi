@@ -193,7 +193,7 @@ namespace str
 
 	void TruncateExtension(usg::string& string)
 	{
-		for (memsize i = string.length(); i > 0; i--)
+		for (memsize i = string.length()-1; i > 0; i--)
 		{
 			if (string.at(i) == '.')
 			{
