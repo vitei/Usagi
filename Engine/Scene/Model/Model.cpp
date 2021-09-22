@@ -162,6 +162,7 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const
 
 void Model::Cleanup(GFXDevice* pDevice)
 {
+	SetInUse(false);
 	m_skinnedBones.Cleanup(pDevice);
 	m_staticBones.Cleanup(pDevice);
 	if (m_pSkeleton)
