@@ -270,7 +270,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
 		if(emitterName.length() > 0)
 		{
-			usg::str::TruncateExtension(emitterName);
+			str::TruncateExtension(emitterName);
 			m_effectGroup.EmitterModified(pDevice, emitterName.c_str(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
 		}
 	}

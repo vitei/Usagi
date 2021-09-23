@@ -121,7 +121,7 @@ void EmitterInstance::LoadEmitter(usg::GFXDevice* pDevice, const char* szEmitter
 	ReloadEmitterFromFileOrGetActive(pDevice, &m_emitter, szEmitterName);
 	usg::string emitterName = szEmitterName;
 	str::TruncateExtension(emitterName);
-	str::Copy(m_emitterData.emitterName, emitterName.CStr(), sizeof(m_emitterData.emitterName));
+	str::Copy(m_emitterData.emitterName, emitterName.c_str(), sizeof(m_emitterData.emitterName));
 	m_emitterName.SetText(szEmitterName);
 	m_pParent->Reset(pDevice);
 	UpdateInstanceMatrix();

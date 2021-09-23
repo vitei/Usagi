@@ -255,13 +255,13 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 		usg::string texName = "particles/";
 		texName += m_fileList.GetFileName(m_fileListBox.GetSelected());
 		// The resource manager adds the extension
-		texName = str::TruncateExtension();
-		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.CStr(), usg::GPU_LOCATION_STANDARD);
+		str::TruncateExtension(texName);
+		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.c_str(), usg::GPU_LOCATION_STANDARD);
 		vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 		m_texture.SetTexture(pDevice, m_pTexture);
 		m_texture.SetSize(vTextureSize);
 		pEffect->GetMaterial().SetTexture(0, m_pTexture, m_sampler);
-		str::Copy(textureVars.name, texName.CStr(), sizeof(textureVars.name));
+		str::Copy(textureVars.name, texName.c_str(), sizeof(textureVars.name));
 		bAnimAltered = true;
 		m_bForceReload = false;
 	}
