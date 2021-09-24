@@ -17,6 +17,7 @@ namespace WINUTIL
 	static HINSTANCE g_hInst;
 	static WindHndl g_wndHndl = NULL;
 	static bool g_bInFocus = true;
+	static bool g_bWasFullScreen = false;
 
 	bool Init(HINSTANCE hInst)
 	{
@@ -175,6 +176,8 @@ namespace WINUTIL
 		SetWindow(hndl);
 		SetForegroundWindow(hndl);
 
+		g_bWasFullScreen = !pDisplaySettings->bWindowed;
+
 		return hndl;
 	}
 
@@ -218,7 +221,10 @@ namespace WINUTIL
 
 			const UINT uFlags = SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
 			
-//			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
+			if(g_bWasFullScreen)
+			{
+				ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
+			}
 
 			SetWindowLong(hwnd, GWL_STYLE, dwStyle);
 			SetWindowLong(hwnd, GWL_EXSTYLE, dwExStyle);
@@ -234,6 +240,9 @@ namespace WINUTIL
 		UpdateWindow(hwnd);
 		ShowWindow(hwnd, SW_SHOWNORMAL);
 		SetForegroundWindow(hwnd);
+
+
+		g_bWasFullScreen = !pDisplaySettings->bWindowed;
 
 
 		usg::GameMessage('WSZE', nullptr);
