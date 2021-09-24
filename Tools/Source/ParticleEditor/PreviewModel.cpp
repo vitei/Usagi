@@ -83,7 +83,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 			m_pModel->SetTransform(mat);
 			for (uint32 i = 0; i < m_pModel->GetSkeleton().GetBoneCount(); i++)
 			{
-				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetBindMatrix(true) * mat;
+				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetDefaultMatrix(true) * mat;
 				m_pModel->GetSkeleton().GetBone(i)->SetTransform(mBoneMat);
 				m_pModel->GetSkeleton().GetBone(i)->UpdateConstants(pDevice);
 			}
