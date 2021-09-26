@@ -69,11 +69,6 @@ message OnJointBroken
 	
 }
 
-message ShiftWorldOrigin
-{
-	required usg.Vector3f vShift = 1;
-}
-
 message PhysicsSceneDirty
 {
 

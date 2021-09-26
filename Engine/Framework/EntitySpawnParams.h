@@ -9,8 +9,7 @@ namespace usg
 	class EntitySpawnParams
 	{
 	public:
-	public:
-		EntitySpawnParams() { m_uOverrideFlags = 0; m_iNuid = 0; m_iOwnerNuid = 0; m_uTeam = 0; }
+		EntitySpawnParams() { m_uOverrideFlags = 0; m_iNuid = 0; m_iOwnerNuid = 0; m_uTeam = 0; m_bGlobalTransform = false; }
 		~EntitySpawnParams() {}
 
 		void SetNUID(sint64 uNuid) { m_iNuid = uNuid; m_uOverrideFlags |= SET_NUID; }
@@ -28,6 +27,8 @@ namespace usg
 		sint64 GetOwnerNUID() const { ASSERT(HasOwnerNUID()); return m_iOwnerNuid; }
 		const TransformComponent& GetTransform() const { ASSERT(HasTransform()); return m_transform; }
 
+		bool HasGlobalTransform() const { return m_bGlobalTransform; }
+		void SetGlobalTransform(bool bValue) { m_bGlobalTransform = bValue; }
 	private:
 		enum Params
 		{
@@ -42,6 +43,8 @@ namespace usg
 		sint64				m_iOwnerNuid;
 		uint32				m_uTeam;
 		TransformComponent	m_transform;
+
+		bool				m_bGlobalTransform;
 	};
 }
 

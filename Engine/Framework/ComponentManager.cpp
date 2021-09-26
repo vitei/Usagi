@@ -496,16 +496,28 @@ namespace usg
 			{
 				Required<usg::TransformComponent> trans;
 				m_componentLoadHandles.GetComponent(e, trans);
+
+				usg::Vector3f vSpawnPos = spawnParams.GetTransform().position;
+				if (spawnParams.HasGlobalTransform())
+				{
+					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
+					vSpawnPos -= scene->vOriginOffset;
+				}
+
 				if (trans.IsValid())
 				{
 					trans.Modify() = spawnParams.GetTransform();
+					trans.Modify().position = vSpawnPos;
 				}
+
+
+
 				Required<usg::MatrixComponent> mat;
 				m_componentLoadHandles.GetComponent(e, mat);
 				if (mat.IsValid())
 				{
 					mat.Modify().matrix = spawnParams.GetTransform().rotation;
-					mat.Modify().matrix.SetPos(spawnParams.GetTransform().position);
+					mat.Modify().matrix.SetPos(vSpawnPos);
 				}
 			}
 

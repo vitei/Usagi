@@ -19,6 +19,7 @@
 #include <limits>
 #include "Engine/Physics/PhysXVehicle/VehicleSceneQueryData.h"
 #include "Engine/Physics/PhysicsEvents.pb.h"
+#include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Physics/PhysicsEventsInternal.pb.h"
 #include "Engine/Physics/PhysicsSceneData.h"
 #include "Engine/Framework/ExclusionCheck.h"

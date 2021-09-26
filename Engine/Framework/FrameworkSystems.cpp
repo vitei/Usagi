@@ -14,7 +14,7 @@
 #include "Engine/Scene/Model/ModelComponents.pb.h"
 #include "Engine/Framework/FrameworkEvents.pb.h"
 #include "Engine/Physics/PhysicsComponents.pb.h"
-#include "Engine/Physics/PhysicsEvents.pb.h"
+#include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Physics/CollisionData.pb.h"
 
 namespace usg

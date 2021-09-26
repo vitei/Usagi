@@ -36,6 +36,7 @@ namespace usg
 				outputs.sceneComp.GetRuntimeData().pScene->PreUpdate();
 			}
 		};
+
 		class UpdateScene : public System
 		{
 		public:
@@ -71,6 +72,13 @@ namespace usg
 				Scene* scene = outputs.sceneComp.GetRuntimeData().pScene;
 				scene->Update(pGPUData->pDevice);
 			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::ShiftWorldOrigin& event)
+			{
+				outputs.sceneComp.Modify().vOriginOffset += event.vShift;
+			}
+
+			
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetViewContextMask& event)
 			{
