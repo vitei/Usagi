@@ -65,7 +65,9 @@ The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Ga
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
-The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title, but work is progressing to demonstrate that potential. Contributions to help meet the goals of the roadmap from those with relevant experience would be considered.
+The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title.  
+
+Progress is likely to be slow, work is being done by ex-staff as Vitei have graciously allowed us to open source this code base. However it is mostly used as a testbed and is no longer being used for commerical projects.  
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
 
@@ -133,11 +135,9 @@ If there is not at least one child entity systems on the root entity will not be
 
 There is no longer a system other than submodules for linking projects and engine versions  
 
-A replacement model editor would be required to take advantage of the existing custom shader support  
+Without a replacement model editor material overrides must be edited in yaml
 
 Resource loading is slow and single threaded  
-
-Resources don't have an internal list of dependenices  
 
 The running of systems is not yet multi-threaded  
 
