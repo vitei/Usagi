@@ -7,12 +7,14 @@
 #include "Engine/Framework/Signal.h"
 #include "Engine/Framework/ComponentEntity.h"
 #include "Engine/Framework/EventManager.h"
+#include "Engine/Core/stl/utility.h"
 #include "Engine/Framework/Signal.h"
 #include "Engine/Framework/HealthModifier.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Scene/Model/ModelComponents.pb.h"
 #include "Engine/Framework/FrameworkEvents.pb.h"
 #include "Engine/Physics/PhysicsComponents.pb.h"
+#include "Engine/Physics/PhysicsEvents.pb.h"
 #include "Engine/Physics/CollisionData.pb.h"
 
 namespace usg
@@ -66,6 +68,32 @@ namespace usg
 						outputs.state.Modify().current = STATUS_DEAD;
 					}
 				}
+			}
+		};
+
+		// Catch all the objects not shifted by the physics system
+		class OriginShiftNonPhysicsBodies : public usg::System 
+		{
+		public:
+
+			struct Inputs
+			{
+				Required<TransformComponent> transform;
+			};
+
+			struct Outputs
+			{
+				Required<TransformComponent> transform;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
+
+
+			EXCLUSION(IfHas<TransformComponent, FromParents>, IfHas<RigidBody, FromSelfOrParents>)
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
+			{
+				outputs.transform.Modify().position = inputs.transform->position - evt.vShift;
 			}
 		};
 
