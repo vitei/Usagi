@@ -197,7 +197,7 @@ namespace str
 		{
 			if (string.at(i) == '.')
 			{
-				string = string.substr(0, i-1);
+				string = string.substr(0, i);
 				break;
 			}
 		}
