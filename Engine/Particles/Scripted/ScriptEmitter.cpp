@@ -509,11 +509,11 @@ namespace usg
 				usg::Matrix4x4 mRot;
 				const Vector3f& vRot = m_emissionDef.emission.vUserRotation;
 				mRot.MakeRotateYPR(Math::DegreesToRadians(vRot.y), Math::DegreesToRadians(vRot.x), Math::DegreesToRadians(vRot.z));
-				pGS->mOrientation = mRot * m_mWorldMatrix;
+				pGS->mOrientation = mRot;
 			}
 			else
 			{
-				pGS->mOrientation = m_mWorldMatrix;
+				pGS->mOrientation = usg::Matrix4x3::Identity();
 			}
 			m_gsTransform.Unlock();	
 		}
