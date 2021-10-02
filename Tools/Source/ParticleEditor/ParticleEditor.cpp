@@ -228,8 +228,18 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetPlaySpeed(), m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
 
+	// Hacky re-implementation of quick emitter load
+	usg::string emitterName;
+	if (m_effectGroup.LoadEmitterRequested(emitterName))
+	{
+		emitterName += ".vpb";
+		usg::string name = "..\\..\\Data\\Particle\\Emitters\\" + emitterName;
 
-	bool bLoad = m_emitterWindow.GetLoaded();	
+		m_emitterWindow.LoadCallback(nullptr, name.c_str(), emitterName.c_str());
+	}
+
+
+	bool bLoad = m_emitterWindow.GetLoaded();
 	bool bRestart = m_emitterPreview.GetRestart() || (m_emitterPreview.GetRepeat() && !m_emitterPreview.GetEffect().IsAlive());
 	if(bLoad)
 	{

@@ -27,8 +27,8 @@ void ScaleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_sliders[SLIDER_INTERMEDIATE].SetToolTip("The standard multiplier for the particle");
 	m_sliders[SLIDER_ENDING].Init("Ending Frac", 0.0f, 5.0f, 2.0f);
 	m_sliders[SLIDER_ENDING].SetToolTip("The size of the particle at the end of its life");
-	m_sliders[SLIDER_BEGIN_SCALE_IN].Init("Begin scale in", 0.0f, 1.0f, 0.0f);
-	m_sliders[SLIDER_BEGIN_SCALE_IN].SetToolTip("How long into the particles life (as a frac) to start scaling to it's standard size");
+	m_sliders[SLIDER_BEGIN_SCALE_IN].Init("End scale in", 0.0f, 1.0f, 0.0f);
+	m_sliders[SLIDER_BEGIN_SCALE_IN].SetToolTip("How long to reach the intermediate scale");
 	m_sliders[SLIDER_START_SCALE_OUT].Init("Start scale out", 0.0f, 1.0f, 0.0f);
 	m_sliders[SLIDER_START_SCALE_OUT].SetToolTip("How long into the particles life (as a frac) to start scaling to it's final size");
 

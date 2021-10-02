@@ -8,7 +8,7 @@ void FloatAnim::Init(usg::GUIWindow* pWindow, const char* szName)
 	m_frameCount.Init("Frame count", &frameCount, 1, 1, usg::particles::FloatAnim::frames_max_count);
 
 	usg::Vector2f vPos(0.0f, 0.0f);
-	usg::Vector2f vScale(270.f, 80.f);
+	usg::Vector2f vScale(270.f, 85.f);
 	m_childWindow.Init(szName, vPos, vScale, usg::GUIWindow::WINDOW_TYPE_CHILD );
 	pWindow->AddItem(&m_childWindow);
 
@@ -51,6 +51,11 @@ void FloatAnim::SetFromDefinition(usg::particles::FloatAnim &src)
 	{
 		m_frameInfo[iFrameIndex].SetValue(src.frames[iFrameIndex].fTimeIndex, 0);
 		m_frameInfo[iFrameIndex].SetValue(src.frames[iFrameIndex].fValue, 1);
+	}
+
+	if (src.frames_count > 0)
+	{
+		m_singleFloat.SetValue(src.frames[0].fValue);
 	}
 }
 

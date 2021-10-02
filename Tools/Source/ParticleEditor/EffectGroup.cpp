@@ -22,6 +22,7 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
 	m_saveItem.SetEnabled(false);
+	m_saveItem.SetCallbacks(this);
 	m_saveAsItem.Init("Save As...");
 	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
