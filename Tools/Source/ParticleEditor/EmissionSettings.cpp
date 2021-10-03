@@ -34,8 +34,10 @@ void EmissionSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	m_maxParticles.SetToolTip("The maximum number of particles to be active at one time");
 	m_sliders[SLIDER_RELEASE_INTERVAL].Init("Interval", 0.0f, 2.0f, 0.0f);
 	m_sliders[SLIDER_RELEASE_INTERVAL].SetToolTip("Time between releasing groups particles");
-	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].Init("Release random", 0.0f, 2.0f, 0.0f);
+	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].Init("Interval random", 0.0f, 2.0f, 0.0f);
 	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].SetToolTip("Maximum randomness (in seconds) of release");
+	m_releaseRandom.Init("Release random", 0.0f, 1.0f, 0.0f);
+	m_releaseRandom.SetToolTip("Chance each particle will be released");
 	m_sliders[SLIDER_EMISSION_TIME].Init("Effect duration", 0.0f, 60.0f, 1.0f);
 	m_sliders[SLIDER_EMISSION_TIME].SetToolTip("Time until emission stops");
 
@@ -46,6 +48,7 @@ void EmissionSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	{
 		m_window.AddItem(&m_sliders[i]);
 	}
+	m_window.AddItem(&m_releaseRandom);
 
 	m_emissionTiming.Init(&m_window, "Emission Rate");
 
@@ -58,6 +61,16 @@ void EmissionSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 
 	m_sliders[SLIDER_RELEASE_INTERVAL].SetValue(emissionVars.fReleaseInterval);
 	m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].SetValue(emissionVars.fReleaseIntervalRandom);
+	if(emissionVars.has_fReleaseRandom)
+	{
+		m_releaseRandom.SetValue(emissionVars.fReleaseRandom);
+	}
+	else
+	{
+		m_releaseRandom.SetValue(1.0f);
+		emissionVars.fReleaseRandom = 1.0f;
+		emissionVars.has_fReleaseRandom = true;
+	}
 	m_sliders[SLIDER_EMISSION_TIME].SetValue(emissionVars.fEmissionTime);
 	m_emissionTiming.SetFromDefinition(emissionVars.emissionRate);
 	m_emissionType.SetSelected(emissionVars.eEmissionType);
@@ -65,7 +78,7 @@ void EmissionSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_maxParticles.SetValues(&maxParticles);
 }
 
-bool EmissionSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool EmissionSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::EmissionVariables& emissionVars = structData.emission;
@@ -75,9 +88,12 @@ bool EmissionSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEm
 
 	bAltered |= Compare(emissionVars.fReleaseInterval,m_sliders[SLIDER_RELEASE_INTERVAL].GetValue());
 	bAltered |= Compare(emissionVars.fReleaseIntervalRandom,m_sliders[SLIDER_RELEASE_INTERVAL_RANDOM].GetValue());
+	bAltered |= Compare(emissionVars.fReleaseRandom, m_releaseRandom.GetValue());
+
 	bAltered |= Compare(emissionVars.fEmissionTime,m_sliders[SLIDER_EMISSION_TIME].GetValue());
 	bAltered |= Compare(emissionVars.uMaxParticles, m_maxParticles.GetValue()[0]);
 	bAltered |= Compare(emissionVars.eEmissionType, m_emissionType.GetSelected());
+
 
 	m_sliders[SLIDER_EMISSION_TIME].SetVisible( emissionVars.eEmissionType == usg::particles::EMISSION_TYPE_TIMED );
 

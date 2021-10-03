@@ -125,7 +125,7 @@ void BlendSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& st
 	m_bForceUpdate = true;
 }
 
-bool BlendSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool BlendSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::AlphaStateGroup& alphaDecl = structData.blend;

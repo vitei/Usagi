@@ -54,7 +54,7 @@ void ScaleSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& st
 	m_baseScale.SetFromDefinition(scaleVars.standardValue);
 }
 
-bool ScaleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool ScaleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::ParticleScale& scaleVars = structData.particleScale;

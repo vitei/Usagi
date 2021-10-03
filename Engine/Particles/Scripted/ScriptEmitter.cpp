@@ -467,11 +467,12 @@ namespace usg
 		
 		m_fEffectTime += fElapsed;
 
+		uint32 uRequestedEmission = 0;
 		if(m_emissionDef.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT)
 		{
 			if(m_fEffectTime == fElapsed)
-			{
-				EmitParticle(m_emissionDef.emission.uMaxParticles);
+			{	
+				uRequestedEmission = m_emissionDef.emission.uMaxParticles;
 			}
 			
 		}
@@ -490,8 +491,26 @@ namespace usg
 
 				m_fAccumulator += m_emission.GetValue() * fElapsed;
 				m_fAccumulator = usg::Math::Clamp(m_fAccumulator, 0.0f, (float)m_emissionDef.emission.uMaxParticles);
-				EmitParticle((uint32)m_fAccumulator);
+				uRequestedEmission = (uint32)m_fAccumulator;
 				m_fAccumulator -= floorf(m_fAccumulator);
+			}
+		}
+
+		if(uRequestedEmission > 0)
+		{
+			if (!m_emissionDef.emission.has_fReleaseRandom || m_emissionDef.emission.fReleaseRandom >= 1.0f)
+			{
+				EmitParticle(uRequestedEmission);
+			}
+			else
+			{
+				for (uint32 i = 0; i < uRequestedEmission; i++)
+				{
+					if (Math::RangedRandom(0.0f, 1.0f) < m_emissionDef.emission.fReleaseRandom)
+					{
+						EmitParticle(1);
+					}
+				}
 			}
 		}
 			
@@ -570,7 +589,7 @@ namespace usg
 				patternIdx = (uint32)(((m_fEffectTime - pOut->fLifeStart) * pOut->fInvLife) * (texData.uPatternRepeatHor * texData.uPatternRepeatVer) );
 				break;
 			case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
-				patternIdx = ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale));
+				patternIdx = (uint32)(m_fEffectTime *texData.textureAnim.fAnimTimeScale*60.f);
 				break;
 			default:
 				continue;
@@ -592,8 +611,7 @@ namespace usg
 			}
 			else
 			{
-				// Only update the random particle every few frames to stop it looking crazy
-				if ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale) != (uint32)(fNextElapsed*texData.textureAnim.fAnimTimeScale))
+				if (fPartElapsed == 0.0f || (uint32)(fPartElapsed* texData.textureAnim.fAnimTimeScale * 60.f) != (uint32)(fNextElapsed* texData.textureAnim.fAnimTimeScale * 60.f))
 				{
 					pOut->vUVOffset.x = m_vUVScale[i].x * uNoX;
 					pOut->vUVOffset.y = m_vUVScale[i].y * uNoY;

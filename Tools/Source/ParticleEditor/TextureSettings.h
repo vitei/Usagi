@@ -23,13 +23,13 @@ public:
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer);
 	void Cleanup(usg::GFXDevice* pDevice);
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData);
-	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
+	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed);
 
 private:
 	virtual void MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results);
 
 	void UpdateAnimFrames(usg::GFXDevice* pDevice);
-	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData);
+	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, float fElapsed);
 	// Returns the aspect
 	float GetUVCoords(uint32 uFrame, usg::Vector2f& vMin, usg::Vector2f &vMax);
 	enum 

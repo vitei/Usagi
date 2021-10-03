@@ -83,7 +83,7 @@ void ColorSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& st
 	m_repetition.SetValues(&repetition);
 }
 
-bool ColorSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool ColorSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::ParticleColor& colorVars = structData.particleColor;

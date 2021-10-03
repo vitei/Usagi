@@ -158,6 +158,8 @@ message EmissionVariables
 	required uint32		uMaxParticles = 7;
 
 	required Vector3f	vUserRotation = 9;
+
+	optional float		fReleaseRandom = 10;
 }
 
 

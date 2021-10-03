@@ -79,7 +79,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	int frameCount = 1;
 	m_frameCount.Init("Frame count", &frameCount, 1, 1, MAX_ANIM_FRAMES);
 
-	m_animTimeScale.Init("Anim time scale", 0.1f, 2.0f, 1.0f);
+	m_animTimeScale.Init("Anim time scale", 0.05f, 2.0f, 1.0f);
 
 	m_window.AddItem(&m_createFlipBook);
 	m_window.AddItem(&m_texture);
@@ -232,7 +232,7 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 
 
 
-bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	bool bAnimAltered = false;
@@ -286,7 +286,8 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 
 	m_animTitle.SetVisible(bShowAnimDetails);
 	m_frameCount.SetVisible(bShowAnimDetails);
-	m_animTimeScale.SetVisible(textureVars.textureAnim.eTexMode==usg::particles::TEX_MODE_FLIPBOOK_LOOP);
+	m_animTimeScale.SetVisible( textureVars.textureAnim.eTexMode==usg::particles::TEX_MODE_FLIPBOOK_LOOP
+				|| textureVars.textureAnim.eTexMode == usg::particles::TEX_MODE_RANDOM_IMAGE );
 
 	uint32 item =0;
 	for(uint32 i=0; i<FRAME_BOXES; i++)
@@ -306,7 +307,7 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 		UpdateAnimFrames(pDevice);
 	}
 
-	SetAnimPreview(pDevice, structData);
+	SetAnimPreview(pDevice, structData, fElapsed);
 
 	if(bAltered)
 	{
@@ -325,21 +326,19 @@ float TextureSettings::GetUVCoords(uint32 uAnimFrame, usg::Vector2f& vMin, usg::
 	float fYRange = 1.0f / (float)uY;
 	uint32 uXCell = uAnimFrame % uX;
 	uint32 uYCell = uAnimFrame / uX;
-
+	 
 	vMin.Assign(fXRange * uXCell, fYRange * uYCell);
 	vMax.Assign((fXRange * (uXCell+1)), (fYRange * (uYCell+1)));
 
 	return (vMax.x-vMin.x)/(vMax.y - vMin.y);
 }
 
-void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData)
+void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, float fElapsed)
 {
 	if(m_previewButton.GetValue())
 	{
 		m_fAnimTime = 0.0f;
 	}
-
-	float fElapsed = 1.0f/60.f;
 
 	m_previewButton.SetVisible(true);
 
@@ -358,8 +357,8 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)(structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) - 1);
 		break;
 	case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
-		patternIdx = ((uint32)((30.f)*m_fAnimTime))%structData.textureData[0].textureAnim.animIndex_count;
-		fElapsed *= m_animTimeScale.GetValue(0);
+		patternIdx = (uint32)(60.f*m_fAnimTime * m_animTimeScale.GetValue(0));
+		patternIdx = patternIdx%structData.textureData[0].textureAnim.animIndex_count;
 		break;
 	case usg::particles::TEX_MODE_NONE:
 	default:
@@ -375,7 +374,13 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 	usg::Vector2f vMin, vMax;
 	float fAspect = GetUVCoords(patternIdx, vMin, vMax);
 	m_previewButton.SetTexture(pDevice, m_pTexture);
-	m_previewButton.SetUVs(vMin, vMax);
+
+	float fTimeSclae = m_animTimeScale.GetValue(0);
+	if( structData.textureData[0].textureAnim.eTexMode != usg::particles::TEX_MODE_RANDOM_IMAGE 
+		|| (uint32)( (m_fAnimTime+fElapsed) * 60.f * fTimeSclae) != (uint32)(m_fAnimTime * 60.f * fTimeSclae) )
+	{
+		m_previewButton.SetUVs(vMin, vMax);
+	}
 
 	if (m_pTexture->GetWidth() > 350.0f)
 	{

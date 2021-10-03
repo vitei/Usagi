@@ -64,7 +64,7 @@ void ParticleSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_userRotation.SetValue(structData.emission.vUserRotation);
 }
 
-bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
 	m_life.SetSingleOnly(bOneFrame);

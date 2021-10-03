@@ -20,7 +20,7 @@ public:
 	~SortSettings();
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer);
-	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
+	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed);
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData);
 
 private:

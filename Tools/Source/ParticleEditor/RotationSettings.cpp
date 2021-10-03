@@ -43,7 +43,7 @@ void RotationSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_sliders[SLIDER_SPEED_RANDOMISE].SetValue(rotationVars.fSpeedRandomise);
 }
 
-bool RotationSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool RotationSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::ParticleRotation& rotationVars = structData.particleRotation;

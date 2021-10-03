@@ -271,7 +271,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	bool bUpdated = false;
 	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)
 	{
-		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(),  &m_emitter);
+		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(),  &m_emitter, fElapsed);
 	}
 
 	if(bUpdated)

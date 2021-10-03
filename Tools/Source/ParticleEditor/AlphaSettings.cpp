@@ -43,7 +43,7 @@ void AlphaSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& st
 	m_sliders[SLIDER_FADE_OUT_TIMING].SetValue(alphaVars.fOutStartTiming);
 }
 
-bool AlphaSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool AlphaSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::ParticleAlpha& alphaVars = structData.particleAlpha;
