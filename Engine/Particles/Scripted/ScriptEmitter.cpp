@@ -379,6 +379,14 @@ namespace usg
 		m_fEffectTime = 0.0f;
 		m_fAccumulator = 0.0f;
 		m_fDelay = m_fTriggerTime;
+
+
+
+		if (m_emissionDef.emission.has_vUserRotationRandom)
+		{
+			m_vRandomRot = usg::Vector3f::RandomRange(-m_emissionDef.emission.vUserRotationRandom, m_emissionDef.emission.vUserRotationRandom);
+		}
+
 		m_initialSpeed.Init(&m_emissionDef.omniVelocity);
 		m_dirVelocity.Init(&m_emissionDef.dirVelocity);
 		m_baseLife.Init(&m_emissionDef.life);
@@ -526,7 +534,9 @@ namespace usg
 			if (pGS->bCustomMatrix)
 			{
 				usg::Matrix4x4 mRot;
-				const Vector3f& vRot = m_emissionDef.emission.vUserRotation;
+				Vector3f vRot = m_emissionDef.emission.vUserRotation;
+				vRot += m_vRandomRot;
+
 				mRot.MakeRotateYPR(Math::DegreesToRadians(vRot.y), Math::DegreesToRadians(vRot.x), Math::DegreesToRadians(vRot.z));
 				pGS->mOrientation = mRot;
 			}

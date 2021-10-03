@@ -134,6 +134,7 @@ namespace usg{
 		Matrix4x4					m_effectLocalMatrix;
 		Vector4f					m_vPrevPos;
 		Vector3f					m_vVelocityOffset;
+		Vector3f					m_vRandomRot;
 		Matrix4x4					m_mWorldMatrix;
 
 		bool						m_bLocalOffset;

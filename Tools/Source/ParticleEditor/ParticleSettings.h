@@ -31,6 +31,7 @@ private:
 	usg::GUISlider			m_lifeRandomness;
 	usg::GUISlider			m_particleCenter;
 	usg::GUIFloat			m_userRotation;
+	usg::GUIFloat			m_userRotationRand;
 };
 
 

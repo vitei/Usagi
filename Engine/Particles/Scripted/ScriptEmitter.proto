@@ -160,6 +160,7 @@ message EmissionVariables
 	required Vector3f	vUserRotation = 9;
 
 	optional float		fReleaseRandom = 10;
+	optional Vector3f	vUserRotationRandom = 11;
 }
 
 
