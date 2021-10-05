@@ -8,7 +8,6 @@
 #ifndef _USG_GRAPHICS_SCENE_SCENEVIEWCONTEXT_H_
 #define _USG_GRAPHICS_SCENE_SCENEVIEWCONTEXT_H_
 
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Scene/SceneContext.h"
 
 

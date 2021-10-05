@@ -5,7 +5,6 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Memory/FastPool.h"
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Scene/RenderGroup.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/ViewContext.h"
