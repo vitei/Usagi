@@ -902,10 +902,11 @@ namespace usg
 
 		Required<RigidBody, FromSelfOrParents> rigidBody;
 		handles.GetComponent(c.GetEntity(), rigidBody);
-		if (rigidBody->bDynamic && !c->bConvex)
+		if (rigidBody->bDynamic && !c->bConvex && !rigidBody->bKinematic)
 		{
 			// Triangle Mesh collider can only be attached to static actors (this is a limitation of PhysX). Split the mesh into convex submeshes if you REALLY need such a complex
 			// collision model in a dynamic entity.
+			// The one exception to this rule is kinematic actors
 			ASSERT(false);
 			c.Modify().bConvex = true;
 		}
