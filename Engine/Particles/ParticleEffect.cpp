@@ -38,14 +38,14 @@ void ParticleEffect::Cleanup()
 	m_pRenderGroup = NULL;
 	m_eState = STATE_INACTIVE;
 
-	for(List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+	for(auto it = m_emitters.begin(); it != m_emitters.end(); ++it)
 	{
 		ParticleEmitter* pEmitter = (*it);
 		// FIXME: Nothing technically wrong with this, but the design makes me sad...
 		pEmitter->FreeFromPool();
 	}
 
-	m_emitters.Clear();
+	m_emitters.clear();
 }
 
 void ParticleEffect::EnableEmission(bool bEnable)
@@ -53,7 +53,7 @@ void ParticleEffect::EnableEmission(bool bEnable)
 	if(m_eState != STATE_RUNNING)
 		return; 
 
-	for(List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+	for(auto it = m_emitters.begin(); it != m_emitters.end(); ++it)
 	{
 		ParticleEmitter* pEmitter = (*it);
 		pEmitter->EnableEmission(bEnable);
@@ -73,9 +73,8 @@ void ParticleEffect::Kill(bool bForce)
 	{
 		// TODO: Tell the particle systems to stop creating new particles
 		m_eState = STATE_SHUTDOWN;
-		for(List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+		for( auto pEmitter : m_emitters)
 		{
-			ParticleEmitter* pEmitter = (*it);
 			pEmitter->EnableEmission(false);
 		}
 	}
@@ -97,9 +96,9 @@ void ParticleEffect::Init(GFXDevice* pDevice, Scene* pScene, const Matrix4x4& mM
 	SetSystemVelocity(vVelocity);
 
 	// Now initialise the particles, possibly with that data
-	for(List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+	for(auto it : m_emitters )
 	{
-		(*it)->Init(pDevice, this);
+		it->Init(pDevice, this);
 	}
 	
 	if(!m_constantSet.IsValid())
@@ -124,9 +123,8 @@ bool ParticleEffect::Update(float fElapsed)
 {
 	bool bAlive = false;
 
-	for(List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+	for(ParticleEmitter* pEmitter : m_emitters)
 	{
-		ParticleEmitter* pEmitter = (*it);
 		bAlive |= (pEmitter->Update(fElapsed) && m_eState == STATE_RUNNING);
 		bAlive |= pEmitter->ActiveParticles();
 		pEmitter->UpdateParticleCPUData(fElapsed);
@@ -158,16 +156,15 @@ void ParticleEffect::UpdateBuffers(GFXDevice* pDevice)
 		m_constantSet.UpdateData(pDevice);
 	}
 
-	for (List<ParticleEmitter>::Iterator it = m_emitters.Begin(); !it.IsEnd(); ++it)
+	for (ParticleEmitter* pEmitter : m_emitters)
 	{
-		ParticleEmitter* pEmitter = (*it);
 		pEmitter->UpdateBuffers(pDevice);
 	}
 }
 
 void ParticleEffect::AddEmitter(GFXDevice* pDevice, ParticleEmitter* pEmitter)
 {
-	m_emitters.AddToEnd(pEmitter);
+	m_emitters.push_back(pEmitter);
 	RenderNode* pNode = (RenderNode*)pEmitter;
 	m_pRenderGroup->AddRenderNodes(pDevice, &pNode, 1);
 	pEmitter->SetScale(m_fScale);
@@ -182,7 +179,7 @@ void ParticleEffect::RemoveEmitter(ParticleEmitter* pEmitter)
 	{
 		m_pRenderGroup->RemoveRenderNode(pNode);
 	}
-	m_emitters.Remove(pEmitter);
+	m_emitters.remove(pEmitter);
 }
 
 bool ParticleEffect::IsAlive()

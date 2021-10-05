@@ -325,16 +325,15 @@ void NavigationGrid::FindPath(Waypoint* pStart, Waypoint* pEnd, usg::ai::Path& p
 	pStart->SetF(0.0f);
 
 	pStart->SetOpen(true);
-	m_openList.AddToEnd(pStart);
+	m_openList.push_back(pStart);
 	Waypoint* pCurrent = NULL;
 
-	while(m_openList.GetSize() > 0)
+	while(m_openList.size() > 0)
 	{
 		float fDistance = FLT_MAX;
 
-		for(List<Waypoint>::Iterator it = m_openList.Begin(); !it.IsEnd(); ++it)
+		for(Waypoint* pWp : m_openList)
 		{
-			Waypoint* pWp = (*it);
 			if(pWp->F() < fDistance)
 			{
 				pCurrent = pWp;
@@ -356,7 +355,7 @@ void NavigationGrid::FindPath(Waypoint* pStart, Waypoint* pEnd, usg::ai::Path& p
 			return;
 		}
 
-		m_openList.Remove(pCurrent);
+		m_openList.remove(pCurrent);
 		pCurrent->SetClosed(true);
 		pCurrent->SetOpen(false);
 
@@ -371,7 +370,7 @@ void NavigationGrid::FindPath(Waypoint* pStart, Waypoint* pEnd, usg::ai::Path& p
 
 				if(!pLinkWp->IsOpen())
 				{
-					m_openList.AddToFront(pLinkWp);
+					m_openList.push_front(pLinkWp);
 					pLinkWp->SetOpen(true);
 					pLinkWp->SetClosed(false);
 					bIsBetter = true;
@@ -605,7 +604,7 @@ void NavigationGrid::Reset() const
 	{
 		(*it)->Reset();
 	}
-	m_openList.Clear();
+	m_openList.clear();
 }
 
 void NavigationGrid::DebugDrawBlocks(Debug3D* pDebugRender) const

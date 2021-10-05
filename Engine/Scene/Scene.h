@@ -9,6 +9,7 @@
 #include "Engine/Maths/Vector3f.h"
 #include "Engine/Maths/Vector4f.h"
 #include "Engine/Maths/Matrix4x4.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
 #include "Engine/Debug/SceneDebugStats.h"
 #include "SceneRenderPasses.h"
@@ -27,8 +28,6 @@ class OffscreenRenderNode;
 class Camera;
 class LightMgr;
 class ParticleMgr;
-template<typename T>
-class List;
 class SceneContext;
 class ParticleEffectHndl;
 class RenderGroup;
@@ -87,7 +86,7 @@ public:
 	ParticleMgr&	GetParticleMgr();
 	const RenderPassHndl& GetShadowRenderPass() const;
 #ifndef FINAL_BUILD
-	List<SceneContext>& GetSceneContexts();
+	list<SceneContext*>& GetSceneContexts();
 #endif
 
 	const AABB&		GetWorldBounds() const;

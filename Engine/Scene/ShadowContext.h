@@ -39,7 +39,7 @@ private:
 
 	const Camera*			m_pCamera;
 	SceneSearchFrustum		m_searchObject;
-	List<RenderNode>		m_drawList;
+	list<RenderNode*>		m_drawList;
 	DescriptorSet			m_descriptorSet;
 	ConstantSet				m_globalConstants;
 };

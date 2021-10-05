@@ -50,14 +50,11 @@ void SockGameConnection::ForceDisconnect()
 
 void SockGameConnection::ClearGames()
 {
-	List<NetAvailableGame>::Iterator it = m_availableGames.Begin();
-	while (!it.IsEnd())
+	for(NetAvailableGame* game : m_availableGames)
 	{
-		NetAvailableGame* game = (*it);
 		m_gamePool.Free(game);
-		++it;
 	}
-	m_availableGames.Clear();
+	m_availableGames.clear();
 }
 
 void SockGameConnection::HostGame()
@@ -101,16 +98,17 @@ void SockGameConnection::LeaveGame()
 
 uint32 SockGameConnection::GetNumAvailableGames()
 {
-	return m_availableGames.GetSize();
+	return (uint32)m_availableGames.size();
 }
 
 // See if there is a better way to do this retrieval
 NetAvailableGame* SockGameConnection::GetAvailableGame(uint32 idx)
 {
-	List<NetAvailableGame>::Iterator it = m_availableGames.Begin();
+	list<NetAvailableGame*>::iterator it = m_availableGames.begin();
 	while (idx > 0)
 	{
 		++it;
+		idx--;
 	}
 
 	return (*it);
@@ -289,8 +287,8 @@ void SockGameConnection::AddOrUpdateGame(NetMessageGameAvailable* message)
 {
 	// See if this game already exists
 	NetAvailableGame* game = 0;
-	List<NetAvailableGame>::Iterator it = m_availableGames.Begin();
-	while (!it.IsEnd())
+	list<NetAvailableGame*>::iterator it = m_availableGames.begin();
+	while (it != m_availableGames.end())
 	{
 		NetAvailableGame* temp = (*it);
 		if (temp->gameUID == message->gameUID)
@@ -308,7 +306,7 @@ void SockGameConnection::AddOrUpdateGame(NetMessageGameAvailable* message)
 	// No match, add a new game to the list
 	game = m_gamePool.Alloc();
 	game->UpdateData(message);
-	m_availableGames.AddToEnd(game);
+	m_availableGames.push_back(game);
 
 }
 
@@ -316,8 +314,8 @@ void SockGameConnection::RemoveStaleGames()
 {
 	double currentTime = net_get_time();
 
-	List<NetAvailableGame>::Iterator it = m_availableGames.Begin();
-	while (!it.IsEnd())
+	list<NetAvailableGame*>::iterator it = m_availableGames.begin();
+	while (it != m_availableGames.end())
 	{
 		NetAvailableGame* game = (*it);
 		++it;
@@ -334,7 +332,7 @@ void SockGameConnection::RemoveStaleGames()
 
 			// Free and remove it
 			m_gamePool.Free(game);
-			m_availableGames.Remove(game);
+			m_availableGames.remove(game);
 		}
 	}
 }

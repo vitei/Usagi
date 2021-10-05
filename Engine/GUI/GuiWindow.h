@@ -8,7 +8,7 @@
 #ifndef _USG_GUI_GUI_WINDOW_H
 #define _USG_GUI_GUI_WINDOW_H
 
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Maths/Vector2f.h"
 #include "GuiMenuBar.h"
 #include "GuiItems.h"
@@ -44,7 +44,7 @@ namespace usg
 
 		GUIMenuBar& GetMenuBar() { return m_menuBar; }
 
-		List<GUIItem>& GetItems() { return m_items; }
+		list<GUIItem*>& GetItems() { return m_items; }
 	private:
 
 		Vector2f	m_vPosition;
@@ -57,7 +57,7 @@ namespace usg
 	
 
 		GUIMenuBar		m_menuBar;
-		List<GUIItem>	m_items;
+		list<GUIItem*>	m_items;
 
 	};
 

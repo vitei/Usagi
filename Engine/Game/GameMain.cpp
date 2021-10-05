@@ -10,7 +10,6 @@
 #include "Engine/Framework/ComponentGetter.h"
 #include "Engine/Framework/ComponentSystemInputOutputs.h"
 #include "Engine/Audio/Audio.h"
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Physics/PhysX.h"
@@ -158,7 +157,6 @@ bool InitInput()
 bool InitEngine(const char** dllModules, uint32 uModuleCount)
 {
 	mem::InitialiseDefault();
-	InitListMemory();
 	File::InitFileSystem();
 
 	usg::ModuleManager::Inst()->Create();

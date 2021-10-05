@@ -73,10 +73,10 @@ struct Scene::PIMPL
 	LightMgr					lightMgr;
 	FastPool<RenderGroup>		sceneComponents;
 	FastPool<ScTransformNode>	transformNodes;
-	List<SceneContext>			sceneContexts;
-	List<RenderGroup>			staticComponents;
-	usg::List<const Camera>		cameras;
-	usg::List<OffscreenRenderNode> offscreenNodes;
+	list<SceneContext*>			sceneContexts;
+	list<RenderGroup*>			staticComponents;
+	usg::list<const Camera*>	cameras;
+	usg::list<OffscreenRenderNode*> offscreenNodes;
 	Debug3D						debug3D;
 	ProfilingTimer				profileTimers[TIMER_COUNT];
 };
@@ -143,12 +143,12 @@ void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
 	if (uViewContext > GetViewContextCount())
 		return;
 
-	for (List<const Camera>::Iterator it = m_pImpl->cameras.Begin(); !it.IsEnd(); ++it)
+	for (auto itr : m_pImpl->cameras)
 	{
-		if ((*it)->GetID() == uCameraId)
+		if (itr->GetID() == uCameraId)
 		{
-			GetViewContext(uViewContext)->SetCamera((*it));
-			GetViewContext(uViewContext)->SetRenderMask((*it)->GetRenderMask());
+			GetViewContext(uViewContext)->SetCamera(itr);
+			GetViewContext(uViewContext)->SetRenderMask(itr->GetRenderMask());
 			return;
 		}
 	}
@@ -228,7 +228,7 @@ RenderGroup* Scene::CreateRenderGroup(const TransformNode* pTransform)
 	}
 	else
 	{
-		m_pImpl->staticComponents.AddToEnd(pSceneComponent);
+		m_pImpl->staticComponents.push_back(pSceneComponent);
 	}
 	return pSceneComponent;
 }
@@ -236,12 +236,12 @@ RenderGroup* Scene::CreateRenderGroup(const TransformNode* pTransform)
 
 void Scene::RegisterOffscreenRenderNode(OffscreenRenderNode* pNode)
 {
-	m_pImpl->offscreenNodes.AddToEnd(pNode);
+	m_pImpl->offscreenNodes.push_back(pNode);
 }
 
 void Scene::DeregisterOffscreenRenderNode(OffscreenRenderNode* pNode)
 {
-	m_pImpl->offscreenNodes.Remove(pNode);
+	m_pImpl->offscreenNodes.remove(pNode);
 }
 
 void Scene::UpdateMask(const TransformNode* pTransform, uint32 uMask)
@@ -271,7 +271,7 @@ void Scene::DeleteRenderGroup(RenderGroup* pRemove)
 	}
 	else
 	{
-		m_pImpl->staticComponents.Remove(pComponent);
+		m_pImpl->staticComponents.remove(pComponent);
 	}
 	pRemove->Cleanup();
 	m_pImpl->sceneComponents.Free(pComponent);
@@ -285,14 +285,14 @@ ViewContext* Scene::CreateViewContext(GFXDevice* pDevice)
 	{
 		pContext->InitDeviceData(pDevice);
 	}
-	m_pImpl->sceneContexts.AddToEnd(pContext);
+	m_pImpl->sceneContexts.push_back(pContext);
 	return pContext;
 }
 
 
 void Scene::DeleteViewContext(ViewContext* pRemove)
 {
-	m_pImpl->sceneContexts.Remove(pRemove);
+	m_pImpl->sceneContexts.remove(pRemove);
 	m_pImpl->viewContexts.Free(pRemove);
 }
 
@@ -327,7 +327,7 @@ OmniShadowContext* Scene::CreateOmniShadowContext(GFXDevice* pDevice)
 			pContext->InitDeviceData(pDevice);
 		}
 		pContext->SetScene(this);
-		m_pImpl->sceneContexts.AddToEnd(pContext);
+		m_pImpl->sceneContexts.push_back(pContext);
 	}
 
 	return pContext;
@@ -336,7 +336,7 @@ OmniShadowContext* Scene::CreateOmniShadowContext(GFXDevice* pDevice)
 
 void Scene::DeleteOmniShadowContext(OmniShadowContext* pRemove)
 {
-	m_pImpl->sceneContexts.Remove(pRemove);
+	m_pImpl->sceneContexts.remove(pRemove);
 	m_pImpl->omniShadowContexts.Free(pRemove);
 }
 
@@ -351,7 +351,7 @@ ShadowContext* Scene::CreateShadowContext(GFXDevice* pDevice)
 			pContext->InitDeviceData(pDevice);
 		}
 		pContext->SetScene(this);
-		m_pImpl->sceneContexts.AddToEnd(pContext);
+		m_pImpl->sceneContexts.push_back(pContext);
 	}
 
 	return pContext;
@@ -360,7 +360,7 @@ ShadowContext* Scene::CreateShadowContext(GFXDevice* pDevice)
 
 void Scene::DeleteShadowContext(ShadowContext* pRemove)
 {
-	m_pImpl->sceneContexts.Remove(pRemove);
+	m_pImpl->sceneContexts.remove(pRemove);
 	m_pImpl->shadowContexts.Free(pRemove);
 }
 
@@ -391,38 +391,37 @@ void Scene::PerformVisibilityTesting(GFXDevice* pDevice)
 	m_pImpl->octree.UpdateTransforms();
 
 	// Primary visibility list
-	for(List<SceneContext>::Iterator it = m_pImpl->sceneContexts.Begin(); !it.IsEnd(); ++it)
+	for(auto it : m_pImpl->sceneContexts)
 	{
-		if( (*it)->IsActive() )
+		if( it->IsActive() )
 		{
-			(*it)->ClearLists();
-			if((*it)->GetCamera())
+			it->ClearLists();
+			if(it->GetCamera())
 			{
-				m_activeView.BuildCameraFromModel((*it)->GetCamera()->GetModelMatrix());
-				m_pImpl->octree.GetVisibleList( (*it)->GetSearchObject() );
+				m_activeView.BuildCameraFromModel(it->GetCamera()->GetModelMatrix());
+				m_pImpl->octree.GetVisibleList( it->GetSearchObject() );
 			}
 			else
 			{
-				ASSERT((*it)->GetSphere());
+				ASSERT(it->GetSphere());
 				// Assuming this is our optimised point light path because there is no way in hell we want
 				// six contexts and 6 draw calls per point light (fuck you engins that do)
-				m_pImpl->octree.GetVisibleList( (*it)->GetSearchObject() );
+				m_pImpl->octree.GetVisibleList( it->GetSearchObject() );
 			}
 			uContextCount++;
 		}
 	}
 	
 
-	for(List<RenderGroup>::Iterator it = m_pImpl->staticComponents.Begin(); !it.IsEnd(); ++it)
+	for(RenderGroup* pGroup : m_pImpl->staticComponents )
 	{
 		bool bVisible = false;
-		RenderGroup* pGroup = (*it);
-		RenderGroup* pCmp = (*it);
-		for (List<SceneContext>::Iterator it = m_pImpl->sceneContexts.Begin(); !it.IsEnd(); ++it)
+		RenderGroup* pCmp = pGroup;
+		for (auto pSceneCtxt : m_pImpl->sceneContexts)
 		{
-			if( (*it)->GetRenderMask() & pGroup->GetRenderMask() )
+			if( pSceneCtxt->GetRenderMask() & pGroup->GetRenderMask() )
 			{
-				(*it)->AddToDrawList(pGroup);
+				pSceneCtxt->AddToDrawList(pGroup);
 				bVisible = true;
 			}
 		}
@@ -450,9 +449,9 @@ void Scene::PreUpdate()
 void Scene::PreDraw(GFXContext* pContext)
 {
 	m_pImpl->lightMgr.GlobalShadowRender(pContext, this);
-	for (auto itr = m_pImpl->offscreenNodes.Begin(); !itr.IsEnd(); ++itr)
+	for (auto itr : m_pImpl->offscreenNodes)
 	{
-		(*itr)->Draw(pContext);
+		itr->Draw(pContext);
 	}
 }
 
@@ -469,11 +468,11 @@ void Scene::Update(GFXDevice* pDevice)
 void Scene::UpdateSceneContexts(GFXDevice* pDevice)
 {
 	m_pImpl->profileTimers[TIMER_SCENE].ClearAndStart();
-	for(List<SceneContext>::Iterator it = m_pImpl->sceneContexts.Begin(); !it.IsEnd(); ++it)
+	for(auto it : m_pImpl->sceneContexts)
 	{
-		if( (*it)->IsActive() )
+		if( it->IsActive() )
 		{
-			(*it)->Update(pDevice);
+			it->Update(pDevice);
 		}
 	}
 	m_pImpl->profileTimers[TIMER_SCENE].Stop();
@@ -514,7 +513,7 @@ const Camera* Scene::GetSceneCamera(uint32 uIndex) const
 
 void Scene::AddCamera(const Camera* pCamera)
 {
-	if (m_pImpl->cameras.GetSize() == 0)
+	if (m_pImpl->cameras.size() == 0)
 	{
 		for (FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.Begin(); !it.IsEnd(); ++it)
 		{
@@ -525,12 +524,12 @@ void Scene::AddCamera(const Camera* pCamera)
 			}
 		}
 	}
-	m_pImpl->cameras.AddToEnd(pCamera);
+	m_pImpl->cameras.push_back(pCamera);
 }
 
 void Scene::RemoveCamera(const Camera* pCamera)
 {
-	m_pImpl->cameras.Remove(pCamera);
+	m_pImpl->cameras.remove(pCamera);
 }
 
 LightMgr& Scene::GetLightMgr()
@@ -574,7 +573,7 @@ void Scene::CreateScriptedEffect(const Matrix4x4& mMat, const char* szName, cons
 }
 
 #ifndef FINAL_BUILD
-List<SceneContext>& Scene::GetSceneContexts()
+list<SceneContext*>& Scene::GetSceneContexts()
 {
 	return m_pImpl->sceneContexts;
 }

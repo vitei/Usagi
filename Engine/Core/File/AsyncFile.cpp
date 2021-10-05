@@ -7,7 +7,7 @@
 #include "Engine/Core/File/AsyncFile.h"
 #include "Engine/Core/Thread/Thread.h"
 #include "Engine/Core/Thread/CriticalSection.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Core/Thread/MessageQueue.h"
 
 uint32 MAX_READ_REQUESTS = 5;
@@ -144,7 +144,7 @@ namespace usg
 
 		CriticalSection		m_criticalSection;
 		FastPool<AsyncFile>	m_fileThreads;
-		List<AsyncFile>		m_clearList;
+		list<AsyncFile*>	m_clearList;
 	};
 
 	static AsyncFileMgr* g_asyncFileMgr = NULL;
@@ -256,16 +256,16 @@ namespace usg
 		{
 			if ( (*it)->GetHndl().unique() && (*it)->IsThreadEnd())
 			{
-				m_clearList.AddToEnd((*it));
+				m_clearList.push_back((*it));
 			}
 		}
 
-		for (List<AsyncFile>::Iterator it = m_clearList.Begin(); !it.IsEnd(); ++it)
+		for (AsyncFile* pFile : m_clearList)
 		{
-			(*it)->JoinThread();	// It's over but we need to finalize it
-			m_fileThreads.Free((*it));
+			pFile->JoinThread();	// It's over but we need to finalize it
+			m_fileThreads.Free(pFile);
 		}
-		m_clearList.Clear();
+		m_clearList.clear();
 	}
 
 	bool AsyncFileMgr::IsSaveInProgress()

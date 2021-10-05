@@ -125,7 +125,7 @@ private:
 
 	SkeletalAnim::Modifier		m_modifiers[MAX_MODIFIERS];
 	uint32						m_uModifiers;
-	List<SkeletalAnimation>		m_activeAnims;	// Only valid during the update loop for now
+	list<SkeletalAnimation*>	m_activeAnims;	// Only valid during the update loop for now
 	ConditionInfo				m_conditions[MAX_CONDITIONS];
 	Context						m_context;
 	bool						m_bRecalculateWeighting;

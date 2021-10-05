@@ -5,7 +5,6 @@
 #ifndef _USG_FRAMEWORK_MODEL_MGR_
 #define _USG_FRAMEWORK_MODEL_MGR_
 
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Scene/Model/Model.h"
 #include "InstanceMgr.h"
 

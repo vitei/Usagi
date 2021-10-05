@@ -2,7 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Audio/AudioComponents.pb.h"
 #include "Engine/Audio/SoundFile.h"
 #include "Engine/Audio/AudioFilter.h"
@@ -116,13 +116,13 @@ void Audio::SetChannelConfig(ChannelConfig eChannelConfig)
 Audio::~Audio()
 {
 	// Kill all the sounds
-	List<SoundData> removeList;
+	list<SoundData*> removeList;
 	for(FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
 	{
-		removeList.AddToEnd(*it);
+		removeList.push_back(*it);
 	}
 
-	for (List<SoundData>::Iterator it = removeList.Begin(); !it.IsEnd(); ++it)
+	for (list<SoundData*>::iterator it = removeList.begin(); it != removeList.end(); ++it)
 	{
 		(*it)->hndl.Destroy(&(*it)->object);
 		(*it)->object.Reset();

@@ -9,7 +9,7 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Core/stl/Vector.h"
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Graphics/Color.h"
@@ -69,10 +69,10 @@ public:
 
 	Light*			CreateLight(GFXDevice* pDevice, ResourceMgr* pResMgr, const struct _LightSpec &spec);
 	
-	void			GetActiveDirLights(List<DirLight>& lightsOut) const; 
-	void			GetPointLightsInView(const Camera* pCamera, List<PointLight>& lightsOut) const;
-	void			GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& lightsOut) const;
-	void			GetProjectionLightsInView(const Camera* pCamera, List<ProjectionLight>& lightsOut) const;
+	void			GetActiveDirLights(list<DirLight*>& lightsOut) const;
+	void			GetPointLightsInView(const Camera* pCamera, list<PointLight*>& lightsOut) const;
+	void			GetSpotLightsInView(const Camera* pCamera, list<SpotLight*>& lightsOut) const;
+	void			GetProjectionLightsInView(const Camera* pCamera, list<ProjectionLight*>& lightsOut) const;
 	const Color&	GetAmbientLight() { return m_ambient; }
 
 	const Color& GetSkyColor() const { return m_skyColor; }

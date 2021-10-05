@@ -23,7 +23,6 @@
 #include "Engine/Resource/ResourceData.h"
 #include "Engine/Resource/ResourceDictionary.h"
 #include "Engine/Core/stl/vector.h"
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Resource/PakFile.h"
 #include <cstring>
@@ -457,7 +456,7 @@ void ResourceMgr::DebugPrintTimings()
 	DEBUG_PRINT("Protocol buffers Find: %f Load %f\n", m_pImpl->protocolBuffers.GetFindTime(), m_pImpl->protocolBuffers.GetLoadTime());
 	DEBUG_PRINT("Skeletal anims Find: %f Load %f\n", m_pImpl->skeletalAnims.GetFindTime(), m_pImpl->skeletalAnims.GetLoadTime());
 
-	for (List<ResourceDataBase>::Iterator it = m_pImpl->resourceSets.Begin(); !it.IsEnd(); ++it)
+	for (list<ResourceDataBase*>::Iterator it = m_pImpl->resourceSets.begin(); it != m_pImpl->resourceSets.end(); ++it)
 	{
 		(*it)->ClearTimers();
 	}

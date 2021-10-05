@@ -55,15 +55,15 @@ namespace usg
 
 	void ModelMgr::PreloadModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount)
 	{
-		List<Model> model;
+		list<Model*> model;
 		// First load the models
 		for(uint32 i=0; i<uCount; i++)
 		{
-			model.AddToEnd( GetModel(pResMgr, szModelName, bDynamic, bPerBoneCulling) );
+			model.push_back( GetModel(pResMgr, szModelName, bDynamic, bPerBoneCulling) );
 		}
 
 		// Now add them to the free list
-		for (List<Model>::Iterator it = model.Begin(); !it.IsEnd(); ++it)
+		for (list<Model*>::iterator it = model.begin(); it != model.end(); ++it)
 		{
 			Free( (*it));
 		}

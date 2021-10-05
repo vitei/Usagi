@@ -64,7 +64,7 @@ void OmniShadowContext::Init(const Sphere* sphere)
 
 void OmniShadowContext::ClearLists()
 {
-	m_drawList.Clear();
+	m_drawList.clear();
 	Inherited::ClearLists();
 }
 
@@ -117,16 +117,15 @@ void OmniShadowContext::Update(GFXDevice* pDevice)
 	m_globalConstants.UpdateData(pDevice);
 	m_descriptorSet.UpdateDescriptors(pDevice);
 
-	for (List<RenderGroup>::Iterator it = GetVisibleGroups().Begin(); !it.IsEnd(); ++it)
+	for (RenderGroup* pGroup : GetVisibleGroups())
 	{
-		RenderGroup* pGroup = *it;
 		uint32 uNodeCount = pGroup->GetLODEntryCount(0);
 		for(uint32 i=0; i < uNodeCount; i++ )
 		{
 			RenderNode* pNode = pGroup->GetLODRenderNode(0, i);
 			if( (pNode->GetRenderMask() & RenderMask::RENDER_MASK_SHADOW_CAST)!=0 )
 			{
-				m_drawList.AddToEnd(pNode);
+				m_drawList.push_back(pNode);
 			}
 		}
 	}
@@ -139,9 +138,8 @@ void OmniShadowContext::DrawScene(GFXContext* pContext)
 	RenderNode::RenderContext renderContext;
 	renderContext.eRenderPass = RenderNode::RENDER_PASS_DEPTH_OMNI;
 
-	for(List<RenderNode>::Iterator it = m_drawList.Begin(); !it.IsEnd(); ++it)
+	for(RenderNode* node : m_drawList)
 	{
-		RenderNode* node = (*it);
 		node->Draw(pContext, renderContext);
 	}
 }

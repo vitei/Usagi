@@ -404,7 +404,7 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
 	m_bActive = true;
 
 	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList(m_drawCtxt);
-	for(List<GUIWindow>::Iterator it = m_windows.Begin(); !it.IsEnd(); ++it)
+	for(list<GUIWindow*>::iterator it = m_windows.begin(); it != m_windows.end(); ++it)
 	{
 		bChanged = (*it)->UpdateAndAddToDrawList(m_drawCtxt) || bChanged;
 	}

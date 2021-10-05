@@ -112,7 +112,7 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 
-	List<DirLight> dirLights;
+	list<DirLight*> dirLights;
 	GetActiveDirLights(dirLights);
 
 	// Now find the most influential shadowed directional light and make it the first
@@ -293,9 +293,9 @@ void LightMgr::RemoveProjectionLight(ProjectionLight* pLight)
 }
 
 
-void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
+void LightMgr::GetActiveDirLights(list<DirLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	for(auto it = m_dirLights.GetActiveLights().begin(); it!=m_dirLights.GetActiveLights().end(); ++it)
 	{
 		if( (*it)->IsActive() )
@@ -303,23 +303,23 @@ void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
 			(*it)->SetVisibleFrame(m_uActiveFrame);
 			if ((*it)->GetShadowEnabled())
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 			else
 			{
-				lightsOut.AddToFront(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
 
-	lightsOut.Sort();
+	lightsOut.sort();
 }
 
 
 
-void LightMgr::GetPointLightsInView(const Camera* pCamera, List<PointLight>& lightsOut) const
+void LightMgr::GetPointLightsInView(const Camera* pCamera, list<PointLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_pointLights.GetActiveLights().begin(); it!=m_pointLights.GetActiveLights().end(); ++it)
 	{
@@ -329,16 +329,16 @@ void LightMgr::GetPointLightsInView(const Camera* pCamera, List<PointLight>& lig
 			if( !(*it)->HasAttenuation() || pCamera->GetFrustum().IsSphereInFrustum( (*it)->GetColSphere() ) )
 			{
 				(*it)->SetVisibleFrame(m_uActiveFrame);
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
 }
 
 
-void LightMgr::GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& lightsOut) const
+void LightMgr::GetSpotLightsInView(const Camera* pCamera, list<SpotLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_spotLights.GetActiveLights().begin(); it != m_spotLights.GetActiveLights().end(); ++it)
 	{
@@ -348,16 +348,16 @@ void LightMgr::GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& light
 			// TODO: These lights should be culled like every object in the game using a quad tree
 			if( !(*it)->HasAttenuation() || pCamera->GetFrustum().IsSphereInFrustum( (*it)->GetColSphere() ) )
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
 }
 
 
-void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionLight>& lightsOut) const
+void LightMgr::GetProjectionLightsInView(const Camera* pCamera, list<ProjectionLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_projLights.GetActiveLights().begin(); it != m_projLights.GetActiveLights().end(); ++it)
 	{
@@ -366,7 +366,7 @@ void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionL
 			(*it)->SetVisibleFrame(m_uActiveFrame);
 			if( (*it)->GetFrustum().ArePointsInFrustum( (*it)->GetCorners(), 8 ) )
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}

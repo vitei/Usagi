@@ -325,10 +325,10 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	ViewContext* pSceneCtxt = m_pSys->GetActiveViewContext();
 
-	uint32 uLightCount = 0;
-	const List<DirLight>& dirLights = pSceneCtxt->GetLightingContext().GetActiveDirLights();
+	memsize uLightCount = 0;
+	const list<DirLight*>& dirLights = pSceneCtxt->GetLightingContext().GetActiveDirLights();
 
-	uLightCount = dirLights.GetSize();
+	uLightCount = dirLights.size();
 
 	pContext->SetRenderTarget(m_pDestTarget);
 	// Set the textures for the G buffer to be read from
@@ -355,7 +355,7 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	{
 		uint32 uLightIndex = 0;
 		uint32 uShadowIndex = 0;
-		for (List<DirLight>::Iterator it = dirLights.Begin(); !it.IsEnd(); ++it)
+		for (auto it = dirLights.begin(); it != dirLights.end(); ++it)
 		{
 			if ((*it)->GetShadowEnabled())
 			{
@@ -392,8 +392,8 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	mesh.pVB = &m_sphereVB;
 	mesh.pIB = &m_sphereIB;
 	
-	const List<PointLight>& pointLights = pSceneCtxt->GetLightingContext().GetPointLightsInView();
-	for(List<PointLight>::Iterator it = pointLights.Begin(); !it.IsEnd(); ++it)
+	const list<PointLight*>& pointLights = pSceneCtxt->GetLightingContext().GetPointLightsInView();
+	for(auto it = pointLights.begin(); it != pointLights.end(); ++it)
 	{
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
 		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
@@ -418,8 +418,8 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 	mesh.pVB = &m_coneVB;
 	mesh.pIB = &m_coneIB;
 
-	const List<SpotLight>& spotLights = pSceneCtxt->GetLightingContext().GetSpotLightsInView();
-	for (List<SpotLight>::Iterator it = spotLights.Begin(); !it.IsEnd(); ++it)
+	const list<SpotLight*>& spotLights = pSceneCtxt->GetLightingContext().GetSpotLightsInView();
+	for (auto it = spotLights.begin(); it != spotLights.end(); ++it)
 	{
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
 		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
@@ -462,12 +462,12 @@ void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 	mesh.pIB = &m_frustumIB;
 
 
-	const List<ProjectionLight>& projLights = pSceneCtxt->GetLightingContext().GetProjLightsInView();
-	for (List<ProjectionLight>::Iterator it = projLights.Begin(); !it.IsEnd(); ++it)
+	const list<ProjectionLight*>& projLights = pSceneCtxt->GetLightingContext().GetProjLightsInView();
+	for (auto it : projLights)
 	{
-		ProjectionLight* pLight = (*it);
-		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
-		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
+		ProjectionLight* pLight = it;
+		mesh.pDescriptorSet = it->GetDescriptorSet(false);
+		mesh.pShadowDescriptorSet = it->GetDescriptorSet(true);
 
 		// Tex reads are at 1
 		pContext->SetDescriptorSet(mesh.pDescriptorSet, 2);
@@ -488,11 +488,11 @@ void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 
 		if(!bOnFarPlane)
 		{
-			DrawLightVolume(pContext, mesh, m_projShaders, true, (*it)->GetShadowEnabled());
+			DrawLightVolume(pContext, mesh, m_projShaders, true, it->GetShadowEnabled());
 		}
 		else
 		{
-			DrawLightVolumeFarPlane(pContext, mesh, m_projShaders, true, (*it)->GetShadowEnabled());
+			DrawLightVolumeFarPlane(pContext, mesh, m_projShaders, true, it->GetShadowEnabled());
 		}
 	}
 	pContext->EndGPUTag();

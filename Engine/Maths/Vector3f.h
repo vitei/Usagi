@@ -67,6 +67,8 @@ public:
 	Vector3f operator*( const Matrix4x4 &rhs ) const;
 	Vector3f operator*( const Matrix3x3 &rhs ) const;
 	Vector3f operator*( const Quaternionf &rhs ) const;
+	Vector3f operator/(const Vector3f& disVector) const;
+
 
 	Vector3f operator-() const;
 
@@ -175,6 +177,12 @@ inline bool Vector3f::operator!=(const Vector3f &compVector3f) const
 	return true;
 
 }
+
+inline Vector3f Vector3f::operator /(const Vector3f& scaleVector) const
+{
+	return Vector3f(x / scaleVector.x, y / scaleVector.y, z / scaleVector.z);
+}
+
 
 inline Vector3f operator*( float scalarValue, const Vector3f &multVector )
 {

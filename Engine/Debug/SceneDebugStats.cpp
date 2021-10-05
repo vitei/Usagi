@@ -187,19 +187,19 @@ namespace usg {
 		pRender->AddString("Scene Info", 0.0f, 0.0f, cTitleCol);
 		usg::string tmpString;
 
-		List<SceneContext>& sceneContexts = m_pScene->GetSceneContexts();
+		list<SceneContext*>& sceneContexts = m_pScene->GetSceneContexts();
 
-		uint32 uContextCount = sceneContexts.GetSize();
+		memsize uContextCount = sceneContexts.size();
 		tmpString = str::ParseString("Number of scenes: %d", uContextCount);
 		pRender->AddString(tmpString.c_str(), 0.0f, fPos, cTextCol);
 
 		fPos += 2.0f;
 		uint32 uContext = 0;
-		for (List<SceneContext>::Iterator it = sceneContexts.Begin(); !it.IsEnd(); ++it)
+		for (auto it : sceneContexts)
 		{
-			if ((*it)->IsActive())
+			if (it->IsActive())
 			{
-				tmpString = str::ParseString("Scene Context: %d showing %d / %d cullable items", uContext, (*it)->GetVisiblePVSCount(), m_pScene->GetPVSCount());
+				tmpString = str::ParseString("Scene Context: %d showing %d / %d cullable items", uContext, it->GetVisiblePVSCount(), m_pScene->GetPVSCount());
 				pRender->AddString(tmpString.c_str(), 0.0f, fPos, cStatCol);
 				fPos += 1.0f;
 			}

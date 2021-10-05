@@ -9,22 +9,24 @@
 
 namespace usg{
 
-ParticleMgr::EmitterInstances::EmitterInstances() :  m_activeEmitters(10), m_freeEmitters(10), m_uPreloadCount(0)
+ParticleMgr::EmitterInstances::EmitterInstances() :  m_uPreloadCount(0)
 {
 
 }
 
 ParticleMgr::EmitterInstances::~EmitterInstances()
 {
-	for (List<ScriptEmitter>::Iterator it = m_freeEmitters.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_freeEmitters)
 	{
-		vdelete *it;
+		vdelete it;
 	}
+	m_freeEmitters.clear();
 
-	for (List<ScriptEmitter>::Iterator it = m_activeEmitters.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_activeEmitters) 
 	{
-		vdelete *it;
+		vdelete it;
 	}
+	m_activeEmitters.clear();
 }
 
 void ParticleMgr::EmitterInstances::Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName)
@@ -35,14 +37,14 @@ void ParticleMgr::EmitterInstances::Init(GFXDevice* pDevice, ParticleMgr& mgr, c
 
 void ParticleMgr::EmitterInstances::Cleanup(GFXDevice* pDevice)
 {
-	for (List<ScriptEmitter>::Iterator it = m_freeEmitters.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_freeEmitters) 
 	{
-		(*it)->Cleanup(pDevice);
+		it->Cleanup(pDevice);
 	}
 
-	for (List<ScriptEmitter>::Iterator it = m_activeEmitters.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_activeEmitters)
 	{
-		(*it)->Cleanup(pDevice);
+		it->Cleanup(pDevice);
 	}
 }
 
@@ -58,32 +60,36 @@ void ParticleMgr::EmitterInstances::ClearPreloadCount()
 
 ScriptEmitter* ParticleMgr::EmitterInstances::GetInstance(GFXDevice* pDevice, ParticleMgr& mgr)
 {
-	ScriptEmitter* pEmitter = m_freeEmitters.PopFront();
+	ScriptEmitter* pEmitter = m_freeEmitters.front();
 	if (!pEmitter)
 	{
 		pEmitter = vnew(ALLOC_PARTICLES) ScriptEmitter();
 		pEmitter->Alloc(pDevice, &mgr, m_name.c_str());
 	}
-	m_activeEmitters.AddToFront(pEmitter);
+	else
+	{
+		m_freeEmitters.pop_front();
+	}
+	m_activeEmitters.push_front(pEmitter);
 
 	return pEmitter;
 }
 
 void ParticleMgr::EmitterInstances::FreeInstance(ScriptEmitter* pInstance)
 {
-	m_activeEmitters.Remove(pInstance);
-	m_freeEmitters.AddToFront(pInstance);
+	m_activeEmitters.remove(pInstance);
+	m_freeEmitters.push_front(pInstance);
 }
 
 void ParticleMgr::EmitterInstances::PreloadInstances(GFXDevice* pDevice, ParticleMgr& mgr)
 {
-	if (m_freeEmitters.GetSize() == 0)
+	if (m_freeEmitters.size() == 0)
 	{
 		for (uint32 i = 0; i < m_uPreloadCount; i++)
 		{
 			ScriptEmitter* pEmitter = vnew(ALLOC_PARTICLES) ScriptEmitter();
 			pEmitter->Alloc(pDevice, &mgr, m_name.c_str());
-			m_freeEmitters.AddToFront(pEmitter);
+			m_freeEmitters.push_front(pEmitter);
 		}
 	}
 }
@@ -154,14 +160,14 @@ m_effects(uMaxEffects)
 
 ParticleMgr::~ParticleMgr()
 {
-	for(List<RibbonTrail>::Iterator it = m_freeRibbons.Begin(); !it.IsEnd(); ++it)
+	for(auto itr : m_freeRibbons)
 	{
-		vdelete *it;
+		vdelete itr;
 	}
 
-	for(List<RibbonTrail>::Iterator it = m_activeRibbons.Begin(); !it.IsEnd(); ++it)
+	for(auto itr : m_activeRibbons)
 	{
-		vdelete *it;
+		vdelete itr;
 	}
 }
 
@@ -192,14 +198,14 @@ void ParticleMgr::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	}
 
 
-	for (List<RibbonTrail>::Iterator it = m_freeRibbons.Begin(); !it.IsEnd(); ++it)
+	for( auto itr : m_freeRibbons )
 	{
-		(*it)->Cleanup(pDevice);
+		itr->Cleanup(pDevice);
 	}
 
-	for (List<RibbonTrail>::Iterator it = m_activeRibbons.Begin(); !it.IsEnd(); ++it)
+	for (auto itr : m_activeRibbons)
 	{
-		(*it)->Cleanup(pDevice);
+		itr->Cleanup(pDevice);
 	}
 
 
@@ -312,12 +318,12 @@ ParticleEffectHndl ParticleMgr::CreateEffect(const Matrix4x4& mMat, const Vector
 		{
 			RibbonTrail* pTrail = NULL;
 			const particles::RibbonData& ribbon = resHndl->GetEffectGroup().ribbons[i];
-			for(List<RibbonTrail>::Iterator it = m_freeRibbons.Begin(); !it.IsEnd(); ++it)
+			for (list<RibbonTrail*>::iterator it = m_freeRibbons.begin(); it != m_freeRibbons.end(); ++it)
 			{
 				if((*it)->IsLargeEnough(ribbon))
 				{
 					pTrail = (*it);
-					m_freeRibbons.Remove(pTrail);
+					m_freeRibbons.remove(pTrail);
 					pTrail->SetDeclaration(m_pDevice, &ribbon);
 					break;
 				}
@@ -331,7 +337,7 @@ ParticleEffectHndl ParticleMgr::CreateEffect(const Matrix4x4& mMat, const Vector
 
 			pEffectData->effect.AddEmitter(m_pDevice, pTrail);
 
-			m_activeRibbons.AddToEnd(pTrail);
+			m_activeRibbons.push_back(pTrail);
 		}
 
 		
@@ -378,8 +384,8 @@ void ParticleMgr::FreeScriptedEffect(ScriptEmitter* pEmitter)
 
 void ParticleMgr::FreeRibbon(RibbonTrail* pRibbon)
 {
-	m_freeRibbons.AddToEnd(pRibbon);
-	m_activeRibbons.Remove(pRibbon);
+	m_freeRibbons.push_back(pRibbon);
+	m_activeRibbons.remove(pRibbon);
 }
 
 ParticleMgr::EffectResources* ParticleMgr::GetEffectResource(GFXDevice* pDevice, const char* szName)

@@ -8,7 +8,7 @@
 #define NET_MESSAGE_DISPATCH_H
 
 #include "Engine/Core/Containers/StringPointerHash.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Core/ProtocolBuffers.h"
 #include "MessageWithHeader.h"
 
@@ -36,7 +36,7 @@ private:
 	friend class Messenger;
 	friend class NetClient;
 
-	StringPointerHash< List<MessageCallback>* >  m_pbMessageCallbacks;
+	StringPointerHash< list<MessageCallback*>* >  m_pbMessageCallbacks;
 
 	void *m_memPoolBuffer;
 	MemHeap m_memPool;
@@ -136,26 +136,26 @@ void MessageDispatch::RegisterCallback(CallbackType cb)
 	MessageCallbackGen<T, CallbackType>* callback = new (bytes) MessageCallbackGen<T, CallbackType>(cb);
 
 	string_crc key(ProtocolBufferFields<T>::ID);
-	List<MessageCallback>* registeredCBs = m_pbMessageCallbacks.Get(key);
+	list<MessageCallback*>* registeredCBs = m_pbMessageCallbacks.Get(key);
 
 	if(registeredCBs == NULL)
 	{
-		void* listBytes = m_memPool.Allocate(sizeof(List<MessageCallback>), 4, 0, ALLOC_NETWORK);
-		registeredCBs = new(listBytes) List<MessageCallback>(16);
+		void* listBytes = m_memPool.Allocate(sizeof(list<MessageCallback>), 4, 0, ALLOC_NETWORK);
+		registeredCBs = new(listBytes) list<MessageCallback*>(16);
 		m_pbMessageCallbacks.Insert(key, registeredCBs);
 	}
 
-	registeredCBs->AddToEnd(callback);
+	registeredCBs->push_back(callback);
 }
 
 template<typename T>
 void MessageDispatch::FireMessage(T& pb)
 {
 	string_crc key(ProtocolBufferFields<T>::ID);
-	List<MessageCallback>* registeredCBs = m_pbMessageCallbacks.Get(key);
+	list<MessageCallback*>* registeredCBs = m_pbMessageCallbacks.Get(key);
 	if(registeredCBs != NULL)
 	{
-		for(List<MessageCallback>::Iterator it = registeredCBs->Begin(); !it.IsEnd(); ++it)
+		for(list<MessageCallback*>::iterator it = registeredCBs->begin(); it != registeredCBs->end(); ++it)
 		{
 			MessageCallbackDecoded<T>& cb = *(MessageCallbackDecoded<T>*)*it;
 			cb(pb);

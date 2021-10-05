@@ -1,11 +1,11 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright ï¿½ Vitei, Inc. 2013
 //	Description: Classes for the various animation state motion types
 *****************************************************************************/
 #ifndef _USG_SCENE_MODEL_MODEL_ANIM_MOTION_H_
 #define _USG_SCENE_MODEL_MODEL_ANIM_MOTION_H_
 
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/TransformNode.h"
 #include "Engine/Resource/SkeletonResource.h"
@@ -32,7 +32,7 @@ namespace usg
 		virtual uint32 GetActiveAnimCount() const = 0;
 		virtual SkeletalAnimation* GetAnim(uint32 uIndex) = 0;
 		virtual void SetSpeedMultiplier(float fMultiplier) = 0;
-		void AppendToAnimList(List<SkeletalAnimation>& list);
+		void AppendToAnimList(list<SkeletalAnimation*>& list);
 		void Reset();
 		bool IsBoneReferenced(uint32 uBoneId);
 		void Play();

@@ -8,7 +8,7 @@
 
 #include <Engine/Network/NetGameConnection.h>
 #include "Engine/Network/NetAvailableGames.h"
-#include <Engine/Core/Containers/List.h>
+#include "Engine/Core/stl/list.h"
 #include <Engine/Memory/FastPool.h>
 
 #define NET_GAME_INVALID_GAME_ID (-1)
@@ -65,7 +65,7 @@ private:
 	float m_handshakeTimer;
 	sint64 m_attemptingToConnectGameID;
 	float m_attemptingToDisconnectTimer;
-	List<NetAvailableGame> m_availableGames;
+	list<NetAvailableGame*> m_availableGames;
 	FastPool<NetAvailableGame> m_gamePool;
 
 	friend class SockMessageHandler;

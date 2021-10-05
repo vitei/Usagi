@@ -59,8 +59,8 @@ protected:
 	private:
 		ParticleEmitterResHndl		m_resHndl;
 		usg::string					m_name;
-		List<ScriptEmitter>			m_activeEmitters;
-		List<ScriptEmitter>			m_freeEmitters;
+		list<ScriptEmitter*>		m_activeEmitters;
+		list<ScriptEmitter*>		m_freeEmitters;
 		uint32						m_uPreloadCount;
 	};
 
@@ -95,8 +95,8 @@ protected:
 	FastPool<EffectResources>	m_effectResources;
 	FastPool<EffectData>		m_effects;
 
-	List<RibbonTrail>			m_activeRibbons;
-	List<RibbonTrail>			m_freeRibbons;
+	list<RibbonTrail*>			m_activeRibbons;
+	list<RibbonTrail*>			m_freeRibbons;
 };
 
 }

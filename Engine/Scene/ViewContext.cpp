@@ -384,9 +384,8 @@ namespace usg {
 		fFOVBias = fFOVBias * fFOVBias * m_fLODBias;
 
 		uint32 uLodId;
-		for (List<RenderGroup>::Iterator it = GetVisibleGroups().Begin(); !it.IsEnd(); ++it)
+		for (RenderGroup* pGroup : GetVisibleGroups())
 		{
-			RenderGroup* pGroup = *it;
 			if (pGroup->GetLod(vCameraPos, uLodId, fFOVBias))
 			{
 				uint32 uNodeCount = pGroup->GetLODEntryCount(uLodId);

@@ -34,7 +34,7 @@ namespace usg
 
 	void EventManager::AddToEventQueue(TriggerableEvent* evt)
 	{
-		m_eventQueue.AddToEnd(evt);
+		m_eventQueue.push_back(evt);
 	}
 
 	float64 EventManager::GetServerTimePrecise()
@@ -60,7 +60,7 @@ namespace usg
 			void* buffer = evtManager.m_heap.Allocate(sizeof(GenericEventOnNetworkEntity), 4, 0, ALLOC_EVENT);
 			ASSERT(buffer != nullptr);
 			GenericEventOnNetworkEntity* pGenericEvent = new (buffer) GenericEventOnNetworkEntity(header.target.nuid, evt, header.target.targets, header.time);
-			evtManager.m_eventQueue.AddToEnd(pGenericEvent);
+			evtManager.m_eventQueue.push_back(pGenericEvent);
 		}
 		else
 		{
@@ -78,7 +78,7 @@ namespace usg
 			void* buffer = evtManager.m_heap.Allocate(sizeof(GenericEvent), 4, 0, ALLOC_EVENT);
 			ASSERT(buffer != nullptr);
 			GenericEvent* pGenericEvent = new (buffer) GenericEvent(evt, header.time);
-			evtManager.m_eventQueue.AddToEnd(pGenericEvent);
+			evtManager.m_eventQueue.push_back(pGenericEvent);
 		}
 	}
 
@@ -144,25 +144,25 @@ EventManager::EventManager()
 
 EventManager::~EventManager()
 {
-	for (EventQueue::Iterator eventIterator = m_eventQueue.Begin(); !eventIterator.IsEnd();)
+	for (auto eventIterator = m_eventQueue.begin(); eventIterator != m_eventQueue.end(); ++eventIterator)
 	{
 		TriggerableEvent* evt = *eventIterator;
 		m_heap.Deallocate(evt);
 	}
-	m_eventQueue.Clear();
+	m_eventQueue.clear();
 
 	mem::Free(m_pMem);
 }
 
 void EventManager::Clear()
 {
-	for (EventQueue::Iterator eventIterator = m_eventQueue.Begin() ; !eventIterator.IsEnd();)
+	for (auto eventIterator = m_eventQueue.begin(); eventIterator != m_eventQueue.end(); )
 	{
 		TriggerableEvent* evt = *eventIterator;
 		m_heap.Deallocate(evt);
-		eventIterator = m_eventQueue.Erase(eventIterator);
+		eventIterator = m_eventQueue.erase(eventIterator);
 	}
-	m_eventQueue.Clear();
+	m_eventQueue.clear();
 
 	m_heap.FreeGroup(0);
 	m_messenger = nullptr;
@@ -178,7 +178,7 @@ void EventManager::TriggerEventsForEntity(SystemCoordinator& systemCoordinator, 
 {
 	ASSERT(e != nullptr);
 	const float64 now = GetTimeNow();
-	for (EventQueue::Iterator eventIterator = m_eventQueue.Begin(); !eventIterator.IsEnd();)
+	for (auto eventIterator = m_eventQueue.begin(); eventIterator != m_eventQueue.end();)
 	{
 		TriggerableEvent* evt = *eventIterator;
 		if (evt->time <= now && e == evt->GetEntity())
@@ -187,7 +187,7 @@ void EventManager::TriggerEventsForEntity(SystemCoordinator& systemCoordinator, 
 			evt->~TriggerableEvent();
 			m_heap.Deallocate(evt);
 
-			eventIterator = m_eventQueue.Erase(eventIterator);
+			eventIterator = m_eventQueue.erase(eventIterator);
 		}
 		else
 		{
@@ -199,8 +199,8 @@ void EventManager::TriggerEventsForEntity(SystemCoordinator& systemCoordinator, 
 void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame)
 {
 	const float64 now = GetTimeNow();
-	for( EventQueue::Iterator eventIterator = m_eventQueue.Begin()
-	   ; !eventIterator.IsEnd()
+	for( auto eventIterator = m_eventQueue.begin()
+	   ; eventIterator != m_eventQueue.end()
 	   ; )
 	{
 		TriggerableEvent* evt = *eventIterator;
@@ -212,7 +212,7 @@ void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity ro
 				evt->~TriggerableEvent();
 				m_heap.Deallocate(evt);
 
-				eventIterator = m_eventQueue.Erase(eventIterator);
+				eventIterator = m_eventQueue.erase(eventIterator);
 			}
 			else
 			{
@@ -229,7 +229,7 @@ void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity ro
 void EventManager::RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount)
 {
 	double now = GetTimeNow();
-	for (EventQueue::Iterator eventIterator = m_eventQueue.Begin(); !eventIterator.IsEnd(); )
+	for (EventQueue::iterator eventIterator = m_eventQueue.begin(); eventIterator != m_eventQueue.end(); )
 	{
 		TriggerableEvent* evt = *eventIterator;	
 		Entity evtEntity = evt->GetEntity();
@@ -244,7 +244,7 @@ void EventManager::RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount)
 		{
 			if (evtEntity == pEntities[i])
 			{
-				eventIterator = m_eventQueue.Erase(eventIterator);
+				eventIterator = m_eventQueue.erase(eventIterator);
 				bFound = true;
 				break;
 			}

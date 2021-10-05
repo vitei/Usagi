@@ -8,7 +8,7 @@
 #ifndef _USG_GRAPHICS_SCENE_SCENECONTEXT_H_
 #define _USG_GRAPHICS_SCENE_SCENECONTEXT_H_
 
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Scene/Octree.h"
 #include "Engine/Scene/RenderGroup.h"
 
@@ -47,14 +47,14 @@ public:
 	const Scene* GetScene() const { return m_pScene; }
 	Scene* GetScene() { return m_pScene; }
 	uint32 GetVisiblePVSCount() const { return m_uVisiblePVSCount; }
-	uint32 GetVisibleGroupCount() const { return m_visibleGroups.GetSize(); }
+	uint32 GetVisibleGroupCount() const { return (uint32)m_visibleGroups.size(); }
 
 	virtual Octree::SearchObject& GetSearchObject() = 0;
 
 protected:
 	void SetDeviceDataLoaded() { m_bDeviceDataValid = true; }
 	void Init(const Camera* pCamera, uint32 uRenderMask);
-	List<RenderGroup>&	GetVisibleGroups() { return m_visibleGroups; }
+	list<RenderGroup*>&	GetVisibleGroups() { return m_visibleGroups; }
 
 private:
 	uint32					m_uVisiblePVSCount;
@@ -64,7 +64,7 @@ private:
 	bool					m_bDeviceDataValid;
 
 	// The visible lists for this context
-	List<RenderGroup>		m_visibleGroups;
+	list<RenderGroup*>		m_visibleGroups;
 };
 
 inline void SceneContext::AddToDrawList(RenderGroup* pGroup)
@@ -73,7 +73,7 @@ inline void SceneContext::AddToDrawList(RenderGroup* pGroup)
 	if(pGroup->GetTransform()!=NULL)
 		m_uVisiblePVSCount++;
 	#endif
-	m_visibleGroups.AddToEnd(pGroup);
+	m_visibleGroups.push_back(pGroup);
 }
 
 }
