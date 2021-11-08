@@ -17,7 +17,9 @@ static const Mapping g_textureTypeMappings[]
 	{ "sampler2D", usg::TD_TEXTURE2D },
 	{ "sampler1D", usg::TD_TEXTURE1D },
 	{ "samplerCube", usg::TD_TEXTURECUBE },
-	{ "sampler3D", usg::TD_TEXTURE3D }
+	{ "sampler3D", usg::TD_TEXTURE3D },
+	{ "sampler2DArray", usg::TD_TEXTURE2DARRAY },
+	{ nullptr, USG_INVALID_ID }
 };
 
 static const Mapping g_constantMappings[]
@@ -110,7 +112,7 @@ uint32 GetType(const char* szTypeName, const Mapping* pMapping)
 		pMapping++;
 	}
 
-	ASSERT(false);
+	FATAL_RELEASE(false, "Invalid type %s\n", szTypeName);
 	return 0;
 }
 
@@ -125,7 +127,7 @@ const char* GetType(uint32 uType, const Mapping* pMapping)
 		pMapping++;
 	}
 
-	ASSERT(false);
+	FATAL_RELEASE(false, "Invalid type %d\n", uType);
 	return nullptr;
 }
 
@@ -193,7 +195,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 		switch (uConstantType)
 		{
 		case usg::CT_MATRIX_44:
-			ASSERT(node.size() == 16);
+			FATAL_RELEASE(node.size() == 16, "Default data contains %d entries, expected 16", node.size());
 			for (uint32 i = 0; i < 16; i++)
 			{
 				float value = node[i].as<float>();
@@ -202,7 +204,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_MATRIX_43:
-			ASSERT(node.size() == 12);
+			FATAL_RELEASE(node.size() == 12, "Default data contains %d entries, expected 12", node.size());
 			for (uint32 i = 0; i < 12; i++)
 			{
 				float value = node[i].as<float>();
@@ -211,7 +213,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR_4:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				float value = node[i].as<float>();
@@ -220,7 +222,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR_3:
-			ASSERT(node.size() == 3);
+			FATAL_RELEASE(node.size() == 3, "Default data contains %d entries, expected 3", node.size());
 			for (uint32 i = 0; i < 3; i++)
 			{
 				float value = node[i].as<float>();
@@ -229,7 +231,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR4I:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				int value = node[i].as<int>();
@@ -238,7 +240,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR4U:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				uint32 value = node[i].as<uint32>();
@@ -248,7 +250,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			break;
 
 		case usg::CT_VECTOR_2:
-			ASSERT(node.size() == 2);
+			FATAL_RELEASE(node.size() == 2, "Default data contains %d entries, expected 2", node.size());
 			for (uint32 i = 0; i < 2; i++)
 			{
 				float value = node[i].as<float>();
@@ -278,7 +280,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			break;
 		}
 		default:
-			ASSERT(false);
+			RELEASE_WARNING("No default data for %d\n", uConstantType);
 		}
 
 		for (uint32 i = 1; i < uConstantCount; i++)
@@ -688,6 +690,10 @@ int MaterialDefinitionExporter::Load(const char* path, const char* effect, const
 	{
 		std::string customFXString = effectNode["custom_effect"].as<std::string>();
 		customFXNode = customFX[customFXString];
+		if(customFXNode.IsNull())
+		{
+			RELEASE_WARNING("Could not find custom effect %s", customFXString.c_str());
+		}
 	}
 	else
 	{
