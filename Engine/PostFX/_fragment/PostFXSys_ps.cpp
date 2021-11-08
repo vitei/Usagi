@@ -141,24 +141,24 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	bool bDeferred = (uInitFlags&PostFXSys::EFFECT_DEFERRED_SHADING)!=0;
 	SampleCount eSamples = SAMPLE_COUNT_1_BIT;			
 
-	m_colorBuffer[BUFFER_HDR_0].Init(pDevice, uWidth, uHeight, CF_RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
-	m_colorBuffer[BUFFER_HDR_1].Init(pDevice, uWidth, uHeight, CF_RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
-	m_colorBuffer[BUFFER_LIN_DEPTH].Init(pDevice, uWidth, uHeight,  CF_R_16F, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 1);
+	m_colorBuffer[BUFFER_HDR_0].Init(pDevice, uWidth, uHeight, ColorFormat::RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
+	m_colorBuffer[BUFFER_HDR_1].Init(pDevice, uWidth, uHeight, ColorFormat::RGB_HDR, eSamples, uFinalTransferFlags | TU_FLAGS_OFFSCREEN_COLOR, 0);
+	m_colorBuffer[BUFFER_LIN_DEPTH].Init(pDevice, uWidth, uHeight, ColorFormat::R_16F, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 1);
 
 	// We don't have enough memory for 1080p if we put this in fast memory too
-	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
-	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
 
 
-	m_depthStencil.Init(pDevice, uWidth, uHeight, DF_DEPTH_24_S8, eSamples, TU_FLAGS_DEPTH_BUFFER | ((uInitFlags&PostFXSys::EFFECT_SMAA) ? TU_FLAG_SHADER_READ : 0));
+	m_depthStencil.Init(pDevice, uWidth, uHeight, DepthFormat::DEPTH_24_S8, eSamples, TU_FLAGS_DEPTH_BUFFER | ((uInitFlags&PostFXSys::EFFECT_SMAA) ? TU_FLAG_SHADER_READ : 0));
 
 
 	if(bDeferred)
 	{
-		m_colorBuffer[BUFFER_DIFFUSE].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 0); // 4th component is specular power
-		m_colorBuffer[BUFFER_NORMAL].Init(pDevice, uWidth, uHeight, CF_NORMAL, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 2);
-		m_colorBuffer[BUFFER_EMISSIVE].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 3);
-		m_colorBuffer[BUFFER_SPECULAR].Init(pDevice, uWidth, uHeight, CF_RGBA_5551, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 4);
+		m_colorBuffer[BUFFER_DIFFUSE].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 0); // 4th component is specular power
+		m_colorBuffer[BUFFER_NORMAL].Init(pDevice, uWidth, uHeight, ColorFormat::NORMAL, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 2);
+		m_colorBuffer[BUFFER_EMISSIVE].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 3);
+		m_colorBuffer[BUFFER_SPECULAR].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_5551, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 4);
 	}
 	
 

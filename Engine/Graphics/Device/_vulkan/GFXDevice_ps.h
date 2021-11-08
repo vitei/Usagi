@@ -72,7 +72,7 @@ public:
 	VkQueue GetQueue() { return m_queue[QUEUE_TYPE_GRAPHICS]; }
 	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
-	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
+	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[(uint32)eFormat]; }
 	ColorFormat GetUSGFormat(VkFormat eFormat);
 
 	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
@@ -156,7 +156,7 @@ private:
 
 
 	usg::queue<DestroyRequest>			m_destroyQueue;
-	VkFormat							m_colorFormats[CF_COUNT];
+	VkFormat							m_colorFormats[ColorFormat::COUNT];
 
 	GFXDevice*							m_pParent;
 	VkFence								m_drawFence;

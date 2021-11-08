@@ -286,13 +286,13 @@ void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidt
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices, uint32 uTextureFlags)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(uTextureFlags);
-	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
 void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
-	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
 
@@ -355,10 +355,10 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	// Only raw 3/4byte images for now
 	switch (eFormat)
 	{
-	case CF_RGB_888:
+	case ColorFormat::RGB_888:
 		m_uBpp = 3; break;
-	case CF_RGBA_8888:
-	case CF_R_32:
+	case ColorFormat::RGBA_8888:
+	case ColorFormat::R_32:
 		m_uBpp = 4; break;
 	default:
 		break;	// bpp won't be valid
@@ -487,7 +487,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 {
 	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
-	const VkFormat depth_format = gDepthFormatViewMap[eFormat];
+	const VkFormat depth_format = gDepthFormatViewMap[(uint32)eFormat];
 
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};

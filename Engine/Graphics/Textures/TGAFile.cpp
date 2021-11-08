@@ -43,14 +43,14 @@ namespace usg
 		m_header.uDataTypeCode = RGB;
 		m_header.uWidth = uWidth;
 		m_header.uHeight = uHeight;
-		uint32 uSrcOffset = eFormat == CF_RGBA_8888 ? 4 : 3;
-		uint32 uBpp = eFormat == CF_RGBA_8888 ? 4 : 3;
-		if (eFormat == CF_R_8)
+		uint32 uSrcOffset = eFormat == ColorFormat::RGBA_8888 ? 4 : 3;
+		uint32 uBpp = eFormat == ColorFormat::RGBA_8888 ? 4 : 3;
+		if (eFormat == ColorFormat::R_8)
 		{
 			uSrcOffset = 1;
 		}
-		m_header.uBitsPerPixel = eFormat == CF_RGBA_8888 ? 32 : 24;
-		ASSERT(eFormat == CF_RGBA_8888 || eFormat == CF_RGB_888 || eFormat == CF_R_8);
+		m_header.uBitsPerPixel = eFormat == ColorFormat::RGBA_8888 ? 32 : 24;
+		ASSERT(eFormat == ColorFormat::RGBA_8888 || eFormat == ColorFormat::RGB_888 || eFormat == ColorFormat::R_8);
 		m_uFileSize = (memsize)(uWidth * uHeight * uBpp);
 
 		ASSERT(m_pData == NULL);
@@ -62,7 +62,7 @@ namespace usg
 		uint32 j = 0;
 		while (i < m_uFileSize)
 		{
-			if(eFormat != CF_R_8)
+			if(eFormat != ColorFormat::R_8)
 			{
 				m_pData[i+0] = pSrc[j+2];       //grab blue
 				m_pData[i+1] = pSrc[j+1];		//assign red to blue

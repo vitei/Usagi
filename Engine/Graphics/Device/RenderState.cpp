@@ -189,7 +189,7 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 RenderPassDecl::Attachment::Attachment()
 {
 	eAttachType = ATTACH_COLOR;
-	format.eColor = CF_RGBA_8888;
+	format.eColor = ColorFormat::RGBA_8888;
 	uAttachFlags = 0;
 	eLoadOp = LOAD_OP_DONT_CARE;
 	eStoreOp = STORE_OP_STORE;

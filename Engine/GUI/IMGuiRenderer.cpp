@@ -178,7 +178,7 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
 	m_globalDescriptor.Init(pDevice, global);
 	m_globalDescriptor.SetConstantSet(0, &m_constantSet);
 	m_globalDescriptor.UpdateDescriptors(pDevice);
-	m_texture.CreateRaw(pDevice, CF_RGBA_8888, width, height, pixels);
+	m_texture.CreateRaw(pDevice, ColorFormat::RGBA_8888, width, height, pixels);
 
 
     // Create texture sampler   

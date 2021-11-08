@@ -29,6 +29,7 @@ enum TextureDimensions
 	TD_TEXTURE2D = 1;
 	TD_TEXTURE3D = 2;
 	TD_TEXTURECUBE = 3;
+	TD_TEXTURE2DARRAY = 4;
 	
 	TD_FORCE_SIZE = 0x7FFFFFFF; // Force enum size to sizeof(int32_t)
 };

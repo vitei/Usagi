@@ -40,7 +40,7 @@ namespace usg
 
 	void ProjectionShadow::Init(GFXDevice* pDevice, Scene* pScene, uint32 uResX, uint32 uResY)
 	{
-		m_depthBuffer.Init(pDevice, uResX, uResY, DF_DEPTH_32F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_DEPTH_BUFFER|TU_FLAG_SHADER_READ);//DF_DEPTH_32F); //DF_DEPTH_24
+		m_depthBuffer.Init(pDevice, uResX, uResY, DepthFormat::DEPTH_32F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_DEPTH_BUFFER|TU_FLAG_SHADER_READ);//DF_DEPTH_32F); //DF_DEPTH_24
 		m_depthTarget.Init(pDevice, NULL, &m_depthBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;

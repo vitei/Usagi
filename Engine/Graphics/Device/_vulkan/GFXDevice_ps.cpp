@@ -54,7 +54,7 @@ static const VkFormat gColorFormatMap[]=
 };
 
 
-static_assert(ARRAY_SIZE(gColorFormatMap) == usg::CF_COUNT, "Mismatch on color format mapping size");
+static_assert(ARRAY_SIZE(gColorFormatMap) == (uint32)usg::ColorFormat::COUNT, "Mismatch on color format mapping size");
 
 static const uint32 gMaxColorFormatFallbacks = 3;
 
@@ -309,7 +309,7 @@ void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::Ext
 
 ColorFormat GFXDevice_ps::GetUSGFormat(VkFormat eFormat)
 {
-	for (int i = 0; i < CF_COUNT; i++)
+	for (int i = 0; i < int(ColorFormat::COUNT); i++)
 	{
 		if (m_colorFormats[i] == eFormat)
 		{
@@ -317,7 +317,7 @@ ColorFormat GFXDevice_ps::GetUSGFormat(VkFormat eFormat)
 		}
 	}
 
-	return CF_INVALID;
+	return ColorFormat::INVALID;
 }
 
 void GFXDevice_ps::Init(GFXDevice* pParent)
@@ -578,7 +578,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	//ASSERT(false);	// Need to set up the copy command buffer
 
-	for (uint32 i = 0; i < CF_COUNT; i++)
+	for (uint32 i = 0; i < int(ColorFormat::COUNT); i++)
 	{
 		if (gColorFormatMap[i] == VK_FORMAT_UNDEFINED || ColorFormatSupported(gColorFormatMap[i]))
 		{

@@ -230,7 +230,7 @@ namespace usg
 		quarterSize.y = (halfSize.y + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
-			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
+			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, ColorFormat::R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
 			pBuffers[i] = &m_halfDepthTargets[i];
 		}
 
@@ -238,17 +238,17 @@ namespace usg
 		pBuffers[1] = &m_halfDepthTargets[3];	// Demo uses 0 and 3, we'll do the same to avoid confusion for now
 		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr);
 
-		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
-		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
+		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
+		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
 		m_pingPongRT1.Init(pDevice, &m_pingPongCB1);
 		m_pingPongRT2.Init(pDevice, &m_pingPongCB2);
 
-		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
-		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
+		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
+		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
 		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB); 
 
-		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
+		m_loadTargetCB.Init(pDevice, 1, 1, ColorFormat::R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
 
 		m_importanceMapDesc.Init(pDevice, desc1Tex);
 		m_importanceMapADesc.Init(pDevice, desc1Tex);
@@ -262,7 +262,7 @@ namespace usg
 		m_importanceMapBDesc.SetImageAtBinding(1, m_loadTargetCB.GetTexture());
 
 
-		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
+		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, ColorFormat::RG_8);
 		m_finalResultsRT.Init(pDevice, &m_finalResultsCB);
 
 		RenderTarget::RenderPassFlags flags;
