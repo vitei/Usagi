@@ -211,6 +211,8 @@ void GFXDevice_ps::Cleanup(GFXDevice* pParent)
 	vkDeviceWaitIdle(m_vkDevice);
 	// Cleanup any requested destroys before destroying the device
 	CleanupDestroyRequests();
+
+	m_criticalSection.Finalize();
 }
 
 GFXDevice_ps::~GFXDevice_ps()
@@ -239,6 +241,8 @@ GFXDevice_ps::~GFXDevice_ps()
 
 void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 {	
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	// Handle case that we've wrapped around
 	uint32 uCurrentFrame = m_pParent->GetFrameCount();
 	
@@ -323,6 +327,8 @@ ColorFormat GFXDevice_ps::GetUSGFormat(VkFormat eFormat)
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {
 	m_pParent = pParent;
+
+	m_criticalSection.Initialize();
 
 	m_allocCallbacks.pfnAllocation = VkAllocation;
 	m_allocCallbacks.pfnFree = VkFree;
@@ -901,6 +907,7 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 
 void GFXDevice_ps::ReqDestroyFrameBuffer(VkFramebuffer frameBuffer)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_FRAME_BUFFER;
 	req.resource.frameBuffer = frameBuffer;
@@ -910,6 +917,7 @@ void GFXDevice_ps::ReqDestroyFrameBuffer(VkFramebuffer frameBuffer)
 
 void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_BUFFER;
 	req.resource.buffer = buffer;
@@ -919,6 +927,7 @@ void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
 
 void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_IMAGE_VIEW;
 	req.resource.imageView = imageView;
@@ -928,6 +937,7 @@ void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
 
 void GFXDevice_ps::ReqDestroyImage(VkImage image)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_IMAGE;
 	req.resource.image = image;
@@ -937,6 +947,7 @@ void GFXDevice_ps::ReqDestroyImage(VkImage image)
 
 void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_DESCRIPTOR_SET;
 	req.resource.desc.set = set;
@@ -947,6 +958,8 @@ void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSe
 
 void GFXDevice_ps::ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_DESCRIPTOR_LAYOUT;
 	req.resource.layout = layout;
@@ -956,6 +969,8 @@ void GFXDevice_ps::ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout)
 
 void GFXDevice_ps::ReqDestroyDescriptorSetPool(VkDescriptorPool pool)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_DESCRIPTOR_POOL;
 	req.resource.pool = pool;

@@ -40,7 +40,6 @@ GFXDevice::~GFXDevice()
 {
 	// Platform specific version may need to cleanup first
 	m_pImpl->immediateContext.Cleanup(this);
-	m_pImpl->platform.Cleanup(this);
 
 	if (m_pHMD)
 	{
@@ -52,6 +51,8 @@ GFXDevice::~GFXDevice()
 	}
 
 	m_pImpl->renderStates.Cleanup(this);
+
+	m_pImpl->platform.Cleanup(this);
 
 	vdelete m_pImpl;
 	m_pImpl = nullptr;

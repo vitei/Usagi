@@ -155,6 +155,7 @@ private:
 	};
 
 
+	CriticalSection						m_criticalSection;
 	usg::queue<DestroyRequest>			m_destroyQueue;
 	VkFormat							m_colorFormats[ColorFormat::COUNT];
 
