@@ -37,11 +37,21 @@ m_pParent(nullptr)
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
 	m_bLightTexDirty = false;
+	m_uShadowCastingFlags = RENDER_MASK_ALL;
 	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
 }
 
 LightMgr::~LightMgr(void)
 {
+}
+
+void LightMgr::SetShadowCastingFlags(uint32 uFlags)
+{
+	m_uShadowCastingFlags = uFlags;
+	for (auto itr : m_dirLights.GetActiveLights())
+	{
+		itr->SetNonShadowFlags(uFlags);
+	}
 }
 
 void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
@@ -117,11 +127,12 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 
 	// Now find the most influential shadowed directional light and make it the first
 	uint32 uCascadeIndex = 0;
-	for (uint32 i = 0; i < m_dirLights.GetActiveLights().size(); i++)
+	uint32 i=0;
+	for (auto itr : dirLights)
 	{
-		if (m_dirLights.GetActiveLights()[i]->GetShadowEnabled())
+		if (itr->GetShadowEnabled())
 		{
-			m_dirLights.GetActiveLights()[i]->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
+			itr->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
 			uCascadeIndex += ShadowCascade::CASCADE_COUNT;
 			if (m_uShadowedDirLightIndex == UINT_MAX)
 			{
@@ -129,17 +140,18 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 			}
 			m_uShadowedDirLights++;
 		}
+		i++;
 	}
 
 	if (m_uShadowedDirLightIndex == UINT_MAX)
 	{
 		// No shadowed lights, set the index to be beyond the list
-		m_uShadowedDirLightIndex = (uint32)m_dirLights.GetActiveLights().size();
+		m_uShadowedDirLightIndex = (uint32)dirLights.size();
 	}
 
 	if (pContext->GetCamera())
 	{
-		for (auto itr : m_dirLights.GetActiveLights())
+		for (auto itr : dirLights)
 		{
 			itr->UpdateCascade(*pContext->GetCamera(), 0);
 		}
@@ -230,9 +242,13 @@ void LightMgr::ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext
 DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
 	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bDirectionalShadows);	
+
+	ASSERT(pLight);
+
 	if(szName)
 		pLight->SetName(szName);
-	ASSERT(pLight);
+
+	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
 
 	if (bSupportsShadow)
 		m_uShadowedDirLights++;
@@ -307,12 +323,14 @@ void LightMgr::GetActiveDirLights(list<DirLight*>& lightsOut) const
 			}
 			else
 			{
-				lightsOut.push_back(*it);
+				lightsOut.push_front(*it);
 			}
 		}
 	}
 
-	lightsOut.sort();
+	// FIXME: Since the switch to eastl this is comparing the pointers. 
+	// Could re-enable but shadow location is the only important thing atm
+	//lightsOut.sort();
 }
 
 

@@ -87,6 +87,7 @@ void main(void)
 	}
 	else
 	{
+		// TODO: Should be applied regardless but defaults coming through too low
 		vSpecular.rgb *= uMaterial.specular.rgb;
 	}
 	vSpecular.rgb *= vSpecRead.rgb; 

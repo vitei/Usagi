@@ -81,8 +81,15 @@ const Vector4f& DirLight::GetDirection() const
 	return m_direction;
 }
 
+void DirLight::SetNonShadowFlags(uint32 uFlags)
+{
+	if (m_pShadowCascade)
+	{
+		m_pShadowCascade->SetNonShadowFlags(uFlags);
+	}
+}
 
-bool DirLight::operator < (DirLight& rhs)
+bool DirLight::operator < (const DirLight& rhs) const
 {
 	// Put the non shadowed lights first
 	if (rhs.GetShadowEnabled() && !GetShadowEnabled())

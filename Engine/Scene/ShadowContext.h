@@ -32,6 +32,7 @@ public:
 	virtual const Camera* GetCamera() const override { return m_pCamera; }
 	virtual Octree::SearchObject& GetSearchObject() override { return m_searchObject; }
 
+	void SetNonShadowFlags(uint32 uFlags);
 
 	void DrawScene(GFXContext* pContext);
 

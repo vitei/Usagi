@@ -191,7 +191,7 @@ namespace usg {
 		SetRenderMask(uRenderMask);
 		m_pImpl->pPostFXSys = pFXSys;
 
-		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask);
+		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask, 0);
 		if(Debug3D::GetRenderer())
 		{
 			Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);

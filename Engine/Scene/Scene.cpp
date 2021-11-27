@@ -148,6 +148,9 @@ void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
 		{
 			GetViewContext(uViewContext)->SetCamera(itr);
 			GetViewContext(uViewContext)->SetRenderMask(itr->GetRenderMask());
+
+			// We only want to show shadows for things valid in our scene
+			GetLightMgr().SetShadowCastingFlags(itr->GetRenderMask() | usg::RENDER_MASK_FORCE_SHADOW);
 			return;
 		}
 	}

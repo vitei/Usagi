@@ -33,7 +33,9 @@ public:
 	const ShadowCascade* GetCascade() const { return m_pShadowCascade; }
 	ShadowCascade* GetCascade() { return m_pShadowCascade; }
 
-	bool operator < (DirLight& rhs);
+	void SetNonShadowFlags(uint32 uFlags);
+
+	bool operator < (const DirLight& rhs) const;
 protected:
 	//	ConstantSet		m_constants;
 	// x, y, z, -1 = spot light, 0 = positional, 1 = directional,

@@ -162,6 +162,17 @@ void ShadowCascade::Update(const Camera& sceneCam)
 	
 }
 
+void ShadowCascade::SetNonShadowFlags(uint32 uFlags)
+{
+    for (uint32 i = 0; i < MAX_CASCADES; i++)
+    {
+        if (m_pSceneContext[i])
+        {
+            m_pSceneContext[i]->SetNonShadowFlags(uFlags);
+        }
+    }
+}
+
 void ShadowCascade::GPUUpdate(GFXDevice* pDevice)
 {
 	if (!m_pRenderTarget)

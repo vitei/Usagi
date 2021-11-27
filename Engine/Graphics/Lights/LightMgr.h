@@ -75,6 +75,8 @@ public:
 	void			GetProjectionLightsInView(const Camera* pCamera, list<ProjectionLight*>& lightsOut) const;
 	const Color&	GetAmbientLight() { return m_ambient; }
 
+	void			SetShadowCastingFlags(uint32 uFlags);
+
 	const Color& GetSkyColor() const { return m_skyColor; }
 	const Color& GetGroundColor() const { return m_groundColor; }
 	const Vector3f& GetHemisphereDir() const { return m_hemisphereDir; }
@@ -179,6 +181,7 @@ private:
 	uint32					m_uShadowedDirLightIndex;
 	uint32					m_uActiveFrame;
 	uint32					m_uShadowMapRes;
+	uint32					m_uShadowCastingFlags;
 	float					m_hemipshereLerp;
 	QualitySettings			m_qualitySettings;
 	bool					m_bLightTexDirty;

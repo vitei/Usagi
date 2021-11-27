@@ -41,14 +41,17 @@ public:
 		SearchObject();
 		~SearchObject();
 
-		void InitInt(uint32 uMask = 0xFFFFFFFF);
+		void InitInt(uint32 uMask = 0xFFFFFFFF, uint32 uRequiredFlags = 0);
 		uint32 GetMask() const { return m_uMask; }
+		uint32 GetReqFlags() const { return m_uReqFlags; }
 		void SetMask(uint32 uMask) { m_uMask = uMask; }
+		void SetReqFlags(uint32 uReq) { m_uReqFlags = uReq; }
 		virtual void Callback(void* pUserData) = 0;
 		virtual void GetVisibleList(Octree* pOctree) = 0;
 
 	protected:
 		uint32			m_uMask;
+		uint32			m_uReqFlags;
 
 	};
 
