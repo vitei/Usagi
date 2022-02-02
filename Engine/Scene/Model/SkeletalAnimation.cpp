@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright � Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Resource/ModelResource.h"

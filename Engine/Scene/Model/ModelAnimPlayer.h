@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright � Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 //	Description: Calculate modifications of model bones and UVs based on
 //	sketal and material animations
 *****************************************************************************/

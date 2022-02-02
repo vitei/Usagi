@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright � Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 //	Description: Classes for the various animation state motion types
 *****************************************************************************/
 #ifndef _USG_SCENE_MODEL_MODEL_ANIM_MOTION_H_
