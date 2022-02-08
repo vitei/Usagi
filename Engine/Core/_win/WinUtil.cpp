@@ -88,18 +88,19 @@ namespace WINUTIL
 	{
 		WindHndl hndl;
 		WNDCLASS		winclass;	// this will hold the class we create
+		HICON icon = pDisplaySettings->iconHndl ? pDisplaySettings->iconHndl : LoadIcon(NULL, IDI_APPLICATION);
 
 		winclass.style = CS_HREDRAW | CS_VREDRAW;
 		winclass.lpfnWndProc = wndProc;
 		winclass.cbClsExtra = 0;
 		winclass.cbWndExtra = 0;
 		winclass.hInstance = WINUTIL::GetInstanceHndl();
-		winclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+		winclass.hIcon = icon;
 		winclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 		winclass.hbrBackground = NULL;
 		winclass.lpszMenuName = NULL;
 		winclass.lpszClassName = szName;
-		//winclass.hIconSm			= LoadIcon(NULL, IDI_WINLOGO);
+		//winclass.hIconSm = icon;
 
 		if (!RegisterClass(&winclass))
 		{

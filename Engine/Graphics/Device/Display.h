@@ -33,6 +33,7 @@ struct DisplayMode
 	GFXBounds	screenDim;
 
 	WindHndl	parentHndl;
+	IconHndl	iconHndl = nullptr;
 	bool		bWindowed = false;
 	bool		bMenu = false;
 	char		name[s_nameLength];

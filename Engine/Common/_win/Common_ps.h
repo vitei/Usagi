@@ -71,6 +71,7 @@ typedef int				   sint;
 typedef unsigned int	   uint;
 typedef size_t             memsize;
 typedef HWND               WindHndl;
+typedef HICON			   IconHndl;
 
 
 // Visual studio allows you to use dependent template names without
