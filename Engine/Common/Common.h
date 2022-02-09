@@ -43,8 +43,8 @@ const uint16	USG_INVALID_ID16 = 0xFFFF;
 typedef uint32 pb_size_t;
 typedef sint32 pb_ssize_t;
 
-#define PRIVATIZE_COPY(NameOfClass) 	NameOfClass(NameOfClass &rhs) { NameOfClass(); ASSERT(false); } \
-										NameOfClass& operator=(NameOfClass &rhs) { NameOfClass(); ASSERT(false); return *this; }
+#define PRIVATIZE_COPY(NameOfClass) 	NameOfClass(NameOfClass &rhs) { ASSERT(false); } \
+										NameOfClass& operator=(NameOfClass &rhs) { ASSERT(false); return *this; }
 
 #define UNUSED_VAR(var)      ((void)&var);
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
