@@ -22,7 +22,7 @@ namespace usg{
 	class XAudioVoiceCallback : public IXAudio2VoiceCallback
 	{
 	public:
-		XAudioVoiceCallback(std::weak_ptr<SoundCallbacks> pIn) { pCallbackInt = pIn; }
+		XAudioVoiceCallback(usg::weak_ptr<SoundCallbacks> pIn) { pCallbackInt = pIn; }
 
 		void STDMETHODCALLTYPE OnStreamEnd() { if (auto spt = pCallbackInt.lock()) spt->StreamEnd(); }
 		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { if (auto spt = pCallbackInt.lock()) spt->PassedEnd(); }
@@ -32,7 +32,7 @@ namespace usg{
 		void STDMETHODCALLTYPE OnLoopEnd(void * context) { if (auto spt = pCallbackInt.lock()) spt->LoopEnd(); }
 		void STDMETHODCALLTYPE OnVoiceError(void * context, HRESULT Error) {}
 
-		std::weak_ptr<SoundCallbacks> pCallbackInt;
+		usg::weak_ptr<SoundCallbacks> pCallbackInt;
 	};
 
 SoundObject_ps::SoundObject_ps()
