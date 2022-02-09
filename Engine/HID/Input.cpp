@@ -20,8 +20,8 @@ static uint32	g_uGamepads;
 void Input::Init()
 {
 	g_platform.Init();
-	RenumberGamepads();
 	g_bInitCalled = true;
+	RenumberGamepads();
 }
 
 void Input::Cleanup()
