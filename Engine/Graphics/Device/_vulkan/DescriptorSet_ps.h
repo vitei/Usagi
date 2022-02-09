@@ -36,8 +36,9 @@ private:
 	uint32				m_uActiveSet;
 	uint32				m_uBuffers;
 
-	vector<const ConstantSet_ps*> m_dynamicBuffers;
-
+	vector<const ConstantSet_ps*>	m_dynamicBuffers;
+	struct VkDescriptorImageInfo*	m_pImages;
+	struct VkWriteDescriptorSet*	m_pWrites;
 };
 
 }
