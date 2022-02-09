@@ -22,10 +22,10 @@ int main(int argc, const char* argv[])
 	RegistryEnvironmentPair RegistryPairs[EntryCounts] =
 	{
 		{
-			"SOFTWARE\\WOW6432Node\\Microsoft\\VisualStudio\\SxS\\VS7",
-			"15.0",
+			"SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\4.0",
+			"MSBuildToolsPath",
 			"MSBUILD_DIR",
-			"MSBuild\\15.0\\Bin"
+			""
 		},
 		{
 			"SOFTWARE\\Autodesk FBX SDK 2020.0.1",
@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
 		printf("Failed to open environment variables for writing\n");
 	}
 
-	if (std::experimental::filesystem::exists("..\\..\\OculusSDK"))
+	if (std::filesystem::exists("..\\..\\OculusSDK"))
 	{
 		std::string s1(currPath);
 		s1 = s1.substr(0, s1.find_last_of("\\"));
@@ -114,7 +114,7 @@ int main(int argc, const char* argv[])
 		printf("OculusSDK not found in ../../OculusSdk, need to manually set OCULUS_SDK_DIR\n");
 	}
 
-	if (std::experimental::filesystem::exists("Engine\\ThirdParty\\PhysX\\physx"))
+	if (std::filesystem::exists("Engine\\ThirdParty\\PhysX\\physx"))
 	{
 		std::string s1(currPath);
 		s1 += "\\Engine\\ThirdParty\\PhysX\\physx";
