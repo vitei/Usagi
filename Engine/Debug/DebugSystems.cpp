@@ -41,124 +41,109 @@ namespace usg
 		}
 	};
 
-	template<typename Shape>
-	class RenderDebug : public System, public DebugShapeRenderer
+	namespace Systems
 	{
-	public:
-		typedef Shape ShapeTP;
-		struct Inputs
-		{
-			Optional<MatrixComponent> matrix;
 
-			Required<DebugRenderData> debug;
-			Required<ShapeTP>         shape;
+		class RenderDebugSphere : public System, public DebugShapeRenderer
+		{
+		public:
+			typedef Components::Sphere ShapeTP;
+			struct Inputs
+			{
+				Optional<MatrixComponent> matrix;
+
+				Required<DebugRenderData> debug;
+				Required<ShapeTP>         shape;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
+
+
+			static void Run(const Inputs& in, Outputs&, float)
+			{
+				RenderDebugShape(*in.debug, *in.shape, in.matrix);
+			}
 		};
 
-		static const SystemCategory CATEGORY = SYSTEM_DEFAULT_PRIORITY;
-		static const char* Name()
-		{
-			static const char* const name = "RenderDebug"; // Would be good to include the shape name
-			return name;
-		}
 
-		static uint32 GetSystemId()
+		class DebugPauseEventHandler : public usg::System
 		{
-			return usg::GetSystemId<RenderDebug<Shape> >();
-		}
+		public:
+			struct Outputs
+			{
+				Required<usg::SimulationActive> sim;
+				Required<usg::SceneComponent> scene;
+			};
 
-		static bool GetInputOutputs(ComponentGetter& GetComponent, Inputs& inputs, Outputs& outputs)
-		{
-			return GetComponent(inputs.matrix) &&
-				GetComponent(inputs.debug) &&
-				GetComponent(inputs.shape);
-		}
-
-		static void Run(const Inputs& in, Outputs&, float)
-		{
-			RenderDebugShape(*in.debug, *in.shape, in.matrix);
-		}
-	};
-
-	namespace Systems {
-		typedef RenderDebug<usg::Components::Sphere> RenderDebugSphere;
-	}
-
-	class DebugPauseEventHandler : public usg::System
-	{
-	public:
-		struct Outputs
-		{
-			Required<usg::SimulationActive> sim;
-			Required<usg::SceneComponent> scene;
-		};
-
-		DECLARE_SYSTEM(usg::SYSTEM_PRE_EARLY)
-		static void OnEvent(const Inputs& inputs, Outputs& outputs, const RequestDebugCameraState_Internal& debugCamera)
-		{
+			DECLARE_SYSTEM(usg::SYSTEM_PRE_EARLY)
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const RequestDebugCameraState_Internal& debugCamera)
+			{
 #ifdef DEBUG_BUILD
-			outputs.sim.Modify().bActive = !debugCamera.bEnable;
-			if (debugCamera.bEnable)
-			{
-				outputs.scene.GetRuntimeData().pScene->SetActiveCamera(utl::CRC32("DebugCam"), 0);
-			}
+				outputs.sim.Modify().bActive = !debugCamera.bEnable;
+				if (debugCamera.bEnable)
+				{
+					outputs.scene.GetRuntimeData().pScene->SetActiveCamera(utl::CRC32("DebugCam"), 0);
+				}
 #endif
-		}
-	};
-
-
-
-	class UpdateDebugCamera : public System
-	{
-	public:
-		struct Inputs
-		{
-			Required<DebugCameraComponent> debug;
-			Required< SystemTimeComponent, FromParents> systemTime;
-			Required< SceneComponent, FromParents> scene;
-			Required< EntityID, FromParentWith<SceneComponent> > sceneEntity;
-
-			Required<EventManagerHandle, FromSelfOrParents> eventManager;
+			}
 		};
 
-		struct Outputs
+
+
+		class UpdateDebugCamera : public System
 		{
-			Required<DebugCameraComponent> debug;
-			Required<MatrixComponent>      matrix;
+		public:
+			struct Inputs
+			{
+				Required<DebugCameraComponent> debug;
+				Required< SystemTimeComponent, FromParents> systemTime;
+				Required< SceneComponent, FromParents> scene;
+				Required< EntityID, FromParentWith<SceneComponent> > sceneEntity;
+
+				Required<EventManagerHandle, FromSelfOrParents> eventManager;
+			};
+
+			struct Outputs
+			{
+				Required<DebugCameraComponent> debug;
+				Required<MatrixComponent>      matrix;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
+
+			static void Run(const Inputs& in, Outputs& outputs, float dt)
+			{
+				if (in.debug.GetRuntimeData().pDebugCam->GetActive())
+				{
+					DebugCamera* pDebugCam = outputs.debug.GetRuntimeData().pDebugCam;
+					pDebugCam->Update(in.systemTime->fSystemElapsed);
+					outputs.matrix.Modify().matrix = pDebugCam->GetModelMat();
+				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::RequestDebugCameraState& event)
+			{
+
+				if (event.bEnable)
+				{
+					outputs.debug.Modify().uPrevCamID = inputs.scene.GetRuntimeData().pScene->GetSceneCamera(0)->GetID();
+					outputs.debug.GetRuntimeData().pDebugCam->SetMatrix(inputs.scene.GetRuntimeData().pScene->GetSceneCamera(0)->GetModelMatrix());
+				}
+				else
+				{
+					EnableCamera enableCamera;
+					enableCamera.uCameraID = inputs.debug->uPrevCamID;
+					enableCamera.uContext = 0;
+					inputs.eventManager->handle->RegisterEvent(enableCamera);
+				}
+				outputs.debug.GetRuntimeData().pDebugCam->SetActive(event.bEnable);
+				RequestDebugCameraState_Internal intEvt;
+				intEvt.bEnable = event.bEnable;
+				inputs.eventManager->handle->RegisterEventWithEntity(inputs.sceneEntity->id, intEvt);
+			}
 		};
 
-		DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
-
-		static void Run(const Inputs& in, Outputs& outputs, float dt)
-		{
-			if (in.debug.GetRuntimeData().pDebugCam->GetActive())
-			{
-				DebugCamera* pDebugCam = outputs.debug.GetRuntimeData().pDebugCam;
-				pDebugCam->Update(in.systemTime->fSystemElapsed);
-				outputs.matrix.Modify().matrix = pDebugCam->GetModelMat();
-			}
-		}
-
-		static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::RequestDebugCameraState& event)
-		{
-
-			if (event.bEnable)
-			{
-				outputs.debug.Modify().uPrevCamID = inputs.scene.GetRuntimeData().pScene->GetSceneCamera(0)->GetID();
-				outputs.debug.GetRuntimeData().pDebugCam->SetMatrix(inputs.scene.GetRuntimeData().pScene->GetSceneCamera(0)->GetModelMatrix());
-			}
-			else
-			{
-				EnableCamera enableCamera;
-				enableCamera.uCameraID = inputs.debug->uPrevCamID;
-				enableCamera.uContext = 0;
-				inputs.eventManager->handle->RegisterEvent(enableCamera);
-			}
-			outputs.debug.GetRuntimeData().pDebugCam->SetActive(event.bEnable);
-			RequestDebugCameraState_Internal intEvt;
-			intEvt.bEnable = event.bEnable;
-			inputs.eventManager->handle->RegisterEventWithEntity(inputs.sceneEntity->id, intEvt);
-		}
-	};
+	}
 
 
 }
