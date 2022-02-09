@@ -430,6 +430,7 @@ SoundHandle Audio::PrepareCustomStream(const StreamingSoundDef& def, float fVolu
 		//DEBUG_PRINT("[Audio::PrepareSound] %s\n", m_ppSoundFiles[uSoundId]->GetName().CStr());
 		handle.GetObject()->SetChannelConfig(m_eChannelConfig);
 		handle.GetObject()->SetCustomData(def);
+		handle.GetObject()->ScaleVolumeBySystemVolume(m_fVolume[AUDIO_TYPE_CUSTOM]);
 		handle.SetVolume(fVolume);
 	}
 	return handle;
