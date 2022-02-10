@@ -77,7 +77,7 @@ Getting up and running
 
 The build process has not been improved or significantly modified and currently has a number of dependencies which can not be directly included in an open source project.  Do *not* clone this project first as it should be checked out to a sub folder of a project which uses the engine.
 
-1. Install **Visual Studio 2019**.  
+1. Install **Visual Studio 2022**.  
    https://www.visualstudio.com/downloads/
 
 1. Install **Ruby 2.3.3**.  
@@ -117,13 +117,14 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
-Current Version 0.2.3
+Current Version 0.2.5
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
 v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.
 v0.2.2 enables per project post process effects
 v0.2.3 upgrades to PhysX 4.0 and simplifies installation
+v0.2.5 tackled additional validation issues presented by the latest Vulkan SDK, added effect comprehensive effect definitions and significantly reduced buffer allocations which would present an issue in larger projects. It also dealt with timing issues surrounding releasing assets. Finally it added an implementation of Adaptive Screen Space Ambient Occlusion.
 
 
 Issues
