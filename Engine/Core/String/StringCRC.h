@@ -6,7 +6,7 @@
 
 
 #include "Engine/Core/Utility.h"
-#include "U8String.h"
+#include "Engine/Core/stl/string.h"
 
 namespace usg{
 
@@ -17,7 +17,7 @@ public:
 	string_crc() { checksum = (uint32)0; }
 
 	string_crc(const char* str);
-	string_crc(U8String& str);
+	string_crc(usg::string& str);
 	string_crc(uint32 crc) { checksum = crc; }
 	
 	// Retrieve the value
@@ -38,9 +38,9 @@ public:
 		return *this;
 	}
 
-	string_crc& operator=(U8String& str)
+	string_crc& operator=(usg::string& str)
 	{
-		checksum = utl::CRC32(str.CStr());
+		checksum = utl::CRC32(str.c_str());
 		return *this;
 	}
 	string_crc& operator=(uint32 crc)

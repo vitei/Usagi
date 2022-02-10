@@ -16,7 +16,7 @@ namespace usg
 {
 
 
-#define FADE_SPEED (1.0f/8.0f)		// 8 frames
+#define FADE_SPEED 8.0f		// 1/8th of a second
 
 	static float sTime = 1.0f;
 	static int sFadeType = 0;
@@ -58,6 +58,12 @@ namespace usg
 			pContext->DrawImmediate(6);
 			pContext->EndGPUTag();
 		}
+	}
+
+
+	void Fader::ForceAlpha(float fAlpha)
+	{
+		sfAlpha = fAlpha;
 	}
 
 
@@ -125,18 +131,19 @@ namespace usg
 
 	void Fader::CleanUpDeviceData(usg::GFXDevice* pDevice)
 	{
-		m_VertexBuffer.CleanUp(pDevice);
-		m_constants.CleanUp(pDevice);
-		m_descriptorSet.CleanUp(pDevice);
+		m_VertexBuffer.Cleanup(pDevice);
+		m_constants.Cleanup(pDevice);
+		m_descriptorSet.Cleanup(pDevice);
 	}
 
 
-	void Fader::Update(usg::GFXDevice* pDevice)
+	void Fader::Update(float fElapsed)
 	{
+		float fChange = FADE_SPEED * fElapsed;
 		switch (sFadeType)
 		{
 		case FADE_IN:
-			sTime += FADE_SPEED;
+			sTime += fChange;
 
 			if (sTime >= 1.0f)
 			{
@@ -152,7 +159,7 @@ namespace usg
 			break;
 
 		case FADE_OUT:
-			sTime += FADE_SPEED;
+			sTime += fChange;
 
 			if (sTime >= 1.0f)
 			{
@@ -168,7 +175,7 @@ namespace usg
 			break;
 
 		case FADE_WIPE:
-			sTime += FADE_SPEED * 2.0f;
+			sTime += fChange * 2.0f;
 
 			if (sTime >= 1.0f)
 			{
@@ -178,19 +185,22 @@ namespace usg
 			}
 			else
 			{
-				if(sTime > 0.5f)
+				if (sTime > 0.5f)
 				{
 					sfAlpha = sTime * 2.0f;
 				}
 				else
 				{
-					sfAlpha = 1.0f - ((sTime-0.5f)*2.f);
+					sfAlpha = 1.0f - ((sTime - 0.5f) * 2.f);
 				}
 			}
 
 			break;
 		}
+	}
 
+	void Fader::GPUUpdate(usg::GFXDevice* pDevice)
+	{
 		if(sfAlpha > 0.0f)
 		{
 			FadeConstants* pConst = m_constants.Lock<FadeConstants>();

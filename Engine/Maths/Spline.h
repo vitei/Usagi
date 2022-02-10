@@ -133,34 +133,34 @@ namespace usg
 	}
 }
 
-namespace spline {
+namespace spline
+{
 
-inline float calcHermite( float frame,
-				   float key0frame, float key0value, float key0slope,
-				   float key1frame, float key1value, float key1slope ) {
-	float32 t1 = frame - key0frame;
-	float32 t2 = 1.0f / ( key1frame - key0frame );
-	float32 v0 = key0value;
-	float32 v1 = key1value;
-	float32 s0 = key0slope;
-	float32 s1 = key1slope;
+	inline float CalcHermite( float frame, float key0frame, float key0value, float key0slope, float key1frame, float key1value, float key1slope )
+	{
+		float32 t1 = frame - key0frame;
+		float32 t2 = 1.0f / ( key1frame - key0frame );
+		float32 v0 = key0value;
+		float32 v1 = key1value;
+		float32 s0 = key0slope;
+		float32 s1 = key1slope;
 
-	float32 t1_squared_t2 = t1 * t1 * t2;
-	float32 t1_squared_t2_squared = t1_squared_t2 * t2;
-	float32 t1_cubed_t2_squared = t1 * t1_squared_t2_squared;
-	float32 t1_cubed_t2_cubed = t1_cubed_t2_squared * t2;
+		float32 t1_squared_t2 = t1 * t1 * t2;
+		float32 t1_squared_t2_squared = t1_squared_t2 * t2;
+		float32 t1_cubed_t2_squared = t1 * t1_squared_t2_squared;
+		float32 t1_cubed_t2_cubed = t1_cubed_t2_squared * t2;
 
-	return v0 * ( 2.0f * t1_cubed_t2_cubed - 3.0f * t1_squared_t2_squared + 1.0f )
-		+ v1 * ( -2.0f * t1_cubed_t2_cubed + 3.0f * t1_squared_t2_squared )
-		+ s0 * ( t1_cubed_t2_squared - 2.0f * t1_squared_t2 + t1 )
-		+ s1 * ( t1_cubed_t2_squared - t1_squared_t2 );
-}
+		return v0 * ( 2.0f * t1_cubed_t2_cubed - 3.0f * t1_squared_t2_squared + 1.0f )
+			+ v1 * ( -2.0f * t1_cubed_t2_cubed + 3.0f * t1_squared_t2_squared )
+			+ s0 * ( t1_cubed_t2_squared - 2.0f * t1_squared_t2 + t1 )
+			+ s1 * ( t1_cubed_t2_squared - t1_squared_t2 );
+	}
 
-inline float calcLinear( float frame,
-				  float key0frame, float key0value, float key1frame, float key1value ) {
-	float tangent = ( key1value - key0value ) / ( key1frame - key0frame );
-	return tangent * ( frame - key0frame ) + key0value;
-}
+	inline float CalcLinear( float frame, float key0frame, float key0value, float key1frame, float key1value )
+	{
+		float tangent = ( key1value - key0value ) / ( key1frame - key0frame );
+		return tangent * ( frame - key0frame ) + key0value;
+	}
 
 }
 

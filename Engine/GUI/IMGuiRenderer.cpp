@@ -178,11 +178,11 @@ void IMGuiRenderer::CreateFontsTexture(GFXDevice* pDevice)
 	m_globalDescriptor.Init(pDevice, global);
 	m_globalDescriptor.SetConstantSet(0, &m_constantSet);
 	m_globalDescriptor.UpdateDescriptors(pDevice);
-	m_texture.CreateRaw(pDevice, CF_RGBA_8888, width, height, pixels);
+	m_texture.CreateRaw(pDevice, ColorFormat::RGBA_8888, width, height, pixels);
 
 
     // Create texture sampler   
-	SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
     m_sampler = pDevice->GetSampler(samplerDecl);
 	m_texHndl = &m_texture;
 	m_texDescriptor.SetImageSamplerPair(0, m_texHndl, m_sampler, 0);
@@ -305,13 +305,13 @@ void IMGuiRenderer::Init()
     //io.RenderDrawListsFn = RenderFunction;
 }
 
-void IMGuiRenderer::CleanUp(GFXDevice* pDevice)
+void IMGuiRenderer::Cleanup(GFXDevice* pDevice)
 {
-	m_texture.CleanUp(pDevice);
-	m_globalDescriptor.CleanUp(pDevice);
-	m_texDescriptor.CleanUp(pDevice);
-	m_vertexBuffer.CleanUp(pDevice);
-	m_constantSet.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
+	m_globalDescriptor.Cleanup(pDevice);
+	m_texDescriptor.Cleanup(pDevice);
+	m_vertexBuffer.Cleanup(pDevice);
+	m_constantSet.Cleanup(pDevice);
 }
 
 
@@ -404,7 +404,7 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
 	m_bActive = true;
 
 	bChanged |= m_mainMenuBar.UpdateAndAddToDrawList(m_drawCtxt);
-	for(List<GUIWindow>::Iterator it = m_windows.Begin(); !it.IsEnd(); ++it)
+	for(list<GUIWindow*>::iterator it = m_windows.begin(); it != m_windows.end(); ++it)
 	{
 		bChanged = (*it)->UpdateAndAddToDrawList(m_drawCtxt) || bChanged;
 	}

@@ -6,8 +6,12 @@ const shaderc_shader_kind g_shaderKinds[] =
 {
 	shaderc_shader_kind::shaderc_glsl_vertex_shader,
 	shaderc_shader_kind::shaderc_glsl_fragment_shader,
-	shaderc_shader_kind::shaderc_glsl_geometry_shader
+	shaderc_shader_kind::shaderc_glsl_geometry_shader,
+	shaderc_shader_kind::shaderc_glsl_tess_control_shader,
+	shaderc_shader_kind::shaderc_glsl_tess_evaluation_shader
 };
+
+static_assert(ARRAY_SIZE(g_shaderKinds) == (memsize)usg::ShaderType::COUNT, "Incorrect number of shader stages defined");
 
 VulkanShaderCompiler::VulkanShaderCompiler()
 {
@@ -214,7 +218,7 @@ bool VulkanShaderCompiler::Compile(const std::string& inputFileName, const std::
 }
 #endif
 
-void VulkanShaderCompiler::CleanUp()
+void VulkanShaderCompiler::Cleanup()
 {
 	shaderc_compiler_release(m_compiler);
 	shaderc_compile_options_release(m_compileOptions);

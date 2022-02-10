@@ -9,7 +9,7 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Textures/DepthStencilBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Core/stl/Vector.h"
 #include "Engine/Memory/FastPool.h"
 #include "Engine/Graphics/Color.h"
@@ -34,11 +34,20 @@ public:
 	LightMgr(void);
 	~LightMgr(void);
 
+	struct QualitySettings
+	{
+		bool	bDirectionalShadows = true;
+		bool	bSpotShadows = false;
+		bool	bPointShadows = false;
+		uint32	uShadowQuality = 2;	// 1-4
+	};
+
 	// TODO: Add names to these lights?
 	void			Init(GFXDevice* pDevice, Scene* pParent);
 	void			InitShadowCascade(GFXDevice* pDevice, uint32 uLayers);
-	void			SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution);
-	void			CleanUp(GFXDevice* pDevice);
+	void			SetQualitySettings(GFXDevice* pDevice, const QualitySettings& settings);
+	const auto&		GetQualitySettings() const { return m_qualitySettings; }
+	void			Cleanup(GFXDevice* pDevice);
 	void			Update(float fDelta, uint32 uFrame);
 	void			GPUUpdate(GFXDevice* pDevice);
 	void			GlobalShadowRender(GFXContext* pContext, Scene* pScene);
@@ -60,11 +69,13 @@ public:
 
 	Light*			CreateLight(GFXDevice* pDevice, ResourceMgr* pResMgr, const struct _LightSpec &spec);
 	
-	void			GetActiveDirLights(List<DirLight>& lightsOut) const; 
-	void			GetPointLightsInView(const Camera* pCamera, List<PointLight>& lightsOut) const;
-	void			GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& lightsOut) const;
-	void			GetProjectionLightsInView(const Camera* pCamera, List<ProjectionLight>& lightsOut) const;
+	void			GetActiveDirLights(list<DirLight*>& lightsOut) const;
+	void			GetPointLightsInView(const Camera* pCamera, list<PointLight*>& lightsOut) const;
+	void			GetSpotLightsInView(const Camera* pCamera, list<SpotLight*>& lightsOut) const;
+	void			GetProjectionLightsInView(const Camera* pCamera, list<ProjectionLight*>& lightsOut) const;
 	const Color&	GetAmbientLight() { return m_ambient; }
+
+	void			SetShadowCastingFlags(uint32 uFlags);
 
 	const Color& GetSkyColor() const { return m_skyColor; }
 	const Color& GetGroundColor() const { return m_groundColor; }
@@ -90,19 +101,19 @@ private:
 			ASSERT(m_freeLights.empty());
 		}
 
-		void CleanUp(GFXDevice* pDevice, Scene* pScene)
+		void Cleanup(GFXDevice* pDevice, Scene* pScene)
 		{
 			ASSERT(m_allocatedLights.empty());
 			for (auto&& it : m_freeLights)
 			{
-				it->CleanUp(pDevice, pScene);
+				it->Cleanup(pDevice, pScene);
 				vdelete it;
 				it = nullptr;
 			}
 			m_freeLights.clear();
 			for (auto&& it : m_allocatedLights)
 			{
-				it->CleanUp(pDevice, pScene);
+				it->Cleanup(pDevice, pScene);
 				vdelete it;
 				it = nullptr;
 			}
@@ -151,6 +162,7 @@ private:
 		usg::vector<LightType*>		m_allocatedLights;
 		usg::vector<LightType*>		m_freeLights;
 	};
+
 	LightInstances<DirLight>		m_dirLights;
 	LightInstances<PointLight>		m_pointLights;
 	LightInstances<SpotLight>		m_spotLights;
@@ -160,7 +172,6 @@ private:
 	// FIXME: These should be per ViewContext
 	DepthStencilBuffer		m_cascadeBuffer;
 	RenderTarget			m_cascadeTarget;
-	uint32					m_shadowMapRes;
 
 	Scene*					m_pParent;
 	Color					m_skyColor;
@@ -169,7 +180,11 @@ private:
 	uint32					m_uShadowedDirLights;
 	uint32					m_uShadowedDirLightIndex;
 	uint32					m_uActiveFrame;
+	uint32					m_uShadowMapRes;
+	uint32					m_uShadowCastingFlags;
 	float					m_hemipshereLerp;
+	QualitySettings			m_qualitySettings;
+	bool					m_bLightTexDirty;
 };
 
 } // namespace

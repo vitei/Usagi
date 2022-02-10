@@ -39,8 +39,8 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_B4G4R4A4_UNORM_PACK16,			// CF_RGBA_4444,
 	VK_FORMAT_R8G8B8_UNORM,						// CF_RGB_888,
 	VK_FORMAT_R32_SFLOAT,						// CF_SHADOW,
-	VK_FORMAT_R16_SFLOAT,						// CF_RGBA_16F
-	VK_FORMAT_B10G11R11_UFLOAT_PACK32,			// CF_RGB_HDR,
+	VK_FORMAT_R16G16B16A16_SFLOAT,				// CF_RGBA_16F
+	VK_FORMAT_A2B10G10R10_UNORM_PACK32,			// CF_RGB_HDR,
 	VK_FORMAT_R32_SFLOAT,						// CF_R_32F,
 	VK_FORMAT_R32_UINT,							// CF_R_32,
 	VK_FORMAT_R32G32_SFLOAT,					// CF_RG_32F,
@@ -49,12 +49,12 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_R8_UNORM,							// CF_R_8
 	VK_FORMAT_R8G8_UNORM,						// CF_RG_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
-	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA
+	VK_FORMAT_B8G8R8A8_SRGB,					// CF_SRGBA
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
 };
 
 
-static_assert(ARRAY_SIZE(gColorFormatMap) == usg::CF_COUNT, "Mismatch on color format mapping size");
+static_assert(ARRAY_SIZE(gColorFormatMap) == (uint32)usg::ColorFormat::COUNT, "Mismatch on color format mapping size");
 
 static const uint32 gMaxColorFormatFallbacks = 3;
 
@@ -66,7 +66,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// CF_RGBA_4444,
 	{ VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },							// CF_RGB_888,
 	{ VK_FORMAT_R32_UINT },																					// CF_SHADOW,
-	{ VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },						// CF_RGBA_16F
+	{  },																									// CF_RGBA_16F
 	{ VK_FORMAT_B10G11R11_UFLOAT_PACK32, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },	// CF_RGB_HDR,
 	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_SFLOAT },									// CF_R_32F,
 	{ VK_FORMAT_R32_SFLOAT },																				// CF_R_32,
@@ -76,7 +76,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
-	{ },																									// CF_SRGBA
+	{ VK_FORMAT_R8G8B8A8_SRGB },																									// CF_SRGBA
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -205,6 +205,16 @@ GFXDevice_ps::GFXDevice_ps()
 	m_fGPUTime = 0.0f;
 }
 
+void GFXDevice_ps::Cleanup(GFXDevice* pParent)
+{
+	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
+	vkDeviceWaitIdle(m_vkDevice);
+	// Cleanup any requested destroys before destroying the device
+	CleanupDestroyRequests();
+
+	m_criticalSection.Finalize();
+}
+
 GFXDevice_ps::~GFXDevice_ps()
 {
 	PFN_vkDestroyDebugReportCallbackEXT DestroyReportCallback = VK_NULL_HANDLE;
@@ -217,10 +227,6 @@ GFXDevice_ps::~GFXDevice_ps()
 	}
 #endif
 
-	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
-	vkDeviceWaitIdle(m_vkDevice);
-	// Cleanup any requested destroys before destroying the device
-	CleanupDestroyRequests();
 	vkDestroyDevice(m_vkDevice, NULL);
 	vkDestroyInstance(m_instance, NULL);
 
@@ -235,6 +241,8 @@ GFXDevice_ps::~GFXDevice_ps()
 
 void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 {	
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	// Handle case that we've wrapped around
 	uint32 uCurrentFrame = m_pParent->GetFrameCount();
 	
@@ -248,6 +256,9 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 				case RESOURCE_BUFFER:
 					vkDestroyBuffer(m_vkDevice, req.resource.buffer, nullptr);
 				break;
+				case RESOURCE_FRAME_BUFFER:
+					vkDestroyFramebuffer(m_vkDevice, req.resource.frameBuffer, nullptr);
+				break;
 				case RESOURCE_IMAGE_VIEW:
 					vkDestroyImageView(m_vkDevice, req.resource.imageView, nullptr);
 				break;
@@ -257,6 +268,12 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 				case RESOURCE_DESCRIPTOR_SET:
 					vkFreeDescriptorSets(m_vkDevice, req.resource.desc.pool, 1, &req.resource.desc.set);
 				break;
+				case RESOURCE_DESCRIPTOR_LAYOUT:
+					vkDestroyDescriptorSetLayout(m_vkDevice, req.resource.layout, nullptr);
+				break;
+				case RESOURCE_DESCRIPTOR_POOL:
+					vkDestroyDescriptorPool(m_vkDevice, req.resource.pool, nullptr);
+					break;
 				default:
 					ASSERT(false);
 			}
@@ -294,9 +311,24 @@ void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::Ext
 }
 
 
+ColorFormat GFXDevice_ps::GetUSGFormat(VkFormat eFormat)
+{
+	for (int i = 0; i < int(ColorFormat::COUNT); i++)
+	{
+		if (m_colorFormats[i] == eFormat)
+		{
+			return (ColorFormat)i;
+		}
+	}
+
+	return ColorFormat::INVALID;
+}
+
 void GFXDevice_ps::Init(GFXDevice* pParent)
 {
 	m_pParent = pParent;
+
+	m_criticalSection.Initialize();
 
 	m_allocCallbacks.pfnAllocation = VkAllocation;
 	m_allocCallbacks.pfnFree = VkFree;
@@ -429,7 +461,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 
 	// Init the device
-	VkDeviceQueueCreateInfo queue_info = {};
+	memset(&m_queueInfo, 0, sizeof(m_queueInfo));
 
 	if (GetHMDPhysicalDeviceVKFn)
 	{
@@ -441,7 +473,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 
 	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, NULL);
-	ASSERT(m_uQueueFamilyCount >= 1);
+	FATAL_RELEASE(m_uQueueFamilyCount >= 1, "No queue families found");
 
 	m_pQueueProps = (VkQueueFamilyProperties*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_INTERNAL, sizeof(VkQueueFamilyProperties)*m_uQueueFamilyCount);
 	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, m_pQueueProps);
@@ -451,21 +483,22 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	bool bFound = false;
 	for (unsigned int i = 0; i < m_uQueueFamilyCount; i++)
 	{
-		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		// TODO: We could use different queue families for the queues. The loading one only needs the transfer bit
+		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && m_pQueueProps[i].queueCount >= 2)
 		{
-			queue_info.queueFamilyIndex = i;
+			m_queueInfo.queueFamilyIndex = i;
 			bFound = true;
 			break;
 		}
 	}
 
-	ASSERT(bFound);
+	FATAL_RELEASE(bFound, "No valid queue family with enough queues");
 
-	float queue_priorities[1] = { 0.0 };	// The relative priority of work submitted to each of the queues
-	queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queue_info.pNext = NULL;
-	queue_info.queueCount = 1;
-	queue_info.pQueuePriorities = queue_priorities;
+	float queue_priorities[QUEUE_TYPE_COUNT] = { 0.0, 0.0 };	// The relative priority of work submitted to each of the queues
+	m_queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	m_queueInfo.pNext = NULL;
+	m_queueInfo.queueCount = QUEUE_TYPE_COUNT;
+	m_queueInfo.pQueuePriorities = queue_priorities;
 
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
@@ -516,7 +549,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_info.pNext = NULL;
 	device_info.queueCreateInfoCount = 1;
-	device_info.pQueueCreateInfos = &queue_info;
+	device_info.pQueueCreateInfos = &m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
 	device_info.ppEnabledExtensionNames = extensions.data();
 	device_info.enabledLayerCount = validationLayerCount;
@@ -527,17 +560,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	res = vkCreateDevice(m_primaryPhysicalDevice, &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
 	ASSERT(res == VK_SUCCESS);
 
-	// Create a command pool to allocate our command buffer from
-	VkCommandPoolCreateInfo cmd_pool_info = {};
-	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmd_pool_info.pNext = NULL;
-	cmd_pool_info.queueFamilyIndex = queue_info.queueFamilyIndex;
-	// We will have short lived cmd buffers (for file loading), and reuse them
-	// TODO: Perhaps we want multiple command pools?
-	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &m_cmdPool);
-	ASSERT(res == VK_SUCCESS);
 
 	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -546,7 +569,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	EnumerateDisplays();
 
-	vkGetDeviceQueue(m_vkDevice, queue_info.queueFamilyIndex, 0, &m_queue);
+	m_cmdPool = CreateCommandPool();
+
+	for(int i=0; i<QUEUE_TYPE_COUNT; i++)
+	{
+		vkGetDeviceQueue(m_vkDevice, m_queueInfo.queueFamilyIndex, i, &m_queue[i]);
+	}
 
 	VkFenceCreateInfo fenceInfo;
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -556,7 +584,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	//ASSERT(false);	// Need to set up the copy command buffer
 
-	for (uint32 i = 0; i < CF_COUNT; i++)
+	for (uint32 i = 0; i < int(ColorFormat::COUNT); i++)
 	{
 		if (gColorFormatMap[i] == VK_FORMAT_UNDEFINED || ColorFormatSupported(gColorFormatMap[i]))
 		{
@@ -585,6 +613,24 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 			}
 		}
 	}
+}
+
+VkCommandPool GFXDevice_ps::CreateCommandPool()
+{
+	// Create a command pool to allocate our command buffer from
+	VkCommandPoolCreateInfo cmd_pool_info = {};
+	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmd_pool_info.pNext = NULL;
+	cmd_pool_info.queueFamilyIndex = m_queueInfo.queueFamilyIndex;
+	// We will have short lived cmd buffers (for file loading), and reuse them
+	// TODO: Perhaps we want multiple command pools?
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+	VkCommandPool pool;
+	VkResult res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &pool);
+	ASSERT(res == VK_SUCCESS);
+
+	return pool;
 }
 
 
@@ -632,15 +678,46 @@ void GFXDevice_ps::EnumerateDisplays()
 				if (hm)
 				{
 					GetMonitorInfo(hm, &mi);
-					pSettings->uX = mi.rcMonitor.left;
-					pSettings->uY = mi.rcMonitor.top;
-					pSettings->uWidth = mi.rcMonitor.right - mi.rcMonitor.left;
-					pSettings->uHeight = Math::Abs(mi.rcMonitor.top - mi.rcMonitor.bottom);
-					pSettings->bWindowed = false;	// No meaning for init data
-					pSettings->hardwareHndl = NULL;	// This represents a display, so there is no parent window
+					pSettings->screenDim.x = mi.rcMonitor.left;
+					pSettings->screenDim.y = mi.rcMonitor.top;
+					pSettings->screenDim.width = mi.rcMonitor.right - mi.rcMonitor.left;
+					pSettings->screenDim.height = Math::Abs(mi.rcMonitor.top - mi.rcMonitor.bottom);
 					m_uDisplayCount++;
 				}
 			}
+
+			// Get other supported resolutions
+			DWORD iMode = 0;
+			bool bFound = false;
+			while(EnumDisplaySettingsEx(DispDev.DeviceName, iMode, &dm, 0))
+			{
+				if (DispDev.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
+				{
+					GFXBounds bounds;
+					bounds.x = 0;
+					bounds.y = 0;
+					bounds.width = dm.dmPelsWidth;
+					bounds.height = dm.dmPelsHeight;
+
+					bool bFound = false;
+					for (auto itr : pSettings->supportedResolutions)
+					{
+						if (itr.width == bounds.width && itr.height == bounds.height)
+						{
+							bFound = true;
+							break;
+						}
+					}
+
+					if(!bFound)
+					{
+						pSettings->supportedResolutions.push_back(bounds);
+					}
+				}
+
+				iMode++;
+
+			} while (bFound == true);
 		}
 	}
 }
@@ -701,7 +778,7 @@ void GFXDevice_ps::End()
 	submitInfo.pWaitSemaphores = &m_pParent->GetDisplay(0)->GetPlatform().GetImageAcquired();
 	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
-	VkResult res = vkQueueSubmit(m_queue, 1, &submitInfo, m_drawFence);
+	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
 }
 
@@ -828,8 +905,19 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	return false;
 }
 
+void GFXDevice_ps::ReqDestroyFrameBuffer(VkFramebuffer frameBuffer)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_FRAME_BUFFER;
+	req.resource.frameBuffer = frameBuffer;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
 void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_BUFFER;
 	req.resource.buffer = buffer;
@@ -839,6 +927,7 @@ void GFXDevice_ps::ReqDestroyBuffer(VkBuffer buffer)
 
 void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_IMAGE_VIEW;
 	req.resource.imageView = imageView;
@@ -848,6 +937,7 @@ void GFXDevice_ps::ReqDestroyImageView(VkImageView imageView)
 
 void GFXDevice_ps::ReqDestroyImage(VkImage image)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_IMAGE;
 	req.resource.image = image;
@@ -857,10 +947,33 @@ void GFXDevice_ps::ReqDestroyImage(VkImage image)
 
 void GFXDevice_ps::ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_DESCRIPTOR_SET;
 	req.resource.desc.set = set;
 	req.resource.desc.pool = pool;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_LAYOUT;
+	req.resource.layout = layout;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyDescriptorSetPool(VkDescriptorPool pool)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_DESCRIPTOR_POOL;
+	req.resource.pool = pool;
 	req.uDestroyReqFrame = m_pParent->GetFrameCount();
 	m_destroyQueue.push(req);
 }
@@ -930,9 +1043,11 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	res = vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
+	res = vkQueueSubmit(m_queue[QUEUE_TYPE_TRANSFER], 1, &submitInfo, VK_NULL_HANDLE);
 	ASSERT(res == VK_SUCCESS);
-	res = vkQueueWaitIdle(m_queue);
+
+	// TODO: Remove these waits
+	res = vkQueueWaitIdle(m_queue[QUEUE_TYPE_TRANSFER]);
 	ASSERT(res == VK_SUCCESS);
 
 	if (free)

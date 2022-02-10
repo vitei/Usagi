@@ -86,14 +86,14 @@ void ProjectionLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShad
 	DescriptorSetLayoutHndl desc = pDevice->GetDescriptorSetLayout(g_projLightDescDesc);
 	m_descriptorSet.Init(pDevice, desc);
 	m_descriptorSet.SetConstantSet(0, &m_constants);
-	SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(linearDecl);
 
 	if (bSupportsShadow)
 	{
 		m_pShadow = vnew(ALLOC_OBJECT) ProjectionShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		samp.bEnableCmp = true;
 		samp.eCmpFnc = CF_LESS;
 
@@ -107,13 +107,13 @@ void ProjectionLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShad
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void ProjectionLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void ProjectionLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		m_pShadow = nullptr;
 	}
@@ -170,12 +170,14 @@ void ProjectionLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void ProjectionLight::ShadowRender(GFXContext* pContext)
+bool ProjectionLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 

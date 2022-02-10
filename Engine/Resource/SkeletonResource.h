@@ -28,8 +28,8 @@ public:
 
 	struct Bone
 	{
-		U8String		name;
-		U8String		parentName;
+		usg::string		name;
+		usg::string		parentName;
 		uint32			parentIndex;
 		// TODO: Improve the other matrix class so we can use it directly
 		Matrix4x4		mMatrix;

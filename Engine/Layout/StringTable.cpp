@@ -26,10 +26,10 @@ StringTable::~StringTable()
 
 void StringTable::Init(const char* szFilename, Region region, Language language)
 {
-	U8String path;
+	string path;
 	CreatePathToStringsFile(path, szFilename, region, language);
-	ASSERT(File::FileStatus(path.CStr()) == FILE_STATUS_VALID);
-	ProtocolBufferFile file(path.CStr());
+	ASSERT(File::FileStatus(path.c_str()) == FILE_STATUS_VALID);
+	ProtocolBufferFile file(path.c_str());
 
 	m_keystringCount = 0;
 	file.Read(&m_table);
@@ -76,11 +76,11 @@ StringTable::KeyString StringTable::Find(uint32 crc) const
 	return keyString;
 }
 
-void StringTable::CreatePathToStringsFile(U8String& path, const char* szBasename, Region region,
+void StringTable::CreatePathToStringsFile(usg::string& path, const char* szBasename, Region region,
                                           Language language)
 {
 	const char* regionName = NameForRegion(region);
-	path.ParseString("VPB/%s_%s_%s.vpb", szBasename, regionName, NameForLanguage(language));
+	path = str::ParseString("VPB/%s_%s_%s.vpb", szBasename, regionName, NameForLanguage(language));
 }
 
 } // namespace usg

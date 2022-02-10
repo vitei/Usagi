@@ -7,11 +7,14 @@
 
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Audio/AudioBank.pb.h"
-#include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/string.h"
+#include "Engine/Core/stl/vector.h"
 
 namespace usg
 {
 class Audio;
+class AudioFilter;
+class AudioEffect;
 
 class SoundFile
 {
@@ -30,39 +33,32 @@ public:
 	float GetMaxDistance() const { return m_fMaxDistance; }
 	float GetMinDistance() const { return m_fMinDistance; }
 	float GetDopplerFactor() const { return m_fDopplerFactor; }
-	const U8String& GetName() const { return m_strName; }
+	const string& GetName() const { return m_strName; }
 	AudioFalloff GetFalloff() const { return m_eFalloff;  }
 	uint32 GetPriority() const { return m_uPriority; }
 	uint32 GetCRC() const { return m_uCRC;  }
-protected:
-	void InitInt(const SoundFileDef* pSoundFile, const U8String& strName)
-	{
-		m_bLooping = pSoundFile->loop;
-		m_fInitVolume = pSoundFile->volume;
-		m_fMinDistance = pSoundFile->minDistance;
-		m_fMaxDistance = pSoundFile->maxDistance;
-		m_eType = pSoundFile->eType;
-		m_strName = strName;
-		m_eFalloff = pSoundFile->has_eFalloff ? pSoundFile->eFalloff : AudioFalloff_AUDIO_FALLOFF_LINEAR;
-		m_fPitchRandomise = pSoundFile->has_pitchRandomisation ? pSoundFile->pitchRandomisation : 0.0f;
-		m_fDopplerFactor = pSoundFile->has_dopplerFactor ? pSoundFile->dopplerFactor : 0.0f;
-		m_fPitch = pSoundFile->has_basePitch ? pSoundFile->basePitch : 1.0f;
-		m_uPriority = pSoundFile->has_priority ? pSoundFile->priority : 128;
-		m_uCRC = pSoundFile->crc;
-	}
 
-	bool	m_bLooping;
-	float	m_fInitVolume;
-	float	m_fMinDistance;
-	float	m_fMaxDistance;
-	float	m_fPitchRandomise;
-	float	m_fDopplerFactor;
-	float	m_fPitch;
-	uint32 m_uCRC;
-	uint32 m_uPriority;
-	AudioType m_eType;
-	AudioFalloff m_eFalloff;
-	U8String m_strName;
+	const AudioFilter* GetFilter() const { return m_pFilter; }
+	memsize GetEffectCount() const { return m_effects.size(); }
+	const AudioEffect* GetEffect(memsize idx) const { return m_effects[idx]; }
+protected:
+	void InitInt(const SoundFileDef* pSoundFile, const string& strName, Audio* pAudio);
+
+	bool			m_bLooping;
+	float			m_fInitVolume;
+	float			m_fMinDistance;
+	float			m_fMaxDistance;
+	float			m_fPitchRandomise;
+	float			m_fDopplerFactor;
+	float			m_fPitch;
+	uint32			m_uCRC;
+	uint32			m_uPriority;
+	AudioType		m_eType;
+	AudioFalloff	m_eFalloff;
+	string			m_strName;
+
+	const AudioFilter*				m_pFilter;
+	usg::vector<const AudioEffect*>	m_effects;
 };
 
 }

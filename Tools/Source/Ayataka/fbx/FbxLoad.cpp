@@ -4,6 +4,7 @@
 //#include "pugi_util.h"
 #include "Engine/Core/stl/map.h"
 #include "StringUtil.h"
+#include "exchange/MaterialAnimation.h"
 #include "exchange/Animation.h"
 #include "exchange/LoaderUtil.h"
 
@@ -367,7 +368,7 @@ void FbxLoad::AddBone(::exchange::Skeleton* pSkeleton, FbxNode* pNode, bool bIsN
 		}
 		if (!nameUnique)
 		{
-			sprintf_s(name, "%s\.%03i", pNode->GetName(), ++loopIdx);
+			sprintf_s(name, "%s.%03i", pNode->GetName(), ++loopIdx);
 		}
 	} while (!nameUnique);
 
@@ -499,23 +500,23 @@ bool FbxLoad::GetTextureIndex(const FbxTexture& textureInfo, const char* szTexNa
 
 	if (!pMaterial->IsCustomFX())
 	{
-		return pMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex);
+		return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex) && pMaterial->pb().textures[uIndex].textureName[0] == '\0';
 	}
 
-	return pMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex);
+	return pMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex) && pMaterial->pb().textures[uIndex].textureName[0] == '\0';
 }
 
 
-usg::exchange::Texture_Wrap GetWrap(FbxTexture::EWrapMode WrapMode)
+usg::SamplerWrap GetWrap(FbxTexture::EWrapMode WrapMode)
 {
 	switch (WrapMode)
 	{
 	case FbxTexture::EWrapMode::eRepeat:
-		return usg::exchange::Texture_Wrap_repeat;
+		return usg::SAMP_WRAP_REPEAT;
 	case FbxTexture::EWrapMode::eClamp:
-		return usg::exchange::Texture_Wrap_clamp_to_edge;
+		return usg::SAMP_WRAP_CLAMP;
 	default:
-		return usg::exchange::Texture_Wrap_repeat;
+		return usg::SAMP_WRAP_REPEAT;
 	}
 }
 
@@ -577,24 +578,25 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 
 					tex.wrapS = GetWrap(pTexture->WrapModeU);
 					tex.wrapT = GetWrap(pTexture->WrapModeV);
-					tex.magFilter = usg::exchange::Texture_Filter_linear;
-					tex.mipFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
-					tex.minFilter = usg::exchange::Texture_Filter_linear_mipmap_linear;
-					tex.lodBias = 0.0f;
-					tex.lodMinLevel = 0;
-					tex.anisoLevel = usg::exchange::Texture_Aniso_aniso_16;	// Assume max as nothing has been asked for
+
+					// Now relying on the custom effect for these values
+					//tex.magFilter = usg::SAMP_FILTER_LINEAR;
+					//tex.mipFilter = usg::MIP_FILTER_LINEAR;
+					//tex.minFilter = usg::SAMP_FILTER_LINEAR;
+					//tex.lodBias = 0.0f;
+					//tex.lodMinLevel = 0;
+					//tex.anisoLevel = usg::ANISO_LEVEL_16;	// Assume max as nothing has been asked for
 					strcpy_s(tex.textureHint, sizeof(tex.textureHint), property.GetNameAsCStr());
 
 					
 					//tex.minFilter = fileTexture->UseMipMap ? usg::exchange::Texture_Filter_linear_mipmap_linear : usg::exchange::Texture_Filter_linear;
 
-					usg::exchange::TextureCoordinator& texCo = pNewMaterial->pb().textureCoordinators[uCoordinatorIndex];
-					texCo.sourceCoordinate = 0; // FIXME: More than one UV set
+					usg::exchange::TextureCoordinator& texCo = pNewMaterial->pb().textureCoordinators[uTexIndex];
+					texCo.sourceCoordinate = 0; // FIXME: Should probably switch to named UV channels
 					texCo.method = usg::exchange::TextureCoordinator_MappingMethod_UV_COORDINATE; // TODO: Support other UV types
 					texCo.scale.Assign((float)pTexture->GetScaleU(), (float)pTexture->GetScaleV());
 					texCo.translate.Assign((float)pTexture->GetTranslationU(), (float)pTexture->GetTranslationV());
 					texCo.rotate = (float)pTexture->GetRotationU();
-					pNewMaterial->pb().textureCoordinators_count++;
 				}
 			}
 		}
@@ -609,7 +611,7 @@ void FbxLoad::AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::
 void FbxLoad::SetBoolBasedOnTexture(::exchange::Material* pNewMaterial, const char* szTexName, const char* szBoolName)
 {
 	uint32 uIndex;
-	if (pNewMaterial->GetCustomFX().GetTextureIndex(szTexName, uIndex))
+	if (pNewMaterial->GetCustomFX(0).GetTextureIndex(szTexName, uIndex))
 	{
 		if (pNewMaterial->pb().textures[uIndex].textureName[0] != '\0')
 		{
@@ -629,16 +631,18 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 	SetBoolBasedOnTexture(pMaterial, "EmissiveFactor", "bEmissiveMap");
 	SetBoolBasedOnTexture(pMaterial, "Reflection", "bReflectionMap");
 
-	for (uint32 i = 0; i < pMaterial->GetCustomFX().GetTextureCount(); i++)
+	for (uint32 i = 0; i < pMaterial->GetCustomFX(0).GetTextureCount(); i++)
 	{
-		if (pMaterial->pb().textures[i].textureName[0] == '\0')
+		uint32 uTexIndex = i;
+		pMaterial->GetCustomFX(0).GetTextureIndex(i, uTexIndex);
+		if (pMaterial->pb().textures[uTexIndex].textureName[0] == '\0')
 		{
 			// Add a dummy texture
-			const char* szTextName = pMaterial->GetCustomFX().GetDefaultTexName(i);
+			const char* szTextName = pMaterial->GetCustomFX(0).GetDefaultTexName(i);
 			int length = (int)(strlen(szTextName));
-			length = Math::Min(length, (int)sizeof(pMaterial->pb().textures[i].textureName));
-			memset(pMaterial->pb().textures[i].textureName, 0, sizeof(pMaterial->pb().textures[i].textureName));
-			strncpy(pMaterial->pb().textures[i].textureName, szTextName, length);
+			length = Math::Min(length, (int)sizeof(pMaterial->pb().textures[uTexIndex].textureName));
+			memset(pMaterial->pb().textures[uTexIndex].textureName, 0, sizeof(pMaterial->pb().textures[uTexIndex].textureName));
+			strncpy(pMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 		}
 	}
 
@@ -725,28 +729,20 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 {
 	usg::exchange::Rasterizer& rRasterizer = pNewMaterial->pb().rasterizer;
 
-	// render state mode
-	rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_OPAQUE;
-
 	// cull face
 	rRasterizer.cullFace = usg::CULL_FACE_BACK;
 
 	// blend mode
-	rRasterizer.blendMode = ::usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
+	rRasterizer.blendEnabled = false;
 	rRasterizer.alphaState.rgbOp = BLEND_EQUATION_ADD;
 	rRasterizer.alphaState.alphaOp = BLEND_EQUATION_ADD;
 	if (bTransparent)
 	{
-		rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_TRANSLUCENT;
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR;
+		rRasterizer.blendEnabled = true;
 		rRasterizer.alphaState.rgbSrcFunc = BLEND_FUNC_SRC_ALPHA;
 		rRasterizer.alphaState.rgbDestFunc = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		rRasterizer.alphaState.alphaSrcFunc = BLEND_FUNC_ONE;
 		rRasterizer.alphaState.alphaDestFunc = BLEND_FUNC_ZERO;
-	}
-	else
-	{
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
 	}
 
 	// depth test
@@ -756,53 +752,49 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 }
 
 
-::exchange::Material* FbxLoad::NewMaterial(FbxSurfaceMaterial* pFBXMaterial)
+::exchange::Material* FbxLoad::NewMaterial(FbxSurfaceMaterial* pFBXMaterial, bool bSkin)
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
-	std::string effectName = "FBXDefault";
-	FbxProperty p = pFBXMaterial->FindProperty("EffectName", false);
-	if (p.IsValid())
-	{
-		std::string nodeName = p.GetName();
-		EFbxType eType = p.GetPropertyDataType().GetType();
-		if (eType == eFbxString)
-		{
-			FbxString string = p.Get< FbxString >();
-			effectName = string;
-		}
-	}
-
-	// FIXME: Get custom effect definitions
-	const char* szUsagiPath = getenv("USAGI_DIR");
-	std::string emuPath = szUsagiPath;
-	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\CustomFX\\";
-	emuPath += effectName;
-	emuPath += ".yml";
-	FILE* pFile = nullptr;
-	if (fopen_s(&pFile, emuPath.c_str(), "r") != 0)
-	{
-		fclose(pFile);
-		emuPath = szUsagiPath;
-		emuPath += "..\\Data\\CustomFX\\";
-		emuPath += effectName;
-		emuPath += ".yml";
-		if (!fopen_s(&pFile, emuPath.c_str(), "r"))
-		{
-			FATAL_RELEASE(false, "Could not find effect %s", effectName.c_str());
-			return nullptr;
-		}
-	}
-	
 	pNewMaterial->SetIsCustomFX(false);
 
-	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str());
+	std::vector<std::string> defines;
+
+	uint32 uTexIndex = 0;
+	if (bSkin)
+	{
+		defines.push_back("skel");
+	}
+	if (pFBXMaterial->sNormalMap || pFBXMaterial->sBump)
+	{
+		FbxProperty property = pFBXMaterial->GetFirstProperty();
+
+		while (property.IsValid())
+		{
+			uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
+			const char* szName = property.GetNameAsCStr();
+			for (uint32 i = 0; i < uTextureCount; ++i)
+			{
+				FbxLayeredTexture* layeredTexture = property.GetSrcObject<FbxLayeredTexture>(i);
+
+				ASSERT_MSG((layeredTexture == nullptr), "Layered texture not supported");
+
+				FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(i);
+				if (pTexture && pTexture->GetName() == "NormalMap")
+				{
+					defines.push_back("bump");
+					break;
+				}
+			}
+			property = pFBXMaterial->GetNextProperty(property);
+		}
+	}
 
 	// material name
 	const char* pMaterialName = pFBXMaterial->GetName();
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
+
+	m_pOverrides->InitDefault(pNewMaterial->pb().materialName, defines, pNewMaterial);
 
 	AddMaterialTextures(pFBXMaterial, pNewMaterial);
 	bool bTransparent = SetDefaultMaterialVariables(pFBXMaterial, pNewMaterial);
@@ -814,7 +806,7 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 }
 
 
-::exchange::Material* FbxLoad::DummyMaterial()
+::exchange::Material* FbxLoad::DummyMaterial(bool bSkinned)
 {
 	::exchange::Material* pNewMaterial = vnew(ALLOC_OBJECT) ::exchange::Material();
 
@@ -822,24 +814,32 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	const char* szUsagiPath = getenv("USAGI_DIR");
 	std::string emuPath = szUsagiPath;
 	// FIXME: Hunt for a matching material setting file
-	emuPath += "\\Data\\CustomFX\\FBXDefault.yml";
+	emuPath += "\\Data\\GLSL\\effects\\Model.yml";
 	pNewMaterial->SetIsCustomFX(false);
 
+	std::vector<std::string> defines;
+	if (bSkinned)
+	{
+		defines.push_back("skel");
+	}
+
 	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str());
+	pNewMaterial->InitCustomMaterial(emuPath.c_str(), "FBXDefault", defines);
 
 	// material name
 	const char* pMaterialName = "Dummy";
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
 
-	for (uint32 i = 0; i < pNewMaterial->GetCustomFX().GetTextureCount(); i++)
+	for (uint32 i = 0; i < pNewMaterial->GetCustomFX(0).GetTextureCount(); i++)
 	{
 		// Set up the default textures first
-		const char* szTextName = pNewMaterial->GetCustomFX().GetDefaultTexName(i);
+		uint32 uTexIndex = i;
+		pNewMaterial->GetCustomFX(0).GetTextureIndex(i, uTexIndex);
+		const char* szTextName = pNewMaterial->GetCustomFX(0).GetDefaultTexName(i);
 		int length = (int)(strlen(szTextName));
-		length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[i].textureName));
-		memset(pNewMaterial->pb().textures[i].textureName, 0, sizeof(pNewMaterial->pb().textures[i].textureName));
-		strncpy(pNewMaterial->pb().textures[i].textureName, szTextName, length);
+		length = Math::Min(length, (int)sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
+		memset(pNewMaterial->pb().textures[uTexIndex].textureName, 0, sizeof(pNewMaterial->pb().textures[uTexIndex].textureName));
+		strncpy(pNewMaterial->pb().textures[uTexIndex].textureName, szTextName, length);
 	}
 
 	pNewMaterial->SetVariable("ambient", Color::White);
@@ -852,28 +852,20 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 
 	usg::exchange::Rasterizer& rRasterizer = pNewMaterial->pb().rasterizer;
 
-	// render state mode
-	rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_OPAQUE;
-
 	// cull face
 	rRasterizer.cullFace = usg::CULL_FACE_BACK;
 
 	// blend mode
-	rRasterizer.blendMode = ::usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
+	rRasterizer.blendEnabled = 0;
 	rRasterizer.alphaState.rgbOp = BLEND_EQUATION_ADD;
 	rRasterizer.alphaState.alphaOp = BLEND_EQUATION_ADD;
 	if (bTransparent)
 	{
-		rRasterizer.mode = usg::exchange::Rasterizer_Mode_MODE_TRANSLUCENT;
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR;
+		rRasterizer.blendEnabled = 1;
 		rRasterizer.alphaState.rgbSrcFunc = BLEND_FUNC_SRC_ALPHA;
 		rRasterizer.alphaState.rgbDestFunc = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		rRasterizer.alphaState.alphaSrcFunc = BLEND_FUNC_ONE;
 		rRasterizer.alphaState.alphaDestFunc = BLEND_FUNC_ZERO;
-	}
-	else
-	{
-		rRasterizer.blendMode = usg::exchange::Rasterizer_BlendMode_BLEND_MODE_NONE;
 	}
 
 	// depth test
@@ -885,8 +877,9 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies, MaterialOverrides* pOverrides)
 {
+	m_pOverrides = pOverrides;
 	m_pDependencies = pDependencies;
 	m_pScene = modelScene;
 	m_bCollisionMesh = bCollisionModel;
@@ -1057,7 +1050,7 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 		info.elementType = m_activeVerts[0].elements[i].eElementType;
 		info.scaling = 1.0f;
 		info.attribute = m_activeVerts[0].elements[i].type;
-		strcpy_s(info.usageHint, sizeof(info.usageHint), m_activeVerts[0].elements[i].hint.c_str());
+		strcpy_s(info.usageHint, sizeof(info.usageHint), m_activeVerts[0].elements[i].hint);
 		info.columns = uColumnNum;
 		info.refIndex = cmdl.GetStreamNum() - 1;
 
@@ -1226,8 +1219,22 @@ void FbxLoad::ReadMeshRecursive(Cmdl& cmdl, FbxNode* pNode, bool bStatic)
 				m_pParentBoneNode = bStatic ? nullptr : pParent;
 			}
 
+			// Materials need to know if they are skinned
+			bool bSkinned = false;
+			for (uint32 uAttribId = 0; uAttribId < (uint32)pNode->GetNodeAttributeCount(); uAttribId++)
+			{
+				if (pNode->GetNodeAttributeByIndex(uAttribId)->GetAttributeType() == FbxNodeAttribute::eMesh)
+				{
+					FbxMesh* pFbxMesh = (FbxMesh*)pNode->GetNodeAttributeByIndex(uAttribId);
+					if (pFbxMesh->GetPolygonCount() > 0)
+					{
+						bSkinned |= pFbxMesh->GetDeformerCount(FbxDeformer::eSkin) > 0;
+					}
+				}
+			}
+
 			m_uMeshMaterialOffset = cmdl.GetMaterialNum();
-			AddMaterials(cmdl, pNode);
+			AddMaterials(cmdl, pNode, bSkinned);
 			
 			for (uint32 uAttribId = 0; uAttribId < (uint32)pNode->GetNodeAttributeCount(); uAttribId++)
 			{
@@ -1485,6 +1492,18 @@ FbxAMatrix FbxLoad::GetCombinedMatrixForNode(FbxNode* pNode, FbxNode* pParent, F
 	return mGlobal * mGeometry;
 }
 
+::exchange::MaterialAnimation* FbxLoad::NewMaterialAnimation(Cmdl& cmdl, FbxAnimStack* animStack)
+{
+	::exchange::MaterialAnimation* pNewAnimation = vnew(ALLOC_OBJECT) ::exchange::MaterialAnimation();
+
+	pNewAnimation->SetName(animStack->GetName());
+	fbxsdk::FbxTime duration = animStack->GetLocalTimeSpan().GetDuration();
+	duration.SetGlobalTimeMode(FRAME_MODE);
+	pNewAnimation->InitTiming((uint32)duration.GetFrameCount() + 1, 30.0f);
+
+	return pNewAnimation;
+}
+
 ::exchange::Animation* FbxLoad::NewAnimation(Cmdl& cmdl, FbxAnimStack* animStack)
 {
 	::exchange::Animation* pNewAnimation = vnew(ALLOC_OBJECT) ::exchange::Animation();
@@ -1507,17 +1526,34 @@ void FbxLoad::ReadAnimations(Cmdl& cmdl, FbxScene* pScene)
 		std::string stackName = pAnimStack->GetName();
 
 		::exchange::Animation* pNewAnim = NewAnimation(cmdl, pAnimStack);
+		::exchange::MaterialAnimation* pMatAnim = NewMaterialAnimation(cmdl, pAnimStack);
 
 		pScene->SetCurrentAnimationStack(pAnimStack);
 
  		int nbAnimLayers = pAnimStack->GetMemberCount<FbxAnimLayer>();
 
-		// Assuming only one layer
 		ReadAnimationsRecursive(pAnimStack, pNewAnim, pScene->GetRootNode());
 		pNewAnim->AllocateAnimBones();
-		ReadAnimationKeyFramesRecursively(pAnimStack, pNewAnim, pScene->GetRootNode());
+		ReadAnimationKeyFramesRecursively(pAnimStack, pNewAnim, pMatAnim, pScene->GetRootNode());
 
-		cmdl.AddAnimation(pNewAnim);
+		if(pNewAnim->ValidAnim())
+		{
+			cmdl.AddAnimation(pNewAnim);
+		}
+		else
+		{
+			vdelete pNewAnim;
+		}
+
+		if (pMatAnim->ValidAnim())
+		{
+			cmdl.AddMaterialAnimation(pMatAnim);
+		}
+		else
+		{
+			vdelete pMatAnim;
+		}
+
 	}
 	pScene->SetCurrentAnimationStack(nullptr);
 }
@@ -1548,14 +1584,91 @@ void FbxLoad::FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::
 
 	// FIXME: All of this functionality should be moved over to the reverse co-ordinate function
 	usg::Matrix4x4 mRot;
-	mRot.MakeRotate(Math::DegreesToRadians(-(float)rot[0]), Math::DegreesToRadians(-(float)rot[1]), Math::DegreesToRadians((float)rot[2]));
+	mRot.MakeRotate(Math::DegreesToRadians((float)rot[0]), Math::DegreesToRadians(-(float)rot[1]), -Math::DegreesToRadians((float)rot[2]));
 	pFrame->qRot = mRot;
 	// FIXME: Having to apply the scale here almost certainly means we are failing to apply a necessary transform
-	pFrame->vPos.Assign((float)(trans[0]* m_appliedScale), (float)(trans[1] * m_appliedScale), -(float)(trans[2] * m_appliedScale));
+	pFrame->vPos.Assign(-(float)(trans[0]* m_appliedScale), (float)(trans[1] * m_appliedScale), (float)(trans[2] * m_appliedScale));
 	pFrame->vScale.Assign((float)(scale[0]), (float)(scale[1]), (float)(scale[2]));
 }
 
-void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode)
+usg::exchange::CurveKeyFrameType FbxLoad::GetKeyFrameType(FbxAnimCurveDef::EInterpolationType eTypeIn)
+{
+	switch (eTypeIn)
+	{
+		case FbxAnimCurveDef::eInterpolationLinear:
+			return usg::exchange::CurveKeyFrameType_LINEAR;
+		case FbxAnimCurveDef::eInterpolationCubic:
+			return usg::exchange::CurveKeyFrameType_HERMITE;
+		case FbxAnimCurveDef::eInterpolationConstant:
+			return usg::exchange::CurveKeyFrameType_STEP;
+		default:
+			ASSERT(false);
+			return usg::exchange::CurveKeyFrameType_LINEAR;
+	}
+}
+
+bool FbxLoad::AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimation* pMatAnim, FbxPropertyT<FbxDouble3>& prop, usg::exchange::MaterialAnimationMemberType eType, const char* szName)
+{
+	FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
+
+	FbxLongLong start = pAnimStack->GetLocalTimeSpan().GetStart().GetFrameCount(FRAME_MODE);
+	FbxLongLong end = pAnimStack->GetLocalTimeSpan().GetStop().GetFrameCount(FRAME_MODE);
+
+	pMatAnim->AddMember();
+
+
+	usg::exchange::AnimationMember& member = pMatAnim->GetCurrentMemberData();
+	member.type = eType;
+	member.targetID = 0;
+	member.curveNum = 0;
+	strcpy(member.targetName, szName);
+
+	const char* szCurve[3] = { FBXSDK_CURVENODE_COMPONENT_X, FBXSDK_CURVENODE_COMPONENT_Y, FBXSDK_CURVENODE_COMPONENT_Z };
+
+	for(int i=0; i<3; i++)
+	{
+		FbxAnimCurve* pCurve = prop.GetCurve(pAnimLayer, szCurve[i]);
+
+		if(!pCurve)
+			continue;
+
+
+		::exchange::MaterialAnimation::Curve curve;
+		curve.curve.axis = 0;
+		curve.curve.keyFrameNum = pCurve->KeyGetCount();
+		curve.curve.start = (sint32)start;
+		curve.curve.end = (sint32)end;
+
+		for (int i = 0; i <= curve.curve.keyFrameNum; ++i)
+		{
+			FbxAnimCurveKey fbxKey = pCurve->KeyGet(i);
+			if (pCurve)
+			{
+				usg::exchange::CurveKeyFrame frame;
+				frame.frame = (float)fbxKey.GetTime().GetSecondDouble();
+				frame.type = GetKeyFrameType(fbxKey.GetInterpolation());
+				// Confirm slopes match the original intention
+				frame.inSlope = fbxKey.GetDataFloat(FbxAnimCurveDef::eRightSlope);
+				frame.outSlope = fbxKey.GetDataFloat(FbxAnimCurveDef::eNextLeftSlope);
+				curve.keyFrames.push_back(frame);
+			}
+		}
+
+		member.curveNum++;
+
+		pMatAnim->AddCurve(curve);
+	}
+
+	if (member.curveNum == 0)
+	{
+		// Remove this member set
+		pMatAnim->PopMember();
+		return false;
+	}
+	return true;
+}
+
+void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode)
 {
 	if (pAnim->GetBone(pNode->GetName()))
 	{
@@ -1570,9 +1683,54 @@ void FbxLoad::ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exch
 			FillOutAnimFrame(pNode, currTime, pFrame);
 		}
 	}
+
+	for (int mat = 0; mat < pNode->GetMaterialCount(); mat++)
+	{
+		bool bValidAnim = false;
+		pMatAnim->AddMemberSet();
+
+		FbxSurfaceMaterial* pMat = pNode->GetMaterial(mat);
+		if (pMat->GetClassId().Is(FbxSurfaceLambert::ClassId))
+		{
+			FbxSurfaceLambert* pLamb = reinterpret_cast<FbxSurfaceLambert*>(pMat);
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Ambient, usg::exchange::MaterialAnimationMemberType_COLOR_AMBIENT, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Diffuse, usg::exchange::MaterialAnimationMemberType_COLOR_DIFFUSE, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->Emissive, usg::exchange::MaterialAnimationMemberType_COLOR_EMISSION, pMat->GetName());
+
+			// One or the other so we try both in the same destination
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->VectorDisplacementColor, usg::exchange::MaterialAnimationMemberType_DISPLACEMENT, pMat->GetName());
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pLamb->DisplacementColor, usg::exchange::MaterialAnimationMemberType_DISPLACEMENT, pMat->GetName());
+		}
+
+		if (pMat->GetClassId().Is(FbxSurfacePhong::ClassId))
+		{
+			FbxSurfacePhong* pPhong = reinterpret_cast<FbxSurfacePhong*>(pMat);
+			bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pPhong->Specular, usg::exchange::MaterialAnimationMemberType_COLOR_SPECULAR_0, pMat->GetName());
+		}
+
+		FbxProperty property = pMat->GetFirstProperty();
+
+		uint32 uTextureCount = property.GetSrcObjectCount<FbxTexture>();
+		for (uint32 tex = 0; tex < uTextureCount; tex++)
+		{
+			FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(tex);
+			if (pTexture)
+			{
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Translation, usg::exchange::MaterialAnimationMemberType_TRANSLATE, pMat->GetName());
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Rotation, usg::exchange::MaterialAnimationMemberType_ROTATE, pMat->GetName());
+				bValidAnim |= AddAnimCurve(pAnimStack, pMatAnim, pTexture->Scaling, usg::exchange::MaterialAnimationMemberType_SCALE, pMat->GetName());
+			}
+		}
+		if (!bValidAnim)
+		{
+			pMatAnim->PopMemberSet();
+		}
+	}
+
+
 	for (int modelCount = 0; modelCount < pNode->GetChildCount(); modelCount++)
 	{
-		ReadAnimationKeyFramesRecursively(pAnimStack, pAnim, pNode->GetChild(modelCount));
+		ReadAnimationKeyFramesRecursively(pAnimStack, pAnim, pMatAnim, pNode->GetChild(modelCount));
 	}
 }
 
@@ -1692,7 +1850,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 			for (int k = 0; k < uUVCount; ++k)
 			{
 				GetUV(currMesh, iVertexIndex, currMesh->GetTextureUVIndex(uTriangle, uTriangleVert), k, UV);
-				UV.hint = uvNames[k];
+				strcpy_s(UV.hint, uvNames[k]);
 				vertexOut.elements.push_back(UV);
 			}
 
@@ -2126,6 +2284,14 @@ void FbxLoad::PostProcessing(Cmdl& cmdl)
 
 	}
 
+	uint32 uMaterialCount = cmdl.GetMaterialNum();
+	for (uint32 i = 0; i < uMaterialCount; i++)
+	{
+		::exchange::Material* pMaterial = cmdl.GetMaterialPtr(i);
+
+		m_pOverrides->ApplyOverrides(pMaterial->pb().materialName, pMaterial);
+	}
+
 	// Calculate adjacency
 	SetupAdjacencyStream(cmdl);
 
@@ -2326,21 +2492,21 @@ void FbxLoad::RemoveDuplicateVertices()
 	// Should already be seperated into seperate meshes per material via the utilities
 }
 
-void FbxLoad::AddMaterials(Cmdl& cmdl, FbxNode* pNode)
+void FbxLoad::AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned)
 {
 	uint32 uMaterialCount = pNode->GetMaterialCount();
 	m_bHasNormalMap = false;
 	for (uint32 i = 0; i < uMaterialCount; ++i)
 	{
 		FbxSurfaceMaterial* surfaceMaterial = pNode->GetMaterial(i);
-		::exchange::Material* pNewMaterial = NewMaterial(surfaceMaterial);
+		::exchange::Material* pNewMaterial = NewMaterial(surfaceMaterial, bSkinned);
 		cmdl.AddMaterial(pNewMaterial);
 	}
 
 	if (uMaterialCount == 0)
 	{
 		// Create a dummy material
-		::exchange::Material* pNewMaterial = DummyMaterial();
+		::exchange::Material* pNewMaterial = DummyMaterial(bSkinned);
 		cmdl.AddMaterial(pNewMaterial);
 	}
 }

@@ -19,18 +19,23 @@ public:
 	FilmGrain();
 	~FilmGrain();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
+	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color); }
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+
 private:
 	PostFXSys*		m_pSys;
 
+	PipelineStateDecl		m_pipelineDecl;
 	RenderTarget*			m_pDestTarget;
 	usg::SamplerHndl		m_sampler;
 	ConstantSet				m_constantSet;

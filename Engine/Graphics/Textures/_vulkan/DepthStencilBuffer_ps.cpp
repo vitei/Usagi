@@ -34,7 +34,7 @@ void DepthStencilBuffer_ps::Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeig
     
     m_texture.GetPlatform().Init(pDevice, eFormat, uWidth, uHeight, uFlags);
 
-	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
+	m_bHasStencil = (eFormat == DepthFormat::DEPTH_24_S8);
 }
 
 
@@ -43,12 +43,12 @@ void DepthStencilBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 
 	m_uWidth = uWidth;
 	m_uHeight = uHeight;
 	
-	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices);
+	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices, uFlags);
 
 	InitLayerViews(pDevice);
 
 
-	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
+	m_bHasStencil = (eFormat == DepthFormat::DEPTH_24_S8);
 }
 
 
@@ -61,13 +61,13 @@ void DepthStencilBuffer_ps::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 u
 	ASSERT(m_pLayerViews == nullptr);
 	InitLayerViews(pDevice);
 
-	m_bHasStencil = (eFormat == DF_DEPTH_24_S8);
+	m_bHasStencil = (eFormat == DepthFormat::DEPTH_24_S8);
 }
 
-void DepthStencilBuffer_ps::CleanUp(GFXDevice* pDevice)
+void DepthStencilBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
 	FreeLayerViews(pDevice);
-	m_texture.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
 }
 
 void DepthStencilBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)

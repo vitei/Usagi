@@ -95,7 +95,7 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 		m_pShadow = vnew(ALLOC_OBJECT) OmniShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
 
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		samp.bEnableCmp = true;
 		samp.eCmpFnc = CF_LESS;
 
@@ -112,18 +112,18 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 }
 
 
-void PointLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void PointLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		vdelete m_pShadow;
 		m_pShadow = nullptr;
 	}
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
-	Light::CleanUp(pDevice, pScene);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
+	Light::Cleanup(pDevice, pScene);
 }
 
 
@@ -159,6 +159,14 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 		}
 		m_constants.Unlock();
 		m_constants.UpdateData(pDevice);
+		if (m_pShadow)
+		{
+			m_descriptorSetShadow.UpdateDescriptors(pDevice);
+		}
+		else
+		{
+			m_descriptorSet.UpdateDescriptors(pDevice);
+		}
 	}
 	if (m_pShadow)
 	{
@@ -167,12 +175,14 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void PointLight::ShadowRender(GFXContext* pContext)
+bool PointLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 bool PointLight::IsInRange(AABB& testBox)

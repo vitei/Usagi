@@ -52,10 +52,10 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	usg::AABB worldBounds;
 	worldBounds.SetCentreRadii(usg::Vector3f(0.0f, 0.0f, 0.0f), usg::Vector3f(512.0f, 512.0f, 512.0f));
 
-	m_scene.Init(pDevice, worldBounds, NULL);
+	m_scene.Init(pDevice, usg::ResourceMgr::Inst(), worldBounds, NULL);
 	m_pSceneCtxt = m_scene.CreateViewContext(pDevice);
 	m_camera.Init(vSize.x / vSize.y);
-	m_pSceneCtxt->Init(pDevice, &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
+	m_pSceneCtxt->Init(pDevice, usg::ResourceMgr::Inst(), &m_postFX, 0, usg::RenderMask::RENDER_MASK_ALL);
 	m_pSceneCtxt->SetCamera(&m_camera.GetCamera());
 
 	m_previewButtons[BUTTON_PLAY].InitAsTexture(pDevice, "Play", usg::ResourceMgr::Inst()->GetTexture(pDevice, "play"));
@@ -106,6 +106,9 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 
 void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 {
+	m_scene.PreDraw(pImmContext);
+	m_scene.GetLightMgr().ViewShadowRender(pImmContext, &m_scene, m_pSceneCtxt);
+
 	m_postFX.BeginScene(pImmContext, 0);
 
 	m_postFX.SetActiveViewContext(m_pSceneCtxt);
@@ -118,17 +121,17 @@ void PreviewWindow::Draw(usg::GFXContext* pImmContext)
 	m_postFX.EndScene();
 }
 
-void PreviewWindow::CleanUp(usg::GFXDevice* pDevice)
+void PreviewWindow::Cleanup(usg::GFXDevice* pDevice)
 {
 	m_scene.GetLightMgr().RemoveDirLight(m_pDirLight);
 	m_pDirLight = nullptr;
-	m_previewButtons[BUTTON_PLAY].CleanUp(pDevice);
-	m_previewButtons[BUTTON_PAUSE].CleanUp(pDevice);
-	m_previewButtons[BUTTON_RESTART].CleanUp(pDevice);
-	m_previewModel.CleanUp(pDevice); 
+	m_previewButtons[BUTTON_PLAY].Cleanup(pDevice);
+	m_previewButtons[BUTTON_PAUSE].Cleanup(pDevice);
+	m_previewButtons[BUTTON_RESTART].Cleanup(pDevice);
+	m_previewModel.Cleanup(pDevice); 
 	m_scene.DeleteViewContext(m_pSceneCtxt);
-	m_postFX.CleanUp(pDevice);
-	m_texture.CleanUp(pDevice);
+	m_postFX.Cleanup(pDevice);
+	m_texture.Cleanup(pDevice);
 	m_scene.Cleanup(pDevice);
 
 }

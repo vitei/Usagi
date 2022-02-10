@@ -8,7 +8,6 @@
 
 namespace usg
 {
-	class U8String;
 	class ParticleEffect;
 	class GFXDevice;
 
@@ -17,7 +16,7 @@ namespace usg
 	public:
 		virtual void InitPools(GFXDevice* pDevice) = 0;
 		virtual void FreePools() = 0;
-		virtual bool CreateCustomEffect(U8String name, ParticleEffect* pParent) = 0;
+		virtual bool CreateCustomEffect(usg::string name, ParticleEffect* pParent) = 0;
 	protected:
 
 	};

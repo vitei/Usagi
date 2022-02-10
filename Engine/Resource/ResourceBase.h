@@ -27,6 +27,7 @@ namespace usg
 		FONT,
 		CUSTOM_EFFECT,
 		SKEL_ANIM,
+		MAT_ANIM,
 		PARTICLE_EFFECT,
 		PARTICLE_EMITTER,
 		PROTOCOL_BUFFER,
@@ -50,7 +51,7 @@ namespace usg
 
 		// Support for asynchronous loading, coded to match level editor for now
 		virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) { ASSERT(false); return false; }
-		virtual void CleanUp(GFXDevice* pDevice) {}
+		virtual void Cleanup(GFXDevice* pDevice) {}
 		bool IsReady() const { return m_bReady; }
 		void SetReady(bool bReady) { m_bReady = bReady; }
 		ResourceType GetResourceType() const { return m_resourceType; }

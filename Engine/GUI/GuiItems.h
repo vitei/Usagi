@@ -162,7 +162,7 @@ namespace usg
 
 		void Init(const char* szName);
 		void InitAsTexture(GFXDevice* pDevice, const char* szName, TextureHndl tex);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void SetValue(bool bValue) { m_bValue = bValue; }
 		bool GetValue() const { return m_bValue; }
 		void SetUVs(Vector2f vUVMin, Vector2f vUVMax);
@@ -239,11 +239,11 @@ namespace usg
 		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt);
 
 		virtual GuiItemType GetItemType() const { return GuiItemType::COMBO_BOX; }
-		const char* GetSelectedName() { return m_selectedName.CStr(); }
+		const char* GetSelectedName() { return m_selectedName.c_str(); }
 	private:
 		const char*	m_szZeroSepNames;
 		const char** m_szNames;
-		U8String	m_selectedName;
+		usg::string	m_selectedName;
 		uint32		m_uItems;
 		uint32		m_uSelected;
 	};
@@ -334,7 +334,7 @@ namespace usg
 		virtual ~GUITexture();
 
 		void Init(GFXDevice* pDevice, const char* szName, Vector2f vSize, usg::TextureHndl pTexture);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void SetSize(Vector2f vSize) { m_vScale = vSize; }
 		void SetUVs(Vector2f vUVMin, Vector2f vUVMax);
 		virtual bool UpdateAndAddToDrawList(const GUIContext& ctxt);

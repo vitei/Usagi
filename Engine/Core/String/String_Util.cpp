@@ -169,4 +169,64 @@ namespace str
 		return NULL;
 	}
 
+	usg::string ParseString(const char* szSrc, ...)
+	{
+		char tmp[1024];
+		va_list va;
+		va_start(va, szSrc);
+		ParseVariableArgs(tmp, sizeof(tmp), szSrc, va);
+		va_end(va);
+		return tmp;
+	}
+
+	void TruncateToPath(usg::string& dest)
+	{
+		for (memsize i = (dest.length())-2; i > 0; i--)
+		{
+			if (dest.at(i) == '\\' || dest.at(i) == '/')
+			{
+				dest = dest.substr(0, i-1);
+				break;
+			}
+		}
+	}
+
+	void TruncateExtension(usg::string& string)
+	{
+		for (memsize i = string.length()-1; i > 0; i--)
+		{
+			if (string.at(i) == '.')
+			{
+				string = string.substr(0, i);
+				break;
+			}
+		}
+	}
+
+	void RemovePath(usg::string& string)
+	{
+		for (memsize i = (string.length()) - 2; i > 0; i--)
+		{
+			if (string.at(i) == '\\' || string.at(i) == '/')
+			{
+				string = string.substr(i + 1);
+				break;
+			}
+		}
+	}
+
+	uint32 GetByteCount(const char* szText)
+	{
+		// Assume the first character is a starter
+		szText++;
+		uint32 uCount = 1;
+		// Add characters where it isn't
+		while ((*szText & 0x80) != 0 && (*szText & 0xc0) != 0xc0 && *szText != '\0')
+		{
+			szText++;
+			uCount++;
+		}
+		return uCount;
+	}
+
 }

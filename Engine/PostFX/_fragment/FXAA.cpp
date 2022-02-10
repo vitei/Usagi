@@ -51,30 +51,31 @@ FXAA::~FXAA()
 
 }
 
-void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 {
 	m_pSys = pSys;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
-	SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
-	PipelineStateDecl pipelineDecl;
-	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
-	pipelineDecl.uInputBindingCount = 1;
-	pipelineDecl.ePrimType = PT_TRIANGLES;
-	pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.FXAA");
+	m_decl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
+	m_decl.uInputBindingCount = 1;
+	m_decl.ePrimType = PT_TRIANGLES;
+	m_decl.pEffect = pResource->GetEffect(pDevice, "PostProcess.FXAA");
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	
 	m_sampler = pDevice->GetSampler(pointDecl);
 
 
-	pipelineDecl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-	pipelineDecl.layout.descriptorSets[1] = matDescriptors;
-	pipelineDecl.layout.uDescriptorSetCount = 2;
-	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
+	m_decl.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
+	m_decl.layout.descriptorSets[1] = matDescriptors;
+	m_decl.layout.uDescriptorSetCount = 2;
+	m_decl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl), matDescriptors);
+	m_decl.alphaState.SetColor0Only();
+
+	m_material.SetDescriptorLayout(pDevice, matDescriptors);
 
 	m_constantSet.Init(pDevice, g_fxaaConstantDef);
 	
@@ -98,9 +99,9 @@ void FXAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, Ren
 	m_constantSet.UpdateData(pDevice);
 }
 
-void FXAA::CleanUp(GFXDevice* pDevice)
+void FXAA::Cleanup(GFXDevice* pDevice)
 {
-	m_constantSet.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
 	m_material.Cleanup(pDevice);
 }
 
@@ -110,17 +111,31 @@ void FXAA::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (m_pDestTarget != pDst)
 	{
 		m_pDestTarget = pDst;
-		PipelineStateDecl decl;
-		RenderPassHndl hndlTmp;
-		pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl, hndlTmp);
-		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), decl));
+		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_decl));
 	}
 }
 
-void FXAA::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
+bool FXAA::LoadsTexture(Input eInput) const
 {
-	m_material.SetTexture(0, pTarget->GetColorTexture(), m_sampler);
-	m_material.UpdateDescriptors(pDevice);
+	return false;
+}
+
+bool FXAA::ReadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+	return false;
+}
+
+void FXAA::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		m_material.SetTexture(0, texture, m_sampler);
+		m_material.UpdateDescriptors(pDevice);
+	}
 }
 
 void FXAA::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)

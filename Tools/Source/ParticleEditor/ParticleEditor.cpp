@@ -3,6 +3,7 @@
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/HID/Input.h"
+#include "Engine/Core/String/String_Util.h"
 #include "Engine/HID/Mouse.h"
 #include "Engine/Scene/SceneContext.h"
 #include "Engine/Graphics/Device/GFXContext.h"
@@ -72,9 +73,9 @@ void ReloadEmitterFromFileOrGetActive(usg::GFXDevice* pDevice, usg::ScriptEmitte
 
 void ParticleEditor::ReloadEmitterFromFile(usg::GFXDevice* pDevice, usg::ScriptEmitter* pEmitter, const char* szScriptName)
 {
-	usg::U8String scriptName = "../../Data/Particle/Emitters/";
+	usg::string scriptName = "../../Data/Particle/Emitters/";
 	scriptName += szScriptName;
-	usg::ProtocolBufferFile file(scriptName.CStr());
+	usg::ProtocolBufferFile file(scriptName.c_str());
 	usg::particles::EmitterEmission variables;
 	bool bReadSucceeded = file.Read(&variables);
 	if (bReadSucceeded)
@@ -98,8 +99,10 @@ ParticleEditor::ParticleEditor()
 
 
 
-void ParticleEditor::Init(usg::GFXDevice* pDevice)
+void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 {
+	usg::Input::Init();
+
 	uint32 uWidth;
 	uint32 uHeight;
 
@@ -112,7 +115,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	mEffectMat.LoadIdentity();
 
 	m_guiRend.Init();
-	m_guiRend.InitResources(pDevice, uWidth, uHeight, 20000);
+	m_guiRend.InitResources(pDevice, usg::ResourceMgr::Inst(), uWidth, uHeight, 20000);
 
 	usg::GUIMenuBar& bar = m_guiRend.GetMainMenuBar();
 	bar.SetVisible(true);
@@ -160,16 +163,17 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice)
 	m_bIsRunning = true;
 } 
 
-void ParticleEditor::CleanUp(usg::GFXDevice* pDevice)
+void ParticleEditor::Cleanup(usg::GFXDevice* pDevice)
 {
 	pDevice->WaitIdle();
-	m_effectGroup.CleanUp(pDevice);
-	m_emitter.CleanUp(pDevice);
-	m_effectPreview.CleanUp(pDevice);
-	m_emitterPreview.CleanUp(pDevice);
+	m_effectGroup.Cleanup(pDevice);
+	m_emitter.Cleanup(pDevice);
+	m_effectPreview.Cleanup(pDevice);
+	m_emitterPreview.Cleanup(pDevice);
 	m_emitterWindow.CleanUp(pDevice);
-	m_editorShapes.CleanUp(pDevice);
-	m_guiRend.CleanUp(pDevice);
+	m_editorShapes.Cleanup(pDevice);
+	m_guiRend.Cleanup(pDevice);
+	m_postFX.Cleanup(pDevice);
 }
 
 ParticleEditor::~ParticleEditor()
@@ -195,7 +199,7 @@ void ParticleEditor::FileOption(const char* szName)
 		}
 		m_decreaseSize.SetEnabled(true);
 		m_guiRend.SetGlobalScale(fScale);
-		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale,(g_uWindowHeight+20.f) * fScale, 0);
+		SetWindowPos(m_hwnd, 0, 0, 0, (int)(g_uWindowWidth * fScale), int((g_uWindowHeight+20.f) * fScale), 0);
 	}
 	else if (strcmp("Decrease Size", szName) == 0)
 	{
@@ -206,7 +210,7 @@ void ParticleEditor::FileOption(const char* szName)
 		}
 		m_increaseSize.SetEnabled(true);
 		m_guiRend.SetGlobalScale(fScale);
-		SetWindowPos(m_hwnd, 0, 0, 0, g_uWindowWidth * fScale, (g_uWindowHeight + 20.f) * fScale, 0);
+		SetWindowPos(m_hwnd, 0, 0, 0, (int)(g_uWindowWidth * fScale), (int)((g_uWindowHeight + 20.f) * fScale), 0);
 	}
 }
 
@@ -224,8 +228,18 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	m_effectGroup.Update(pDevice, fElapsed, m_effectPreview.GetPlaySpeed(), m_effectPreview.GetRepeat(), m_effectPreview.GetPaused(), m_effectPreview.GetRestart());
 
 
+	// Hacky re-implementation of quick emitter load
+	usg::string emitterName;
+	if (m_effectGroup.LoadEmitterRequested(emitterName))
+	{
+		emitterName += ".vpb";
+		usg::string name = "..\\..\\Data\\Particle\\Emitters\\" + emitterName;
 
-	bool bLoad = m_emitterWindow.GetLoaded();	
+		m_emitterWindow.LoadCallback(nullptr, name.c_str(), emitterName.c_str());
+	}
+
+
+	bool bLoad = m_emitterWindow.GetLoaded();
 	bool bRestart = m_emitterPreview.GetRestart() || (m_emitterPreview.GetRepeat() && !m_emitterPreview.GetEffect().IsAlive());
 	if(bLoad)
 	{
@@ -255,19 +269,19 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 	}
 
 	bool bUpdated = false;
-	for(usg::List<EmitterModifier>::Iterator it = m_emitterWindow.GetModifiers().Begin(); !it.IsEnd(); ++it)
+	for(auto it : m_emitterWindow.GetModifiers())
 	{
-		bUpdated |= (*it)->Update(pDevice, m_emitterWindow.GetVariables(), &m_emitter);
+		bUpdated |= it->Update(pDevice, m_emitterWindow.GetVariables(),  &m_emitter, fElapsed);
 	}
 
 	if(bUpdated)
 	{
-		usg::U8String emitterName = m_emitterWindow.GetEditFileName();
+		usg::string emitterName = m_emitterWindow.GetEditFileName();
 		m_emitter.SetDefinition(pDevice, m_emitterWindow.GetVariables());
-		if(emitterName.Length() > 0)
+		if(emitterName.length() > 0)
 		{
-			emitterName.TruncateExtension();
-			m_effectGroup.EmitterModified(pDevice, emitterName.CStr(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
+			str::TruncateExtension(emitterName);
+			m_effectGroup.EmitterModified(pDevice, emitterName.c_str(), m_emitterWindow.GetVariables(), *m_emitterWindow.GetShapeSettings().GetShapeDetails());
 		}
 	}
 	
@@ -315,7 +329,7 @@ void ParticleEditor::Draw(usg::GFXDevice* pDevice)
 	context.pPostFX = &m_postFX;
 	context.eRenderPass = usg::RenderNode::RENDER_PASS_FORWARD;
 
-	pGFXCtxt->Transfer(m_postFX.GetInitialRT(), pDisplay);
+	pGFXCtxt->Transfer(m_postFX.GetFinalRT(), pDisplay);
 	pGFXCtxt->RenderToDisplay(pDisplay);
 
 	m_guiRend.Draw(pGFXCtxt, context);

@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 //	Description: Maintains the mapping between an animation resource and a
 //	skeletons bone indices, also tracks the current frame
 *****************************************************************************/
@@ -33,7 +33,7 @@ public:
 	
 	void Update(float fElapsed);
 	//void Reverse() { m_fPlaybackSpeed = -m_fPlaybackSpeed;  }
-	const char* GetName() { return m_name.CStr(); }
+	const char* GetName() { return m_name.c_str(); }
 
 	uint32 GetNumberOfTargets() { return m_uBoneCount;  }
 	void GetTransform(uint32 uIndex, exchange::BoneAnimationFrame& transform) const;
@@ -46,7 +46,7 @@ private:
 		exchange::BoneAnimationFrame transform;
 	};
 
-	U8String							m_name;
+	usg::string							m_name;
 	BoneInfo*							m_pBoneInfo;
 	uint32								m_uBoneCount;
 	const SkeletonResource*				m_pResource;

@@ -7,7 +7,7 @@
 #ifndef _USG_FRAMEWORK_INSTANCE_MGR_
 #define _USG_FRAMEWORK_INSTANCE_MGR_
 
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 
 namespace usg
@@ -36,32 +36,27 @@ namespace usg
 
 			// Device not needed to remove
 			pInstance->ForceRemoveFromScene();
-			if (m_inUseList.Remove(pInstance))
-			{
-				m_freeList.AddToEnd(pInstance);
-			}
-			else
-			{
-				DEBUG_PRINT("Attempt to free an instance we don't have a record of allocating");
-			}
+
+			m_inUseList.remove(pInstance);
+			m_freeList.push_back(pInstance);
 		}
 
 
 		void Destroy(GFXDevice* pDevice)
 		{
 			InstanceType* pReturn = NULL;
-			for (typename List<InstanceType>::Iterator it = m_freeList.Begin(); !it.IsEnd(); ++it)
+			for (auto it = m_freeList.begin(); it != m_freeList.end(); ++it)
 			{
-				(*it)->CleanUp(pDevice);
+				(*it)->Cleanup(pDevice);
 			}
 		}
 
 
 	protected:
-		InstanceType* GetFreeInstance(U8String &name)
+		InstanceType* GetFreeInstance(usg::string &name)
 		{
 			InstanceType* pReturn = NULL;
-			for (typename List<InstanceType>::Iterator it = m_freeList.Begin(); !it.IsEnd(); ++it)
+			for (auto it = m_freeList.begin(); it != m_freeList.end(); ++it)
 			{
 				if ((*it)->GetName() == name)
 				{
@@ -72,8 +67,8 @@ namespace usg
 
 			if (pReturn)
 			{
-				m_freeList.Remove(pReturn);
-				m_inUseList.AddToEnd(pReturn);
+				m_freeList.remove(pReturn);
+				m_inUseList.push_back(pReturn);
 			}
 
 			return pReturn;
@@ -83,8 +78,8 @@ namespace usg
 		Scene*						m_pScene;
 
 		FastPool<InstanceType>		m_pool;
-		List<InstanceType>			m_inUseList;
-		List<InstanceType>			m_freeList;
+		usg::list<InstanceType*>	m_inUseList;
+		usg::list<InstanceType*>	m_freeList;
 
 	};
 

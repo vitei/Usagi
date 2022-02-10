@@ -8,6 +8,7 @@
 namespace usg{
 
 static Input_ps	g_platform; 
+static bool g_bInitCalled = false;
 enum
 {
 	MAX_CONTROLLERS = 8,
@@ -19,6 +20,7 @@ static uint32	g_uGamepads;
 void Input::Init()
 {
 	g_platform.Init();
+	g_bInitCalled = true;
 	RenumberGamepads();
 }
 
@@ -29,6 +31,9 @@ void Input::Cleanup()
 
 void Input::RenumberGamepads()
 {
+	if(!g_bInitCalled)
+		return;
+
 	g_platform.RegisterDeviceChange();
 	usg::vector<IGamepad*> gamepads;
 	g_platform.GetActiveGamepads(gamepads);
@@ -44,6 +49,9 @@ void Input::RenumberGamepads()
 
 void Input::Update(GFXDevice* pDevice)
 {
+	if(!g_bInitCalled)
+		return;
+
 	g_platform.Update(pDevice);
 
 	for (uint32 i = 0; i < g_uGamepads; i++)

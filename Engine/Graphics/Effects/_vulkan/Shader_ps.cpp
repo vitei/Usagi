@@ -40,7 +40,7 @@ namespace usg {
 
 	}
 
-	void Shader_ps::CleanUp(GFXDevice* pDevice)
+	void Shader_ps::Cleanup(GFXDevice* pDevice)
 	{
 
 	}

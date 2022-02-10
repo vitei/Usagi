@@ -39,7 +39,7 @@ public:
 	usg::GUIWindow&		GetWindow() { return m_emitterWindow; }
 	ShapeSettings& GetShapeSettings() { return m_shapeSettings; }
 	usg::particles::EmitterEmission& GetVariables() { return m_variables; }
-	usg::List<EmitterModifier>& GetModifiers() { return m_modifiers; }
+	usg::list<EmitterModifier*>& GetModifiers() { return m_modifiers; }
 	bool IsShapeTabOpen() const { return m_emitterShapeTab.IsOpen(); }
 	const char* GetEditFileName() const { return m_fileName.GetName(); }
 
@@ -79,7 +79,7 @@ private:
 	usg::GUITab				m_scaleTab;
 	usg::GUITab				m_motionTab;
 
-	usg::List<EmitterModifier>	m_modifiers;
+	usg::list<EmitterModifier*>	m_modifiers;
 	bool						m_bLoaded;
 
 };

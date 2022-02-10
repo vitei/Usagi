@@ -95,7 +95,7 @@ void SetupAlphaStateDecl( AlphaStateDecl& decl, const exchange::Rasterizer& rast
 		decl.uAlphaRef = static_cast<uint8>( rasterizer.alphaState.alphaTestReference * UCHAR_MAX );
 	}
 
-	if( rasterizer.blendMode == exchange::Rasterizer_BlendMode_BLEND_MODE_COLOR )
+	if( rasterizer.blendEnabled )
 	{
 		decl.bBlendEnable = true;
 		decl.srcBlend = static_cast<BlendFunc>( rasterizer.alphaState.rgbSrcFunc );
@@ -124,39 +124,6 @@ void SetupDepthStencilStateDecl( DepthStencilStateDecl& decl, const exchange::St
 	}
 }
 
-SamplerFilter chooseMagFilter( exchange::Texture_Filter filter )
-{
-	return ( filter == exchange::Texture_Filter_nearest ? SF_POINT : SF_LINEAR );
-}
-
-SamplerFilter chooseMinFilter( exchange::Texture_Filter filter )
-{
-	if( filter == exchange::Texture_Filter_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_linear )
-	{
-		return SF_POINT;
-	}
-	else
-	{
-		return SF_LINEAR;
-	}
-}
-
-MipFilter chooseMipFilter( exchange::Texture_Filter filter )
-{
-	if( filter == exchange::Texture_Filter_nearest ||
-		filter == exchange::Texture_Filter_nearest_mipmap_nearest ||
-		filter == exchange::Texture_Filter_linear_mipmap_nearest )
-	{
-		return MF_POINT;
-	}
-	else
-	{
-		return MF_LINEAR;
-	}
-}
-
 ModelResource::ModelResource() :
 	ResourceBase(StaticResType)
 {
@@ -179,10 +146,10 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	m_uBoneNodes = 0;
 
 	m_bInstance = false;// bInstance;
-	U8String path = szFileName;
-	path.TruncateToPath();
+	string path = szFileName;
+	str::TruncateToPath(path);
 
-	ResourceMgr::Inst()->LoadPackage(pDevice, path.CStr(), "resources.pak");
+	ResourceMgr::Inst()->LoadPackage(pDevice, path.c_str(), "resources.pak");
 
 	File modelFile(szFileName, FILE_ACCESS_READ );
 	
@@ -218,7 +185,7 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	}
 
 	m_name = szFileName;
-	SetupHash( m_name.CStr() );
+	SetupHash( m_name.c_str() );
 	SetupMeshes( path, pDevice, p, bFastMem );
 	SetupSkeleton( p );
 
@@ -227,16 +194,16 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 }
 
 
-void ModelResource::CleanUp(GFXDevice* pDevice)
+void ModelResource::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < m_uMeshCount; i++)
 	{
-		m_meshArray[i].CleanUp(pDevice);
+		m_meshArray[i].Cleanup(pDevice);
 	}
 }
 
 
-void ModelResource::SetupMeshes( const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
+void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
 {
 	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>( p );
 
@@ -413,7 +380,7 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 
 		*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
 		bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
-		m_meshArray[m_uMeshCount].renderSets[RenderState].singleVerts.Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->customEffectName, GPU_USAGE_CONST_REG);
+		m_meshArray[m_uMeshCount].renderSets[RenderState].singleVerts.Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->renderPasses[RenderState].effectName, GPU_USAGE_CONST_REG);
 		pipelineState.uInputBindingCount++;
 	}
 
@@ -421,7 +388,7 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 }
 
 
-void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
+void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
 {
 	uint8* pT = reinterpret_cast<uint8*>( pHeader );
 
@@ -442,47 +409,23 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	const int maxElements = 15;
 	// FIXME: Remove hardocding
 
-	U8String name = "CustomFX/";
-	name += pMaterial->customEffectName;
-	name += ".cfx";
-	m_meshArray[m_uMeshCount].effectRuntime.Init(pDevice, name.CStr());
+	EffectHndl effects[usg::exchange::_Material_RenderPass_count];
 
-
-	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
+	for(uint32 i=0; i<usg::exchange::_Material_RenderPass_count; i++)
+	{
+		effects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[i].effectName);
+		m_meshArray[m_uMeshCount].renderSets[i].effectRuntime.Init(pDevice, effects[i]->GetCustomEffect());
+	}
 
 	PipelineStateDecl pipelineState;
 	pipelineState.ePrimType = PT_TRIANGLES;
 
-	EffectHndl pEffect;
-	EffectHndl pDeferredEffect;
-	EffectHndl pTransparentEffect;
-
-	U8String effectPath = fxRunTime.GetResource()->GetEffectName();
-	U8String transparentPath = fxRunTime.GetResource()->GetTransparentEffectName();
-	U8String deferredEffectPath = fxRunTime.GetResource()->GetDeferredEffectName();
 
 	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
 
-	if (bAnimated)
-	{
-		effectPath += ".skel";
-		deferredEffectPath += ".skel";
-		transparentPath += ".skel";
-	}
-	if (HasAttribute(pShape->streamInfo, exchange::VertexAttribute_TANGENT, pShape->streamInfo_count))
-	{
-		effectPath += ".bump";
-		deferredEffectPath += ".bump";
-		transparentPath += ".bump";
-	}
-
-	pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
-	pDeferredEffect = ResourceMgr::Inst()->GetEffect(pDevice, deferredEffectPath.CStr());
-	pTransparentEffect = ResourceMgr::Inst()->GetEffect(pDevice, transparentPath.CStr());
-
 	ASSERT(uCount <= maxElements);
 
-	memsize uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, pEffect->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
+	memsize uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, effects[usg::exchange::Material_RenderPass_DEFAULT]->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
 
 	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
@@ -497,7 +440,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	
 	// set vertex stream
 	uint32 vertexStreamOffset = calcIndexStreamSizeSum( pShape );
-	m_meshArray[m_uMeshCount].vertexBuffer.Init(pDevice, pIndexStream + vertexStreamOffset, (uint32)uVertexSize, pShape->vertexNum, pMaterial->customEffectName, GPU_USAGE_STATIC, eVertGPULocation );
+	m_meshArray[m_uMeshCount].vertexBuffer.Init(pDevice, pIndexStream + vertexStreamOffset, (uint32)uVertexSize, pShape->vertexNum, "Mesh", GPU_USAGE_STATIC, eVertGPULocation );
 	
 	// TODO: Implement skinning
 	m_meshArray[m_uMeshCount].name = pInitialMesh[meshIndex].name;
@@ -536,8 +479,6 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	depthDecl.SetMask(0x0, STENCIL_MASK_GEOMETRY, STENCIL_GEOMETRY);
 	depthDecl.SetOperation(STENCIL_OP_REPLACE, STENCIL_OP_KEEP, STENCIL_OP_KEEP);
 	depthDecl.bStencilEnable = true;
-	m_meshArray[m_uMeshCount].bEnableFog = pMaterial->attribute.isFogEnable != 0;
-	m_meshArray[m_uMeshCount].uFogIndex = pMaterial->attribute.fogIndex;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 	SetupAlphaStateDecl( alphaDecl, pMaterial->rasterizer );
@@ -550,19 +491,19 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	rasterizerDecl.bUseDepthBias = ( pMaterial->rasterizer.isPolygonOffsetEnable ? true : false );
 	rasterizerDecl.fDepthBias = static_cast<float>( pMaterial->rasterizer.polygonOffsetUnit );
 
-	pipelineState.pEffect = pEffect;
+	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFAULT];
 	m_meshArray[m_uMeshCount].matName = pMaterial->materialName;
 
-	pipelineState.alphaState.uColorTargets = 1;
+	pipelineState.alphaState.uColorTargets = 2;
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
 
-	pipelineState.pEffect = pDeferredEffect;
+	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFERRED];
 	pipelineState.alphaState.uColorTargets = 5;
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEFERRED, pipelineState);
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
 
 	pipelineState.alphaState.uColorTargets = 1;
-	pipelineState.pEffect = pTransparentEffect;
+	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_TRANSPARENT];
 	if (m_meshArray[m_uMeshCount].layer < RenderLayer::LAYER_TRANSLUCENT)
 	{
 		// FIXME: Default blend settings for now, just here to handle our issues with default imported blender materials
@@ -580,11 +521,14 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
 
 	
-	for (uint32 i = 0; i < pMaterial->constants_count; i++)
+	// FIXME: FXRunTime per type
+	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].renderSets[0].effectRuntime;
+
+	for (uint32 i = 0; i < pMaterial->renderPasses[0].constants_count; i++)
 	{
 		// Override the default values if we have them
-		void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->constants[i].uOffset);
-		fxRunTime.SetSetData(i, pData, pMaterial->constants[i].uSize);
+		void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->renderPasses[0].constants[i].uOffset);
+		fxRunTime.SetSetData(i, pData, pMaterial->renderPasses[0].constants[i].uSize);
 	}
 	// The w is scaling of the vertex color, if 0 the vertex color is ignored
 	fxRunTime.SetVariable("iBoneCount", GetBoneIndexCount(pShape));
@@ -617,7 +561,7 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		m_meshArray[m_uMeshCount].pTextures[i] = NULL;
 	}
 
-	SamplerDecl sampDecl( SF_LINEAR, SC_WRAP );
+	SamplerDecl sampDecl( SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT );
 	for( int i = 0; i < exchange::Material_Constant_TEXTURE_NUM; ++i )
 	{
 		if( pMaterial->textures[i].textureName[0] != '\0' )
@@ -627,25 +571,25 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 
 			if( uIndex != USG_INVALID_ID )
 			{
-				U8String pathName = m_name;
-				pathName.TruncateToPath();
-				//pathName = U8String("models/") + pathName; 
+				usg::string pathName = m_name;
+				pathName = pathName.substr( 0, pathName.find_last_of("\\/") + 1);
+
 				::usg::exchange::Texture& texture = pMaterial->textures[i];
 				const char* pTextureName = &texture.textureName[0];
 				pathName += pTextureName;
 
-				sampDecl.eClampU = static_cast<SamplerClamp>(texture.wrapS);
-				sampDecl.eClampV = static_cast<SamplerClamp>(texture.wrapT);
-				sampDecl.eFilterMag = chooseMagFilter((exchange::Texture_Filter)texture.magFilter);
-				sampDecl.eFilterMin = chooseMinFilter((exchange::Texture_Filter)texture.minFilter);
-				sampDecl.eMipFilter = chooseMipFilter((exchange::Texture_Filter)texture.mipFilter);
-				sampDecl.eAnisoLevel = (SamplerDecl::Anisotropy)texture.anisoLevel;
+				sampDecl.eClampU = static_cast<SamplerWrap>(texture.wrapS);
+				sampDecl.eClampV = static_cast<SamplerWrap>(texture.wrapT);
+				sampDecl.eFilterMag = static_cast<SamplerFilter>(texture.magFilter);
+				sampDecl.eFilterMin = static_cast<SamplerFilter>(texture.minFilter);
+				sampDecl.eMipFilter = static_cast<MipFilter>(texture.mipFilter);
+				sampDecl.eAnisoLevel = (Anisotropy)texture.anisoLevel;
 				sampDecl.LodBias = texture.lodBias;
 				sampDecl.LodMinLevel = texture.lodMinLevel;
 
 
 				// First check the models local textures
-				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.CStr(), false, eGPULocation);
+				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.c_str(), false, eGPULocation);
 				if (m_meshArray[m_uMeshCount].pTextures[uIndex].get() == nullptr)
 				{
 					// Fallback to absolute path, passing in true for replace missing texture just in case
@@ -657,11 +601,11 @@ void ModelResource::SetupMesh( const U8String & modelDir, GFXDevice* pDevice, us
 		}
 	}
 
-	CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial, effectPath);
+	CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial);
 }
 
 
-void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName)
+void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial)
 {
 	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
 
@@ -679,14 +623,10 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	usg::DescriptorSetLayoutHndl globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_shadowGlobalDescriptorDecl);
 	pipelineState.layout.descriptorSets[0] = globalDescriptors;
 
-	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].effectRuntime;
-	U8String effectPath = fxRunTime.GetResource()->GetDepthEffectName();
-	if (bAnimated)
-	{
-		effectPath += ".skel";
-	}
+	// FIXME: Render set per type
+	string effectPath = pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEPTH].effectName;
 
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.CStr());
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectPath.c_str());
 
 	alphaDecl.bBlendEnable = false;
 	uint32 uRenderMask = alphaDecl.uColorMask[0];
@@ -698,12 +638,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEPTH, pipelineState);
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEPTH].pipeline = pipelineState;
 
-	U8String omniDepthName = fxRunTime.GetResource()->GetOmniDepthEffectName();
-	if (bAnimated)
-	{
-		omniDepthName += ".skel";
-	}
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.CStr());
+	string omniDepthName = pMaterial->renderPasses[usg::exchange::Material_RenderPass_OMNI_DEPTH].effectName;
+
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, omniDepthName.c_str());
 
 	globalDescriptors = pDevice->GetDescriptorSetLayout(SceneConsts::g_omniShadowGlobalDescriptorDecl);
 	pipelineState.layout.descriptorSets[0] = globalDescriptors;
@@ -712,7 +649,9 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_OMNI_DEPTH, pipelineState);
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_OMNI_DEPTH].pipeline = pipelineState;
 	  
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, effectName.CStr());
+
+	// FIXME: Still using default effect for depth pass
+	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEFAULT].effectName);
 	pipelineState = m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline;
 	alphaDecl.bBlendEnable = true;
 	alphaDecl.uColorMask[0] = uRenderMask;
@@ -799,7 +738,7 @@ uint32 ModelResource::GetModelDeclUVReusse(const exchange::Shape* pShape, const 
 	const uint32 mask = 0xf;
 	int texUV = 0;
 	offset = 0;
-	uint32 uUVIndex = customFXDecl->GetAttribBinding("uv");
+	uint32 uUVIndex = customFXDecl->GetAttribBinding("uv0");
 	for (uint32 i = 0; i < pShape->streamInfo_count; i++)
 	{
 		VertexElement element;

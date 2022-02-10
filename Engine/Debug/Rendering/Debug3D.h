@@ -24,7 +24,7 @@ public:
 
 	void Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr);
 	void InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewContext* pContext);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void AddSphere(const Vector3f &vPos, float fRadius, const Color& color);
 	void AddCube(const Matrix4x4& mMat, const Color& color);

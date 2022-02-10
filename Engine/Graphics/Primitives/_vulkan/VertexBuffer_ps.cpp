@@ -75,7 +75,7 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 }
 
 
-void VertexBuffer_ps::CleanUp(GFXDevice* pDevice)
+void VertexBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
 

@@ -83,7 +83,7 @@ namespace usg
 		ComponentLoadHandles handles;
 		FillComponentLoadHandles(handles, ComponentEntity::GetRoot());
 		m_systemCoordinator.Clear(handles);
-		m_systemCoordinator.CleanUp(handles);
+		m_systemCoordinator.Cleanup(handles);
 		GetEventManager().Clear();
 		ComponentEntity::Reset();
 		ComponentStats::Reset();
@@ -376,7 +376,7 @@ namespace usg
 							removedEntitites[uRemovedEntities] = e;
 							uRemovedEntities++;
 
-							if (uRemovedEntities > uMaxBatchSize)
+							if (uRemovedEntities >= uMaxBatchSize)
 							{
 								// Free this group
 								m_eventManager.RegisterEntitiesRemoved(removedEntitites, uRemovedEntities);
@@ -496,16 +496,28 @@ namespace usg
 			{
 				Required<usg::TransformComponent> trans;
 				m_componentLoadHandles.GetComponent(e, trans);
+
+				usg::Vector3f vSpawnPos = spawnParams.GetTransform().position;
+				if (spawnParams.HasGlobalTransform())
+				{
+					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
+					vSpawnPos -= scene->vOriginOffset;
+				}
+
 				if (trans.IsValid())
 				{
 					trans.Modify() = spawnParams.GetTransform();
+					trans.Modify().position = vSpawnPos;
 				}
+
+
+
 				Required<usg::MatrixComponent> mat;
 				m_componentLoadHandles.GetComponent(e, mat);
 				if (mat.IsValid())
 				{
 					mat.Modify().matrix = spawnParams.GetTransform().rotation;
-					mat.Modify().matrix.SetPos(spawnParams.GetTransform().position);
+					mat.Modify().matrix.SetPos(vSpawnPos);
 				}
 			}
 
@@ -516,6 +528,16 @@ namespace usg
 				if (owner.IsValid())
 				{
 					owner.Modify().ownerUID = spawnParams.GetOwnerNUID();
+				}
+			}
+
+			if (spawnParams.HasTeam())
+			{
+				Required<usg::TeamComponent> team;
+				m_componentLoadHandles.GetComponent(e, team);
+				if (team.IsValid())
+				{
+					team.Modify().uTeam = spawnParams.GetTeam();
 				}
 			}
 

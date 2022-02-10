@@ -26,7 +26,7 @@ public:
 	virtual ~ProjectionLight(void);
 
 	virtual void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	virtual void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	virtual void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 	void	SetProjectionMtx(const Matrix4x4& projMat);
 	// Use one of the two, they will the reverse calculate the other
 	void 	SetViewMatrix(const Matrix4x4& viewMat);
@@ -51,7 +51,7 @@ public:
 	const Matrix4x4& GetProjMatrix() const { return m_projMat; }
 	const Matrix4x4& GetViewMatrix() const { return m_viewMat; }
 
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();

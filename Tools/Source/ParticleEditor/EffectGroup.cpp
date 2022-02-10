@@ -22,6 +22,7 @@ void EffectGroup::Init(usg::GFXDevice* pDevice, usg::Scene* pScene, usg::IMGuiRe
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
 	m_saveItem.SetEnabled(false);
+	m_saveItem.SetCallbacks(this);
 	m_saveAsItem.Init("Save As...");
 	m_saveAsItem.AddFilter("Vitei ProtoBuf", "*.vpb");
 	m_saveAsItem.SetStartPath("..\\..\\Data\\Particle\\Effects\\");
@@ -134,21 +135,21 @@ void EffectGroup::FileOption(const char* szName)
 	}
 }
 
-void EffectGroup::CleanUp(usg::GFXDevice* pDevice)
+void EffectGroup::Cleanup(usg::GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < MAX_RIBBONS; i++)
 	{
-		m_ribbons[i].CleanUp(pDevice);
+		m_ribbons[i].Cleanup(pDevice);
 	}
 
 	for (uint32 i = 0; i < MAX_INSTANCES; i++)
 	{
-		m_instances[i].CleanUp(pDevice);
+		m_instances[i].Cleanup(pDevice);
 	}
-	m_effect.CleanUp(pDevice);
+	m_effect.Cleanup(pDevice);
 }
 
-bool EffectGroup::LoadEmitterRequested(usg::U8String& name)
+bool EffectGroup::LoadEmitterRequested(usg::string& name)
 {
 	for (uint32 i = 0; i < MAX_INSTANCES; i++)
 	{

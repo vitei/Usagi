@@ -162,7 +162,7 @@ SystemCoordinator::~SystemCoordinator()
 	ASSERT(!m_pInternalData);
 }
 
-void SystemCoordinator::CleanUp(ComponentLoadHandles& handles)
+void SystemCoordinator::Cleanup(ComponentLoadHandles& handles)
 {
 	Clear(handles);
 

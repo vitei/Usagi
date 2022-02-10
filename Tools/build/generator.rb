@@ -176,27 +176,27 @@ end
 # must use thse GUIDs.)
 def vs_project_tuples
   [
-   ['AI', 'Engine/AI/AI.vcxproj', 'FB917B79-9C70-45F8-8674-1428B7895167'],
-   ['Audio', 'Engine/Audio/Audio.vcxproj', '2219A034-B5EF-44FF-B7DC-981CB58711B5'],
-   ['Common', 'Engine/Common/Common.vcxproj', '81E3ED0A-3D5F-4689-BDB6-DDF15B06EEE4'],
-   ['Core', 'Engine/Core/Core.vcxproj', '4F44A822-08D7-424A-8D40-72677D8346A4'],
-   ['Debug', 'Engine/Debug/Debug.vcxproj', '505A7767-C568-4303-8979-116FF110C8FF'],
-   ['Game', 'Engine/Game/Game.vcxproj', '1DA383D2-7811-445A-AACC-CA255B994732'],
-   ['Framework', 'Engine/Framework/Framework.vcxproj', '1DA383D2-7811-445A-AACC-CA255B994731'],
-   ['GUI', 'Engine/GUI/GUI.vcxproj', 'C918F277-3782-4FAD-A501-B5F861A1C5C0'],
-   ['Graphics', 'Engine/Graphics/Graphics.vcxproj', 'A73A2DDE-2075-496C-9770-21395924E08B'],
-   ['HID', 'Engine/HID/HID.vcxproj', '6C1FFE72-4FE6-4890-A961-425CAC514F62'],
-   ['Layout', 'Engine/Layout/Layout.vcxproj', 'F9B13ED7-9CF4-4151-9CB4-3B7EDBAE1566'],
-   ['Maths', 'Engine/Maths/Maths.vcxproj', '258C9D89-38FB-4B1E-81E1-6D32AC81FF17'],
-   ['Memory', 'Engine/Memory/Memory.vcxproj', '1C319D5B-0060-4653-9000-2ED6C92ACAEF'],
-   ['Network', 'Engine/Network/Network.vcxproj', 'F68E2BF2-E65E-422F-BBED-249E476331A0'],
-   ['Particles', 'Engine/Particles/Particles.vcxproj', '10466B50-9371-4F53-815B-A024DD74C7E7'],
-   ['Physics', 'Engine/Physics/Physics.vcxproj', '41E78C13-BDDA-4803-9FE5-1FA6B7607685'],
-   ['PostFX', 'Engine/PostFX/PostFX.vcxproj', 'BE5CB977-8776-4EFB-A718-766CF0026E4D'],
-   ['Resource', 'Engine/Resource/Resource.vcxproj', '8E6B74E5-B0C4-4AC1-8E09-7C97747B3F2E'],
-   ['Scene', 'Engine/Scene/Scene.vcxproj', '6FEBD175-576B-411D-8173-2833305AE882'],
-   ['System', 'Engine/System/System.vcxproj', '2CA5C758-FA4D-431A-86EF-79065E243D3E'],
-   ['ThirdParty', 'Engine/ThirdParty/ThirdParty.vcxproj', '491FE2EF-D449-4FDD-A3CE-9A1102AA2AF4']
+   ['AI', 'Engine/AI/AI.vcxproj', 'FB917B79-9C70-45F8-8674-1428B7895167', 'Engine/Project.vcxproj.erb'],
+   ['Audio', 'Engine/Audio/Audio.vcxproj', '2219A034-B5EF-44FF-B7DC-981CB58711B5', 'Engine/Project.vcxproj.erb'],
+   ['Common', 'Engine/Common/Common.vcxproj', '81E3ED0A-3D5F-4689-BDB6-DDF15B06EEE4', 'Engine/Project.vcxproj.erb'],
+   ['Core', 'Engine/Core/Core.vcxproj', '4F44A822-08D7-424A-8D40-72677D8346A4', 'Engine/Project.vcxproj.erb'],
+   ['Debug', 'Engine/Debug/Debug.vcxproj', '505A7767-C568-4303-8979-116FF110C8FF', 'Engine/Project.vcxproj.erb'],
+   ['Game', 'Engine/Game/Game.vcxproj', '1DA383D2-7811-445A-AACC-CA255B994732', 'Engine/Project.vcxproj.erb'],
+   ['Framework', 'Engine/Framework/Framework.vcxproj', '1DA383D2-7811-445A-AACC-CA255B994731', 'Engine/Project.vcxproj.erb'],
+   ['GUI', 'Engine/GUI/GUI.vcxproj', 'C918F277-3782-4FAD-A501-B5F861A1C5C0', 'Engine/Project.vcxproj.erb'],
+   ['Graphics', 'Engine/Graphics/Graphics.vcxproj', 'A73A2DDE-2075-496C-9770-21395924E08B', 'Engine/Project.vcxproj.erb'],
+   ['HID', 'Engine/HID/HID.vcxproj', '6C1FFE72-4FE6-4890-A961-425CAC514F62', 'Engine/Project.vcxproj.erb'],
+   ['Layout', 'Engine/Layout/Layout.vcxproj', 'F9B13ED7-9CF4-4151-9CB4-3B7EDBAE1566', 'Engine/Project.vcxproj.erb'],
+   ['Maths', 'Engine/Maths/Maths.vcxproj', '258C9D89-38FB-4B1E-81E1-6D32AC81FF17', 'Engine/Project.vcxproj.erb'],
+   ['Memory', 'Engine/Memory/Memory.vcxproj', '1C319D5B-0060-4653-9000-2ED6C92ACAEF', 'Engine/Project.vcxproj.erb'],
+   ['Network', 'Engine/Network/Network.vcxproj', 'F68E2BF2-E65E-422F-BBED-249E476331A0', 'Engine/Project.vcxproj.erb'],
+   ['Particles', 'Engine/Particles/Particles.vcxproj', '10466B50-9371-4F53-815B-A024DD74C7E7', 'Engine/Project.vcxproj.erb'],
+   ['Physics', 'Engine/Physics/Physics.vcxproj', '41E78C13-BDDA-4803-9FE5-1FA6B7607685', 'Engine/Project.vcxproj.erb'],
+   ['PostFX', 'Engine/PostFX/PostFX.vcxproj', 'BE5CB977-8776-4EFB-A718-766CF0026E4D', 'Engine/Project.vcxproj.erb'],
+   ['Resource', 'Engine/Resource/Resource.vcxproj', '8E6B74E5-B0C4-4AC1-8E09-7C97747B3F2E', 'Engine/Project.vcxproj.erb'],
+   ['Scene', 'Engine/Scene/Scene.vcxproj', '6FEBD175-576B-411D-8173-2833305AE882', 'Engine/Project.vcxproj.erb'],
+   ['System', 'Engine/System/System.vcxproj', '2CA5C758-FA4D-431A-86EF-79065E243D3E', 'Engine/Project.vcxproj.erb'],
+   ['ThirdParty', 'Engine/ThirdParty/ThirdParty.vcxproj', '491FE2EF-D449-4FDD-A3CE-9A1102AA2AF4', 'Engine/ThirdParty/ThirdParty.vcxproj.erb']
   ]
 end
 
@@ -239,13 +239,13 @@ end
 def vs_project(config, n, order_only_deps)
   FileUtils.mkdir_p(config.vs_projects_dir)
 
-  vs_project_tuples().map do |name, proj, guid|
+  vs_project_tuples().map do |name, proj, guid, template|
     output = File.join(config.vs_projects_dir, proj)
     # TODO: fix these when adding the next projects
     rootdir = File.dirname(proj)
     sources = File.join(config.code_working_dir, rootdir, '.sources.txt')
     platform_source = File.join(config.code_working_dir, rootdir, 'platform.sources.txt')
-    options = {:template => 'Engine/Project.vcxproj.erb', :rootdir => rootdir, :guid => guid}
+    options = {:template => template, :rootdir => rootdir, :guid => guid}
 
     GeneratorUtil.create_project_file(config, n, output, sources, options,
                                       [], order_only_deps)

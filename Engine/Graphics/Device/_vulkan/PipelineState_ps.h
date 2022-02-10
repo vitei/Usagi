@@ -21,6 +21,8 @@ namespace usg
 
 		// Set up the defaults
 		void Init(GFXDevice* pDevice, const struct PipelineInitData& decl);
+		void Cleanup(GFXDevice* pDevice);
+
 		VkPipeline GetPipeline() const { return m_pipeline; }
 		VkPipelineLayout GetLayout() const { return m_layout; }
 

@@ -122,7 +122,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 			attachmentDescriptions[i].format = pDevice->GetPlatform().GetColorFormat(in.format.eColor);
 			break;
 		case RenderPassDecl::ATTACH_DEPTH:
-			attachmentDescriptions[i].format = gDepthFormatViewMap[in.format.eDepth];
+			attachmentDescriptions[i].format = gDepthFormatViewMap[(uint32)in.format.eDepth];
 			break;
 		default:
 			ASSERT(false);
@@ -227,6 +227,11 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 	ASSERT(res == VK_SUCCESS);
 }
 
+
+void RenderPass::Cleanup(GFXDevice* pDevice)
+{
+	vkDestroyRenderPass(pDevice->GetPlatform().GetVKDevice(), m_renderPass, nullptr);
+}
 
 }
 

@@ -12,7 +12,8 @@ enum AxisType
     AXIS_TYPE_ABSOLUTE = 0;
     AXIS_TYPE_POSITIVE = 1;
     AXIS_TYPE_NEGATIVE = 2;
-    AXIS_TYPE_NONE = 3;
+    AXIS_TYPE_ABSOLUTE_TO_POSITIVE = 3;
+    AXIS_TYPE_NONE = 4;
 };
 
 enum OutputType
@@ -53,7 +54,8 @@ enum GamepadAxis
 
     GAMEPAD_AXIS_SCROLL_X = 20;
     GAMEPAD_AXIS_SCROLL_Y = 21;
-    GAMEPAD_AXIS_NONE = 22;
+    GAMEPAD_AXIS_POV_ANGLE = 22;
+    GAMEPAD_AXIS_NONE = 23;
 };
 
 
@@ -64,7 +66,9 @@ enum MouseButton
     MOUSE_BUTTON_LEFT = 0;
     MOUSE_BUTTON_RIGHT = 1;
     MOUSE_BUTTON_MIDDLE = 2;
-	MOUSE_BUTTON_NONE = 3;
+    MOUSE_BUTTON_X1 = 3;
+    MOUSE_BUTTON_X2 = 4;
+	MOUSE_BUTTON_NONE = 5;
 };
 
 enum MouseAxis
@@ -109,6 +113,19 @@ enum ButtonState
     BUTTON_STATE_NONE = 4;
 };
 
+// Mostly joystick buttons are numbered but we have some convenience special cases
+enum JoystickButton
+{
+    option (nanopb_enumopt).long_names = false;
+
+    JOYSTICK_BUTTON_NONE = 0;
+
+    JOYSTICK_BUTTON_POV_UP = 28;
+    JOYSTICK_BUTTON_POV_LEFT = 29;
+    JOYSTICK_BUTTON_POV_DOWN = 30;
+    JOYSTICK_BUTTON_POV_RIGHT = 31;
+};
+
 enum GamepadButton
 {
     option (nanopb_enumopt).long_names = false;
@@ -140,6 +157,8 @@ enum GamepadButton
 
     // Screen touch
     GAMEPAD_BUTTON_TOUCH = 18;
+
+    GAMEPAD_BUTTON_COUNT = 19;
 };
 
 enum TouchType

@@ -7,7 +7,7 @@
 #ifndef USG_RESOURCE_RESOURCE_DATA_H
 #define USG_RESOURCE_RESOURCE_DATA_H
 
-#include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/string.h"
 
 
 //#define DEBUG_RESOURCE_MGR
@@ -87,7 +87,7 @@ public:
 				// Ensure it's not being used elsewhere
 				// FIXME: There is a memory leak going on so can't check in this assert yet
 				//ASSERT((*it)->resource.unique());
-				const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
+				const_cast<ResourceBase*>(val->resource.get())->Cleanup(pDevice);
 				vdelete val->resource.get();
 				val->resource.reset();
 				it.RemoveElement();
@@ -100,7 +100,7 @@ public:
 		for (ResourceDynamicIter it = m_resources.BeginDynamic(); !it.IsEnd(); ++it)
 		{
 			ResourceInfo* val = *it;
-			const_cast<ResourceBase*>(val->resource.get())->CleanUp(pDevice);
+			const_cast<ResourceBase*>(val->resource.get())->Cleanup(pDevice);
 			vdelete val->resource.get();
 			val->resource.reset();
 			it.RemoveElement();
@@ -122,7 +122,7 @@ public:
 		}
 	}
 	 
-	BaseResHandle GetResourceHndl(const U8String& resName, ResourceType eType);
+	BaseResHandle GetResourceHndl(const usg::string& resName, ResourceType eType);
 	BaseResHandle AddResource(const ResourceBase* pResource);
 	void AddResource(BaseResHandle resHndl);
 
@@ -131,7 +131,7 @@ public:
 
 	// TODO: Remove this functions accessing the raw resource
 	template <class ResourceType>
-	const ResourceType* GetResource(const U8String &resName, usg::ResourceType eType);
+	const ResourceType* GetResource(const usg::string&resName, usg::ResourceType eType);
 	
 	template <class ResourceType>
 	const ResourceType* GetResource(uint32 uIndex) const
@@ -191,10 +191,10 @@ inline void ResourceData::AddResource(BaseResHandle resHandle)
 }
 
 
-BaseResHandle ResourceData::GetResourceHndl(const U8String& resName, ResourceType eType)
+BaseResHandle ResourceData::GetResourceHndl(const usg::string& resName, ResourceType eType)
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
-	NameHash nameHash = ResourceDictionary::calcNameHash( resName.CStr() );
+	NameHash nameHash = ResourceDictionary::calcNameHash( resName.c_str() );
 	DataHash dataHash = ResourceDictionary::searchDataHashByName( nameHash );
 	
 #ifdef DEBUG_RESOURCE_MGR
@@ -221,7 +221,7 @@ BaseResHandle ResourceData::GetResourceHndl(const U8String& resName, ResourceTyp
 }
 
 template <class ResourceType>
-const ResourceType* ResourceData::GetResource(const U8String &resName, usg::ResourceType eType)
+const ResourceType* ResourceData::GetResource(const usg::string &resName, usg::ResourceType eType)
 {
 	return GetAs<ResourceType>(GetResourceHndl(resName, eType));
 }

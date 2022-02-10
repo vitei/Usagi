@@ -16,10 +16,19 @@ namespace usg
 		}
 
 
-		RECT screen;
+		RECT screen, client;
 		POINT mousePos;
 		GetCursorPos(&mousePos);
+		GetClientRect(m_hwnd, &client);
+
 		GetWindowRect(m_hwnd, &screen);
+
+		screen.left += client.left;
+		screen.right += client.left;
+		screen.top += client.top;
+		screen.bottom += client.top;
+
+
 		// Per arnauds request release the buttons outside of the window
 		if(mousePos.x > screen.right || mousePos.x < screen.left
 			|| mousePos.y < screen.top || mousePos.y > screen.bottom)
@@ -38,7 +47,7 @@ namespace usg
 		float fHeight = (float)(screen.bottom - screen.top);
 
 		m_fAxis[MOUSE_NORM_POS_X] = ((m_fAxis[MOUSE_POS_X] / fWidth) * 2.0f) - 1.0f;
-		m_fAxis[MOUSE_NORM_ASPECT_POS_X] = usg::Math::Clamp(((m_fAxis[MOUSE_POS_X] / fHeight) * 2.0f) - 1.0f, -1.0f, 1.0f);
+		m_fAxis[MOUSE_NORM_ASPECT_POS_X] = usg::Math::Clamp(m_fAxis[MOUSE_NORM_POS_X] * fWidth/fHeight, -1.0f, 1.0f);
 		m_fAxis[MOUSE_NORM_POS_Y] = ((m_fAxis[MOUSE_POS_Y] / fHeight) * 2.0f) - 1.0f;
 
 		m_fAxis[MOUSE_DELTA_X_NORM] = ((m_fAxis[MOUSE_DELTA_X] / fWidth) * 2.0f) - 1.0f;

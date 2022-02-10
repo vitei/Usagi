@@ -25,7 +25,7 @@ public:
 	// Set up the defaults
 	void Init(GFXDevice* pDevice, const DescriptorSetLayoutHndl& layout);
 	void Init(GFXDevice* pDevice, const DescriptorSet& copy);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void SetImageSamplerPair(uint32 uLayoutIndex, const TextureHndl& pTexture, const SamplerHndl& sampler, uint32 uSubIndex = 0, const ImageViewDef& imageView = ImageViewDef::Default());
 	void SetImage(uint32 uLayoutIndex, const TextureHndl& pTexture, const ImageViewDef& imageView = ImageViewDef::Default());

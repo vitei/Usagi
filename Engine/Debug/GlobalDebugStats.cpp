@@ -4,7 +4,6 @@
 *****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/Color.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Memory/MemHeap.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -125,18 +124,18 @@ namespace usg {
 		m_warnings[WARNING_MEMORY].bActive = ((float)mem::GetMainHeap()->GetFreeSize() / (float)mem::GetMainHeap()->GetSize()) < 0.05f;
 	}
 
-	void GlobalDebugStats::AppendWarnings(U8String& string)
+	void GlobalDebugStats::AppendWarnings(usg::string& string)
 	{
-		usg::U8String warningString;
+		usg::string warningString;
 		if (m_warnings[WARNING_CPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
-			warningString.ParseString("CPU %f ms", m_fCPUTime);
-			string += warningString;
+			warningString = str::ParseString("CPU %f ms", m_fCPUTime);
+			string += warningString.c_str();
 		}
 		if (m_warnings[WARNING_GPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
-			warningString.ParseString("GPU %f ms", m_fGPUTime);
-			string += warningString;
+			warningString = str::ParseString("GPU %f ms", m_fGPUTime);
+			string += warningString.c_str();
 		}
 
 		if (m_warnings[WARNING_MEMORY].fTimeSinceActive < 1.5f)
@@ -144,12 +143,12 @@ namespace usg {
 			MemHeap* pHeap = mem::GetMainHeap();
 			float fSize = static_cast<float>(pHeap->GetSize());
 			float fUsed = static_cast<float>(pHeap->GetSize() - pHeap->GetFreeSize());
-			U8String str;
+			usg::string str;
 			float fMemMB = ((float)fUsed) / (1024.f * 1024.f);
 			float fSizeMB = ((float)fSize) / (1024.f * 1024.f);
 
-			warningString.ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
-			string += warningString;
+			warningString = str::ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
+			string += warningString.c_str();
 		}
 	}
 
@@ -170,29 +169,29 @@ namespace usg {
 			cCol.Assign(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		usg::U8String fpsString;
-		usg::U8String cpuString;
-		usg::U8String gpuString;
+		usg::string fpsString;
+		usg::string cpuString;
+		usg::string gpuString;
 		if (m_pCpuTimer)
 		{
-			cpuString.ParseString(" (CPU %2.0fms)", m_fCPUTime);
+			cpuString = str::ParseString(" (CPU %2.0fms)", m_fCPUTime);
 		}
-		gpuString.ParseString(" (GPU %2.0fms)", m_fGPUTime);
+		gpuString = str::ParseString(" (GPU %2.0fms)", m_fGPUTime);
 
-		fpsString.ParseString("FPS: %d", m_uFrameRate);
+		fpsString = str::ParseString("FPS: %d", m_uFrameRate);
 		fpsString += cpuString;
 		fpsString += gpuString;
-		pRender->AddString(fpsString.CStr(), 0.25f, 1.0f, cCol);
+		pRender->AddString(fpsString.c_str(), 0.25f, 1.0f, cCol);
 	}
 
 
 	void GlobalDebugStats::DrawThreadsPage(DebugRender* pRender)
 	{
 		Color cTextCol(0.0f, 1.0f, 0.0f, 1.0f);
-		U8String tmpString;
+		string tmpString;
 		pRender->AddString("Disabled", 0.0f, 0.0f, cTextCol);
 		pRender->AddString("Job Manager Activities:", 0.0f, 0.0f, cTextCol);
-		pRender->AddString(tmpString.CStr(), 0.0f, 1.0f, cTextCol);
+		pRender->AddString(tmpString.c_str(), 0.0f, 1.0f, cTextCol);
 
 		/*for(uint32 i = 0; i < uCpuCount; i++)
 		{
@@ -209,12 +208,12 @@ namespace usg {
 		float fSize = static_cast<float>(pHeap->GetSize());
 		float fUsed = static_cast<float>(pHeap->GetSize() - pHeap->GetFreeSize());
 
-		U8String str;
+		string str;
 		float fMemMB = ((float)fUsed) / (1024.f * 1024.f);
 		float fSizeMB = ((float)fSize) / (1024.f * 1024.f);
-		str.ParseString("%s (%.1fMB / %.1fMB)", szName, fMemMB, fSizeMB);
+		str = str::ParseString("%s (%.1fMB / %.1fMB)", szName, fMemMB, fSizeMB);
 
-		pRender->AddString(str.CStr(), 0.0f, 1.0f, cTitle);
+		pRender->AddString(str.c_str(), 0.0f, 1.0f, cTitle);
 		pRender->AddBar(2.0f, 0.0f, 1.0f * (fUsed / fSize), cTitle);
 
 #ifdef DEBUG_MEMORY
@@ -253,10 +252,10 @@ namespace usg {
 
 		if (uAllocated > 10 * 1024)
 		{
-			U8String str;
+			string str;
 			float fMemMB = ((float)uAllocated) / (1024.f * 1024.f);
-			str.ParseString("%.2fMB", fMemMB);
-			pRenderer->AddString(str.CStr(), 0.0f, fPos, cBreakDown);
+			str = str::ParseString("%.2fMB", fMemMB);
+			pRenderer->AddString(str.c_str(), 0.0f, fPos, cBreakDown);
 			pRenderer->AddString(mem::GetAllocString(eType), 0.125f, fPos, cBreakDown);
 			pRenderer->AddBar(fPos, 0.4f, (((float)uAllocated) / fMaxSize) * 0.5f, cBreakDown);
 			fPos += 1.0f;

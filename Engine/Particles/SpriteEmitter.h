@@ -24,7 +24,7 @@ public:
     void Alloc(GFXDevice* pDevice, uint32 uMaxCount, uint32 uVertexSize, uint32 uMetaDataSize = 0, uint32 uVerticesPerSprite = 1);
 	
 	virtual void Init(usg::GFXDevice* pDevice, const class ParticleEffect* pParent);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual bool Update(float fElapsed);
 	virtual void UpdateBuffers(GFXDevice* pDevice);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) override;

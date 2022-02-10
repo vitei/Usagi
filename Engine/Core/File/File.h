@@ -5,6 +5,7 @@
 #ifndef _USG_FILE_H_
 #define _USG_FILE_H_
 #include "Engine/Core/stl/vector.h"
+#include "Engine/Core/stl/string.h"
 
 namespace usg{
 
@@ -73,7 +74,6 @@ struct FilePathResult
 
 #ifdef DEBUG_FILE_READING
 #include "Engine/Core/Timer/ProfilingTimer.h"
-#include "Engine/Core/String/U8String.h"
 #endif
 
 namespace usg {
@@ -148,7 +148,7 @@ private:
 
 #ifdef DEBUG_FILE_READING
 	struct ProfileData*	  m_pProfile;
-	U8String			  m_name;
+	usg::string			  m_name;
 #endif
 };
 

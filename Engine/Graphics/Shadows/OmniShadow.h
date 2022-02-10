@@ -9,7 +9,6 @@
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
-#include "Engine/Core/Containers/List.h"
 
 namespace usg
 {

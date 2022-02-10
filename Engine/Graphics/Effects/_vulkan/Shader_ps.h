@@ -21,7 +21,7 @@ public:
 
 	void Init(GFXDevice* pDevice, const char* szEffectName) { ASSERT(false); }
 	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	// PS
 	VkShaderModule GetShaderModule() { return m_shaderModule; }

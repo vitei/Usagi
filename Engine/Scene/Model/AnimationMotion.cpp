@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
  ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Resource/ModelResource.h"
@@ -17,11 +17,11 @@ namespace usg
 		m_uModifierCount = 0;
 	}
 
-	void AnimationMotion::AppendToAnimList(List<SkeletalAnimation>& list)
+	void AnimationMotion::AppendToAnimList(list<SkeletalAnimation*>& list)
 	{
 		for (uint32 i = 0; i < GetActiveAnimCount(); i++)
 		{
-			list.AddToEnd(GetActiveAnim(i));
+			list.push_back(GetActiveAnim(i));
 		}
 	}
 

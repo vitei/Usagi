@@ -11,9 +11,23 @@
 #include OS_HEADER(Engine/HID, XInputPad.h)
 #include OS_HEADER(Engine/HID, VirtualGamepad.h)
 #include OS_HEADER(Engine/HID, Keyboard_ps.h)
-#include OS_HEADER(Engine/HID, Mouse_ps.h)
 #include OS_HEADER(Engine/HID, DirectInput.h)
 #include OS_HEADER(Engine/HID, DirectInputJoystick.h)
+
+//#define USE_DIRECT_INPUT_KB
+//#define USE_DIRECT_INPUT_MOUSE
+
+#ifdef USE_DIRECT_INPUT_MOUSE
+#include OS_HEADER(Engine/HID, DirectInputMouse.h)
+#else
+#include OS_HEADER(Engine/HID, Mouse_ps.h)
+#endif
+
+#ifdef USE_DIRECT_INPUT_KB
+#include OS_HEADER(Engine/HID, DirectInputKeyboard.h)
+#else
+#include OS_HEADER(Engine/HID, Keyboard_ps.h)
+#endif
 
 namespace usg{
 
@@ -57,14 +71,23 @@ private:
 	
 	enum
 	{
-		MOUSE_BUTTON_COUNT = 3,
 		MAX_EXTERNAL_PADS = 4
 	};
 
 	VirtualGamepad	m_virtualGamepad;
-	Keyboard_ps		m_keyboard;
 	// TODO: Have a mouse per display
+
+#ifdef USE_DIRECT_INPUT_MOUSE
+	DirectInputMouse m_mouse;
+#else
 	Mouse_ps		m_mouse;
+#endif
+
+#ifdef USE_DIRECT_INPUT_KB
+	DirectInputKeyboard m_keyboard;
+#else
+	Keyboard_ps		m_keyboard;
+#endif
 
 	XInputPad		m_xboxPad;
 	DirectInput*	m_pDirectInput;
@@ -77,8 +100,8 @@ private:
 	uint32		m_uInputChars;
 	bool		m_keysDown[KEYBOARD_KEY_COUNT];
 	bool		m_keysThisFrame[KEYBOARD_KEY_COUNT];
-	bool		m_mouseButtonsDown[MOUSE_BUTTON_COUNT];
-	bool		m_mouseButtonsThisFrame[MOUSE_BUTTON_COUNT];
+	bool		m_mouseButtonsDown[MOUSE_BUTTON_NONE];
+	bool		m_mouseButtonsThisFrame[MOUSE_BUTTON_NONE];
 };
 
 inline bool Input_ps::GetKeyDown(uint8 uKey) const
@@ -90,7 +113,7 @@ inline bool Input_ps::GetKeyDown(uint8 uKey) const
 
 inline bool	Input_ps::GetMouseButtonDown(uint32 uButton) const
 {
-	ASSERT(uButton<MOUSE_BUTTON_COUNT);
+	ASSERT(uButton< MOUSE_BUTTON_NONE);
 	return m_mouseButtonsDown[uButton] | m_mouseButtonsThisFrame[uButton];
 }
 

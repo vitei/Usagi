@@ -6,7 +6,6 @@
 
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include "Engine/Resource/ResourceDecl.h"
-#include "Engine/Core/String/U8String.h"
 #include API_HEADER(Engine/Graphics/Effects, InputBinding_ps.h)
 
 namespace usg {

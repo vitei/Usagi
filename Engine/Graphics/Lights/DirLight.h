@@ -21,11 +21,11 @@ public:
 	virtual ~DirLight();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 
 	void UpdateCascade(const usg::Camera& camera, uint32 uContextId);
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	virtual void	SetDirection(const Vector4f &direction);
 	virtual const Vector4f&	GetDirection() const;
@@ -33,7 +33,9 @@ public:
 	const ShadowCascade* GetCascade() const { return m_pShadowCascade; }
 	ShadowCascade* GetCascade() { return m_pShadowCascade; }
 
-	bool operator < (DirLight& rhs);
+	void SetNonShadowFlags(uint32 uFlags);
+
+	bool operator < (const DirLight& rhs) const;
 protected:
 	//	ConstantSet		m_constants;
 	// x, y, z, -1 = spot light, 0 = positional, 1 = directional,

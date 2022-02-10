@@ -19,11 +19,6 @@ namespace usg
 			uint32 uSamplerCount;
 			uint32 uConstantSetDeclOffset;
 			uint32 uConstantSetCount;
-			char   effectName[64];
-			char   shadowEffectName[64];
-			char   omniShadowEffectName[64];
-			char   deferredEffectName[64];
-			char   transparentEffectName[64];
 		};
 
 		struct Sampler
@@ -32,7 +27,18 @@ namespace usg
 			char    texName[64];
 			uint32	eTexType;
 			uint32	uIndex;
+			uint32	uShaderSets;
+
+			uint32	eFilterMin;
+			uint32	eFilterMag;
+			uint32	eFilterMip;
+
+			uint32	eAnisoLevel;
+
+			float32	LodBias;
+			uint32	LodMinLevel;
 		};
+
 
 		struct Attribute
 		{

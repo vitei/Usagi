@@ -31,7 +31,7 @@ public:
 	};
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer, const char* szName, const usg::Vector2f& vPos, uint32 uInitFlags = SHOW_PLAY_CONTROLS|SHOW_PREVIEW_MODEL);
-	virtual void CleanUp(usg::GFXDevice* pDevice);
+	virtual void Cleanup(usg::GFXDevice* pDevice);
 	virtual bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	virtual void Draw(usg::GFXContext* pImmContext);
 	usg::Scene& GetScene() { return m_scene; }
@@ -42,7 +42,7 @@ public:
 	bool GetRestart() { return m_previewButtons[BUTTON_RESTART].GetValue(); }
 	float GetPlaySpeed() const;
 	void SetBackgroundColor(const usg::Color& color) { m_clearColor.SetValue(color); }
-	const usg::Color& GetBackgroundColor() { return m_clearColor.GetValue(); }
+	usg::Color GetBackgroundColor() { return m_clearColor.GetValue(); }
 
 private:
 	enum

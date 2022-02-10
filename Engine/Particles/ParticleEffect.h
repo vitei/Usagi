@@ -5,7 +5,7 @@
 #define _USG_PARTICLE_EFFECT_H_
 
 #include "Engine/Scene/TransformNode.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "ParticleEmitter.h"
 
@@ -22,7 +22,7 @@ public:
     ~ParticleEffect();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, const Matrix4x4& mMat, const Vector3f& vVelocity = Vector3f(0.0f, 0.0f, 0.0f), float fScale = 1.0f);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	bool Update(float fElapsed);
 	void UpdateBuffers(GFXDevice* pDevice);
 	void AddEmitter(GFXDevice* pDevice, ParticleEmitter* pEmitter);	
@@ -51,7 +51,7 @@ private:
 		STATE_INACTIVE
 	};
 
-	List<ParticleEmitter>	m_emitters;
+	list<ParticleEmitter*>	m_emitters;
 
 	// We group all of the emitters in any given effect to a single bounding area
 	Matrix4x4				m_mTransform;

@@ -16,7 +16,7 @@ public:
 	~BlitImage();
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& pass);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void ChangeRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass);
 	void SetSourceTexture(GFXDevice* pDevice, const TextureHndl& tex);
 	bool Draw(GFXContext* pContext);

@@ -48,7 +48,7 @@ namespace usg
 				const float fDistance = (request.vTo - request.vFrom).Magnitude();
 				const physx::PxVec3 vDirection = ToPhysXVec3((request.vTo - request.vFrom)*(1.0f / fDistance));
 
-				physx::PxHitFlags hitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL | physx::PxHitFlag::eDISTANCE;
+				physx::PxHitFlags hitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;
 				physx::PxQueryFilterData filterData;
 				filterData.data.word0 = request.uFilter;
 				filterData.data.word1 = 0;

@@ -28,7 +28,7 @@ public:
 
 	// Only need to pass in an effect if this is a dynamic constant set
 	void Init(class GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUUsage eUsage = GPU_USAGE_DYNAMIC, void* pData = nullptr);
-	void CleanUp(class GFXDevice* pDevice);
+	void Cleanup(class GFXDevice* pDevice);
 	bool IsValid() const { return m_uSize > 0; }
 
 	uint32	GetSize() const { return m_uSize; }

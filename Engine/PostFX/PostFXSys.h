@@ -39,19 +39,25 @@ public:
 		EFFECT_SKY_FOG = (1 << 4),
 		EFFECT_SMAA = (1 << 5),
 		EFFECT_FILM_GRAIN = (1<<6),
-		EFFECT_SSAO = (1<<7)
+		EFFECT_SSAO = (1<<7),
+		// This post effect is being used to create an intermediate target
+		EFFECT_OFFSCREEN_TARGET = (1<<8),
+		EFFECT_FINAL_TARGET_HDR = (1 << 9)
 	};
 
 	PostFXSys();
 	~PostFXSys();
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, uint32 uHeight, uint32 uEffectFlags);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 
 	void Update(Scene* pScene, float fElapsed) { m_platform.Update(pScene, fElapsed); }
 	void UpdateGPU(GFXDevice* pDevice) { m_platform.UpdateGPU(pDevice); }
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
+
+	void AddCustomEffect(PostEffect* pEffect) { m_platform.AddCustomEffect(pEffect); }
+	void RemoveCustomEffect(PostEffect* pEffect) { m_platform.RemoveCustomEffect(pEffect); }
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
@@ -69,7 +75,6 @@ public:
 
 	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	void UpdateRTSize(GFXDevice* pDevice, Display* pDisplay);
-	void SetPostDepthDescriptors(GFXContext* pCtxt);
 
 	uint32 GetFinalTargetWidth(bool bOrient = true) { return m_platform.GetFinalTargetWidth(bOrient); }
 	uint32 GetFinalTargetHeight(bool bOrient = true) { return m_platform.GetFinalTargetHeight(bOrient); }
@@ -85,6 +90,7 @@ public:
 	PostEffect* GetEffect(uint32 uEffectId);
 	void RegisterEffect(PostEffect* pEffect);
 	bool IsEffectEnabled(EffectFlags uFlag) { return (m_uEffectsEnabled & uFlag) != 0; }
+	uint32 GetEnabledEffectFlags() const { return m_uEffectsEnabled; }
 
 	// Platform specific implementations
 	void Copy(GFXContext* pContext, RenderTarget* pSrc, RenderTarget* pDst);

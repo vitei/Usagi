@@ -99,7 +99,7 @@ namespace usg
 				DESCRIPTOR_END()
 			};
 
-			SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+			SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 			m_sampler = pDevice->GetSampler(samplerDecl);
 
 			DescriptorSetLayoutHndl layout = pDevice->GetDescriptorSetLayout(decl);
@@ -113,11 +113,11 @@ namespace usg
 		InitBase(szName);
 	}
 
-	void GUIButton::CleanUp(GFXDevice* pDevice)
+	void GUIButton::Cleanup(GFXDevice* pDevice)
 	{
 		if (m_bTexDescValid)
 		{
-			m_descriptor.CleanUp(pDevice);
+			m_descriptor.Cleanup(pDevice);
 		}
 	}
 
@@ -358,7 +358,7 @@ namespace usg
 	{
 		m_szNames = NULL;
 		m_szZeroSepNames = szZeroSeperatedString;
-		if(m_selectedName.Length() > 0)
+		if(m_selectedName.length() > 0)
 		{
 			const char* index = szZeroSeperatedString;
 			uint32 uIndex = 0;
@@ -586,7 +586,7 @@ namespace usg
 				DESCRIPTOR_END()
 			};
 
-			SamplerDecl samplerDecl(SF_LINEAR, SC_WRAP);
+			SamplerDecl samplerDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 			m_sampler = pDevice->GetSampler(samplerDecl);
 
 			DescriptorSetLayoutHndl layout = pDevice->GetDescriptorSetLayout(decl);
@@ -601,9 +601,9 @@ namespace usg
 		m_vScale = vSize;
 	}
 
-	void GUITexture::CleanUp(GFXDevice* pDevice)
+	void GUITexture::Cleanup(GFXDevice* pDevice)
 	{
-		m_descriptor.CleanUp(pDevice);
+		m_descriptor.Cleanup(pDevice);
 	}
 
 	void GUITexture::SetUVs(Vector2f vUVMin, Vector2f vUVMax)

@@ -236,10 +236,10 @@ namespace usg{
 	{
 		static const uint32 AyatakaMagicNumber = utl::CRC32("AyatakaCollisionModel");
 
-		U8String tmpString;
-		tmpString.ParseString("Models/%s", szName);
+		char name[256];
+		str::ParseVariableArgsC(name, 256, "Models/%s", szName);
 
-		File dataFile(tmpString.CStr());
+		File dataFile(name);
 
 		ScratchRaw dataBuffer;
 		const size_t uFileSize = dataFile.GetSize();
@@ -248,7 +248,7 @@ namespace usg{
 		dataFile.Read(uFileSize, dataBuffer.GetRawData());
 
 		m_name = szName;
-		SetupHash(m_name.CStr());
+		SetupHash(m_name.c_str());
 
 		uint32* pData = reinterpret_cast<uint32*>(dataBuffer.GetRawData());
 		const uint32 uMagicNumber = pData[0];
@@ -291,10 +291,10 @@ namespace usg{
 		m_pVertices = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f)*header.uVertices, FILE_READ_ALIGN);
 		m_uVertices = header.uVertices;
 
-		if (header.uTriangles >= 32)
+		/*if (header.uTriangles >= 32)
 		{
 			DEBUG_PRINT("WARNING: using a very complex collision model (%s) with %u triangles, %u vertices.\n", szName, header.uTriangles, header.uVertices);
-		}
+		}*/
 
 		size_t uNextBlockSize = sizeof(TriangleIndices) * header.uTriangles;
 		usg::MemCpy(m_pTriangles, pRawData + uPos, uNextBlockSize);

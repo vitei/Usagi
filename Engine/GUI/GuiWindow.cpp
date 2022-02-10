@@ -11,7 +11,7 @@ namespace usg
 {
 	GUIWindow::GUIWindow() 
 		: m_menuBar(false)
-		, m_items(20)
+		, m_items(300)
 	{
 		m_fScale = 1.0f;
 		m_bShowBorders = false;
@@ -36,7 +36,7 @@ namespace usg
 	
 	void GUIWindow::AddItem(GUIItem* pItem)
 	{
-		m_items.AddToEnd(pItem);
+		m_items.push_back(pItem);
 	}
 
 	bool GUIWindow::UpdateAndAddToDrawList(const GUIContext& ctxt)
@@ -84,7 +84,7 @@ namespace usg
 
 		if(m_bVisible)
 		{
-			for(List<GUIItem>::Iterator it = m_items.Begin(); !it.IsEnd(); ++it)
+			for(list<GUIItem*>::iterator it = m_items.begin(); it != m_items.end(); ++it)
 			{
 				GUIItem* pItem = (*it);
 				if(pItem->IsVisible())

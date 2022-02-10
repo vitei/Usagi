@@ -4,7 +4,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Scene/Model/Model.h"
 #include "Engine/Resource/ModelResource.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "ModelMgr.h"
 
@@ -23,7 +22,7 @@ namespace usg
 
 	Model* ModelMgr::GetModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling)
 	{
-		U8String cmpName = pResMgr->GetModelDir() + szModelName;
+		usg::string cmpName = pResMgr->GetModelDir() + szModelName;
 		Model* pModel = GetFreeInstance(cmpName);
 
 		if(!pModel)	// Handle creating a new instance
@@ -34,7 +33,7 @@ namespace usg
 			{
 				pModel->Load(m_pDevice, m_pScene, pResMgr, szModelName, bDynamic, true, m_bAutoTransform, bPerBoneCulling);
 			}
-			m_inUseList.AddToEnd(pModel);
+			m_inUseList.push_back(pModel);
 		}
 		else
 		{
@@ -56,15 +55,15 @@ namespace usg
 
 	void ModelMgr::PreloadModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling, uint32 uCount)
 	{
-		List<Model> model;
+		list<Model*> model;
 		// First load the models
 		for(uint32 i=0; i<uCount; i++)
 		{
-			model.AddToEnd( GetModel(pResMgr, szModelName, bDynamic, bPerBoneCulling) );
+			model.push_back( GetModel(pResMgr, szModelName, bDynamic, bPerBoneCulling) );
 		}
 
 		// Now add them to the free list
-		for (List<Model>::Iterator it = model.Begin(); !it.IsEnd(); ++it)
+		for (list<Model*>::iterator it = model.begin(); it != model.end(); ++it)
 		{
 			Free( (*it));
 		}

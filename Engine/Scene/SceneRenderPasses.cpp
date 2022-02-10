@@ -25,6 +25,8 @@ namespace usg {
 		CallbackData data;
 		data.fnCallback = callback;
 		data.pUserData = pUserData;
+
+		m_callbacks.push_back(data);
 	}
 
 	void SceneRenderPasses::RemoveCallback(ChangeCallback callback, void* pUserData)
@@ -109,7 +111,6 @@ namespace usg {
 			}
 		}
 
-		ASSERT(false);
 		return RenderPassHndl();
 	}
 
@@ -161,8 +162,8 @@ namespace usg {
 	bool SceneRenderPasses::GetRenderPassChanged(const RenderNode& node, RenderPassHndl& hndlOut) const
 	{
 		// TODO: This could definitely be sped up
-		hndlOut = GetRenderPass(node);
-		return GetRenderPass(node, false) != hndlOut;
+		hndlOut = GetRenderPass(node, false);
+		return GetRenderPass(node, true) != hndlOut;
 	}
 
 }

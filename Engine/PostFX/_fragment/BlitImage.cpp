@@ -45,7 +45,7 @@ void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPas
 
 	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
 	
-	SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 	m_sampler = pDevice->GetSampler(pointDecl);
 
 
@@ -75,10 +75,10 @@ void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPas
 
 }
 
-void BlitImage::CleanUp(GFXDevice* pDevice)
+void BlitImage::Cleanup(GFXDevice* pDevice)
 {
-	m_fullScreenIB.CleanUp(pDevice);
-	m_fullScreenVB.CleanUp(pDevice);
+	m_fullScreenIB.Cleanup(pDevice);
+	m_fullScreenVB.Cleanup(pDevice);
 	m_material.Cleanup(pDevice);
 }
 

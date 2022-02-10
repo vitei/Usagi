@@ -59,6 +59,8 @@ public:
 	bool			bUseDepthBias;
 	bool			bMultisample;
 	bool			bWireframe;
+	// 0 indicates no tessellation
+	uint32			uPatchControlPoints;	
 };
 
 
@@ -297,28 +299,19 @@ class SamplerDecl
 {
 public:
 	SamplerDecl();
-	SamplerDecl(SamplerFilter eFilterIn, SamplerClamp eClampIn);
+	SamplerDecl(SamplerFilter eFilterIn, SamplerWrap eClampIn);
 	~SamplerDecl();
 
 	void SetFilter(SamplerFilter eFilter);
-	void SetClamp(SamplerClamp eClamp);
-
-	enum Anisotropy
-	{
-		ANISO_LEVEL_1 = 0,
-		ANISO_LEVEL_2,
-		ANISO_LEVEL_4,
-		ANISO_LEVEL_8,
-		ANISO_LEVEL_16
-	};
+	void SetClamp(SamplerWrap eClamp);
 
 	bool operator==(const SamplerDecl& rhs) const;
 
 	SamplerFilter	eFilterMin;
 	SamplerFilter	eFilterMag;
 
-	SamplerClamp	eClampU;
-	SamplerClamp	eClampV;
+	SamplerWrap	eClampU;
+	SamplerWrap	eClampV;
 
 	CompareFunc		eCmpFnc;
 	Anisotropy		eAnisoLevel;

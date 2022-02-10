@@ -19,6 +19,7 @@
 #include <limits>
 #include "Engine/Physics/PhysXVehicle/VehicleSceneQueryData.h"
 #include "Engine/Physics/PhysicsEvents.pb.h"
+#include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Physics/PhysicsEventsInternal.pb.h"
 #include "Engine/Physics/PhysicsSceneData.h"
 #include "Engine/Framework/ExclusionCheck.h"
@@ -112,7 +113,7 @@ namespace usg
 		};
 
 
-		// FIXME: This system can't be run on a thread - we need some way of siginalling this
+		// FIXME: This system can't be run on a thread - we need some way of signalling this
 		class BeginPhysicsSimulationSystem : public System, public UnsafeComponentGetter
 		{
 		public:
@@ -355,6 +356,7 @@ namespace usg
 
 			struct Inputs
 			{
+				Required<EventManagerHandle, FromSelfOrParents> eventManager;
 				Required<usg::Components::SimulationActive, FromSelfOrParents> simactive;
 				Required<SceneComponent, FromSelfOrParents> visualScene;
 				Required<usg::PhysicsScene, FromSelf> scene;
@@ -395,6 +397,14 @@ namespace usg
 					physics::DebugRender(*inputs.visualScene.GetRuntimeData().pScene->GetSceneCamera(0));
 				}
 #endif
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
+			{
+ 				outputs.scene.GetRuntimeData().pSceneData->pScene->shiftOrigin(ToPhysXVec3(evt.vShift));
+
+				PhysicsSceneDirty dirtyEvt;
+				inputs.eventManager->handle->RegisterEvent(dirtyEvt);
 			}
 		};
 
@@ -557,6 +567,44 @@ namespace usg
 			}
 		};
 
+		class HandlePhysicsDirty : public System
+		{
+		public:
+
+			struct Inputs
+			{
+				Required<RigidBody> rigidBody;
+				Required<TransformComponent> transform;
+				Optional<MatrixComponent, FromParents> parentMatrix;
+			};
+
+			struct Outputs
+			{
+				Required<TransformComponent> transform;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const PhysicsSceneDirty& evt)
+			{
+				const auto& rtd = inputs.rigidBody.GetRuntimeData();
+				if (!inputs.transform->bInheritFromParent || !inputs.parentMatrix.Exists())
+				{
+					TransformComponent& transOut = outputs.transform.Modify();
+					transOut.position = ToUsgVec3(rtd.pRigidActor->getGlobalPose().p);
+					transOut.rotation = ToUsgQuaternionf(rtd.pRigidActor->getGlobalPose().q);
+					return;
+				}
+
+				const physx::PxTransform& globalTransform = rtd.pRigidActor->getGlobalPose();
+				physx::PxTransform cumulativeParentTransform = ToPhysXTransform(*inputs.parentMatrix.Force());
+
+				const physx::PxTransform localTransform = cumulativeParentTransform.transformInv(globalTransform);
+				outputs.transform.Modify().position = ToUsgVec3(localTransform.p);
+				outputs.transform.Modify().rotation = ToUsgQuaternionf(localTransform.q);
+			}
+		};
+
 		class TransformRigidBody : public System
 		{
 		public:
@@ -565,7 +613,6 @@ namespace usg
 			{
 				Required<RigidBody> rigidBody;
 				Required<DynamicBodyTag> dynamicTag;
-				Optional<TransformComponent, FromParents> parentTransform;
 			};
 
 			struct Outputs
@@ -576,7 +623,7 @@ namespace usg
 			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
 			EXCLUSION(IfHas<SleepTag, FromSelf>, IfHas<TransformComponent, FromParents>)
 
-				static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
+			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
 				ASSERT(inputs.rigidBody->bDynamic);
 				const auto& rtd = inputs.rigidBody.GetRuntimeData();
@@ -585,6 +632,7 @@ namespace usg
 				transOut.rotation = ToUsgQuaternionf(rtd.pRigidActor->getGlobalPose().q);
 			}
 		};
+
 
 		class TransformRigidBodyWithParent : public System
 		{

@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
  ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Resource/ModelResource.h"
@@ -447,9 +447,8 @@ namespace usg
 	{
 		ClearWeighting();
 
-		for (List<SkeletalAnimation>::Iterator it = m_activeAnims.Begin(); !it.IsEnd(); ++it)
+		for (SkeletalAnimation* pAnim : m_activeAnims)
 		{
-			SkeletalAnimation* pAnim = *it;
 			for (uint32 i = 0; i < m_pResource->GetBoneCount(); i++)
 			{
 				if (m_pBoneInfo[i].bReferencedByAnim)
@@ -479,9 +478,8 @@ namespace usg
 		}
 
 		// Now got through the list of active anims and apply them based on their weighting
-		for (List<SkeletalAnimation>::Iterator it = m_activeAnims.Begin(); !it.IsEnd(); ++it)
+		for (SkeletalAnimation* pAnim : m_activeAnims)
 		{
-			SkeletalAnimation* pAnim = *it;
 			if (pAnim->GetWeighting() > 0.0f)
 			{
 				ApplyBoneTransforms(pAnim);
@@ -569,7 +567,7 @@ namespace usg
 
 		TryToTransition();
 
-		m_activeAnims.Clear();
+		m_activeAnims.clear();
 
 		// TODO: This is a VERY simple no blended chained animation system but we could easily expand this to allow for blending
 		// FIXME: Not good logic, only valid whilst we are testing with a single animation
@@ -616,13 +614,13 @@ namespace usg
 
 //		if (IsVisible())
 		{
-			switch (m_activeAnims.GetSize())
+			switch (m_activeAnims.size())
 			{
 			case 0:
 				// Do nothing
 				break;
 			case 1:
-				ApplyBoneTransformsNoWeights(*m_activeAnims.Begin());
+				ApplyBoneTransformsNoWeights(*m_activeAnims.begin());
 				break;
 			default:
 				ApplyBlendedAnim();

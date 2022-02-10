@@ -10,7 +10,7 @@
 #define USAGI_FRAMEWORK_EVENT_MANAGER_H
 
 #include "Engine/Memory/MemHeap.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Framework/Event.pb.h"
 #include "Engine/Framework/Script/ExecuteScript.h"
 #include "Engine/Framework/SystemCoordinator.h"
@@ -27,7 +27,7 @@ namespace usg
 class EventManager
 {
 public:
-	typedef List< TriggerableEvent > EventQueue;
+	typedef list< TriggerableEvent* > EventQueue;
 	EventManager();
 	~EventManager();
 	void Clear();

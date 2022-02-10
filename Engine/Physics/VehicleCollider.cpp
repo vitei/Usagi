@@ -2,6 +2,7 @@
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Physics/PhysXVehicle/VehicleSceneQueryData.h"
 #include "VehicleCollider.h"
+#include "extensions/PxRigidActorExt.h"
 #include "Engine/Physics/PhysXVehicle/FrictionPairs.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
@@ -132,7 +133,7 @@ namespace usg
 		for (physx::PxU32 i = 0; i < uNumWheels; i++)
 		{
 			physx::PxConvexMeshGeometry geom(wheelConvexMeshes[i]);
-			physx::PxShape* pWheelShape = pRigidBody->createShape(geom, *wheelMaterials[i]);
+			physx::PxShape* pWheelShape = physx::PxRigidActorExt::createExclusiveShape(*pRigidBody, geom, *wheelMaterials[i]);
 			pWheelShape->setQueryFilterData(wheelQryFilterData);
 			pWheelShape->setSimulationFilterData(wheelSimFilterData);
 			pWheelShape->setLocalPose(physx::PxTransform(physx::PxIdentity));
@@ -161,7 +162,7 @@ namespace usg
 		//Add the chassis shapes to the actor.
 		for (physx::PxU32 i = 0; i < uNumChassisMeshes; i++)
 		{
-			physx::PxShape* pChassisShape = pRigidBody->createShape(physx::PxConvexMeshGeometry(pChassisMesh), *chassisMaterials[i]);
+			physx::PxShape* pChassisShape = physx::PxRigidActorExt::createExclusiveShape(*pRigidBody, physx::PxConvexMeshGeometry(pChassisMesh), *chassisMaterials[i]);
 			pChassisShape->setLocalPose(chassisTransform);
 			pChassisShape->userData = &vehicleRtd;
 			vehicleRtd.pShape = pChassisShape;

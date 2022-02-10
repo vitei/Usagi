@@ -69,12 +69,12 @@ class DistanceCmp
 {
 public:
 	DistanceCmp(const Vector4f& vCameraPos) { m_vCameraPos = vCameraPos; }
-	bool operator() (const PointLight &i, const PointLight &j) const
+	bool operator() (const PointLight *i, const PointLight *j) const
 	{
-		Vector3f vDirI = i.GetPosition().v3() - m_vCameraPos.v3();
-		Vector3f vDirJ = j.GetPosition().v3() - m_vCameraPos.v3();
-		float fDistISq = DotProduct(vDirI, vDirI) - (i.GetFar()*i.GetFar());
-		float fDistJSq = DotProduct(vDirJ, vDirJ) - (j.GetFar()*j.GetFar());
+		Vector3f vDirI = i->GetPosition().v3() - m_vCameraPos.v3();
+		Vector3f vDirJ = j->GetPosition().v3() - m_vCameraPos.v3();
+		float fDistISq = DotProduct(vDirI, vDirI) - (i->GetFar()*i->GetFar());
+		float fDistJSq = DotProduct(vDirJ, vDirJ) - (j->GetFar()*j->GetFar());
 		return (fDistISq<fDistJSq);
 	}
 private:
@@ -99,7 +99,7 @@ void LightingContext::Init(GFXDevice* pDevice)
 
 void LightingContext::Cleanup(GFXDevice* pDevice)
 {
-	m_lightingConstants.CleanUp(pDevice);
+	m_lightingConstants.Cleanup(pDevice);
 }
 
 void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
@@ -111,14 +111,14 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 	pScene->GetLightMgr().GetProjectionLightsInView(pCtxt->GetCamera(), m_visProjLights);
 
 	DistanceCmp cmp(pCtxt->GetCamera()->GetPos());
-	m_visPointLights.Sort(cmp);
+	m_visPointLights.sort(cmp);
 	m_ambient = pCtxt->GetScene()->GetLightMgr().GetAmbientLight();
 
 	Matrix4x4 mViewMat = pCtxt->GetCamera()->GetViewMatrix(VIEW_CENTRAL);
 
-	const List<DirLight>& dirLights = m_visDirLights;
-	const List<PointLight>& pointLights = m_visPointLights;
-	const List<SpotLight>& spotLights = m_visSpotLights;
+	const list<DirLight*>& dirLights = m_visDirLights;
+	const list<PointLight*>& pointLights = m_visPointLights;
+	const list<SpotLight*>& spotLights = m_visSpotLights;
 
 	LightingConsts* pLightingData = m_lightingConstants.Lock<LightingConsts>();
 
@@ -132,7 +132,7 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 	// FIXME: If we re-implemenet deferred shading we need the per light constants to be updated somewhere
 	uint32 uLightCount = 0;
 	uint32 uCascadeCount = 0;
-	for(List<DirLight>::Iterator it = dirLights.Begin(); !it.IsEnd() && uLightCount < MAX_LIGHTS; ++it)
+	for(auto it = dirLights.begin(); it != dirLights.end() && uLightCount < MAX_LIGHTS; ++it)
 	{
 		const DirLight* pLight = *it;
 
@@ -169,7 +169,7 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 	}
 
 	
-	for(List<PointLight>::Iterator it = pointLights.Begin(); !it.IsEnd() && uLightCount < MAX_LIGHTS; ++it)
+	for(auto it = pointLights.begin(); it != pointLights.end() && uLightCount < MAX_LIGHTS; ++it)
 	{
 		const PointLight* pLight = *it;
 
@@ -188,7 +188,7 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 		}
 	}
 	
-	for(List<SpotLight>::Iterator it = spotLights.Begin(); !it.IsEnd() && uLightCount < MAX_LIGHTS; ++it)
+	for(auto it = spotLights.begin(); it != spotLights.end() && uLightCount < MAX_LIGHTS; ++it)
 	{
 		const SpotLight* pLight = *it;
 
@@ -218,26 +218,26 @@ void LightingContext::Update(GFXDevice* pDevice, SceneContext* pCtxt)
 
 void LightingContext::ClearLists()
 {
-	m_visDirLights.Clear();
-	m_visPointLights.Clear();
+	m_visDirLights.clear();
+	m_visPointLights.clear();
 }
 
-const List<DirLight>& LightingContext::GetActiveDirLights() const
+const list<DirLight*>& LightingContext::GetActiveDirLights() const
 {
 	return m_visDirLights;
 }
 
-const List<PointLight>& LightingContext::GetPointLightsInView() const
+const list<PointLight*>& LightingContext::GetPointLightsInView() const
 {
 	return m_visPointLights;
 }
 
-const List<SpotLight>& LightingContext::GetSpotLightsInView() const
+const list<SpotLight*>& LightingContext::GetSpotLightsInView() const
 {
 	return m_visSpotLights;
 }
 
-const List<ProjectionLight>& LightingContext::GetProjLightsInView() const
+const list<ProjectionLight*>& LightingContext::GetProjLightsInView() const
 {
 	return m_visProjLights;
 }

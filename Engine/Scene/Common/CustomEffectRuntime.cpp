@@ -90,13 +90,13 @@ void CustomEffectRuntime::Init(GFXDevice* pDevice, const CustomEffectRuntime* pC
 	
 }
 
-void CustomEffectRuntime::CleanUp(GFXDevice* pDevice)
+void CustomEffectRuntime::Cleanup(GFXDevice* pDevice)
 {
 	if (m_pConstantSets)
 	{
 		for (uint32 i = 0; i < m_uConstantSets; i++)
 		{
-			m_pConstantSets[i].CleanUp(pDevice);
+			m_pConstantSets[i].Cleanup(pDevice);
 		}
 		vdelete[] m_pConstantSets;
 		m_pConstantSets = nullptr;

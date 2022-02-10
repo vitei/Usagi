@@ -29,6 +29,7 @@ public:
 
 	void Begin(bool bApplyDefaults);
 	void End();
+	void Cleanup(GFXDevice* pDevice);
 
 	// Transfer a render target to the scan buffer
 	void Transfer(RenderTarget* pTarget, Display* pDisplay);

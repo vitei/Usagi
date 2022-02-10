@@ -10,7 +10,6 @@
 #include "Engine/Framework/ComponentGetter.h"
 #include "Engine/Framework/ComponentSystemInputOutputs.h"
 #include "Engine/Audio/Audio.h"
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Physics/PhysX.h"
@@ -50,8 +49,6 @@ static GameInterface* game;
 
 bool GameInit()
 {
-	game = CreateGame();
-
 	Math::SeedRand();
 	game->Init(g_pGFXDevice, usg::ResourceMgr::Inst());
 
@@ -79,7 +76,7 @@ void GameLoop()
 
 void GameCleanup()
 {
-	game->CleanUp(g_pGFXDevice);
+	game->Cleanup(g_pGFXDevice);
 	vdelete game;
 	game = nullptr;
 	ResourceMgr::Cleanup(g_pGFXDevice);
@@ -101,6 +98,16 @@ bool GameMain(const char** dllModules, uint32 uModuleCount)
 
 	if(!GameInit())
 		return false;
+
+#if 0
+	if (!InitInput())
+	{
+		return false;
+	}
+#endif
+
+	// Everything should be set up now, time to finalize any early load modules
+	usg::ModuleManager::Inst()->PostInit(g_pGFXDevice);
 
 	if (OS::ShouldQuit())
 	{
@@ -150,8 +157,6 @@ bool InitInput()
 bool InitEngine(const char** dllModules, uint32 uModuleCount)
 {
 	mem::InitialiseDefault();
-	U8String::InitPool();
-	InitListMemory();
 	File::InitFileSystem();
 
 	usg::ModuleManager::Inst()->Create();
@@ -161,11 +166,6 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 		// We pre-load as some of these may need to be known about when initing gfx and input
 		usg::ModuleManager::Inst()->LoadModule(dllModules[i]);
 	}
-    
-    if(!InitInput())
-	{
-		return false;
-	}
 
 	g_pGFXDevice = GFX::Initialise();
 
@@ -173,6 +173,10 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 	{
 		return false;
 	}
+
+	game = CreateGame();
+	game->PreGFXInit();
+
 #if (defined PLATFORM_PC)
 	g_pGFXDevice->InitDisplay(WINUTIL::GetWindow());
 #else
@@ -184,9 +188,6 @@ bool InitEngine(const char** dllModules, uint32 uModuleCount)
 
 	//physics::init();
 
-	// Everything should be set up now, time to finalize any early load modules
-	usg::ModuleManager::Inst()->PostInit(g_pGFXDevice);
-
 	return true;
 }
 
@@ -197,9 +198,8 @@ void EngineCleanup()
 	Input::Cleanup();
 	File::FinalizeFileSystem();
 	GFX::Reset();
-	U8String::CleanupPool();
 	ComponentSystemInputOutputsSharedBase::Cleanup();
-	usg::ModuleManager::Inst()->CleanUp();
+	usg::ModuleManager::Inst()->Cleanup();
 	mem::Cleanup();
 }
 

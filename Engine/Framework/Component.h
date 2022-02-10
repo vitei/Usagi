@@ -25,6 +25,9 @@ struct FromSelfOrParents { static const int value = FROM_SELF | FROM_PARENTS; };
 template<typename Component>
 struct FromParentWith    {};
 
+template<typename Component>
+struct FromUnderCompInc {};
+
 typedef uint32 ModifyId;
 
 // RuntimeData allows you to specify some data which is initialised in OnActivate/OnLoaded

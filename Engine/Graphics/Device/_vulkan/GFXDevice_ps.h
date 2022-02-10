@@ -4,7 +4,6 @@
 #ifndef _USG_GRAPHICS_PC_GFXDEVICE_
 #define _USG_GRAPHICS_PC_GFXDEVICE_
 
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Core/stl/list.h"
@@ -35,6 +34,7 @@ public:
 	~GFXDevice_ps();
 
 	void Init(GFXDevice* pParent);
+	void Cleanup(GFXDevice* pParent);
 
 	uint32 GetHardwareDisplayCount();
 	const DisplaySettings* GetDisplayInfo(uint32 uIndex);
@@ -48,6 +48,7 @@ public:
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
 	VkCommandPool& GetCommandPool() { return m_cmdPool;  }
+	VkCommandPool CreateCommandPool();
 	VkDevice& GetVKDevice() { return m_vkDevice;  }
 	VkInstance& GetVKInstance() { return m_instance;  }
 	uint32 GetQueueFamilyCount() const { return m_uQueueFamilyCount; }
@@ -68,10 +69,11 @@ public:
 
 	VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin);
 	void FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free);
-	VkQueue GetQueue() { return m_queue; }
+	VkQueue GetQueue() { return m_queue[QUEUE_TYPE_GRAPHICS]; }
 	const VkPhysicalDeviceProperties* GetPhysicalProperties(uint32 uGPU = 0);
 
-	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[eFormat]; }
+	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[(uint32)eFormat]; }
+	ColorFormat GetUSGFormat(VkFormat eFormat);
 
 	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
 	bool AllocateMemory(VkMemAllocator* pAllocInOut);
@@ -81,6 +83,9 @@ public:
 	void ReqDestroyImageView(VkImageView buffer);
 	void ReqDestroyImage(VkImage image);
 	void ReqDestroyDescriptorSet(VkDescriptorPool pool, VkDescriptorSet set);
+	void ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout);
+	void ReqDestroyDescriptorSetPool(VkDescriptorPool pool);
+	void ReqDestroyFrameBuffer(VkFramebuffer frameBuffer);
 
 
 private:
@@ -95,12 +100,22 @@ private:
 		CALLBACK_COUNT = 2
 	};
 
+	enum QueueType
+	{
+		QUEUE_TYPE_GRAPHICS = 0,
+		QUEUE_TYPE_TRANSFER,
+		QUEUE_TYPE_COUNT
+	};
+
 	enum ResourceType
 	{
 		RESOURCE_BUFFER = 0,
 		RESOURCE_IMAGE_VIEW,
 		RESOURCE_DESCRIPTOR_SET,
-		RESOURCE_IMAGE
+		RESOURCE_IMAGE,
+		RESOURCE_DESCRIPTOR_LAYOUT,
+		RESOURCE_DESCRIPTOR_POOL,
+		RESOURCE_FRAME_BUFFER
 	};
 
 
@@ -124,9 +139,12 @@ private:
 
 		union Resource
 		{
-			VkBuffer	buffer;
-			VkImageView imageView;
-			VkImage		image;
+			VkBuffer				buffer;
+			VkFramebuffer			frameBuffer;
+			VkImageView				imageView;
+			VkImage					image;
+			VkDescriptorPool		pool;
+			VkDescriptorSetLayout	layout;
 			struct Descriptor
 			{
 				// TODO: The device should probably own the pools
@@ -137,8 +155,9 @@ private:
 	};
 
 
+	CriticalSection						m_criticalSection;
 	usg::queue<DestroyRequest>			m_destroyQueue;
-	VkFormat							m_colorFormats[CF_COUNT];
+	VkFormat							m_colorFormats[ColorFormat::COUNT];
 
 	GFXDevice*							m_pParent;
 	VkFence								m_drawFence;
@@ -157,7 +176,9 @@ private:
 	uint32								m_uGPUCount;
 	VkQueueFamilyProperties*			m_pQueueProps;
 	uint32								m_uQueueFamilyCount;
-	VkQueue								m_queue;
+	VkQueue								m_queue[QUEUE_TYPE_COUNT];
+	VkDeviceQueueCreateInfo				m_queueInfo;
+
 
 	VkPipelineCache						m_pipelineCache;
 	VkAllocationCallbacks				m_allocCallbacks;

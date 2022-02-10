@@ -6,6 +6,7 @@
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/ViewContext.h"
+#include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Graphics/Lights/LightSpec.pb.h"
@@ -17,6 +18,14 @@
 
 namespace usg {
 
+static const uint32 g_uShadowResMap[] =
+{
+	1024,
+	1536,
+	2048,
+	4096
+};
+
 LightMgr::LightMgr(void):
 m_pParent(nullptr)
 {
@@ -27,11 +36,22 @@ m_pParent(nullptr)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 	m_uActiveFrame = UINT_MAX;
-	m_shadowMapRes = 2048;
+	m_bLightTexDirty = false;
+	m_uShadowCastingFlags = RENDER_MASK_ALL;
+	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
 }
 
 LightMgr::~LightMgr(void)
 {
+}
+
+void LightMgr::SetShadowCastingFlags(uint32 uFlags)
+{
+	m_uShadowCastingFlags = uFlags;
+	for (auto itr : m_dirLights.GetActiveLights())
+	{
+		itr->SetNonShadowFlags(uFlags);
+	}
 }
 
 void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
@@ -39,23 +59,26 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 	m_pParent = pParent;
 
 	// Set up an initial dummy array for binding purposes
-	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DF_DEPTH_32F);//DF_DEPTH_32F); //DF_DEPTH_24
+	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DepthFormat::DEPTH_32F, SAMPLE_COUNT_1_BIT);//DF_DEPTH_32F); //DF_DEPTH_24
 	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 	usg::RenderTarget::RenderPassFlags flags;
 	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 	m_cascadeTarget.InitRenderPass(pDevice, flags);
+	m_bLightTexDirty = true;
 }
 
 
-void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution)
+void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& settings)
 {
 	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
-	m_shadowMapRes = uResolution;
+	m_qualitySettings = settings;
+	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
+
 	if (m_cascadeBuffer.GetSlices() > 1)
 	{
-		m_cascadeBuffer.Resize(pDevice, uResolution, uResolution);
+		m_cascadeBuffer.Resize(pDevice, m_uShadowMapRes, m_uShadowMapRes);
 		m_cascadeTarget.Resize(pDevice);
 	}
 }
@@ -63,29 +86,30 @@ void LightMgr::SetShadowCascadeResolution(GFXDevice* pDevice, uint32 uResolution
 
 void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 {
-	if (m_cascadeBuffer.GetWidth() != m_shadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
+	if (m_cascadeBuffer.GetWidth() != m_uShadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
 	{
-		m_cascadeBuffer.CleanUp(pDevice);
-		m_cascadeTarget.CleanUp(pDevice);
-		m_cascadeBuffer.InitArray(pDevice, m_shadowMapRes, m_shadowMapRes, uLayers, DF_DEPTH_32F);
+		m_cascadeBuffer.Cleanup(pDevice);
+		m_cascadeTarget.Cleanup(pDevice);
+		m_cascadeBuffer.InitArray(pDevice, m_uShadowMapRes, m_uShadowMapRes, uLayers, DepthFormat::DEPTH_32F);
 		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_DEPTH;
 		m_cascadeTarget.InitRenderPass(pDevice, flags);
+		m_bLightTexDirty = true;
 	}
 }
 
 
-void LightMgr::CleanUp(GFXDevice* pDevice)
+void LightMgr::Cleanup(GFXDevice* pDevice)
 {
-	m_dirLights.CleanUp(pDevice, m_pParent);
-	m_spotLights.CleanUp(pDevice, m_pParent);
-	m_pointLights.CleanUp(pDevice, m_pParent);
-	m_projLights.CleanUp(pDevice, m_pParent);
-	m_cascadeTarget.CleanUp(pDevice);
-	m_cascadeBuffer.CleanUp(pDevice);
+	m_dirLights.Cleanup(pDevice, m_pParent);
+	m_spotLights.Cleanup(pDevice, m_pParent);
+	m_pointLights.Cleanup(pDevice, m_pParent);
+	m_projLights.Cleanup(pDevice, m_pParent);
+	m_cascadeTarget.Cleanup(pDevice);
+	m_cascadeBuffer.Cleanup(pDevice);
 }
 
 
@@ -98,16 +122,17 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 	m_uShadowedDirLights = 0;
 	m_uShadowedDirLightIndex = UINT_MAX;
 
-	List<DirLight> dirLights;
+	list<DirLight*> dirLights;
 	GetActiveDirLights(dirLights);
 
 	// Now find the most influential shadowed directional light and make it the first
 	uint32 uCascadeIndex = 0;
-	for (uint32 i = 0; i < m_dirLights.GetActiveLights().size(); i++)
+	uint32 i=0;
+	for (auto itr : dirLights)
 	{
-		if (m_dirLights.GetActiveLights()[i]->GetShadowEnabled())
+		if (itr->GetShadowEnabled())
 		{
-			m_dirLights.GetActiveLights()[i]->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
+			itr->GetCascade()->AssignRenderTarget(&m_cascadeTarget, uCascadeIndex);
 			uCascadeIndex += ShadowCascade::CASCADE_COUNT;
 			if (m_uShadowedDirLightIndex == UINT_MAX)
 			{
@@ -115,17 +140,18 @@ void LightMgr::Update(float fDelta, uint32 uFrame)
 			}
 			m_uShadowedDirLights++;
 		}
+		i++;
 	}
 
 	if (m_uShadowedDirLightIndex == UINT_MAX)
 	{
 		// No shadowed lights, set the index to be beyond the list
-		m_uShadowedDirLightIndex = (uint32)m_dirLights.GetActiveLights().size();
+		m_uShadowedDirLightIndex = (uint32)dirLights.size();
 	}
 
 	if (pContext->GetCamera())
 	{
-		for (auto itr : m_dirLights.GetActiveLights())
+		for (auto itr : dirLights)
 		{
 			itr->UpdateCascade(*pContext->GetCamera(), 0);
 		}
@@ -195,17 +221,34 @@ void LightMgr::ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext
 {
 	for (auto itr : m_dirLights.GetActiveLights())
 	{
-		itr->ShadowRender(pContext);
+		if(itr->ShadowRender(pContext))
+		{
+			m_bLightTexDirty = false;
+		}
+	}
+
+	if(m_bLightTexDirty)
+	{
+		// Clear the shadow texture (and resolve the input layout for vulkan)
+		for(uint32 i=0; i<m_cascadeBuffer.GetSlices(); i++ )
+		{
+			pContext->SetRenderTargetLayer(&m_cascadeTarget, i);
+			pContext->SetRenderTarget(NULL);
+		}
 	}
 }
 
 
 DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow);	
+	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bDirectionalShadows);	
+
+	ASSERT(pLight);
+
 	if(szName)
 		pLight->SetName(szName);
-	ASSERT(pLight);
+
+	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
 
 	if (bSupportsShadow)
 		m_uShadowedDirLights++;
@@ -220,12 +263,13 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 
 void LightMgr::RemoveDirLight(DirLight* pLight)
 {
-	return m_dirLights.Free(pLight);
+	// FIXME: Adjust shadowed lights
+	m_dirLights.Free(pLight);
 }
 
 PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bPointShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;
@@ -239,7 +283,7 @@ void LightMgr::RemovePointLight(PointLight* pLight)
 
 SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;
@@ -253,7 +297,7 @@ void LightMgr::RemoveSpotLight(SpotLight* pLight)
 
 ProjectionLight* LightMgr::AddProjectionLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow);
+	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;	
@@ -265,9 +309,9 @@ void LightMgr::RemoveProjectionLight(ProjectionLight* pLight)
 }
 
 
-void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
+void LightMgr::GetActiveDirLights(list<DirLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	for(auto it = m_dirLights.GetActiveLights().begin(); it!=m_dirLights.GetActiveLights().end(); ++it)
 	{
 		if( (*it)->IsActive() )
@@ -275,23 +319,25 @@ void LightMgr::GetActiveDirLights(List<DirLight>& lightsOut) const
 			(*it)->SetVisibleFrame(m_uActiveFrame);
 			if ((*it)->GetShadowEnabled())
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 			else
 			{
-				lightsOut.AddToFront(*it);
+				lightsOut.push_front(*it);
 			}
 		}
 	}
 
-	lightsOut.Sort();
+	// FIXME: Since the switch to eastl this is comparing the pointers. 
+	// Could re-enable but shadow location is the only important thing atm
+	//lightsOut.sort();
 }
 
 
 
-void LightMgr::GetPointLightsInView(const Camera* pCamera, List<PointLight>& lightsOut) const
+void LightMgr::GetPointLightsInView(const Camera* pCamera, list<PointLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_pointLights.GetActiveLights().begin(); it!=m_pointLights.GetActiveLights().end(); ++it)
 	{
@@ -301,16 +347,16 @@ void LightMgr::GetPointLightsInView(const Camera* pCamera, List<PointLight>& lig
 			if( !(*it)->HasAttenuation() || pCamera->GetFrustum().IsSphereInFrustum( (*it)->GetColSphere() ) )
 			{
 				(*it)->SetVisibleFrame(m_uActiveFrame);
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
 }
 
 
-void LightMgr::GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& lightsOut) const
+void LightMgr::GetSpotLightsInView(const Camera* pCamera, list<SpotLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_spotLights.GetActiveLights().begin(); it != m_spotLights.GetActiveLights().end(); ++it)
 	{
@@ -320,16 +366,16 @@ void LightMgr::GetSpotLightsInView(const Camera* pCamera, List<SpotLight>& light
 			// TODO: These lights should be culled like every object in the game using a quad tree
 			if( !(*it)->HasAttenuation() || pCamera->GetFrustum().IsSphereInFrustum( (*it)->GetColSphere() ) )
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
 }
 
 
-void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionLight>& lightsOut) const
+void LightMgr::GetProjectionLightsInView(const Camera* pCamera, list<ProjectionLight*>& lightsOut) const
 {
-	lightsOut.Clear();
+	lightsOut.clear();
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_projLights.GetActiveLights().begin(); it != m_projLights.GetActiveLights().end(); ++it)
 	{
@@ -338,7 +384,7 @@ void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionL
 			(*it)->SetVisibleFrame(m_uActiveFrame);
 			if( (*it)->GetFrustum().ArePointsInFrustum( (*it)->GetCorners(), 8 ) )
 			{
-				lightsOut.AddToEnd(*it);
+				lightsOut.push_back(*it);
 			}
 		}
 	}
@@ -347,7 +393,7 @@ void LightMgr::GetProjectionLightsInView(const Camera* pCamera, List<ProjectionL
 
 Light* LightMgr::FindLight(const char* szName)
 {
-	U8String name(szName);
+	usg::string name(szName);
 	for (auto it : m_pointLights.GetActiveLights() )
 	{
 		if( it->GetName() == name )

@@ -24,7 +24,7 @@ public:
 
 	// Set up the defaults
 	void Init(GFXDevice* pDevice, DescriptorSetLayout* pLayout);
-	void CleanUp(GFXDevice* pDevice, DescriptorSetLayout* pLayout);
+	void Cleanup(GFXDevice* pDevice, DescriptorSetLayout* pLayout);
 
 	void UpdateDescriptors(GFXDevice* pDevice, const DescriptorSetLayout* pLayout, const DescriptorData* pData, bool bDoubleUpdate);
 
@@ -36,8 +36,9 @@ private:
 	uint32				m_uActiveSet;
 	uint32				m_uBuffers;
 
-	vector<const ConstantSet_ps*> m_dynamicBuffers;
-
+	vector<const ConstantSet_ps*>	m_dynamicBuffers;
+	struct VkDescriptorImageInfo*	m_pImages;
+	struct VkWriteDescriptorSet*	m_pWrites;
 };
 
 }

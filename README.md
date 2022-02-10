@@ -1,9 +1,7 @@
 usagi
 =====
 
-Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/). The engine is still in the early stages of the open sourcing process;  be sure to check out the [wiki](https://github.com/vitei/Usagi/wiki) in order to understand the intention.     
-
-By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential. 
+Usagi is a platform independent hierarchical [Entity-Component-System](https://github.com/vitei/Usagi/wiki/Component-entity-system) based game engine created by [Vitei Inc.](http://www.vitei.com/).  
 
 In Usagi the entire world is grouped into a hierarchy of entities. These entities are very fine grained, every bone on every character is an entity, with optional additional logical entities where required.  
 
@@ -53,9 +51,12 @@ static void OnEvent(const Inputs& inputs, Outputs& outputs, const KillEntityEven
 }
 ```
 
+By [modifying the ECS design pattern](https://github.com/vitei/Usagi/wiki/Component-entity-system-coding) to put a hierarchy at its core we believe we have created a paradigm which is far more practical when trying to manage the complex interactions required in a modern game, as well as improving multi-threading potential.  
+
+
 The word Usagi is Japanese for rabbit. Rabbits are quick, nimble and light, and that was our goal for the engine. Vitei was developing  games limited in scope but with high technical demands for Nintendo platforms, so we set about creating an engine suited to those titles.  
 
-The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.  
+The public release supports Windows, but the currently unmaintained Mac code is also included, both Vulkan and OpenGL versions of the rendering code are publically available - but internally the interface has been proven on everything from 3DS to XBoxOne.
 
 The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Games/Nintendo-3DS-download-software/Tank-Troopers-1136173.html) as well as several internal demos on numerous platforms and APIs.  
 
@@ -64,13 +65,11 @@ The engine has been proven on a [commerical title](https://www.nintendo.co.uk/Ga
 
 The open source release is currently in progress, for more details see the [introduction](https://github.com/vitei/Usagi/wiki/Introduction) and [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap).  
 
-Whilst the engine isn't that old the compilers targetted did mean we were unable to utilize modern C++ features. Some of these features are creeping into the code base, but there is not currently a pro-active effort to update to C++ 11 - 17.
+The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title.  
 
-The engine fully supported online multiplayer and more modern shader based platforms; unfortunately these features were not highlighted in its one commercial title, but work is progressing to demonstrate that potential.
-The majority of work is currently focused on a closed source project, UsagiTest is confirmed to compile and run with each major release but is not maintained beyond that.
+Progress is likely to be slow, work is being done by ex-staff as Vitei have graciously allowed us to open source this code base. However it is mostly used as a testbed and is no longer being used for commerical projects.  
 
 More detailed information is available in the [wiki](https://github.com/vitei/Usagi/wiki).  
-
 
 
 Getting up and running
@@ -78,10 +77,10 @@ Getting up and running
 
 The build process has not been improved or significantly modified and currently has a number of dependencies which can not be directly included in an open source project.  Do *not* clone this project first as it should be checked out to a sub folder of a project which uses the engine.
 
-1. Install **Visual Studio 2019**.  
+1. Install **Visual Studio 2022**.  
    https://www.visualstudio.com/downloads/
 
-1. Install **Ruby 2.3.3 x64**.  
+1. Install **Ruby 2.3.3**.  
    Make sure that you select the option to add a path variable  
    Note that versions newer than 2.4 will not function with nokogiri  
    https://rubyinstaller.org/
@@ -90,29 +89,19 @@ The build process has not been improved or significantly modified and currently 
    Make sure that you select the option to add a path variable  
    https://www.python.org/downloads/
 
-1. Clone the **PhysX repository 3.4**.  
-   Requires accepting a EULA  
-   https://developer.nvidia.com/physx-source-github  
-
-1. Build the PhysX binaries  
-   [**PhysX Checkout Dir**]\PhysX_3.4\Source\compiler\vc15win64\PhysX.sln and compile for both debug and release  
-   Use the project located in Source\compiler\vc15win64  
-   Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
-
-1. **Optional** Install the **FBX SDK 2019.0 VS2015**.  
-   Not necessary to run, but required to build the model converter (Ayataka)
-   https://www.autodesk.com/products/fbx/overview
-
-1. **Optional** Install and build the **Oculus SDK for Windows**.  
-   Not necessary to run, but required if you want to make a VR app  
-   Again Note that you must currently change the default options to build with Multi-threaded Debug DLL and Multi-threaded DLL
-   https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
-
 1. Clone an Usagi based Project  
    For example [UsagiTest](https://github.com/vitei/UsagiTest)  
    Always clone Usagi repos recursively as we make heavy use of submodules  
    **OR**  
    [Create a new one](https://github.com/vitei/Usagi/wiki/Creating-a-New-Project)  
+
+1. **Optional** Install the **FBX SDK 2020.0.1 VS2017**.  
+   Not necessary to run, but required to build the model converter (Ayataka)
+   https://www.autodesk.com/products/fbx/overview
+
+1. **Optional** Install and build the **Oculus SDK for Windows**.  
+   Not necessary to run, but required if you want to make a VR app  
+   https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/
 
 1. From a command window run **Setup.bat**  
    If gems fail to install confirm your ruby version  
@@ -120,19 +109,11 @@ The build process has not been improved or significantly modified and currently 
    Pay attention to which environmet variables EnvironmentSetup.exe failed to set  
    Note you must run environment setup whenever you switch to running a different Usagi project in order to set the correct USAGI_DIR env variable  
 
-1. Add the following environment variables either manually or by running EnvironmentSetup.exe  
-   MSBUILD_DIR -> [**Visual Studio Install Dir**]\MSBuild\15.0\Bin  
-   FBXSDK_DIR -> [**FBX SDK Install Dir**]\2019.0  
-   USAGI_DIR -> [**This checkout**]  
-
-1. Manually add the following environment variables  
-   EnvironmentSetup.exe may have been able to automatically find and add them if they were in ../../PhysX-3.4 and ../../OculusSDK  
-   PHYSX_DIR -> [**PhysX Checkout Dir**]\PhysX_3.4  
+1. **Optional** If you installed the oculus sdk manually add the following environment variable 
+   EnvironmentSetup.exe may have been able to automatically find and add them if they were in ../../OculusSDK  
    OCULUS_SDK_DIR -> [**Oculus SDK directory**]  
 
 1. Reset to ensure environment variable changes take effect  
-
-1. Ensure you have up-to-date drivers and have installed the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows)  
 
 1. Follow the instructions in that projects README.md  
 
@@ -140,29 +121,24 @@ Current Version 0.2.5
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
-v0.2.1 enabled Vulkan validation and has addressed many of the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.  
-v0.2.5 tackled additional validation issues presented by the latest Vulkan SDK, added effect comprehensive effect definitions and significantly reduced buffer allocations which would present an issue in larger projects. It also dealt with timing issues surrounding releasing assets. Finally it added an implementation of Adaptive Screen Space Ambient Occlusion.    
+v0.2.1 enables Vulkan validation and has addressed the issues that presented. It has also updated the old particle editor to Vulkan as its replacement is not yet ready.
+v0.2.2 enables per project post process effects
+v0.2.3 upgrades to PhysX 4.0 and simplifies installation
+v0.2.5 tackled additional validation issues presented by the latest Vulkan SDK, added effect comprehensive effect definitions and significantly reduced buffer allocations which would present an issue in larger projects. It also dealt with timing issues surrounding releasing assets. Finally it added an implementation of Adaptive Screen Space Ambient Occlusion.
 
-Since the code base is in a very early state the assumption is no one outside of the original developers are using the code base for anything other than reference; if you do attempt to make a project in Usagi be aware that you may periodically have to delete your build files (directories that begin with an underscore (such as _build) may periodically have to be deleted as the build system is altered.
 
 Issues
 ----------------------
 
-**The current is a list of known issues with Usagi which need to be addressed on the main branch.**
-
-Only the more recent nVidia cards have been tested since switching to Vulkan
-
-Multiple Inherits[] inside a single yaml file will currently be ignored
+**The current is a list of known issues with Usagi which need to be addressed.**
 
 If there is not at least one child entity systems on the root entity will not be run  
 
 There is no longer a system other than submodules for linking projects and engine versions  
 
-A replacement model editor would be required to take advantage of the existing custom shader support  
+Without a replacement model editor material overrides must be edited in yaml
 
 Resource loading is slow and single threaded  
-
-Resources don't have an internal list of dependenices 
 
 The running of systems is not yet multi-threaded  
 
@@ -170,10 +146,10 @@ Spot and projection lights are not properlly culled
 
 The AI would need updating to be able to control flying vehicles  
 
-Details of when these issues are to be addressed can be found in the [roadmap](https://github.com/vitei/Usagi/wiki/Roadmap)  
 
 License
 ----------------------
 
 Usagi its self is available under the MIT licence (see [LICENSE](LICENSE) in this repository). We would appreciate you letting us know if you make use of any part of the code or the design; but there is no requirement to do so.  
-Third party software falls under the MIT, Modified BSD and zLib licenses, the specifics of which are detailed in [Documents/License.md](Documents/License.md)
+It requires PhysX to run, any project making use of this project will need to be aware of this.
+Third party software falls under the PhysX, MIT, Modified BSD and zLib licenses, the specifics of which are detailed in [Documents/License.md](Documents/License.md)

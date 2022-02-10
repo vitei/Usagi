@@ -42,7 +42,7 @@ void SceneContext::SetRenderMask(uint32 uRenderMask)
 
 void SceneContext::ClearLists()
 {
-	m_visibleGroups.Clear();
+	m_visibleGroups.clear();
 	m_uVisiblePVSCount = 0;
 }
 

@@ -76,7 +76,7 @@ void GFXContext::SetRenderTarget(RenderTarget* pTarget, const Viewport* pViewpor
 {
 	bool bHadDS = false;
 	m_bRenderToDisplay = false;
-	if(m_pActiveRT)
+	if(m_pActiveRT && m_pActiveRT != pTarget)
 	{
 		m_platform.EndRTDraw(m_pActiveRT);
 		bHadDS = m_pActiveRT->GetDepthStencilBuffer()!=NULL;
@@ -366,6 +366,11 @@ void GFXContext::DrawImmediate(uint32 uCount, uint32 uOffset)
 	m_platform.DrawImmediate(uCount, uOffset);
 }
 
+
+void GFXContext::Cleanup(GFXDevice* pDevice)
+{
+	m_platform.Cleanup(pDevice);
+}
 
 void GFXContext::DrawIndexed(const IndexBuffer* pBuffer)
 {

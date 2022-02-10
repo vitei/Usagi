@@ -23,7 +23,7 @@ public:
 	~DebugRender();
 
 	void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetDrawArea(float fLeft, float fTop, float fWidth, float fHeight, float fLineSpacing = 1.25f);
 
 	// Values on the X range are a fraction of the debug draw area
@@ -63,6 +63,8 @@ private:
 	ConstantSet				m_posColConstants;
 	Material				m_textMaterial;
 	ConstantSet				m_textConstants;
+	ConstantSet				m_global2DConsts;
+	DescriptorSet			m_globalDescriptors;
 
 	VertexBuffer			m_barVerts;
 	VertexBuffer			m_charVerts;

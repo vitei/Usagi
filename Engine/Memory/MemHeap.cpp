@@ -254,6 +254,8 @@ void MemHeap::Deallocate(AllocHeader * pHeader)
 
 void MemHeap::FreeGroup(uint32 uGroup)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	// Iterate through the heap looking for items from this allocation group
 	if(!m_pHeadAlloc)
 		return; 
@@ -274,6 +276,8 @@ void MemHeap::FreeGroup(uint32 uGroup)
 
 void MemHeap::CheckData()
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	if(!m_pHeadAlloc)
 		return;
 	
@@ -289,6 +293,8 @@ void MemHeap::CheckData()
 
 void MemHeap::PrintDynamicAllocTypes()
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 #ifdef DEBUG_MEMORY
 	if(!m_pHeadAlloc)
 		return;
@@ -310,6 +316,8 @@ void MemHeap::PrintDynamicAllocTypes()
 void MemHeap::PrintUsage()
 {
 #ifdef DEBUG_MEMORY
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	memsize uAllocSizes[ALLOC_TYPE_COUNT];
 	for(uint32 i=0; i<ALLOC_TYPE_COUNT; i++)
 	{

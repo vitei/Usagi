@@ -21,15 +21,15 @@ public:
 	~TextureSettings();
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData);
-	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect);
+	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed);
 
 private:
 	virtual void MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results);
 
 	void UpdateAnimFrames(usg::GFXDevice* pDevice);
-	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData);
+	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, float fElapsed);
 	// Returns the aspect
 	float GetUVCoords(uint32 uFrame, usg::Vector2f& vMin, usg::Vector2f &vMax);
 	enum 
@@ -51,7 +51,7 @@ private:
 	usg::GUIIntInput		m_repeat;
 	usg::GUIComboBox		m_comboBox;
 	usg::GUIComboBox		m_fileListBox;
-	usg::U8String			m_textureName;
+	usg::string				m_textureName;
 	usg::GUISlider			m_animTimeScale;
 	usg::GUICheckBox		m_checkBox;
 	usg::GUIText			m_animTitle;

@@ -58,9 +58,9 @@ namespace usg
 		}
 	}
 
-	void Text::CleanUp(GFXDevice* pDevice)
+	void Text::Cleanup(GFXDevice* pDevice)
 	{
-		m_drawer.CleanUp(pDevice);
+		m_drawer.Cleanup(pDevice);
 	}
 
 
@@ -83,17 +83,17 @@ namespace usg
 		DEBUG_PRINT("Text::SetText(const char*) is deprecated; use Text::SetText(const U8String) instead.\n");
 #endif*/
 
-		U8String u8TempStr(str);
+		string u8TempStr(str);
 		return SetText(u8TempStr);
 	}
 
-	bool Text::SetText( const U8String& u8Str )
+	bool Text::SetText( const string& u8Str )
 	{
 		// If the new string's length is longer than the cached string's length, recreate the buffers.
 		if (u8Str == m_cachedString)
 			return true;
 
-		const uint32 newStrLength = u8Str.CharCount();
+		const memsize newStrLength = u8Str.size();
 
 		/*
 		// Null string...
@@ -261,14 +261,14 @@ namespace usg
 		return true;
 	}
 
-	const U8String& Text::GetText() const
+	const string& Text::GetText() const
 	{
 		return m_cachedString;
 	}
 
 	unsigned int Text::GetTextLength() const
 	{
-		return m_cachedString.Length();
+		return (int)m_cachedString.size();
 	}
 
 	void Text::GetPosition(unsigned int* outX, unsigned int* outY) const
@@ -356,8 +356,8 @@ namespace usg
 	void Text::PrintDebugInfo() const
 	{
 		DEBUG_PRINT("--BEGIN TEXT DUMP--\nm_vtxBufCmdBuf: %u\nm_DrawStringBuffer: %u\nm_cachedString: %s\nm_cachedStringLength: %u\nm_positionX/m_positionY: %u/%u\nm_color (r/g/b/a): %u/%u/%u/%u\nm_alignment: %u\nm_widthLimit: %f\nm_lineSpacing: %f\nm_charSpacing: %f\nm_dirtyFlags: %u\n--END TEXT DUMP--\n",
-			m_cachedString.CStr(),
-			m_cachedString.Length(),
+			m_cachedString.c_str(),
+			m_cachedString.size(),
 			m_positionX, m_positionY,
 			m_color.r8(), m_color.g8(), m_color.b8(), m_color.a8(),
 			m_alignment,

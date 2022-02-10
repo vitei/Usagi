@@ -26,6 +26,8 @@ public:
 	inline void Assign(const Vector4f& v4);
 	inline void AssignRGBA32(const uint32 rgba);
 
+	void operator *=(const Color& cScaleColor);
+
 	float& r() { return m_fR; }
 	float& g() { return m_fG; }
 	float& b() { return m_fB; }
@@ -236,6 +238,14 @@ inline void Color::FillU8(uint8 &r, uint8 &g, uint8 &b, uint8 &a) const
 	g = g8();
 	b = b8();
 	a = a8();
+}
+
+inline void Color::operator *=(const Color& cScaleColor)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		m_rgba[i] *= cScaleColor.m_rgba[i];
+	}
 }
 
 }

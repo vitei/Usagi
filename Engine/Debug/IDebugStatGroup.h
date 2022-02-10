@@ -10,9 +10,9 @@
 namespace usg {
 
 class DebugRender;
-class U8String;
 class GFXDevice;
 class DebugStats;
+class string;
 
 class IDebugStatGroup
 {
@@ -30,7 +30,7 @@ public:
 	void ClearOwner() { m_pOwner = nullptr; }
 	virtual uint32 GetPageCount() const = 0;
 	virtual void SetPage(uint32 uPage) { m_uActivePage = uPage; }
-	virtual void AppendWarnings(U8String& string) {}
+	virtual void AppendWarnings(usg::string& string) {}
 
 	void SetActive(bool bActive) { }
 

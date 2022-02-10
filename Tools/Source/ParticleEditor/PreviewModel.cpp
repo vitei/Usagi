@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/HID/Gamepad.h"
 #include "Engine/HID/Input.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -14,13 +15,13 @@ PreviewModel::~PreviewModel()
 	
 }
 
-void PreviewModel::CleanUp(usg::GFXDevice* pDevice)
+void PreviewModel::Cleanup(usg::GFXDevice* pDevice)
 {
 	if (m_pModel)
 	{
 		m_pModel->AddToScene(false);
 		m_pModel->GPUUpdate(pDevice);
-		m_pModel->CleanUp(pDevice);
+		m_pModel->Cleanup(pDevice);
 		vdelete m_pModel;
 	}
 }
@@ -58,18 +59,18 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 {
 	if(m_loadButton.GetValue())
 	{
-		usg::U8String modelName = m_loadFilePaths.GetSelectedName();
+		usg::string modelName = m_loadFilePaths.GetSelectedName();
 	
 		if (m_pModel)
 		{
 			m_pModel->AddToScene(false);
 			m_pModel->GPUUpdate(pDevice);
-			m_pModel->CleanUp(pDevice);
+			m_pModel->Cleanup(pDevice);
 			vdelete m_pModel;
 		}
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-		m_pModel->Load(pDevice, m_pScene, modelName.CStr(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
+		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.c_str(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
 	}
 	if (m_pModel)
 	{
@@ -82,7 +83,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 			m_pModel->SetTransform(mat);
 			for (uint32 i = 0; i < m_pModel->GetSkeleton().GetBoneCount(); i++)
 			{
-				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetBindMatrix(true) * mat;
+				usg::Matrix4x4 mBoneMat = m_pModel->GetSkeleton().GetBone(i)->GetDefaultMatrix(true) * mat;
 				m_pModel->GetSkeleton().GetBone(i)->SetTransform(mBoneMat);
 				m_pModel->GetSkeleton().GetBone(i)->UpdateConstants(pDevice);
 			}

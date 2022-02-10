@@ -24,7 +24,7 @@ namespace usg{
 		// This should really be private, but exposed for the benefit of the shape emitter
 		void CreateEmitterShape(particles::EmitterShape eShape, const particles::EmitterShapeDetails shapeDetails);
 		virtual void Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pParent);
-		virtual void CleanUp(GFXDevice* pDevice) override;
+		virtual void Cleanup(GFXDevice* pDevice) override;
 		virtual bool Update(float fElapsed);
 		virtual void UpdateBuffers(GFXDevice* pDevice);
 		virtual void CalculateMaxBoundingArea(usg::Sphere& sphereOut);
@@ -39,7 +39,7 @@ namespace usg{
 
 		virtual void FreeFromPool();
 
-		const U8String& GetScriptName() { return m_scriptName; }
+		const usg::string& GetScriptName() { return m_scriptName; }
 
 		const usg::particles::EmitterShapeDetails& GetShapeDetails() const;
 
@@ -128,12 +128,13 @@ namespace usg{
 		FloatAnimation				m_initialSpeed;
 		FloatAnimation				m_dirVelocity;
 		FloatAnimation				m_emission;
-		U8String					m_scriptName;
+		usg::string					m_scriptName;
 		bool						m_bRequiredCPUUpdate;
 		Matrix4x4					m_definitionMatrix;
 		Matrix4x4					m_effectLocalMatrix;
 		Vector4f					m_vPrevPos;
 		Vector3f					m_vVelocityOffset;
+		Vector3f					m_vRandomRot;
 		Matrix4x4					m_mWorldMatrix;
 
 		bool						m_bLocalOffset;

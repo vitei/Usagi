@@ -59,6 +59,8 @@ namespace usg {
 		Vector4f	vHemGroundColor;
 		Vector4f	vHemisphereDir;
 		Vector4f	vShadowColor;
+		Vector4f	vFrustumPlanes[6];
+		Vector2f	vViewportDim;
 		float		fAspect;
 	};
 
@@ -80,6 +82,8 @@ namespace usg {
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemGroundColor,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vHemisphereDir,	CT_VECTOR_4, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vShadowColor,		CT_VECTOR_4, 1),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, vFrustumPlanes,	CT_VECTOR_4, 6),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, vViewportDim,		CT_VECTOR_2, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, fAspect,			CT_FLOAT, 1),
 		SHADER_CONSTANT_END()
 	};
@@ -94,7 +98,7 @@ namespace usg {
 
 			for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 			{
-				uVisibleNodes[i] = 0;
+				pVisibleNodes[i].reserve(500);
 			}
 		}
 		DescriptorSet			globalDescriptors[VIEW_COUNT];
@@ -110,8 +114,7 @@ namespace usg {
 		// Arbitrarily assigning fog to the scene context
 		Fog						fog[MAX_FOGS];
 
-		RenderNode*				pVisibleNodes[RenderLayer::LAYER_COUNT][MAX_NODES_PER_LAYER];
-		uint32					uVisibleNodes[RenderLayer::LAYER_COUNT];
+		vector<RenderNode*>		pVisibleNodes[RenderLayer::LAYER_COUNT];
 	};
 
 
@@ -129,10 +132,10 @@ namespace usg {
 	void ViewContext::InitDeviceData(GFXDevice* pDevice)
 	{
 		const Scene* pScene = GetScene();
-		SamplerDecl shadowSamp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl shadowSamp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		shadowSamp.bEnableCmp = true;
 		shadowSamp.eCmpFnc = CF_LESS;
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
+		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
 		SamplerHndl sampler = pDevice->GetSampler(pointDecl);
 		SamplerHndl shadowSampler = pDevice->GetSampler(shadowSamp);
 		TextureHndl dummyDepth = ResourceMgr::Inst()->GetTexture(pDevice, "white_default");
@@ -144,7 +147,12 @@ namespace usg {
 			m_pImpl->globalDescriptors[i].SetConstantSet(0, &m_pImpl->globalConstants[i]);
 			m_pImpl->lightingContext.AddConstantsToDescriptor(m_pImpl->globalDescriptors[i], 1);
 			m_pImpl->globalDescriptors[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_pImpl->globalDescriptors[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+			usg::TextureHndl shadowCascade = pScene->GetLightMgr().GetShadowCascadeImage();
+			if (pScene->GetLightMgr().GetShadowedDirLightCount() == 0)
+			{
+				shadowCascade = dummyDepth;
+			}
+			m_pImpl->globalDescriptors[i].SetImageSamplerPair(3, shadowCascade, shadowSampler, 0);
 
 			m_pImpl->globalDescriptors[i].UpdateDescriptors(pDevice);
 
@@ -152,7 +160,7 @@ namespace usg {
 			m_pImpl->globalDescriptorsWithDepth[i].SetConstantSet(0, &m_pImpl->globalConstants[i]);
 			m_pImpl->lightingContext.AddConstantsToDescriptor(m_pImpl->globalDescriptorsWithDepth[i], 1);
 			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(2, dummyDepth, sampler);
-			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(3, pScene->GetLightMgr().GetShadowCascadeImage(), shadowSampler, 0);
+			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPair(3, shadowCascade, shadowSampler, 0);
 
 			m_pImpl->globalDescriptorsWithDepth[i].UpdateDescriptors(pDevice);
 		}
@@ -166,9 +174,9 @@ namespace usg {
 
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
-			m_pImpl->globalConstants[i].CleanUp(pDevice);
-			m_pImpl->globalDescriptors[i].CleanUp(pDevice);
-			m_pImpl->globalDescriptorsWithDepth[i].CleanUp(pDevice);
+			m_pImpl->globalConstants[i].Cleanup(pDevice);
+			m_pImpl->globalDescriptors[i].Cleanup(pDevice);
+			m_pImpl->globalDescriptorsWithDepth[i].Cleanup(pDevice);
 		}
 	}
 
@@ -183,8 +191,11 @@ namespace usg {
 		SetRenderMask(uRenderMask);
 		m_pImpl->pPostFXSys = pFXSys;
 
-		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask);
-		Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
+		m_pImpl->searchObject.Init(GetScene(), this, uRenderMask, 0);
+		if(Debug3D::GetRenderer())
+		{
+			Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
+		}
 	}
 
 
@@ -227,8 +238,7 @@ namespace usg {
 	{
 		for (int i = 0; i < RenderLayer::LAYER_COUNT; i++)
 		{
-			//m_drawLists[i].Clear();
-			m_pImpl->uVisibleNodes[i] = 0;
+			m_pImpl->pVisibleNodes[i].clear();
 		}
 
 		m_pImpl->lightingContext.ClearLists();
@@ -272,6 +282,7 @@ namespace usg {
 	void ViewContext::Update(GFXDevice* pDevice)
 	{
 		const Camera* pCamera = GetCamera();
+		SetRenderMask(pCamera->GetRenderMask());
 		const Scene* pScene = GetScene();
 		const uint32 uRenderMask = GetRenderMask();
 
@@ -336,10 +347,16 @@ namespace usg {
 			if (m_pImpl->pPostFXSys)
 			{
 				globalData->fAspect = m_pImpl->pPostFXSys->GetInitialRT()->GetWidth() / (float)m_pImpl->pPostFXSys->GetInitialRT()->GetHeight();
+				globalData->vViewportDim = Vector2f( (float)m_pImpl->pPostFXSys->GetFinalTargetWidth(), (float)m_pImpl->pPostFXSys->GetFinalTargetHeight() );
 			}
 			else
 			{
 				globalData->fAspect = 1.0f;
+			}
+			Frustum frustum = pCamera->GetFrustum();
+			for(uint32 uPlane = 0; uPlane < 6; uPlane++)
+			{
+				globalData->vFrustumPlanes[i] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
 			}
 			m_pImpl->globalConstants[i].Unlock();
 			m_pImpl->globalConstants[i].UpdateData(pDevice);
@@ -367,9 +384,8 @@ namespace usg {
 		fFOVBias = fFOVBias * fFOVBias * m_fLODBias;
 
 		uint32 uLodId;
-		for (List<RenderGroup>::Iterator it = GetVisibleGroups().Begin(); !it.IsEnd(); ++it)
+		for (RenderGroup* pGroup : GetVisibleGroups())
 		{
-			RenderGroup* pGroup = *it;
 			if (pGroup->GetLod(vCameraPos, uLodId, fFOVBias))
 			{
 				uint32 uNodeCount = pGroup->GetLODEntryCount(uLodId);
@@ -380,8 +396,7 @@ namespace usg {
 					{
 						//m_drawLists[pNode->GetLayer()].AddToEnd(pNode);
 						uint32 uLayer = pNode->GetLayer();
-						m_pImpl->pVisibleNodes[uLayer][m_pImpl->uVisibleNodes[uLayer]] = pNode;
-						m_pImpl->uVisibleNodes[uLayer]++;
+						m_pImpl->pVisibleNodes[uLayer].push_back(pNode);
 					}
 				}
 			}
@@ -396,8 +411,7 @@ namespace usg {
 				{
 					//m_drawLists[pEffect->GetLayer()].AddToEnd(pEffect);
 					uint32 uLayer = pEffect->GetLayer();
-					m_pImpl->pVisibleNodes[uLayer][m_pImpl->uVisibleNodes[uLayer]] = pEffect;
-					m_pImpl->uVisibleNodes[uLayer]++;
+					m_pImpl->pVisibleNodes[uLayer].push_back(pEffect);
 				}
 			}
 		}
@@ -406,13 +420,16 @@ namespace usg {
 		// FIXME: This needs to be more intelligent, an insertion sort when adding/ removing a node
 		for (int uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
+			if(m_pImpl->pVisibleNodes[uLayer].size() == 0)
+				continue;
+
 			if (uLayer == RenderLayer::LAYER_TRANSLUCENT)
 			{
-				qsort(m_pImpl->pVisibleNodes[uLayer], m_pImpl->uVisibleNodes[uLayer], sizeof(RenderNode*), CompareSortedNodes);
+				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareSortedNodes);
 			}
 			else
 			{
-				qsort(m_pImpl->pVisibleNodes[uLayer], m_pImpl->uVisibleNodes[uLayer], sizeof(RenderNode*), CompareNodes);
+				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareNodes);
 			}
 		}
 
@@ -453,19 +470,15 @@ namespace usg {
 		{
 			pContext->BeginGPUTag(g_szLayerNames[uLayer]);
 			//for(List<RenderNode>::Iterator it = m_drawLists[uLayer].Begin(); !it.IsEnd(); ++it)
-			for (uint32 i = 0; i < m_pImpl->uVisibleNodes[uLayer]; i++)
+			for (auto itr = m_pImpl->pVisibleNodes[uLayer].begin(); itr != m_pImpl->pVisibleNodes[uLayer].end(); ++itr)
 			{
-				RenderNode* node = m_pImpl->pVisibleNodes[uLayer][i];
+				RenderNode* node = *itr;
 				node->Draw(pContext, renderContext);
 			}
 
 			if (uLayer == RenderLayer::LAYER_OPAQUE_UNLIT)
 			{
 				renderContext.eRenderPass = RenderNode::RENDER_PASS_FORWARD;
-				if (m_pImpl->pPostFXSys)
-				{
-					m_pImpl->pPostFXSys->SetPostDepthDescriptors(pContext);
-				}
 				pContext->SetDescriptorSet(&m_pImpl->globalDescriptorsWithDepth[m_pImpl->eActiveViewType], 0);
 				renderContext.pGlobalDescriptors = &m_pImpl->globalDescriptorsWithDepth[m_pImpl->eActiveViewType];
 			}

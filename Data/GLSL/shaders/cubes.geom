@@ -15,17 +15,11 @@ BUFFER_LAYOUT(1, UBO_CUSTOM_0_ID) uniform Instance
 };
 
 
-in VertexData {
-    ATTRIB_LOC(0) vec3    vo_vScale;
-    ATTRIB_LOC(1) vec4    vo_vColor;
-    ATTRIB_LOC(2) float	vo_fYaw;
-} VertexIn[];
+ATTRIB_LOC(0) in vec3    vo_vScale[];
+ATTRIB_LOC(1) in vec4    vo_vColor[];
+ATTRIB_LOC(2) in float	vo_fYaw[];
 
-
-out GeometryData
-{
-    ATTRIB_LOC(0) vec4 	vo_vColor;
-} geometryData;
+ATTRIB_LOC(0) out vec4 	go_vColor;
 
 
 vec3 lightDir = vec3(-0.7, 0.4, 0.7);
@@ -50,10 +44,10 @@ void MakeVertex(vec3 orig, vec3 off, vec4 clr, vec3 norm, float yaw)
     if (vLighting>0.0)
     {
         vec4 mclr = clr * max(0, dot(wNorm,lightDir)) + (clr * amb);
-        geometryData.vo_vColor = vec4(mclr.rgb, vViewPos.z);
+        go_vColor = vec4(mclr.rgb, vViewPos.z);
     }else
     {
-        geometryData.vo_vColor = clr;
+        go_vColor = clr;
     }
     
     EmitVertex();
@@ -62,9 +56,9 @@ void MakeVertex(vec3 orig, vec3 off, vec4 clr, vec3 norm, float yaw)
 void MakeCube(int ii)
 {
     vec3 orig = gl_in[ii].gl_Position.xyz;
-    vec4 clr = VertexIn[ii].vo_vColor;
-    vec3 sc = VertexIn[ii].vo_vScale;
-    float yaw = VertexIn[ii].vo_fYaw;
+    vec4 clr = vo_vColor[ii];
+    vec3 sc = vo_vScale[ii];
+    float yaw = vo_fYaw[ii];
 
     // front
     MakeVertex(orig, vec3(sc.x,sc.y,sc.z), clr, vec3(0,0,1), yaw);

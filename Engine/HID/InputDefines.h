@@ -27,7 +27,7 @@ enum SampleRate
 };
 
 
-enum KeyboardToggles
+enum KeyboardToggle
 {
 	KEYBOARD_TOGGLE_SHIFT = 0,
 	KEYBOARD_TOGGLE_CTRL,
@@ -47,7 +47,10 @@ enum GamepadCaps
 	CAP_ACCELEROMETER = (1 << 1),
 	CAP_DUAL_HANDED = (1 << 2),
 	CAP_LEFT_STICK = (1<<3),
-	CAP_RIGHT_STICK = (1<<4)
+	CAP_RIGHT_STICK = (1<<4),
+	CAP_GAMEPAD = (1<<5),
+	CAP_POV = (1<<6),
+	CAP_VIRTUAL_PAD = (1<<7)
 };
 
 }

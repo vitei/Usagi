@@ -93,25 +93,35 @@ void CreateVertex(int ii, vec2 scale)
     // Add the transparency for the fog
     geometryData.vo_vColor.w *= (1.0-CalculateLinearFog(-vEyePos.xyz));
     pos = vec4( vEyePos.xyz, 1.0 ) * mProjMat;
-    pos /= pos.w;
 
-    float fHalfDepthFade = fDepthFadeDist*0.5f;
-    float fZDepth = max(vEyePos.z - fHalfDepthFade, min(vNearFar.x, vEyePos.z + fHalfDepthFade));//min(vNearFar.x + 0.2f, vEyePos.z));
+    if(bCustomMatrix)
+    {
+        pos.w *= gl_in[ii].gl_Position.w;
+        gl_Position = pos;
+        geometryData.vo_fEyeDepth = pos.z/pos.w;
+        geometryData.vo_fDepthFadeClamp = 1000000.0f;
+    }
+    else
+    {
+        pos /= pos.w;
 
-    // Back pos - 
-    geometryData.vo_fDepthFadeClamp = fDepthFadeDist - ((vEyePos.z - fHalfDepthFade) - fZDepth);
- 
-    vec4 vOffsetPos = vec4( vEyePos.xy, fZDepth, 1.0f) * mProjMat;
-    vOffsetPos /= vOffsetPos.w;
+        float fHalfDepthFade = fDepthFadeDist*0.5f;
+        float fZDepth = max(vEyePos.z - fHalfDepthFade, min(vNearFar.x, vEyePos.z + fHalfDepthFade));//min(vNearFar.x + 0.2f, vEyePos.z));
 
+        // Back pos - 
+        geometryData.vo_fDepthFadeClamp = fDepthFadeDist - ((vEyePos.z - fHalfDepthFade) - fZDepth);
+     
+        vec4 vOffsetPos = vec4( vEyePos.xy, fZDepth, 1.0f) * mProjMat;
+        vOffsetPos /= vOffsetPos.w;
 
-    pos.w *= gl_in[ii].gl_Position.w;
+        pos.w *= gl_in[ii].gl_Position.w;
 
-    geometryData.vo_fEyeDepth = fZDepth;
+        geometryData.vo_fEyeDepth = fZDepth;
+
+        gl_Position = vec4(pos.xy, vOffsetPos.z, 1.0f);
+    }
 
     geometryData.vo_vScreenTex = pos.xy / pos.ww;
-
-    gl_Position = vec4(pos.xy, vOffsetPos.z, 1.0f);
 
     EmitVertex();
 }

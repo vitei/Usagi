@@ -29,6 +29,10 @@ namespace usg {
 			flagsOut |= VK_SHADER_STAGE_GEOMETRY_BIT;
 		if(eFlags & SHADER_FLAG_PIXEL)
 			flagsOut |= VK_SHADER_STAGE_FRAGMENT_BIT;
+		if(eFlags & SHADER_FLAG_TCONTROL)
+			flagsOut |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+		if(eFlags & SHADER_FLAG_TEVAL)
+			flagsOut |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
 
 		return flagsOut;
 
@@ -36,12 +40,33 @@ namespace usg {
 
 	DescriptorSetLayout_ps::DescriptorSetLayout_ps()
 	{
-
+		m_layout = nullptr;
 	}
 
 	DescriptorSetLayout_ps::~DescriptorSetLayout_ps()
 	{
 
+	}
+
+
+	void DescriptorSetLayout_ps::UpdateFreeList(GFXDevice* pDevice, DescriptorSetLayout_ps::Allocator& allocator)
+	{
+		uint32 uFrame = (int)pDevice->GetFrameCount();
+		uint32 uClearFrame = uFrame > GFX_NUM_DYN_BUFF ? uFrame - GFX_NUM_DYN_BUFF : UINT_MAX;
+
+		while (!allocator.pendingDeleteFrames.empty())
+		{
+			if (allocator.pendingDeleteFrames.front() < uClearFrame || allocator.pendingDeleteFrames.front() > uFrame)
+			{
+				allocator.pendingDeleteFrames.pop();
+				ASSERT(allocator.uAllocations > 0);
+				allocator.uAllocations--;
+			}
+			else
+			{
+				return;
+			}
+		}
 	}
 
 	DescriptorAlloc_ps DescriptorSetLayout_ps::AllocDescriptorSet(GFXDevice* pDevice)
@@ -50,10 +75,17 @@ namespace usg {
 		uint32 uAllocId = USG_INVALID_ID;
 		for (uint32 i = 0; i < m_allocators.size(); i++)
 		{
+			if (m_allocators[i].pendingDeleteFrames.size() > 0)
+			{
+				UpdateFreeList(pDevice, m_allocators[i]);
+			}
 			if (m_allocators[i].uAllocations < g_allocGroupSize)
 			{
-				uAllocId = i;
-				break;
+				if(m_allocators[i].uDeviceAllocId == pDevice->GetAllocId())
+				{
+					uAllocId = i;
+					break;
+				}
 			}
 		}
 
@@ -69,7 +101,8 @@ namespace usg {
 
 			Allocator alloc;
 			alloc.uAllocations = 0;
-			eResult = vkCreateDescriptorPool(pDevice->GetPlatform().GetVKDevice(), &poolCreateInfo, pDevice->GetPlatform().GetAllocCallbacks(), &alloc.pool);
+			alloc.uDeviceAllocId = pDevice->GetAllocId();
+			eResult = vkCreateDescriptorPool(pDevice->GetPlatform().GetVKDevice(), &poolCreateInfo, nullptr, &alloc.pool);
 			ASSERT(eResult == VK_SUCCESS);
 			uAllocId = (uint32)m_allocators.size();
 			m_allocators.push_back(alloc);
@@ -101,8 +134,7 @@ namespace usg {
 			pDevice->GetPlatform().ReqDestroyDescriptorSet(pAlloc->pool, descAlloc.descSet);
 			descAlloc.uPoolIndex = USG_INVALID_ID;
 			descAlloc.descSet = nullptr;
-			ASSERT(pAlloc->uAllocations > 0);
-			pAlloc->uAllocations--;
+			pAlloc->pendingDeleteFrames.push( pDevice->GetFrameCount() );
 		}
 	}
 
@@ -148,10 +180,12 @@ namespace usg {
 	{
 		for (uint32 i = 0; i < m_allocators.size(); i++)
 		{
-			vkDestroyDescriptorPool(pDevice->GetPlatform().GetVKDevice(), m_allocators[i].pool, pDevice->GetPlatform().GetAllocCallbacks());
+			pDevice->GetPlatform().ReqDestroyDescriptorSetPool(m_allocators[i].pool);
+			m_allocators[i].pool = nullptr;
 		}
 
-		vkDestroyDescriptorSetLayout(pDevice->GetPlatform().GetVKDevice(), m_layout, pDevice->GetPlatform().GetAllocCallbacks());
+		pDevice->GetPlatform().ReqDestroyDescriptorSetLayout(m_layout);
+		m_layout = nullptr;
 		m_allocators.clear();
 	}
 

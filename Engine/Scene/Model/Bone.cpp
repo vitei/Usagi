@@ -34,9 +34,9 @@ void Bone::Init(GFXDevice* pDevice, Bone* pParent, const SkeletonResource::Bone*
 	m_boneConstants.Init(pDevice, SceneConsts::g_instanceCBDecl);
 }
 
-void Bone::CleanUp(GFXDevice* pDevice)
+void Bone::Cleanup(GFXDevice* pDevice)
 {
-	m_boneConstants.CleanUp(pDevice);
+	m_boneConstants.Cleanup(pDevice);
 }
 
 void Bone::CreateTransformNode(Scene* pScene, TransformNode* pRootNode)
@@ -71,14 +71,18 @@ void Bone::RemoveTransformNode(Scene* pScene)
 }
 
 
-Matrix4x4 Bone::GetBindMatrix(bool bIncludeParents) const
-{ 
-	if (m_pParent && bIncludeParents)
+Matrix4x4 Bone::GetDefaultMatrix(bool bIncludeParents) const
+{
+	usg::Matrix4x4 mat = Matrix4x4::Identity();
+	const usg::SkeletonResource::Bone* pBone = m_pResource;
+	while (pBone)
 	{
-		return m_pResource->mBindMatrix * m_pParent->GetBindMatrix(true);
+		mat = mat * pBone->mMatrix;
+		pBone = pBone->parentIndex != USG_INVALID_ID ? m_pParent->GetResource() : nullptr;
 	}
-	return m_pResource->mBindMatrix; 
+	return mat;
 }
+
 
 void Bone::AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod, bool bDynamic)
 {

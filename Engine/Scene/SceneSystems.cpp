@@ -36,6 +36,7 @@ namespace usg
 				outputs.sceneComp.GetRuntimeData().pScene->PreUpdate();
 			}
 		};
+
 		class UpdateScene : public System
 		{
 		public:
@@ -71,6 +72,13 @@ namespace usg
 				Scene* scene = outputs.sceneComp.GetRuntimeData().pScene;
 				scene->Update(pGPUData->pDevice);
 			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::ShiftWorldOrigin& event)
+			{
+				outputs.sceneComp.Modify().vOriginOffset += event.vShift;
+			}
+
+			
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetViewContextMask& event)
 			{
@@ -240,6 +248,7 @@ namespace usg
 		public:
 			struct Inputs
 			{
+				usg::Required<usg::CameraComponent> cam;
 				usg::Required<usg::MatrixComponent> mtx;
 			};
 
@@ -260,6 +269,7 @@ namespace usg
 				Matrix4x4 mtx;
 				mtx.LookAt(vPos, vPos + vForward, vUp);
 				cameraRtd.pCamera->SetUp(mtx, outputs.cam->fAspectRatio, outputs.cam->fFOV, outputs.cam->fNearPlaneDist, outputs.cam->fFarPlaneDist);
+				cameraRtd.pCamera->SetRenderMask(outputs.cam->uRenderMask);
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetAspectRatio& evt)
@@ -270,6 +280,26 @@ namespace usg
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetFieldOfView& evt)
 			{
 				outputs.cam.Modify().fFOV = evt.fFOV;
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::AddSubCameraRenderMask& evt)
+			{
+				if(evt.uCameraID == 0 || outputs.cam.GetRuntimeData().pCamera->GetID() == evt.uCameraID)
+				{
+					outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
+				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::EnableCamera& evt)
+			{
+				if (evt.uCameraID == outputs.cam->uCamId)
+				{
+					outputs.cam.Modify().bActive = true;
+				}
+				else
+				{
+					outputs.cam.Modify().bActive = false;
+				}
 			}
 
 		};

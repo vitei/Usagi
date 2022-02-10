@@ -25,7 +25,7 @@ WaveFile::~WaveFile()
 	}
 }
 
-void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName)
+void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef, const char* szName, Audio* pAudio)
 {
 	sint64 blockAlign = reader.GetChannelCount() * reader.GetDataSize() / 8;
 	sint64 totalNumBytes = reader.GetDataSize();
@@ -54,7 +54,7 @@ void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef,
 	}
 	m_uSize = (uint32)totalNumBytes;
 
-	InitInt(pDef, szName);
+	InitInt(pDef, szName, pAudio);
 }
 
 
@@ -63,13 +63,13 @@ void WaveFile::InitRaw(const SoundFileDef* pDef, const void* pData, size_t rawDa
 	WaveFileReader reader;
 	reader.Initialize(pData, rawDataSize);
 
-	ProcessWaveFile(reader, pDef, pDef->filename);
+	ProcessWaveFile(reader, pDef, pDef->filename, pAudio);
 
 }
 
 void WaveFile::Init(const SoundFileDef* pDef, Audio* pAudio, const char* pszLocalizedSubdir)
 {
-	U8String name = "Audio/";
+	string name = "Audio/";
 	if (pDef->localized && pszLocalizedSubdir != NULL)
 	{
 		name += pszLocalizedSubdir;
@@ -78,9 +78,9 @@ void WaveFile::Init(const SoundFileDef* pDef, Audio* pAudio, const char* pszLoca
 	name += pDef->filename;
 	name += ".wav";
 
-	WaveFileReader reader(name.CStr());
+	WaveFileReader reader(name.c_str());
 
-	ProcessWaveFile(reader, pDef, name.CStr());
+	ProcessWaveFile(reader, pDef, name.c_str(), pAudio);
 }
 
 void WaveFile::BindToSoundObject(class SoundObject* pSoundObject, bool bPositional)

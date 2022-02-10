@@ -31,9 +31,9 @@ DescriptorSet::~DescriptorSet()
 
 
 
-void DescriptorSet::CleanUp(GFXDevice* pDevice)
+void DescriptorSet::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice, m_layoutHndl.GetContents());
+	m_platform.Cleanup(pDevice, m_layoutHndl.GetContents());
 	if (m_pData)
 	{
 		vdelete[] m_pData;
@@ -55,7 +55,7 @@ void DescriptorSet::Init(GFXDevice* pDevice, const DescriptorSetLayoutHndl& layo
 			// Already fine
 			return;
 		}
-		CleanUp(pDevice);
+		Cleanup(pDevice);
 	}
 	m_pLayoutDesc = layout.GetContents();
 	m_layoutHndl = layout;

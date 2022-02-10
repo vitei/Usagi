@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Core/String/U8String.h"
 #include "Engine/Layout/Fonts/Text.h" 
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXContext.h"
@@ -39,6 +40,10 @@ namespace usg
 	{
 		m_bufferValid = false;
 		m_bOriginTL = false;
+		m_bDirty = false;
+		m_fWidthLimit = FLT_MAX;
+		m_alignFlags = 0;
+		m_uCharCount = 0;
 	}
 
 	TextDrawer::~TextDrawer()
@@ -71,12 +76,14 @@ namespace usg
 		
 		AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 		alphaDecl.bBlendEnable = true;
-		alphaDecl.SetColor0Only();
+		alphaDecl.SetColor0Only(); 
 		alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlend = BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_MAX;
 		alphaDecl.srcBlendAlpha = BLEND_FUNC_SRC_ALPHA;
 		alphaDecl.dstBlendAlpha = BLEND_FUNC_DST_ALPHA;
+
+		alphaDecl.uColorTargets = pDevice->GetColorTargetCount(renderPass);
 
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
 		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.DistanceField");
@@ -93,9 +100,9 @@ namespace usg
 		m_bufferValid = true;
 	}
 
-	void TextDrawer::CleanUp(GFXDevice* pDevice)
+	void TextDrawer::Cleanup(GFXDevice* pDevice)
 	{
-		m_charVerts.CleanUp(pDevice);
+		m_charVerts.Cleanup(pDevice);
 		m_bufferValid = false;
 	}
 
@@ -140,7 +147,7 @@ namespace usg
 
 			pContext->SetDescriptorSet(&desc, 1);
 			pContext->SetVertexBuffer(&m_charVerts);
-			pContext->DrawImmediate(m_uCharCount);
+			pContext->DrawImmediate((uint32)m_uCharCount);
 
 		}
 
@@ -200,11 +207,14 @@ namespace usg
 
 		m_context.Init(m_pParent);
 
-		U8String u8Text = m_pParent->GetText();
+		string u8Text = m_pParent->GetText();
 		const FontHndl& font = m_pParent->GetFont();
 		float fTmpWidth = 0.0f;
-		char* szTxtTmp = u8Text.Data();
+		char* szTxtTmp = (char*)u8Text.data();	// Valid on new eastl, need to cast now we've gone back to the old one
 		const float fWidthLimit = m_pParent->GetWidthLimit();
+
+		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
+		m_vMaxBounds.Assign(-FLT_MAX, -FLT_MAX);
 
 		if(fWidthLimit > 0.0f)
 		{
@@ -227,7 +237,7 @@ namespace usg
  				if (fTmpWidth > fWidthLimit)
 				{
 					szTxtTmp--;
-					while (szTxtTmp > u8Text.CStr())
+					while (szTxtTmp > u8Text.c_str())
 					{
 						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
 						U8Char thisChar(szTxtTmp, uByteCount);
@@ -245,8 +255,8 @@ namespace usg
 			}
 		}
 
-		const char* szText = u8Text.CStr();
-		uint32 uCharCount = u8Text.CharCount();
+		const char* szText = u8Text.c_str();
+		uint32 uCharCount = (uint32)u8Text.size();
 		const usg::Color& color = m_context.GetColor();
 		const usg::Color& colorUpper = m_pParent->GetGradationStartColor();
 		const usg::Color& colorLower = m_pParent->GetGradationEndColor();
@@ -387,6 +397,13 @@ namespace usg
 
 
 		ApplyAlignment(lines, uLineCount, vOrigin, fMaxWidth);
+
+		for(uint32 i=0; i< uFoundCharCount; i++)
+		{
+			pVert = &m_textBufferTmp[i];
+			m_vMinBounds.Assign(Math::Min(m_vMinBounds.x, pVert->vPosRange.x), Math::Min(m_vMinBounds.y, pVert->vPosRange.y));
+			m_vMaxBounds.Assign(Math::Max(m_vMaxBounds.x, pVert->vPosRange.z), Math::Max(m_vMaxBounds.y, pVert->vPosRange.w));
+		}
 	
 
 		if (uFoundCharCount > 0)
@@ -396,7 +413,7 @@ namespace usg
 		m_uCharCount = uFoundCharCount;
 	}
 
-	bool TextDrawer::Resize(uint32 uStrLen)
+	bool TextDrawer::Resize(memsize uStrLen)
 	{
 		if(uStrLen>MAX_CHARS)
 		{
@@ -410,7 +427,14 @@ namespace usg
 		}
 	}
 
-	uint32 TextDrawer::GetMaxStringLength() const
+	void TextDrawer::GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const
+	{
+		vMin = m_vMinBounds;
+		vMax = m_vMaxBounds;
+	}
+
+
+	memsize TextDrawer::GetMaxStringLength() const
 	{
 		return MAX_CHARS;
 	}

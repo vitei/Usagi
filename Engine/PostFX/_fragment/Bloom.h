@@ -22,12 +22,18 @@ public:
 	Bloom();
 	~Bloom();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
-	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+	virtual void PassDataSet(GFXDevice* pDevice) override;
+
+	virtual bool RequiresHDR() const override { return true; }
 
 private:
 	void GetOffsetsAndWeights(uint32 texSize, float fDeviation, float fMultiplier, float* pWeights, float* pOffsets);
@@ -56,7 +62,7 @@ private:
 
 	PipelineStateHndl	m_bloomEffect;
 	PipelineStateHndl	m_brightPassEffect;
-	PipelineStateHndl	m_finalPassEffect;
+	Pipeline			m_finalPassEffect;
 	PipelineStateHndl	m_gaussBlurPipeline;
 	PipelineStateHndl	m_downscalePipeline;
 

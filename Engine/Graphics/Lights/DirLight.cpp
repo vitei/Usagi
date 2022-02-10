@@ -30,7 +30,7 @@ void DirLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void DirLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void DirLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
 	if (m_pShadowCascade)
 	{
@@ -38,7 +38,7 @@ void DirLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
 		vdelete m_pShadowCascade;
 		m_pShadowCascade = nullptr;
 	}
-	Light::CleanUp(pDevice, pScene);
+	Light::Cleanup(pDevice, pScene);
 }
 
 
@@ -59,12 +59,14 @@ void DirLight::GPUUpdate(GFXDevice* pDevice)
 	}
 }
 
-void DirLight::ShadowRender(GFXContext* pContext)
+bool DirLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadowCascade)
 	{
 		m_pShadowCascade->CreateShadowTex(pContext);
+		return true;
 	}
+	return false;
 }
 
 void DirLight::SetDirection(const Vector4f &direction)
@@ -79,8 +81,15 @@ const Vector4f& DirLight::GetDirection() const
 	return m_direction;
 }
 
+void DirLight::SetNonShadowFlags(uint32 uFlags)
+{
+	if (m_pShadowCascade)
+	{
+		m_pShadowCascade->SetNonShadowFlags(uFlags);
+	}
+}
 
-bool DirLight::operator < (DirLight& rhs)
+bool DirLight::operator < (const DirLight& rhs) const
 {
 	// Put the non shadowed lights first
 	if (rhs.GetShadowEnabled() && !GetShadowEnabled())

@@ -22,15 +22,19 @@ public:
 	ASSAO();
 	~ASSAO();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys) override;
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc);
-	void SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc, ColorBuffer* pNorm);
+	void SetDepthSource();
+	void SetLinearDepthSource();
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	virtual void Update(Scene* pScene, float fElapsed) override;
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
+
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
 
 private:
 	void UpdateConstants(uint32 uWidth, uint32 uHeight, const usg::Camera* pCamera);
@@ -115,10 +119,10 @@ private:
 	PipelineStateHndl	m_genImportanceMap;
 	PipelineStateHndl	m_importanceMapA;
 	PipelineStateHndl	m_importanceMapB;
-	PipelineStateHndl	m_applyEffect;
-	PipelineStateHndl	m_nonSmartApplyEffect;
-	PipelineStateHndl	m_nonSmartHalfApplyEffect;
-
+	Pipeline			m_applyEffect;
+	Pipeline			m_nonSmartApplyEffect;
+	Pipeline			m_nonSmartHalfApplyEffect;
+		
 	DescriptorSet		m_applyDesc;
 	DescriptorSet		m_prepareDepthDesc;
 	DescriptorSet		m_mipDesc[MIP_COUNT-1];

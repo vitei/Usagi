@@ -80,13 +80,13 @@ Bloom::~Bloom()
 
 }
 
-void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
+void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 {
 	m_pSys = pSys;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 	m_pointSampler = pDevice->GetSampler(pointDecl);
 	m_linearSampler = pDevice->GetSampler(linearDecl);
@@ -110,9 +110,9 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 	uint32 uScrWidth = pSys->GetFinalTargetWidth();
 	uint32 uScrHeight = pSys->GetFinalTargetHeight();
 
-	m_scaledSceneTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
-	m_brightPassTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
-	m_bloomSourceTex.Init(pDevice, uScrWidth / 8, uScrHeight / 8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_scaledSceneTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_brightPassTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+	m_bloomSourceTex.Init(pDevice, uScrWidth / 8, uScrHeight / 8, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 
 	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex);
 	m_brightPassRT.Init(pDevice, &m_brightPassTex);
@@ -127,7 +127,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 
 	for (int i = 0; i < BLOOM_PASS_TEXTURES; i++)
 	{
-		m_bloomTex[i].Init(pDevice, uScrWidth / 8, uScrHeight / 8, CF_RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+		m_bloomTex[i].Init(pDevice, uScrWidth / 8, uScrHeight / 8, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_bloomRT[i].Init(pDevice, &m_bloomTex[i]);
 		m_bloomRT[i].InitRenderPass(pDevice, flags);
 	}
@@ -139,7 +139,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 	m_brightPassEffect	= pDevice->GetPipelineState(m_brightPassRT.GetRenderPass(), pipelineDecl);
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "PostProcess.BloomFinal");
 	pipelineDecl.layout.descriptorSets[1] = desc2Tex;
-	m_finalPassEffect = pDevice->GetPipelineState(m_pDestTarget->GetRenderPass(), pipelineDecl);
+	m_finalPassEffect.decl = pipelineDecl;
 
 	m_gaussBlurPipeline = pSys->GetPlatform().GetGaussBlurPipeline(pDevice, pRes, m_bloomSourceRT.GetRenderPass());
 	m_downscalePipeline = pSys->GetPlatform().GetDownscale4x4Pipeline(pDevice, pRes, m_scaledSceneRT.GetRenderPass());
@@ -193,39 +193,40 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderT
 }
 
 
-void Bloom::CleanUp(GFXDevice* pDevice)
+void Bloom::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < PASS_COUNT; i++)
 	{
-		m_descriptors[i].CleanUp(pDevice);
+		m_descriptors[i].Cleanup(pDevice);
 	}
 
 	for (uint32 i = 0; i < PASS_COUNT; i++)
 	{
-		m_constants[i].CleanUp(pDevice);
+		m_constants[i].Cleanup(pDevice);
 	}
 
 	for (auto& it : m_bloomTex)
 	{
-		it.CleanUp(pDevice);
+		it.Cleanup(pDevice);
 	}
 
 	for (auto& it : m_bloomRT)
 	{
-		it.CleanUp(pDevice);
+		it.Cleanup(pDevice);
 	}
 
-	m_scaledSceneTex.CleanUp(pDevice);
-	m_brightPassTex.CleanUp(pDevice);
-	m_bloomSourceTex.CleanUp(pDevice);
+	m_scaledSceneTex.Cleanup(pDevice);
+	m_brightPassTex.Cleanup(pDevice);
+	m_bloomSourceTex.Cleanup(pDevice);
 
-	m_scaledSceneRT.CleanUp(pDevice);
-	m_brightPassRT.CleanUp(pDevice);
-	m_bloomSourceRT.CleanUp(pDevice);
+	m_scaledSceneRT.Cleanup(pDevice);
+	m_brightPassRT.Cleanup(pDevice);
+	m_bloomSourceRT.Cleanup(pDevice);
 }
 
 void Bloom::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 {
+	m_finalPassEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_finalPassEffect.decl);
 	m_pDestTarget = pDst;
 }
 
@@ -253,14 +254,6 @@ void Bloom::Resize(GFXDevice* pDevice, uint32 uScrWidth, uint32 uSrcHeight)
 		// These passes don't change
 		m_descriptors[i].UpdateDescriptors(pDevice);
 	}
-}
-
-void Bloom::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-{
-	m_descriptors[PASS_4X4].SetImageSamplerPair(0, pTarget->GetColorTexture(0), m_linearSampler);
-	m_descriptors[PASS_FINAL].SetImageSamplerPair(0, pTarget->GetColorTexture(0), m_pointSampler);
-	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
-	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
 }
 
 
@@ -310,7 +303,7 @@ bool Bloom::Draw(GFXContext* pContext, RenderContext& renderContext)
 	// Perform the vertical bloom, transferring into a non HDR destination RT
 	pContext->SetRenderTarget(m_pDestTarget);
 	pContext->SetDescriptorSet(&m_descriptors[PASS_FINAL], 1);
-	pContext->SetPipelineState(m_finalPassEffect);
+	pContext->SetPipelineState(m_finalPassEffect.state);
 	m_pSys->DrawFullScreenQuad(pContext);
 
 	pContext->EndGPUTag();
@@ -390,6 +383,43 @@ void Bloom::GetOffsetsAndWeights(uint32 texSize, float fDeviation, float fMultip
         memcpy(&pWeights[i], &pWeights[(i-7)], sizeof(float));
         pOffsets[i] = -pOffsets[i - 7];
     }
+}
+
+
+
+bool Bloom::ReadsTexture(Input eInput) const
+{
+	switch (eInput)
+	{
+	case PostEffect::Input::Color:
+		return true;
+
+	default:
+		return false;
+
+	}
+}
+
+
+bool Bloom::LoadsTexture(Input eInput) const
+{
+	return PostEffect::LoadsTexture(eInput);
+}
+
+void Bloom::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if(eInput == PostEffect::Input::Color)
+	{
+		m_descriptors[PASS_4X4].SetImageSamplerPair(0, texture, m_linearSampler);
+		m_descriptors[PASS_FINAL].SetImageSamplerPair(0, texture, m_pointSampler);
+	}
+
+}
+
+void Bloom::PassDataSet(GFXDevice* pDevice)
+{
+	m_descriptors[PASS_4X4].UpdateDescriptors(pDevice);
+	m_descriptors[PASS_FINAL].UpdateDescriptors(pDevice);
 }
 
 }

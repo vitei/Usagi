@@ -127,6 +127,13 @@ namespace usg
 	};
 
 	template<>
+	struct RuntimeData<usg::Components::HeightFieldCollider> : public PhysXShapeRuntimeData
+	{
+		physx::PxHeightField* pHeightfield;
+		physx::PxHeightFieldSample* pSamples;
+	};
+
+	template<>
 	struct RuntimeData<usg::Components::PrismaticJoint>
 	{
 		physx::PxPrismaticJoint* pJoint;

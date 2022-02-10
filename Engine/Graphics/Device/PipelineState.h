@@ -22,6 +22,7 @@ namespace usg {
 		DepthStencilStateHndl		depth;
 		PrimitiveType				ePrimType;
 		SampleCount					eSampleCount;
+		uint32						uPatchControlPoints;
 
 		EffectHndl 					pEffect;
 		InputBindingHndl			pBinding;
@@ -35,7 +36,8 @@ namespace usg {
 		{
 			return (rhs.uCmpValue == uCmpValue 
 				&& renderPass == rhs.renderPass
-				&& pEffect == rhs.pEffect);
+				&& pEffect == rhs.pEffect
+				&& uPatchControlPoints == rhs.uPatchControlPoints);
 		}
 	};
 
@@ -47,6 +49,7 @@ namespace usg {
 
 		// Set up the defaults
 		void Init(GFXDevice* pDevice, const PipelineInitData& decl, uint32 uID);
+		void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 
 		const AlphaStateHndl& GetAlphaHndl() const { return m_alphaState; }
 		const DepthStencilStateHndl& GetDepthStencilHndl() const { return m_depthStencilState; }

@@ -10,7 +10,6 @@
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Maths/AABB.h"
 #include "Engine/Core/stl/vector.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace vmdc {
 struct Header;
@@ -106,7 +105,7 @@ private:
 	const SubmeshData* GetSubmeshData(const uint32 uMeshNameHash) const;
 	void UpdateSubmeshAABBs();
 
-	U8String			m_name;
+	usg::string			m_name;
 	uint32				m_uTriangles;
 	TriangleIndices*	m_pTriangles;
 	float				m_fRadius;

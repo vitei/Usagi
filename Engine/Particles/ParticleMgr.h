@@ -21,7 +21,7 @@ public:
     ~ParticleMgr();
 
 	void Init(GFXDevice* pDevice, Scene* pScene, ParticleSet* pSet);
-	void CleanUp(GFXDevice* pDevice, Scene* pScene);
+	void Cleanup(GFXDevice* pDevice, Scene* pScene);
 	bool Update(float fElapsed);
 	void UpdateBuffers(usg::GFXDevice* pDevice);
 	void CreateInstances(GFXDevice* pDevice, uint32 uInstances=8);
@@ -49,18 +49,18 @@ protected:
 		~EmitterInstances();
 
 		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdatePreloadCount(ParticleMgr& mgr, uint32 uCount);
 		void ClearPreloadCount();
-		const U8String& GetName() { return m_name; }
+		const usg::string& GetName() { return m_name; }
 		ScriptEmitter* GetInstance(GFXDevice* pDevice, ParticleMgr& mgr);
 		void FreeInstance(ScriptEmitter* pInstance);
 		void PreloadInstances(GFXDevice* pDevice, ParticleMgr& mgr);
 	private:
 		ParticleEmitterResHndl		m_resHndl;
-		U8String					m_name;
-		List<ScriptEmitter>			m_activeEmitters;
-		List<ScriptEmitter>			m_freeEmitters;
+		usg::string					m_name;
+		list<ScriptEmitter*>		m_activeEmitters;
+		list<ScriptEmitter*>		m_freeEmitters;
 		uint32						m_uPreloadCount;
 	};
 
@@ -72,11 +72,11 @@ protected:
 
 		void Init(GFXDevice* pDevice, ParticleMgr& mgr, const char* szName);
 		void UpdatePreloadCount(ParticleMgr& mgr);
-		const U8String& GetName() const { return m_name;  }
+		const usg::string& GetName() const { return m_name;  }
 		void AddEmitters(GFXDevice* pDevice, ParticleMgr& mgr, ParticleEffect& effect);
 		ParticleEffectResHndl& GetResHndl() { return m_resHndl; }
 	private:
-		U8String				m_name;
+		usg::string				m_name;
 		uint32					m_uPreloadCount;
 		ParticleEffectResHndl	m_resHndl;
 		EmitterInstances*		m_pInstanceGroups[particles::EffectGroup::emitters_max_count];
@@ -95,8 +95,8 @@ protected:
 	FastPool<EffectResources>	m_effectResources;
 	FastPool<EffectData>		m_effects;
 
-	List<RibbonTrail>			m_activeRibbons;
-	List<RibbonTrail>			m_freeRibbons;
+	list<RibbonTrail*>			m_activeRibbons;
+	list<RibbonTrail*>			m_freeRibbons;
 };
 
 }

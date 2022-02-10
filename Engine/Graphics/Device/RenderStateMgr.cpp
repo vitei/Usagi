@@ -93,6 +93,35 @@ public:
 
 	}
 
+	void ClearAllResources()
+	{
+		for (uint32 i = 0; i < m_uPairs; i++)
+		{
+			vdelete m_pairings[i].state;
+		}
+		m_uPairs = 0;
+
+	}
+
+	void ClearAllResources(usg::GFXDevice* pDevice)
+	{
+		for (uint32 i = 0; i < m_uPairs; i++)
+		{
+			m_pairings[i].state->Cleanup(pDevice);
+		}
+		ClearDynamicResources();
+	}
+
+	void ClearDynamicResources(usg::GFXDevice* pDevice)
+	{
+		for (uint32 i = m_uStaticPairs; i < m_uPairs; i++)
+		{
+			m_pairings[i].state->Cleanup(pDevice);
+		}
+		ClearDynamicResources();
+
+	}
+
 private:
 	HandleType			m_default;
 	Pairing				m_pairings[COUNT];
@@ -150,6 +179,18 @@ void RenderStateMgr::InitDefaults(GFXDevice* pDevice)
 	m_pImpl->depthStates.SetDefault(GetDepthStencilState(&defaultDepthStencil, pDevice));
 }
 
+void RenderStateMgr::Cleanup(GFXDevice* pDevice)
+{
+	m_pImpl->alphaStates.ClearAllResources();
+	m_pImpl->depthStates.ClearAllResources();
+	m_pImpl->rasterizerStates.ClearAllResources();
+	m_pImpl->samplers.ClearAllResources(pDevice);
+	m_pImpl->pipelines.ClearAllResources(pDevice);
+	m_pImpl->renderPasses.ClearAllResources(pDevice);
+	m_pImpl->descriptorLayouts.ClearAllResources(pDevice);
+	m_pImpl->pipelineLayouts.ClearAllResources();
+}
+
 AlphaStateHndl RenderStateMgr::GetAlphaState(const AlphaStateDecl* pDecl, GFXDevice* pDevice)
 {
 	return m_pImpl->alphaStates.GetState(pDecl, pDevice);
@@ -195,13 +236,10 @@ PipelineStateHndl RenderStateMgr::GetPipelineState(const RenderPassHndl& renderP
 	PipelineLayoutHndl layout = GetPipelineLayout(&decl.layout, pDevice);
 
 #ifdef DEBUG_BUILD
-//	ASSERT(decl.layout.uDescriptorSetCount > 0);
 	for (uint32 i = 0; i < decl.layout.uDescriptorSetCount; i++)
 	{
 		ASSERT(decl.layout.descriptorSets[i].IsValid());
 	}
-	// TODO: Re-add me when the render pass stuff is ready to go
-	//ASSERT(decl.renderPass.IsValid());
 #endif
 
 	// Replace the pointers with our own internal ones so we don't end up creating additional PSOs
@@ -354,6 +392,23 @@ void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipelin
 }
 
 
+uint32 RenderStateMgr::GetColorTargetCount(const RenderPassHndl pass)
+{
+	uint32 uCount = 0;
+	const RenderPassInitData* pInit = m_pImpl->renderPasses.GetDeclaration(pass);
+	if (pInit)
+	{
+		for (uint32 i = 0; i < pInit->GetDecl().uAttachments; i++)
+		{
+			if( pInit->GetDecl().pAttachments[i].eAttachType == RenderPassDecl::ATTACH_COLOR )
+			{
+				uCount++;
+			}
+		}
+	}
+	return uCount;
+}
+ 
 void RenderStateMgr::FinishedStaticLoad()
 {
 	m_pImpl->alphaStates.FinishedStaticLoad();
@@ -369,15 +424,15 @@ void RenderStateMgr::FinishedStaticLoad()
 }
 
 
-void RenderStateMgr::ClearDynamicResources()
+void RenderStateMgr::ClearDynamicResources(usg::GFXDevice* pDevice)
 {
 	m_pImpl->alphaStates.ClearDynamicResources();
 	m_pImpl->depthStates.ClearDynamicResources();
 	m_pImpl->rasterizerStates.ClearDynamicResources();
-	m_pImpl->samplers.ClearDynamicResources();
-	m_pImpl->pipelines.ClearDynamicResources();
-	m_pImpl->renderPasses.ClearDynamicResources();
-	m_pImpl->descriptorLayouts.ClearDynamicResources();
+	m_pImpl->samplers.ClearDynamicResources(pDevice);
+	m_pImpl->pipelines.ClearDynamicResources(pDevice);
+	m_pImpl->renderPasses.ClearDynamicResources(pDevice);
+	m_pImpl->descriptorLayouts.ClearDynamicResources(pDevice);
 	m_pImpl->pipelineLayouts.ClearDynamicResources();
 
 	for (uint32 i = m_pImpl->uDynamicBindingStart; i < m_pImpl->uInputBindings; i++)

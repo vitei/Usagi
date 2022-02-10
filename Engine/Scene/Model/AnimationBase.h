@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 //	Description: Base class for handling the state of an animation resource
 *****************************************************************************/
 #ifndef _USG_SCENE_MODEL_ANIMATION_BASE_H_
@@ -9,7 +9,7 @@
 #include "Engine/Resource/ResourceDecl.h"
 
 namespace usg {
-
+	 
 class Model;
 class ModelResource;
 
@@ -32,6 +32,7 @@ public:
 
 
 protected:
+	void UpdateInt(float fElapsed, float fFrameRate, float fFrameCount, bool bLoop);
 
 	float								m_fWeighting;
 	float								m_fPlaybackSpeed;

@@ -24,8 +24,8 @@ namespace usg
 		PBU8String& operator=(const PBU8String& o) = delete;
 		~PBU8String();
 
-		U8String& Get();
-		const U8String& Get() const;
+		usg::string& Get();
+		const usg::string& Get() const;
 
 		void PreLoad();
 		void PostLoad();

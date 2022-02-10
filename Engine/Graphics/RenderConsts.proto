@@ -29,6 +29,7 @@ enum TextureDimensions
 	TD_TEXTURE2D = 1;
 	TD_TEXTURE3D = 2;
 	TD_TEXTURECUBE = 3;
+	TD_TEXTURE2DARRAY = 4;
 	
 	TD_FORCE_SIZE = 0x7FFFFFFF; // Force enum size to sizeof(int32_t)
 };
@@ -61,10 +62,57 @@ enum RenderLayer
 	LAYER_COUNT = 11;
 }; 
 
+enum SamplerWrap
+{
+	option (nanopb_enumopt).long_names = false;
+
+	SAMP_WRAP_REPEAT = 0;
+	SAMP_WRAP_MIRROR = 1;
+	SAMP_WRAP_CLAMP = 2;
+	SAMP_WRAP_COUNT = 3;
+
+	SAMP_WRAP_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum Anisotropy
+{
+	option (nanopb_enumopt).long_names = false;
+
+	ANISO_LEVEL_1 = 0;
+	ANISO_LEVEL_2 = 1;
+	ANISO_LEVEL_4 = 2;
+	ANISO_LEVEL_8 = 3;
+	ANISO_LEVEL_16 = 4;
+};
+
+enum SamplerFilter
+{
+	option (nanopb_enumopt).long_names = false;
+
+	SAMP_FILTER_POINT = 0;
+	SAMP_FILTER_LINEAR = 1;
+	SAMP_FILTER_COUNT = 2;
+
+	SAMP_FILTER_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+enum MipFilter
+{
+	option (nanopb_enumopt).long_names = false;
+
+	MIP_FILTER_POINT = 0;
+	MIP_FILTER_LINEAR = 1;
+	MIP_FILTER_COUNT = 2;
+
+	MIP_FILTER_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+
 enum RenderMask {
 	option (nanopb_enumopt).long_names = false;
 	option (usagipb_enumopt).is_bitmask = true;
 
+	// 20 bits for engine
 	RENDER_MASK_NONE			= 0x00000000;
 	RENDER_MASK_WORLD			= 0x00000001;
 	RENDER_MASK_LIGHTING		= 0x00000002;
@@ -74,7 +122,12 @@ enum RenderMask {
 	RENDER_MASK_INSIDE			= 0x00000020;
 	RENDER_MASK_OUTSIDE			= 0x00000040;
 	RENDER_MASK_SHADOW_CAST		= 0x00000080;
-	RENDER_MASK_CUSTOM			= 0x00000100;
+	RENDER_MASK_FORCE_SHADOW	= 0x00000F00;
+	// 12 bits for game
+	RENDER_MASK_CUSTOM_0		= 0x00100000;
+	RENDER_MASK_CUSTOM_1		= 0x00200000;
+	RENDER_MASK_CUSTOM_2		= 0x00400000;
+	RENDER_MASK_CUSTOM_3		= 0x00800000;
 
 	// Useful predefines for cameras, everything except shadows
 	RENDER_MASK_CAMERA_INSIDE	= 0x0FFFFF3F;
@@ -89,6 +142,8 @@ enum ShaderTypeFlags {
 	SHADER_FLAG_VERTEX		= 0x00000001;
 	SHADER_FLAG_GEOMETRY 	= 0x00000002;
 	SHADER_FLAG_PIXEL 		= 0x00000004;
+	SHADER_FLAG_TCONTROL	= 0x00000008;
+	SHADER_FLAG_TEVAL		= 0x00000010;
 	SHADER_FLAG_VS_GS 		= 0x00000003;
 	SHADER_FLAG_VS_PS 		= 0x00000005;
 	SHADER_FLAG_ALL 		= 0x00000007;
@@ -107,4 +162,13 @@ enum ShaderConstantType {
 	SHADER_CONSTANT_LIGHTING = 7;
 	SHADER_CONSTANT_SHADOW = 8;
 	SHADER_CONSTANT_COUNT = 9;
+}
+
+enum VSyncMode {
+	option (nanopb_enumopt).long_names = false;
+
+	VSYNC_MODE_IMMEDIATE = 0;		// Tearing
+	VSYNC_MODE_QUEUE = 1;			// Low power usage, high latency
+	VSYNC_MODE_QUEUE_RELAXED = 2;	// Same as queue but don't block if missed a flip
+	VSYNC_MODE_MAILBOX = 3;			// Low latency, can result in discarded frames if running fast
 }

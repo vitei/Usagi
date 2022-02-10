@@ -21,13 +21,12 @@ MessageDispatch::~MessageDispatch()
 	shutdown.dispatch = this;
 	FireMessage(shutdown);
 
-	StringPointerHash< List<MessageCallback>* >::Iterator it = m_pbMessageCallbacks.Begin();
+	StringPointerHash< list<MessageCallback*>* >::Iterator it = m_pbMessageCallbacks.Begin();
 	for(; !it.IsEnd(); ++it)
 	{
-		List<MessageCallback>* callbackList = **it;
+		list<MessageCallback*>* callbackList = **it;
 		if(callbackList != NULL)
 		{
-			callbackList->~List<MessageCallback>();
 			m_memPool.Deallocate(callbackList);
 		}
 	}
@@ -40,12 +39,12 @@ MessageDispatch::~MessageDispatch()
 void MessageDispatch::FireMessage(uint32 type, ProtocolBufferReader& pb)
 {
 	string_crc key(type);
-	List<MessageCallback>* registeredCBs = m_pbMessageCallbacks.Get(key);
+	list<MessageCallback*>* registeredCBs = m_pbMessageCallbacks.Get(key);
 	if(registeredCBs != NULL)
 	{
-		for(List<MessageCallback>::Iterator it = registeredCBs->Begin(); !it.IsEnd(); ++it)
+		for(auto it : *registeredCBs)
 		{
-			MessageCallback& cb = **it;
+			MessageCallback& cb = *it;
 			cb(pb);
 		}
 	}

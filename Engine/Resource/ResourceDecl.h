@@ -69,6 +69,7 @@ typedef ResourceHandle<const Texture, ResourceType::TEXTURE> TextureHndl;
 typedef ResourceHandle<const Font, ResourceType::FONT> FontHndl;
 typedef ResourceHandle<const CustomEffectResource, ResourceType::CUSTOM_EFFECT> CustomEffectResHndl;
 typedef ResourceHandle<const SkeletalAnimationResource, ResourceType::SKEL_ANIM> SkeletalAnimationResHndl;
+typedef ResourceHandle<const MaterialAnimationResource, ResourceType::MAT_ANIM> MaterialAnimationResHndl;
 typedef ResourceHandle<const ParticleEffectResource, ResourceType::PARTICLE_EFFECT> ParticleEffectResHndl;
 typedef ResourceHandle<const ParticleEmitterResource, ResourceType::PARTICLE_EMITTER> ParticleEmitterResHndl;
 typedef ResourceHandle<const PakFile, ResourceType::PAK_FILE> ResourcePakHndl;

@@ -18,12 +18,24 @@ struct DisplaySettings
 {
 	static const int s_nameLength = 64;
 	// Always zero on most platforms, PC uses the co-ordinates to represent different monitors
-	uint32		uX;	
-	uint32		uY;
-	uint32		uWidth;
-	uint32		uHeight;
+	GFXBounds	screenDim;
+
+	usg::vector<GFXBounds>	supportedResolutions;
+
 	WindHndl	hardwareHndl;
-	bool		bWindowed;
+	char		name[s_nameLength];
+};
+
+struct DisplayMode
+{
+	static const int s_nameLength = 64;
+	// Always zero on most platforms, PC uses the co-ordinates to represent different monitors
+	GFXBounds	screenDim;
+
+	WindHndl	parentHndl;
+	IconHndl	iconHndl = nullptr;
+	bool		bWindowed = false;
+	bool		bMenu = false;
 	char		name[s_nameLength];
 };
 
@@ -34,7 +46,7 @@ public:
 	~Display() {}
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl, struct DeviceResource& res);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetDisplayDimensions(xOut, yOut, bOrient); }
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient) { return m_platform.GetActualDimensions(xOut, yOut, bOrient); }
 	void Present();
@@ -43,6 +55,9 @@ public:
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight) { m_platform.Resize(pDevice, uWidth, uHeight); }
     void Resize(usg::GFXDevice* pDevice) { m_platform.Resize(pDevice); }
 	void Minimized(usg::GFXDevice* pDevice) { m_platform.Minimized(pDevice); }
+
+	void SetVSyncMode(VSyncMode eVsync) { m_platform.SetVSyncMode(eVsync); }
+	bool HasHDRSupport() const { return m_platform.HasHDRSupport(); }
 
 	Display_ps& GetPlatform() { return m_platform; }
 	WindHndl GetHandle() const { return m_window; }

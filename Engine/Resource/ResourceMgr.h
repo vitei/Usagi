@@ -10,7 +10,6 @@
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg{
 
@@ -36,6 +35,7 @@ public:
 	ModelResHndl				GetModelAsInstance(GFXDevice* pDevice, const char* szModelName);
 	FontHndl					GetFont( GFXDevice* pDevice, const char* szFontName );
 	SkeletalAnimationResHndl	GetSkeletalAnimation( const char* szFileName );
+	MaterialAnimationResHndl	GetMaterialAnimation(const char* szFileName);
 	ParticleEffectResHndl		GetParticleEffect(const char* szFileName);
 	ParticleEmitterResHndl		GetParticleEmitter(GFXDevice* pDevice, const char* szFileName);
 	CollisionModelResHndl		GetCollisionModel(const char* szFileName);
@@ -49,7 +49,7 @@ public:
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);
 
 	void SetModelDir(const char* szModelDir) { m_modelDir = szModelDir; }
-	const U8String& GetModelDir() const { return m_modelDir; }
+	const usg::string& GetModelDir() const { return m_modelDir; }
 	void SetTextureDir(const char* szTextureDir) { m_textureDir = szTextureDir; }
 	void SetEffectDir(const char* szEffectDir) { m_effectDir = szEffectDir; }
 	void SetFontDir( const char* szFontDir ) { m_fontDir = szFontDir; }
@@ -84,10 +84,10 @@ private:
 	struct PIMPL;
 	PIMPL*						m_pImpl;
 
-	U8String					m_modelDir;
-	U8String					m_textureDir;
-	U8String					m_effectDir;
-	U8String					m_fontDir;
+	usg::string					m_modelDir;
+	usg::string					m_textureDir;
+	usg::string					m_effectDir;
+	usg::string					m_fontDir;
 	bool						m_bReloadIfDirty;
 	bool						m_bUseLODs;
 

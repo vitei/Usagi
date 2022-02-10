@@ -603,6 +603,57 @@ namespace usg
 		c.GetRuntimeData().pConvexMesh = nullptr;
 	}
 
+	// Heightfield Collider
+	template <>
+	void OnLoaded<HeightFieldCollider>(Component<HeightFieldCollider>& c, ComponentLoadHandles& handles, bool bWasPreviouslyCalled)
+	{
+		if (bWasPreviouslyCalled)
+		{
+			return;
+		}
+
+		// FIXME: Once working this should be cached like the CollisionMesh as we may well re-use terrain sections
+		auto& rtd = c.GetRuntimeData();
+		rtd.pSamples = (physx::PxHeightFieldSample*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_PHYSICS, sizeof(physx::PxHeightFieldSample) * (c->uColumns * c->uRows));
+
+		physx::PxHeightFieldDesc hfDesc;
+		hfDesc.format = physx::PxHeightFieldFormat::eS16_TM;
+		hfDesc.nbColumns = c->uColumns;
+		hfDesc.nbRows = c->uRows;
+		hfDesc.samples.data = rtd.pSamples;
+		hfDesc.samples.stride = sizeof(physx::PxHeightFieldSample);
+
+		auto& sceneRuntimeData = *handles.pPhysicsScene;
+
+		rtd.pHeightfield = sceneRuntimeData.pCooking->createHeightField(hfDesc, sceneRuntimeData.pPhysics->getPhysicsInsertionCallback());
+
+		Required<RigidBody, FromSelf> rb;
+		OnShapeLoaded(c, physx::PxHeightFieldGeometry(rtd.pHeightfield, (physx::PxMeshGeometryFlags)0, c->fHeightScale, c->fColumnScale, c->fRowScale), handles);
+	}
+
+	template<>
+	void OnActivate<HeightFieldCollider>(Component<HeightFieldCollider>& c)
+	{
+		auto& rtd = c.GetRuntimeData();
+		rtd.pHeightfield = nullptr;
+		rtd.pSamples = nullptr;
+		OnActivateShape(c);
+	}
+
+	template<>
+	void OnDeactivate<HeightFieldCollider>(Component<HeightFieldCollider>& c, ComponentLoadHandles& handles)
+	{
+		auto& rtd = c.GetRuntimeData();
+		OnDeactivateShape(c, handles);
+		if (rtd.pHeightfield)
+		{
+			rtd.pHeightfield->release();
+			mem::Free(rtd.pSamples);
+			rtd.pSamples = nullptr;
+			rtd.pHeightfield = nullptr;
+		}
+	}
+
 	// Joint Shared functions
 
 	template<typename JointType, typename PhysXJointType>
@@ -851,10 +902,11 @@ namespace usg
 
 		Required<RigidBody, FromSelfOrParents> rigidBody;
 		handles.GetComponent(c.GetEntity(), rigidBody);
-		if (rigidBody->bDynamic && !c->bConvex)
+		if (rigidBody->bDynamic && !c->bConvex && !rigidBody->bKinematic)
 		{
 			// Triangle Mesh collider can only be attached to static actors (this is a limitation of PhysX). Split the mesh into convex submeshes if you REALLY need such a complex
 			// collision model in a dynamic entity.
+			// The one exception to this rule is kinematic actors
 			ASSERT(false);
 			c.Modify().bConvex = true;
 		}

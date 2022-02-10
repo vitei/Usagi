@@ -1,6 +1,5 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "gli/gli.hpp"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -24,14 +23,18 @@ const char* g_szExtensions[] =
 {
 	".vert",
 	".frag",
-	".geom"
+	".geom",
+	".tesc",
+	".tese"
 };
 
 const char* g_szUsageStrings[] =
 {
 	"vertex_shader",
 	"fragment_shader",
-	"geometry_shader"
+	"geometry_shader",
+	"tessellation_control_shader",
+	"tessellation_evaluation_shader"
 };
 
 
@@ -212,6 +215,14 @@ int main(int argc, char *argv[])
 				if ((*it)["geom"])
 				{
 					def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
+				}
+				if ((*it)["tesc"])
+				{
+					def.prog[(uint32)usg::ShaderType::TC] = (*it)["tesc"].as<std::string>();
+				}
+				if ((*it)["tese"])
+				{
+					def.prog[(uint32)usg::ShaderType::TE] = (*it)["tese"].as<std::string>();
 				}
 				def.sets.push_back(set);
 			}
@@ -413,7 +424,7 @@ int main(int argc, char *argv[])
 	depFile.clear();
 	depFile << effectDependencies.str();
 
-	pCompiler->CleanUp();
+	pCompiler->Cleanup();
 	delete pCompiler;
 
 	return 0;

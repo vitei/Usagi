@@ -26,7 +26,7 @@ public:
 	virtual ~PointLight(void);
 
 	void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 
 	const DescriptorSet* GetDescriptorSet(bool bWithShadow) const;
 
@@ -45,7 +45,7 @@ public:
 	bool IsInVolume(const Vector4f& vPos) const;
 
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();

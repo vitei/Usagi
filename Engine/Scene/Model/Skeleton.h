@@ -25,7 +25,7 @@ public:
 	~Skeleton();
 
 	bool Load( GFXDevice* pDevice, Scene* pScene, Model* pModel, bool bAutoTransform);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetInUse(Scene* pScene, Model* pModel, bool bInUse);
 	// TODO: Loading and processing of animations
 	//void SetAnimation()
@@ -36,8 +36,8 @@ public:
 
 	Bone* GetBone(uint32 uIndex);
 	const Bone* GetBone(uint32 uIndex) const;
-	const Bone* GetBone(const U8String& name) const;
-	Bone* GetBone(const U8String& name);
+	const Bone* GetBone(const usg::string& name) const;
+	Bone* GetBone(const usg::string& name);
 
 private:
 	PRIVATIZE_COPY(Skeleton)

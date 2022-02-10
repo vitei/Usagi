@@ -17,6 +17,7 @@ ColorBuffer_ps::ColorBuffer_ps()
 	: m_pExtraViews(nullptr)
 {
 	m_texHndl = &m_texture;
+	m_texture.SetReady(true);
 	m_uMips = 1;
 }
 
@@ -82,14 +83,14 @@ void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 
 }
 
-void ColorBuffer_ps::CleanUp(GFXDevice* pDevice)
+void ColorBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
 	if (m_pExtraViews)
 	{
 		vdelete[] m_pExtraViews;
 		m_pExtraViews = nullptr;
 	}
-	m_texture.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
 }
 
 

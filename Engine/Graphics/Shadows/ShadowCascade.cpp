@@ -69,7 +69,7 @@ ShadowCascade::~ShadowCascade()
 
 void ShadowCascade::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_readConstants.CleanUp(pDevice);
+	m_readConstants.Cleanup(pDevice);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
 		if (m_pSceneContext[i])
@@ -140,7 +140,7 @@ void ShadowCascade::Update(const Camera& sceneCam)
         readData->mCascadeMtxVInv[i] = mInvView * m_cascadeCamera[i].GetViewMatrix() * m_cascadeCamera[i].GetProjection() * texBias;
     }
 
-	float fBiasMul = 0.125f;
+	float fBiasMul = 10.125f;
 
     readData->vBias.Assign(-0.000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
 	readData->vSampleRange.Assign(3.0f, 2.5f, 2.0f, 0.5f);
@@ -160,6 +160,17 @@ void ShadowCascade::Update(const Camera& sceneCam)
 	m_readConstantsData = *readData;
     m_readConstants.Unlock();
 	
+}
+
+void ShadowCascade::SetNonShadowFlags(uint32 uFlags)
+{
+    for (uint32 i = 0; i < MAX_CASCADES; i++)
+    {
+        if (m_pSceneContext[i])
+        {
+            m_pSceneContext[i]->SetNonShadowFlags(uFlags);
+        }
+    }
 }
 
 void ShadowCascade::GPUUpdate(GFXDevice* pDevice)

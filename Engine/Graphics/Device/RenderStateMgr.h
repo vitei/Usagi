@@ -19,6 +19,7 @@ class RenderStateMgr
 	friend class GFXDevice;
 public:
 	void					InitDefaults(GFXDevice* pDevice);
+	void					Cleanup(GFXDevice* pDevice);
 
 	// If NULL will return the default states
 	PipelineStateHndl		GetPipelineState(const RenderPassHndl& hndl, const PipelineStateDecl& decl, GFXDevice* pDevice);
@@ -28,9 +29,11 @@ public:
 	bool					UsesBlendColor(AlphaStateHndl hndl);
 
 	void GetPipelineStateDeclaration(const PipelineStateHndl pipeline, PipelineStateDecl& out, RenderPassHndl& passOut);
+	uint32 GetColorTargetCount(const RenderPassHndl pass);
 
 	void FinishedStaticLoad();
-	void ClearDynamicResources();
+	void ClearDynamicResources(usg::GFXDevice* pDevice);
+
 
 private:
 	AlphaStateHndl			GetAlphaState(const AlphaStateDecl* pDecl, GFXDevice* pDevice);

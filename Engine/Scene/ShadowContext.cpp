@@ -49,8 +49,8 @@ void ShadowContext::InitDeviceData(GFXDevice* pDevice)
 
 void ShadowContext::Cleanup(GFXDevice* pDevice)
 {
-	m_globalConstants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_globalConstants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 }
 
 void ShadowContext::Init(const Camera* pCamera)
@@ -58,13 +58,18 @@ void ShadowContext::Init(const Camera* pCamera)
 	SetRenderMask(RenderMask::RENDER_MASK_SHADOW_CAST);
 
 	m_pCamera = pCamera;
-	m_searchObject.Init(GetScene(), this, RenderMask::RENDER_MASK_SHADOW_CAST);
+	m_searchObject.Init(GetScene(), this, RenderMask::RENDER_MASK_ALL, RenderMask::RENDER_MASK_SHADOW_CAST);
 	m_searchObject.SetFrustum(&m_pCamera->GetFrustum());
+}
+
+void ShadowContext::SetNonShadowFlags(uint32 uFlags)
+{
+	m_searchObject.SetMask(uFlags);
 }
 
 void ShadowContext::ClearLists()
 {
-	m_drawList.Clear();
+	m_drawList.clear();
 	Inherited::ClearLists();
 }
 
@@ -82,7 +87,7 @@ void ShadowContext::Update(GFXDevice* pDevice)
 	m_globalConstants.UpdateData(pDevice);
 	m_descriptorSet.UpdateDescriptors(pDevice);
 
-	for (List<RenderGroup>::Iterator it = GetVisibleGroups().Begin(); !it.IsEnd(); ++it)
+	for (list<RenderGroup*>::iterator it = GetVisibleGroups().begin(); it != GetVisibleGroups().end(); ++it)
 	{
 		RenderGroup* pGroup = *it;
 		uint32 uNodeCount = pGroup->GetLODEntryCount(0);
@@ -91,7 +96,7 @@ void ShadowContext::Update(GFXDevice* pDevice)
 			RenderNode* pNode = pGroup->GetLODRenderNode(0, i);
 			if( (pNode->GetRenderMask() & RenderMask::RENDER_MASK_SHADOW_CAST)!=0 )
 			{
-				m_drawList.AddToEnd(pNode);
+				m_drawList.push_back(pNode);
 			}
 		}
 	}
@@ -105,7 +110,7 @@ void ShadowContext::DrawScene(GFXContext* pContext)
 	RenderNode::RenderContext renderContext;
 	renderContext.eRenderPass = RenderNode::RENDER_PASS_DEPTH;
 
-	for(List<RenderNode>::Iterator it = m_drawList.Begin(); !it.IsEnd(); ++it)
+	for(list<RenderNode*>::iterator it = m_drawList.begin(); it != m_drawList.end(); ++it)
 	{
 		RenderNode* node = (*it);
 		node->Draw(pContext, renderContext);

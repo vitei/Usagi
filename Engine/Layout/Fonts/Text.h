@@ -22,12 +22,12 @@ namespace usg
 		~Text();
 
 		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		bool Draw(GFXContext* context, bool b3D = false);
 		void SetFromKeyString(GFXDevice* pDevice, usg::ResourceMgr* pMgr, uint32 uCRC);
 		bool SetText(const char* str);
-		bool SetText(const U8String& u8Str);
+		bool SetText(const string& u8Str);
 		bool SetFont(FontHndl pFont);
 		bool SetPosition(float x, float y, float z = 0.0f);
 		bool SetColor(const Color& color);
@@ -42,7 +42,7 @@ namespace usg
 		bool SetScale(Vector2f scale);
 		bool SetTabWidth(int tabWidth);
 
-		const U8String& GetText() const;
+		const string& GetText() const;
 		uint32 GetTextLength() const;
 		void GetPosition(unsigned int* outX, unsigned int* outY) const;
 		void GetPosition(float* outX, float* outY) const;
@@ -60,6 +60,7 @@ namespace usg
 		int GetTabWidth() const;
 		const FontHndl& GetFont() const { return m_pFont; }
 		uint32 GetDirtyFlags() const { return m_dirtyFlags; }
+		void GetBounds( usg::Vector2f &vMin, usg::Vector2f& vMax ) const { m_drawer.GetBounds(vMin, vMax); }
 
 		void PrintDebugInfo() const;
 
@@ -82,7 +83,7 @@ namespace usg
 	private:
 		TextDrawer	m_drawer;
 
-		U8String    m_cachedString;
+		string		m_cachedString;
 		FontHndl	m_pFont;
 
 		float		m_positionX;

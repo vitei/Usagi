@@ -38,7 +38,7 @@ public:
 private:
 	SceneSearchSphere		m_searchObject;
 	const Sphere*			m_pSphere;
-	List<RenderNode>		m_drawList;
+	list<RenderNode*>		m_drawList;
 	DescriptorSet			m_descriptorSet;
 	ConstantSet				m_globalConstants;
 };

@@ -21,9 +21,13 @@ public:
 	~LinearDepth();
 
 	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pResult);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	const TextureHndl& GetTexture() { return m_depthRT.GetColorTexture(); }
+
+	virtual bool ReadsTexture(Input eInput) const override { return true; }
+	virtual bool LoadsTexture(Input eInput) const override { return false;}
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override {}
 
 private:
 	PostFXSys*		m_pSys;

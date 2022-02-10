@@ -4,7 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Debug/Debug.h"
 #include "Engine/Core/String/String_Util.h"
-#include "Engine/Core/String/U8String.h"
+#include "Engine/Core/stl/string.h"
 #include "Engine/Core/File/File.h"
 #include "CircularBuffer.h"
 
@@ -110,15 +110,15 @@ void FatalInFinal(const char *szFile, int line, const char* func, const char *fo
 void DumpDebugLog(const char* szBuildId)
 {
 	// FIXME: Name this
-	const char* szVersionText = szBuildId ? szBuildId : "unversioned";
-	usg::U8String dir = "_crash";
-	usg::U8String log;
-	log.ParseString("_crash/log.%s.txt", szVersionText);
+	usg::string szVersionText = szBuildId ? szBuildId : "unversioned";
+	usg::string dir = "_crash";
+	usg::string log;
+	log = "_crash/log." + szVersionText + ".txt";
 
 		
-	File::CreateFileDirectory(dir.CStr(), usg::FILE_TYPE_DEBUG_DATA);
+	File::CreateFileDirectory(dir.c_str(), usg::FILE_TYPE_DEBUG_DATA);
 
-	File outputFile(log.CStr(), usg::FILE_ACCESS_WRITE, usg::FILE_TYPE_DEBUG_DATA);
+	File outputFile(log.c_str(), usg::FILE_ACCESS_WRITE, usg::FILE_TYPE_DEBUG_DATA);
 
 	if (outputFile.IsOpen())
 	{

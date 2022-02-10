@@ -26,10 +26,10 @@ void ParticlePreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pR
 	m_effect.Init(pDevice, &GetScene(), mEffectMat);
 }
 
-void ParticlePreviewWindow::CleanUp(usg::GFXDevice* pDevice)
+void ParticlePreviewWindow::Cleanup(usg::GFXDevice* pDevice)
 {
-	Inherited::CleanUp(pDevice);
-	m_effect.CleanUp(pDevice);
+	Inherited::Cleanup(pDevice);
+	m_effect.Cleanup(pDevice);
 }
 
 bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
@@ -56,9 +56,4 @@ bool ParticlePreviewWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 	m_bReload = false;
 
 	return true;
-}
-
-void ParticlePreviewWindow::Draw(usg::GFXContext* pImmContext)
-{
-	Inherited::Draw(pImmContext);
 }

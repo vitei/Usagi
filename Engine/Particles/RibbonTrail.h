@@ -23,9 +23,10 @@ public:
     void Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const particles::RibbonData* pDecl, bool bDynamicResize = false);	// Dynamic resize should be used in the editor only);
 	
 	virtual void Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffect);
-	virtual void CleanUp(usg::GFXDevice* pDevice) override;
+	virtual void Cleanup(usg::GFXDevice* pDevice) override;
 	virtual bool Update(float fElapsed);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) override;
+	virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl& renderPass, const SceneRenderPasses& passes) override;
 	virtual bool ActiveParticles();
 	virtual void FreeFromPool();
 	virtual void UpdateBuffers(GFXDevice* pDevice);

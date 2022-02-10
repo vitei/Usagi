@@ -4,7 +4,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/File/File.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/GFX.h"
 #include "Engine/Graphics/MeshUtility.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -55,8 +54,8 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, co
 	uint8* heightData = NULL;
 	ScratchObj<uint8> scratchHeight(heightData, uWidth*uHeight, FILE_READ_ALIGN);
 
-	U8String fileAndPath = U8String("Terrain/") + szFileName;
-	File heightFile(fileAndPath.CStr(), FILE_ACCESS_READ);
+	string fileAndPath = string("Terrain/") + szFileName;
+	File heightFile(fileAndPath.c_str(), FILE_ACCESS_READ);
 	
 	if(!heightFile.IsOpen())
 	{
@@ -151,7 +150,7 @@ bool HeightMap::Load(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, co
 	m_mesh.GetDescriptorSet().Init(pDevice, matDescriptors);
 
     
-	SamplerDecl sampDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl sampDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 	for(int i=0; i<TERRAIN_TEX_COUNT; i++)
 	{
 		m_mesh.GetDescriptorSet().SetImageSamplerPair(i, pResMgr->GetTexture(pDevice, g_texNames[i]), pDevice->GetSampler(sampDecl) );

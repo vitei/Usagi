@@ -54,6 +54,7 @@ enum PrimitiveType
 	PT_TRIANGLES_ADJ,
 	PT_LINES_ADJ,
 	PT_LINE_STRIP,
+	PT_PATCH_LIST,
 	PT_COUNT
 	//PT_TRIANGLESTRIPS,
 };
@@ -74,8 +75,11 @@ enum class ShaderType : uint32
 	VS,
 	PS,
 	GS,
+	TC,
+	TE,
 	COUNT
 };
+
 
 
 enum TextureUsageFlags
@@ -94,61 +98,39 @@ enum TextureUsageFlags
 	TU_FLAGS_DEPTH_BUFFER = TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_FAST_MEM | TU_FLAG_USE_HI_Z,
 };
 
-enum ColorFormat
+enum class ColorFormat
 {
-	CF_RGBA_8888 = 0,
-	CF_RGBA_5551,
-	CF_RGB_565,
-	CF_RGBA_4444,
-	CF_RGB_888,
-	CF_SHADOW,
-	CF_RGBA_16F,
-	CF_RGB_HDR,
-	CF_R_32F,
-	CF_R_32,
-	CF_RG_32F,
-	CF_R_16F,
-	CF_RG_16F,
-	CF_R_8,
-	CF_RG_8,
-	CF_NORMAL,
-	CF_SRGBA,
-	CF_UNDEFINED,
-	CF_COUNT,
-	CF_INVALID
+	RGBA_8888 = 0,
+	RGBA_5551,
+	RGB_565,
+	RGBA_4444,
+	RGB_888,
+	SHADOW,
+	RGBA_16F,
+	RGB_HDR,
+	R_32F,
+	R_32,
+	RG_32F,
+	R_16F,
+	RG_16F,
+	R_8,
+	RG_8,
+	NORMAL,
+	SRGBA,
+	UNDEFINED,
+	COUNT,
+	INVALID = COUNT
 };
 
-enum DepthFormat
+enum class DepthFormat
 {
-	DF_DEPTH_24,
-	DF_DEPTH_24_S8,
-	DF_DEPTH_16,
-	DF_DEPTH_32F,
-	DF_DEPTH_32,
-	DF_COUNT,
-	DF_INVALID
-};
-
-enum SamplerFilter
-{
-	SF_POINT = 0,
-	SF_LINEAR,
-	SF_COUNT
-};
-
-enum MipFilter
-{
-	MF_POINT = 0,
-	MF_LINEAR,
-	MF_COUNT
-};
-
-enum SamplerClamp
-{
-	SC_WRAP = 0,
-	SC_MIRROR,
-	SC_CLAMP,
-	SC_COUNT
+	DEPTH_24,
+	DEPTH_24_S8,
+	DEPTH_16,
+	DEPTH_32F,
+	DEPTH_32,
+	COUNT,
+	INVALID = COUNT
 };
 
 

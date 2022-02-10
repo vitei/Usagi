@@ -13,6 +13,9 @@
 #include "Engine/Graphics/Textures/ColorBuffer.h"
 #include "Engine/Graphics/Textures/RenderTarget.h"
 #include "Engine/Graphics/Device/GFXHandles.h"
+#include "Engine/PostFX/PostEffect.h"
+#include "Engine/Core/stl/vector.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Scene/RenderNode.h"
 #include "Engine/Scene/SceneRenderPasses.h"
 
@@ -34,13 +37,16 @@ public:
 	~PostFXSys_ps();
 
 	void Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDevice, uint32 uEffectFlags, uint32 uWidth, uint32 uHeight);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void Update(Scene* pScene, float fElapsed);
 	void UpdateGPU(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
+
+	void AddCustomEffect(PostEffect* pEffect);
+	void RemoveCustomEffect(PostEffect* pEffect);
 
 	const TextureHndl& GetLinearDepthTex() const;
 
@@ -51,7 +57,6 @@ public:
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
 	uint32 GetFinalTargetHeight(bool bOrient) { return m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
 	float GetFinalTargetAspect() { return  (float)m_colorBuffer[BUFFER_LDR_0].GetWidth() / (float)m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
-	void DepthWriteEnded(GFXContext* pContext, uint32 uActiveEffects);
 
 	// For setting up pipelines, will need the render pass in future
 	PipelineStateHndl GetDownscale4x4Pipeline(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& renderPass) const;
@@ -62,8 +67,8 @@ public:
 
 	void UpdateRTSize(GFXDevice* pDevice, Display* pDisplay);
 
-	RenderTarget* GetInitialRT() { return m_pInitialTarget; }
-	RenderTarget* GetFinalRT() { return m_pFinalTarget;  }
+	RenderTarget* GetInitialRT();
+	RenderTarget* GetFinalRT();
 
 protected:
 	PRIVATIZE_COPY(PostFXSys_ps)
@@ -72,12 +77,22 @@ protected:
 	void SetupGaussBlurBuffer(GFXDevice* pDevice, ConstantSet& cb, uint32 uWidth, uint32 uHeight, float fMultiplier) const;
 	void ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
-	PostEffect* GetFinalEffect();
-	RenderTarget* GetLDRTargetForEffect(PostEffect* pEffect, RenderTarget* pPrevTarget);
+	void EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags);
+	bool NeedsStoring(memsize pass, PostEffect::Input eInput);
+	bool NeedsShaderRead(sint32 pass, PostEffect::Input eInput);
+	void GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx);
+	int GetFlagForTarget(PostEffect::Input eTarget);
+	void ClearDynamicTargets(GFXDevice* pDevice);
+	bool CanReuseTarget(memsize pass);
+	bool IsLastTarget(memsize pass);
+	TextureHndl GetTexture(PostEffect::Input eInput, bool bHDR, memsize hdrIdx, memsize ldrIdx);
 
-	enum COLOR_BUFFERS
+	PostEffect* GetFinalEffect();
+
+	enum COLOR_BUFFER
 	{
-		BUFFER_HDR = 0,
+		BUFFER_HDR_0= 0,
+		BUFFER_HDR_1,
 		BUFFER_NORMAL,
 		BUFFER_DIFFUSE,
 		BUFFER_LIN_DEPTH,
@@ -88,25 +103,11 @@ protected:
 		BUFFER_COUNT
 	};
 
-	enum RENDER_TARGETS
-	{
-		TARGET_GBUFFER,
-		TARGET_HDR_NO_LOAD,
-		TARGET_HDR,
-		TARGET_HDR_LIN_DEPTH,
-		TARGET_LDR_LIN_DEPTH,
-		TARGET_LDR_0,
-		TARGET_LDR_1,
-		TARGET_LDR_0_POST_DEPTH,	// After depth, maintain load color without acting on it
-		TARGET_LDR_0_TRANSFER_SRC,	// Final target to be transfered to the screen
-		TARGET_LDR_1_TRANSFER_SRC,  // Final target to be transfered to the screen
-		TARGET_COUNT
-	};
-
 	enum
 	{
 		MAX_DEFAULT_EFFECTS = 20
 	};
+
 
 	PostFXSys*				m_pParent;
 	class SkyFog*			m_pSkyFog;
@@ -116,7 +117,10 @@ protected:
 	class FilmGrain*		m_pFilmGrain;
 	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
+	class SetSceneTarget*	m_pSetNoDepthTarget;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
+	vector<PostEffect*>		m_activeEffects;
+	list<PostEffect*>		m_customEffects;
 	PostEffect*				m_pFinalEffect;
 	uint32					m_uDefaultEffects;
 	float					m_fPixelScale;
@@ -124,18 +128,12 @@ protected:
 	SceneRenderPasses		m_renderPasses;
 	DepthStencilBuffer		m_depthStencil;
 	ColorBuffer				m_colorBuffer[BUFFER_COUNT];
-	RenderTarget			m_screenRT[TARGET_COUNT];
-	RenderTarget*			m_pFinalTarget;
-	RenderTarget*			m_pInitialTarget;
-
-//	PipelineStateHndl		m_downscale4x4Effect;
-//	PipelineStateHndl		m_downscale2x2Effect;
-//	PipelineStateHndl		m_gaussBlur5x5Effect;
+	vector<RenderTarget*>	m_dynamicTargets;
 
 	SamplerHndl				m_linearSampler;
 	SamplerHndl				m_pointSampler;
 
-	uint32					m_uLDRCount;
+	bool					m_bHDROut;
 };
 
 

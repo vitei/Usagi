@@ -57,7 +57,7 @@ Model::RenderMesh::~RenderMesh()
 void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
 {
 	m_pMeshResource = pMesh;
-	const char* pszName = pModel->GetResource()->GetName().CStr();
+	const char* pszName = pModel->GetResource()->GetName().c_str();
 	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
 
@@ -112,8 +112,8 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
 
 	// FIXME: Get the index from the custom fx declaration
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 
 	switch (pMesh->primitive.eSkinningMode)
 	{
@@ -142,16 +142,16 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 
-void Model::RenderMesh::CleanUp(GFXDevice* pDevice)
+void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
 	{
 		if (m_pOverridesConstants[i])
 		{
-			m_pOverridesConstants[i]->CleanUp(pDevice);
+			m_pOverridesConstants[i]->Cleanup(pDevice);
 		}
 	}
-	Inherited::CleanUp(pDevice);
+	Inherited::Cleanup(pDevice);
 }
 
 void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)

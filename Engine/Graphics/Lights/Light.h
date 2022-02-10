@@ -7,7 +7,6 @@
 
 #include "Engine/Graphics/Color.h"
 #include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg {
 
@@ -32,13 +31,13 @@ public:
 
 	virtual void	Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow);
 
-	virtual void	CleanUp(GFXDevice* pDevice, Scene* pScene) {};
+	virtual void	Cleanup(GFXDevice* pDevice, Scene* pScene) {};
 
 	void	SetDiffuse(const Color &diffuse);
 	void	SetAmbient(const Color& ambient);
 	void	SetSpecularColor(const Color& specular);
 	void	SetName(const char* szName) { m_name = szName; }
-	const U8String& GetName() { return m_name; }
+	const usg::string& GetName() { return m_name; }
 
 	const Color&	GetSpecular() const { return m_specular; }
 	const Color&	GetDiffuse() const	{ return m_colour; }
@@ -53,7 +52,7 @@ public:
 	LightType GetType() const { return m_eType; }
 
 	virtual void GPUUpdate(GFXDevice* pDevice) {}
-	virtual void ShadowRender(GFXContext* pContext) {}
+	virtual bool ShadowRender(GFXContext* pContext) { return false; }
 
 	virtual void SetPosition(const Vector4f &position) { ASSERT(false); }
 	virtual void SetDirection(const Vector4f &direction) { ASSERT(false); }
@@ -65,7 +64,7 @@ public:
 	uint32 GetVisibleFrame() { return m_uVisibleFrame; }
 protected:
 
-	U8String		m_name;
+	usg::string		m_name;
 	uint32			m_uVisibleFrame;
 	// RGB, specular power
 	Color			m_colour;

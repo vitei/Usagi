@@ -6,67 +6,6 @@ import 'Engine/Maths/Maths.proto';
 
 package usg.text;
 
-message Scalable
-{
-	required float ScaleH = 1;
-	required float ScaleV = 2;
-	required float CharSpace = 3; 		// Kerning
-	required float LineSpace = 4;		// Line spacing
-	required float TabWidth = 5;		// Tab stops
-	optional uint32 AllocateStringLength = 6; // # of chars to allocate
-	optional float FixedWidth = 7;		// Use _hasFixedWidth for EnableFixedWidth
-};
-
-message StyleDefinition
-{
-	required string FontName = 1 [(nanopb).max_size = 32];
-	required uint32 RegionWidth = 2;	// Width of display range
-	required uint32 LineNum = 3;		// Displayable line count
-	optional Scalable ScalableInfo = 4;
-};
-
-message StyleClass
-{
-	required string StyleName = 1 [(nanopb).max_size = 32];
-	required StyleDefinition Default = 2;
-};
-
-message Language
-{
-	required string LanguageName = 1 [(nanopb).max_size = 32];
-};
-
-message LanguageCell
-{
-	required string LanguageName = 1 [(nanopb).max_size = 32];
-	required string Text = 2 [(nanopb).max_size = 128];
-};
-
-message TextRow
-{
-	required string Label = 1 [(nanopb).max_size = 32];
-	required StyleClass Style = 2;
-	repeated LanguageCell Cells = 3 [(nanopb).max_count = 8];
-};
-
-message MessageStudioText
-{
-	required string Format = 1 [(nanopb).max_size = 32];
-	repeated TextRow Rows = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
-};
-
-message MessageStudioProject
-{
-	required string Format = 1 [(nanopb).max_size = 32];
-	repeated Language Languages = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
-	repeated MessageStudioText ContentItems = 3 [(nanopb).max_count = 8];
-};
-
-message FontWidthDefinition
-{
-	required float Left = 1;
-	required float Right = 2;
-};
 
 message CharDefinition
 {
@@ -75,20 +14,6 @@ message CharDefinition
 	required Vector2f UV_BottomRight = 3;
 };
 
-message Rect
-{
-	required sint32 X = 1;
-	required sint32 Y = 2;
-	required sint32 Width = 3;
-	required sint32 Height = 4;
-};
-
-message CharDefinition_Intermediate
-{
-	required string CharData = 1 [(nanopb).max_size = 2];
-	required Rect Source = 2;
-	required Rect Dest = 3;
-};
 
 message FontDefinition
 {
@@ -99,8 +24,3 @@ message FontDefinition
 	repeated CharDefinition Chars = 7 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
 };
 
-//message FontDefinition_Test
-//{
-//	required string FontName = 1 [(nanopb).max_size = 32];
-//	repeated uint32 Chars = 2 [(nanopb).decoder = "PBChunkedArray<usg::ALLOC_OBJECT, 32>"];
-//};

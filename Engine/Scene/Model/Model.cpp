@@ -160,26 +160,28 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const
 }
 
 
-void Model::CleanUp(GFXDevice* pDevice)
+void Model::Cleanup(GFXDevice* pDevice)
 {
-	m_skinnedBones.CleanUp(pDevice);
-	m_staticBones.CleanUp(pDevice);
+	AddToSceneInt(pDevice);
+	SetInUse(false);
+	m_skinnedBones.Cleanup(pDevice);
+	m_staticBones.Cleanup(pDevice);
 	if (m_pSkeleton)
 	{
-		m_pSkeleton->CleanUp(pDevice);
+		m_pSkeleton->Cleanup(pDevice);
 	}
 
 	for (uint32 i = 0; i < m_uMeshCount; i++)
 	{
-		m_meshArray[i]->CleanUp(pDevice);
-		m_depthMeshArray[i]->CleanUp(pDevice);
+		m_meshArray[i]->Cleanup(pDevice);
+		m_depthMeshArray[i]->Cleanup(pDevice);
 	}
 
 	if (m_pOverrideMaterials)
 	{
 		for (uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++)
 		{
-			m_pOverrideMaterials[uMesh].customFX.CleanUp(pDevice);
+			m_pOverrideMaterials[uMesh].customFX.Cleanup(pDevice);
 		}
 	}
 
@@ -211,8 +213,15 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
 		DescriptorSet& descSet = m_meshArray[i]->GetDescriptorSet();
 		// FIXME: Use the correct indicies
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+		for (uint32 i = 0; i < ModelResource::Mesh::MAX_UV_STAGES; i++)
+		{
+			if (pMesh->pTextures[i])
+			{
+				descSet.SetImageSamplerPairAtBinding(i, pMesh->pTextures[i], pMesh->samplers[i]);
+			}
+		}
 		descSet.UpdateDescriptors(pDevice);
 		for (uint32 uTex = 0; uTex < ModelResource::Mesh::MAX_UV_STAGES; uTex++)
 		{
@@ -232,7 +241,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		if (m_depthMeshArray)
 		{
 			DescriptorSet& depthDesc = m_depthMeshArray[i]->GetDescriptorSet();
-			depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+			depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 			m_depthMeshArray[i]->ResetOverrides();
 			m_depthMeshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
 		}
@@ -300,7 +309,7 @@ void Model::InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 i)
 	if (m_bDynamic)
 	{
 		// Copy the override constant sets (only doing material, not lighting atm)
-		m_pOverrideMaterials[i].customFX.Init(pDevice, &pMesh->effectRuntime);
+		m_pOverrideMaterials[i].customFX.Init(pDevice, &pMesh->renderSets[0].effectRuntime);
 		m_pOverrideMaterials[i].customFX.GPUUpdate(pDevice);
 
 		// Add the UV sets to the model for updating of the texture matrices
@@ -465,7 +474,7 @@ void Model::ForceRemoveFromScene()
 
 Model::RenderMesh* Model::GetRenderMesh(const char* szMaterialName)
 {
-	U8String matNameU8(szMaterialName);
+	usg::string matNameU8(szMaterialName);
 	//ASSERT(m_bDynamic);
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
@@ -499,13 +508,13 @@ Model::RenderMesh* Model::GetRenderMesh(uint32 uMeshId)
 void Model::SetTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType)
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -547,7 +556,7 @@ uint32 Model::GetMeshIndex(const char* szName, IdentifierType eNameType) const
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if(cmpName == szName)
 		{
 			return uMesh;
@@ -560,13 +569,13 @@ uint32 Model::GetMeshIndex(const char* szName, IdentifierType eNameType) const
 void Model::AddTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType)
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string& cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -583,12 +592,12 @@ void Model::AddTextureTranslate(const char* szName, uint32 uTexId, float fX, flo
 void Model::SetTextureScale( const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType /*= IDENTIFIER_MATERIAL */ )
 {
 	ASSERT( m_bDynamic );
-	U8String matNameU8( szName );
+	usg::string matNameU8( szName );
 
 	for( uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++ ) {
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh( uMesh );
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if( matNameU8.Length() == 0 || cmpName == matNameU8 ) {
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if( matNameU8.length() == 0 || cmpName == matNameU8 ) {
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper( uTexId );
 			if( pMapper ) {
 				Vector2f scale( fX, fY );
@@ -601,13 +610,13 @@ void Model::SetTextureScale( const char* szName, uint32 uTexId, float fX, float 
 void Model::AddTextureRotation( const char* szName, uint32 uTexId, float fRot, IdentifierType eNameType )
 {
 	ASSERT(m_bDynamic);
-	U8String matNameU8(szName);
+	usg::string matNameU8(szName);
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(uMesh);
-		const U8String &cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
-		if(matNameU8.Length() == 0 || cmpName == matNameU8)
+		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
+		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
 			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
 			if(pMapper)
@@ -625,7 +634,7 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 	ASSERT(m_bDynamic);
 	ASSERT(pOverrideTex.get()!=NULL);
 
-	U8String texNameU8(szTextureName);
+	string texNameU8(szTextureName);
 
 	bool bFound = false;
 	UNUSED_VAR(bFound);
@@ -639,8 +648,8 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 			if(pOrigTex.get() != NULL)
 			{
 				SamplerHndl origSamp = pSrcMesh->samplers[uTex];
-				U8String cmpName = pOrigTex->GetName();
-				cmpName.RemovePath();
+				string cmpName = pOrigTex->GetName().c_str();
+				str::RemovePath(cmpName);
 				if ((cmpName == texNameU8))
 				{
 					pMaterial->SetImageSamplerPairAtBinding(uTex, pOverrideTex, origSamp);
@@ -857,7 +866,7 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 	}
 }
 
-const U8String& Model::GetName() const
+const usg::string& Model::GetName() const
 {
 	return m_pResource->GetName();
 }

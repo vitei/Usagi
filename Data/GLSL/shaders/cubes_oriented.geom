@@ -5,16 +5,11 @@ layout(points) in;
 layout (triangle_strip, max_vertices=24) out;
 
 
-in VertexData {
-    INT_LOC(0) mat3x4  vo_matrix;
-    INT_LOC(3) vec4    vo_vColor;
-} VertexIn[];
+ATTRIB_LOC(0) in mat3x4  vo_matrix[];
+ATTRIB_LOC(3) in vec4    vo_vColor[];
 
 
-out GeometryData
-{
-    INT_LOC(0) vec4 	vo_vColor;
-} geometryData;
+ATTRIB_LOC(0) out vec4 go_vColor;
 
 
 vec3 lightDir = vec3(-0.7, 0.4, 0.7);
@@ -23,20 +18,20 @@ float degToRad = 0.0174532925;
 
 void MakeVertex(vec3 orig, vec4 clr, vec3 norm)
 {
-	vec4 vWorldPos = vec4( vec4(orig, 1.0) * VertexIn[0].vo_matrix, 1.0);
+	vec4 vWorldPos = vec4( vec4(orig, 1.0) * vo_matrix[0], 1.0);
     vec4 vViewPos = vWorldPos * mViewMat;
 
 	vec4 vProjPos = vec4(vViewPos.xyz, 1.0) * mProjMat;
 	gl_Position	= vProjPos;
     
-    geometryData.vo_vColor = clr;
+    go_vColor = clr;
     
     EmitVertex();
 }
 
 void MakeCube(int ii)
 {
-    vec4 clr = VertexIn[ii].vo_vColor;
+    vec4 clr = vo_vColor[ii];
 
     // front
     MakeVertex(vec3(1.0,1.0,1.0), clr, vec3(0,0,1));

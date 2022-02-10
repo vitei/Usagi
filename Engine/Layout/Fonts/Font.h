@@ -4,8 +4,6 @@
 #ifndef _USG_GRAPHICS_FONTS_FONT_H_
 #define _USG_GRAPHICS_FONTS_FONT_H_
 
-
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Layout/Fonts/TextStructs.pb.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
@@ -19,7 +17,7 @@ namespace usg
 		virtual ~Font();
 
 		bool Load(GFXDevice* pDevice, ResourceMgr* pResMgr, const char* const filename);
-		virtual void CleanUp(GFXDevice* pDevice) override;
+		virtual void Cleanup(GFXDevice* pDevice) override;
 
 
 
@@ -28,9 +26,10 @@ namespace usg
 
 		bool	GetCharacterCoords(uint32 uChar, float& fLeft, float& fRight, float& fTop, float& fBottom) const;
 		float	GetCharacterWidth(uint32 uChar, float height) const;
+		bool	HasCharacter(uint32 uChar) const;
 		
 		const DescriptorSet& GetDescriptor() const { return m_descriptor; }
-		const U8String& GetName    () const{ return m_name; }
+		const usg::string& GetName    () const{ return m_name; }
 
 		static const DescriptorDeclaration m_sDescriptorDecl[];
 
@@ -52,7 +51,7 @@ namespace usg
 
 		usg::text::FontDefinition m_fontDefinition;
 
-		U8String m_name;
+		usg::string m_name;
 	};
 }
 

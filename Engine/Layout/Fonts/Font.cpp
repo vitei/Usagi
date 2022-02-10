@@ -31,34 +31,33 @@ namespace usg
 		
 	}
 
-	void Font::CleanUp(GFXDevice* pDevice)
+	void Font::Cleanup(GFXDevice* pDevice)
 	{
-		m_descriptor.CleanUp(pDevice);
+		m_descriptor.Cleanup(pDevice);
 	}
 
 	bool Font::Load( GFXDevice* pDevice, ResourceMgr* pResMgr, const char* filename )
 	{
 		m_name = filename;
-		SetupHash( m_name.CStr() );
+		SetupHash( m_name.c_str() );
 		
-		U8String szFilename = filename;
+		usg::string szFilename = filename;
 
 		m_descriptor.Init(pDevice, pDevice->GetDescriptorSetLayout(m_sDescriptorDecl));
 
 
-		U8String szTemp = "";
-		szTemp.ParseString("%s.vpb", szFilename.CStr());
+		usg::string szTemp = szFilename + ".vpb";
 
 		// @todo it may actually not be so hot to use usg::text::FontDefinition at runtime. investigate.
-		ProtocolBufferFile viteifont(szTemp.CStr());
+		ProtocolBufferFile viteifont(szTemp.c_str());
 		bool bReadSucceeded = viteifont.Read(&m_fontDefinition);
 		ASSERT(bReadSucceeded);
 
-		szTemp.ParseString("%s", szFilename.CStr());
-		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.CStr());
+		szTemp = szFilename;
+		m_pTexture = pResMgr->GetTextureAbsolutePath(pDevice, szTemp.c_str());
 		ASSERT(m_pTexture.get() != NULL);
-		SamplerDecl pointDecl(SF_LINEAR, SC_CLAMP);
-		pointDecl.eAnisoLevel = SamplerDecl::ANISO_LEVEL_16;
+		SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
+		pointDecl.eAnisoLevel = usg::ANISO_LEVEL_16;
 
 		m_descriptor.SetImageSamplerPair(0, m_pTexture, pDevice->GetSampler(pointDecl));
 		m_descriptor.UpdateDescriptors(pDevice);
@@ -77,6 +76,22 @@ namespace usg
 			totalWidth += GetCharacterWidth(*c, height);
 		}
 		return totalWidth;
+	}
+
+	bool Font::HasCharacter(uint32 uChar) const
+	{
+		usg::text::CharDefinition* pChars = m_fontDefinition.Chars.Get().array;
+		for (uint32 i = 0; i < m_fontDefinition.Chars.Get().count; i++)
+		{
+			::usg::text::CharDefinition& ch = pChars[i];
+
+			if (ch.CharData == uChar)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool Font::GetCharacterCoords(uint32 uChar, float& fLeft, float& fRight, float& fTop, float& fBottom) const

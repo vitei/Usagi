@@ -34,6 +34,7 @@ SkyFog::SkyFog(void)
 {
 	m_bValid = false;
 	SetLayer(RenderLayer::LAYER_SKY);
+	SetPriority(1);
 }
 
 SkyFog::~SkyFog(void)
@@ -42,17 +43,16 @@ SkyFog::~SkyFog(void)
 }
 
 
-void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 {
 	m_bUseDepthTex = true;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
 	MakeSphere(pDevice, 1.0f);
 	//MakeCube(pDevice);
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
 	PipelineStateDecl pipeline;
-	RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
@@ -100,13 +100,14 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	pipeline.pEffect = pResource->GetEffect(pDevice, "PostProcess.FogSphere");
 
 	Material &mat = m_materialFade;
-	mat.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptorsFade);
+	mat.SetDescriptorLayout(pDevice, matDescriptorsFade);
+	m_pipelineFadeDecl = pipeline;
 
-	SamplerDecl sampDecl(SF_LINEAR, SC_CLAMP);	
-	sampDecl.eMipFilter = MF_POINT;
+	SamplerDecl sampDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);	
+	sampDecl.eMipFilter = MIP_FILTER_POINT;
 	SamplerHndl linear = pDevice->GetSampler(sampDecl);
-	sampDecl.SetFilter(SF_POINT);
-	sampDecl.SetClamp(SC_WRAP);
+	sampDecl.SetFilter(SAMP_FILTER_POINT);
+	sampDecl.SetClamp(SAMP_WRAP_REPEAT);
 	SamplerHndl point = pDevice->GetSampler(sampDecl);
 
 	Material &mat2 = m_materialNoFade;
@@ -115,22 +116,23 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, R
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
 	alphaDecl.bBlendEnable = false;
-	mat2.Init(pDevice, pDevice->GetPipelineState(renderPassHndl, pipeline), matDescriptors);
+	m_pipelineNoFadeDecl = pipeline;
+	mat2.SetDescriptorLayout(pDevice, matDescriptors);
 	
 	// TODO: Set the transform nodes bounding volume (should always pass)
-	SamplerDecl depthSamp(SF_POINT, SC_WRAP);
-	SamplerDecl colorSamp(SF_LINEAR, SC_WRAP);
-	colorSamp.SetClamp(SC_CLAMP);
+	SamplerDecl depthSamp(SAMP_FILTER_POINT, SAMP_WRAP_REPEAT);
+	SamplerDecl colorSamp(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
+	colorSamp.SetClamp(SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 	m_linearSampl = pDevice->GetSampler(colorSamp);
 }
 
-void SkyFog::CleanUp(GFXDevice* pDevice)
+void SkyFog::Cleanup(GFXDevice* pDevice)
 {
 	m_materialFade.Cleanup(pDevice);
 	m_materialNoFade.Cleanup(pDevice);
-	m_vertexBuffer.CleanUp(pDevice);
-	m_indexBuffer.CleanUp(pDevice);
+	m_vertexBuffer.Cleanup(pDevice);
+	m_indexBuffer.Cleanup(pDevice);
 	m_bValid = false;
 }
 
@@ -139,8 +141,8 @@ void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (pDst != m_pDestTarget)
 	{
 		m_pDestTarget = pDst;
-		m_materialFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
-		m_materialNoFade.UpdateRenderPass(pDevice, pDst->GetRenderPass());
+		m_materialFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineFadeDecl));
+		m_materialNoFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineNoFadeDecl));
 	}
 }
 
@@ -331,7 +333,7 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 	pContext->BeginGPUTag("Sky", Color::Green);
 
 	// Setting the destination target now handled outside
-	//pContext->SetRenderTarget(m_pDestTarget);
+	pContext->SetRenderTarget(m_pDestTarget);
 	m_materialFade.Apply(pContext);
 	pContext->SetVertexBuffer(&m_vertexBuffer);
 	pContext->DrawIndexed(&m_indexBuffer);
@@ -344,6 +346,41 @@ bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 	
 	return true;
+}
+
+bool SkyFog::LoadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool SkyFog::ReadsTexture(Input eInput) const
+{
+	if (eInput == PostEffect::Input::LinearDepth)
+	{
+		return true;
+	}
+	return false;
+}
+
+void SkyFog::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::LinearDepth)
+	{
+		m_materialFade.SetTexture(5, texture, m_samplerHndl);
+	}
+}
+
+void SkyFog::PassDataSet(GFXDevice* pDevice)
+{
+	if(m_bValid)
+	{
+		m_materialFade.UpdateDescriptors(pDevice);
+	}
 }
 
 }

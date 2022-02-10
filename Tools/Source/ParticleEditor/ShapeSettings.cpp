@@ -122,7 +122,7 @@ void ShapeSettings::SetShapeSettings(const usg::particles::EmitterShapeDetails& 
 	m_identityMatrix.SetValue( m_shapeDetails.baseShape.vPosition == usg::Vector3f::ZERO && m_shapeDetails.baseShape.vRotation == usg::Vector3f::ZERO && m_shapeDetails.baseShape.vScale == usg::Vector3f::ONE);
 }
 
-bool ShapeSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool ShapeSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 

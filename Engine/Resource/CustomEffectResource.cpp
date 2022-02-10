@@ -159,7 +159,7 @@ namespace usg
 		{
 			pDescDecl->eDescriptorType = usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			pDescDecl->uCount = 1;
-			pDescDecl->shaderType = usg::SHADER_FLAG_PIXEL;
+			pDescDecl->shaderType = (ShaderTypeFlags)m_pSamplers[i].uShaderSets;
 			pDescDecl->uBinding = m_pSamplers[i].uIndex;
 			pDescDecl++;
 		}
@@ -283,31 +283,6 @@ namespace usg
 			}
 		}
 		return nullptr;
-	}
-
-	const char* CustomEffectResource::GetEffectName() const
-	{
-		return m_header.effectName;
-	}
-
-	const char* CustomEffectResource::GetDepthEffectName() const
-	{
-		return m_header.shadowEffectName;
-	}
-
-	const char* CustomEffectResource::GetDeferredEffectName() const
-	{
-		return m_header.deferredEffectName;
-	}
-
-	const char* CustomEffectResource::GetTransparentEffectName() const
-	{
-		return m_header.transparentEffectName;
-	}
-
-	const char* CustomEffectResource::GetOmniDepthEffectName() const
-	{
-		return m_header.omniShadowEffectName;
 	}
 
 	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const

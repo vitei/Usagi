@@ -16,7 +16,7 @@ static const VkFormat gDepthFormatViewMap[] =
 	VK_FORMAT_X8_D24_UNORM_PACK32		// DF_DEPTH_32	// There is no 32 unorm
 };
 
-static_assert(ARRAY_SIZE(gDepthFormatViewMap) == usg::DF_COUNT, "Depth format count does not match platform independent defines");
+static_assert(ARRAY_SIZE(gDepthFormatViewMap) == (uint32)usg::DepthFormat::COUNT, "Depth format count does not match platform independent defines");
 
 
 static const VkSampleCountFlagBits gSampleCountMap[] =

@@ -22,12 +22,14 @@ namespace usg
 		virtual ~SimpleGameBase();
 
 		virtual void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) override;
-		virtual void CleanUp(usg::GFXDevice* pDevice) override;
+		virtual void Cleanup(usg::GFXDevice* pDevice) override;
 		virtual void Update(usg::GFXDevice* pDevice) override;
 		virtual void Draw(usg::GFXDevice* pDevice) override;
 		virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) override;
-
+	
 	protected:
+		virtual bool DrawLoadingScreen() const { return true; }
+		virtual bool PauseCurrentMode() const { return false; }
 		virtual void PreModeUpdate(float fElapsed) {}
 		virtual void OverlayRender(usg::GFXContext* pImmContext, Display* pDisplay, IHeadMountedDisplay* pHMD) {}
 		void StartNextMode(usg::GFXDevice* pDevice);
@@ -35,7 +37,9 @@ namespace usg
 		virtual void ModeFinished() = 0;
 		virtual ModeLoadFunc GetLoadFunc() const = 0;
 		virtual usg::ModeTransition* CreateTransitionMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr);
+		virtual usg::Mode* CreateSplashMode(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr) { return nullptr; }
 		void FinishedStaticLoad(usg::GFXDevice* pDevice);
+		virtual void PostSplashInit(usg::GFXDevice* pDevice, ResourceMgr* pResMgr);
 
 		enum State
 		{
@@ -43,7 +47,8 @@ namespace usg
 			STATE_FADE_OUT,
 			STATE_TRANSITION,
 			STATE_LOADING,
-			STATE_END_LOADING
+			STATE_END_LOADING,
+			STATE_SPLASH
 		};
 
 

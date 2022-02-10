@@ -23,7 +23,7 @@ namespace usg
 
 	void OmniShadow::Init(GFXDevice* pDevice, Scene* pScene, uint32 uResX, uint32 uResY)
 	{
-		m_cubeBuffer.InitCube(pDevice, uResX, uResY, DF_DEPTH_32F);
+		m_cubeBuffer.InitCube(pDevice, uResX, uResY, DepthFormat::DEPTH_32F);
 		m_cubeTarget.Init(pDevice, NULL, &m_cubeBuffer);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
@@ -46,8 +46,8 @@ namespace usg
 
 	void OmniShadow::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	{
-		m_cubeBuffer.CleanUp(pDevice);
-		m_cubeTarget.CleanUp(pDevice);
+		m_cubeBuffer.Cleanup(pDevice);
+		m_cubeTarget.Cleanup(pDevice);
 		if (m_pShadowContext)
 		{
 			pScene->DeleteOmniShadowContext(m_pShadowContext);

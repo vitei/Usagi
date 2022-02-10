@@ -26,6 +26,7 @@ namespace usg
 		{
 			FILE_FLAG_NONE = 0,
 			FILE_FLAG_KEEP_DATA = (1 << 0),
+			FILE_FLAG_NO_AUTO_LOAD = (1 << 1)
 		};
 
 		struct FileInfo

@@ -185,9 +185,8 @@ namespace usg
 	ASSAO::ASSAO()
 	{
 		SetRenderMask(RENDER_MASK_POST_EFFECT);
-		// Don't really care if before or after but going with after
 		SetLayer(LAYER_SKY);
-		SetPriority(2);
+		SetPriority(0);
 
 		m_pSys = nullptr;
 		m_pDest = nullptr;
@@ -201,7 +200,7 @@ namespace usg
 
 	}
 
-	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys, RenderTarget* pDst)
+	void ASSAO::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 	{
 		m_pSys = pSys;
 		// Get the handles for the various descriptor layouts
@@ -215,23 +214,23 @@ namespace usg
 		usg::ColorBuffer* pBuffers[4];
 
 
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-		SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+		SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 		m_pointSampler = pDevice->GetSampler(pointDecl);
-		pointDecl.SetClamp(SC_MIRROR);
+		pointDecl.SetClamp(SAMP_WRAP_MIRROR);
 		m_pointMirrorSampler = pDevice->GetSampler(pointDecl);
 		m_linearSampler = pDevice->GetSampler(linearDecl);
 
 		Vector2i halfSize;
-		halfSize.x = (pDst->GetWidth() + 1) / 2;
-		halfSize.y = (pDst->GetHeight() + 1) / 2;
+		halfSize.x = (pSys->GetFinalTargetWidth() + 1) / 2;
+		halfSize.y = (pSys->GetFinalTargetHeight() + 1) / 2;
 		Vector2i quarterSize;
 		quarterSize.x = (halfSize.x + 1) / 2;
 		quarterSize.y = (halfSize.y + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
-			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, CF_R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
+			m_halfDepthTargets[i].Init(pDevice, halfSize.x, halfSize.y, ColorFormat::R_16F, usg::SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, i, MIP_COUNT);
 			pBuffers[i] = &m_halfDepthTargets[i];
 		}
 
@@ -239,17 +238,17 @@ namespace usg
 		pBuffers[1] = &m_halfDepthTargets[3];	// Demo uses 0 and 3, we'll do the same to avoid confusion for now
 		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr);
 
-		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
-		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, CF_RG_8);
+		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
+		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
 		m_pingPongRT1.Init(pDevice, &m_pingPongCB1);
 		m_pingPongRT2.Init(pDevice, &m_pingPongCB2);
 
-		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
-		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, CF_R_8);
+		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
+		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
 		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB); 
 
-		m_loadTargetCB.Init(pDevice, 1, 1, CF_R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
+		m_loadTargetCB.Init(pDevice, 1, 1, ColorFormat::R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
 
 		m_importanceMapDesc.Init(pDevice, desc1Tex);
 		m_importanceMapADesc.Init(pDevice, desc1Tex);
@@ -263,7 +262,7 @@ namespace usg
 		m_importanceMapBDesc.SetImageAtBinding(1, m_loadTargetCB.GetTexture());
 
 
-		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, CF_RG_8);
+		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, ColorFormat::RG_8);
 		m_finalResultsRT.Init(pDevice, &m_finalResultsCB);
 
 		RenderTarget::RenderPassFlags flags;
@@ -427,15 +426,15 @@ namespace usg
 
 		pipelineDecl.layout.descriptorSets[1] = desc1Tex;
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartApply");
-		m_nonSmartApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_nonSmartApplyEffect.decl = pipelineDecl;
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.Apply");
 
 
-		m_applyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_applyEffect.decl =pipelineDecl;
 
 		pipelineDecl.pEffect = pRes->GetEffect(pDevice, "ASSAO.NonSmartHalfApply");
-		m_nonSmartHalfApplyEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_nonSmartHalfApplyEffect.decl = pipelineDecl;
 	}
 
 
@@ -559,53 +558,53 @@ namespace usg
 		}
 	}
 
-	void ASSAO::CleanUp(GFXDevice* pDevice)
+	void ASSAO::Cleanup(GFXDevice* pDevice)
 	{
 		for(int i=0; i< DEPTH_COUNT; i++)
 		{
-			m_halfDepthTargets[i].CleanUp(pDevice);
+			m_halfDepthTargets[i].Cleanup(pDevice);
 		}
-		m_blurDescPing.CleanUp(pDevice);
-		m_blurDescPong.CleanUp(pDevice);
-		m_pingPongCB1.CleanUp(pDevice);
-		m_applyDesc.CleanUp(pDevice);
-		m_pingPongCB2.CleanUp(pDevice);
-		m_finalResultsCB.CleanUp(pDevice);
-		m_importanceMapCB.CleanUp(pDevice);
-		m_importanceMapPongCB.CleanUp(pDevice);
-		m_loadTargetCB.CleanUp(pDevice);
+		m_blurDescPing.Cleanup(pDevice);
+		m_blurDescPong.Cleanup(pDevice);
+		m_pingPongCB1.Cleanup(pDevice);
+		m_applyDesc.Cleanup(pDevice);
+		m_pingPongCB2.Cleanup(pDevice);
+		m_finalResultsCB.Cleanup(pDevice);
+		m_importanceMapCB.Cleanup(pDevice);
+		m_importanceMapPongCB.Cleanup(pDevice);
+		m_loadTargetCB.Cleanup(pDevice);
 
-		m_importanceMapDesc.CleanUp(pDevice);
-		m_importanceMapADesc.CleanUp(pDevice);
-		m_importanceMapBDesc.CleanUp(pDevice);
+		m_importanceMapDesc.Cleanup(pDevice);
+		m_importanceMapADesc.Cleanup(pDevice);
+		m_importanceMapBDesc.Cleanup(pDevice);
 
 
-		m_constants.CleanUp(pDevice);
-		m_prepareDepthDesc.CleanUp(pDevice);
+		m_constants.Cleanup(pDevice);
+		m_prepareDepthDesc.Cleanup(pDevice);
 		for(int i=0; i<MIP_COUNT-1; i++)
 		{
-			m_mipDesc[i].CleanUp(pDevice);
+			m_mipDesc[i].Cleanup(pDevice);
 		}
 
 		for (int i = 0; i < CONST_PASS_COUNT; i++)
 		{
-			m_passConstants[i].CleanUp(pDevice);
+			m_passConstants[i].Cleanup(pDevice);
 		}	
 		
 		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
 		{
 			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
 			{
-				m_genQDesc[i][uPass].CleanUp(pDevice);
+				m_genQDesc[i][uPass].Cleanup(pDevice);
 			}
 		}
 	}
 
 	void ASSAO::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	{
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartApplyEffect);
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_applyEffect);
-		pDevice->ChangePipelineStateRenderPass(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect);
+		m_nonSmartApplyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_nonSmartApplyEffect.decl);
+		m_applyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_applyEffect.decl);
+		m_nonSmartHalfApplyEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_nonSmartHalfApplyEffect.decl);
 
 		m_pDest = pDst;
 
@@ -614,8 +613,11 @@ namespace usg
 
 	void ASSAO::Update(Scene* pScene, float fElapsed)
 	{
-		const Camera* pCamera = pScene->GetViewContext(0)->GetCamera();
-		UpdateConstants(m_pDest->GetWidth(), m_pDest->GetHeight(), pCamera);
+		if(m_pDest)
+		{
+			const Camera* pCamera = pScene->GetViewContext(0)->GetCamera();
+			UpdateConstants(m_pDest->GetWidth(), m_pDest->GetHeight(), pCamera);
+		}
 	}
 	
 	void ASSAO::UpdateBuffer(usg::GFXDevice* pDevice)
@@ -689,26 +691,15 @@ namespace usg
 	}
 
 
-	void ASSAO::SetDepthSource(GFXDevice* pDevice, DepthStencilBuffer* pSrc)
+	void ASSAO::SetDepthSource()
 	{
-		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
-		m_prepareDepthDesc.UpdateDescriptors(pDevice);
 		m_bHasLinearDepth = false;
 	}
 
-	void ASSAO::SetLinearDepthSource(GFXDevice* pDevice, ColorBuffer* pSrc, ColorBuffer* pNorm)
+	void ASSAO::SetLinearDepthSource()
 	{
-		m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, pSrc->GetTexture(), m_pointSampler);
-		m_prepareDepthDesc.UpdateDescriptors(pDevice);
 		m_bHasLinearDepth = true;
 
-		for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
-		{
-			for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
-			{
-				m_genQDesc[i][uPass].SetImageSamplerPair(1, pNorm->GetTexture(), m_pointSampler);
-			}
-		}
 	}
 
 
@@ -917,15 +908,15 @@ namespace usg
 
 		if (m_settings.QualityLevel < 0)
 		{
-			pContext->SetPipelineState(m_nonSmartHalfApplyEffect);
+			pContext->SetPipelineState(m_nonSmartHalfApplyEffect.state);
 		}
 		else if (m_settings.QualityLevel == 0)
 		{
-			pContext->SetPipelineState(m_nonSmartApplyEffect);
+			pContext->SetPipelineState(m_nonSmartApplyEffect.state);
 		}
 		else
 		{
-			pContext->SetPipelineState(m_applyEffect);
+			pContext->SetPipelineState(m_applyEffect.state);
 		}
 		m_pSys->DrawFullScreenQuad(pContext);
 
@@ -935,5 +926,57 @@ namespace usg
 		return true;
 	}
 
+
+	bool ASSAO::ReadsTexture(Input eInput) const
+	{
+		switch(eInput)
+		{
+		case PostEffect::Input::Depth:
+			return !m_bHasLinearDepth;
+		case PostEffect::Input::Normal:
+			return true;
+		case PostEffect::Input::LinearDepth:
+			return m_bHasLinearDepth;
+
+		default:
+			return false;
+
+		}
+	}
+
+
+	bool ASSAO::LoadsTexture(Input eInput) const
+	{
+		if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	void ASSAO::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+	{
+		if (eInput == PostEffect::Input::Depth && !m_bHasLinearDepth)
+		{
+			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
+			m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		}
+		if (eInput == PostEffect::Input::LinearDepth && m_bHasLinearDepth)
+		{
+			m_prepareDepthDesc.SetImageSamplerPairAtBinding(0, texture, m_pointSampler);
+			m_prepareDepthDesc.UpdateDescriptors(pDevice);
+		}
+		if (eInput == PostEffect::Input::Normal)
+		{
+			for (uint32 i = 0; i < GEN_Q_PASS_COUNT; i++)
+			{
+				for (uint32 uPass = 0; uPass < DEPTH_COUNT; uPass++)
+				{
+					m_genQDesc[i][uPass].SetImageSamplerPair(1, texture, m_pointSampler);
+				}
+			}
+		}
+	}
 
 }

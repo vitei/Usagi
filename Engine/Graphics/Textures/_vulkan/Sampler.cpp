@@ -80,7 +80,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	createInfo.addressModeV = g_textureClampMap[decl.eClampV];
 	createInfo.addressModeW = g_textureClampMap[decl.eClampV];//VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	createInfo.mipLodBias = decl.LodBias;
-	createInfo.anisotropyEnable = decl.eAnisoLevel != SamplerDecl::ANISO_LEVEL_1;
+	createInfo.anisotropyEnable = decl.eAnisoLevel != ANISO_LEVEL_1;
 	createInfo.maxAnisotropy = g_anisoLevel[decl.eAnisoLevel];
 	createInfo.compareEnable = decl.bEnableCmp;
 	createInfo.compareOp = decl.bEnableCmp ? g_cmpFuncMap[decl.eCmpFnc] : VK_COMPARE_OP_NEVER;
@@ -94,7 +94,7 @@ void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
 	ASSERT(!err);
 }
 
-void Sampler::CleanUp(GFXDevice* pDevice)
+void Sampler::Cleanup(GFXDevice* pDevice)
 {
 	if (m_sampler)
 	{

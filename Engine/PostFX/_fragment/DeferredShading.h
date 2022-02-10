@@ -25,25 +25,31 @@ public:
 	DeferredShading();
 	~DeferredShading();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
+
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool WritesTexture(Input eInput) const;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+	virtual void PassDataSet(GFXDevice* pDevice) override;
+	virtual bool LoadsTexture(Input eInput) const override;
 
 private:
 
 
 	struct VolumeShader
 	{
-		PipelineStateHndl	pLightingEffect;
-		PipelineStateHndl	pLightingNoSpecEffect;
-		PipelineStateHndl	pLightingShadowEffect;
-		PipelineStateHndl	pLightingFarPlaneEffect;
-		PipelineStateHndl	pLightingFarPlaneNoSpecEffect;
-		PipelineStateHndl	pLightingFarPlaneShadowEffect;
-		PipelineStateHndl	pStencilWriteEffect;
+		Pipeline	pLightingEffect;
+		Pipeline	pLightingNoSpecEffect;
+		Pipeline	pLightingShadowEffect;
+		Pipeline	pLightingFarPlaneEffect;
+		Pipeline	pLightingFarPlaneNoSpecEffect;
+		Pipeline	pLightingFarPlaneShadowEffect;
+		Pipeline	pStencilWriteEffect;
 	};
 
 	struct MeshData
@@ -74,8 +80,8 @@ private:
 	SamplerHndl				m_samplerHndl;
 	SamplerHndl 			m_linSamplerHndl;
 
-	PipelineStateHndl		m_baseDirPass;
-	PipelineStateHndl		m_additionalShadowPass[MAX_EXTRA_DIR_LIGHTS];
+	Pipeline				m_baseDirPass;
+	Pipeline				m_additionalShadowPass[MAX_EXTRA_DIR_LIGHTS];
 	DescriptorSet			m_readDescriptors;
 	
 	VolumeShader			m_spotShaders;

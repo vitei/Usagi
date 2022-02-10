@@ -22,13 +22,14 @@ namespace usg
 		~TextDrawer();
 
 		void Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 		void UpdateBuffers(GFXDevice* pDevice);
 		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }
+		void GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const;
 		bool Draw(GFXContext* context, bool b3D);
 	
-		bool Resize(uint32 uStrLen);
-		uint32 GetMaxStringLength() const;
+		bool Resize(memsize uStrLen);
+		memsize GetMaxStringLength() const;
 
 		struct Vertex
 		{
@@ -45,7 +46,7 @@ namespace usg
 
 		enum
 		{
-			MAX_CHARS = 140,
+			MAX_CHARS = 200,
 			MAX_CHAR_VERTICES = MAX_CHARS,
 			MAX_INDICES = MAX_CHARS,
 			MAX_LINES = 20
@@ -72,9 +73,11 @@ namespace usg
 		VertexBuffer			m_charVerts;
 
 		// # of characters currently being drawn
-		uint32			m_uCharCount;
+		memsize			m_uCharCount;
 
 		Vector2f		m_vPosition;
+		Vector2f		m_vMinBounds;
+		Vector2f		m_vMaxBounds;
 		int				m_alignFlags;
 		float			m_fWidthLimit;
 		bool			m_bufferValid;

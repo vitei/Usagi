@@ -67,9 +67,9 @@ void IndexBuffer::InitSize(GFXDevice* pDevice, const void* const pIndices, uint3
 	}
 }
 
-void IndexBuffer::CleanUp(GFXDevice* pDevice)
+void IndexBuffer::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 

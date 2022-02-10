@@ -54,7 +54,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_createFlipBook.AddFilter("Targa Image File", "*.tga");
 	m_createFlipBook.SetCallbacks(this);
 
-	usg::SamplerDecl samplerDecl(usg::SF_LINEAR, usg::SC_WRAP);
+	usg::SamplerDecl samplerDecl(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_REPEAT);
 	m_sampler = pDevice->GetSampler(samplerDecl);
 
 	m_previewButton.InitAsTexture(pDevice, "Preview", m_pTexture);
@@ -79,7 +79,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	int frameCount = 1;
 	m_frameCount.Init("Frame count", &frameCount, 1, 1, MAX_ANIM_FRAMES);
 
-	m_animTimeScale.Init("Anim time scale", 0.1f, 2.0f, 1.0f);
+	m_animTimeScale.Init("Anim time scale", 0.05f, 2.0f, 1.0f);
 
 	m_window.AddItem(&m_createFlipBook);
 	m_window.AddItem(&m_texture);
@@ -159,8 +159,8 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 				// Make the file
 				usg::TGAFile outFile;
 				// First calculate the size
-				sint iWidth = sqrt( results.size() + 1 );
-				sint iHeight = ((results.size() + iWidth - 1) / iWidth);
+				sint iWidth = (sint)sqrt( results.size() + 1 );
+				sint iHeight = (sint)((results.size() + iWidth - 1) / iWidth);
 
 				sint texWidth = files[0].GetHeader().uWidth * iWidth;
 				sint texHeight = files[0].GetHeader().uHeight * iHeight;
@@ -176,14 +176,14 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 	}
 }
 
-void TextureSettings::CleanUp(usg::GFXDevice* pDevice)
+void TextureSettings::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_previewButton.CleanUp(pDevice);
+	m_previewButton.Cleanup(pDevice);
 	for (uint32 i = 0; i < MAX_ANIM_FRAMES; i++)
 	{
-		m_animTextures[i].CleanUp(pDevice);
+		m_animTextures[i].Cleanup(pDevice);
 	}
-	m_texture.CleanUp(pDevice);
+	m_texture.Cleanup(pDevice);
 }
 
 void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData)
@@ -193,9 +193,9 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 	m_fileList.Update();
 	for(uint32 i=0; i<m_fileList.GetFileCount(); i++)
 	{
-		usg::U8String name = "particles/";
+		usg::string name = "particles/";
 		name += m_fileList.GetFileName(i);
-		name.TruncateExtension();
+		str::TruncateExtension(name);
 		if(name == textureVars.name)
 		{
 			m_fileListBox.SetSelected(i);
@@ -232,7 +232,7 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 
 
 
-bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	bool bAnimAltered = false;
@@ -252,16 +252,16 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 	{
 		m_textureName = m_fileList.GetFileName(m_fileListBox.GetSelected());
 		usg::Vector2f vTextureSize(64.f, 64.f);
-		usg::U8String texName = "particles/";
+		usg::string texName = "particles/";
 		texName += m_fileList.GetFileName(m_fileListBox.GetSelected());
 		// The resource manager adds the extension
-		texName.TruncateExtension();
-		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.CStr(), usg::GPU_LOCATION_STANDARD);
+		str::TruncateExtension(texName);
+		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.c_str(), usg::GPU_LOCATION_STANDARD);
 		vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 		m_texture.SetTexture(pDevice, m_pTexture);
 		m_texture.SetSize(vTextureSize);
 		pEffect->GetMaterial().SetTexture(0, m_pTexture, m_sampler);
-		str::Copy(textureVars.name, texName.CStr(), sizeof(textureVars.name));
+		str::Copy(textureVars.name, texName.c_str(), sizeof(textureVars.name));
 		bAnimAltered = true;
 		m_bForceReload = false;
 	}
@@ -286,7 +286,8 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 
 	m_animTitle.SetVisible(bShowAnimDetails);
 	m_frameCount.SetVisible(bShowAnimDetails);
-	m_animTimeScale.SetVisible(textureVars.textureAnim.eTexMode==usg::particles::TEX_MODE_FLIPBOOK_LOOP);
+	m_animTimeScale.SetVisible( textureVars.textureAnim.eTexMode==usg::particles::TEX_MODE_FLIPBOOK_LOOP
+				|| textureVars.textureAnim.eTexMode == usg::particles::TEX_MODE_RANDOM_IMAGE );
 
 	uint32 item =0;
 	for(uint32 i=0; i<FRAME_BOXES; i++)
@@ -306,7 +307,7 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 		UpdateAnimFrames(pDevice);
 	}
 
-	SetAnimPreview(pDevice, structData);
+	SetAnimPreview(pDevice, structData, fElapsed);
 
 	if(bAltered)
 	{
@@ -325,21 +326,19 @@ float TextureSettings::GetUVCoords(uint32 uAnimFrame, usg::Vector2f& vMin, usg::
 	float fYRange = 1.0f / (float)uY;
 	uint32 uXCell = uAnimFrame % uX;
 	uint32 uYCell = uAnimFrame / uX;
-
+	 
 	vMin.Assign(fXRange * uXCell, fYRange * uYCell);
 	vMax.Assign((fXRange * (uXCell+1)), (fYRange * (uYCell+1)));
 
 	return (vMax.x-vMin.x)/(vMax.y - vMin.y);
 }
 
-void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData)
+void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, float fElapsed)
 {
 	if(m_previewButton.GetValue())
 	{
 		m_fAnimTime = 0.0f;
 	}
-
-	float fElapsed = 1.0f/60.f;
 
 	m_previewButton.SetVisible(true);
 
@@ -358,8 +357,8 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 		patternIdx = usg::Math::Clamp(patternIdx, (uint32)0, (uint32)(structData.textureData[0].uPatternRepeatHor * structData.textureData[0].uPatternRepeatVer) - 1);
 		break;
 	case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
-		patternIdx = ((uint32)((30.f)*m_fAnimTime))%structData.textureData[0].textureAnim.animIndex_count;
-		fElapsed *= m_animTimeScale.GetValue(0);
+		patternIdx = (uint32)(60.f*m_fAnimTime * m_animTimeScale.GetValue(0));
+		patternIdx = patternIdx%structData.textureData[0].textureAnim.animIndex_count;
 		break;
 	case usg::particles::TEX_MODE_NONE:
 	default:
@@ -375,7 +374,13 @@ void TextureSettings::SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::Em
 	usg::Vector2f vMin, vMax;
 	float fAspect = GetUVCoords(patternIdx, vMin, vMax);
 	m_previewButton.SetTexture(pDevice, m_pTexture);
-	m_previewButton.SetUVs(vMin, vMax);
+
+	float fTimeSclae = m_animTimeScale.GetValue(0);
+	if( structData.textureData[0].textureAnim.eTexMode != usg::particles::TEX_MODE_RANDOM_IMAGE 
+		|| (uint32)( (m_fAnimTime+fElapsed) * 60.f * fTimeSclae) != (uint32)(m_fAnimTime * 60.f * fTimeSclae) )
+	{
+		m_previewButton.SetUVs(vMin, vMax);
+	}
 
 	if (m_pTexture->GetWidth() > 350.0f)
 	{

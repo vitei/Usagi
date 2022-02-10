@@ -49,7 +49,7 @@ void DebugStats::Init(GFXDevice* pDevice, DebugRender* pRender)
 	m_platform.Init(pDevice);
 }
 
-void DebugStats::CleanUp(GFXDevice* pDevice)
+void DebugStats::Cleanup(GFXDevice* pDevice)
 {
 	if (m_pRender)
 	{
@@ -61,7 +61,7 @@ void DebugStats::Draw()
 {
 	m_debugStats[m_uActiveType]->Draw(m_pRender);
 
-	U8String warningString;
+	usg::string warningString;
 	Color warningCol(1.0f, 0.2f, 0.2f, 1.0);
 	float fLineNo = 0.0f;
 	
@@ -70,9 +70,9 @@ void DebugStats::Draw()
 		(*it)->AppendWarnings(warningString);
 	}
 
-	if (warningString.Length() > 0)
+	if (warningString.length() > 0)
 	{
-		m_pRender->AddString(warningString.CStr(), 0.8f, fLineNo, warningCol);
+		m_pRender->AddString(warningString.c_str(), 0.8f, fLineNo, warningCol);
 	}
 
 
@@ -118,7 +118,10 @@ void DebugStats::UpdatePageNumber(bool bForward, bool bBack)
 void DebugStats::Update(float fElapsed)
 {
 	Gamepad* pGamepad = Input::GetGamepad(0);
-	UpdatePageNumber(pGamepad->GetButtonDown(GAMEPAD_BUTTON_SELECT), false);
+	if(pGamepad)
+	{
+		UpdatePageNumber(pGamepad->GetButtonDown(GAMEPAD_BUTTON_SELECT), false);
+	}
 
 	usg::vector<IDebugStatGroup*>::iterator it;
 	for (it = m_debugStats.begin(); it != m_debugStats.end(); ++it)

@@ -13,14 +13,13 @@ namespace usg {
 class DepthStencilBuffer
 {
 public:
-
 	DepthStencilBuffer();
 	~DepthStencilBuffer();
 
 	void Init(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
-	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
-	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER);
-	void CleanUp(GFXDevice* pDevice);
+	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uSlices, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER| TU_FLAG_SHADER_READ);
+	void InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, DepthFormat eFormat, SampleCount eSamples = SAMPLE_COUNT_1_BIT, uint32 uFlags = TU_FLAGS_DEPTH_BUFFER| TU_FLAG_SHADER_READ);
+	void Cleanup(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 

@@ -142,7 +142,11 @@ bool ParseManually(const char* szFileName, const char* szDefines, const class Ma
 	std::vector<char*> buffer;
 
 	if (!pShaderFile)
+	{
+		FATAL_RELEASE(false, "Missing shader file %s\n", szFileName);
 		return false;
+	}
+
 
 	// Add this file to the set of references
 	std::string fullName = szFileName;

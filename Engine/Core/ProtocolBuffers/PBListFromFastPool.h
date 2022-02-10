@@ -10,7 +10,7 @@
 #include <pb_decode.h>
 
 #include "Engine/Memory/FastPool.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Core/ProtocolBuffers/PBDecoderDelegate.h"
 
 namespace usg {
@@ -21,7 +21,7 @@ class PBListFromFastPool : public PBDecoderDelegate<T>
 public:
 	PBListFromFastPool() : m_pool(NULL) {}
 
-	typedef List<T> AccessorType;
+	typedef list<T> AccessorType;
 	AccessorType data;
 	typedef PBListFromFastPool<T> WorkingData;
 	typedef typename AccessorType::Iterator Iterator;

@@ -40,10 +40,12 @@ public:
 	PlaneClass GetSpherePlaneClass(const usg::Sphere &sphere) const;
 	Vector4f ReflectPoint(const Vector4f &point) const;
 	
+	bool GetLineIntersectionPoint(const Vector3f& vLineStart, const Vector3f& vLineEnd, Vector3f& vPointOut) const;
 	const Vector3f& GetNormal() const { return m_normal; }
 	float GetDistance() const { return m_fDistance; }
 
 	float SignedDistance(const Vector3f &v) const;
+	Vector4f GetNormalAndDistanceV4() const { return Vector4f(m_normal, m_fDistance); }
 	
 private:
 	// Normal of the plane

@@ -2,7 +2,6 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
@@ -92,6 +91,8 @@ VkFormat GetFormatGLI(uint32 uFormat)
 		return VK_FORMAT_BC7_SRGB_BLOCK;
 	case gli::format::FORMAT_BGRA8_UNORM_PACK8:
 		return VK_FORMAT_B8G8R8A8_UNORM;
+	case gli::format::FORMAT_BGRA8_SRGB_PACK8:
+		return VK_FORMAT_B8G8R8A8_SRGB;
 	default:
 		ASSERT(false);	// See what we end up getting passed through
 	}
@@ -282,16 +283,16 @@ void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidt
 	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, pDevice->GetPlatform().GetColorFormat(eFormat), imageUsage);
 }
 
-void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices)
+void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices, uint32 uTextureFlags)
 {
-	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
-	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[eFormat], imageUsage);
+	VkImageUsageFlags imageUsage = GetImageUsage(uTextureFlags);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
 void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
-	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
 
@@ -354,10 +355,10 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	// Only raw 3/4byte images for now
 	switch (eFormat)
 	{
-	case CF_RGB_888:
+	case ColorFormat::RGB_888:
 		m_uBpp = 3; break;
-	case CF_RGBA_8888:
-	case CF_R_32:
+	case ColorFormat::RGBA_8888:
+	case ColorFormat::R_32:
 		m_uBpp = 4; break;
 	default:
 		break;	// bpp won't be valid
@@ -486,7 +487,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 {
 	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
-	const VkFormat depth_format = gDepthFormatViewMap[eFormat];
+	const VkFormat depth_format = gDepthFormatViewMap[(uint32)eFormat];
 
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};
@@ -631,7 +632,7 @@ void Texture_ps::ClearViews(GFXDevice* pDevice)
 }
 
 
-void Texture_ps::CleanUp(GFXDevice* pDevice)
+void Texture_ps::Cleanup(GFXDevice* pDevice)
 {
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
@@ -649,18 +650,18 @@ void Texture_ps::CleanUp(GFXDevice* pDevice)
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
-	U8String filename = szFileName;
+	usg::string filename = szFileName;
 
-	U8String tmp = filename + ".ktx";
+	usg::string tmp = filename + ".ktx";
 
-	if (File::FileStatus(tmp.CStr()) == FILE_STATUS_VALID)
+	if (File::FileStatus(tmp.c_str()) == FILE_STATUS_VALID)
 	{
-		return LoadWithGLI(pDevice, tmp.CStr());
+		return LoadWithGLI(pDevice, tmp.c_str());
 	}
 	else
 	{
 		tmp = filename + ".dds";
-		return LoadWithGLI(pDevice, tmp.CStr());
+		return LoadWithGLI(pDevice, tmp.c_str());
 	}
 
 	m_uUpdateCount++;
@@ -854,12 +855,12 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 #if 0
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
-	U8String tmp = szFileName;
+	usg::string tmp = szFileName;
 	tmp += ".ktx";
 	File file;
 
 	VkDevice vkDevice = pDevice->GetPlatform().GetVKDevice();
-	file.Open(tmp.CStr());
+	file.Open(tmp.c_str());
 
 	ScratchRaw rawData;
 	rawData.Init(file.GetSize(), FILE_READ_ALIGN);
@@ -1052,14 +1053,14 @@ uint32 Texture_ps::GetFaces() const
 
 bool Texture_ps::FileExists(const char* szFileName)
 {
-	U8String file(szFileName);
+	usg::string file(szFileName);
 	file += ".dds";
-	if (File::FileStatus(file.CStr()) == FILE_STATUS_VALID)
+	if (File::FileStatus(file.c_str()) == FILE_STATUS_VALID)
 		return true;
 
 	file = szFileName;
 	file += ".ktx";
-	return File::FileStatus(file.CStr()) == FILE_STATUS_VALID;
+	return File::FileStatus(file.c_str()) == FILE_STATUS_VALID;
 }
 
 }

@@ -40,6 +40,8 @@ public:
 	Quaternionf operator +( const Quaternionf &addQuart ) const;
 	Quaternionf operator -( const Quaternionf &subQuart ) const;
 	const Quaternionf& operator +=(const Quaternionf &addQuart);
+	bool operator ==(const Quaternionf& rhs) const { return rhs.x == x && rhs.y == y &&	rhs.z == z && rhs.w == w; }
+	bool operator !=(const Quaternionf& rhs) const { return !(*this == rhs); }
 	// Return negated version of this quaternion
 	const Quaternionf operator -() const;
 	

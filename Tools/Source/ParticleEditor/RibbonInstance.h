@@ -17,7 +17,7 @@ public:
 	~RibbonInstance() {}
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pGroup, uint32 uIndex);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	bool Update(usg::GFXDevice* pDevice, float fElapsed);
 	void AddToScene(usg::GFXDevice* pDevice, usg::particles::RibbonData* pInstance = NULL);
 	void RemoveFromScene();

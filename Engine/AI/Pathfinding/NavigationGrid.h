@@ -8,7 +8,7 @@
 
 
 #include "Engine/Memory/FastPool.h"
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Maths/Vector3f.h"
 #include "Shape.h"
 #include "Waypoint.h"
@@ -91,7 +91,7 @@ private:
 
 	FastPool<usg::ai::BlockingArea> m_blocks;
 	FastPool<usg::ai::Waypoint> m_waypoints;
-	mutable List<usg::ai::Waypoint> m_openList;
+	mutable list<usg::ai::Waypoint*> m_openList;
 };
 
 }	//	namespace ai

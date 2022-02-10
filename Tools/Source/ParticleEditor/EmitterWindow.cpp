@@ -106,7 +106,7 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 
 void EmitterWindow::CleanUp(usg::GFXDevice* pDevice)
 {
-	m_textureSettings.CleanUp(pDevice);
+	m_textureSettings.Cleanup(pDevice);
 }
 
 void EmitterWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
@@ -116,9 +116,9 @@ void EmitterWindow::Update(usg::GFXDevice* pDevice, float fElapsed)
 
 void EmitterWindow::LoadCallback(const char* szName, const char* szFilePath, const char* szRelPath)
 {
-	usg::U8String scriptName = szFilePath;
+	usg::string scriptName = szFilePath;
 	m_fileName.SetText(szRelPath);
-	usg::ProtocolBufferFile file(scriptName.CStr());
+	usg::ProtocolBufferFile file(scriptName.c_str());
 	bool bReadSucceeded = file.Read(&m_variables);
 
 	if (bReadSucceeded)
@@ -139,9 +139,9 @@ void EmitterWindow::LoadCallback(const char* szName, const char* szFilePath, con
 
 void EmitterWindow::SaveCallback(const char* szName, const char* szFilePath, const char* szRelPath)
 {
-	usg::U8String scriptName = szFilePath;
+	usg::string scriptName = szFilePath;
 
-	usg::ProtocolBufferFile file(scriptName.CStr(), usg::FILE_ACCESS_WRITE);
+	usg::ProtocolBufferFile file(scriptName.c_str(), usg::FILE_ACCESS_WRITE);
 	bool bWritten = file.Write(&m_variables);
 	ASSERT(bWritten);
 	bWritten = file.Write(m_shapeSettings.GetShapeDetails());

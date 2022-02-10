@@ -5,7 +5,7 @@
 #ifndef _USG_GRAPHICS_LIGHT_SCENE_LIGHTING_H_
 #define _USG_GRAPHICS_LIGHT_SCENE_LIGHTING_H_
 
-#include "Engine/Core/Containers/List.h"
+#include "Engine/Core/stl/list.h"
 #include "Engine/Graphics/Lights/DirLight.h"
 #include "Engine/Graphics/Lights/PointLight.h"
 #include "Engine/Graphics/Lights/SpotLight.h"
@@ -30,10 +30,10 @@ public:
 	// TODO: Enable and disable lights on a per-model basis?
 	// void SetLighting(uint64 uLightFlags);
 
-	const List<DirLight>& 	GetActiveDirLights() const; 
-	const List<PointLight>&	GetPointLightsInView() const;
-	const List<SpotLight>&	GetSpotLightsInView() const;
-	const List<ProjectionLight>& GetProjLightsInView() const;
+	const list<DirLight*>& 	GetActiveDirLights() const; 
+	const list<PointLight*>&	GetPointLightsInView() const;
+	const list<SpotLight*>&	GetSpotLightsInView() const;
+	const list<ProjectionLight*>& GetProjLightsInView() const;
 
 	void ClearLists();
 
@@ -50,14 +50,14 @@ private:
 		MAX_LIGHT_LUTS = 6
 	};
 
-	ConstantSet			m_lightingConstants;
+	ConstantSet				m_lightingConstants;
 
 	Color					m_ambient;
 
-	List<DirLight>			m_visDirLights;
-	List<PointLight>		m_visPointLights;
-	List<SpotLight>			m_visSpotLights;
-	List<ProjectionLight>	m_visProjLights;
+	list<DirLight*>			m_visDirLights;
+	list<PointLight*>		m_visPointLights;
+	list<SpotLight*>		m_visSpotLights;
+	list<ProjectionLight*>	m_visProjLights;
 };
 
 }

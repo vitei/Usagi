@@ -65,9 +65,9 @@ namespace usg
 		m_platform.InitCube(pDevice, uWidth, uHeight, eFormat, eSamples, uFlags);
 	}
 
-	void DepthStencilBuffer::CleanUp(GFXDevice* pDevice)
+	void DepthStencilBuffer::Cleanup(GFXDevice* pDevice)
 	{
-		m_platform.CleanUp(pDevice);
+		m_platform.Cleanup(pDevice);
 	}
 
 

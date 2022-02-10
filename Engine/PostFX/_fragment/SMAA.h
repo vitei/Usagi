@@ -20,12 +20,18 @@ public:
 	SMAA();
 	~SMAA();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst);
-	virtual void CleanUp(GFXDevice* pDevice);
+	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys);
+	virtual void Cleanup(GFXDevice* pDevice);
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
+	virtual void SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+
+	virtual bool WritesTexture(Input eInput) const { return (eInput == Input::Color); }
+	virtual bool ReadsTexture(Input eInput) const override;
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
+	virtual void PassDataSet(GFXDevice* pDevice) override;
 
 private:
 	void UpdateConstants(GFXDevice* pDevice, uint32 uScrWidth, uint32 uScrHeight);
@@ -53,8 +59,9 @@ private:
 	PipelineStateHndl		m_lumaEdgeDetectEffect;
 	PipelineStateHndl		m_colorEdgeDetectEffect;
 	PipelineStateHndl		m_blendWeightEffect;
-	PipelineStateHndl		m_neighbourBlendEffect;
+	Pipeline				m_neighbourBlendEffect;
 	PipelineStateHndl		m_resolveEffect;
+
 
 	SamplerHndl				m_pointSampler;
 	SamplerHndl				m_linearSampler;

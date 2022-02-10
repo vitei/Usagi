@@ -142,7 +142,7 @@ void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffe
 
 void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPassHndl &renderPass)
 {
-	CleanUp(pDevice);
+	Cleanup(pDevice);
 	m_fbCreateInfo.renderPass = renderPass.GetContents()->GetPass();
 
 	VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &m_fbCreateInfo, NULL, &m_framebuffer);
@@ -168,7 +168,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 {
 	if (m_framebuffer != VK_NULL_HANDLE)
 	{
-		vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), m_framebuffer, nullptr);
+		pDevice->GetPlatform().ReqDestroyFrameBuffer(m_framebuffer);
 		m_framebuffer = VK_NULL_HANDLE;
 	}
 
@@ -176,7 +176,7 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 	{
 		if (itr.frameBuffer != VK_NULL_HANDLE)
 		{
-			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), itr.frameBuffer, nullptr);
+			pDevice->GetPlatform().ReqDestroyFrameBuffer(itr.frameBuffer);
 			itr.frameBuffer = VK_NULL_HANDLE;
 		}
 	}
@@ -185,14 +185,14 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 	{
 		if (itr.frameBuffer != VK_NULL_HANDLE)
 		{
-			vkDestroyFramebuffer(pDevice->GetPlatform().GetVKDevice(), itr.frameBuffer, nullptr);
+			pDevice->GetPlatform().ReqDestroyFrameBuffer(itr.frameBuffer);
 			itr.frameBuffer = VK_NULL_HANDLE;
 		}
 	}
 }
 
 
-void RenderTarget_ps::CleanUp(GFXDevice* pDevice)
+void RenderTarget_ps::Cleanup(GFXDevice* pDevice)
 {
 	FreeFramebuffers(pDevice);
 }

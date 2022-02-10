@@ -37,7 +37,7 @@ namespace usg{
 		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
 		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
 		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_RZ, 1.0f },
-		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_Z, -1.0f },
+		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_SLIDER(0), -1.0f },
 		{ GAMEPAD_AXIS_NONE,		0 }
 	};
 
@@ -94,7 +94,11 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 	{
 		m_bConnected = false;
 		m_bIsGamepad = pInput->IsGamepad(m_uInputId);
-
+		
+		if (m_bIsGamepad)
+		{
+			m_uCaps |= CAP_GAMEPAD;
+		}
 
 		if (m_pDevice)
 		{
@@ -120,20 +124,29 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			return;
 		}
 
-		DIDEVCAPS diCaps;
-
+		m_pDevice->Acquire();
 		SetDeadzone(0.05f);
 
-		if ( m_pDevice->GetCapabilities(&diCaps) >= 0 )
+		DIDEVCAPS diCaps;
+		diCaps.dwSize = sizeof(DIDEVCAPS);
+		HRESULT hr = m_pDevice->GetCapabilities(&diCaps);
+		if ( !FAILED(hr) )
 		{
+			if (diCaps.dwAxes > 1)
+			{
+				m_uCaps |= CAP_LEFT_STICK;
+			}
 			if (diCaps.dwAxes > 3)
 			{
 				m_uCaps |= CAP_RIGHT_STICK;
 			}
+			if (diCaps.dwPOVs > 0)
+			{
+				m_uCaps |= CAP_POV;
+			}
 			m_uNumAxes = diCaps.dwAxes;
 			m_uNumButtons = diCaps.dwButtons;
 		}
-		m_pDevice->Acquire();
 		m_bConnected = true;
 	}
 }
@@ -195,6 +208,35 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 			m_axisRanges[i].max = range.lMax;
 		}
 	}
+}
+
+bool DirectInputJoystick::IsPovInRange(DWORD povVal, DWORD targVal)
+{
+	const int povButtonRange = 2000;
+
+	if (targVal < povButtonRange)
+	{
+		if (povVal <= (targVal + povButtonRange))
+		{
+			return true;
+		}
+		DWORD remainder = povButtonRange - targVal;
+		DWORD wrap = 36000 - remainder;
+		if (povVal >= wrap)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (povVal >= (targVal - povButtonRange)
+			&& povVal <= (targVal + povButtonRange))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
@@ -285,6 +327,35 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 			deviceStateOut.fAxisValues[g_axisMappingJoy[i].uAbstractID] = GetAxis(js, i);
 
+		}
+
+		if (m_uCaps & CAP_POV)
+		{
+			if (js.rgdwPOV[0] & 0xf0000000)
+			{
+				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = -1.0f;
+			}
+			else
+			{
+				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = ((float)js.rgdwPOV[0])/100.f;
+
+				if(IsPovInRange(js.rgdwPOV[0], 0))
+				{
+					deviceStateOut.uButtonsDown = (1<<JOYSTICK_BUTTON_POV_UP);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 9000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_RIGHT);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 18000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_DOWN);
+				}
+				else if (IsPovInRange(js.rgdwPOV[0], 27000))
+				{
+					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_LEFT);
+				}
+			}
 		}
 	}
 }

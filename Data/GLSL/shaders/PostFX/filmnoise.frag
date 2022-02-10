@@ -22,9 +22,9 @@ void main(void)
 {	
    vec3 texColor = texture(sampler0, vo_vTexCoord).rgb;
 
-    float zoom = 1.f/512.f;//0.002;
-    float strength = 1.0f;
-    vec3 noiseUV = vec3(vo_vTexCoord * vResolution * zoom, fTime * 3);
+    float zoom = 1.f/1024.f;//0.002;
+    float strength = 0.85f;
+    vec3 noiseUV = vec3(vo_vTexCoord * vResolution * zoom, fTime);
 
 #if 0
     vec3 g = texture(sampler1, noiseUV ).rgb - vec3(0.5);
@@ -35,7 +35,7 @@ void main(void)
     colorOut = vec4(texColor + g, 1.0);
 
 #else
-    vec3 overlay = texture(sampler1, noiseUV ).rgb;
+    vec3 overlay = texture(sampler1, noiseUV ).rrr;
     float luminance = luma(texColor);
     vec3 result;
     result.r = mix(1 - (1-2 *(texColor.r-0.5)) * (1 - overlay.r), 2 * texColor.r * overlay.r, step( texColor.r, 0.5 ));

@@ -25,7 +25,7 @@ public:
 
 	void Init(usg::GFXDevice* pDevice, usg::Scene* pScene);
 	void Update(usg::GFXDevice* pDevice, float fElapsed);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 
 	void AddToWindow(usg::GUIWindow* pWindow)
 	{

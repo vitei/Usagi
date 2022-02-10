@@ -20,6 +20,7 @@ public:
 
 	// Set up the defaults
 	void Init(GFXDevice* pDevice, const DescriptorSetLayoutDecl& declaration, uint32 uID);
+	void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 
 	const DescriptorDeclaration* GetDeclaration(uint32 uIndex) const { ASSERT(uIndex < m_uDecls); return &m_pDeclInfo[uIndex].declaration; }
 	uint32 GetResourceIndex(uint32 uDecl, uint32 uSubResource) const;

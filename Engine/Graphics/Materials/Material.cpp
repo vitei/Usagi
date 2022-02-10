@@ -30,8 +30,6 @@ bool Material::Init(GFXDevice* pDevice, PipelineStateHndl pipelineState, const D
 {
 	m_pipelineState = pipelineState;
 
-	SamplerDecl samplerDecl(SF_LINEAR, SC_CLAMP);
-
 	if (descriptorDecl.IsValid())
 	{
 		m_descriptorSet.Init(pDevice, descriptorDecl);
@@ -56,7 +54,7 @@ bool Material::Init(GFXDevice* pDevice, const Material& copyMat)
 
 void Material::Cleanup(GFXDevice* pDevice)
 {
-	m_descriptorSet.CleanUp(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 }
 
 
@@ -72,7 +70,10 @@ void Material::UpdateRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass)
 
 void Material::SetDescriptorLayout(GFXDevice* pDevice, const DescriptorSetLayoutHndl& descriptorDecl)
 {
-	m_descriptorSet.Init(pDevice, descriptorDecl);
+	if (descriptorDecl.IsValid())
+	{
+		m_descriptorSet.Init(pDevice, descriptorDecl);
+	 }
 }
 
 void Material::Apply(GFXContext* pContext) const

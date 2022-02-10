@@ -199,6 +199,7 @@ class BuildConfig
       [
        build_path('Engine/ThirdParty/nanopb'),
        build_path('Engine/ThirdParty/lua-5.3.2/src'),
+       build_path('Engine/ThirdParty/EASTL/source'),
        '.'
       ]
 

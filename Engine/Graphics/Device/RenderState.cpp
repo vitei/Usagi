@@ -159,6 +159,7 @@ RasterizerStateDecl::RasterizerStateDecl()
 	bUseDepthBias = false;
 	bMultisample = false;
 	bWireframe = false;
+	uPatchControlPoints = 0;
 }
 
 RasterizerStateDecl::~RasterizerStateDecl()
@@ -181,13 +182,14 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 
 	return ( eCullFace == rhs.eCullFace
 		&& bMultisample == rhs.bMultisample
-		&& bWireframe == rhs.bWireframe );
+		&& bWireframe == rhs.bWireframe
+		&& uPatchControlPoints == rhs.uPatchControlPoints );
 }
 
 RenderPassDecl::Attachment::Attachment()
 {
 	eAttachType = ATTACH_COLOR;
-	format.eColor = CF_RGBA_8888;
+	format.eColor = ColorFormat::RGBA_8888;
 	uAttachFlags = 0;
 	eLoadOp = LOAD_OP_DONT_CARE;
 	eStoreOp = STORE_OP_STORE;
@@ -449,7 +451,7 @@ bool DepthStencilStateDecl::operator==(const DepthStencilStateDecl& rhs) const
 }
 
 
-SamplerDecl::SamplerDecl(SamplerFilter eFilterIn, SamplerClamp eClampIn)
+SamplerDecl::SamplerDecl(SamplerFilter eFilterIn, SamplerWrap eClampIn)
 {
 	eFilterMin = eFilterIn;
 	eFilterMag = eFilterIn;
@@ -458,7 +460,7 @@ SamplerDecl::SamplerDecl(SamplerFilter eFilterIn, SamplerClamp eClampIn)
 	bEnableCmp = false;
 	eCmpFnc = CF_ALWAYS;
 	eAnisoLevel = ANISO_LEVEL_1;
-	eMipFilter = MF_POINT;
+	eMipFilter = MIP_FILTER_POINT;
 	bProjection = false;
 	LodBias = 0.0f;
 	LodMinLevel = 0;
@@ -466,14 +468,14 @@ SamplerDecl::SamplerDecl(SamplerFilter eFilterIn, SamplerClamp eClampIn)
 
 SamplerDecl::SamplerDecl()
 {
-	eFilterMin = SF_LINEAR;
-	eFilterMag = SF_LINEAR;
-	eClampU = SC_CLAMP;
-	eClampV = SC_CLAMP;
+	eFilterMin = SAMP_FILTER_LINEAR;
+	eFilterMag = SAMP_FILTER_LINEAR;
+	eClampU = SAMP_WRAP_CLAMP;
+	eClampV = SAMP_WRAP_CLAMP;
 	bEnableCmp = false;
 	eCmpFnc = CF_ALWAYS;
 	eAnisoLevel = ANISO_LEVEL_1;
-	eMipFilter = MF_POINT;
+	eMipFilter = MIP_FILTER_POINT;
 	bProjection = false;
 	LodBias = 0.0f;
 	LodMinLevel = 0;
@@ -489,7 +491,7 @@ void SamplerDecl::SetFilter(SamplerFilter eFilter)
 	eFilterMin = eFilterMag = eFilter;
 }
 
-void SamplerDecl::SetClamp(SamplerClamp eClamp)
+void SamplerDecl::SetClamp(SamplerWrap eClamp)
 {
 	eClampU = eClampV = eClamp;
 }

@@ -30,7 +30,8 @@ namespace usg
 
 		void Draw(usg::GFXContext* pContext, bool upper);
 
-		void Update(usg::GFXDevice* pDevice);
+		void GPUUpdate(usg::GFXDevice* pDevice);
+		void Update(float fElapsed);
 
 		void StartFade(int type, bool bWipeLower = true);
 
@@ -39,6 +40,8 @@ namespace usg
 		void Blackout();
 
 		bool IsBlackout();
+
+		void ForceAlpha(float fAlpha);
 
 	private:
 		usg::PipelineStateHndl	m_pipelineState;

@@ -43,10 +43,10 @@ namespace usg{
 			uint32					uRootIndex;
 		} primitive;
 		VertexBuffer			vertexBuffer;
-		CustomEffectRuntime		effectRuntime;
 
 		struct RenderSet
 		{
+			CustomEffectRuntime		effectRuntime;
 			PipelineStateDecl		pipeline;
 			VertexBuffer			singleVerts;
 		} renderSets[RS_COUNT];
@@ -56,28 +56,26 @@ namespace usg{
 
 
 
-		void CleanUp(GFXDevice* pDevice)
+		void Cleanup(GFXDevice* pDevice)
 		{
-			vertexBuffer.CleanUp(pDevice);
+			vertexBuffer.Cleanup(pDevice);
 			for (auto& it : renderSets)
 			{
-				it.singleVerts.CleanUp(pDevice);
+				it.singleVerts.Cleanup(pDevice);
+				it.effectRuntime.Cleanup(pDevice);
 			}
-			primitive.indexBuffer.CleanUp(pDevice);
-			effectRuntime.CleanUp(pDevice);
+			primitive.indexBuffer.Cleanup(pDevice);
 		}
 
 
 		DescriptorSetLayoutHndl	defaultPipelineDescLayout;
-		U8String				name;
-		U8String				matName;
+		usg::string				name;
+		usg::string				matName;
 
 		TextureHndl				pTextures[MAX_UV_STAGES];
 		SamplerHndl				samplers[MAX_UV_STAGES];
 		TextureCoordInfo		uvMapping[MAX_UV_STAGES];
 		uint32					uUVCount;
-		uint32					uFogIndex;
-		bool					bEnableFog;
 		bool					bCanFade;
 
 		uint32					singleAttributesNum;

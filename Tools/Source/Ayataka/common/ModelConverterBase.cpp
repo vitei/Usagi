@@ -9,6 +9,7 @@
 #include "common/CollisionStore.h"
 #include "exchange/LoaderUtil.h"
 #include "exchange/Animation.h"
+#include "exchange/MaterialAnimation.h"
 #include "StringUtil.h"
 
 inline void writeTextToFile( const aya::string& path, const aya::string& text )
@@ -80,6 +81,14 @@ void ModelConverterBase::ExportAnimations(const aya::string& path)
 		aya::string fileName = path + pAnim->GetName();
 		fileName += ".vskla";
 		pAnim->Export(fileName);
+	}
+
+	for (uint32 i = 0; i < mCmdl.GetMatAnimationNum(); i++)
+	{
+		::exchange::MaterialAnimation* pAnim = mCmdl.GetMatAnimation(i);
+		aya::string fileName = path + pAnim->GetName();
+		fileName += ".vmata";
+		pAnim->Export(fileName.c_str());
 	}
 
 }

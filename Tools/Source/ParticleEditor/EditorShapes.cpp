@@ -61,7 +61,7 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 	AlphaStateDecl& alphaDecl = pipeline.alphaState;
 	alphaDecl.SetColor0Only();
-	alphaDecl.uColorTargets = 2;
+	alphaDecl.uColorTargets = 1;
 	alphaDecl.bBlendEnable = false;
 	alphaDecl.blendEq = BLEND_EQUATION_ADD;
 	alphaDecl.srcBlend = BLEND_FUNC_SRC_ALPHA;
@@ -118,24 +118,24 @@ void EditorShapes::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 
 }
 
-void EditorShapes::CleanUp(usg::GFXDevice* pDevice)
+void EditorShapes::Cleanup(usg::GFXDevice* pDevice)
 {
-	m_objectConstants.CleanUp(pDevice);
-	m_hollowObjectConstants.CleanUp(pDevice);
+	m_objectConstants.Cleanup(pDevice);
+	m_hollowObjectConstants.Cleanup(pDevice);
 	m_objectMat.Cleanup(pDevice);
 	m_hollowObjectMat.Cleanup(pDevice);
 	m_gridMat.Cleanup(pDevice);
-	m_gridConstants.CleanUp(pDevice);
-	m_grid.vb.CleanUp(pDevice);
-	m_sphere.vb.CleanUp(pDevice);
-	m_box.vb.CleanUp(pDevice);
-	m_cylinder.vb.CleanUp(pDevice);
-	m_line.vb.CleanUp(pDevice);
-	m_grid.ib.CleanUp(pDevice);
-	m_sphere.ib.CleanUp(pDevice);
-	m_box.ib.CleanUp(pDevice);
-	m_cylinder.ib.CleanUp(pDevice);
-	m_line.ib.CleanUp(pDevice);
+	m_gridConstants.Cleanup(pDevice);
+	m_grid.vb.Cleanup(pDevice);
+	m_sphere.vb.Cleanup(pDevice);
+	m_box.vb.Cleanup(pDevice);
+	m_cylinder.vb.Cleanup(pDevice);
+	m_line.vb.Cleanup(pDevice);
+	m_grid.ib.Cleanup(pDevice);
+	m_sphere.ib.Cleanup(pDevice);
+	m_box.ib.Cleanup(pDevice);
+	m_cylinder.ib.Cleanup(pDevice);
+	m_line.ib.Cleanup(pDevice);
 
 }
 

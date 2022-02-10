@@ -31,14 +31,14 @@ public:
 	{
 		// file object contains relative path in the case of 
 		// directory iterators (i.e. just the file name)
-		if (m_cmpExt.Length() == 0 || file.extension() == m_cmpExt.CStr())
+		if (m_cmpExt.length() == 0 || file.extension() == m_cmpExt.c_str())
 		{
 			FileType parentPath = file.parent_path();
 			usg::string rootPath = parentPath.generic_u8string().c_str();
 			usg::string name = file.filename().generic_u8string().c_str();
-			if (m_directory.Length() < rootPath.length())
+			if (m_directory.length() < rootPath.length())
 			{
-				rootPath = rootPath.substr(m_directory.Length() + 1, usg::string::npos);
+				rootPath = rootPath.substr(m_directory.length() + 1, usg::string::npos);
 				name = rootPath + usg::string("\\") + name;
 			}
 
@@ -57,14 +57,14 @@ public:
 
 		if (!m_bSubDirectories)
 		{
-			for (auto it = std::filesystem::directory_iterator(m_directory.CStr()); it != std::filesystem::directory_iterator(); ++it)
+			for (auto it = std::filesystem::directory_iterator(m_directory.c_str()); it != std::filesystem::directory_iterator(); ++it)
 			{
 				ProcessFile(it->path());
 			}
 		}
 		else
 		{
-			for (auto it = std::filesystem::recursive_directory_iterator(m_directory.CStr()); it != std::filesystem::recursive_directory_iterator(); ++it)
+			for (auto it = std::filesystem::recursive_directory_iterator(m_directory.c_str()); it != std::filesystem::recursive_directory_iterator(); ++it)
 			{
 				ProcessFile(it->path());
 			}
@@ -86,8 +86,8 @@ private:
 	uint32					m_uFileNameCount;
 	bool					m_bSubDirectories;
 
-	usg::U8String			m_cmpExt;
-	usg::U8String			m_directory;
+	usg::string				m_cmpExt;
+	usg::string				m_directory;
 	
 };
 

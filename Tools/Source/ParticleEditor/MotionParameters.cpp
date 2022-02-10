@@ -81,7 +81,7 @@ void MotionParameters::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_checkBoxes[CHECKBOX_LOCAL_SPACE].SetValue(structData.has_bLocalEffect ? structData.bLocalEffect : false);
 }
 
-bool MotionParameters::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool MotionParameters::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 

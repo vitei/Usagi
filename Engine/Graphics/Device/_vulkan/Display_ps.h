@@ -18,7 +18,7 @@ public:
 	~Display_ps();
 
 	void Initialise(usg::GFXDevice* pDevice, WindHndl hndl);
-	void CleanUp(usg::GFXDevice* pDevice);
+	void Cleanup(usg::GFXDevice* pDevice);
 	void SetAsTarget(VkCommandBuffer& cmd);
 
 	void Present();
@@ -29,6 +29,7 @@ public:
 
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
     void Resize(usg::GFXDevice* pDevice);	
+	void SetVSyncMode(VSyncMode eVsync);
 	void Minimized(usg::GFXDevice* pDevice);
 	
 	// PS
@@ -37,6 +38,7 @@ public:
 	void SwapBuffers(GFXDevice* pDevice);
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
+	bool HasHDRSupport() const { return m_bHDR; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -46,6 +48,7 @@ private:
 	void RecreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChainImageViews(GFXDevice* pDevice);
+	ColorFormat GetColorFormat(VkFormat eFormat);
 
 	enum 
 	{
@@ -56,6 +59,7 @@ private:
 	usg::RenderPassHndl	m_postCopyRenderPass;
 	VkFramebuffer*		m_pFramebuffers;
 	VkFramebuffer*		m_pFramebuffersNoCopy;
+	VSyncMode			m_eVsync;
 	HWND				m_hwnd;
 	HDC					m_hdc;
 	VkImage*			m_pSwapchainImages;
@@ -69,8 +73,10 @@ private:
 	uint32				m_uWidth;
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
+	ColorFormat			m_eSwapChainFormat;
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
+	bool				m_bHDR;
 };
 
 inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)

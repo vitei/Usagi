@@ -6,7 +6,6 @@
 #include "Engine/Graphics/Device/Display.h"
 #include "Engine/Graphics/Device/RenderState.h"
 #include "Engine/Graphics/Device/GFXContext.h"
-#include "Engine/Core/Containers/List.h"
 #include "Engine/Graphics/Device/PipelineState.h"
 #include "Engine/Graphics/Device/RenderStateMgr.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
@@ -32,20 +31,29 @@ GFXDevice::GFXDevice()
 	: m_pHMD(nullptr) 
 	, m_uDisplayCount(0)
 	, m_uFrameCount(0)
+	, m_uAllocId(0)
 {
 	m_pImpl = vnew(ALLOC_OBJECT) PIMPL;
 }
 
 GFXDevice::~GFXDevice()
 {
+	// Platform specific version may need to cleanup first
+	m_pImpl->immediateContext.Cleanup(this);
+
 	if (m_pHMD)
 	{
 		m_pHMD->Cleanup(this);
 	}
 	for (uint32 i = 0; i < m_uDisplayCount; i++)
 	{
-		m_pDisplays[i]->CleanUp(this);
+		m_pDisplays[i]->Cleanup(this);
 	}
+
+	m_pImpl->renderStates.Cleanup(this);
+
+	m_pImpl->platform.Cleanup(this);
+
 	vdelete m_pImpl;
 	m_pImpl = nullptr;
 }
@@ -136,6 +144,11 @@ bool GFXDevice::ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, 
 	return true;
 }
 
+uint32 GFXDevice::GetColorTargetCount(RenderPassHndl pass)
+{
+	return m_pImpl->renderStates.GetColorTargetCount(pass);
+}
+
 RenderPassHndl GFXDevice::GetRenderPass(const RenderPassDecl& decl)
 {
 	return m_pImpl->renderStates.GetRenderPass(decl, this);
@@ -206,8 +219,9 @@ void GFXDevice::FinishedStaticLoad()
 
 void GFXDevice::ClearDynamicResources()
 {
-	m_pImpl->renderStates.ClearDynamicResources();
+	m_pImpl->renderStates.ClearDynamicResources(this);
 	m_pImpl->platform.ClearDynamicResources();
+	m_uAllocId = m_uAllocId ? 0 : 1;
 }
 
 float GFXDevice::GetGPUTime() const

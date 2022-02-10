@@ -32,7 +32,7 @@ struct StreamingSoundDef
 	uint32 uChannels = 2;
 	uint32 uBitsPerSample = 16;
 	uint32 uSampleRate = 4800;
-	SoundCallbacks* pCallbacks = nullptr;
+	usg::weak_ptr<SoundCallbacks> pCallbacks;
 };
 
 class Audio : public Singleton<Audio>
@@ -55,6 +55,7 @@ public:
 	~Audio();
 
 	void Init();
+	void SetChannelConfig(ChannelConfig eChannelConfig);	// Note will stop all active sounds! 
 	void Update(float fElapsed);
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
@@ -71,6 +72,9 @@ public:
 	SoundHandle Play3DSound(const Vector3f& vPos, uint32 uSoundId, const float fVolume);
 	void SetVolume(const AudioType eType, const float fVolume);
 	float GetVolume(const AudioType eType);
+	void EnableEffect(const AudioType eType, uint32 uEffectCRC);
+	void DisableEffect(const AudioType eType, uint32 uEffectCRC);
+
 	void StopAll(AudioType eType, float fTime=0.2f);
 	void PauseAll(AudioType eType, float fTime = 0.2f);
 	void ResumeAll(AudioType eType, float fTime = 0.2f);
@@ -85,6 +89,9 @@ public:
 	void			SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject* objectBase);
 	float			GetDoppler(const AudioListener* pListener, const Vector3f& vScreenPos, const Vector3f &vVelocity, SoundObject* objectBase);
 	FastPool<SoundData>* GetPool() { return &m_sounds; }
+
+	AudioFilter* GetFilter(uint32 uCRC);
+	AudioEffect* GetEffect(uint32 uCRC);
 
 private:
 	bool ShouldPlay(Vector3f vPos, SoundFile* pSoundFile);
@@ -103,11 +110,17 @@ private:
 	{
 		char			name[USG_MAX_PATH];
 		SoundFile**		ppSoundFiles;
+		AudioFilter**	ppAudioFilters;
+		AudioEffect**	ppAudioEffects;
 		uint32			uFiles;
+		uint32			uFilters;
+		uint32			uEffects;
 	};
 	
 	usg::vector<Archive>			m_archives;
 	hash_map<uint32, SoundFile*>	m_soundHashes;
+	hash_map<uint32, AudioFilter*>	m_filterHashes;
+	hash_map<uint32, AudioEffect*>	m_effectHashes;
 	FastPool<AudioListener>			m_listeners;
 	FastPool<ActorData>				m_actors;
 	FastPool<SoundData>				m_sounds;
@@ -116,14 +129,17 @@ private:
 
 	struct SpeakerInfo
 	{
-		float	fSpeakerHorAngles[SOUND_CHANNEL_COUNT+2];	// +2 because we include the wrapped values
-		uint32	uChannelIndex[SOUND_CHANNEL_COUNT + 2];
-		uint32  uSpeakerValues;
+		SpeakerInfo() {}
+		SpeakerInfo(float fAngle, uint32 uIndex) { fSpeakerHorAngle = fAngle; uChannelIndex = uIndex; }
+		float fSpeakerHorAngle;	
+		uint32 uChannelIndex;		
 	};
 
-	SpeakerInfo	m_speakerInfo;
 
-	Audio_ps	m_platform;
+	usg::vector<SpeakerInfo>	m_speakerInfo; // 2 greater than the actual number of speakers because we include the wrapped values
+	ChannelConfig				m_eChannelConfig;
+
+	Audio_ps					m_platform;
 };
 
 }

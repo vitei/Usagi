@@ -25,6 +25,7 @@ ConstantSet::~ConstantSet()
 	if(m_pCPUData)
 	{
 		mem::Free(MEMTYPE_STANDARD, m_pCPUData);
+		m_pCPUData = nullptr;
 	}
 }
 
@@ -92,9 +93,9 @@ void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUU
 }
 
 
-void ConstantSet::CleanUp(GFXDevice* pDevice)
+void ConstantSet::Cleanup(GFXDevice* pDevice)
 {
-	m_platform.CleanUp(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 void* ConstantSet::Lock(uint32 uSize)

@@ -226,7 +226,7 @@ namespace usg
 		for (uint32 i = 0; i < m_emissionDef.textureData_count; i++)
 		{
 			SamplerDecl decl;
-			decl.SetClamp(SC_CLAMP);
+			decl.SetClamp(SAMP_WRAP_CLAMP);
 			pTextures[i] = ResourceMgr::Inst()->GetTexture(pDevice, m_emissionDef.textureData[i].name);
 			m_material.SetTexture(i, pTextures[i], pDevice->GetSampler(decl));
 		}
@@ -379,6 +379,14 @@ namespace usg
 		m_fEffectTime = 0.0f;
 		m_fAccumulator = 0.0f;
 		m_fDelay = m_fTriggerTime;
+
+
+
+		if (m_emissionDef.emission.has_vUserRotationRandom)
+		{
+			m_vRandomRot = usg::Vector3f::RandomRange(-m_emissionDef.emission.vUserRotationRandom, m_emissionDef.emission.vUserRotationRandom);
+		}
+
 		m_initialSpeed.Init(&m_emissionDef.omniVelocity);
 		m_dirVelocity.Init(&m_emissionDef.dirVelocity);
 		m_baseLife.Init(&m_emissionDef.life);
@@ -400,14 +408,14 @@ namespace usg
 		ResetMatrix(shapeDef, m_fScale);
 	}
 
-	void ScriptEmitter::CleanUp(GFXDevice* pDevice)
+	void ScriptEmitter::Cleanup(GFXDevice* pDevice)
 	{
-		m_customConstants.CleanUp(pDevice);
-		m_gsTransform.CleanUp(pDevice);
-		m_materialConsts.CleanUp(pDevice);
-		m_fragConsts.CleanUp(pDevice);
+		m_customConstants.Cleanup(pDevice);
+		m_gsTransform.Cleanup(pDevice);
+		m_materialConsts.Cleanup(pDevice);
+		m_fragConsts.Cleanup(pDevice);
 		m_material.Cleanup(pDevice);
-		Inherited::CleanUp(pDevice);
+		Inherited::Cleanup(pDevice);
 	}
 
 	void ScriptEmitter::SetScale(float fScale)
@@ -467,11 +475,12 @@ namespace usg
 		
 		m_fEffectTime += fElapsed;
 
+		uint32 uRequestedEmission = 0;
 		if(m_emissionDef.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT)
 		{
 			if(m_fEffectTime == fElapsed)
-			{
-				EmitParticle(m_emissionDef.emission.uMaxParticles);
+			{	
+				uRequestedEmission = m_emissionDef.emission.uMaxParticles;
 			}
 			
 		}
@@ -488,9 +497,28 @@ namespace usg
 					}
 				}
 
-				m_fAccumulator += m_emission.GetValue()*fElapsed;
-				EmitParticle((uint32)m_fAccumulator);
+				m_fAccumulator += m_emission.GetValue() * fElapsed;
+				m_fAccumulator = usg::Math::Clamp(m_fAccumulator, 0.0f, (float)m_emissionDef.emission.uMaxParticles);
+				uRequestedEmission = (uint32)m_fAccumulator;
 				m_fAccumulator -= floorf(m_fAccumulator);
+			}
+		}
+
+		if(uRequestedEmission > 0)
+		{
+			if (!m_emissionDef.emission.has_fReleaseRandom || m_emissionDef.emission.fReleaseRandom >= 1.0f)
+			{
+				EmitParticle(uRequestedEmission);
+			}
+			else
+			{
+				for (uint32 i = 0; i < uRequestedEmission; i++)
+				{
+					if (Math::RangedRandom(0.0f, 1.0f) < m_emissionDef.emission.fReleaseRandom)
+					{
+						EmitParticle(1);
+					}
+				}
 			}
 		}
 			
@@ -506,13 +534,15 @@ namespace usg
 			if (pGS->bCustomMatrix)
 			{
 				usg::Matrix4x4 mRot;
-				const Vector3f& vRot = m_emissionDef.emission.vUserRotation;
+				Vector3f vRot = m_emissionDef.emission.vUserRotation;
+				vRot += m_vRandomRot;
+
 				mRot.MakeRotateYPR(Math::DegreesToRadians(vRot.y), Math::DegreesToRadians(vRot.x), Math::DegreesToRadians(vRot.z));
-				pGS->mOrientation = mRot * m_mWorldMatrix;
+				pGS->mOrientation = mRot;
 			}
 			else
 			{
-				pGS->mOrientation = m_mWorldMatrix;
+				pGS->mOrientation = usg::Matrix4x3::Identity();
 			}
 			m_gsTransform.Unlock();	
 		}
@@ -569,7 +599,7 @@ namespace usg
 				patternIdx = (uint32)(((m_fEffectTime - pOut->fLifeStart) * pOut->fInvLife) * (texData.uPatternRepeatHor * texData.uPatternRepeatVer) );
 				break;
 			case usg::particles::TEX_MODE_FLIPBOOK_LOOP:
-				patternIdx = ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale));
+				patternIdx = (uint32)(m_fEffectTime *texData.textureAnim.fAnimTimeScale*60.f);
 				break;
 			default:
 				continue;
@@ -591,8 +621,7 @@ namespace usg
 			}
 			else
 			{
-				// Only update the random particle every few frames to stop it looking crazy
-				if ((uint32)(fPartElapsed*texData.textureAnim.fAnimTimeScale) != (uint32)(fNextElapsed*texData.textureAnim.fAnimTimeScale))
+				if (fPartElapsed == 0.0f || (uint32)(fPartElapsed* texData.textureAnim.fAnimTimeScale * 60.f) != (uint32)(fNextElapsed* texData.textureAnim.fAnimTimeScale * 60.f))
 				{
 					pOut->vUVOffset.x = m_vUVScale[i].x * uNoX;
 					pOut->vUVOffset.y = m_vUVScale[i].y * uNoY;

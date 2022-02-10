@@ -4,7 +4,6 @@
 #ifndef _USG_GRAPHICS_EFFECT_
 #define _USG_GRAPHICS_EFFECT_
 
-#include "Engine/Core/String/U8String.h"
 #include "Engine/Graphics/Primitives/VertexDeclaration.h"
 #include API_HEADER(Engine/Graphics/Effects, Effect_ps.h)
 #include "Engine/Resource/ResourceBase.h"
@@ -24,7 +23,7 @@ public:
 	virtual ~Effect();
 
 	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const FileDependencies* pDependencies, const void* pData) override;
-	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
+	void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 	//void Apply() const;
 
 	Effect_ps& GetPlatform() { return m_platform; }

@@ -54,6 +54,11 @@ void PipelineLayout::Init(GFXDevice* pDevice, const PipelineLayoutDecl &decl, ui
 	}
 }
 
+void PipelineLayout::Cleanup(GFXDevice* pDevice)
+{
+	vkDestroyPipelineLayout(pDevice->GetPlatform().GetVKDevice(), m_layout, nullptr);
+}
+
 
 }
 

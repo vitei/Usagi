@@ -69,11 +69,11 @@ void PostFXSys::Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, 
 	m_platform.Init(this, pResource, pDevice, uInitFlags, uWidth, uHeight);
 }
 
-void PostFXSys::CleanUp(GFXDevice* pDevice)
+void PostFXSys::Cleanup(GFXDevice* pDevice)
 {
-	m_fullScreenIB.CleanUp(pDevice);
-	m_fullScreenVB.CleanUp(pDevice);
-	m_platform.CleanUp(pDevice);
+	m_fullScreenIB.Cleanup(pDevice);
+	m_fullScreenVB.Cleanup(pDevice);
+	m_platform.Cleanup(pDevice);
 }
 
 void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
@@ -82,6 +82,13 @@ void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	ASSERT(bSupport);
 	if (bSupport && m_uEffectsEnabled != uEffectFlags)
 	{
+		if( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0
+		&& (uEffectFlags & PostFXSys::EFFECT_SSAO) != 0 )
+		{
+			DEBUG_PRINT("Disabling SSAO, not currently suported without deferred");
+			uEffectFlags &= ~PostFXSys::EFFECT_SSAO;
+		}
+
 		m_platform.EnableEffects(pDevice, uEffectFlags);
 		m_uEffectsEnabled = uEffectFlags;
 	}
@@ -111,10 +118,6 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 	return pTarget;
 }
 
-void PostFXSys::SetPostDepthDescriptors(GFXContext* pCtxt)
-{
-	m_platform.DepthWriteEnded(pCtxt, m_uEffectsEnabled);
-}
 
 void PostFXSys::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl)
 {

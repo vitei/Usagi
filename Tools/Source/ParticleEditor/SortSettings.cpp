@@ -55,7 +55,7 @@ void SortSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& str
 	m_bForceUpdate = true;
 }
 
-bool SortSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool SortSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bAltered = false;
 	usg::particles::SortSettings& sortVars = structData.sortSettings;

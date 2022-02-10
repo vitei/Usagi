@@ -1,10 +1,6 @@
 [submodule "Engine/ThirdParty/imgui"]
 	path = Engine/ThirdParty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "Engine/ThirdParty/EASTL"]
-	path = Engine/ThirdParty/EASTL
-	url = https://github.com/vitei/EASTL.git
-	branch = vitei-master
 [submodule "Engine/ThirdParty/yaml-cpp"]
 	path = Engine/ThirdParty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
@@ -22,3 +18,10 @@
 [submodule "Engine/ThirdParty/ImGuiColorTextEdit"]
 	path = Engine/ThirdParty/ImGuiColorTextEdit
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git
+[submodule "Engine/ThirdParty/EASTL"]
+	path = Engine/ThirdParty/EASTL
+	url = https://github.com/electronicarts/EASTL.git
+	fetchRecurseSubmodules = false
+[submodule "Engine/ThirdParty/PhysX"]
+	path = Engine/ThirdParty/PhysX
+	url = https://github.com/NVIDIAGameWorks/PhysX.git

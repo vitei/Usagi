@@ -98,8 +98,8 @@ namespace usg
 
 	void PakFile::LoadFile(GFXDevice* pDevice, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
 	{
-		U8String name = pFileInfo->szName;
-		name.ToLower();
+		string name = pFileInfo->szName;
+		name.make_lower();
 
 		void* pData = nullptr;
 		if (pFileInfo->uDataOffset == USG_INVALID_ID)
@@ -141,7 +141,7 @@ namespace usg
 		return nullptr;
 	}
 
-	void PakFile::CleanUp(GFXDevice* pDevice)
+	void PakFile::Cleanup(GFXDevice* pDevice)
 	{
 
 	}

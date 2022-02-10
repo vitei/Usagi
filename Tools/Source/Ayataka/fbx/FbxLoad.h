@@ -6,27 +6,33 @@
 #include "exchange/Shape.h"
 #include "exchange/Material.h"
 #include "exchange/Skeleton.h"
+#include "exchange/MaterialAnimation.h"
 #include "Dependencies/DependencyTracker.h"
 #include "Engine/Core/Utility.h"
 #include "Engine/Core/stl/vector.h"
+#include "exchange/MaterialOverrides.h"
 #include "Engine/Scene/Model/SkeletalAnimation.pb.h"
+#include "Engine/Scene/Model/MaterialAnimation.pb.h"
 #include <fbxsdk.h>
 
 struct FBXVertexElement
 {
 	FBXVertexElement(std::string inHint, usg::exchange::VertexAttribute inType, usg::VertexElementType eInElementType, uint32 inIndex, uint32 inCount)
 	{
+		memset(hint, 0, sizeof(hint));
 		for (uint32 i = 0; i < 4; i++)
 		{
 			elements[i] = 0.0f;
 		}
-		hint = inHint;
+		strcpy_s(hint, inHint.c_str());
 		type = inType;
 		uIndex = inIndex;
 		uCount = inCount;
 		eElementType = eInElementType;
 	}
-	std::string hint;
+
+	// Only raw types allowed as we CRC the contents
+	char hint[32];
 	usg::exchange::VertexAttribute type;
 	usg::VertexElementType eElementType;
 	uint32	uIndex;
@@ -83,7 +89,7 @@ struct TempVertex
 			uint32 controlPointIndex;
 			uint32 caluclatedHash;
 		};
-		uint64 cmpValue;
+		uint64 cmpValue = 0;
 	};
 	
 
@@ -103,7 +109,7 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies, MaterialOverrides* pOverrides);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
 	void SetAttenScale(double fScale) { m_fAttenScale = fScale; }
 
@@ -130,21 +136,21 @@ private:
 	// Animations
 	void ReadAnimations(Cmdl& cmdl, FbxScene* pScene);
 	void ReadAnimationsRecursive(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode);
-	void ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, FbxNode* pNode);
+	void ReadAnimationKeyFramesRecursively(FbxAnimStack* pAnimStack, ::exchange::Animation* pAnim, ::exchange::MaterialAnimation* pMatAnim, FbxNode* pNode);
 	bool GetAnimBoneInfluences(FbxAnimLayer* pAnimStack, FbxNode* pNode, bool& bTrans, bool& bRot, bool& bScale);
 	void FillOutAnimFrame(FbxNode* pNode, FbxTime currTime, usg::exchange::BoneAnimationFrame* pFrame);
 
 	// Materials
-	void AddMaterials(Cmdl& cmdl, FbxNode* pNode);
+	void AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned);
 	void AddMaterialTextures(FbxSurfaceMaterial* pFBXMaterial, ::exchange::Material* pNewMaterial);
-	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);
-	
+	bool GetTextureIndex(const FbxTexture& textureInfo, const char* szTexName, ::exchange::Material* pMaterial, uint32& uIndex);	
 
 	::exchange::Shape* NewShape(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Mesh* NewMesh(Cmdl& cmdl, FbxNode* pShapeNode);
 	::exchange::Animation* FbxLoad::NewAnimation(Cmdl& cmdl, FbxAnimStack* layerNode);
-	::exchange::Material* NewMaterial(FbxSurfaceMaterial* pFBXMaterial);
-	::exchange::Material* DummyMaterial();
+	::exchange::MaterialAnimation* FbxLoad::NewMaterialAnimation(Cmdl& cmdl, FbxAnimStack* layerNode);
+	::exchange::Material* NewMaterial(FbxSurfaceMaterial* pFBXMaterial, bool bSkin);
+	::exchange::Material* DummyMaterial(bool bSkinned);
 	::exchange::Skeleton* NewSkeleton();
 
 	void AddIdentityBone(::exchange::Skeleton* pSkeleton);
@@ -163,6 +169,8 @@ private:
 	FbxAMatrix GetGlobalPoseMatrix(FbxNode* pNode);
 	FbxAMatrix GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName);
 	bool IsBone(FbxNode* pNode);
+	usg::exchange::CurveKeyFrameType GetKeyFrameType(FbxAnimCurveDef::EInterpolationType eTypeIn);
+	bool AddAnimCurve(FbxAnimStack* pAnimStack, ::exchange::MaterialAnimation* pMatAnim, FbxPropertyT<FbxDouble3>& prop, usg::exchange::MaterialAnimationMemberType eType, const char* szName);
 
 	// Below here are custom tweaks for our own behaviour
 	// At this stage only used for culling duplicate bones used for the LOD system
@@ -220,6 +228,7 @@ private:
 	usg::vector<TempVertex>	m_activeVerts;
 	usg::vector<WeightingInfo> m_activeWeights;
 	DependencyTracker*		m_pDependencies;
+	MaterialOverrides*		m_pOverrides;
 };
 
 #endif // FMDALOAD_H

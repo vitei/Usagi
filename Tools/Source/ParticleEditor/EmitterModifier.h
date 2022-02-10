@@ -23,7 +23,7 @@ public:
 
 	virtual void Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer) = 0;
 	virtual void SetWidgetsFromDefinition(usg::particles::EmitterEmission& structData) = 0;
-	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect) = 0;
+	virtual bool Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed) = 0;
 	
 	template <class VariableType, class ComparisonType>
 	inline bool Compare(VariableType& inOut, const ComparisonType newValue)

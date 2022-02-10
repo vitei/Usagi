@@ -188,7 +188,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	case WM_MOUSEWHEEL:
 	{
-		Input::GetPlatform().RegisterMouseWheel(wparam);
+		Input::GetPlatform().RegisterMouseWheel((long)wparam);
 	}
 	break;
 
@@ -222,12 +222,13 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdlin
 		DEBUG_PRINT("USAGI_DIR enviroment variable not located, please set it!!!!");
 	}
 
-	usg::DisplaySettings settings;
-	settings.uX = 0; settings.uY = 0; settings.uWidth = g_uWindowWidth; settings.uHeight = g_uWindowHeight;
-	settings.bWindowed = !g_bFullScreen; settings.hardwareHndl = NULL;
-	const char * const p_string = "Virtual Screen";
+	usg::DisplayMode settings;
+	settings.screenDim.x = 0; settings.screenDim.y = 0; settings.screenDim.width = g_uWindowWidth; settings.screenDim.height = g_uWindowHeight;
+	settings.bWindowed = !g_bFullScreen; settings.parentHndl = NULL;
+	settings.bMenu = true;
+	const char * const p_string = "Particle Editor";
 	str::Copy(settings.name, p_string, sizeof(settings.name));
-	WindHndl hndl = WINUTIL::CreateDisplayWindow(WindowProc, "Usagi", &settings, false);
+	WindHndl hndl = WINUTIL::CreateDisplayWindow(WindowProc, "Particle Editor", &settings, false);
 	usg::Input::GetPlatform().RegisterHwnd(0, hndl);
 
 #ifndef USE_VULKAN

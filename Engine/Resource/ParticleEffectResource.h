@@ -9,7 +9,6 @@
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Particles/Scripted/EmitterShapes.pb.h"
 #include "Engine/Resource/ResourceBase.h"
-#include "Engine/Core/String/U8String.h"
 
 namespace usg{
 
@@ -26,14 +25,14 @@ public:
 	const particles::EffectGroup& GetEffectGroup() const { return m_definition; }
 	uint32 GetEmitterCount() const { return m_definition.emitters_count; }
 	uint32 GetRibbonCount() const { return m_definition.ribbons_count; }
-	const U8String& GetName() const { return m_name; }
+	const string& GetName() const { return m_name; }
 
 	const static ResourceType StaticResType = ResourceType::PARTICLE_EFFECT;
 
 
 protected:
 
-	U8String					m_name;
+	string					m_name;
 	particles::EffectGroup		m_definition;		
 };
 

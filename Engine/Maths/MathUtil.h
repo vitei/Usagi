@@ -188,6 +188,13 @@ namespace Math
 		ASSERT(base && ((base & (base - 1)) == 0)); // assert that base is a power of two
         return ((x) + ((base)-1)) & ~((base)-1);
     }	
+
+	template <class VariableType>
+	inline VariableType Round(const float x)
+	{
+		return (VariableType)(x + 0.5f);
+	}
+
 	
 	inline	float	DegreesToRadians(const float deg)
 	{

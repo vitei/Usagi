@@ -14,7 +14,12 @@ namespace WINUTIL
 	// FIXME: Not ideal
 	WindHndl		GetWindow();
 	void			SetWindow(WindHndl hndl);
+	void			SetInFocus(bool bInFocus);
+	bool			GetInFocus();
 
-	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplaySettings* pDisplaySettings, bool bHidden);
+	WindHndl CreateDisplayWindow(WNDPROC wndProc, const char* szName, const usg::DisplayMode* pDisplaySettings, bool bHidden);
+	void UpdateWindow(const usg::DisplayMode* pDisplaySettings);
+	void OnLostFocus();
+	void OnGainedFocus(uint32 uWidth, uint32 uHeight);
 
 };

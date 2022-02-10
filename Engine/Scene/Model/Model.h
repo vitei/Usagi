@@ -31,12 +31,12 @@ public:
 
 	// bAutoTransform - Scene nodes are parented and automatically updated, set this to false when using the component system
 	bool Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const char* szFileName, bool bDynamic = false, bool bFastMem = true, bool bAutoTransform = true, bool bPerBoneCulling = true );
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 uMesh);
 	// Note that AddToScene is dependent on a GPU update, to remove a model from the systems use ForceRemoveFromScene
 	void AddToScene(bool bAdd);
 	void ForceRemoveFromScene();
-	const U8String& GetName() const;
+	const usg::string& GetName() const;
 	void SetInUse(bool bInUse);
 
 	void SetTransform(const Matrix4x4 &trans);
@@ -49,7 +49,7 @@ public:
 		OverrideVariable(szVarName, (void*)&var, sizeof(VariableType), uIndex);
 	}
 	void UpdateDescriptors(GFXDevice* pDevice);
-	const Matrix4x4& GetTransform() const { return m_pTransformNode->GetMatrix(); }
+	const Matrix4x4& GetTransformMtx() const { return m_pTransformNode->GetMatrix(); }
 	TransformNode* GetTransform() { return m_pTransformNode; }
 	const ModelResHndl& GetResource() const { return m_pResource; }
 

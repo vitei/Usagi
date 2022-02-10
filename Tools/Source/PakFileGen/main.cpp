@@ -1,6 +1,5 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Graphics/RenderConsts.h"
-#include "Engine/Core/String/U8String.h"
 #include "FileFactory.h"
 #include "FileFactoryWin.h"
 #include "Engine/Graphics/Textures/TGAFile.h"

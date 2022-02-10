@@ -68,13 +68,13 @@ void FilmGrain::UpdateBuffer(usg::GFXDevice* pDevice)
 	m_material.UpdateDescriptors(pDevice); 
 }
 
-void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 {
 	m_pSys = pSys;
-	m_pDestTarget = pDst;
+	m_pDestTarget = nullptr;
 
-	SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-	SamplerDecl linearDecl(SF_LINEAR, SC_WRAP);
+	SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+	SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
 
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
@@ -93,7 +93,8 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	pipelineDecl.layout.uDescriptorSetCount = 2;
 	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
-	m_material.Init(pDevice, pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl), matDescriptors);
+	m_pipelineDecl = pipelineDecl;
+	m_material.SetDescriptorLayout(pDevice, matDescriptors);
 
 	m_constantSet.Init(pDevice, g_filmGrainConstantDef);
 	
@@ -112,9 +113,9 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 	m_constantSet.UpdateData(pDevice);
 }
 
-void FilmGrain::CleanUp(GFXDevice* pDevice)
+void FilmGrain::Cleanup(GFXDevice* pDevice)
 {
-	m_constantSet.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
 	m_material.Cleanup(pDevice);
 }
 
@@ -124,24 +125,41 @@ void FilmGrain::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (m_pDestTarget != pDst)
 	{
 		m_pDestTarget = pDst;
-		PipelineStateDecl decl;
-		RenderPassHndl hndlTmp;
 		
 		FilmGrainConstants* pConsts = m_constantSet.Lock<FilmGrainConstants>();
 		pConsts->vResolution.x = (float)pDst->GetWidth();
 		pConsts->vResolution.y = (float)pDst->GetHeight();
 		m_constantSet.Unlock();
 
-		pDevice->GetPipelineDeclaration(m_material.GetPipelineStateHndl(), decl, hndlTmp);
-		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), decl));
+		m_material.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineDecl));
+	}
+}
+
+
+bool FilmGrain::ReadsTexture(Input eInput) const 
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+bool FilmGrain::LoadsTexture(Input eInput) const
+{
+	return PostEffect::LoadsTexture(eInput);
+}
+
+void FilmGrain::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+{
+	if (eInput == PostEffect::Input::Color)
+	{
+		m_material.SetTexture(0, texture, m_sampler);
+		m_material.UpdateDescriptors(pDevice);
 	}
 }
  
-void FilmGrain::SetSourceTarget(GFXDevice* pDevice, RenderTarget* pTarget)
-{
-	m_material.SetTexture(0, pTarget->GetColorTexture(), m_sampler);
-	m_material.UpdateDescriptors(pDevice);
-}
 
 void FilmGrain::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {

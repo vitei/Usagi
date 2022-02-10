@@ -14,11 +14,22 @@ namespace usg {
 		m_bValid = false;
 		// TODO: We should support startic buffers
 		m_uBuffers = 0;	
+		m_pImages = nullptr;
+		m_pWrites = nullptr;
 	}
 
 	DescriptorSet_ps::~DescriptorSet_ps()
 	{
-
+		if (m_pImages)
+		{
+			vdelete[] m_pImages;
+			m_pImages = nullptr;
+		}
+		if (m_pWrites)
+		{
+			vdelete[] m_pWrites;
+			m_pWrites = nullptr;
+		}
 	}
 
 	void DescriptorSet_ps::Init(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
@@ -30,10 +41,19 @@ namespace usg {
 			m_descSet[i] = pLayout->GetPlatform().AllocDescriptorSet(pDevice);
 		}
 
+		ASSERT(!m_pImages && !m_pWrites);
+
+		uint32 imageCount = pLayout->GetNumberOfType(DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) + pLayout->GetNumberOfType(DESCRIPTOR_TYPE_STORAGE_IMAGE);
+
+		m_pImages = imageCount > 0 ? vnew(usg::ALLOC_GFX_SHADER) VkDescriptorImageInfo[imageCount] : nullptr;
+		m_pWrites = vnew(usg::ALLOC_GFX_SHADER) VkWriteDescriptorSet[pLayout->GetDeclarationCount()];
+
+		usg::MemClear(m_pWrites, sizeof(VkWriteDescriptorSet) * pLayout->GetDeclarationCount());
+
 		m_bValid = true;
 	}
 
-	void DescriptorSet_ps::CleanUp(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
+	void DescriptorSet_ps::Cleanup(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
 	{
 		if (m_bValid)
 		{
@@ -51,35 +71,31 @@ namespace usg {
 		{
 			m_uActiveSet = (m_uActiveSet + 1) % m_uBuffers;
 		}
-		vector<VkDescriptorImageInfo> images;
-		images.reserve(pLayout->GetNumberOfType(DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) + pLayout->GetNumberOfType(DESCRIPTOR_TYPE_STORAGE_IMAGE));
 
-		vector<VkWriteDescriptorSet> writes;
-		writes.resize(pLayout->GetDeclarationCount());
+		size_t uImageIndex = 0;
 
 		m_dynamicBuffers.clear();
 		
 		for (uint32 i = 0; i < pLayout->GetDeclarationCount(); i++)
 		{
-			writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writes[i].pNext = NULL;
-			writes[i].dstSet = m_descSet[m_uActiveSet].descSet;
-			writes[i].dstBinding = pLayout->GetDeclaration(i)->uBinding;
-			writes[i].descriptorCount = pLayout->GetDeclaration(i)->uCount;
+			m_pWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			m_pWrites[i].pNext = NULL;
+			m_pWrites[i].dstSet = m_descSet[m_uActiveSet].descSet;
+			m_pWrites[i].dstBinding = pLayout->GetDeclaration(i)->uBinding;
+			m_pWrites[i].descriptorCount = pLayout->GetDeclaration(i)->uCount;
 			switch (pLayout->GetDeclaration(i)->eDescriptorType)
 			{
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER:
 			{
-				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				writes[i].pBufferInfo = &pData->pConstBuffer->GetPlatform().GetDescriptorInfo();
+				m_pWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				m_pWrites[i].pBufferInfo = &pData->pConstBuffer->GetPlatform().GetDescriptorInfo();
 				break;
 			}
 			case DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC:
 			{
-				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;	// Dynamic so that we can update every frame
-				writes[i].pBufferInfo = &pData->pConstBuffer->GetPlatform().GetBaseDescriptorInfo();
-				size_t uIndex = m_dynamicBuffers.size();
-				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				m_pWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;	// Dynamic so that we can update every frame
+				m_pWrites[i].pBufferInfo = &pData->pConstBuffer->GetPlatform().GetBaseDescriptorInfo();
+				for (uint32 j = 0; j < m_pWrites[i].descriptorCount; j++)
 				{
 					m_dynamicBuffers.push_back(&pData[j].pConstBuffer->GetPlatform());
 				}
@@ -87,12 +103,11 @@ namespace usg {
 			}
 			case DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
 			{
-				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				writes[i].dstBinding += SAMPLER_OFFSET;
-				size_t uIndex = images.size();
-				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				m_pWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				m_pWrites[i].dstBinding += SAMPLER_OFFSET;
+				for (uint32 j = 0; j < m_pWrites[i].descriptorCount; j++)
 				{
-					VkDescriptorImageInfo image = {};
+					VkDescriptorImageInfo& image = m_pImages[uImageIndex];
 					image.sampler = pData[j].texData.sampler.GetContents()->GetSampler();
 					if (pData[j].texData.imageView.IsDefault())
 					{
@@ -104,20 +119,18 @@ namespace usg {
 						image.imageView = texPlat.GetImageView(pDevice, pData[j].texData.imageView);
 					}
 					image.imageLayout = pData[j].texData.tex->GetPlatform().GetImageLayout();
-					images.push_back(image);
 				}
 
-				writes[i].pImageInfo = &images[uIndex];
+				m_pWrites[i].pImageInfo = &m_pImages[uImageIndex++];
 				break;
 			}
 			case DESCRIPTOR_TYPE_STORAGE_IMAGE:
 			{
-				writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-				writes[i].dstBinding += SAMPLER_OFFSET;	// Share the offsets of standard samplers
-				size_t uIndex = images.size();
-				for (uint32 j = 0; j < writes[i].descriptorCount; j++)
+				m_pWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				m_pWrites[i].dstBinding += SAMPLER_OFFSET;	// Share the offsets of standard samplers
+				for (uint32 j = 0; j < m_pWrites[i].descriptorCount; j++)
 				{
-					VkDescriptorImageInfo image = {};
+					VkDescriptorImageInfo& image = m_pImages[uImageIndex];
 					if (pData[j].texData.imageView.IsDefault())
 					{
 						image.imageView = pData[j].texData.tex->GetPlatform().GetImageView();
@@ -128,10 +141,9 @@ namespace usg {
 						image.imageView = texPlat.GetImageView(pDevice, pData[j].texData.imageView);
 					}
 					image.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-					images.push_back(image);
 				}
 
-				writes[i].pImageInfo = &images[uIndex];
+				m_pWrites[i].pImageInfo = &m_pImages[uImageIndex++];
 				break;
 			}
 			default:
@@ -141,7 +153,7 @@ namespace usg {
 			pData += pLayout->GetDeclaration(i)->uCount;
 		}
 
-		vkUpdateDescriptorSets(pDevice->GetPlatform().GetVKDevice(), pLayout->GetDeclarationCount(), writes.data(), 0, nullptr);
+		vkUpdateDescriptorSets(pDevice->GetPlatform().GetVKDevice(), pLayout->GetDeclarationCount(), m_pWrites, 0, nullptr);
 	}
 
 

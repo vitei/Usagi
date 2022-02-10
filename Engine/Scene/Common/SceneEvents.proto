@@ -39,3 +39,17 @@ message SetRenderMask
 {
 	required uint32 uRenderMask = 1 [default = 0x0FFFFF7F];
 }
+
+message AddSubCameraRenderMask
+{
+	required uint32 uCameraID = 1 [default = 0];
+	required uint32 uAddMasks = 2 [default = 0];
+	required uint32 uSubMasks = 3 [default = 0];
+}
+
+
+message ShiftWorldOrigin
+{
+	required usg.Vector3f vShift = 1;
+}
+

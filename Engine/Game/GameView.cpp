@@ -11,7 +11,7 @@
 namespace usg
 {
 
-	GameView::GameView(usg::GFXDevice* pDevice, usg::Scene& scene, ResourceMgr* pResMgr, usg::PostFXSys& postFXSys, const usg::GFXBounds& bounds, float32 fFov, float32 fNear, float32 fFar) :
+	GameView::GameView(usg::GFXDevice* pDevice, usg::Scene& scene, ResourceMgr* pResMgr, usg::PostFXSys& postFXSys, const usg::GFXBounds& bounds) :
 		m_bounds(bounds)
 	{
 		usg::ViewContext* pContext = scene.CreateViewContext(pDevice);
@@ -20,7 +20,7 @@ namespace usg
 		SetViewContext(*pContext);
 	}
 
-	void GameView::CleanUp(usg::GFXDevice* pDevice, usg::Scene& scene)
+	void GameView::Cleanup(usg::GFXDevice* pDevice, usg::Scene& scene)
 	{
 		if (m_pViewContext)
 		{

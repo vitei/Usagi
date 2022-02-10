@@ -17,7 +17,9 @@ static const Mapping g_textureTypeMappings[]
 	{ "sampler2D", usg::TD_TEXTURE2D },
 	{ "sampler1D", usg::TD_TEXTURE1D },
 	{ "samplerCube", usg::TD_TEXTURECUBE },
-	{ "sampler3D", usg::TD_TEXTURE3D }
+	{ "sampler3D", usg::TD_TEXTURE3D },
+	{ "sampler2DArray", usg::TD_TEXTURE2DARRAY },
+	{ nullptr, USG_INVALID_ID }
 };
 
 static const Mapping g_constantMappings[]
@@ -42,6 +44,8 @@ static const Mapping g_shaderMappings[]
 	{ "VS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_VERTEX },
 	{ "GS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_GEOMETRY },
 	{ "PS", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_PIXEL },
+	{ "TC", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_TCONTROL },
+	{ "TE", (uint32)usg::ShaderTypeFlags::SHADER_FLAG_TEVAL },
 	{ nullptr, USG_INVALID_ID }
 };
 
@@ -60,7 +64,41 @@ static const uint32 g_shaderFlagMap[]
 {
 	usg::SHADER_FLAG_VERTEX,
 	usg::SHADER_FLAG_PIXEL,
-	usg::SHADER_FLAG_GEOMETRY
+	usg::SHADER_FLAG_GEOMETRY,
+	usg::SHADER_FLAG_TCONTROL,
+	usg::SHADER_FLAG_TEVAL
+};
+
+
+struct EnumTable
+{
+	const char* szVarName;
+	uint32		uEnumValue;
+};
+
+// TODO: Filters and aniso should have defaults in the effect
+static const EnumTable g_filterTable[]
+{
+	{ "Linear", usg::SAMP_FILTER_LINEAR },
+	{ "Point", usg::SAMP_FILTER_POINT },
+	{ nullptr, 0 }
+};
+
+static const EnumTable g_mipFilterTable[]
+{
+	{ "Linear", usg::MIP_FILTER_LINEAR },
+	{ "Point", usg::MIP_FILTER_POINT },
+	{ nullptr, 0 }
+};
+
+static const EnumTable g_anisoTable[]
+{
+	{ "1", usg::ANISO_LEVEL_1 },
+	{ "2", usg::ANISO_LEVEL_2 },
+	{ "4", usg::ANISO_LEVEL_4 },
+	{ "8", usg::ANISO_LEVEL_8 },
+	{ "16", usg::ANISO_LEVEL_16 },
+	{ nullptr, 0 }
 };
 
 uint32 GetType(const char* szTypeName, const Mapping* pMapping)
@@ -74,7 +112,7 @@ uint32 GetType(const char* szTypeName, const Mapping* pMapping)
 		pMapping++;
 	}
 
-	ASSERT(false);
+	FATAL_RELEASE(false, "Invalid type %s\n", szTypeName);
 	return 0;
 }
 
@@ -89,7 +127,7 @@ const char* GetType(uint32 uType, const Mapping* pMapping)
 		pMapping++;
 	}
 
-	ASSERT(false);
+	FATAL_RELEASE(false, "Invalid type %d\n", uType);
 	return nullptr;
 }
 
@@ -157,7 +195,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 		switch (uConstantType)
 		{
 		case usg::CT_MATRIX_44:
-			ASSERT(node.size() == 16);
+			FATAL_RELEASE(node.size() == 16, "Default data contains %d entries, expected 16", node.size());
 			for (uint32 i = 0; i < 16; i++)
 			{
 				float value = node[i].as<float>();
@@ -166,7 +204,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_MATRIX_43:
-			ASSERT(node.size() == 12);
+			FATAL_RELEASE(node.size() == 12, "Default data contains %d entries, expected 12", node.size());
 			for (uint32 i = 0; i < 12; i++)
 			{
 				float value = node[i].as<float>();
@@ -175,7 +213,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR_4:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				float value = node[i].as<float>();
@@ -184,7 +222,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR_3:
-			ASSERT(node.size() == 3);
+			FATAL_RELEASE(node.size() == 3, "Default data contains %d entries, expected 3", node.size());
 			for (uint32 i = 0; i < 3; i++)
 			{
 				float value = node[i].as<float>();
@@ -193,7 +231,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR4I:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				int value = node[i].as<int>();
@@ -202,7 +240,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			}
 			break;
 		case usg::CT_VECTOR4U:
-			ASSERT(node.size() == 4);
+			FATAL_RELEASE(node.size() == 4, "Default data contains %d entries, expected 4", node.size());
 			for (uint32 i = 0; i < 4; i++)
 			{
 				uint32 value = node[i].as<uint32>();
@@ -212,7 +250,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			break;
 
 		case usg::CT_VECTOR_2:
-			ASSERT(node.size() == 2);
+			FATAL_RELEASE(node.size() == 2, "Default data contains %d entries, expected 2", node.size());
 			for (uint32 i = 0; i < 2; i++)
 			{
 				float value = node[i].as<float>();
@@ -242,7 +280,7 @@ void SetDefaultData(uint32 uConstantType, uint32 uConstantCount, const YAML::Nod
 			break;
 		}
 		default:
-			ASSERT(false);
+			RELEASE_WARNING("No default data for %d\n", uConstantType);
 		}
 
 		for (uint32 i = 1; i < uConstantCount; i++)
@@ -267,6 +305,19 @@ void SetDefaultData(usg::CustomEffectDecl::Attribute& attrib, const YAML::Node& 
 {
 	uint8* pData8 = (uint8*)attrib.defaultData;
 	SetDefaultData(attrib.eConstantType, 1, node, pData8);
+}
+
+bool MaterialDefinitionExporter::OverrideData(uint32 uPass, const char* szVariableName, const YAML::Node& node, void* pDst)
+{
+	for (int var = 0; var < m_constantSets[uPass].constants.size(); var++)
+	{
+		if (strcmp(m_constantSets[uPass].constants[var].szName, szVariableName) == 0)
+		{
+			SetDefaultData(m_constantSets[uPass].constants[var], node, pDst);
+			return true;
+		}
+	}
+	return false;
 }
 
 MaterialDefinitionExporter::~MaterialDefinitionExporter()
@@ -309,6 +360,78 @@ bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 	return true;
 }
 
+void StringToValue(const EnumTable* pTable, YAML::Node node, uint32& uValOut)
+{
+	if (!node)
+	{
+		// This override wasn't specified
+		return;
+	}
+	std::string value = node.as<std::string>();
+	if (value.size() == 0)
+	{
+		RELEASE_WARNING("Invalid string for override\n");
+		return;
+	}
+	while (pTable->szVarName != nullptr)
+	{
+		if (strcmp(pTable->szVarName, value.c_str()) == 0)
+		{
+			uValOut = pTable->uEnumValue;
+			return;
+		}
+		pTable++;
+	}
+	RELEASE_WARNING("Invalid override semantic %s\n", value.c_str());
+
+}
+
+void GetSamplerOverrides(const YAML::Node& attributeNode, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip)
+{
+	// Filter values
+	StringToValue(g_filterTable, attributeNode["minFilter"], uMinFilter);
+	StringToValue(g_filterTable, attributeNode["magFilter"], uMagFilter);
+	StringToValue(g_mipFilterTable, attributeNode["mipFilter"], uMipFilter);
+	StringToValue(g_anisoTable, attributeNode["anisotropy"], uAniso);
+	if (attributeNode["lodBias"])
+	{
+		fLodBias = attributeNode["lodBias"].as<float>();
+	}
+	if (attributeNode["lodMinLevel"])
+	{
+		uBaseMip = attributeNode["lodMinLevel"].as<uint32>();
+	}
+}
+
+void GetTexCoordMapperOverrides(const YAML::Node& attributeNode, uint32& uSourceCoord, usg::Vector2f& vTrans, usg::Vector2f& vScale, float& fRot)
+{
+	const YAML::Node coordNode = attributeNode["sourceUV"];
+	const YAML::Node transNode = attributeNode["trans"];
+	const YAML::Node scaleNode = attributeNode["scale"];
+	const YAML::Node rotateNode = attributeNode["rotate"];
+
+	if (coordNode)
+	{
+		uSourceCoord = coordNode.as<uint32>();
+	}
+	
+	if (transNode)
+	{
+		vTrans.Assign(transNode[0].as<float>(), transNode[1].as<float>());
+	}
+
+	if (scaleNode)
+	{
+		vTrans.Assign(scaleNode[0].as<float>(), scaleNode[1].as<float>());
+	}
+
+	if (rotateNode)
+	{
+		fRot = rotateNode.as<float>();
+	}
+}
+
+
 bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 {
 	for (YAML::const_iterator it = samplers.begin(); it != samplers.end(); ++it)
@@ -339,10 +462,41 @@ bool MaterialDefinitionExporter::LoadSamplers(YAML::Node& samplers)
 		{
 			sampler.eTexType = usg::TD_TEXTURE2D;
 		}
+
+		sampler.eFilterMin = usg::SAMP_FILTER_LINEAR;
+		sampler.eFilterMag = usg::SAMP_FILTER_LINEAR;
+		sampler.eFilterMip = usg::SAMP_FILTER_LINEAR;
+		sampler.eAnisoLevel = usg::ANISO_LEVEL_16;
+
+		sampler.LodBias = 0.0f;
+		sampler.LodMinLevel = 0;
+
+		GetSamplerOverrides((*it), sampler.eFilterMin, sampler.eFilterMag, sampler.eFilterMip, sampler.eAnisoLevel, sampler.LodBias, sampler.LodMinLevel);
+
+		if ((*it)["shaderType"])
+		{
+			std::string type = (*it)["shaderType"].as<std::string>();
+			sampler.uShaderSets = GetShaderType(type.c_str());
+		}
+		else
+		{
+			sampler.uShaderSets = usg::SHADER_FLAG_PIXEL;
+		}
+
 		m_samplers.push_back(sampler);
 	}
 
 	return true;
+}
+
+void MaterialDefinitionExporter::GetSamplerDefaults(uint32 uTex, uint32& uMinFilter, uint32& uMagFilter, uint32& uMipFilter, uint32& uAniso, float& fLodBias, uint32& uBaseMip)
+{
+	uMinFilter = m_samplers[uTex].eFilterMin;
+	uMagFilter = m_samplers[uTex].eFilterMag;
+	uMipFilter = m_samplers[uTex].eFilterMip;
+	uAniso = m_samplers[uTex].eAnisoLevel;
+	fLodBias = m_samplers[uTex].LodBias;
+	uBaseMip = m_samplers[uTex].LodMinLevel;
 }
 
 bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
@@ -361,6 +515,10 @@ bool MaterialDefinitionExporter::LoadConstantSets(YAML::Node& constantDefs)
 		{
 			std::string type = (*setIt)["shaderType"].as<std::string>();
 			setData.set.uShaderSets = GetShaderType(type.c_str());
+		}
+		else
+		{
+			FATAL_RELEASE(false, "Missing shader message");
 		}
 		setData.set.uBinding = GetBufferMapping((*setIt)["binding"].as<std::string>().c_str());
 		YAML::Node variableDefs = (*setIt)["Variables"];
@@ -450,16 +608,6 @@ int MaterialDefinitionExporter::Load(YAML::Node& mainNode, const std::string& de
 
 	} while (nextDefine != std::string::npos);
 
-
-	if (mainNode["Shader"])
-	{
-		m_effectName = mainNode["Shader"]["name"].as<std::string>();
-		m_shadowEffectName = mainNode["Shader"]["shadow"].as<std::string>();
-		m_deferredEffectName = mainNode["Shader"]["deferred"].as<std::string>();
-		m_omniShadowEffectName = mainNode["Shader"]["omniShadow"].as<std::string>();
-		m_transparentEffectName = mainNode["Shader"]["transparent"].as<std::string>();
-	}
-
 	YAML::Node attributes = mainNode["Attributes"];
 	LoadAttributes(attributes);
 
@@ -478,6 +626,120 @@ int MaterialDefinitionExporter::Load(const char* path, const std::string& define
 {
 	YAML::Node mainNode = YAML::LoadFile(path);
 	return Load(mainNode, defines);
+
+}
+
+
+int MaterialDefinitionExporter::Load(const char* path, const char* effect, const std::vector<std::string>& defineSets)
+{
+	YAML::Node mainNode = YAML::LoadFile(path);
+	YAML::Node customFX = mainNode["CustomEffects"];
+	YAML::Node effects = mainNode["Effects"];
+	std::string defines;
+	YAML::Node effectNode;
+	YAML::Node customFXNode;
+
+	uint32 uMaxDefinesFound = 0;
+	for (YAML::iterator it = effects.begin(); it != effects.end(); ++it)
+	{
+		uint32 uFoundThisNode = 0;
+
+		if ((*it)["define_sets"])
+		{
+			YAML::Node defineNode = (*it)["define_sets"];
+			for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+			{
+				for (memsize i = 0; i < defineSets.size(); i++)
+				{
+					if (defineSets[i] == (*it)["name"].as<std::string>())
+					{
+						uFoundThisNode++;
+					}
+				}
+			}
+		}
+		if ((*it)["global_sets"])
+		{
+			YAML::Node defineNode = (*it)["global_sets"];
+			for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+			{
+				for (memsize i = 0; i < defineSets.size(); i++)
+				{
+					if (defineSets[i] == (*it)["name"].as<std::string>())
+					{
+						uFoundThisNode++;
+					}
+				}
+			}
+		}
+
+
+		if ((*it)["name"] && (*it)["name"].as<std::string>() == effect && ((uFoundThisNode > uMaxDefinesFound) || defineSets.size() == 0) )
+		{
+			uMaxDefinesFound = uFoundThisNode;
+			effectNode = (*it).as<YAML::Node>();
+		}
+	}
+	
+	if (effectNode.IsNull())
+	{
+		return -1;
+	}
+
+	if(effectNode["custom_effect"])
+	{
+		std::string customFXString = effectNode["custom_effect"].as<std::string>();
+		customFXNode = customFX[customFXString];
+		if(customFXNode.IsNull())
+		{
+			RELEASE_WARNING("Could not find custom effect %s", customFXString.c_str());
+		}
+	}
+	else
+	{
+		return -1;
+	}
+
+	if (effectNode["define_sets"])
+	{
+		YAML::Node defineNode = effectNode["defineSets"];
+		for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+		{
+			for (memsize i = 0; i < defineSets.size(); i++)
+			{
+				if (defineSets[i] == (*it)["name"].as<std::string>())
+				{
+					if (defines.size() > 0)
+					{
+						defines += "";
+					}
+					defines += (*it)["defines"].as<std::string>();
+				}
+			}
+		}
+	}
+	if (effectNode["global_sets"])
+	{
+		YAML::Node defineNode = effectNode["global_sets"];
+		for (YAML::const_iterator it = defineNode.begin(); it != defineNode.end(); ++it)
+		{
+			for (memsize i = 0; i < defineSets.size(); i++)
+			{
+				if (defineSets[i] == (*it)["name"].as<std::string>())
+				{
+					if (defines.size() > 0)
+					{
+						defines += "";
+					}
+					defines += (*it)["defines"].as<std::string>();
+				}
+			}
+		}
+	}
+
+	Load(customFXNode, defines);
+
+	return 1;
 
 }
 
@@ -500,6 +762,16 @@ const char* MaterialDefinitionExporter::GetConstantSetName(uint32 uSet)
 void MaterialDefinitionExporter::CopyDefaultData(uint32 uSet, void* pDst)
 {
 	memcpy(pDst, m_constantSets[uSet].rawData.data(), m_constantSets[uSet].rawData.size());
+}
+
+bool MaterialDefinitionExporter::GetTextureIndex(uint32 uTex, uint32& indexOut)
+{
+	if (uTex < m_samplers.size())
+	{
+		indexOut = m_samplers[uTex].uIndex;
+		return true;
+	}
+	return false;
 }
 
 bool MaterialDefinitionExporter::GetTextureIndex(const char* szHint, uint32& indexOut)
@@ -676,14 +948,6 @@ void MaterialDefinitionExporter::InitBinaryData()
 		pDst += m_constantSets[i].rawData.size();
 	}
 
-
-	// FIXME: Needs removing
-	strcpy_s(m_header.effectName, m_effectName.c_str());
-	strcpy_s(m_header.shadowEffectName, m_shadowEffectName.c_str());
-	strcpy_s(m_header.transparentEffectName, m_transparentEffectName.c_str());
-	strcpy_s(m_header.omniShadowEffectName, m_omniShadowEffectName.c_str());
-	strcpy_s(m_header.deferredEffectName, m_deferredEffectName.c_str());
-
 	m_uHeaderCRC = utl::CRC32(&m_header, sizeof(m_header));
 	m_uDataCRC = utl::CRC32(m_binary.data(), (uint32)m_binary.size());
 
@@ -698,13 +962,20 @@ void MaterialDefinitionExporter::InitAutomatedCode()
 
 	char buffer[512];
 
-	for (const auto& sampler : m_samplers)
+	for (uint32 uShaderType = 0; uShaderType < (uint32)usg::ShaderType::COUNT; uShaderType++)
 	{
-		// TODO: When the custom effects are fully integrated we can start naming these
-		sprintf_s(buffer, sizeof(buffer), "SAMPLER_LOC(1, %d) uniform %s sampler%d;\n", sampler.uIndex, GetTextureMapping(sampler.eTexType), sampler.uIndex);
+		for (const auto& sampler : m_samplers)
+		{
+			if(sampler.uShaderSets & g_shaderFlagMap[uShaderType])
+			{
+				// TODO: When the custom effects are fully integrated we can start naming these
+				sprintf_s(buffer, sizeof(buffer), "SAMPLER_LOC(1, %d) uniform %s sampler%d;\n", sampler.uIndex, GetTextureMapping(sampler.eTexType), sampler.uIndex);
 
-		m_automatedCode[(uint32)usg::ShaderType::PS] += buffer;
+				m_automatedCode[uShaderType] += buffer;
+			}
+		}
 	}
+
 	m_automatedCode[(uint32)usg::ShaderType::VS] += "\n";
 
 	for (const auto& attrib : m_attributes)

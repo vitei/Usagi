@@ -68,3 +68,8 @@ message OnJointBroken
 {
 	
 }
+
+message PhysicsSceneDirty
+{
+
+}

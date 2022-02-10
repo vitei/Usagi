@@ -55,8 +55,19 @@ void Input_ps::Init()
 	{
 		m_pJoystick->Init(m_pDirectInput, 0);
 	}
-	m_keyboard.Init(this);
+
+#ifdef USE_DIRECT_INPUT_MOUSE
+	m_mouse.Init(m_pDirectInput);
+#else
 	m_mouse.Init(this);
+#endif
+
+#ifdef USE_DIRECT_INPUT_KB
+	m_keyboard.Init(this, m_pDirectInput);
+#else
+	m_keyboard.Init(this);
+#endif
+
 	m_virtualGamepad.Init(&m_keyboard);
 	m_xboxPad.Init(0);
 }
@@ -95,7 +106,7 @@ void Input_ps::Update(GFXDevice* pDevice)
 
 	m_mouseWheel = 0;
 	memset(m_keysThisFrame, 0, KEYBOARD_KEY_COUNT*sizeof(bool));
-	memset(m_mouseButtonsThisFrame, 0, MOUSE_BUTTON_COUNT*sizeof(bool));
+	memset(m_mouseButtonsThisFrame, 0, MOUSE_BUTTON_NONE *sizeof(bool));
 	m_uInputChars = 0;
 }
 
@@ -122,7 +133,9 @@ void Input_ps::RegisterInputChar(char16 uChar)
 
 void Input_ps::RegisterHwnd(uint32 uDisplay, HWND hwnd)
 {
+#ifndef USE_DIRECT_INPUT
 	m_mouse.SetHWND(hwnd);
+#endif
 }
 
 

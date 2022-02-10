@@ -13,8 +13,6 @@ require 'set'
 require 'yaml'
 require 'zlib'
 
-require_relative 'lib/skeletonextractor'
-require_relative 'lib/componentextractor'
 
 $defaults = {}
 $entities = []
@@ -72,9 +70,13 @@ $options[:require_dirs].each do |dir|
   end
 end
 
-require_relative 'tracker'
+require 'Engine/Framework/FrameworkComponents.pb.rb'
+require 'Engine/Scene/Model/Skeleton.pb.rb'
 require_relative 'lib/entity_util'
 require_relative 'lib/matrix_util'
+require_relative 'lib/skeletonextractor'
+require_relative 'lib/componentextractor'
+require_relative 'tracker'
 
 ENTITY_SRC = ARGV[0]
 

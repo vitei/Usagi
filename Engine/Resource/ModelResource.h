@@ -36,11 +36,11 @@ public:
 	virtual ~ModelResource();
 
 	bool Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem );
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	uint32 GetMeshCount() const { return m_uMeshCount; }
 	const Mesh* GetMesh(uint32 uMesh) const;
 	const usg::Sphere& GetBounds() const { return m_bounds;}
-	const U8String& GetName() const { return m_name; }
+	const usg::string& GetName() const { return m_name; }
 	bool IsInstanceModel() const { return m_bInstance; }
 
 	uint32 GetRequiredBoneNodeCount() const { return m_uBoneNodes; }
@@ -62,10 +62,10 @@ public:
 
 private:
 
-	void SetupMeshes(const U8String & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
-	void SetupMesh(const U8String & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );
+	void SetupMeshes(const string& modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
+	void SetupMesh(const string & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );
 	void SetupSkeleton( uint8* p );
-	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial, const U8String& effectName);
+	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
 
 	memsize InitInputBindings(GFXDevice* pDevice, const exchange::Shape* pShape, const exchange::Material* pMaterial, const CustomEffectResHndl& customFXDecl,
@@ -80,7 +80,7 @@ private:
 	usg::vector<uint32>		m_smoothBoneIndices;
 	bool					m_bNeedsRootNode;
 	uint32					m_uBoneNodes;
-	U8String				m_name;
+	usg::string				m_name;
 	bool					m_bInstance;
 };
 

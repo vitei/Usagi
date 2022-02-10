@@ -135,7 +135,7 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 
 	m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_constantSet);
 
-	usg::SamplerDecl samp(usg::SF_LINEAR, usg::SC_MIRROR);	
+	usg::SamplerDecl samp(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_MIRROR);	
 	m_material.SetTexture(0, usg::ResourceMgr::Inst()->GetTexture(pDevice, szTexName), pDevice->GetSampler(samp) );
 	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, szPatternName), pDevice->GetSampler(samp));
 	m_material.UpdateDescriptors(pDevice);	// We've bound all our resources
@@ -165,12 +165,12 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 	m_capVertex.fEmissionLength = -1.0f;
 }
 
-void RibbonTrail::CleanUp(usg::GFXDevice* pDevice) 
+void RibbonTrail::Cleanup(usg::GFXDevice* pDevice) 
 {
 	m_material.Cleanup(pDevice);
-	m_constantSet.CleanUp(pDevice);
-	m_vertices.CleanUp(pDevice);
-	m_indices.CleanUp(pDevice);
+	m_constantSet.Cleanup(pDevice);
+	m_vertices.Cleanup(pDevice);
+	m_indices.Cleanup(pDevice);
 }
 
 
@@ -194,15 +194,15 @@ void RibbonTrail::SetDeclaration(GFXDevice* pDevice, const particles::RibbonData
 	m_uDeclLength = GetRequiredVerts(pDecl->fLifeTime);
 	ASSERT(m_uDeclLength<=m_uMaxLength);
 
-	usg::SamplerDecl samp(usg::SF_LINEAR, usg::SC_MIRROR);
-	usg::U8String name = "ribbon/";
-	usg::U8String srcName = pDecl->textureName;
+	usg::SamplerDecl samp(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_MIRROR);
+	usg::string name = "ribbon/";
+	usg::string srcName = pDecl->textureName;
 	if (str::StartsWithToken(pDecl->textureName, "ribbon/"))
 	{
-		srcName.RemovePath();	// FIXME: Hack for old particle data
+		str::RemovePath(srcName);	// FIXME: Hack for old particle data
 	}
 	name += srcName;
-	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, name.CStr()), pDevice->GetSampler(samp) );
+	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, name.c_str()), pDevice->GetSampler(samp) );
 }
 
 void RibbonTrail::Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffect)
@@ -312,6 +312,13 @@ void RibbonTrail::UpdateBuffers(GFXDevice* pDevice)
 
 	m_constantSet.UpdateData(pDevice);
 	m_material.UpdateDescriptors(pDevice);
+}
+
+
+void RibbonTrail::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl& renderPass, const SceneRenderPasses& passes)
+{
+	m_material.UpdateRenderPass(pDevice, renderPass);
+
 }
 
 bool RibbonTrail::Draw(GFXContext* pContext, RenderContext& renderContext)

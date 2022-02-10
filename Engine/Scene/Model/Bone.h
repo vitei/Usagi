@@ -25,7 +25,7 @@ public:
 	~Bone();
 
 	void Init(GFXDevice* pDevice, Bone* pParent, const SkeletonResource::Bone* pBone);
-	void CleanUp(GFXDevice* pDevice);
+	void Cleanup(GFXDevice* pDevice);
 	void SetTransform(const Matrix4x4& mat, bool bUpdateConsts = true)
 	{
 		m_pTransformNode->SetMatrix(mat);
@@ -52,7 +52,9 @@ public:
 	// frames matrix
 	const Matrix4x4& GetWorldMatrix() const { return m_pTransformNode->GetMatrix(); }
 	const Matrix4x4& GetInverseBindMatrix() const { return m_pResource->mInvBindMatrix;  }
-	Matrix4x4 GetBindMatrix(bool bIncludeParents) const;
+	
+	Matrix4x4 GetDefaultMatrix(bool bIncludeParents) const;
+
 	const usg::Sphere& GetLocalColSphere() const { return m_pResource->cColSphere;  }
 	void AttachRenderNode(GFXDevice* pDevice, Scene* pScene, RenderNode* pNode, uint8 uLod = 0, bool bDynamic = false);
 	void RemoveRenderNode(Scene* pScene, RenderNode* pNode);
@@ -76,7 +78,6 @@ private:
 	TransformNode*					m_pTransformNode;
 	ConstantSet						m_boneConstants;
 	RenderGroup*					m_pRenderGroup;
-	bool							m_bWorldTransDirty;
 };
 
 } // namespace usg

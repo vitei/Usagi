@@ -27,26 +27,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -95,7 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;_DEBUG;NW_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -112,12 +112,13 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;_DEBUG;NW_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3DEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CommonDEBUG_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3ExtensionsDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3VehicleDEBUG.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3CookingDEBUG_x64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -136,7 +137,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -157,20 +158,22 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Common_x64.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Extensions.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Vehicle.lib;$(USAGI_PHYSICS)\Lib\vc15win64\PhysX3Cooking_x64.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+      <Command>call $(USAGI_DIR)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

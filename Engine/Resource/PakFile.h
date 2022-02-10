@@ -22,7 +22,7 @@ namespace usg
 		~PakFile();
 
 		void Load(GFXDevice* pDevice, const char* szFileName);
-		void CleanUp(GFXDevice* pDevice);
+		void Cleanup(GFXDevice* pDevice);
 
 		// This should be valid before threading so we can return handles to resources
 		usg::map<uint32, BaseResHandle>& GetResources() { return m_resources; }

@@ -96,13 +96,13 @@ namespace usg {
 
 	}
 
-	void SMAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys, RenderTarget* pDst)
+	void SMAA::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
 	{
 		m_pSys = pSys;
-		m_pDestTarget = pDst;
+		m_pDestTarget = nullptr;
 
-		SamplerDecl pointDecl(SF_POINT, SC_CLAMP);
-		SamplerDecl linearDecl(SF_LINEAR, SC_CLAMP);
+		SamplerDecl pointDecl(SAMP_FILTER_POINT, SAMP_WRAP_CLAMP);
+		SamplerDecl linearDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 
 		m_pointSampler = pDevice->GetSampler(pointDecl);
 		m_linearSampler = pDevice->GetSampler(linearDecl);
@@ -122,13 +122,13 @@ namespace usg {
 
 		uint32 uWidth = pSys->GetFinalTargetWidth();
 		uint32 uHeight = pSys->GetFinalTargetHeight();
-		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+		m_colorBuffers[RT_EDGES].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_renderTargets[RT_EDGES].Init(pDevice, &m_colorBuffers[RT_EDGES]);
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
 		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0;
 		m_renderTargets[RT_EDGES].InitRenderPass(pDevice, flags);
-		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, CF_RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
+		m_colorBuffers[RT_BLEND_WEIGHT].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 		m_renderTargets[RT_BLEND_WEIGHT].Init(pDevice, &m_colorBuffers[RT_BLEND_WEIGHT]);
 		m_renderTargets[RT_BLEND_WEIGHT].InitRenderPass(pDevice, flags);
 
@@ -159,7 +159,7 @@ namespace usg {
 		// Neighbourhood blend
 		pipelineDecl.layout.descriptorSets[1] = neighborHoodBlendDescriptors;
 		pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.SMAANeighborhoodBlend");
-		m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), pipelineDecl);
+		m_neighbourBlendEffect.decl = pipelineDecl;
 
 #if SMAA_REPROJECTION
 		// Resolve
@@ -169,8 +169,6 @@ namespace usg {
 #endif
 
 		m_constantSet.Init(pDevice, g_smaaConstantDef);
-
-		UpdateConstants(pDevice, pDst->GetWidth(), pDst->GetHeight());
 
 
 		m_lumaColorEdgeDescriptorSet.Init(pDevice, colorLumaEdgeDescriptors);
@@ -196,23 +194,23 @@ namespace usg {
 	}
 
 
-	void SMAA::CleanUp(GFXDevice* pDevice)
+	void SMAA::Cleanup(GFXDevice* pDevice)
 	{
-		m_lumaColorEdgeDescriptorSet.CleanUp(pDevice);
-		m_depthEdgeDescriptorSet.CleanUp(pDevice);
-		m_blendWeightDescriptorSet.CleanUp(pDevice);
-		m_neighbourBlendDescriptorSet.CleanUp(pDevice);
-		m_resolveDescriptorSet.CleanUp(pDevice);
-		m_constantSet.CleanUp(pDevice);
+		m_lumaColorEdgeDescriptorSet.Cleanup(pDevice);
+		m_depthEdgeDescriptorSet.Cleanup(pDevice);
+		m_blendWeightDescriptorSet.Cleanup(pDevice);
+		m_neighbourBlendDescriptorSet.Cleanup(pDevice);
+		m_resolveDescriptorSet.Cleanup(pDevice);
+		m_constantSet.Cleanup(pDevice);
 
 		for (auto& it : m_colorBuffers)
 		{
-			it.CleanUp(pDevice);
+			it.Cleanup(pDevice);
 		}
 
 		for (auto& it : m_renderTargets)
 		{
-			it.CleanUp(pDevice);
+			it.Cleanup(pDevice);
 		}
 	}
 
@@ -220,11 +218,7 @@ namespace usg {
 	{
 		if (pDst != m_pDestTarget)
 		{
-			// Need to update the pipeline state if the destination changes
-			PipelineStateDecl decl;
-			RenderPassHndl rpOut;
-			pDevice->GetPipelineDeclaration(m_neighbourBlendEffect, decl, rpOut);
-			m_neighbourBlendEffect = pDevice->GetPipelineState(pDst->GetRenderPass(), decl);
+			m_neighbourBlendEffect.state = pDevice->GetPipelineState(pDst->GetRenderPass(), m_neighbourBlendEffect.decl);
 
 			m_pDestTarget = pDst;
 		}
@@ -312,13 +306,52 @@ namespace usg {
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->SetRenderTarget(m_pDestTarget);
-		pContext->SetPipelineState(m_neighbourBlendEffect);
+		pContext->SetPipelineState(m_neighbourBlendEffect.state);
 		pContext->SetDescriptorSet(&m_neighbourBlendDescriptorSet, 1);
 		m_pSys->DrawFullScreenQuad(pContext);
 
 		pContext->EndGPUTag();
 	 
 		return true;
+	}
+
+
+	bool SMAA::LoadsTexture(Input eInput) const
+	{
+		return false;
+	}
+
+	bool SMAA::ReadsTexture(Input eInput) const
+	{
+		if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	void SMAA::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture)
+	{
+		if (eInput == PostEffect::Input::Depth)
+		{
+			m_depthEdgeDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);	// FIXME: Use the linear depth
+		}
+		if (eInput == PostEffect::Input::Color)
+		{
+			m_lumaColorEdgeDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+			m_neighbourBlendDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+#if SMAA_REPROJECTION
+			m_resolveDescriptorSet.SetImageSamplerPair(1, texture, m_linearSampler);
+#endif
+			UpdateConstants(pDevice, texture->GetWidth(), texture->GetHeight());
+
+		}
+	}
+
+	void SMAA::PassDataSet(GFXDevice* pDevice)
+	{
+		UpdateDescriptors(pDevice);
+
 	}
 
 }

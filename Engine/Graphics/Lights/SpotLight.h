@@ -28,7 +28,7 @@ public:
 	virtual ~SpotLight(void);
 
 	virtual void	Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
-	virtual void CleanUp(GFXDevice* pDevice, Scene* pScene) override;
+	virtual void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
 	virtual void	SetPosition(const Vector4f &position);
 	virtual void 	SetDirection(const Vector4f &direction);
 	void 	SetOuterCutoff(float fOuterCutoff);
@@ -50,7 +50,7 @@ public:
 	bool HasAttenuation() const { return m_bAtten; }
 
 	void GPUUpdate(GFXDevice* pDevice) override;
-	void ShadowRender(GFXContext* pContext) override;
+	bool ShadowRender(GFXContext* pContext) override;
 	
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
 	const DescriptorSet* GetDescriptorSet(bool bWidthShadow) const;

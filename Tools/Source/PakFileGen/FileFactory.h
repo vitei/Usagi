@@ -13,6 +13,8 @@ public:
 
 	void Init(const char* rootPath, const char* tempDir);
 	virtual bool LoadFile(const char* szFileName);
+	// Just load the wav for most platforms but support conversion
+	virtual bool LoadWavFile(const char* szFileName);
 	void ExportResources(const char* szFileName);
 	void WriteDependencies(const char* szFileName);
 
@@ -33,13 +35,24 @@ protected:
 		uint32 binarySize;
 	};
 
+	enum YmlType
+	{
+		YML_VPB = 0,
+		YML_ENTITY,
+		YML_AUDIO
+	};
+
 	const char* GetExtension(const char* szFileName);
 	bool HasExtension(const char* szFileName, const char* szExt);
 	bool LoadModel(const char* szFileName);
+	bool LoadModelVMDL(const char* szFileName);
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
 	bool LoadRawFile(const char* szFileName);
-	bool LoadYMLFile(const char* szFileName);
+	bool LoadYMLVPBFile(const char* szFileName);
+	bool LoadYMLEntityFile(const char* szFileName);
+	bool LoadYMLAudioFile(const char* szFileName);
+	YmlType GetYmlType(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);

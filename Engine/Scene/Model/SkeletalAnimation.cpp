@@ -1,5 +1,5 @@
 /****************************************************************************
-//	Usagi Engine, Copyright © Vitei, Inc. 2013
+//	Usagi Engine, Copyright Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include "Engine/Resource/ModelResource.h"
@@ -39,7 +39,7 @@ namespace usg
 	{
 		m_name = szAnimName;
 		m_name += ".vskla";
-		m_pAnimResource = ResourceMgr::Inst()->GetSkeletalAnimation(m_name.CStr());
+		m_pAnimResource = ResourceMgr::Inst()->GetSkeletalAnimation(m_name.c_str());
 		if (!m_pAnimResource)
 			return false;
 	
@@ -51,7 +51,7 @@ namespace usg
 		for (uint32 i = 0; i < m_uBoneCount; i++)
 		{
 			const SkeletonResource::Bone* pBone = pSkeleton->GetBoneByIndex(i);
-			m_pBoneInfo[i].sBoneRefIndex = m_pAnimResource->GetBoneReference(pBone->name.CStr());
+			m_pBoneInfo[i].sBoneRefIndex = m_pAnimResource->GetBoneReference(pBone->name.c_str());
 			m_pBoneInfo[i].transform.vPos = pBone->vTranslate;
 			m_pBoneInfo[i].transform.vScale = pBone->vScale;
 			Matrix4x4 mRot = Matrix4x4::Identity();
@@ -67,44 +67,7 @@ namespace usg
 
 	void SkeletalAnimation::Update(float fElapsed)
 	{
-		if(!m_bActive)
-			return;
-
-		const float fAnimSpeed = m_pAnimResource->GetFrameRate();
-		bool bLoop = m_pAnimResource->IsLoop();
-		m_fActiveFrame += (fElapsed*m_fPlaybackSpeed*fAnimSpeed);
-		float fFrameCount = (float)m_pAnimResource->GetFrameCount();
-
-		// We've passed the end (playing the anim forward)
-		if (m_fActiveFrame > fFrameCount)
-		{
-			ASSERT(m_fPlaybackSpeed * fElapsed > 0.0f);
-			if (bLoop)
-			{
-				m_fActiveFrame = 0.0f;
-			}
-			else
-			{
-				m_fActiveFrame = fFrameCount;
-				m_bActive = false;
-			}
-		}
-
-		// We've passed the beginning (playing the anim backward)
-		if (m_fActiveFrame < 0.0f)
-		{
-			ASSERT(m_fPlaybackSpeed * fElapsed < 0.0f);
-			if (bLoop)
-			{
-				m_fActiveFrame = fFrameCount;
-			}
-			else
-			{
-				m_fActiveFrame = 0.0f;
-				m_bActive = false;
-			}
-		}
-
+		UpdateInt(fElapsed, m_pAnimResource->GetFrameRate(), (float)m_pAnimResource->GetFrameCount(), m_pAnimResource->IsLoop());
 	}
 
 	void SkeletalAnimation::GetTransform(uint32 uIndex, exchange::BoneAnimationFrame& transform) const

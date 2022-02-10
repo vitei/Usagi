@@ -18,8 +18,8 @@ namespace usg{
 	bool ParticleEffectResource::Load(const char* szFileName)
 	{
 		m_name = szFileName;
-		m_name.RemovePath();
-		m_name.TruncateExtension();
+		str::RemovePath(m_name);
+		str::TruncateExtension(m_name);
 		SetupHash(szFileName);
 		ProtocolBufferFile effectVPB(szFileName);
 		bool bReadSucceeded = effectVPB.Read(&m_definition);	

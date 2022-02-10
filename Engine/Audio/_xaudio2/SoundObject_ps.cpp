@@ -4,31 +4,43 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Audio/Audio.h"
 #include "Engine/Audio/SoundCallbacks.h"
+#include "AudioFilter_ps.h"
 #include "SoundObject_ps.h"
 
 namespace usg{
+
+	static const uint32 g_suChannelMapping[][SOUND_CHANNEL_COUNT] =
+	{
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_LOW_FREQ },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
+		{ SOUND_CHANNEL_FRONT_LEFT, SOUND_CHANNEL_FRONT_RIGHT, SOUND_CHANNEL_CENTER, SOUND_CHANNEL_LOW_FREQ, SOUND_CHANNEL_BACK_LEFT, SOUND_CHANNEL_BACK_RIGHT, SOUND_CHANNEL_SIDE_LEFT, SOUND_CHANNEL_SIDE_RIGHT },
+	};
 
 
 	class XAudioVoiceCallback : public IXAudio2VoiceCallback
 	{
 	public:
-		XAudioVoiceCallback(SoundCallbacks* pIn) { pCallbackInt = pIn; }
+		XAudioVoiceCallback(usg::weak_ptr<SoundCallbacks> pIn) { pCallbackInt = pIn; }
 
-		void STDMETHODCALLTYPE OnStreamEnd() { pCallbackInt->StreamEnd(); }
-		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { pCallbackInt->PassedEnd(); }
+		void STDMETHODCALLTYPE OnStreamEnd() { if (auto spt = pCallbackInt.lock()) spt->StreamEnd(); }
+		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() { if (auto spt = pCallbackInt.lock()) spt->PassedEnd(); }
 		void STDMETHODCALLTYPE OnVoiceProcessingPassStart(UINT32 samples) { }
-		void STDMETHODCALLTYPE OnBufferEnd(void * context) { pCallbackInt->BufferEnd(); }
-		void STDMETHODCALLTYPE OnBufferStart(void * context) { pCallbackInt->BufferStart(); }
-		void STDMETHODCALLTYPE OnLoopEnd(void * context) { pCallbackInt->LoopEnd(); }
+		void STDMETHODCALLTYPE OnBufferEnd(void * context) { if (auto spt = pCallbackInt.lock()) spt->BufferEnd(); }
+		void STDMETHODCALLTYPE OnBufferStart(void * context) { if (auto spt = pCallbackInt.lock()) spt->BufferStart(); }
+		void STDMETHODCALLTYPE OnLoopEnd(void * context) { if (auto spt = pCallbackInt.lock()) spt->LoopEnd(); }
 		void STDMETHODCALLTYPE OnVoiceError(void * context, HRESULT Error) {}
 
-		SoundCallbacks* pCallbackInt;
+		usg::weak_ptr<SoundCallbacks> pCallbackInt;
 	};
 
 SoundObject_ps::SoundObject_ps()
 {
-	m_pSourceVoice = NULL;
+	m_pSourceVoice = nullptr;
+	m_pSoundFile = nullptr;
 	m_uChannels = 0;
+	m_bPositional = false;
 	m_bValid = false;
 	m_bPaused = false;
 	m_bCustomData = false;
@@ -53,6 +65,7 @@ void SoundObject_ps::Reset()
 		m_pSourceVoice = NULL;
 		m_bValid = false;
 		m_bPaused = false;
+		m_bPositional = false;
 	}
 	if (m_pCallback)
 	{
@@ -63,7 +76,13 @@ void SoundObject_ps::Reset()
 
 void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 {
-	HRESULT result = Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat());
+	Audio_ps& audioPS = Audio::Inst()->GetPlatform();
+
+	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, audioPS.GetSubmixVoice(waveFile.GetAudioType()) };
+	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
+
+	HRESULT result = audioPS.GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat(),
+		0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr, &SFXSendList, NULL);
 	if( FAILED( result ) )
 	{
 		ASSERT(false);
@@ -97,6 +116,11 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 
 void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 {
+	Audio_ps& audioPS = Audio::Inst()->GetPlatform();
+	// TODO: Pass in audio type
+	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, audioPS.GetSubmixVoice(AUDIO_TYPE_CUSTOM) };
+	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
+
 	WAVEFORMATEX format = { 0 };
 	format.wFormatTag = WAVE_FORMAT_PCM;
 	format.nChannels = def.uChannels;
@@ -104,14 +128,16 @@ void SoundObject_ps::SetCustomData(const StreamingSoundDef& def)
 	format.nSamplesPerSec = def.uSampleRate;
 	format.nBlockAlign = format.wBitsPerSample / 8 * format.nChannels;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-	if (def.pCallbacks)
+	m_uChannels = format.nChannels;
+	if (def.pCallbacks.use_count() > 0)
 	{
 		m_pCallback = vnew(ALLOC_AUDIO) XAudioVoiceCallback(def.pCallbacks);
 	}
-	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback);
+	Audio::Inst()->GetPlatform().GetEngine()->CreateSourceVoice(&m_pSourceVoice, &format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, m_pCallback, &SFXSendList);
 
 	m_bValid = true;
 	m_bCustomData = true;
+	m_pSoundFile = nullptr;
 }
 
 void SoundObject_ps::SubmitData(void* pData, memsize size)
@@ -142,6 +168,11 @@ void SoundObject_ps::Start()
 {
 	if (m_bValid)
 	{
+		if (m_pSoundFile && m_pSoundFile->GetFilter())
+		{
+			AudioFilter_ps* pFilterPS = (AudioFilter_ps*)m_pSoundFile->GetFilter();
+			m_pSourceVoice->SetFilterParameters(&pFilterPS->GetParameters());
+		}
 		m_pSourceVoice->Start();
 		m_bPaused = false;
 	}
@@ -159,7 +190,7 @@ void SoundObject_ps::Stop()
 		// FIXME: Reset the internal data
 		if (m_pCallback)
 		{
-			m_pCallback->pCallbackInt->Stopped();
+			if (auto spt = m_pCallback->pCallbackInt.lock()) spt->Stopped();
 		}
 	}
 }
@@ -185,25 +216,28 @@ void SoundObject_ps::Update(const SoundObject* pParent)
 	if(!m_bValid)
 		return;
 
-	static float32 matrixCoefficients[2 * 8];
-	ZeroMemory(matrixCoefficients, sizeof(float)*2*8);
-	// Merging left and right channels of the sound
-	const int destChannels = 2;
-	uint32 uIndex = 0;
-	for (uint32 i = 0; i < destChannels; i++)
+	static float32 matrixCoefficients[SOUND_CHANNEL_COUNT * SOUND_CHANNEL_COUNT] = {};
+	
+	if(m_bPositional)
 	{
-		for (uint32 j = 0; j < m_uChannels; j++)
+		const usg::PanningData& panning = pParent->GetPanningData();
+		const uint32 destChannels = Audio_ps::GetChannelCount(panning.eConfig);
+		uint32 uIndex = 0;
+		for (uint32 i = 0; i < destChannels; i++)
 		{
-			matrixCoefficients[uIndex] = pParent->GetPanningData().fMatrix[SOUND_CHANNEL_LEFT + i];
-			uIndex++;
+			for (uint32 j = 0; j < m_uChannels; j++)
+			{
+				matrixCoefficients[uIndex] = panning.fMatrix[ g_suChannelMapping[panning.eConfig][i] ];
+				uIndex++;
+			}
 		}
+		m_pSourceVoice->SetOutputMatrix(NULL, m_uChannels, destChannels, matrixCoefficients);
 	}
 	
 	float fVolume = pParent->GetAdjVolume() * pParent->GetAttenMul();
 	//ASSERT(fVolume >= 0.0f && fVolume <= 1.0f);
 	m_pSourceVoice->SetVolume(pParent->GetAdjVolume() * pParent->GetAttenMul());
 	m_pSourceVoice->SetFrequencyRatio(pParent->GetPitch() * pParent->GetDopplerFactor());
-	m_pSourceVoice->SetOutputMatrix(NULL, m_uChannels, destChannels, matrixCoefficients);
 	// TODO: Would need interal handling
 	//m_pSourceVoice->SetPriority( pParent->GetPriority() );
 

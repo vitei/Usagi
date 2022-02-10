@@ -5,8 +5,6 @@
 ****************************************************************************/
 #ifndef _USG_GRAPHICS_SHADER_
 #define _USG_GRAPHICS_SHADER_
-
-#include "Engine/Core/String/U8String.h"
 #include API_HEADER(Engine/Graphics/Effects, Shader_ps.h)
 #include "Engine/Resource/ResourceBase.h"
 
@@ -22,7 +20,7 @@ public:
 	virtual ~Shader() {}
 
 	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
-	void CleanUp(GFXDevice* pDevice) { m_platform.CleanUp(pDevice); }
+	void Cleanup(GFXDevice* pDevice) { m_platform.Cleanup(pDevice); }
 
 	Shader_ps& GetPlatform() { return m_platform; }
 	const Shader_ps& GetPlatform() const { return m_platform; }

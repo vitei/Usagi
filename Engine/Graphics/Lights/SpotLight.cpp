@@ -91,7 +91,7 @@ void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	{
 		m_pShadow = vnew(ALLOC_OBJECT) ProjectionShadow;
 		m_pShadow->Init(pDevice, pScene, 1024, 1024);
-		SamplerDecl samp(SF_LINEAR, SC_CLAMP);
+		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 		samp.bEnableCmp = true;
 		samp.eCmpFnc = CF_LESS;
 
@@ -106,13 +106,13 @@ void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
-void SpotLight::CleanUp(GFXDevice* pDevice, Scene* pScene)
+void SpotLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 {
-	m_constants.CleanUp(pDevice);
-	m_descriptorSet.CleanUp(pDevice);
+	m_constants.Cleanup(pDevice);
+	m_descriptorSet.Cleanup(pDevice);
 	if (m_pShadow)
 	{
-		m_descriptorSetShadow.CleanUp(pDevice);
+		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
 		m_pShadow = nullptr;
 	}
@@ -151,12 +151,15 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 }
 
 
-void SpotLight::ShadowRender(GFXContext* pContext)
+bool SpotLight::ShadowRender(GFXContext* pContext)
 {
 	if (m_pShadow)
 	{
 		m_pShadow->CreateShadowTex(pContext);
+		return true;
 	}
+
+	return false;
 }
 
 bool SpotLight::IsInRange(const AABB& testBox)

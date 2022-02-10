@@ -41,6 +41,9 @@ void ParticleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	m_userRotation.Init("User rotation", -360.0f, 360.0f, fDefaultVector, 3);
 	m_userRotation.SetToolTip("Custom orientation for user oriented particles");
 
+	m_userRotationRand.Init("User random", -360.0f, 360.0f, fDefaultVector, 3);
+	m_userRotationRand.SetToolTip("Random +/- to add to the user orientation");
+
 
 	float fDefault[] = {0.0f, 0.0f };
 	m_particleCenter.Init("Pivot", -0.5f, 0.5f, fDefault, 2);
@@ -50,6 +53,7 @@ void ParticleSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRender
 	m_window.AddItem(&m_particleType);
 	m_window.AddItem(&m_particleCenter);
 	m_window.AddItem(&m_userRotation);
+	m_window.AddItem(&m_userRotationRand);
 	
 	//pRenderer->AddWindow(&m_window);
 }
@@ -62,24 +66,38 @@ void ParticleSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission&
 	m_particleCenter.SetValue(structData.vParticleCenter.x, 0);
 	m_particleCenter.SetValue(structData.vParticleCenter.y, 1);
 	m_userRotation.SetValue(structData.emission.vUserRotation);
+	m_userRotationRand.SetValue(structData.emission.vUserRotationRandom);
+
+	m_userRotation.SetVisible(structData.eParticleType == usg::particles::PARTICLE_TYPE_USER_ORIENTED);
+	m_userRotationRand.SetVisible(structData.eParticleType == usg::particles::PARTICLE_TYPE_USER_ORIENTED);
 }
 
-bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect)
+bool ParticleSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
 	bool bOneFrame = structData.emission.eEmissionType == usg::particles::EMISSION_TYPE_ONE_SHOT;
 	m_life.SetSingleOnly(bOneFrame);
 	bool bAltered = false;
 	bAltered = m_life.Update(structData.life);
+
+	if (m_particleType.GetSelected() == ::usg::particles::ParticleType::PARTICLE_TYPE_TRAIL)
+	{
+		m_particleType.SetSelected(::usg::particles::ParticleType::PARTICLE_TYPE_BILLBOARD);
+	}
+
 	bAltered |= Compare(structData.eParticleType, m_particleType.GetSelected());
 	bAltered |= Compare(structData.fLifeRandomness,m_lifeRandomness.GetValue(0));
 	bAltered |= Compare(structData.vParticleCenter,m_particleCenter.GetValueV2());
 	bAltered |= Compare(structData.emission.vUserRotation, m_userRotation.GetValueV3());
+	bAltered |= Compare(structData.emission.vUserRotationRandom, m_userRotationRand.GetValueV3());
+
 
 	if(bAltered)
 	{
 		// TODO: Update the emission parameters
 		m_userRotation.SetVisible(structData.eParticleType == usg::particles::PARTICLE_TYPE_USER_ORIENTED);
+		m_userRotationRand.SetVisible(structData.eParticleType == usg::particles::PARTICLE_TYPE_USER_ORIENTED);
 	}
+	structData.emission.has_vUserRotationRandom = true;
 
 	// Nothing we do here makes it necessary to re-create the effect
 	return bAltered;

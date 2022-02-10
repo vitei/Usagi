@@ -84,7 +84,7 @@ void IndexBuffer_ps::Init(GFXDevice* pDevice, const void* pIndices, uint32 uCoun
 	}
 }
 
-void IndexBuffer_ps::CleanUp(GFXDevice* pDevice)
+void IndexBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
 
