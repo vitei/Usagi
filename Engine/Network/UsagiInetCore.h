@@ -23,7 +23,7 @@ namespace usg
 		Initializer* m_pInitializers[7];
 
 #ifndef FINAL_BUILD
-		std::basic_string<char, std::char_traits<char>, usg::StdAllocator<char, ALLOC_NETWORK> > m_log;
+		usg::basic_string<char > m_log;
 #endif
 	public:
 		UsagiInetCore();
