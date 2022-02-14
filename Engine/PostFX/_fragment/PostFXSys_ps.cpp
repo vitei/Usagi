@@ -460,11 +460,17 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 		pBuffers.push_back(&m_colorBuffer[BUFFER_SPECULAR]);
 
 		flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4 | RenderTarget::RT_FLAG_DS;
-		flags.uShaderReadFlags = RenderTarget::RT_FLAG_COLOR_0 | RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_COLOR_2 | RenderTarget::RT_FLAG_COLOR_3 | RenderTarget::RT_FLAG_COLOR_4;
 
 		if (uEffectFlags & PostFXSys::EFFECT_SSAO)
 		{
 			m_pSSAO->SetLinearDepthSource();
+		}
+
+		for (int iTarget = (int)PostEffect::Input::LinearDepth; iTarget <= (int)PostEffect::Input::Specular; iTarget++)
+		{
+			PostEffect::Input eTarget = PostEffect::Input(iTarget);
+			if (NeedsShaderRead(-1, eTarget))
+				flags.uShaderReadFlags |= GetFlagForTarget(eTarget);
 		}
 	}
 
@@ -688,7 +694,10 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if (m_pFilmGrain)
 		m_pFilmGrain->SetEnabled((uEffectFlags & PostFXSys::EFFECT_FILM_GRAIN) != 0);
 	if (m_pSSAO)
+	{
 		m_pSSAO->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SSAO) != 0);
+		m_pSSAO->SetDeferred((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0 );
+	}
 
 	m_renderPasses.SetDeferredEnabled(m_pDeferredShading && (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 

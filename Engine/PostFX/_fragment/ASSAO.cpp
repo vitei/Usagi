@@ -193,6 +193,7 @@ namespace usg
 		m_iQualityLevel = 4;
 		m_bHasLinearDepth = false;
 		m_bGenerateNormals = false;
+		SetDeferred(true);
 	}
 
 	ASSAO::~ASSAO()
@@ -945,11 +946,53 @@ namespace usg
 	}
 
 
+	void ASSAO::SetDeferred(bool bDeferred)
+	{
+		m_bDeferred = bDeferred;
+
+		if (m_bDeferred)
+		{
+			SetLayer(LAYER_DEFERRED_SHADING);
+			SetPriority(126);
+		}
+		else
+		{
+			SetLayer(LAYER_SKY);
+			SetPriority(0);
+		}
+	}
+
+	bool ASSAO::WritesTexture(Input eInput) const
+	{
+		if (m_bDeferred)
+		{
+			return (eInput == Input::Albedo);
+		}
+		else
+		{
+			return (eInput == Input::Color);
+		}
+	}
+
 	bool ASSAO::LoadsTexture(Input eInput) const
 	{
-		if (eInput == PostEffect::Input::Color || eInput == PostEffect::Input::Depth)
+		if (m_bHasLinearDepth && eInput == PostEffect::Input::LinearDepth)
 		{
 			return true;
+		}
+
+		if (!m_bHasLinearDepth && eInput == PostEffect::Input::Depth)
+		{
+			return true;
+		}
+
+		if (m_bDeferred)
+		{
+			return eInput == PostEffect::Input::Albedo;
+		}
+		else
+		{
+			return eInput == PostEffect::Input::Color;
 		}
 
 		return false;
