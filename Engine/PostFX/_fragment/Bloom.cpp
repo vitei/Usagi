@@ -24,7 +24,7 @@ struct BloomConstants
 
 struct BloomFinalConstants
 {
-	Vector4f	vBloomScale;
+	float	fBloomScale;
 };
 
 struct BloomBrightPassConstants
@@ -40,7 +40,7 @@ static const ShaderConstantDecl g_bloomConstantDef[] =
 
 static const ShaderConstantDecl g_bloomFinalConstantDef[] = 
 {
-	SHADER_CONSTANT_ELEMENT( BloomFinalConstants, vBloomScale,	CT_VECTOR_4, 1 ),
+	SHADER_CONSTANT_ELEMENT( BloomFinalConstants, fBloomScale,	CT_FLOAT, 1 ),
 	SHADER_CONSTANT_END()
 };
 
@@ -147,7 +147,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 	m_constants[PASS_HOR_BLOOM].Init(pDevice, g_bloomConstantDef);
 	m_constants[PASS_VER_BLOOM].Init(pDevice, g_bloomConstantDef);
 	m_constants[PASS_FINAL].Init(pDevice, g_bloomFinalConstantDef);
-	m_constants[PASS_BRIGHT_PASS].Init(pDevice, g_bloomFinalConstantDef);
+	m_constants[PASS_BRIGHT_PASS].Init(pDevice, g_brightpassConstantDef);
 
 	m_descriptors[PASS_BRIGHT_PASS].Init(pDevice, desc1Tex);
 	m_descriptors[PASS_HOR_BLOOM].Init(pDevice, desc1Tex);
@@ -156,12 +156,12 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 
 
 	BloomBrightPassConstants* pConsts = m_constants[PASS_BRIGHT_PASS].Lock<BloomBrightPassConstants>();
-	pConsts->vMiddleGray.x = 0.005f;
+	pConsts->vMiddleGray.x = 0.0075f;
 	m_constants[PASS_BRIGHT_PASS].Unlock();
 	m_constants[PASS_BRIGHT_PASS].UpdateData(pDevice);
 
 	BloomFinalConstants* pFinalConsts = m_constants[PASS_FINAL].Lock<BloomFinalConstants>();
-	pFinalConsts->vBloomScale.x = 1.0f;
+	pFinalConsts->fBloomScale = 1.0f;
 	m_constants[PASS_FINAL].Unlock();
 	m_constants[PASS_FINAL].UpdateData(pDevice);
 
