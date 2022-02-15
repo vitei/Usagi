@@ -14,7 +14,7 @@ CustomEffects:
       - { index: 9, name: ao_uv3, hint: "uv3", type: vec2, default: [0.0, 0.0] }
     Samplers:
       - { index: 0, hint: "DiffuseColor", default: "Textures/white_default" }
-      - { index: 1, hint: "NormalMap", default: "Textures/normal_default", defines: "HAS_BUMP !SHADOW_PASS" }
+      - { index: 1, hint: "NormalMap", default: "Textures/normal_default", defines: "!SHADOW_PASS" } # HAS_BUMP breaks when multiple in scene atm
       - { index: 2, hint: "EmissiveFactor", default: "Textures/black_default", defines: "!SHADOW_PASS"  }
       - { index: 3, hint: "SpecularColor", default: "Textures/black_default", defines: "!SHADOW_PASS"  }
       - { index: 4, hint: "Reflection",  type: "samplerCube", default: "Textures/white_cube", defines: "!SHADOW_PASS"  }      

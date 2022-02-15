@@ -175,6 +175,13 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 
 	FbxAMatrix mGeometry;
 	Matrix4x4 mMatUsg;
+
+	FbxAMatrix globalPoseMatrix = GetGlobalPoseMatrix(pNode);
+
+	mGeometry = GetLocalPoseMatrix(cmdl, globalPoseMatrix, pLight->parentBone.c_str());
+
+#if 0
+
 	mGeometry = GetCombinedMatrixForNode(pNode, pParentBone);//pNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);//GetCombinedMatrixForNode(pNode);
 
 	// Undo the root transform that conversion puts in
@@ -197,6 +204,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 			mGeometry = mGeometry * RootPose.Inverse();
 		}
 	}
+#endif
 
 	for (uint32 i = 0; i < 4; i++)
 	{
@@ -205,15 +213,21 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 			mMatUsg.M[i][j] = (float)mGeometry.Get(i, j);
 		}
 	}
+
+	// Lights face down by default whereas forward is x
+	usg::Matrix4x4 mRot;
+	mRot.MakeRotAboutAxis(usg::Vector4f(1.0f, 0.0f, 0.0f, 0.0f), -usg::Math::pi_over_2);
 	
+	mMatUsg = mRot * mMatUsg;
+
 	pLight->name = pFBXLight->GetName();
 
 	switch (pFBXLight->LightType.Get())
 	{
 	case FbxLight::eSpot:
 		pLight->spec.base.kind = usg::LightKind_SPOT;
-		pLight->spec.spot.fInnerAngle = (float)pFBXLight->InnerAngle.Get();
-		pLight->spec.spot.fOuterAngle = (float)pFBXLight->OuterAngle.Get();
+		pLight->spec.spot.fInnerAngle = (float)pFBXLight->InnerAngle.Get()/2.f;
+		pLight->spec.spot.fOuterAngle = (float)pFBXLight->OuterAngle.Get()/2.f;
 		pLight->spec.direction = mMatUsg.vFace().v3().GetNormalised();
 		pLight->position = mMatUsg.vPos().v3() * (float)m_appliedScale;
 		break;
@@ -271,8 +285,9 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 			fFarEnd = pow(fFarIntensityFrac*fIntensity, 1.0f / 3.0f);
 			break;
 		case FbxLight::eNone:
-			// We don't support no attenuation; set range to 1.0f by default
-			fFarEnd = 1000.0f;
+			// Seems to come through as this when inverse square
+			fFarEnd = fAttenuationStart;
+			fAttenuationStart *= 0.5f; 
 			break;
 		}
 
@@ -780,10 +795,14 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 				ASSERT_MSG((layeredTexture == nullptr), "Layered texture not supported");
 
 				FbxTexture* pTexture = property.GetSrcObject<FbxTexture>(i);
-				if (pTexture && pTexture->GetName() == "NormalMap")
+
+				if (pTexture)
 				{
-					defines.push_back("bump");
-					break;
+					if (property.GetName() == "NormalMap")
+					{
+						defines.push_back("bump");
+						break;
+					}
 				}
 			}
 			property = pFBXMaterial->GetNextProperty(property);

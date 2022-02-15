@@ -95,7 +95,7 @@ The build process has not been improved or significantly modified and currently 
    **OR**  
    [Create a new one](https://github.com/vitei/Usagi/wiki/Creating-a-New-Project)  
 
-1. **Optional** Install the **FBX SDK 2020.0.1 VS2017**.  
+1. **Optional** Install the **FBX SDK 2020.2.1 VS2019**.  
    Not necessary to run, but required to build the model converter (Ayataka)
    https://www.autodesk.com/products/fbx/overview
 
