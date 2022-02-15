@@ -28,7 +28,7 @@ int main(int argc, const char* argv[])
 			""
 		},
 		{
-			"SOFTWARE\\Autodesk FBX SDK 2020.0.1",
+			"SOFTWARE\\Autodesk FBX SDK 2020.2.1",
 			"Install_Dir",
 			"FBXSDK_DIR",
 			""
