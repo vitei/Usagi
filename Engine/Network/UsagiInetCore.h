@@ -8,7 +8,6 @@
 
 #include "Engine/Network/NetCommon.h"
 #include <string>
-#include <Engine/Memory/StdAllocator.h>
 
 namespace usg
 {
