@@ -54,7 +54,7 @@ def build_audio()
     output = output.sub(".yml", ".proto")
     name = File.basename(input).sub(".yml", "") 
     name_upper = name.upcase
-    vitei_audio_tool = "#{mono} #{ENV['USAGI_DIR']}/Tools/AudioTool/FSIDBuilder.exe"
+    vitei_audio_tool = "#{mono} \"#{ENV['USAGI_DIR']}/Tools/AudioTool/FSIDBuilder.exe\""
     cmdline = vitei_audio_tool + ' --proto -i="' + input + '" -o=' + output + ' -e=' + name + 'Audio -g=_CLR_' + name_upper + '_FSID_'
     puts cmdline
     sh cmdline
