@@ -51,6 +51,11 @@ bool Matrix4x4::operator==(const Matrix4x4 &mat) const
 	return true;
 }
 
+bool Matrix4x4::operator != (const Matrix4x4& mat) const
+{
+	return !(mat == (*this));
+}
+
 void Matrix4x4::LoadIdentity(void)
 {
 	MemSet(&_11, 0, sizeof(Matrix4x4));

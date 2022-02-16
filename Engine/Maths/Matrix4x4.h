@@ -55,6 +55,7 @@ public:
 
 	Matrix4x4 operator *= (const Matrix4x4 matr);
 	bool operator == (const Matrix4x4 &mat) const; 
+	bool operator != (const Matrix4x4& mat) const;
 
 	Matrix4x4 operator + (const Matrix4x4 rhs) const;
 	Matrix4x4& operator += (const Matrix4x4 rhs);
