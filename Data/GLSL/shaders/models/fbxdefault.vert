@@ -7,8 +7,8 @@
 #include "../includes/model_transform.inc"
 
 // Output attributes
-ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
 #ifndef SHADOW_PASS
+ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
 ATTRIB_LOC(1) out vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) out vec4 vo_vColor;
 ATTRIB_LOC(3) out vec3 vo_vNormal;
@@ -31,6 +31,7 @@ void main(void)
 
 	vec4 vTmp = vec4(0.0, 0.0, 1.0, 1.0);
 
+#ifndef SHADOW_PASS	
 	vTmp.xy = ao_uv0;
 	vo_vTexCoord01.x = dot(uVSMaterial.mTexMatrix[0][0].xywz, vTmp);
 	vo_vTexCoord01.y = dot(uVSMaterial.mTexMatrix[0][1].xywz, vTmp);
@@ -39,7 +40,6 @@ void main(void)
 	vo_vTexCoord01.z = dot(uVSMaterial.mTexMatrix[1][0].xywz, vTmp);
 	vo_vTexCoord01.w = dot(uVSMaterial.mTexMatrix[1][1].xywz, vTmp);
 
-#ifndef SHADOW_PASS	
 	vTmp.xy = ao_uv2;
 	vo_vTexCoord23.x = dot(uVSMaterial.mTexMatrix[2][0].xywz, vTmp);
 	vo_vTexCoord23.y = dot(uVSMaterial.mTexMatrix[2][1].xywz, vTmp);

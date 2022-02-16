@@ -2,16 +2,16 @@ CustomEffects:
   ModelAttributes:
     Attributes:
       - { index: 0, name: ao_position, hint: "position", type: vec3 }
-      - { index: 1, name: ao_normal, hint: "normal",   type: vec3 }
-      - { index: 2, name: ao_tangent, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP" }
-      - { index: 10, name: ao_binormal, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP"  }
+      - { index: 1, name: ao_normal, hint: "normal",   type: vec3, defines: "!SHADOW_PASS" }
+      - { index: 2, name: ao_tangent, hint: "tangent",  type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP !SHADOW_PASS" }
+      - { index: 10, name: ao_binormal, hint: "binormal", type: vec3, default: [ 0.0, 1.0, 0.0 ], defines: "HAS_BUMP !SHADOW_PASS"  }
       - { index: 3, name: ao_boneIndex,  hint: "blendindex", type: uvec4, default: [ 0, 0, 0, 0 ], defines: "HAS_SKELETON" }
       - { index: 4, name: ao_boneWeight,  hint: "blendweight", type: vec4, default: [ 1.0, 0, 0, 0 ], defines: "HAS_SKELETON"  }
-      - { index: 5, name: ao_color, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ] }
-      - { index: 6, name: ao_uv0, hint: "uv0", type: vec2, default: [0.0, 0.0] }
-      - { index: 7, name: ao_uv1, hint: "uv1", type: vec2, default: [0.0, 0.0] }
-      - { index: 8, name: ao_uv2, hint: "uv2", type: vec2, default: [0.0, 0.0] }
-      - { index: 9, name: ao_uv3, hint: "uv3", type: vec2, default: [0.0, 0.0] }
+      - { index: 5, name: ao_color, hint: "color", type: vec4, default: [ 1.0, 1.0, 1.0, 1.0 ], defines: "!SHADOW_PASS" }
+      - { index: 6, name: ao_uv0, hint: "uv0", type: vec2, default: [0.0, 0.0], defines: "!SHADOW_PASS" }
+      - { index: 7, name: ao_uv1, hint: "uv1", type: vec2, default: [0.0, 0.0], defines: "!SHADOW_PASS" }
+      - { index: 8, name: ao_uv2, hint: "uv2", type: vec2, default: [0.0, 0.0], defines: "!SHADOW_PASS" }
+      - { index: 9, name: ao_uv3, hint: "uv3", type: vec2, default: [0.0, 0.0], defines: "!SHADOW_PASS" }
     Samplers:
       - { index: 0, hint: "DiffuseColor", default: "Textures/white_default" }
       - { index: 1, hint: "NormalMap", default: "Textures/normal_default", defines: "!SHADOW_PASS" } # HAS_BUMP breaks when multiple in scene atm

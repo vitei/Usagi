@@ -196,6 +196,20 @@ int main(int argc, char *argv[])
 		def.name = (*it)["name"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::VS] = (*it)["vert"].as<std::string>();
 		def.prog[(uint32)usg::ShaderType::PS] = (*it)["frag"].as<std::string>();
+
+		if ((*it)["geom"])
+		{
+			def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
+		}
+		if ((*it)["tesc"])
+		{
+			def.prog[(uint32)usg::ShaderType::TC] = (*it)["tesc"].as<std::string>();
+		}
+		if ((*it)["tese"])
+		{
+			def.prog[(uint32)usg::ShaderType::TE] = (*it)["tese"].as<std::string>();
+		}
+
 		def.customFXName = (*it)["custom_effect"] ? (*it)["custom_effect"].as<std::string>() : "";
 		{
 			bool bHasDefault = true;
@@ -212,18 +226,6 @@ int main(int argc, char *argv[])
 				set.definesAsCRC = "";
 				set.defines = "";
 				set.customFXName = def.customFXName;
-				if ((*it)["geom"])
-				{
-					def.prog[(uint32)usg::ShaderType::GS] = (*it)["geom"].as<std::string>();
-				}
-				if ((*it)["tesc"])
-				{
-					def.prog[(uint32)usg::ShaderType::TC] = (*it)["tesc"].as<std::string>();
-				}
-				if ((*it)["tese"])
-				{
-					def.prog[(uint32)usg::ShaderType::TE] = (*it)["tese"].as<std::string>();
-				}
 				def.sets.push_back(set);
 			}
 

@@ -16,8 +16,8 @@
 
 // <<GENERATED_CODE>>
 
-ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
 #ifndef SHADOW_PASS
+ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
 ATTRIB_LOC(1) in vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) in vec4 vo_vColor;
 ATTRIB_LOC(3) in vec3 vo_vNormal;
