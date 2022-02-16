@@ -289,9 +289,9 @@ void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidt
 	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
-void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight)
+void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uTextureFlags)
 {
-	VkImageUsageFlags imageUsage = GetImageUsage(TU_FLAG_DEPTH_ATTACHMENT | TU_FLAG_SHADER_READ);
+	VkImageUsageFlags imageUsage = GetImageUsage(uTextureFlags);
 	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
 }
 
