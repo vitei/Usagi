@@ -163,10 +163,7 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 		{
 			m_descriptorSetShadow.UpdateDescriptors(pDevice);
 		}
-		else
-		{
-			m_descriptorSet.UpdateDescriptors(pDevice);
-		}
+		m_descriptorSet.UpdateDescriptors(pDevice);
 	}
 	if (m_pShadow)
 	{
