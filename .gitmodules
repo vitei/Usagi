@@ -25,3 +25,6 @@
 [submodule "Engine/ThirdParty/PhysX"]
 	path = Engine/ThirdParty/PhysX
 	url = https://github.com/NVIDIAGameWorks/PhysX.git
+[submodule "Engine/ThirdParty/meshoptimizer"]
+	path = Engine/ThirdParty/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git

@@ -12,18 +12,12 @@ void ApplyBoneWeight(inout vec4 vVector, in vec4 vVertex, int boneIndex, float b
 	vVector.xyz += ( (vVertex * mBonePalette[boneIndex]) * (boneWeight));
 }
 
-vec4 ApplyWorldTransformSkinning(in vec4 vVertex, in int iBoneCount)
-{
-	// TODO: Maybe the indices should be passed as indices
-	vec4 vOut = vec4( 0.0, 0.0, 0.0, vVertex.w );
-	// Always at least two weights
-	if(iBoneCount == 1.0)
-	{
-		vOut.xyz = vVertex * mBonePalette[ao_boneIndex.x];
-		return vOut;
-	}
 
-	vOut.xyz +=  ( (vVertex * mBonePalette[ao_boneIndex.x]) * ao_boneWeight.x);	
+vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
+{
+	vec4 vOut = vec4( vVertex * mBonePalette[ao_boneIndex.x] * ao_boneWeight.x, vVertex.w );
+	
+	if(iBoneCount == 1) return vOut;
 	vOut.xyz +=  ( (vVertex * mBonePalette[ao_boneIndex.y]) * ao_boneWeight.y);	
 
 	if(iBoneCount == 2) return vOut;
@@ -33,21 +27,6 @@ vec4 ApplyWorldTransformSkinning(in vec4 vVertex, in int iBoneCount)
 	vOut.xyz +=  ( (vVertex * mBonePalette[ao_boneIndex.w]) * ao_boneWeight.w);	
 
 	return vOut;
-}
-
-vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
-{
-// Bone count should never be 0 in this path
-#if 0
-	if(iBoneCount == 0)
-	{
-		return vec4( vVertex * mModelMat, vVertex.w);
-	}
-	else
-#endif
-	{
-		return ApplyWorldTransformSkinning( vVertex, iBoneCount );
-	}
 }
 
 #else

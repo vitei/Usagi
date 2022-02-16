@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "Engine/ThirdParty/meshoptimizer/src/meshoptimizer.h"
+
 #include "PbUtil.h"
 #include "exchange/Mesh.h"
 #include "exchange/Material.h"
@@ -186,10 +188,13 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 	// first, copy simply
 	*pOutputShape = pShape->pb();
 
-	// primitives info
 
 	const ::exchange::PrimitiveInfo& primInfo = pShape->GetPrimitiveInfo( );
 	::exchange::Stream* pIndexStream = cmdl.GetStreamPtr( primInfo.indexStreamRefIndex );
+
+	::exchange::Stream* pPositionStream = cmdl.GetStreamPtr(pShape->GetPositionStreamRefIndex());
+	const uint32_t vertexNum = pPositionStream->GetLength() / pPositionStream->GetColumnNum();
+
 
 	uint32_t sizeAligned = (uint32_t)calcAlignedSize( pIndexStream->GetLength() * primInfo.indexStreamFormatSize, alignment );
 	pOutputShape->primitive.indexStream.sizeAligned = sizeAligned;
@@ -237,8 +242,6 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 
 	vertexStreamStep = (int)calcAlignedSize(vertexStreamStep, registerAlign);
 
-	::exchange::Stream* pPositionStream = cmdl.GetStreamPtr( pShape->GetPositionStreamRefIndex() );
-	const uint32_t vertexNum = pPositionStream->GetLength() / pPositionStream->GetColumnNum();
 
 	vertexStreamSize = vertexStreamStep * vertexNum;
 
@@ -253,6 +256,8 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 	uint32_t indexStreamSizeAligned = pOutputShape->primitive.indexStream.sizeAligned;
 	uint32_t adjacencyStreamSizeAligned = pOutputShape->primitive.adjacencyStream.sizeAligned;
 	ASSERT_MSG( indexStreamSizeAligned == adjacencyStreamSizeAligned, "error" ); // They should be same
+
+	uint32* pIndices = (uint32*)p;
 
 	switch( primInfo.indexStreamFormatSize )
 	{
@@ -298,6 +303,7 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 
 	// vertex stream itself
 	uint8* pOutputVertexStream = reinterpret_cast<uint8*>( p );
+	uint8* pOutputVerts = pOutputVertexStream;
 
 	for( uint32_t i = 0; i < streamNum; ++i ) {
 		const usg::exchange::VertexStreamInfo info = pShape->GetVertexStreamInfo( i );
@@ -327,6 +333,18 @@ void *CmdlBinaryStore::StoreShape(void *p, const Cmdl& cmdl, const ::exchange::S
 		}
 		pOutputVertexStream += itemSize;
 	}
+
+	// FIXME: Both these assumptions are always true atm but if other platforms were supported again this would need fixing
+	if (primInfo.indexStreamFormatSize == sizeof(uint32_t) && !mbSwapEndian)
+	{
+		meshopt_optimizeVertexCache(pIndices, pIndices, pIndexStream->GetLength(), vertexNum);
+
+		const float kThreshold = 1.01f; // allow up to 1% worse ACMR to get more reordering opportunities for overdraw
+		meshopt_optimizeOverdraw(pIndices, pIndices, pIndexStream->GetLength(), (float*)pOutputVerts, vertexNum, sizeof(usg::Vector3f), kThreshold);
+
+		meshopt_optimizeVertexFetch(pOutputVerts, pIndices, pIndexStream->GetLength(), pOutputVerts, vertexNum, vertexStreamStep);
+	}
+
 
 	p = offsetAddress( p, pOutputShape->vertexStreamSizeAligned );
 

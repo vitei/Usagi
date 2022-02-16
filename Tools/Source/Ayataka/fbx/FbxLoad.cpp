@@ -1106,6 +1106,8 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 	{
 		*pData++ = (*it);
 	}
+
+
 	cmdl.AddStream(pNewStream);
 
 	const bool bHasSkin = pFbxMesh->GetDeformerCount(FbxDeformer::eSkin) > 0;
@@ -1887,9 +1889,22 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 		uMaxWeights = uMaxWeights < 4 ? 4 : uMaxWeights;
 	}
 
-	for (uint32 uVert=0; uVert<m_activeVerts.size(); uVert++)
+	bool bNeedsBlendStream = false;
+	for (auto itr : m_activeWeights)
 	{
-		if (uMaxWeights > 0)
+		for (uint32 i = 0; i < itr.weights.size(); i++)
+		{
+			if (itr.weights[i].index != 0)
+			{
+				bNeedsBlendStream = true;
+				break;
+			}
+		}
+	}
+
+	for (uint32 uVert = 0; uVert < m_activeVerts.size(); uVert++)
+	{
+		if (uMaxWeights > 0 && bNeedsBlendStream)
 		{
 			WeightingInfo& info = m_activeWeights[m_activeVerts[uVert].controlPointIndex];
 			for (uint32 i = 0; i < info.weights.size(); i++)
@@ -2509,6 +2524,7 @@ void FbxLoad::RemoveDuplicateVertices()
 	uniqueVertices.clear();
 
 	// Should already be seperated into seperate meshes per material via the utilities
+
 }
 
 void FbxLoad::AddMaterials(Cmdl& cmdl, FbxNode* pNode, bool bSkinned)

@@ -43,10 +43,10 @@ CustomEffects:
           - { type: bool,   name: bEmissiveMap,   default: false } # 72            
           - { type: bool,   name: bReflectionMap, default: false } # 76
       - binding: Custom0
-        shaderType: VS
+        shaderType: VS 
         Variables:
          - { type: mat3x4,   name: mModelMat,    count: 1  }  # 0          
-Effects:
+Effects: 
   - name: FBXDefault
     vert: models/fbxdefault
     frag: models/fbxdefault

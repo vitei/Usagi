@@ -12,7 +12,6 @@ ATTRIB_LOC(0) out vec4 vo_vTexCoord01;
 ATTRIB_LOC(1) out vec4 vo_vTexCoord23;
 ATTRIB_LOC(2) out vec4 vo_vColor;
 ATTRIB_LOC(3) out vec3 vo_vNormal;
-#endif
 #ifdef HAS_BUMP
 ATTRIB_LOC(4) out vec3 vo_vTangent;
 ATTRIB_LOC(5) out vec3 vo_vBinormal;
@@ -20,6 +19,7 @@ ATTRIB_LOC(5) out vec3 vo_vBinormal;
 #ifndef OMNI_DEPTH
 ATTRIB_LOC(6) out vec3 vo_vWorldPos;
 ATTRIB_LOC(7) out vec3 vo_vViewDir;
+#endif
 #endif
 
 
@@ -81,13 +81,15 @@ void main(void)
 #ifdef OMNI_DEPTH
 	gl_Position			= vWorldPos;
 #else
+
 	vec4 vViewPos	= vWorldPos * mViewMat;	// Reverse ordering as a mat3x4
 	vec4 vProjPos	= vec4(vViewPos.xyz, 1.0) * mProjMat;
 
+#ifndef SHADOW_PASS
 	vo_vViewDir			= -vViewPos.xyz;
-	
 
 	vo_vWorldPos		= vWorldPos.xyz;
+#endif
 
 	gl_Position			= vProjPos;
 #endif

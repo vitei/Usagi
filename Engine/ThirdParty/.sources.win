@@ -9,3 +9,4 @@ lua-5.3.2/src/*.c
 -:lua-5.3.2/src/lua.c
 -:lua-5.3.2/src/luac.c
 yaml-cpp/src/*.cpp
+meshoptimizer/src/*.cpp
