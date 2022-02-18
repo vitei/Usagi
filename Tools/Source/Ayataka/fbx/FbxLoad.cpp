@@ -351,7 +351,7 @@ FbxAMatrix FbxLoad::GetGlobalPoseMatrix(FbxNode* pNode)
 
 FbxAMatrix FbxLoad::GetLocalPoseMatrix(Cmdl& cmdl, FbxAMatrix globalPose, const char* szParentName)
 {
-	if (!m_bHasDefaultStaticBone)
+	//if (!m_bHasDefaultStaticBone)
 	{
 		uint32 boneIndex = FindBone(*cmdl.GetSkeleton(), szParentName);
 		if (boneIndex != USG_INVALID_ID)
