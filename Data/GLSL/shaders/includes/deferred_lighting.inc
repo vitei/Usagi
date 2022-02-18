@@ -35,11 +35,6 @@ void main(void)
 
 	int count = iCascadeLightStart;
 
-	for(int i=0; i<count; i++)
-	{
-		CalculateDirectionalLighting(0, vNormal, vFSVector, fSpecPow, vDiffuse, vSpecular);
-	}
-
 	if(iCascadeLightStart < iDirLightCount)
 	{
 		// Apply the first shadowed light
@@ -54,6 +49,11 @@ void main(void)
 			vSpecular *= vShadowMul;
 		}
 
+	}
+
+	for(int i=0; i<count; i++)
+	{
+		CalculateDirectionalLighting(i, vNormal, vFSVector, fSpecPow, vDiffuse, vSpecular);
 	}
 
 	vec3 vEmissive = GetDeferredEmissive(vo_vTexCoord);
