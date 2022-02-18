@@ -27,13 +27,22 @@ class IndexBuffer_ps
 		VkIndexType GetType() const { return m_eIndexType; }
 
 	private:
+		void CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize);
+		void CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging);
+		void CleanupStaging(GFXDevice* pDevice);
+
 		VkIndexType		m_eIndexType;
 		uint32			m_uIndexSize;
 		VkBuffer 		m_buffer[GFX_NUM_DYN_BUFF];
+		VkBuffer 		m_stagingBuffer[GFX_NUM_DYN_BUFF];
+
 		VkMemAllocator	m_memoryAlloc;
+		VkMemAllocator	m_stagingMemoryAlloc;
 		uint32			m_uActiveIBO;
 		uint32			m_uBufferCount;
-		uint32			m_uBufferSize;
+		memsize			m_uBufferSize;
+		bool			m_bUseStaging;
+
 };
 
 }

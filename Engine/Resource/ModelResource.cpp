@@ -438,8 +438,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	m_meshArray[m_uMeshCount].defaultPipelineDescLayout = matDescriptors;
 
 	GPULocation eGPULocation = bFastMem ? GPU_LOCATION_FASTMEM : GPU_LOCATION_STANDARD;
-	// Seem to be running short on VRAM and it's not impacting performance any
-	GPULocation eVertGPULocation = GPU_LOCATION_STANDARD;//bFastMem ? GPU_LOCATION_FASTMEM : GPU_LOCATION_STANDARD;
+	GPULocation eVertGPULocation = GPU_LOCATION_FASTMEM;
 	
 	// set vertex stream
 	uint32 vertexStreamOffset = calcIndexStreamSizeSum( pShape );

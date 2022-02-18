@@ -27,11 +27,20 @@ public:
 
 	VkBuffer GetBuffer() const { return m_buffer[m_uActiveVBO]; }
 private:
+	void CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize);
+	void CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging);
+	void CleanupStaging(GFXDevice* pDevice);
+
     VkBuffer 					m_buffer[GFX_NUM_DYN_BUFF];
+	VkBuffer 					m_stagingBuffer[GFX_NUM_DYN_BUFF];
+
+	GPULocation					m_eLocation;
 	VkDeviceSize				m_uBufferSize;
 	VkMemAllocator				m_memoryAlloc;
+	VkMemAllocator				m_stagingMemoryAlloc;
 	uint32						m_uActiveVBO;
 	uint32						m_uBufferCount;
+	bool						m_bUseStaging;
 };
 
 }

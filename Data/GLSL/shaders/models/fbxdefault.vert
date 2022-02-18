@@ -26,12 +26,15 @@ ATTRIB_LOC(7) out vec3 vo_vViewDir;
 
 void main(void)
 {
+#ifdef HAS_SKELETON
 	vec4 vWorldPos	= vec4(ao_position, 1.0);
 	vWorldPos = ApplyWorldTransform(vWorldPos, uVSMaterial.iBoneCount);
-
-	vec4 vTmp = vec4(0.0, 0.0, 1.0, 1.0);
+#else
+	vec4 vWorldPos = vec4( vec4(ao_position, 1.0) * mModelMat, 1.0);
+#endif
 
 #ifndef SHADOW_PASS	
+	vec4 vTmp = vec4(0.0, 0.0, 1.0, 1.0);
 	vTmp.xy = ao_uv0;
 	vo_vTexCoord01.x = dot(uVSMaterial.mTexMatrix[0][0].xywz, vTmp);
 	vo_vTexCoord01.y = dot(uVSMaterial.mTexMatrix[0][1].xywz, vTmp);
