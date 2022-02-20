@@ -37,8 +37,8 @@ public:
 	struct QualitySettings
 	{
 		bool	bDirectionalShadows = true;
-		bool	bSpotShadows = false;
-		bool	bPointShadows = false;
+		bool	bSpotShadows = true;
+		bool	bPointShadows = true;
 		uint32	uShadowQuality = 2;	// 1-4
 	};
 
