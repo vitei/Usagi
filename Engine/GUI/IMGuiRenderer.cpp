@@ -30,7 +30,6 @@ static GFXDevice* g_pDevice = NULL;
 IMGuiRenderer::IMGuiRenderer() 
 	: m_pIMGUIContext(nullptr)
 	, m_mainMenuBar(true)
-	, m_windows(2)
 {
 	g_spGUIRenderer = this;
 	m_vOffset.Assign(0.0f, 0.0f);

@@ -9,6 +9,7 @@
 #include "Engine/GUI/GuiTabBar.h"
 #include "Engine/GUI/GuiTab.h"
 #include "Engine/GUI/IMGuiRenderer.h"
+#include "Engine/Core/stl/list.h"
 #include "MayaCamera.h"
 #include "ShapeSettings.h"
 #include "EditorShapes.h"

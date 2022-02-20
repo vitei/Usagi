@@ -52,18 +52,18 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_blendSettings.AddToTab(m_blendTab);
 	m_sortSettings.AddToTab(m_blendTab);
 
-	m_modifiers.AddToEnd(&m_shapeSettings);
-	m_modifiers.AddToEnd(&m_emissionSettings);
+	m_modifiers.push_back(&m_shapeSettings);
+	m_modifiers.push_back(&m_emissionSettings);
 
-	m_modifiers.AddToEnd(&m_sortSettings);
-	m_modifiers.AddToEnd(&m_blendSettings);
-	m_modifiers.AddToEnd(&m_rotationSettings);
-	m_modifiers.AddToEnd(&m_colorSettings);
-	m_modifiers.AddToEnd(&m_alphaSettings);
-	m_modifiers.AddToEnd(&m_scaleSettings);
-	m_modifiers.AddToEnd(&m_motionParams);
-	m_modifiers.AddToEnd(&m_textureSettings);
-	m_modifiers.AddToEnd(&m_particleSettings);
+	m_modifiers.push_back(&m_sortSettings);
+	m_modifiers.push_back(&m_blendSettings);
+	m_modifiers.push_back(&m_rotationSettings);
+	m_modifiers.push_back(&m_colorSettings);
+	m_modifiers.push_back(&m_alphaSettings);
+	m_modifiers.push_back(&m_scaleSettings);
+	m_modifiers.push_back(&m_motionParams);
+	m_modifiers.push_back(&m_textureSettings);
+	m_modifiers.push_back(&m_particleSettings);
 
 	m_fileMenu.Init("File");
 	m_saveItem.Init("Save");
@@ -79,15 +79,15 @@ void EmitterWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer)
 	m_loadItem.SetStartPath("..\\..\\Data\\Particle\\Emitters\\");
 	m_loadItem.SetCallbacks(this);
 
-	for (usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_modifiers)
 	{
-		(*it)->Init(pDevice, pRenderer);
+		it->Init(pDevice, pRenderer);
 	}
 
 
-	for (usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
+	for (auto it : m_modifiers)
 	{
-		(*it)->SetWidgetsFromDefinition(m_variables);
+		it->SetWidgetsFromDefinition(m_variables);
 	}
 
 
@@ -123,9 +123,9 @@ void EmitterWindow::LoadCallback(const char* szName, const char* szFilePath, con
 
 	if (bReadSucceeded)
 	{
-		for (usg::List<EmitterModifier>::Iterator it = m_modifiers.Begin(); !it.IsEnd(); ++it)
+		for( auto it : m_modifiers )
 		{
-			(*it)->SetWidgetsFromDefinition(m_variables);
+			it->SetWidgetsFromDefinition(m_variables);
 		}
 	}
 

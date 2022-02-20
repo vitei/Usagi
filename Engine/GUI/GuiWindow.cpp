@@ -11,7 +11,6 @@ namespace usg
 {
 	GUIWindow::GUIWindow() 
 		: m_menuBar(false)
-		, m_items(300)
 	{
 		m_fScale = 1.0f;
 		m_bShowBorders = false;
@@ -36,7 +35,9 @@ namespace usg
 	
 	void GUIWindow::AddItem(GUIItem* pItem)
 	{
+		ASSERT(pItem != nullptr);
 		m_items.push_back(pItem);
+		ASSERT(m_items.back() != nullptr);
 	}
 
 	bool GUIWindow::UpdateAndAddToDrawList(const GUIContext& ctxt)

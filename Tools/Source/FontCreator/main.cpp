@@ -248,7 +248,6 @@ int main(int argc, char *argv[])
 {
 	usg::mem::InitialiseDefault();
 	usg::mem::setConventionalMemManagement(true);
-	usg::U8String::InitPool();
 
 	FreetypeHandle *ft = initializeFreetype();
 	FontDefinition fontDef;
@@ -410,8 +409,6 @@ int main(int argc, char *argv[])
 
 	vdelete[] texDef.pData;
 	texDef.pData = nullptr;
-
-	usg::U8String::CleanupPool();
 
 	return 0;
 }
