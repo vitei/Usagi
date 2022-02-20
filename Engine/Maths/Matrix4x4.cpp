@@ -43,9 +43,14 @@ Matrix4x4::Matrix4x4(	float r11, float r12, float r13, float r14,
 
 bool Matrix4x4::operator==(const Matrix4x4 &mat) const
 {
-	for(uint32 i=0; i<16; i++)
+	return IsEqual(mat, FLT_EPSILON);
+}
+
+bool Matrix4x4::IsEqual(const Matrix4x4& mat, float fEpsilon) const
+{
+	for (uint32 i = 0; i < 16; i++)
 	{
-		if(!Math::IsEqual(m[i], mat.m[i]))
+		if (!Math::IsEqual(m[i], mat.m[i], fEpsilon))
 			return false;
 	}
 	return true;

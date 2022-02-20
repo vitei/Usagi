@@ -57,6 +57,8 @@ public:
 	bool operator == (const Matrix4x4 &mat) const; 
 	bool operator != (const Matrix4x4& mat) const;
 
+	bool IsEqual(const Matrix4x4& mat, float fEpsilon = FLT_EPSILON) const;
+
 	Matrix4x4 operator + (const Matrix4x4 rhs) const;
 	Matrix4x4& operator += (const Matrix4x4 rhs);
 
