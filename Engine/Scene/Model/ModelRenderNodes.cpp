@@ -61,6 +61,8 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
 
+	SetAnimated(pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING);
+
 	//	SetMaterial(&pMesh->material);
 	m_pszName = pszName;
 	m_uLod = pMesh->uLodIndex;

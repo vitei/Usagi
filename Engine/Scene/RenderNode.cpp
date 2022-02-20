@@ -21,7 +21,9 @@ const uint64 COMPARISON_MASK_TEXTURE	= (0x00000000000000FF);
 RenderNode::RenderNode()
 :m_eLayer(LAYER_OPAQUE),
 m_uPriority(0),
-m_uRenderMask(RENDER_MASK_ALL)
+m_uRenderMask(RENDER_MASK_ALL),
+m_bHasShadow(false),
+m_bAnimated(false)
 {
 	m_pParent = NULL;
 	m_bPostEffect = false;

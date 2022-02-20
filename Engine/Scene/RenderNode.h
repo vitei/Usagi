@@ -42,10 +42,10 @@ public:
 
 	struct RenderContext
 	{
-		RenderContext() : pPostFX(nullptr), eRenderPass(RENDER_PASS_FORWARD) {}
-		const class DescriptorSet* pGlobalDescriptors;
-		PostFXSys* pPostFX;
-		RenderPass eRenderPass;
+		RenderContext() {}
+		const class DescriptorSet* pGlobalDescriptors = nullptr;
+		PostFXSys* pPostFX = nullptr;
+		RenderPass eRenderPass = RENDER_PASS_FORWARD;
 	};
 
 	void SetParent(RenderGroup* pParent);
@@ -54,6 +54,8 @@ public:
 	void SetRenderMask(uint32 uMask);
 	void SetRenderMaskIncShadow(uint32 uMask);
 	uint32 GetRenderMask() const { return m_uRenderMask; }
+	bool IsAnimated() const { return m_bAnimated;  }
+	void SetAnimated(bool bAnimated) { m_bAnimated = bAnimated; }
 
 	RenderLayer	GetLayer() const { return m_eLayer; }
 	uint8	GetPriority() const { return m_uPriority; }
@@ -90,6 +92,7 @@ private:
 	uint32					m_uRenderMask;
 	bool					m_bPostEffect;
 	bool					m_bHasShadow;
+	bool					m_bAnimated;
 	uint64					m_uComparisonVal;
 };
 
