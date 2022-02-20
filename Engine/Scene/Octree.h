@@ -47,7 +47,7 @@ public:
 		void SetMask(uint32 uMask) { m_uMask = uMask; }
 		void SetReqFlags(uint32 uReq) { m_uReqFlags = uReq; }
 		virtual void Callback(void* pUserData) = 0;
-		virtual void GetVisibleList(Octree* pOctree) = 0;
+		virtual void GetVisibleList(const Octree* pOctree) = 0;
 
 	protected:
 		uint32			m_uMask;
@@ -60,7 +60,7 @@ public:
 	public:
 		const Frustum* GetFrustum() const { return m_pFrustum; }
 		void SetFrustum(const Frustum* pFrustum) { m_pFrustum = pFrustum; }
-		void GetVisibleList(Octree* pOctree) override { pOctree->GetVisibleList(*this); }
+		void GetVisibleList(const Octree* pOctree) override { pOctree->GetVisibleList(*this); }
 
 	protected:
 		const Frustum*	m_pFrustum;
@@ -71,15 +71,15 @@ public:
 	public:
 		const usg::Sphere* GetSphere() const { return m_pSphere; }
 		void SetSphere(const usg::Sphere* sphere) { m_pSphere = sphere; }
-		void GetVisibleList(Octree* pOctree) override { pOctree->GetVisibleList(*this); }
+		void GetVisibleList(const Octree* pOctree) override { pOctree->GetVisibleList(*this); }
 
 	protected:
 		const usg::Sphere*	m_pSphere;
 	};
 
-	void	GetVisibleList(SearchObject& object);
-	void	GetVisibleList(SearchFrustum& object);
-	void	GetVisibleList(SearchSphere& object);
+	void	GetVisibleList(SearchObject& object) const;
+	void	GetVisibleList(SearchFrustum& object) const;
+	void	GetVisibleList(SearchSphere& object) const;
 
 private:
 	enum
@@ -94,11 +94,11 @@ private:
 
 	struct OctreeComponent
 	{
-		Node*					pParent;
-		const TransformNode*	pNode;
-		void*					pUserData;
-		OctreeComponent*		pNext;
-		uint32					uTestMask;
+		Node*					pParent = nullptr;
+		const TransformNode*	pNode = nullptr;
+		void*					pUserData = nullptr;
+		OctreeComponent*		pNext = nullptr;
+		uint32					uTestMask = 0;
 	};
 
 	class Node
@@ -136,8 +136,8 @@ private:
 		AABB				m_aabbTight;
 		AABB				m_aabbLoose;
 
-		Octree*				m_pOctree;
-		Octree::Node*		m_pParent;
+		Octree*				m_pOctree = nullptr;
+		Octree::Node*		m_pParent = nullptr;
 		Octree::Node*		m_pChildren[NUM_CHILDREN];
 		// Useful for collision detection
 		OctreeComponent*	m_pGeomList;

@@ -125,17 +125,17 @@ void Octree::UpdateTransforms()
 }
 
 
-void Octree::GetVisibleList(SearchObject& object)
+void Octree::GetVisibleList(SearchObject& object) const
 {
 	object.GetVisibleList(this);
 }
 
-void Octree::GetVisibleList( SearchFrustum& searchObj )
+void Octree::GetVisibleList( SearchFrustum& searchObj ) const
 {
 	m_pParentNode->GetVisibleList(searchObj);
 }
 
-void Octree::GetVisibleList(SearchSphere& searchObj)
+void Octree::GetVisibleList(SearchSphere& searchObj) const
 {
 	m_pParentNode->GetVisibleList(searchObj);
 }
