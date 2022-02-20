@@ -27,6 +27,14 @@ SceneContext::~SceneContext()
 
 }
 
+void SceneContext::UpdateVisibleGroups()
+{
+	for (auto itr : m_visibleGroups)
+	{
+		m_pScene->UpdateObject(itr);
+	}
+}
+
 
 void SceneContext::SetScene(Scene* pScene)
 {

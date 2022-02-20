@@ -20,6 +20,7 @@
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Debug/DebugStats.h"
 #include "Engine/Scene/Scene.h"
+#include <future>
 #include <array>
 
 const int RENDER_GROUP_POOL_SIZE = 1000;
@@ -84,6 +85,8 @@ struct Scene::PIMPL
 static const char* g_szTimerNames[Scene::TIMER_COUNT] =
 {
 	"Visibility update",
+	"Node update",
+	"Static update",
 	"Scene update",
 	"Particle update",
 	"Timer Pre-Cull"
@@ -129,6 +132,8 @@ void Scene::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const AABB& worldBoun
 
 	m_debugStats.Init(&m_pImpl->debug3D, this);
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
+
+	RegisterTimers();
 }
 
 const RenderPassHndl& Scene::GetShadowRenderPass() const
@@ -384,6 +389,7 @@ void Scene::TransformUpdate(float fElapsed)
 	m_pImpl->lightMgr.Update(fElapsed, m_uFrame);
 }
 
+
 void Scene::PerformVisibilityTesting(GFXDevice* pDevice)
 {
 	m_pImpl->profileTimers[TIMER_VISIBILITY].ClearAndStart();
@@ -401,20 +407,37 @@ void Scene::PerformVisibilityTesting(GFXDevice* pDevice)
 			if(it->GetCamera())
 			{
 				m_activeView.BuildCameraFromModel(it->GetCamera()->GetModelMatrix());
-				m_pImpl->octree.GetVisibleList( it->GetSearchObject() );
 			}
-			else
-			{
-				ASSERT(it->GetSphere());
-				// Assuming this is our optimised point light path because there is no way in hell we want
-				// six contexts and 6 draw calls per point light (fuck you engins that do)
-				m_pImpl->octree.GetVisibleList( it->GetSearchObject() );
-			}
+
 			uContextCount++;
 		}
 	}
-	
 
+	for (auto it : m_pImpl->sceneContexts)
+	{
+		if (it->IsActive())
+		{
+			m_pImpl->octree.GetVisibleList(it->GetSearchObject());
+		}
+	}
+
+	m_pImpl->profileTimers[TIMER_VISIBILITY].Stop();
+
+	m_pImpl->profileTimers[TIMER_NODE_UPDATE].ClearAndStart();
+
+
+	for (auto it : m_pImpl->sceneContexts)
+	{
+		if (it->IsActive())
+		{
+			it->UpdateVisibleGroups();
+		}
+	}
+
+	m_pImpl->profileTimers[TIMER_NODE_UPDATE].Stop();
+
+
+	m_pImpl->profileTimers[TIMER_STATIC_UPDATE].ClearAndStart();
 	for(RenderGroup* pGroup : m_pImpl->staticComponents )
 	{
 		bool bVisible = false;
@@ -437,9 +460,10 @@ void Scene::PerformVisibilityTesting(GFXDevice* pDevice)
 			}
 		}
 	}
+	m_pImpl->profileTimers[TIMER_STATIC_UPDATE].Stop();
+
 
 	m_pDevice = NULL;
-	m_pImpl->profileTimers[TIMER_VISIBILITY].Stop();
 }
 
 void Scene::PreUpdate()

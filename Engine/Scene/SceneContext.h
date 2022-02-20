@@ -10,6 +10,7 @@
 
 #include "Engine/Core/stl/list.h"
 #include "Engine/Scene/Octree.h"
+#include "Engine/Core/Thread/Thread.h"
 #include "Engine/Scene/RenderGroup.h"
 
 namespace usg{
@@ -21,7 +22,7 @@ class SceneSearchObject;
 class RenderGroup;
 
 
-class SceneContext
+class SceneContext 
 {
 public:
 	SceneContext();
@@ -50,6 +51,8 @@ public:
 	uint32 GetVisibleGroupCount() const { return (uint32)m_visibleGroups.size(); }
 
 	virtual Octree::SearchObject& GetSearchObject() = 0;
+
+	void UpdateVisibleGroups();
 
 protected:
 	void SetDeviceDataLoaded() { m_bDeviceDataValid = true; }

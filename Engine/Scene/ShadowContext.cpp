@@ -26,7 +26,7 @@ static const ShaderConstantDecl g_globalShadowCBDecl[] =
 
 
 ShadowContext::ShadowContext():
-SceneContext()
+	Inherited()
 {
 	m_pCamera = nullptr;
 }
@@ -67,11 +67,6 @@ void ShadowContext::SetNonShadowFlags(uint32 uFlags)
 	m_searchObject.SetMask(uFlags);
 }
 
-void ShadowContext::ClearLists()
-{
-	m_drawList.clear();
-	Inherited::ClearLists();
-}
 
 void ShadowContext::Update(GFXDevice* pDevice)
 {
@@ -115,6 +110,14 @@ void ShadowContext::DrawScene(GFXContext* pContext)
 		RenderNode* node = (*it);
 		node->Draw(pContext, renderContext);
 	}
+	CacheDirtyInfo();
 }
+
+usg::Matrix4x4 ShadowContext::GetLightMat() const
+{
+	return m_pCamera->GetViewMatrix() * m_pCamera->GetProjection();
+
+}
+
 
 }

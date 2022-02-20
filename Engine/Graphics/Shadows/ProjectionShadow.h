@@ -50,6 +50,7 @@ private:
 	bool					m_bStatic;
 	bool					m_bEnableUpdate;
 	bool					m_bNothingVisible;
+	bool					m_bFirst;
 };
 
 }

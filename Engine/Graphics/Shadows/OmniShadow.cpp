@@ -14,6 +14,7 @@ namespace usg
 		m_pShadowContext = nullptr;
 		m_bEnableUpdate = true;
 		m_bNothingVisible = false;
+		m_bFirst = true;
 	}
 
 	OmniShadow::~OmniShadow()
@@ -81,10 +82,19 @@ namespace usg
 		if (!m_bEnableUpdate)
 			return;
 
-		if (m_bNothingVisible && m_pShadowContext->GetVisibleGroupCount() == 0)
-			return;	// We have a blank shadow tex, no need to clear it again
+		if (!m_bFirst)
+		{
+			// We run the first frame to avoid issues with texture layout
+			if (m_bNothingVisible && m_pShadowContext->GetVisibleGroupCount() == 0)
+				return;	// We have a blank shadow tex, no need to clear it again
+
+			if (!m_pShadowContext->IsDirty())
+				return;
+		}
 
 		m_bNothingVisible = m_pShadowContext->GetVisibleGroupCount() == 0;
+
+		m_bFirst = false;
 
 		pContext->BeginGPUTag("PointShadow", Color::Grey);
 

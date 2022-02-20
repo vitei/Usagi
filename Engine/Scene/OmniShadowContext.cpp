@@ -29,7 +29,7 @@ static const ShaderConstantDecl g_globalOmniShadowCBDecl[] =
 
 
 OmniShadowContext::OmniShadowContext():
-SceneContext()
+Inherited()
 {
 }
 
@@ -60,12 +60,6 @@ void OmniShadowContext::Init(const Sphere* sphere)
 	SetRenderMask(RenderMask::RENDER_MASK_SHADOW_CAST);
 	m_pSphere = sphere;
 	m_searchObject.Init(GetScene(), this, *m_pSphere, RenderMask::RENDER_MASK_SHADOW_CAST);
-}
-
-void OmniShadowContext::ClearLists()
-{
-	m_drawList.clear();
-	Inherited::ClearLists();
 }
 
 void OmniShadowContext::Update(GFXDevice* pDevice)
@@ -128,6 +122,7 @@ void OmniShadowContext::Update(GFXDevice* pDevice)
 				m_drawList.push_back(pNode);
 			}
 		}
+
 	}
 }
 
@@ -142,6 +137,21 @@ void OmniShadowContext::DrawScene(GFXContext* pContext)
 	{
 		node->Draw(pContext, renderContext);
 	}
+
+	CacheDirtyInfo();
+}
+
+usg::Matrix4x4 OmniShadowContext::GetLightMat() const
+{
+	Matrix4x4 mProj;
+	mProj.Perspective(usg::Math::pi_over_2, 1.0f, 0.1f, m_pSphere->GetRadius());
+
+	Vector4f vPos = Vector4f(m_pSphere->GetPos(), 1.0f);
+
+	usg::Matrix4x4 mMat;
+	mMat.CameraMatrix(V4F_X_AXIS, V4F_Y_AXIS, V4F_Z_AXIS, vPos);
+
+	return mMat * mProj;
 }
 
 }

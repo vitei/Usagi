@@ -6,7 +6,7 @@
 #define _USG_GRAPHICS_SCENE_SHADOWCONTEXT_H_
 
 #include "Engine/Memory/FastPool.h"
-#include "Engine/Scene/SceneContext.h"
+#include "Engine/Scene/ShadowContextBase.h"
 #include "Engine/Scene/SceneSearchObject.h"
 #include "Engine/Graphics/Device/DescriptorSet.h"
 
@@ -16,10 +16,10 @@ class Scene;
 class Camera;
 class PostFXSys;
 
-class ShadowContext : public SceneContext
+class ShadowContext : public ShadowContextBase
 {
 public:
-	typedef SceneContext Inherited;
+	typedef ShadowContextBase Inherited;
 
 	ShadowContext();
 	~ShadowContext();
@@ -28,7 +28,6 @@ public:
 	virtual void Cleanup(GFXDevice* pDevice) override;
 	void Init(const Camera* pCamera);
 	virtual void Update(GFXDevice* pDevice);
-	virtual void ClearLists();
 	virtual const Camera* GetCamera() const override { return m_pCamera; }
 	virtual Octree::SearchObject& GetSearchObject() override { return m_searchObject; }
 
@@ -36,11 +35,13 @@ public:
 
 	void DrawScene(GFXContext* pContext);
 
+protected:
+	virtual Matrix4x4 GetLightMat() const override;
+
 private:
 
 	const Camera*			m_pCamera;
 	SceneSearchFrustum		m_searchObject;
-	list<RenderNode*>		m_drawList;
 	DescriptorSet			m_descriptorSet;
 	ConstantSet				m_globalConstants;
 };

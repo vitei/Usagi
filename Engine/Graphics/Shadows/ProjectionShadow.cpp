@@ -92,7 +92,7 @@ namespace usg
 			Vector4f vDirection = pSpotLight->GetDirection();
 			Vector4f vUp(0.0f, 1.0f, 0.0f, 0.0f);
 
-			if (DotProduct(vUp, vDirection) > 0.8f)
+			if ( Math::Abs( DotProduct(vUp, vDirection) ) > 0.8f )
 			{
 				vUp.Assign(1.0f, 0.0f, 0.0f, 0.0f);
 			}
@@ -126,10 +126,18 @@ namespace usg
 		if (!m_bEnableUpdate)
 			return;
 
-		if (m_bNothingVisible && m_pSceneContext->GetVisibleGroupCount() == 0)
-			return;	// We have a blank shadow tex, no need to clear it again
+		if (!m_bFirst)
+		{
+			if (m_bNothingVisible && m_pSceneContext->GetVisibleGroupCount() == 0)
+				return;	// We have a blank shadow tex, no need to clear it again
 
+			if (!m_pSceneContext->IsDirty())
+				return;
+		}
+
+		m_bFirst = false;
 		m_bNothingVisible = m_pSceneContext->GetVisibleGroupCount() == 0;
+
 
 		pContext->BeginGPUTag("SpotShadow", Color::Grey);
 
@@ -150,7 +158,6 @@ namespace usg
 			m_bEnableUpdate = false;
 		}
 	}
-
 
 
 }
