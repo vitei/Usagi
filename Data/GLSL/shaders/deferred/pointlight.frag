@@ -34,11 +34,11 @@ float rand(vec2 co)
 
 float ShadowCalculationSoft(vec3 fragPos)
 {
-	float fBias   = -0.045;
+	float fBias   = -0.02;
 
     vec3 vFragToLight = fragPos - light.vPos.xyz;
 	float fCurrentDepth = length(vFragToLight) / light.vRange.y;
-    vFragToLight.y = 1.0 - vFragToLight.y;
+//    vFragToLight.y = 1.0 - vFragToLight.y;
 
     vFragToLight = normalize(vFragToLight);
    	vec3 vRight = normalize(cross(vFragToLight, vec3(0, 0, 1)));
@@ -47,7 +47,7 @@ float ShadowCalculationSoft(vec3 fragPos)
 	vRight *= vInvShadowDim.xxx;
 	vUp *= vInvShadowDim.yyy;
 
-    float fDiskRadius = 2.5;
+    float fDiskRadius = 0.1;
 	float fShadow = 0.0;
 	for(int i = 0; i < 12; ++i)
 	{
@@ -66,7 +66,7 @@ float ShadowCalculation(vec3 fragPos)
 	float fCurrentDepth = length(vFragToLight) / light.vRange.y;
 	// TODO: Pass this value in
     float fBias = -0.01; 	
-    vFragToLight.y = 1.0 - vFragToLight.y;
+    //vFragToLight.y = 1.0 - vFragToLight.y;
 	vec4 tc = vec4( normalize(vFragToLight), fCurrentDepth + fBias);
 
     float readValue = texture(sampler9, tc);
