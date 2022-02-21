@@ -44,26 +44,6 @@ def ninja(build_name, failed_job_limit=10)
   "#{NINJA_PREFIX}ninja #{VERBOSITY_FLAG} -w dupbuild=err -f #{ninja_file(build_name)} -k #{failed_job_limit} #{CORES ? "-j #{CORES}" : ""}"
 end
 
-def build_audio()
-  files = []
-  mono = ''
-  mono = 'mono' if ! Gem.win_platform?
-  FileUtils.mkdir_p("#{PROJECT}/audio_gen")
-  FileList["Data/VPB/Audio/*.yml"].select{|f| !File.directory? f}.map do |input|
-    output = "#{PROJECT}/#{input.sub(/^Data\/VPB\/Audio\//, "audio_gen\/")}"
-    output = output.sub(".yml", ".proto")
-    name = File.basename(input).sub(".yml", "") 
-    name_upper = name.upcase
-    vitei_audio_tool = "#{mono} \"#{ENV['USAGI_DIR']}/Tools/AudioTool/FSIDBuilder.exe\""
-    cmdline = vitei_audio_tool + ' --proto -i="' + input + '" -o=' + output + ' -e=' + name + 'Audio -g=_CLR_' + name_upper + '_FSID_'
-    puts cmdline
-    sh cmdline
-    files.push(output)
-  end
-  puts files
-  files
-end
-
 task :default => :build
 task :build => :ninja do |t|
   BUILDS.each{ |b| sh ninja(b) }
