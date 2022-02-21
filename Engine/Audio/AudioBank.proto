@@ -19,7 +19,11 @@ enum AudioFilterType
 	option (nanopb_enumopt).long_names = false;
 
 	AUDIO_FILTER_LOW_PASS = 0;
-	AUDIO_FILTER_HIGH_PASS = 1;
+	AUDIO_FILTER_BAND_PASS = 1;
+	AUDIO_FILTER_HIGH_PASS = 2;
+	AUDIO_FILTER_NOTCH = 3;
+	AUDIO_FILTER_LOW_PASS_ONE_POLE = 4;
+	AUDIO_FILTER_HIGH_PASS_ONE_POLE = 5;
 }
 
 enum AudioEffectType

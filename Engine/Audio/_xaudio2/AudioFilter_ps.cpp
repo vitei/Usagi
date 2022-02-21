@@ -27,10 +27,22 @@ namespace usg{
 		switch (pDef->eFilter)
 		{
 			case AUDIO_FILTER_LOW_PASS:
-				m_parameters.Frequency = XAUDIO2_FILTER_TYPE::LowPassFilter;
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::LowPassFilter;
 				break;
 			case AUDIO_FILTER_HIGH_PASS:
-				m_parameters.Frequency = XAUDIO2_FILTER_TYPE::HighPassFilter;
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::HighPassFilter;
+				break;
+			case AUDIO_FILTER_BAND_PASS:
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::BandPassFilter;
+				break;
+			case AUDIO_FILTER_NOTCH:
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::NotchFilter;
+				break;
+			case AUDIO_FILTER_LOW_PASS_ONE_POLE:
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::LowPassOnePoleFilter;
+				break;
+			case AUDIO_FILTER_HIGH_PASS_ONE_POLE:
+				m_parameters.Type = XAUDIO2_FILTER_TYPE::HighPassOnePoleFilter;
 				break;
 			default:
 				break;
