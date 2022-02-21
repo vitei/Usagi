@@ -45,6 +45,12 @@ namespace usg
 		return m_cubeBuffer.GetTexture();
 	}
 
+	void OmniShadow::SetNonShadowFlags(uint32 uFlags)
+	{
+		m_pShadowContext->SetNonShadowFlags(uFlags);
+	}
+
+
 	void OmniShadow::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	{
 		m_cubeBuffer.Cleanup(pDevice);

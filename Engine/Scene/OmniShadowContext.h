@@ -35,6 +35,11 @@ public:
 
 	void DrawScene(GFXContext* pContext);
 
+	void SetNonShadowFlags(uint32 uFlags)
+	{
+		m_searchObject.SetMask(uFlags);
+	}
+
 protected:
 	usg::Matrix4x4 GetLightMat() const;
 private:

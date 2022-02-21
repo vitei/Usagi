@@ -52,6 +52,16 @@ void LightMgr::SetShadowCastingFlags(uint32 uFlags)
 	{
 		itr->SetNonShadowFlags(uFlags);
 	}
+
+	for (auto itr : m_pointLights.GetActiveLights())
+	{
+		itr->SetNonShadowFlags(uFlags);
+	}
+
+	for (auto itr : m_spotLights.GetActiveLights())
+	{
+		itr->SetNonShadowFlags(uFlags);
+	}
 }
 
 void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
@@ -272,6 +282,9 @@ PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, co
 	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bPointShadows);
 	if(szName)
 		pLight->SetName(szName);
+
+	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
+
 	return pLight;
 }
 
@@ -286,6 +299,10 @@ SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, cons
 	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
 	if(szName)
 		pLight->SetName(szName);
+
+	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
+
+
 	return pLight;
 }
 

@@ -38,6 +38,8 @@ public:
 	const ConstantSet* GetShadowConstants() { return &m_readConstants; }
 	const TextureHndl GetShadowTexture() { return m_depthBuffer.GetTexture(); }
 
+	void SetNonShadowFlags(uint32 uFlags);
+
 private:
 
 	ConstantSet				m_readConstants;

@@ -38,6 +38,9 @@ public:
 
 	TextureHndl GetShadowTexture();
 
+	void SetNonShadowFlags(uint32 uFlags);
+
+
 	enum
 	{
 		DRAW_SIDES = 6

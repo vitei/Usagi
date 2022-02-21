@@ -79,6 +79,15 @@ SpotLight::~SpotLight(void)
 {
 }
 
+
+void SpotLight::SetNonShadowFlags(uint32 uFlags)
+{
+	if (m_pShadow)
+	{
+		m_pShadow->SetNonShadowFlags(uFlags);
+	}
+}
+
 void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 {
 	m_constants.Init(pDevice, g_spotLightDecl);

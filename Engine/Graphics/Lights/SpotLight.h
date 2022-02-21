@@ -51,6 +51,8 @@ public:
 
 	void GPUUpdate(GFXDevice* pDevice) override;
 	bool ShadowRender(GFXContext* pContext) override;
+
+	void SetNonShadowFlags(uint32 uFlags);
 	
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
 	const DescriptorSet* GetDescriptorSet(bool bWidthShadow) const;

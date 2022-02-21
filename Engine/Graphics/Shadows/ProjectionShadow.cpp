@@ -120,6 +120,11 @@ namespace usg
 		m_readConstants.UpdateData(pDevice);
 	}
 
+	void ProjectionShadow::SetNonShadowFlags(uint32 uFlags)
+	{
+		m_pSceneContext->SetNonShadowFlags(uFlags);
+	}
+
 	
 	void ProjectionShadow::CreateShadowTex(GFXContext* pContext)
 	{
