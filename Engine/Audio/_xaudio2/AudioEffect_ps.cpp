@@ -57,4 +57,11 @@ namespace usg{
 		m_params.WetDryMix = pReverb->wetDryMix;
 	}
 
+	IUnknown* AudioEffect_ps::CreateEffect()
+	{
+		IUnknown* pRet = nullptr;
+		HRESULT hr = XAudio2CreateReverb(&pRet);
+		return pRet;
+	}
+
 }

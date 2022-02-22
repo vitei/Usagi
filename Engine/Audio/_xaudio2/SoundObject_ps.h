@@ -40,6 +40,7 @@ private:
 	
 	class XAudioVoiceCallback* m_pCallback;
 	WaveFile*				m_pSoundFile;
+	usg::vector<IUnknown*>	m_pEffects;
 	bool					m_bLooping;
 	bool					m_bPositional;
 	IXAudio2SourceVoice*	m_pSourceVoice;

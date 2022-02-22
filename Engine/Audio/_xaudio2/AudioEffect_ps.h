@@ -22,6 +22,7 @@ public:
 	virtual void Init(const AudioEffectDef* pEffect, Audio* pAudio) override;
 
 	const XAUDIO2FX_REVERB_PARAMETERS& GetParams() const { return m_params; }
+	IUnknown* CreateEffect();
 private:
 	XAUDIO2FX_REVERB_PARAMETERS	m_params;
 };

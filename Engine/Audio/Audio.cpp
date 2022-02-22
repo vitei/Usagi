@@ -7,6 +7,7 @@
 #include "Engine/Audio/SoundFile.h"
 #include "Engine/Audio/AudioFilter.h"
 #include "Engine/Audio/AudioEffect.h"
+#include "Engine/Audio/AudioRoom.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -130,17 +131,15 @@ Audio::~Audio()
 	}
 
 	// Destory the sound files
-	for(usg::vector<Archive>::iterator it = m_archives.begin(); it!=m_archives.end(); it++)
+	usg::vector< usg::string > archiveNames;
+	for (auto& itr : m_archives)
 	{
-		for(uint32 i=0; i< (*it).uFiles; i++)
-		{
-			(*it).ppSoundFiles[i]->Cleanup(this);
-			vdelete(*it).ppSoundFiles[i];
-			(*it).ppSoundFiles[i] = NULL;
-		}
-
-		vdelete[](*it).ppSoundFiles;
-		(*it).ppSoundFiles = NULL;
+		archiveNames.push_back(itr.name);
+	}
+	
+	for (auto itr : archiveNames)
+	{
+		UnloadArchive(itr.c_str());
 	}
 
 	m_archives.clear();
@@ -205,6 +204,7 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	uint32 uCount = (uint32)bank.soundFiles.m_decoderDelegate.data.count;
 	uint32 uFilters = (uint32)bank.filters.m_decoderDelegate.data.count;
 	uint32 uEffects = (uint32)bank.reverbs.m_decoderDelegate.data.count;
+	uint32 uRooms = (uint32)bank.rooms.m_decoderDelegate.data.count;
 
 	Archive archive;
 	str::Copy(archive.name, pszArchiveName, USG_MAX_PATH);
@@ -212,13 +212,14 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	archive.ppSoundFiles = uCount ? vnew(ALLOC_AUDIO)SoundFile*[uCount] : nullptr;
 	archive.ppAudioFilters = uFilters ? vnew(ALLOC_AUDIO)AudioFilter * [uFilters] : nullptr;
 	archive.ppAudioEffects = uEffects ? vnew(ALLOC_AUDIO)AudioEffect * [uEffects] : nullptr;
+	archive.ppAudioRooms = uRooms ? vnew(ALLOC_AUDIO)AudioRoom * [uRooms] : nullptr;
+
 
 	for (uint32 i = 0; i < uCount; i++)
 	{
 		const SoundFileDef* pDef = &bank.soundFiles[i];
 		archive.ppSoundFiles[i] = m_platform.CreateSoundFile(pDef);
 		ASSERT(archive.ppSoundFiles[i] != NULL);
-		archive.ppSoundFiles[i]->Init(pDef, this, pszLocalizedSubdirName);
 		ASSERT(m_soundHashes[pDef->crc] == NULL);
 		m_soundHashes[pDef->crc] = archive.ppSoundFiles[i];
 	}
@@ -229,8 +230,8 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 		const AudioFilterDef* pDef = &bank.filters[i];
 		archive.ppAudioFilters[i] = m_platform.CreateAudioFilter(pDef);
 		ASSERT(archive.ppAudioFilters[i] != NULL);
-		archive.ppAudioFilters[i]->Init(pDef, this);
-		ASSERT(m_soundHashes[pDef->crc] == NULL);
+		
+		ASSERT(m_filterHashes[pDef->crc] == NULL);
 		m_filterHashes[pDef->crc] = archive.ppAudioFilters[i];
 	}
 	archive.uFilters = uFilters;
@@ -241,13 +242,52 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 		const AudioEffectDef* pDef = &pReverbDef->effectDef;
 		archive.ppAudioEffects[i] = m_platform.CreateAudioEffect(pDef);
 		ASSERT(archive.ppAudioEffects[i] != NULL);
-		archive.ppAudioEffects[i]->Init(pDef, this);
-		ASSERT(m_soundHashes[pDef->crc] == NULL);
+
+		ASSERT(m_effectHashes[pDef->crc] == NULL);
 		m_effectHashes[pDef->crc] = archive.ppAudioEffects[i];
 	}
 	archive.uEffects = uEffects;
 
+	// Load rooms last as they reference effects/ filters
+	for (uint32 i = 0; i < uRooms; i++)
+	{
+		const AudioRoomDef* pRoomDef = &bank.rooms[i];
+		archive.ppAudioRooms[i] = m_platform.CreateAudioRoom(pRoomDef);
+
+		ASSERT(m_roomHashes[pRoomDef->crc] == NULL);
+
+		m_roomHashes[pRoomDef->crc] = archive.ppAudioRooms[i];
+	}
+	archive.uRooms = uRooms;
+
 	m_archives.push_back(archive);
+
+	// We do the init after as there may be inter-referencing
+	for (uint32 i = 0; i < uRooms; i++)
+	{
+		const AudioRoomDef* pRoomDef = &bank.rooms[i];
+		archive.ppAudioRooms[i]->Init(pRoomDef, this);
+
+	}
+
+	for (uint32 i = 0; i < uEffects; i++)
+	{
+		const ReverbEffectDef* pReverbDef = &bank.reverbs[i];
+		const AudioEffectDef* pDef = &pReverbDef->effectDef;
+		archive.ppAudioEffects[i]->Init(pDef, this);
+	}
+
+	for (uint32 i = 0; i < uFilters; i++)
+	{
+		const AudioFilterDef* pDef = &bank.filters[i];
+		archive.ppAudioFilters[i]->Init(pDef, this);
+	}
+
+	for (uint32 i = 0; i < uCount; i++)
+	{
+		const SoundFileDef* pDef = &bank.soundFiles[i];
+		archive.ppSoundFiles[i]->Init(pDef, this, pszLocalizedSubdirName);
+	}
 #endif
 }
 
@@ -272,11 +312,46 @@ void Audio::UnloadArchive(const char* pszArchiveName)
 			m_soundHashes.erase(archive.ppSoundFiles[i]->GetCRC());
 			archive.ppSoundFiles[i]->Cleanup(this);
 			vdelete archive.ppSoundFiles[i];
-			archive.ppSoundFiles[i] = NULL;
+			archive.ppSoundFiles[i] = NULL; 
 		}
 
 		vdelete[] archive.ppSoundFiles;
 		archive.ppSoundFiles = NULL;
+
+		if (archive.ppAudioEffects)
+		{
+			for (uint32 i = 0; i < archive.uEffects; i++)
+			{
+				m_effectHashes.erase(archive.ppAudioEffects[i]->GetCRC());
+				vdelete archive.ppAudioEffects[i];
+			}
+			vdelete[] archive.ppAudioEffects;
+			archive.ppAudioEffects = nullptr;
+		}
+
+		if (archive.ppAudioFilters)
+		{
+			for (uint32 i = 0; i < archive.uFilters; i++)
+			{
+				m_filterHashes.erase(archive.ppAudioFilters[i]->GetCRC());
+
+				vdelete archive.ppAudioFilters[i];
+			}
+			vdelete[] archive.ppAudioFilters;
+			archive.ppAudioFilters = nullptr;
+		}
+
+		if (archive.ppAudioRooms)
+		{
+			for (uint32 i = 0; i < archive.uRooms; i++)
+			{
+				m_roomHashes.erase(archive.ppAudioRooms[i]->GetCRC());
+
+				vdelete archive.ppAudioRooms[i];
+			}
+			vdelete[] archive.ppAudioRooms;
+			archive.ppAudioRooms = nullptr;
+		}
 
 		m_archives.erase(&archive);
 	}
@@ -509,6 +584,11 @@ AudioFilter* Audio::GetFilter(uint32 uCRC)
 AudioEffect* Audio::GetEffect(uint32 uCRC)
 {
 	return m_effectHashes[uCRC];
+}
+
+AudioRoom* Audio::GetRoom(uint32 uCRC)
+{
+	return m_roomHashes[uCRC];
 }
 
 SoundHandle Audio::Prepare3DSound(SoundActorHandle& actorHandle, uint32 crc, const float fVolume, bool bPlay)

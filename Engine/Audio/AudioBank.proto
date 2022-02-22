@@ -100,7 +100,7 @@ message ReverbEffectDef
 message AudioRoomDef
 {
 	required string roomName = 1  [(nanopb).max_size = 32];
-	required uint32 roomCrc = 2 [default = 0];
+	required uint32 crc = 2 [default = 0];
 	required uint32 filterCrc = 3 [default = 0];
 	repeated uint32 effectCrcs = 4 [(nanopb).max_count = 4];
 }

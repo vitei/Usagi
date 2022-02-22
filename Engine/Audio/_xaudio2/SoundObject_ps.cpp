@@ -5,6 +5,8 @@
 #include "Engine/Audio/Audio.h"
 #include "Engine/Audio/SoundCallbacks.h"
 #include "AudioFilter_ps.h"
+#include "AudioRoom_ps.h"
+#include "AudioEffect_ps.h"
 #include "SoundObject_ps.h"
 
 namespace usg{
@@ -63,6 +65,13 @@ void SoundObject_ps::Reset()
 	{
 		m_pSourceVoice->DestroyVoice();
 		m_pSourceVoice = NULL;
+
+		for (auto itr : m_pEffects)
+		{
+			itr->Release();
+		}
+		m_pEffects.clear();
+
 		m_bValid = false;
 		m_bPaused = false;
 		m_bPositional = false;
@@ -78,7 +87,14 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 {
 	Audio_ps& audioPS = Audio::Inst()->GetPlatform();
 
-	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, audioPS.GetSubmixVoice(waveFile.GetAudioType()) };
+	IXAudio2Voice* pOutputVoice = audioPS.GetSubmixVoice(waveFile.GetAudioType());
+	if (m_pSoundFile && m_pSoundFile->GetRoom())
+	{
+		AudioRoom_ps* pRoomPS = (AudioRoom_ps*)m_pSoundFile->GetRoom();
+		pOutputVoice = pRoomPS->GetVoice();
+	}
+
+	XAUDIO2_SEND_DESCRIPTOR SFXSend = { 0, pOutputVoice };
 	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
 
 	HRESULT result = audioPS.GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat(),
@@ -108,6 +124,48 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 		m_pSourceVoice = NULL;
 		ASSERT(false);
 		return;
+	}
+
+	if (m_pSoundFile)
+	{
+		if (m_pSoundFile->GetFilter())
+		{
+			AudioFilter_ps* pFilterPS = (AudioFilter_ps*)m_pSoundFile->GetFilter();
+			m_pSourceVoice->SetFilterParameters(&pFilterPS->GetParameters());
+		}
+
+		usg::vector<XAUDIO2_EFFECT_DESCRIPTOR> descriptors;
+
+		for (int i = 0; i < m_pSoundFile->GetEffectCount(); i++)
+		{
+			AudioEffect_ps* pEffect = (AudioEffect_ps*)m_pSoundFile->GetEffect(i);
+			IUnknown* pXAPO = pEffect->CreateEffect();
+
+			XAUDIO2_EFFECT_DESCRIPTOR descriptor;
+			descriptor.InitialState = m_uChannels;
+			descriptor.OutputChannels = 1;
+			descriptor.pEffect = pXAPO;
+
+			descriptors.push_back(descriptor);
+
+			m_pEffects.push_back(pXAPO);
+		}
+
+		if (descriptors.size() > 0)
+		{
+			XAUDIO2_EFFECT_CHAIN chain;
+			chain.EffectCount = (uint32)descriptors.size();
+			chain.pEffectDescriptors = &descriptors[0];
+
+			m_pSourceVoice->SetEffectChain(&chain);
+		}
+
+		for (int i = 0; i < m_pSoundFile->GetEffectCount(); i++)
+		{
+			AudioEffect_ps* pEffect = (AudioEffect_ps*)m_pSoundFile->GetEffect(i);
+			m_pSourceVoice->SetEffectParameters(i, &pEffect->GetParams(), sizeof(pEffect->GetParams()));
+		}
+
 	}
 
 	m_bCustomData = false;
@@ -167,12 +225,7 @@ void SoundObject_ps::SetSoundFile(WaveFile* pWaveFile, bool bPositional, bool bL
 void SoundObject_ps::Start()
 {
 	if (m_bValid)
-	{
-		if (m_pSoundFile && m_pSoundFile->GetFilter())
-		{
-			AudioFilter_ps* pFilterPS = (AudioFilter_ps*)m_pSoundFile->GetFilter();
-			m_pSourceVoice->SetFilterParameters(&pFilterPS->GetParameters());
-		}
+	{	
 		m_pSourceVoice->Start();
 		m_bPaused = false;
 	}

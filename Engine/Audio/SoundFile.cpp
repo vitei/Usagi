@@ -25,6 +25,7 @@ void SoundFile::InitInt(const SoundFileDef* pSoundFile, const string& strName, A
 	m_uCRC = pSoundFile->crc;
 
 	m_pFilter = pSoundFile->filterCRC ? pAudio->GetFilter(pSoundFile->filterCRC) : nullptr;
+	m_pRoom = pSoundFile->roomNameCRC ? pAudio->GetRoom(pSoundFile->roomNameCRC) : nullptr;
 	for (uint32 i = 0; i < pSoundFile->effectCRCs_count; i++)
 	{
 		if(pSoundFile->effectCRCs[i])

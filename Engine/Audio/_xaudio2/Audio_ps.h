@@ -18,6 +18,7 @@ class SoundHandle;
 class SoundHandle3D;
 class AudioListener;
 class SoundFile;
+class AudioRoom;
 class SoundObject;
 class IHeadMountedDisplay;
 
@@ -32,6 +33,7 @@ public:
 	SoundFile* CreateSoundFile(const SoundFileDef* pDef);
 	AudioFilter* CreateAudioFilter(const AudioFilterDef* pDef);
 	AudioEffect* CreateAudioEffect(const AudioEffectDef* pDef);
+	AudioRoom* CreateAudioRoom(const AudioRoomDef* pDef);
 
 	void AddListener(AudioListener* pListener);
 	void RemoveListener(AudioListener* pListener);

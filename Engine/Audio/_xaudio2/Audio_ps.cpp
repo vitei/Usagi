@@ -5,6 +5,7 @@
 #include "Engine/Audio/_xaudio2/DummySoundFile.h"
 #include "Engine/Audio/_xaudio2/AudioFilter_ps.h"
 #include "Engine/Audio/_xaudio2/AudioEffect_ps.h"
+#include "Engine/Audio/_xaudio2/AudioRoom_ps.h"
 #include "Audio_ps.h"
 
 namespace usg{
@@ -155,6 +156,11 @@ AudioFilter* Audio_ps::CreateAudioFilter(const AudioFilterDef* pDef)
 AudioEffect* Audio_ps::CreateAudioEffect(const AudioEffectDef* pDef)
 {
 	return vnew(ALLOC_AUDIO) AudioEffect_ps;
+}
+
+AudioRoom* Audio_ps::CreateAudioRoom(const AudioRoomDef* pDef)
+{
+	return vnew(ALLOC_AUDIO) AudioRoom_ps;
 }
 
 void Audio_ps::AddListener(AudioListener* pListener)

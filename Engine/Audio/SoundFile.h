@@ -15,6 +15,7 @@ namespace usg
 class Audio;
 class AudioFilter;
 class AudioEffect;
+class AudioRoom;
 
 class SoundFile
 {
@@ -41,6 +42,7 @@ public:
 	const AudioFilter* GetFilter() const { return m_pFilter; }
 	memsize GetEffectCount() const { return m_effects.size(); }
 	const AudioEffect* GetEffect(memsize idx) const { return m_effects[idx]; }
+	const AudioRoom* GetRoom() const { return m_pRoom; }
 protected:
 	void InitInt(const SoundFileDef* pSoundFile, const string& strName, Audio* pAudio);
 
@@ -58,6 +60,7 @@ protected:
 	string			m_strName;
 
 	const AudioFilter*				m_pFilter;
+	const AudioRoom*				m_pRoom;
 	usg::vector<const AudioEffect*>	m_effects;
 };
 

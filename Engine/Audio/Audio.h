@@ -26,6 +26,7 @@ class Vector3f;
 class SoundFile;
 class IHeadMountedDisplay;
 class SoundCallbacks;
+class AudioRoom;
 
 struct StreamingSoundDef
 {
@@ -56,6 +57,7 @@ public:
 
 	void Init();
 	void SetChannelConfig(ChannelConfig eChannelConfig);	// Note will stop all active sounds! 
+	ChannelConfig GetChannelConfig() const { return m_eChannelConfig; }
 	void Update(float fElapsed);
 
 	void LoadSoundArchive(const char* pszArchiveName, const char* pszLocalizedSubdirName = NULL);
@@ -92,6 +94,7 @@ public:
 
 	AudioFilter* GetFilter(uint32 uCRC);
 	AudioEffect* GetEffect(uint32 uCRC);
+	AudioRoom* GetRoom(uint32 uCRC);
 
 private:
 	bool ShouldPlay(Vector3f vPos, SoundFile* pSoundFile);
@@ -109,18 +112,21 @@ private:
 	struct Archive
 	{
 		char			name[USG_MAX_PATH];
-		SoundFile**		ppSoundFiles;
-		AudioFilter**	ppAudioFilters;
-		AudioEffect**	ppAudioEffects;
-		uint32			uFiles;
-		uint32			uFilters;
-		uint32			uEffects;
+		SoundFile**		ppSoundFiles = nullptr;
+		AudioFilter**	ppAudioFilters = nullptr;
+		AudioEffect**	ppAudioEffects = nullptr;
+		AudioRoom**		ppAudioRooms = nullptr;
+		uint32			uFiles = 0;
+		uint32			uFilters = 0;
+		uint32			uEffects = 0;
+		uint32			uRooms = 0;
 	};
 	
 	usg::vector<Archive>			m_archives;
 	hash_map<uint32, SoundFile*>	m_soundHashes;
 	hash_map<uint32, AudioFilter*>	m_filterHashes;
 	hash_map<uint32, AudioEffect*>	m_effectHashes;
+	hash_map<uint32, AudioRoom*>	m_roomHashes;
 	FastPool<AudioListener>			m_listeners;
 	FastPool<ActorData>				m_actors;
 	FastPool<SoundData>				m_sounds;
