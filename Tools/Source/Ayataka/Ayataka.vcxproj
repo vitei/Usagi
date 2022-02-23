@@ -171,7 +171,7 @@
       <AdditionalLibraryDirectories>$(UsagiLibDir);$(FBXSDK_DIR)\lib\vs2019\x64\debug;$(USAGI_STL_LIB)\x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(FBXSDK_DIR)\lib\vs2017\x64\debug\libfbxsdk.dll" "$(OutDir)\libfbxsdk.dll" /Y
+      <Command>copy "$(FBXSDK_DIR)\lib\vs2019\x64\debug\libfbxsdk.dll" "$(OutDir)\libfbxsdk.dll" /Y
 ruby.exe post_build.rb "$(TargetPath)" "$(TargetDir)\libfbxsdk.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -227,7 +227,7 @@ ruby.exe post_build.rb "$(TargetPath)" "$(TargetDir)\libfbxsdk.dll"</Command>
       <AdditionalLibraryDirectories>$(UsagiLibDir);$(FBXSDK_DIR)\lib\vs2019\x64\release;$(USAGI_STL_LIB)\x64\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(FBXSDK_DIR)\lib\vs2017\x64\release\libfbxsdk.dll" "$(OutDir)\libfbxsdk.dll" /Y
+      <Command>copy "$(FBXSDK_DIR)\lib\vs2019\x64\release\libfbxsdk.dll" "$(OutDir)\libfbxsdk.dll" /Y
 ruby.exe post_build.rb "$(TargetPath)" "$(TargetDir)\libfbxsdk.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
