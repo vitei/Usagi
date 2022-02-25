@@ -248,11 +248,10 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 	float fIntensity = 1.0f;// pFBXLight->Intensity.Get() / 100.0f;
 	usg::Color color((float)pFBXLight->Color.Get().mData[0], (float)pFBXLight->Color.Get().mData[1],
 		(float)pFBXLight->Color.Get().mData[2]);
-	pLight->spec.base.ambient = color * fIntensity * 0.2f;
+	pLight->spec.base.ambient = color * fIntensity * 0.05f;
 	pLight->spec.base.diffuse = color * fIntensity * 1.0f;
 	pLight->spec.base.specular = color * fIntensity * 1.0f;
-	pLight->spec.base.bShadow = pFBXLight->CastShadows;
-
+	pLight->spec.base.bShadow = true;// pFBXLight->CastShadows;	// Sadly this isn't coming through correctly
 
 	// Matching our simplified settings
 	// TODO: We should really should support these falloff settings in the engine
