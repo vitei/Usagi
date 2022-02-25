@@ -31,7 +31,8 @@ void main(void)
 	float d = length(vLightDir);
 	
 	vec3 vScaledLightDir = vLightDir.xyz * light.vRange.x;
-	float fAttenuation = clamp(1.0 - dot(vScaledLightDir, vScaledLightDir), 0.0, 1.0);
+	float fAttenuation = clamp(dot(vScaledLightDir, vScaledLightDir), 0.0, 1.0);
+	fAttenuation = 1.0-smoothstep(light.vRange.z, 1.0, fAttenuation);
 
 	vLightDir /= d;	// Normalize the vector
 

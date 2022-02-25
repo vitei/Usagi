@@ -136,7 +136,7 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 	pData->vPos = GetPosition();
 	pData->vDirection = GetDirection();
 	// TODO: Add support for the near range (pre-falloff)
-	pData->vRange.Assign(1.0f / GetFar(), GetFar(), 0.0f, 0.0f);
+	pData->vRange.Assign(1.0f / GetFar(), GetFar(), GetNear()/GetFar(), 0.0f);
 	pData->fCosSpotCutoff = cosf(GetOuterCutoff());
 
 	// The radius of the geometrys termination point
