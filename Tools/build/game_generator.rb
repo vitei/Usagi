@@ -154,7 +154,7 @@ end
 #####################################################################
 
 def build_audio(config, n)
-  pairs = FileList["Data/Audio/*.wav"].select{|f| !File.directory? f}.map do |input|
+  pairs = FileList["Data/Audio/**/*.wav"].select{|f| !File.directory? f}.map do |input|
     [input, "#{config.romfiles_dir}/Audio/#{input.sub(/^Data\/Audio\//, "")}"]
   end
 
