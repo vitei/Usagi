@@ -293,6 +293,7 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 
 void Audio::UnloadArchive(const char* pszArchiveName)
 {
+#if !DISABLE_SOUND
 	uint32 uIndex = USG_INVALID_ID;
 	for (uint32 i = 0; i < m_archives.size(); i++)
 	{
@@ -355,6 +356,7 @@ void Audio::UnloadArchive(const char* pszArchiveName)
 
 		m_archives.erase(&archive);
 	}
+#endif
 }
 
 void Audio::Init()
