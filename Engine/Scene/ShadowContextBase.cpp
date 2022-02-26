@@ -48,10 +48,11 @@ namespace usg {
 				return true;
 			}
 
-			if (itr->IsAnimated())
+			// Disabling for now due to false positives, need to exclude external items
+			/*if (itr->IsAnimated())
 			{
 				return true;
-			}
+			}*/
 
 			usg::Matrix4x4 CmpMat = itr->GetParent()->GetTransform()->GetMatrix() * mLightTransform;
 			if (!CmpMat.IsEqual(prev->CmpLoc, FLT_EPSILON * 10.f))
