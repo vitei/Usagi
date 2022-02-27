@@ -44,7 +44,7 @@ enum AudioFalloff
 message SoundFileDef
 {
 	required string enumName = 1  [(nanopb).max_size = 32];
-	required string filename = 2 [(nanopb).max_size = 32];
+	required string filename = 2 [(nanopb).max_size = 128];
 	required bool stream = 3 [default = false];
 	required bool loop = 4  [default = false];
 	required float volume = 5 [default = 1.0];
