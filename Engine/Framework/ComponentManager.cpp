@@ -96,6 +96,7 @@ namespace usg
 		m_systemCoordinator.RegisterComponent<usg::Identifier>();
 		m_systemCoordinator.RegisterComponent<usg::SleepTag>();
 		m_systemCoordinator.RegisterComponent<usg::ModelMgrComponent>();
+		m_systemCoordinator.RegisterComponent<usg::PhysicsAggregate>();
 
 	}
 
