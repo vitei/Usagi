@@ -659,7 +659,7 @@ namespace usg
 	template<typename JointType, typename PhysXJointType>
 	void OnJointLoaded(PhysXJointType* pJoint, Component<JointType>& c)
 	{
-		if (c->has_breakForce)
+		if (c->bCanBreak)
 		{
 			const auto& joinBreakForce = c->breakForce;
 			pJoint->setBreakForce(joinBreakForce.fLinear, joinBreakForce.fAngular);
@@ -713,8 +713,14 @@ namespace usg
 		physx::PxTransform t1(physx::PxIdentity);
 		Quaternionf q1;
 		q1.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
-		t1.q = ToPhysXQuaternion(q1);
-		t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity(), handles).position);
+
+		TransformComponent trans;
+		trans = TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity(), handles);
+
+		t1.q = ToPhysXQuaternion(trans.rotation);
+		t1.p = ToPhysXVec3(trans.position);
+
+		t1.q = t1.q * ToPhysXQuaternion(q1);
 
 		Required<TransformComponent> myTrans;
 		handles.GetComponent(c.GetEntity(), myTrans);
@@ -728,6 +734,12 @@ namespace usg
 		c.GetRuntimeData().pJoint = pJoint;
 
 		pJoint->setRevoluteJointFlag(physx::PxRevoluteJointFlag::eDRIVE_ENABLED, c->bEnableMotor);
+		if (c->fMinAngleDegrees < -180.f || c->fMaxAngleDegrees > 180.f)
+		{
+			physx::PxJointAngularLimitPair limit(Math::DegToRad(c->fMinAngleDegrees), Math::DegToRad(c->fMaxAngleDegrees), 0.1f);
+			pJoint->setLimit(limit);
+			pJoint->setRevoluteJointFlag(physx::PxRevoluteJointFlag::eLIMIT_ENABLED, true);
+		}
 
 		OnJointLoaded(pJoint, c);
 	}
@@ -772,14 +784,19 @@ namespace usg
 		ASSERT(pActor2 != nullptr);
 
 		physx::PxTransform t1(physx::PxIdentity);
+		TransformComponent trans;
 		if (myParentsRigidBody.Exists())
 		{
-			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(myParentsRigidBody.Force().GetEntity(), myRigidBody.GetEntity(), handles).position);
+			trans = TransformTool::GetRelativeTransform(myParentsRigidBody.Force().GetEntity(), myRigidBody.GetEntity(), handles);
 		}
 		else
 		{
-			t1.p = ToPhysXVec3(TransformTool::GetRelativeTransform(nullptr, myRigidBody.GetEntity(), handles).position);
+			trans = TransformTool::GetRelativeTransform(nullptr, myRigidBody.GetEntity(), handles);
 		}
+
+		t1.q = ToPhysXQuaternion(trans.rotation);
+		t1.p = ToPhysXVec3(trans.position);
+
 
 		Required<TransformComponent> myTrans;
 		handles.GetComponent(c.GetEntity(), myTrans);

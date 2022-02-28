@@ -231,10 +231,11 @@ message RevoluteJoint
 	required float fProjectionLinearTolerance = 4 [default = 0.01];
 	required float fProjectionAngularTolerance = 5 [default = 0.05];
 
-	optional float fMinAngleDegrees = 6;
-	optional float fMaxAngleDegrees = 7;
+	required float fMinAngleDegrees = 6 [default = -360.f];
+	required float fMaxAngleDegrees = 7 [default = 360.f];
 
-	optional JointBreakForce breakForce = 20;
+	required bool 			 bCanBreak = 19 [default = false];
+	required JointBreakForce breakForce = 20;
 }
 
 message FixedJoint
@@ -247,7 +248,8 @@ message FixedJoint
 	required float fProjectionLinearTolerance = 4 [default = 0.01];
 	required float fProjectionAngularTolerance = 5 [default = 0.05];
 
-	optional JointBreakForce breakForce = 20;
+	required bool 			 bCanBreak = 19 [default = false];
+	required JointBreakForce breakForce = 20;
 }
 
 message PrismaticJoint
@@ -262,7 +264,8 @@ message PrismaticJoint
 	required float fProjectionLinearTolerance = 4 [default = 0.01];
 	required float fProjectionAngularTolerance = 5 [default = 0.05];
 
-	optional JointBreakForce breakForce = 20;
+	required bool 			 bCanBreak = 19 [default = false];
+	required JointBreakForce breakForce = 20;
 }
 
 message VehicleWheel
