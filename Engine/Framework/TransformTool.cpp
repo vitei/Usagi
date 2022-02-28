@@ -33,7 +33,7 @@ namespace usg
 		while (e->GetParentEntity() != parent)
 		{
 			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity(), handles));
-			trans = trans.transform(parentTrans);
+			trans = parentTrans.transform(trans);
 			e = e->GetParentEntity();
 		}
 		usgTrans.position = ToUsgVec3(trans.p);
