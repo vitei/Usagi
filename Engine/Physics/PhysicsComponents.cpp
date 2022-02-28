@@ -734,7 +734,7 @@ namespace usg
 		c.GetRuntimeData().pJoint = pJoint;
 
 		pJoint->setRevoluteJointFlag(physx::PxRevoluteJointFlag::eDRIVE_ENABLED, c->bEnableMotor);
-		if (c->fMinAngleDegrees < -180.f || c->fMaxAngleDegrees > 180.f)
+		if (c->fMinAngleDegrees > -180.f || c->fMaxAngleDegrees < 180.f)
 		{
 			physx::PxJointAngularLimitPair limit(Math::DegToRad(c->fMinAngleDegrees), Math::DegToRad(c->fMaxAngleDegrees), 0.1f);
 			pJoint->setLimit(limit);
