@@ -198,7 +198,7 @@ namespace usg
 			}
 			if (c->bEnableCCD)
 			{
-				ASSERT(!c->bKinematic && "CCD not supported on kinematic bodies.");
+				ASSERT_MSG(!c->bKinematic, "CCD not supported on kinematic bodies.");
 				pRigidBody->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 			}
 			if (c->bDisableGravity)
@@ -208,9 +208,9 @@ namespace usg
 		}
 		else
 		{
-			ASSERT(!c->bKinematic && "Kinematic bodies must be dynamic.");
-			ASSERT(!c->bEnableCCD && "CCD is applied to dynamic bodies.");
-			ASSERT(!c->bDisableGravity && "Gravity is applied to dynamic bodies.");
+			ASSERT_MSG(!c->bKinematic, "Kinematic bodies must be dynamic.");
+			ASSERT_MSG(!c->bEnableCCD, "CCD is applied to dynamic bodies.");
+			ASSERT_MSG(!c->bDisableGravity, "Gravity is applied to dynamic bodies.");
 			rtd.pRigidActor = sceneRuntimeData.pPhysics->createRigidStatic(initialTransform);
 		}
 		ASSERT(rtd.pRigidActor != nullptr);
