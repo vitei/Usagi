@@ -231,8 +231,8 @@ message RevoluteJoint
 	required float fProjectionLinearTolerance = 4 [default = 0.01];
 	required float fProjectionAngularTolerance = 5 [default = 0.05];
 
-	required float fMinAngleDegrees = 6 [default = -360.f];
-	required float fMaxAngleDegrees = 7 [default = 360.f];
+	required float fMinAngleDegrees = 6 [default = -360.0];
+	required float fMaxAngleDegrees = 7 [default = 360.0];
 
 	required bool 			 bCanBreak = 19 [default = false];
 	required JointBreakForce breakForce = 20;
