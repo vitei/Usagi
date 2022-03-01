@@ -29,7 +29,6 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
 	m_createInfo.lineWidth = decl.fLineWidth;
 	//m_createInfo.lineWidth = 1.0f;
 
-#if 0
 	if (decl.bWireframe && decl.bLineSmooth)
 	{
 		m_createInfo.pNext = &m_lineState;
@@ -37,7 +36,6 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
 		m_lineState.lineRasterizationMode = VK_LINE_RASTERIZATION_MODE_RECTANGULAR_SMOOTH_EXT;
 		m_lineState.stippledLineEnable = false;
 	}
-#endif
 }
 
 

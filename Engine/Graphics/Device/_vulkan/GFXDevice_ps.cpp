@@ -346,7 +346,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	app_info.applicationVersion = 1;
 	app_info.pEngineName = "Usagi_Engine";
 	app_info.engineVersion = 1;
-	app_info.apiVersion = VK_API_VERSION_1_0;
+	app_info.apiVersion = VK_API_VERSION_1_2;
 
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
@@ -541,7 +541,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 #endif
 
 	// Smooth lines are hugely helpful, but not online until 1.1.117
-	//extensions.push_back("VK_EXT_line_rasterization");
+	extensions.push_back("VK_EXT_line_rasterization");
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
