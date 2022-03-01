@@ -27,6 +27,7 @@ public:
 	void Cleanup(GFXDevice* pDevice);
 
 	void AddSphere(const Vector3f &vPos, float fRadius, const Color& color);
+	void AddTriangle(const Vector3f& vPos0, const Color& color0, const Vector3f& vPos1, const Color& color1, const Vector3f& vPos2, const Color& color2);
 	void AddCube(const Matrix4x4& mMat, const Color& color);
 	void AddLine(const Vector3f& vStart, const Vector3f& vEnd, const Color& color, float fWidth);
 	void Clear();
@@ -44,13 +45,20 @@ public:
 		Vector4f	vColor;
 	};
 
+	struct TriData
+	{
+		Vector3f	vPos;
+		Vector4f	vColor;
+	};
+
 private:
 	void MakeSphere(GFXDevice* pDevice);
 
 	enum
 	{
 		MAX_SPHERES = 1024,
-		MAX_CUBES = 2048
+		MAX_CUBES = 16384,
+		MAX_TRIS = 16384
 	};
 
 	static Debug3D*			m_psRenderer;
@@ -60,20 +68,24 @@ private:
 	
 	PipelineStateHndl		m_spherePipeline;
 	PipelineStateHndl		m_cubePipeline;
+	PipelineStateHndl		m_triPipeline;
 	Material				m_lineMat;
 	ConstantSet				m_lineConstants;
 	
 	VertexBuffer			m_sphereVB;
 	VertexBuffer			m_cubeVB;
+	VertexBuffer			m_triVB;
 	
 	IndexBuffer				m_sphereIB;
 	IndexBuffer				m_cubeIB;
 
 	CubeRender::Cube		m_cubes[MAX_CUBES];
 	SphereData				m_spheres[MAX_SPHERES];
+	TriData					m_triangles[MAX_TRIS * 3];
 
 	uint32					m_uSpheres;
 	uint32					m_uCubes;
+	uint32					m_uTris;
 
 	RenderGroup*			m_pRenderGroup;
 };

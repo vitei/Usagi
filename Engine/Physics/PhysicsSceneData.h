@@ -11,6 +11,7 @@
 #include "Engine/Physics/PhysicsStructs.pb.h"
 #include "Engine/Physics/PhysX.h"
 #include "Engine/Physics/RaycastHitBase.h"
+#include "Engine/Physics/Debug/PhysicsDebugStats.h"
 
 namespace usg
 {
@@ -45,6 +46,8 @@ namespace usg
 			set<physx::PxActor*> removeActorList;
 			set<physx::PxAggregate*> addAggregateList;
 			set<physx::PxAggregate*> removeAggregateList;
+
+			PhysicsDebugStats debugStats;
 
 			struct
 			{

@@ -24,11 +24,20 @@ static const VertexElement g_instanceVertex[] =
 	VERTEX_DATA_END()
 };
 
+static const VertexElement g_triVertex[] =
+{
+	VERTEX_DATA_ELEMENT_NAME(0, Debug3D::TriData, vPos, VE_FLOAT, 3, false),
+	VERTEX_DATA_ELEMENT_NAME(1, Debug3D::TriData, vColor, VE_FLOAT, 4, false),
+	VERTEX_DATA_END()
+};
+
 
 Debug3D::Debug3D()
 {
 	m_uSpheres = 0;
 	m_uCubes = 0;
+	m_uTris = 0;  
+	m_pRenderGroup = nullptr;
 	SetLayer(RenderLayer::LAYER_TRANSLUCENT);
 	SetPriority(0);
 }
@@ -57,6 +66,8 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 
 	m_cubeVB.Init(pDevice, NULL, sizeof(CubeRender::Cube), MAX_CUBES, "Cube", GPU_USAGE_DYNAMIC);
 	m_cubeIB.Init(pDevice, pIndices, MAX_CUBES);
+
+	m_triVB.Init(pDevice, nullptr, sizeof(TriData), MAX_TRIS * 3, "Tri", GPU_USAGE_DYNAMIC);
 
 
 
@@ -105,8 +116,22 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewCont
 
 	pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Debug.CubesOriented");
 	pipelineState.ePrimType = PT_POINTS;
-	// FIXME: Issue on Vulkan with this effect
-	//m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
+	
+	m_cubePipeline = pDevice->GetPipelineState(rp, pipelineState);
+
+	pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Debug.SolidCol");
+	pipelineState.ePrimType = PT_TRIANGLES;
+
+	pipelineState.inputBindings[0].Init(g_triVertex);
+	pipelineState.uInputBindingCount = 1;
+	pipelineState.rasterizerState.bWireframe = true;
+	pipelineState.rasterizerState.bLineSmooth = false;
+
+	pipelineState.rasterizerState.eCullFace = CULL_FACE_NONE;
+
+	m_triPipeline = pDevice->GetPipelineState(rp, pipelineState);
+
+
 }
 
 void Debug3D::Cleanup(GFXDevice* pDevice)
@@ -115,6 +140,7 @@ void Debug3D::Cleanup(GFXDevice* pDevice)
 	m_sphereVB.Cleanup(pDevice);
 	m_cubeIB.Cleanup(pDevice);
 	m_cubeVB.Cleanup(pDevice);
+	m_triVB.Cleanup(pDevice);
 	m_transforms.Cleanup(pDevice);
 }
 
@@ -127,6 +153,7 @@ void Debug3D::Clear()
 {
 	m_uSpheres = 0;
 	m_uCubes = 0;
+	m_uTris = 0;
 }
 
 void Debug3D::AddSphere(const Vector3f &vPos, float fRadius, const Color& color)
@@ -189,6 +216,32 @@ void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 	{
 		m_transforms.SetContents(pDevice, m_spheres, m_uSpheres);
 	}
+
+	if (m_uTris > 0)
+	{
+		m_triVB.SetContents(pDevice, m_triangles, m_uTris * 3);
+	}
+}
+
+void Debug3D::AddTriangle(const Vector3f& vPos0, const Color& color0, const Vector3f& vPos1, const Color& color1, const Vector3f& vPos2, const Color& color2)
+{
+	if (m_uTris >= MAX_TRIS)
+	{
+		return;
+	}
+
+	uint32 uIndex = m_uTris * 3;
+
+	m_triangles[uIndex + 0].vPos = vPos0;
+	color0.FillV4(m_triangles[uIndex + 0].vColor);
+
+	m_triangles[uIndex + 1].vPos = vPos1;
+	color1.FillV4(m_triangles[uIndex + 1].vColor);
+
+	m_triangles[uIndex + 2].vPos = vPos2;
+	color2.FillV4(m_triangles[uIndex + 2].vColor);
+
+	m_uTris++;
 }
 
 bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
@@ -206,6 +259,13 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 		pContext->SetPipelineState(m_cubePipeline);
 		pContext->SetVertexBuffer(&m_cubeVB);
 		pContext->DrawIndexedEx(&m_cubeIB, 0, m_uCubes);
+	}
+
+	if (m_uTris != 0 && m_triPipeline.IsValid())
+	{
+		pContext->SetPipelineState(m_triPipeline);
+		pContext->SetVertexBuffer(&m_triVB);
+		pContext->DrawImmediate(m_uTris * 3);
 	}
 
 	return true;

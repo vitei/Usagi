@@ -6,5 +6,6 @@ Effects:
   - { name: Cubes, vert: cubes, geom: cubes, frag: cubes }
   - { name: CubesOriented, vert: cubes_oriented, geom: cubes_oriented, frag: cubes }
   - { name: Solid, vert: solid, frag: solid }
+  - { name: SolidCol, vert: solidcol, frag: solidcol }
   - { name: Wireframe, vert: debug/wireframe, frag: debug/wireframe }
   

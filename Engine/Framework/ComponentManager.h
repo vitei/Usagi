@@ -32,7 +32,8 @@ namespace usg
 
 		void RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene);
 
-		void TriggerAllSignals(float32 fElapsed, GFXDevice* pDevice);
+		void TriggerAllSignals(float32 fElapsed);
+		void TriggerGPUSignals(GFXDevice* pDevice);
 
 		Entity SpawnEntityFromTemplate(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams);
 		void SpawnHierarchyFromFile(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams);

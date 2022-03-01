@@ -141,7 +141,7 @@ namespace usg
 		}
 	}
 
-	void ComponentManager::TriggerAllSignals(float fElapsed, GFXDevice* pDevice)
+	void ComponentManager::TriggerAllSignals(float fElapsed)
 	{
 		HandleSpawnRequests();
 		CheckEntities();
@@ -175,6 +175,12 @@ namespace usg
 		LateUpdateSignal lateUpdateSignal(fElapsed);
 		m_systemCoordinator.TriggerFromRoot(rootEntity, lateUpdateSignal);
 
+	}
+
+	void ComponentManager::TriggerGPUSignals(GFXDevice* pDevice)
+	{
+		Entity rootEntity = ComponentEntity::GetRoot();
+
 		GPUHandles handles = { pDevice };
 		GPUUpdateSignal gpuUpdateSignal(&handles);
 		m_systemCoordinator.TriggerFromRoot(rootEntity, gpuUpdateSignal);
@@ -189,6 +195,7 @@ namespace usg
 		{
 			m_uFrameCounter = 1;
 		}
+
 	}
 
 	Entity ComponentManager::SpawnEntityFromTemplate(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams)

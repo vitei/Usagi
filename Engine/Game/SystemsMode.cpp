@@ -82,9 +82,17 @@ namespace usg
 	{
 		if (m_pImpl->pComponentManager != nullptr)
 		{
-			m_pImpl->pComponentManager->TriggerAllSignals(fElapsed, m_pImpl->pDevice);
+			m_pImpl->pComponentManager->TriggerAllSignals(fElapsed);
 		}
 		return false;
+	}
+
+	void SystemsMode::PreDraw(GFXDevice* pDevice, GFXContext* pImmContext)
+	{
+		if (m_pImpl->pComponentManager != nullptr)
+		{
+			m_pImpl->pComponentManager->TriggerGPUSignals(pDevice);
+		}
 	}
 
 	void SystemsMode::InitNetworking(UsagiNet& usagiNetwork)

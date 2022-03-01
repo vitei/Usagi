@@ -171,6 +171,9 @@ namespace usg
 		case STATE_ACTIVE:
 			bFinished = m_pActiveMode->Update(fElapsed);
 
+			m_debug.Draw();
+
+
 			if (bFinished)
 			{
 				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
@@ -252,7 +255,6 @@ namespace usg
 		// These things aren't ready yet
 		if(m_eState != STATE_SPLASH)
 		{
-			m_debug.Draw();
 			usg::MusicManager::Inst()->Update(fElapsed);
 			usg::Audio::Inst()->Update(fElapsed);
 		}

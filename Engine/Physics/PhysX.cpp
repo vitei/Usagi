@@ -7,7 +7,7 @@
 #include "Engine/Physics/Raycast.h"
 #include "PhysX.h"
 #include "PhysXMeshCache.h"
-
+#include "Engine/Debug/DebugStats.h"
 #include "Engine/Physics/CollisionData.pb.h"
 #include "Engine/Physics/Signals/OnTrigger.h"
 #include "Engine/Physics/Signals/OnCollision.h"
@@ -435,11 +435,20 @@ namespace usg
 		rtd.vehicleData.pVehicleSceneQueryData = VehicleSceneQueryData::Allocate(p->uMaxNumberOfVehicles, PX_MAX_NB_WHEELS, p->uMaxNumberOfVehicles, physics::s_physXAllocator);
 		rtd.vehicleData.pVehicleBatchQuery = VehicleSceneQueryData::SetUpBatchedSceneQuery(0, *rtd.vehicleData.pVehicleSceneQueryData, rtd.pScene);
 		rtd.vehicleData.pFrictionPairs = CreateFrictionPairs(Required<PhysicsScene>(p));
+
+		rtd.debugStats.Init(rtd.pScene);
+
+		DebugStats::Inst()->RegisterGroup(&rtd.debugStats);
+
 	}
 
 	void DeinitPhysicsScene(Component<usg::Components::PhysicsScene>& p)
 	{
 		auto& rtd = p.GetRuntimeData().GetData();
+
+		DebugStats::Inst()->DeregisterGroup(&rtd.debugStats);
+
+
 		rtd.addActorList.clear();
 		rtd.dirtyShapeList.clear();
 
@@ -453,6 +462,7 @@ namespace usg
 
 		rtd.pScene->release();
 		rtd.pScene = nullptr;
+
 
 		vdelete(p.GetRuntimeData().pSceneData);
 		p.GetRuntimeData().pSceneData = nullptr;
