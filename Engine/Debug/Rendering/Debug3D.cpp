@@ -90,7 +90,7 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewCont
 	DepthStencilStateDecl& depthDecl = pipelineState.depthState;
 	depthDecl.bDepthWrite = false;
 	depthDecl.bDepthEnable = true;
-	depthDecl.eDepthFunc = DEPTH_TEST_LESS;
+	depthDecl.eDepthFunc = DEPTH_TEST_ALWAYS;//DEPTH_TEST_LESS;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 	alphaDecl.SetColor0Only();
