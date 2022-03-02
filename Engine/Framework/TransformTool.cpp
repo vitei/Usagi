@@ -20,6 +20,7 @@ namespace usg
 
 	TransformComponent TransformTool::GetRelativeTransform(Entity parent, Entity child, ComponentLoadHandles& handles)
 	{
+		// FIXME: This won't handle any scaled objects
 		TransformComponent usgTrans = GetTransform(child, handles);
 		if (!usgTrans.bInheritFromParent)
 		{
