@@ -85,10 +85,10 @@ namespace usg {
 			m_pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, uPage == PAGE_COLLISION ? 1.0f : 0.0f);
 			m_pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eJOINT_LIMITS, uPage == PAGE_JOINTS ? 1.0f : 0.f);
 			m_pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eJOINT_LOCAL_FRAMES, uPage == PAGE_JOINTS ? 1.0f : 0.0f);
-			//m_pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eBODY_AXES, 1.0f);
+			//pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eBODY_AXES, 1.0f);
 			m_pPhysicsScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
 		}
-		m_uActivePage = uPage;
+		IDebugStatGroup::SetPage(uPage);
 	}
 
 
