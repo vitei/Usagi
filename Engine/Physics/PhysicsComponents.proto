@@ -214,6 +214,8 @@ message PhysicsAggregate
 	required bool bEnableSelfCollisions = 2 [default = false];
 }
 
+// Note that joints do not currently correctly handle any scale in the hierarchy!
+
 message RevoluteJoint
 {
 	option (nanopb_msgopt).has_onactivate = true;
@@ -221,6 +223,7 @@ message RevoluteJoint
 	option (nanopb_msgopt).has_onloaded = true;
 	
 	required Vector3f vAxis = 1;
+	required Vector3f vFace = 8;
 	required bool bEnableMotor = 2 [default = false];
 
 	// Under stressful conditions, PhysX dynamics solver may not be able to accurately enforce the constraints specified by the joint.

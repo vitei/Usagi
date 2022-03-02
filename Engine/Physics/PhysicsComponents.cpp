@@ -711,8 +711,20 @@ namespace usg
 		ASSERT(pActor1 != nullptr && pActor2 != nullptr);
 
 		physx::PxTransform t1(physx::PxIdentity);
+
+		usg::Matrix4x4 mMat;
+
+		mMat.SetRight(usg::Vector4f(c->vAxis, 0.0f));
+		mMat.SetUp( usg::Vector4f(c->vFace, 0.0f) );
+
+		usg::Vector4f vCross = usg::CrossProduct(mMat.vRight(), mMat.vUp());
+
+		mMat.SetFace(vCross);
+
 		Quaternionf q1;
-		q1.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
+		//q1.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
+		q1 = mMat;
+		q1.Normalise();
 
 		TransformComponent trans;
 		trans = TransformTool::GetRelativeTransform(myParentsRigidBody.GetEntity(), myRigidBody.GetEntity(), handles);
@@ -724,10 +736,15 @@ namespace usg
 
 		Required<TransformComponent> myTrans;
 		handles.GetComponent(c.GetEntity(), myTrans);
-		// myTrans.Modify().bInheritFromParent = false;
+
+		// FIXME: The code to handle inverting the transforms doesn't handle nested
+		// entities. Although there's no good reason to inherit
+		myTrans.Modify().bInheritFromParent = false;
 		physx::PxTransform t2(physx::PxIdentity);
 		Quaternionf q2;
-		q2.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
+		//q2.MakeVectorRotation(Vector3f::X_AXIS, c->vAxis);
+		q2 = mMat;
+		
 		t2.q = ToPhysXQuaternion(q2);
 		
 		auto pJoint = physx::PxRevoluteJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
