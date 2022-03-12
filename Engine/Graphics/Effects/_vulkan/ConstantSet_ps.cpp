@@ -137,6 +137,26 @@ void ConstantSet_ps::Cleanup(GFXDevice* pDevice)
 	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 }
 
+uint32 ConstantSet_ps::GetGPUAlignment(ConstantType eType, uint32 uCount)
+{
+	memsize uAlign =  (memsize)g_uGPUAlignments[eType];
+	if (uCount > 1)
+	{
+		uAlign = usg::AlignSizeUp(uAlign, 16);
+	}
+	return (uint32)uAlign;
+}
+
+uint32 ConstantSet_ps::GetGPUSize(ConstantType eType, uint32 uCount)
+{
+	memsize uSize = (memsize)g_uGPUFormatSize[eType];
+	if (uCount > 1)
+	{
+		uSize = usg::AlignSizeUp(uSize, 16);
+	}
+	return (uint32)uSize;
+}
+
 
 void ConstantSet_ps::AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffset, uint32& uSize, uint32& uVars)
 {
@@ -153,8 +173,8 @@ void ConstantSet_ps::AppendOffsets(const ShaderConstantDecl* pDecl, uint32 uOffs
 		}
 		else
 		{
-			uint32 uAlign = g_uGPUAlignments[pDecl->eType];
-			uint32 uItemSize = g_uGPUFormatSize[pDecl->eType];
+			uint32 uAlign = GetGPUAlignment(pDecl->eType, pDecl->uiCount);
+			uint32 uItemSize = GetGPUSize(pDecl->eType, pDecl->uiCount);
 			if (pDecl->uiCount > 1)
 			{
 				// When we have arrays each element takes up a full vec4 to allow address indexing

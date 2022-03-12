@@ -51,6 +51,8 @@ private:
 	void WriteInt(const int* pVal, uint32 uCount, uint8* pGPUTarget);
 	void WriteInt4(const Vector4i* pVec, uint32 uCount, uint8* pGPUTarget);
 
+	uint32 GetGPUAlignment(ConstantType eType, uint32 uCount);
+	uint32 GetGPUSize(ConstantType eType, uint32 uCount);
 
 	struct VariableData
 	{
@@ -117,11 +119,12 @@ inline void ConstantSet_ps::WriteVector4(const Vector4f* pVec, uint32 uCount, ui
 
 inline void ConstantSet_ps::WriteVector3(const Vector3f* pVec, uint32 uCount, uint8* pGPUTarget)
 {
-	Vector3f* pDst = (Vector3f*)pGPUTarget;
 	for (uint32 i = 0; i < uCount; i++)
 	{
+		Vector3f* pDst = (Vector3f*)pGPUTarget;
+
 		*pDst = *pVec;
-		pDst++;
+		pGPUTarget+= 16;
 		pVec++;
 	}
 }
@@ -131,19 +134,20 @@ inline void ConstantSet_ps::WriteVector2(const Vector2f* pVec, uint32 uCount, ui
 	Vector2f* pDst = (Vector2f*)pGPUTarget;
 	for(uint32 i=0; i<uCount; i++)
 	{
+		Vector2f* pDst = (Vector2f*)pGPUTarget;
 		*pDst = *pVec;
-		pDst++;
+		pGPUTarget += 16;
 		pVec++;
 	}
 }
 
 inline void ConstantSet_ps::WriteFloat(const float* pFloat, uint32 uCount, uint8* pGPUTarget)
 {
-	float* pDst = (float*)pGPUTarget;
 	for(uint32 i=0; i<uCount; i++)
 	{
+		float* pDst = (float*)pGPUTarget;
 		*pDst = *pFloat;
-		pDst++;
+		pGPUTarget += 16;
 		pFloat++;
 	}
 }
@@ -151,11 +155,11 @@ inline void ConstantSet_ps::WriteFloat(const float* pFloat, uint32 uCount, uint8
 
 inline void ConstantSet_ps::WriteBool(const bool* pVal, uint32 uCount, uint8* pGPUTarget)
 {
-	int* pDst = (int*)pGPUTarget;
 	for(uint32 i=0; i<uCount; i++)
 	{
+		int* pDst = (int*)pGPUTarget;
 		*pDst = (*pVal) == true ? 1 : 0;
-		pDst++;
+		pGPUTarget += 16;
 		pVal++;
 	}
 }
@@ -176,11 +180,12 @@ inline void ConstantSet_ps::WriteBool4(const Vector4b* pVal, uint32 uCount, uint
 
 inline void ConstantSet_ps::WriteInt(const int* pVal, uint32 uCount, uint8* pGPUTarget)
 {
-	int* pDst = (int*)pGPUTarget;
 	for(uint32 i=0; i<uCount; i++)
 	{
+		int* pDst = (int*)pGPUTarget;
+
 		*pDst = *pVal;
-		pDst++;
+		pGPUTarget += 16;
 		pVal++;
 	}
 }
