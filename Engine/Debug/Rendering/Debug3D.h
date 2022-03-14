@@ -57,7 +57,7 @@ private:
 	enum
 	{
 		MAX_SPHERES = 1024,
-		MAX_CUBES = 16384,
+		MAX_CUBES = 32768,
 		MAX_TRIS = 16384
 	};
 
