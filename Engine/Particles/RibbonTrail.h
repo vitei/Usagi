@@ -35,8 +35,8 @@ public:
 	uint32 GetMaxCount() { return m_uMaxLength; }
 	bool IsLargeEnough(const particles::RibbonData& decl) { return GetRequiredVerts(decl.fLifeTime) <= GetMaxCount();}
 	uint32  GetRequiredVerts(float fLifeTime) { return Math::Max(2U, (uint32)(GetTargetFrameRate()*fLifeTime)); }
-	float GetTargetFrameRate() { return 60.f;  }
-	float GetEmissionInterval() { return 1.f/60.f; }
+	float GetTargetFrameRate() { return 200.f;  }
+	float GetEmissionInterval() { return 1.f/200.f; }
 
 	struct RibbonTrailVertex
 	{
