@@ -162,15 +162,45 @@ void TextureSettings::MultiLoadCallback(const char* szName, const usg::vector<us
 				sint iWidth = (sint)sqrt( results.size() + 1 );
 				sint iHeight = (sint)((results.size() + iWidth - 1) / iWidth);
 
+				// Square them for easier resizing
+				if (iWidth < iHeight)
+					iWidth = iHeight;
+
 				sint texWidth = files[0].GetHeader().uWidth * iWidth;
 				sint texHeight = files[0].GetHeader().uHeight * iHeight;
+
+				sint32 subWidth = (uint32)files[0].GetHeader().uWidth;
+				sint32 subHeight = (uint32)files[0].GetHeader().uHeight;
+
 
 				usg::TGAFile::Header hdr = files[0].GetHeader();
 				hdr.uWidth = texWidth;
 				hdr.uHeight = texHeight;
-				outFile.PrepareImage(files[0].GetHeader());
+				outFile.PrepareImage(hdr);
+
+				usg::GFXBounds src, dst;
+				src.x = 0;
+				src.y = 0;
+				src.width = (sint32)files[0].GetHeader().uWidth;
+				src.height = (sint32)files[0].GetHeader().uWidth;
+
+				dst.x = 0;
+				dst.y = 0;
+				dst.width = (sint32)files[0].GetHeader().uWidth;
+				dst.height = (sint32)files[0].GetHeader().uWidth;
+				for (auto& itr : files)
+				{
+					outFile.CopyData(&itr, src, dst);
+
+					dst.x += subWidth;
+					if (dst.x >= texWidth)
+					{
+						dst.y += subHeight;
+						dst.x = 0;
+					}
+				}
 				
-				outFile.Save("d:\\aaa\\test.tga", usg::FILE_TYPE_RESOURCE);
+				outFile.Save(result.szPath, usg::FILE_TYPE_RESOURCE);
 			}
 		}
 	}

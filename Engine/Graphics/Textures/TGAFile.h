@@ -27,19 +27,18 @@ namespace usg
 		bool Load(const char* szFileName, FILE_TYPE eFileType = FILE_TYPE_DEBUG_DATA);
 
 		void SetFlipImage(bool bFlipImage) { m_bFlipImage = bFlipImage; }
+		bool FlipVertical();
 
 		memsize GetFileSize() { return m_uFileSize;  }
 		enum TGA_TYPE
 		{
-			NO_IMAGE = 0x0000,
-			PALETTE = 0x0001,
-			RGB = 0x0002,
-			BW = 0x0003,
-			RLE_PALETTE = 0x1001,
-			RLE_RGB = 0x1002,
-			CMP_BW = 0x1003,
-			CMP_PALETTE = 0x100000,
-			CMP_4PASS = 0x100001
+			NO_IMAGE = 0,
+			PALETTE = 1,
+			RGB = 2,
+			BW = 3,
+			RLE_PALETTE = 9,
+			RLE_RGB = 10,
+			RLE_BW = 11,
 		};
 
 		PACK(
@@ -60,6 +59,7 @@ namespace usg
 		uint8* GetData() { return m_pData; }
 
 	private:
+
 		uint8*	m_pData;
 		Header	m_header;
 		memsize	m_uFileSize;
