@@ -103,6 +103,8 @@ namespace usg
 		return *(const Quaternionf*)(&q);
 	}
 
+	usg::Matrix4x4 ToUsgMatrix(const physx::PxTransform& trans);
+
 	physx::PxTransform ToPhysXTransform(const Components::TransformComponent& trans);
 	physx::PxTransform ToPhysXTransform(const Components::MatrixComponent& matrix);
 

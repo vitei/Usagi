@@ -53,6 +53,14 @@ namespace usg
 			return r;
 		}
 
+		usg::Matrix4x4 ToUsgMatrix(const physx::PxTransform& trans)
+		{
+			usg::Matrix4x4 mRet = ToUsgQuaternionf(trans.q);
+			mRet.SetTranslation(ToUsgVec3(trans.p));
+
+			return mRet;
+		}
+
 		static PhysXAllocator s_physXAllocator;
 		static PhysXErrorCallback s_physXErrorCallback;
 
