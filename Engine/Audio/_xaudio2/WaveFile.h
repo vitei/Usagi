@@ -7,6 +7,7 @@
 
 #include "Engine/Audio/SoundFile.h"
 #include "Engine/Audio/Shared/WaveFileReader.h"
+#include "Engine/Resource/PakFile.h"
 #include <xaudio2.h>
 
 namespace usg
@@ -20,7 +21,7 @@ namespace usg
 		WaveFile();
 		~WaveFile();
 
-		virtual void Init(const SoundFileDef* pSoundFile, Audio* pAudio, const char* pszLocalizedSubdir = NULL);
+		virtual void Init(const SoundFileDef* pSoundFile, const PakFileRaw* pPak, Audio* pAudio, const char* pszLocalizedSubdir = NULL);
 		virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio);
 		virtual void Cleanup(Audio* pAudio) {}
 		virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional);

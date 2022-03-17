@@ -40,6 +40,31 @@ namespace usg
 
 	};
 
+	// For loading outside of the resource manager
+	class PakFileRaw
+	{
+	public:
+		PakFileRaw();
+		~PakFileRaw();
+
+		bool Load(const char* szFileName);
+
+		struct FileRef
+		{
+			const PakFileDecl::FileInfo* pFileHeader = nullptr;
+			const PakFileDecl::Dependency* pDependencies = nullptr;
+			const void* pData = nullptr;
+		};
+
+		bool GetFile(const char* szName, FileRef& refOut) const;
+		bool GetFile(uint32 uFileCRC, FileRef& refOut) const;
+
+	private:
+		map<uint32, FileRef > m_files;
+		uint8*	m_pData = nullptr;
+		uint32	m_uFileSize = 0;
+	};
+
 }
 
 #endif	// #ifndef _USG_RESOURCE_PAK_FILE_H_

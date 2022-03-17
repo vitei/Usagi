@@ -1,6 +1,7 @@
 #pragma once
 #include "FileFactory.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
+#include "Engine/Core/stl/map.h"
 #include <gli/gli.hpp>
 #include <sstream>
 
@@ -11,7 +12,7 @@ public:
 	FileFactoryWin();
 	virtual ~FileFactoryWin();
 
-	virtual bool LoadFile(const char* szFileName) override;
+	virtual bool LoadFile(const char* szFileName, YAML::Node node) override;
 
 protected:
 	struct TextureEntry : public ResourceEntry
@@ -25,8 +26,12 @@ protected:
 		std::vector<char> memory;
 	};
 
-	bool LoadTGA(const char* szFileName);
+	bool LoadTGA(const char* szFileName, YAML::Node node);
 	bool LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
-	bool LoadCompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
-	bool LoadDDS(const char* szFileName);
+	bool LoadDDS(const char* szFileName, YAML::Node node);
+
+private:
+	gli::format GetTexFormat(const char* szDstFormat);
+
+	usg::map< usg::string, gli::format >	m_texFormats;
 };

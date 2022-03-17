@@ -46,6 +46,17 @@ public:
 			m_ostream = pb_ostream_from_file(this);
 		}
 	}
+
+	explicit ProtocolBufferFile(void* pData, memsize uSize)
+		: BufferedFile(pData, uSize), ResourceBase(StaticResType)
+	{
+		if (IsOpen())
+		{
+			m_istream = pb_istream_from_file(this);
+			m_ostream = pb_ostream_from_file(this);
+		}
+	}
+
 	virtual ~ProtocolBufferFile(void) {}
 
 	void SetupHash(const char* szFileName)

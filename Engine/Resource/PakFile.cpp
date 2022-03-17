@@ -147,5 +147,86 @@ namespace usg
 	}
 
 
+	PakFileRaw::PakFileRaw()
+	{
+
+	}
+
+	PakFileRaw::~PakFileRaw()
+	{
+		if (m_pData)
+		{
+			mem::Free(m_pData);
+			m_pData = nullptr;
+		}
+	}
+
+	bool PakFileRaw::Load(const char* szFileName)
+	{
+		File pakFile(szFileName);
+
+		PakFileDecl::ResourcePakHdr		header;
+
+		pakFile.Read(sizeof(header), &header);
+		pakFile.SeekPos(0);	// We will grab the header again to keep offsets consistent
+
+		if (header.uFileCount == 0 || header.uVersionId != PakFileDecl::CURRENT_VERSION)
+		{
+			ASSERT(false);
+			return false;
+		}
+
+		size_t pakSize = pakFile.GetSize();
+		size_t uPersistentDataSize = header.uResDataOffset == USG_INVALID_ID ? 0 : (uint32)pakFile.GetSize() - header.uResDataOffset;
+		uint32 uTempDataSize = uPersistentDataSize > 0 ? header.uResDataOffset : (uint32)pakFile.GetSize();
+
+		m_pData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_LOADING, uTempDataSize);
+
+		pakFile.Read(uTempDataSize, m_pData);
+
+		if (uPersistentDataSize > 0)
+		{
+			// Should be no persistent data in raw files
+			ASSERT(false);
+		}
+
+
+		const PakFileDecl::FileInfo* pFileInfo = (const PakFileDecl::FileInfo*) (m_pData + sizeof(PakFileDecl::ResourcePakHdr));
+		for (uint32 i = 0; i < header.uFileCount; i++)
+		{
+			FileRef fileRef;
+			fileRef.pData = ((uint8*)m_pData) + pFileInfo->uDataOffset;
+			fileRef.pDependencies = PakFileDecl::GetDependencies(pFileInfo);
+			fileRef.pFileHeader = pFileInfo;
+
+			ASSERT(m_files.find(fileRef.pFileHeader->CRC) == m_files.end());
+
+			m_files[fileRef.pFileHeader->CRC] = fileRef;
+
+			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo + pFileInfo->uTotalFileInfoSize);
+
+		}
+
+		return true;
+	}
+
+	bool PakFileRaw::GetFile(const char* szName, FileRef& refOut) const
+	{
+		uint32 uCrc = utl::CRC32(szName);
+		return GetFile(uCrc, refOut);
+	}
+
+	bool PakFileRaw::GetFile(uint32 uFileCRC, FileRef& refOut) const
+	{
+		auto itr = m_files.find(uFileCRC);
+		if (itr != m_files.end())
+		{
+			refOut = (*itr).second;
+			return true;
+		}
+		return false;
+	}
+
+
 }
 

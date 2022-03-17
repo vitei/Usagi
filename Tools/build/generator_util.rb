@@ -190,6 +190,9 @@ module GeneratorUtil
            "$ruby #{config.vpb_converter} #{config.vpb_converter_opts} #{config.script_dep_opt} $require_all_pb_opt -o $out $in",
            {:description => 'VPB $out', :dependencies => :gcc})
 
+        n.rule('pak_file', "#{config.resource_packer} $in -o$out -p$platform  #{config.cmdl_converter_dep_opts}",
+           {:dependencies => :gcc, :description => 'pack_file $in'})        
+
   end
 
   def GeneratorUtil.define_pc_rules(config, platform, n)
@@ -451,14 +454,6 @@ module GeneratorUtil
   end
 
 
-  def GeneratorUtil.pak_data(config, n, targets)
-    targets.each do |input, output, implicit_deps|
-      if implicit_deps.any?
-        FileUtils.mkdir_p(File.dirname(output))
-        n.build('resource_packer', {output => [input]}, {:implicit_deps => [config.resource_packer] + implicit_deps})
-      end
-    end
-  end
 
   def GeneratorUtil.get_msbuild_targetpath(project_file, configuration, assembly_name)
     outpath_base = project_file.match("(.*\/)")[0].chomp('/')

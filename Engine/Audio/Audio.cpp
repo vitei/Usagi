@@ -8,6 +8,7 @@
 #include "Engine/Audio/AudioFilter.h"
 #include "Engine/Audio/AudioEffect.h"
 #include "Engine/Audio/AudioRoom.h"
+#include "Engine/Resource/PakFile.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
@@ -198,7 +199,19 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 {
 #if !DISABLE_SOUND
 	AudioBank bank;
-	ProtocolBufferFile test_vpb(pszArchiveName);
+
+	usg::string pakName = pszArchiveName;
+	str::TruncateExtension(pakName);
+	pakName += ".pak";
+
+	PakFileRaw pakFile;
+	pakFile.Load(pakName.c_str());
+
+	PakFileRaw::FileRef ref;
+	if (!pakFile.GetFile(pszArchiveName, ref))
+		return;
+
+	ProtocolBufferFile test_vpb((void*)ref.pData, (memsize)ref.pFileHeader->uDataSize);
 	bool bReadSucceeded = test_vpb.Read(&bank);
 
 	uint32 uCount = (uint32)bank.soundFiles.m_decoderDelegate.data.count;
@@ -286,7 +299,7 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	for (uint32 i = 0; i < uCount; i++)
 	{
 		const SoundFileDef* pDef = &bank.soundFiles[i];
-		archive.ppSoundFiles[i]->Init(pDef, this, pszLocalizedSubdirName);
+		archive.ppSoundFiles[i]->Init(pDef, &pakFile, this, pszLocalizedSubdirName);
 	}
 #endif
 }

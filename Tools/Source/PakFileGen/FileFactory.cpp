@@ -5,6 +5,7 @@
 #include "Engine/Audio/AudioBank.pb.h"
 #include <algorithm>
 #include <fstream>
+#include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include "FileFactory.h"
 
@@ -51,7 +52,27 @@ bool FileFactory::LoadWavFile(const char* szFileName)
 }
 
 
-bool FileFactory::LoadFile(const char* szFileName)
+FileFactory::TextureSettings FileFactory::GetTextureSettings(const YAML::Node& node)
+{
+	TextureSettings ret;
+	if (node)
+	{
+		const YAML::Node format = node["format"];
+		const YAML::Node mips = node["mips"];
+		if (format)
+		{
+			ret.format = format.as<std::string>().c_str();
+			ret.bConvert = true;
+		}
+		if (mips)
+		{
+			ret.bGenMips = mips.as<bool>();
+		}
+	}
+	return ret;
+}
+
+bool FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 {
 	// Note we don't have .wav files here as the sound bank adds them
 	// For build times we don't want the pack file to be passed the raw files, but they are handled for testing, exception is Audio yaml as it's one file per pack and we need to parse
@@ -128,7 +149,7 @@ FileFactory::YmlType FileFactory::GetYmlType(const char* szFileName)
 
 bool FileFactory::LoadRawFile(const char* szFileName)
 {
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
@@ -228,7 +249,7 @@ bool FileFactory::LoadModelVMDL(const char* szFileName)
 bool FileFactory::LoadModel(const char* szFileName)
 {
 	std::stringstream command;
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size()+1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + "pakgen/" + relativeNameNoExt + ".vmdl";
@@ -410,20 +431,29 @@ bool FileFactory::LoadYMLVPBFile(const char* szFileName)
 bool FileFactory::LoadYMLAudioFile(const char* szFileName)
 {
 	std::stringstream command;
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
 	std::string depFileName = tempFileName + ".d";
 
-	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
-	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
+	//std::filesystem::path cwd = std::filesystem::current_path();
+	std::string fullPath = /*cwd.string() + std::string("\\") +*/ RemoveFileName(tempFileName);
+
+	command << "ruby Usagi\\Tools\\ruby\\yml2vpb.rb -o " << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+
+	memsize pos = 0;
+	do
+	{
+		pos = fullPath.find_first_of("\\/", pos + 1);
+		CreateDirectory(fullPath.substr(0, pos).c_str(), NULL);
+	} while (pos != std::string::npos);
 
 	system(command.str().c_str());
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->SetName(relativeNameNoExt + std::string(".vpb"), usg::ResourceType::PROTOCOL_BUFFER);
 
 	FILE* pFileOut = nullptr;
 
@@ -437,14 +467,21 @@ bool FileFactory::LoadYMLAudioFile(const char* szFileName)
 	// FIXME: Should probably do with a protocol buffer file, but parsing the yml creates fewer dependencies
 	YAML::Node mainNode = YAML::LoadFile(szFileName);
 	YAML::Node soundFiles = mainNode["AudioBank"]["soundFiles"];
+
+	std::vector< std::string > loadedFiles;
 	for (YAML::const_iterator it = soundFiles.begin(); it != soundFiles.end(); ++it)
 	{
 		if ((*it)["filename"].IsDefined())
 		{
 			bool bStream = false;
-			std::string fileName = RemoveFileName(szFileName) + (*it)["filename"].as<std::string>();
+			std::string fileName = "Data/Audio/" + (*it)["filename"].as<std::string>();
 			fileName += ".wav";
-			LoadWavFile(fileName.c_str());
+
+			if (std::find(loadedFiles.begin(), loadedFiles.end(), fileName) == loadedFiles.end())
+			{
+				LoadWavFile(fileName.c_str());
+				loadedFiles.push_back(fileName);
+			}
 
 			if ((*it)["stream"].IsDefined())
 			{
@@ -563,7 +600,7 @@ std::string FileFactory::RemoveExtension(const std::string& fileName)
 
 std::string FileFactory::RemovePath(const std::string& fileName)
 {
-	std::string out = fileName.substr(fileName.find_last_of("\\/")+1);
+	std::string out = fileName.substr(fileName.find_last_of("\\/"));
 	return out;
 }
 

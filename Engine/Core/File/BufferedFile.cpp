@@ -16,6 +16,18 @@ namespace usg {
 		Open(szFileName, eMode, eFileType);
 	}
 
+	BufferedFile::BufferedFile(void* pData, memsize uSize)
+	{
+		m_pCurrPointer = NULL;
+		m_pBasePointer = NULL;
+		m_uSize = 0;
+
+		m_uSize = uSize;
+
+		m_pCurrPointer = m_pBasePointer = (uint8*)pData;
+
+	}
+
 	BufferedFile::BufferedFile(void)
 	{
 		m_pCurrPointer = NULL;

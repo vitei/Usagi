@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Utility.h"
 #include "../ResourceLib/ResourcePakExporter.h"
+#include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <algorithm>
 
@@ -12,7 +13,7 @@ public:
 	virtual ~FileFactory();
 
 	void Init(const char* rootPath, const char* tempDir);
-	virtual bool LoadFile(const char* szFileName);
+	virtual bool LoadFile(const char* szFileName, YAML::Node node);
 	// Just load the wav for most platforms but support conversion
 	virtual bool LoadWavFile(const char* szFileName);
 	void ExportResources(const char* szFileName);
@@ -42,6 +43,14 @@ protected:
 		YML_AUDIO
 	};
 
+	struct TextureSettings
+	{
+		bool bGenMips = true;
+		bool bConvert = false;
+		// BC7 RGB
+		usg::string format = "BC7-srgb";
+	};
+
 	const char* GetExtension(const char* szFileName);
 	bool HasExtension(const char* szFileName, const char* szExt);
 	bool LoadModel(const char* szFileName);
@@ -58,6 +67,8 @@ protected:
 	std::string RemoveExtension(const std::string& fileName);
 	std::string RemovePath(const std::string& fileName);
 	std::string RemoveFileName(const std::string& fileName);
+
+	TextureSettings GetTextureSettings(const YAML::Node& node);
 
 	std::string m_tempDir;
 	std::string m_rootDir;

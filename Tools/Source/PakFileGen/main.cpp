@@ -28,17 +28,20 @@ bool CheckArgument(std::string& target, const std::string& argument)
 }
 
 
-bool ProcessFile(const std::string& fileName)
+bool ProcessFile(const std::string& fileName, YAML::Node node)
 {
-	return g_pFileFactory->LoadFile(fileName.c_str());
+	return g_pFileFactory->LoadFile(fileName.c_str(), node);
 }
 
+// We shouldn't use this, creating pak file definitions for dependency sanity
 bool ProcessFiles(const std::string& inputDir)
 {
 	std::string pathName = inputDir + "/*";
 	WIN32_FIND_DATA findFileData;
 	HANDLE hFind;
 	hFind = FindFirstFile(pathName.c_str(), &findFileData);
+
+	YAML::Node fakeNode;
 
 	if (hFind == INVALID_HANDLE_VALUE)
 	{
@@ -59,7 +62,7 @@ bool ProcessFiles(const std::string& inputDir)
 		}
 		else
 		{
-			if (!ProcessFile(inputDir + "/" + findFileData.cFileName))
+			if (!ProcessFile(inputDir + "/" + findFileData.cFileName, fakeNode))
 				return false;
 		}
 
@@ -73,11 +76,12 @@ bool ProcessFiles(const std::string& inputDir)
 int main(int argc, char *argv[])
 {
 	std::string platform = "win";
-	std::string inputDir;
+	std::string input;
 	std::string outputFile;
 	std::string dependencyFile;
 	std::string tempDir;
 	std::string arg;
+	bool bIsPakDefinition = false;
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -85,7 +89,7 @@ int main(int argc, char *argv[])
 
 		if (arg.at(0) != '-')
 		{
-			inputDir = arg;
+			input = arg;
 		}
 		else if (CheckArgument(arg, "-p"))
 		{
@@ -95,6 +99,10 @@ int main(int argc, char *argv[])
 		{
 			outputFile = arg;
 		}
+		else if (CheckArgument(arg, "-def"))
+		{
+			bIsPakDefinition = true;
+		}
 		else if (CheckArgument(arg, "-d"))
 		{
 			dependencyFile = arg;
@@ -103,9 +111,10 @@ int main(int argc, char *argv[])
 		{
 			tempDir = arg;
 		}
+
 	}
 
-	if (inputDir.empty() || outputFile.empty())
+	if (input.empty() || outputFile.empty())
 	{
 		printf("Invalid arguments\nProper usage PakFileGen <<inputdir>> -o<<outputfile>>");
 		return -1;
@@ -131,11 +140,25 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	g_pFileFactory->Init(inputDir.c_str(), tempDir.c_str());
+	std::string rootDir = "Data/";
+	std::string rootPath = std::string(input).substr( 0, input.find_first_of(rootDir) + rootDir.size());
+
+	g_pFileFactory->Init(rootPath.c_str(), tempDir.c_str());
 
 
-	if (!ProcessFiles(inputDir))
-		return -1;
+	// Abandoning auto directories as need meta data
+	if (!bIsPakDefinition)
+	{
+		YAML::Node dummyNode;
+		ProcessFile(input.c_str(), dummyNode);
+	}
+	else
+	{
+		// TODO: Load pak file def
+	}
+	
+	//if (!ProcessFiles(inputDir))
+	//	return -1;
 	
 
 	// Write out the file

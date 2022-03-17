@@ -10,9 +10,6 @@ require 'yaml'
 def build_pc_data(config, n, platform)
   data_deps = Set.new
 
-  audio = build_audio(config, n)
-  data_deps.merge audio
-
   shaders = build_pc_shaders(config, n, platform)
   data_deps.merge shaders
 
@@ -45,6 +42,9 @@ def process_data(config, platform, n)
     pc_data = build_pc_data(config, n, platform)
     data_deps.merge pc_data
   end
+
+  audio = build_paks_for_audio(config, n, platform) #build_audio(config, n)
+  data_deps.merge audio
 
   # find once, and pass around the array into build rule functions
   protocol_ruby_classes = find_protocol_ruby_classes(config)
@@ -105,48 +105,6 @@ def projects(config, n, order_only_deps, win_bp_cpp, data_deps)
 end
 
 
-def build_model_paks(config, n, models_textures, models_resources, vfx_ext, aux_materials)
-  pak_resources  = models_resources.select { |resource| resource.include?(vfx_ext) } # only want VFX resources
-  pak_resources |= aux_materials.select { |resource| resource.include?(vfx_ext) } if aux_materials.nil? == false
-  pak_resources |= models_textures
-  folders = pak_resources.map { |f| File.dirname(f) }.uniq
-
-  targets = folders.map do |src_path|
-    output_path  = "#{src_path}".sub!("#{config.working_dir}/Data", "#{config.romfiles_dir}")
-    dst_path     = "#{output_path}/resources.pak"
-    dependencies = pak_resources.select { |f| f.include?(src_path) }
-
-    [src_path, dst_path, dependencies] if dependencies.any?
-  end.compact
-
-  GeneratorUtil.pak_data(config, n, targets)
-
-  targets.map {|i, o, d| o}
-end
-
-def build_particle_paks(config, n)
-  particle_src = [["#{config.particle_dir}/Effects", '.pfx'], ["#{config.particle_dir}/Emitters", '.pem']]
-
-  output_dir = "#{config.particle_working_dir}"
-
-  dependencies = []
-  particle_src.each do |src_info|
-    src_folder = src_info[0]
-    cvt_ext = src_info[1]
-    FileList["#{src_folder}/*.vpb"].each do |file|
-      dependencies << file.sub(src_folder, output_dir).sub!('.vpb', cvt_ext)
-    end
-  end
-
-  targets  = []
-  if dependencies.any?
-    dst_path = "#{config.particle_out_dir}/resources.pak"
-    targets << [config.particle_working_dir, dst_path, dependencies]
-    GeneratorUtil.pak_data(config, n, targets)
-  end
-
-  targets.map {|i, o, d| o}
-end
 
 
 #####################################################################
@@ -188,6 +146,21 @@ def build_shader_pak_for_dir(config, n, effect_dir, shader_dir, api, includes)
         'shader_dir' => shader_dir,
         'api' => api,
         'includes' => includes }} )
+
+    output
+  end
+end
+
+
+def build_paks_for_audio(config, n, platform)
+  targets = FileList["Data/Audio/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
+    output = ("#{config.audio_out_dir}/" + input.sub(/^Data\/Audio\//, '')).sub(".yml", ".pak")
+    defines = ""
+    n.build('pak_file', {output => [input]},
+        { :implicit_deps => [config.resource_packer],
+          :variables => {'out' => to_windows_path(output),
+        'in' => input,
+        'platform' => config.target_platform } } )
 
     output
   end

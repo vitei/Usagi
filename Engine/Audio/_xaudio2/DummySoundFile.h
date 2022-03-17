@@ -7,6 +7,7 @@
 #define __USG_AUDIO_DUMMYSOUNDFILE_H__
 
 #include "Engine/Audio/SoundFile.h"
+#include "Engine/Resource/PakFile.h"
 
 namespace usg{
 
@@ -17,7 +18,7 @@ namespace usg{
 		DummySoundFile() {}
 		~DummySoundFile() {}
 
-		virtual void Init(const SoundFileDef* pSoundFile, Audio* pAudio, const char* pszLocalizedSubdir = NULL) { }
+		virtual void Init(const SoundFileDef* pSoundFile, const PakFileRaw* pPak, Audio* pAudio, const char* pszLocalizedSubdir = NULL) { }
 		virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio) { }
 		virtual void Cleanup(Audio* pAudio) { }
 		virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional) {}

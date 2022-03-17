@@ -21,9 +21,11 @@ class BufferedFile : protected File
 public:
 	BufferedFile(void);
 	explicit BufferedFile(const char* szFileName, FILE_ACCESS_MODE eMode = FILE_ACCESS_READ, FILE_TYPE eFileType = FILE_TYPE_RESOURCE);
+	explicit BufferedFile(void* pData, memsize uSize);
 	~BufferedFile(void) { Close(); }
 
 	virtual bool Open(const char* szFileName, FILE_ACCESS_MODE eMode = FILE_ACCESS_READ, FILE_TYPE eFileType = FILE_TYPE_RESOURCE);
+
 	virtual void Close();
 	virtual bool Flush();
 

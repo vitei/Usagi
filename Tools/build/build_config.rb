@@ -373,7 +373,7 @@ def shader_pack
   end
 
   def resource_packer
-    "#{tools_bin_dir}/ResPak.exe"
+    "#{tools_bin_dir}/PakFileGen.exe"
   end
 
   def vitei_audio_tool
@@ -498,6 +498,10 @@ def shader_pack
 
   def effects_out_dir
     "#{romfiles_dir}/Effects"
+  end
+
+  def audio_out_dir
+    "#{romfiles_dir}/Audio"
   end
 
   def skeleton_out_dir
