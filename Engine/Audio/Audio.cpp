@@ -735,6 +735,7 @@ SoundActorHandle Audio::CreateSoundActor(const Vector3f &vPos)
 		pActorData->hndl.Init(&pActorData->actor);
 
 		pActorData->hndl.SetPosition(vPos);
+		pActorData->hndl.SetVelocity(usg::Vector3f::ZERO);
 		return pActorData->hndl;
 	}
 #endif
