@@ -189,6 +189,8 @@ namespace usg
 			struct Inputs
 			{
 				Required<MatrixComponent, FromSelfOrParents> mtx;
+				Optional<RigidBody, FromSelfOrParents>		rigidBody;
+
 			};
 
 			struct Outputs
@@ -200,7 +202,22 @@ namespace usg
 
 			static void LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
+				usg::Vector3f vPrevPos = outputs.listener.GetRuntimeData().pListener->GetMatrix().vPos().v3();
 				outputs.listener.GetRuntimeData().pListener->SetMatrix(inputs.mtx->matrix);
+				if (inputs.rigidBody.Exists())
+				{
+					outputs.listener.GetRuntimeData().pListener->SetVelocity(physics::GetLinearVelocity(inputs.rigidBody));
+				}
+				else
+				{
+					if (fDelta > FLT_EPSILON)
+					{
+						usg::Vector3f vDir = inputs.mtx->matrix.vPos().v3() - vPrevPos;
+						vDir /= fDelta;
+
+						outputs.listener.GetRuntimeData().pListener->SetVelocity(vDir);
+					}
+				}
 			}
 
 		};

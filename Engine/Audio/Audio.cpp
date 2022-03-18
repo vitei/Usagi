@@ -978,7 +978,7 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			// Only handle the first one for now
 			if (pSoundFile->GetDopplerFactor() > 0.0f)
 			{
-				Vector3f vTransVel = (*it)->GetViewMatrix().TransformVec3(vVel, 1.0f);
+				Vector3f vTransVel = (*it)->GetViewMatrix().TransformVec3(vVel, 0.0f);
 				fDopplerAccum = GetDoppler(*it, vTransPos.GetNormalisedIfNZero(), vTransVel, object);// *fAtten;
 			}
 
