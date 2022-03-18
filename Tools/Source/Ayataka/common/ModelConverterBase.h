@@ -16,6 +16,8 @@ public:
 	void Store( size_t alignment, bool bSwapEndian );
 	void StoreCollisionBinary( bool bBigEndian );
 	void ExportStoredBinary( const aya::string& path );
+	void ExportStoredBinary(void* pDest, size_t destSize);
+	size_t GetBinarySize() const;
 	void ExportBoneHierarchy(const aya::string& path);
 	void ExportAnimations(const aya::string& path);
 	void DumpStoredBinary( void );
@@ -24,10 +26,17 @@ public:
 	void CalculatePolygonNormal( void );
 	void FlipUV( void );
 
+	uint32 GetAnimationCount() const;
+	size_t GetAnimBinarySize(uint32 uAnim) const;
+	const char* GetAnimName(uint32 uAnim) const;
+	void ExportAnimation(uint32 uAnim, void* pData, size_t destSize);
+
+	std::vector< std::string > GetTextureNames() const;
+
 protected:
 	void SetNameFromPath( const char* path );
 
-	Cmdl mCmdl;
+	Cmdl m_cmdl;
 
 	struct StoredBinary {
 		void* pBinary;
@@ -40,7 +49,7 @@ protected:
 		eSECTION_NAMES,
 		eSECTION_NUM
 	};
-	StoredBinary mSections[eSECTION_NUM];
+	StoredBinary m_sections[eSECTION_NUM];
 };
 
 #endif // MODELCONVERTERBASE_H

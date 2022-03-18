@@ -103,6 +103,33 @@ usg::exchange::BoneAnimationFrame* Animation::GetBoneAnimFrame(const char* szBon
 }
 
 
+size_t Animation::GetBinarySize() const
+{
+	size_t size = sizeof(m_header);
+	size += sizeof(usg::exchange::BoneAnimationDescription) * m_boneInfo.size();
+	for (uint32 i = 0; i < m_animFrames.size(); i++)
+	{
+		size += sizeof(usg::exchange::BoneAnimationFrame) * m_animFrames[i].boneFrameInfo.size();
+	}
+	return size;
+}
+
+void Animation::Export(void* pDest, size_t destSize)
+{
+	uint8* pCurr = (uint8*)pDest;
+	memcpy(pCurr, &m_header, sizeof(m_header)); pCurr += sizeof(m_header);
+	memsize boneInfoSize = sizeof(usg::exchange::BoneAnimationDescription) * m_boneInfo.size();
+
+	memcpy(pCurr, m_boneInfo.data(), boneInfoSize); pCurr += boneInfoSize;
+	for (uint32 i = 0; i < m_animFrames.size(); i++)
+	{
+		memsize frameSize = sizeof(usg::exchange::BoneAnimationFrame) * m_animFrames[i].boneFrameInfo.size();
+		memcpy(pCurr, m_animFrames[i].boneFrameInfo.data(), frameSize); pCurr += frameSize;
+	}
+
+	ASSERT(size_t(pCurr - ((uint8*)pDest)) <= destSize);
+}
+
 void Animation::Export(aya::string path)
 {
 	FILE* fp = fopen(path.c_str(), "wb");

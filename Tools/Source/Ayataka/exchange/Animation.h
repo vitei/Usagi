@@ -39,6 +39,8 @@ public:
 	uint32 GetFrameCount() const { return m_header.frameCount; }
 
 	void Export(aya::string path);
+	void Export(void* pDest, size_t destSize);
+	size_t GetBinarySize() const;
 
 	bool ValidAnim() const { return m_boneInfo.size() > 0; }
 

@@ -26,66 +26,89 @@ inline void writeTextToFile( const aya::string& path, const aya::string& text )
 ModelConverterBase::ModelConverterBase()
 {
 	for( int i = 0; i < eSECTION_NUM; ++i ) {
-		mSections[i].pBinary = NULL;
-		mSections[i].pHead = NULL;
-		mSections[i].size = 0;
+		m_sections[i].pBinary = NULL;
+		m_sections[i].pHead = NULL;
+		m_sections[i].size = 0;
 	}
 }
 
 ModelConverterBase::~ModelConverterBase()
 {
 	for( int i = 0; i < eSECTION_NUM; ++i ) {
-		aya::Free( mSections[i].pBinary );
+		aya::Free( m_sections[i].pBinary );
 	}
 }
 
 void ModelConverterBase::Store( size_t alignment, bool bSwapEndian )
 {
 	CmdlBinaryStore cmdlBinaryStore( bSwapEndian );
-	size_t binarySize = cmdlBinaryStore.calcStoredBinarySize( mCmdl, alignment );
+	size_t binarySize = cmdlBinaryStore.calcStoredBinarySize( m_cmdl, alignment );
 
 	// main section
-	mSections[eSECTION_MAIN].pBinary = aya::Alloc( binarySize + alignment );
-	mSections[eSECTION_MAIN].pHead = offsetAndAlignAddress( mSections[eSECTION_MAIN].pBinary, 0, alignment );
-	mSections[eSECTION_MAIN].size= binarySize;
+	m_sections[eSECTION_MAIN].pBinary = aya::Alloc( binarySize + alignment );
+	m_sections[eSECTION_MAIN].pHead = offsetAndAlignAddress( m_sections[eSECTION_MAIN].pBinary, 0, alignment );
+	m_sections[eSECTION_MAIN].size= binarySize;
 
-	cmdlBinaryStore.store( mSections[eSECTION_MAIN].pHead, mSections[eSECTION_MAIN].size, mCmdl, alignment );
+	cmdlBinaryStore.store( m_sections[eSECTION_MAIN].pHead, m_sections[eSECTION_MAIN].size, m_cmdl, alignment );
 }
 
 void ModelConverterBase::StoreCollisionBinary(bool bBigEndian)
 {
 	CollisionStore collisionStore( bBigEndian );
-	size_t binarySize = collisionStore.CalcStoredBinarySize( mCmdl );
+	size_t binarySize = collisionStore.CalcStoredBinarySize( m_cmdl );
 
 	// main section
-	StoredBinary& mainSec = mSections[eSECTION_MAIN];
+	StoredBinary& mainSec = m_sections[eSECTION_MAIN];
 	mainSec.pBinary = mainSec.pHead = aya::Alloc( binarySize );
 	mainSec.size = binarySize;
 
-	collisionStore.Store( mainSec.pHead, mainSec.size, mCmdl );
+	collisionStore.Store( mainSec.pHead, mainSec.size, m_cmdl );
 
 	// names section
-	binarySize = collisionStore.CalcNamesSectionBinarySize( mCmdl );
-	StoredBinary& namesSec = mSections[eSECTION_NAMES];
+	binarySize = collisionStore.CalcNamesSectionBinarySize( m_cmdl );
+	StoredBinary& namesSec = m_sections[eSECTION_NAMES];
 	namesSec.pBinary = namesSec.pHead = aya::Alloc( binarySize );
 	namesSec.size = binarySize;
 
-	collisionStore.StoreNamesSection( namesSec.pHead, namesSec.size, mCmdl );
+	collisionStore.StoreNamesSection( namesSec.pHead, namesSec.size, m_cmdl );
+}
+
+uint32 ModelConverterBase::GetAnimationCount() const
+{
+	return m_cmdl.GetAnimationNum();
+}
+
+const char* ModelConverterBase::GetAnimName(uint32 uAnim) const
+{
+	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+	return pAnim->GetName();
+}
+
+size_t ModelConverterBase::GetAnimBinarySize(uint32 uAnim) const
+{
+	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+	return pAnim->GetBinarySize();
+}
+
+void ModelConverterBase::ExportAnimation(uint32 uAnim, void* pData, size_t destSize)
+{
+	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+	pAnim->Export(pData, destSize);
 }
 
 void ModelConverterBase::ExportAnimations(const aya::string& path)
 {
-	for (uint32 i = 0; i < mCmdl.GetAnimationNum(); i++)
+	for (uint32 i = 0; i < m_cmdl.GetAnimationNum(); i++)
 	{
-		::exchange::Animation* pAnim = mCmdl.GetAnimation(i);
+		::exchange::Animation* pAnim = m_cmdl.GetAnimation(i);
 		aya::string fileName = path + pAnim->GetName();
 		fileName += ".vskla";
 		pAnim->Export(fileName);
 	}
 
-	for (uint32 i = 0; i < mCmdl.GetMatAnimationNum(); i++)
+	for (uint32 i = 0; i < m_cmdl.GetMatAnimationNum(); i++)
 	{
-		::exchange::MaterialAnimation* pAnim = mCmdl.GetMatAnimation(i);
+		::exchange::MaterialAnimation* pAnim = m_cmdl.GetMatAnimation(i);
 		aya::string fileName = path + pAnim->GetName();
 		fileName += ".vmata";
 		pAnim->Export(fileName.c_str());
@@ -101,19 +124,69 @@ void ModelConverterBase::ExportStoredBinary(const aya::string& path)
 		return;
 	}
 
-	for( int i = 0; i < eSECTION_NUM; ++i ) {
-		if( mSections[i].pBinary ) {
-			fwrite( mSections[i].pHead, mSections[i].size, 1, fp );
+	for( int i = 0; i < eSECTION_NUM; ++i )
+	{
+		if( m_sections[i].pBinary )
+		{
+			fwrite( m_sections[i].pHead, m_sections[i].size, 1, fp );
 		}
 	}
 	fclose( fp );
+}
+
+std::vector< std::string > ModelConverterBase::GetTextureNames() const
+{
+	std::vector< std::string > namesOut;
+	for (uint32 i = 0; i < m_cmdl.GetMaterialNum(); i++)
+	{
+		for (uint32 uTex = 0; uTex < usg::exchange::Material::textures_max_count; uTex++)
+		{
+			if (m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureName[0] != '\0')
+			{
+				std::string name = m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureName;
+				if (std::find(namesOut.begin(), namesOut.end(), name) == namesOut.end())
+				{
+					namesOut.push_back(name);
+				}
+			}
+		}
+	}
+	return namesOut;
+}
+
+void ModelConverterBase::ExportStoredBinary(void* pDest, size_t destSize)
+{
+	ASSERT(destSize >= GetBinarySize());
+
+	uint8* pCurr = (uint8*)pDest;
+	for (int i = 0; i < eSECTION_NUM; ++i)
+	{
+		if (m_sections[i].pBinary)
+		{
+			memcpy(pCurr, m_sections[i].pHead, m_sections[i].size);
+			pCurr += m_sections[i].size;
+		}
+	}
+}
+
+size_t ModelConverterBase::GetBinarySize() const
+{
+	size_t size = 0;
+	for (int i = 0; i < eSECTION_NUM; ++i)
+	{
+		if (m_sections[i].pBinary)
+		{
+			size += m_sections[i].size;
+		}
+	}
+	return size;
 }
 
 void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 {
 	pugi::xml_document skeletonDocument;
 	pugi::xml_node hierarchyNode = skeletonDocument.append_child("hierarchy");
-	::exchange::Skeleton* pSkeleton = mCmdl.GetSkeleton();
+	::exchange::Skeleton* pSkeleton = m_cmdl.GetSkeleton();
 	pugi::xml_node boneSet = hierarchyNode.append_child("bone_array");
 	pugi::xml_attribute arrayLength = boneSet.append_attribute("length");
 	arrayLength.set_value((unsigned int)pSkeleton->Bones().size());
@@ -169,18 +242,18 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 
 	}
 
-	if(mCmdl.GetLightNum() > 0)
+	if(m_cmdl.GetLightNum() > 0)
 	{
 	//	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
 		pugi::xml_node lightSet = hierarchyNode.append_child("light_array");
 
 		pugi::xml_attribute lightArrayLength = lightSet.append_attribute("length");
-		lightArrayLength.set_value((unsigned int)mCmdl.GetLightNum());
+		lightArrayLength.set_value((unsigned int)m_cmdl.GetLightNum());
 
-		for (uint32 i = 0; i < mCmdl.GetLightNum(); i++)
+		for (uint32 i = 0; i < m_cmdl.GetLightNum(); i++)
 		{
 			pugi::xml_node light = lightSet.append_child("light");
-			const Cmdl::Light* pLight = mCmdl.GetLight(i);
+			const Cmdl::Light* pLight = m_cmdl.GetLight(i);
 
 			pugi::xml_attribute name = light.append_attribute("name");
 			name.set_value(pLight->name.c_str());
@@ -242,18 +315,18 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		}
 	}
 
-	if (mCmdl.GetCameraNum() > 0)
+	if (m_cmdl.GetCameraNum() > 0)
 	{
 		//	pugi::xml_node lightNode = skeletonDocument.append_child("lighting");
 		pugi::xml_node cameraSet = hierarchyNode.append_child("camera_array");
 
 		pugi::xml_attribute cameraArrayLength = cameraSet.append_attribute("length");
-		cameraArrayLength.set_value((unsigned int)mCmdl.GetCameraNum());
+		cameraArrayLength.set_value((unsigned int)m_cmdl.GetCameraNum());
 
-		for (uint32 i = 0; i < mCmdl.GetCameraNum(); i++)
+		for (uint32 i = 0; i < m_cmdl.GetCameraNum(); i++)
 		{
 			pugi::xml_node camera = cameraSet.append_child("camera");
-			const Cmdl::Camera* pCamera = mCmdl.GetCamera(i);
+			const Cmdl::Camera* pCamera = m_cmdl.GetCamera(i);
 
 			pugi::xml_attribute name = camera.append_attribute("name");
 			name.set_value(pCamera->name.c_str());
@@ -286,7 +359,7 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 
 void ModelConverterBase::DumpStoredBinary()
 {
-	if( !mSections[eSECTION_MAIN].pHead) {
+	if( !m_sections[eSECTION_MAIN].pHead) {
 		return;
 	}
 }
@@ -294,17 +367,17 @@ void ModelConverterBase::DumpStoredBinary()
 
 void ModelConverterBase::ReverseCoordinate()
 {
-	mCmdl.ReverseCoordinate();
+	m_cmdl.ReverseCoordinate();
 }
 
 void ModelConverterBase::CalculatePolygonNormal()
 {
-	mCmdl.CalculatePolygonNormal();
+	m_cmdl.CalculatePolygonNormal();
 }
 
 void ModelConverterBase::FlipUV( void )
 {
-	LoaderUtil::filpUV( mCmdl );
+	LoaderUtil::filpUV( m_cmdl );
 }
 
 void ModelConverterBase::SetNameFromPath(const char *path)
@@ -322,5 +395,5 @@ void ModelConverterBase::SetNameFromPath(const char *path)
 		basename = list.back();
 		basename = split( basename, aya::string( "." ) ).at(0);
 	}
-	mCmdl.SetName( basename );
+	m_cmdl.SetName( basename );
 }
