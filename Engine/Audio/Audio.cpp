@@ -979,7 +979,7 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			if (pSoundFile->GetDopplerFactor() > 0.0f)
 			{
 				Vector3f vTransVel = (*it)->GetViewMatrix().TransformVec3(vVel, 1.0f);
-				fDopplerAccum = GetDoppler(*it, vTransPos.GetNormalisedIfNZero(), vTransVel, object) * fAtten;
+				fDopplerAccum = GetDoppler(*it, vTransPos.GetNormalisedIfNZero(), vTransVel, object);// *fAtten;
 			}
 
 
@@ -1013,7 +1013,8 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 		object->SetPanningData(totalPanning);
 		if (pSoundFile->GetDopplerFactor() > 0.0f)
 		{
-			object->SetDopplerFactor(fDopplerAccum * fMultiplier);
+			fDopplerAccum = usg::Math::Lerp(1.0f, fDopplerAccum, fMultiplier);
+			object->SetDopplerFactor(fDopplerAccum);
 		}
 	}
 	else
