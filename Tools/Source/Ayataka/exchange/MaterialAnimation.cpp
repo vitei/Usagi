@@ -140,6 +140,19 @@ void MaterialAnimation::InitTiming(uint32 uFrameCount, float fFrameRate)
 	//m_animFrames.resize(uFrameCount);
 }
 
+void MaterialAnimation::Export(void* pDest, size_t destSize)
+{
+	// TODO: implment me
+	ASSERT(false);
+}
+
+size_t MaterialAnimation::GetBinarySize() const
+{
+	// TODO: implment me
+	ASSERT(false);
+
+	return 0;
+}
 
 
 void MaterialAnimation::Export(const char* path)

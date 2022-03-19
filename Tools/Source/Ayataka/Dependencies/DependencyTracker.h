@@ -13,6 +13,8 @@ public:
 	void LogDependency(const char* dependency);
 	void ExportDependencies();
 
+	const std::vector<std::string>& GetDependencies() { return m_dependencies; }
+
 private:
 	std::string ParsePath(const char* path);
 

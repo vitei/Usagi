@@ -41,6 +41,27 @@ namespace usg
 	}
 
 
+	bool SkeletalAnimationResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
+	{
+		// TODO: Switch to persistent data? Need to consider alignment if we do
+		const uint8* pSrc = (uint8*)pData;
+
+		memcpy(&m_header, pSrc, sizeof(m_header));
+		pSrc += sizeof(m_header);
+
+		m_pBoneDescriptions = vnew(ALLOC_ANIMATION) exchange::BoneAnimationDescription[m_header.referencedBones];
+		m_pBoneAnimFrames = vnew(ALLOC_ANIMATION) exchange::BoneAnimationFrame[m_header.frameCount * m_header.referencedBones];
+
+		memsize boneDescSize = m_header.referencedBones * sizeof(m_pBoneDescriptions[0]);
+		memcpy(m_pBoneDescriptions, pSrc, boneDescSize);
+		pSrc += boneDescSize;
+
+		memsize animFramesSize = m_header.referencedBones * m_header.frameCount * sizeof(m_pBoneAnimFrames[0]);
+		memcpy(m_pBoneAnimFrames, pSrc, animFramesSize);
+
+		return true;
+	}
+
 	sint32 SkeletalAnimationResource::GetBoneReference(const char* szBoneName) const
 	{
 		for (uint32 i = 0; i < m_header.referencedBones; i++)

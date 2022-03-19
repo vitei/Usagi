@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Utility.h"
 #include "../ResourceLib/ResourcePakExporter.h"
+#include "../Ayataka/Dependencies/DependencyTracker.h"
 #include <yaml-cpp/yaml.h>
 #include <sstream>
 #include <algorithm>
@@ -12,10 +13,10 @@ public:
 	FileFactory();
 	virtual ~FileFactory();
 
-	void Init(const char* rootPath, const char* tempDir);
-	virtual bool LoadFile(const char* szFileName, YAML::Node node);
+	void Init(const char* rootPath, const char* tempDir, const char* pakName);
+	virtual std::string LoadFile(const char* szFileName, YAML::Node node);
 	// Just load the wav for most platforms but support conversion
-	virtual bool LoadWavFile(const char* szFileName);
+	virtual std::string LoadWavFile(const char* szFileName);
 	void ExportResources(const char* szFileName);
 	void WriteDependencies(const char* szFileName);
 
@@ -53,25 +54,30 @@ protected:
 
 	const char* GetExtension(const char* szFileName);
 	bool HasExtension(const char* szFileName, const char* szExt);
-	bool LoadModel(const char* szFileName);
-	bool LoadModelVMDL(const char* szFileName);
+	std::string LoadModel(const char* szFileName, const YAML::Node& node);
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
-	bool LoadRawFile(const char* szFileName);
-	bool LoadYMLVPBFile(const char* szFileName);
-	bool LoadYMLEntityFile(const char* szFileName);
-	bool LoadYMLAudioFile(const char* szFileName);
+	void AddDependenciesFromDepTracker(DependencyTracker& tracker);
+	std::string LoadRawFile(const char* szFileName);
+	std::string LoadYMLVPBFile(const char* szFileName);
+	std::string LoadYMLEntityFile(const char* szFileName);
+	std::string LoadYMLAudioFile(const char* szFileName);
 	YmlType GetYmlType(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);
 	std::string RemovePath(const std::string& fileName);
 	std::string RemoveFileName(const std::string& fileName);
-
+	
 	TextureSettings GetTextureSettings(const YAML::Node& node);
+
+	bool HasSrcResource(std::string srcName);
+	bool HasDestResource(std::string dstName);
+
 
 	std::string m_tempDir;
 	std::string m_rootDir;
+	std::string m_pakName;
 	std::vector<ResourceEntry*> m_resources;
 	std::vector<std::string> m_referencedFiles;
 };

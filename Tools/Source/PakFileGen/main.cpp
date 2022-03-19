@@ -30,7 +30,7 @@ bool CheckArgument(std::string& target, const std::string& argument)
 
 bool ProcessFile(const std::string& fileName, YAML::Node node)
 {
-	return g_pFileFactory->LoadFile(fileName.c_str(), node);
+	return g_pFileFactory->LoadFile(fileName.c_str(), node).size() > 0;
 }
 
 // We shouldn't use this, creating pak file definitions for dependency sanity
@@ -143,7 +143,8 @@ int main(int argc, char *argv[])
 	std::string rootDir = "Data/";
 	std::string rootPath = std::string(input).substr( 0, input.find_first_of(rootDir) + rootDir.size());
 
-	g_pFileFactory->Init(rootPath.c_str(), tempDir.c_str());
+
+	g_pFileFactory->Init(rootPath.c_str(), tempDir.c_str(), outputFile.c_str());
 
 
 	// Abandoning auto directories as need meta data
@@ -154,7 +155,32 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		// TODO: Load pak file def
+		std::string path = input.c_str();
+		size_t pathEnd = path.find_last_of("\\/");
+		if (pathEnd != std::string::npos)
+		{
+			path = path.substr(0, pathEnd);
+		}
+
+		YAML::Node mainNode = YAML::LoadFile(input.c_str());
+		if (!mainNode)
+			return -1;
+
+		YAML::Node resources = mainNode["Resources"];
+		if (!resources)
+			return -1;
+
+		for (YAML::const_iterator it = resources.begin(); it != resources.end(); ++it)
+		{
+			YAML::Node file = (*it)["File"];
+			YAML::Node data = (*it)["Data"];
+
+			if (file)
+			{
+				std::string fileName = path + "/" +  file.as<std::string>();
+				ProcessFile(fileName, data);
+			}
+		}
 	}
 	
 	//if (!ProcessFiles(inputDir))

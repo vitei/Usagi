@@ -656,6 +656,11 @@ void Texture_ps::Cleanup(GFXDevice* pDevice)
 }
 
 
+bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize)
+{
+	return LoadWithGLI(pDevice, pData, (memsize)uSize);
+}
+
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
 {
 	usg::string filename = szFileName;
@@ -678,181 +683,189 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 }
 
 
+bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize)
+{
+	VkResult res;
+
+	gli::texture Texture = gli::load((char*)pData, uSize);
+
+	VkFormatProperties formatProperties;
+	VkFormat eFormatVK = GetFormatGLI(Texture.format());
+
+	glm::tvec3<uint32> const Extent(Texture.extent());
+	uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
+	m_uWidth = Extent.x;
+	m_uHeight = Extent.y;
+	m_uDepth = Extent.z;
+	m_uFaces = FaceTotal;
+	m_uMips = static_cast<uint32>(Texture.layers());
+
+	vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormatVK, &formatProperties);
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+	VkDevice device = devicePS.GetVKDevice();
+
+	VkMemoryAllocateInfo memAllocInfo = {};
+	memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	VkMemoryRequirements memReqs = {};
+
+	VkImageType eVKImageType = VK_IMAGE_TYPE_2D;
+	VkImageViewType eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
+	if (m_uHeight > 1)
+	{
+		if (m_uDepth > 1)
+		{
+			eVKImageType = VK_IMAGE_TYPE_3D;
+			eVKImageViewType = VK_IMAGE_VIEW_TYPE_3D;
+		}
+		else if (m_uFaces > 1)
+		{
+			eVKImageType = VK_IMAGE_TYPE_2D;
+			eVKImageViewType = VK_IMAGE_VIEW_TYPE_CUBE;
+		}
+		else
+		{
+			eVKImageType = VK_IMAGE_TYPE_2D;
+			eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
+		}
+	}
+	else
+	{
+		eVKImageType = VK_IMAGE_TYPE_1D;
+		eVKImageViewType = VK_IMAGE_VIEW_TYPE_1D;
+	}
+
+	// Create a staging area that contains the raw image data
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingMemory;
+
+	VkBufferCreateInfo bufferCreateInfo = {};
+	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.size = Texture.size();
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	res = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &stagingBuffer);
+
+	vkGetBufferMemoryRequirements(device, stagingBuffer, &memReqs);
+
+	memAllocInfo.allocationSize = memReqs.size;
+	memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	res = vkAllocateMemory(device, &memAllocInfo, nullptr, &stagingMemory);
+	res = vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0);
+
+	// Copy texture data into staging buffer
+	uint8_t* data;
+	res = vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data);
+	memcpy(data, Texture.data(), Texture.size());
+	vkUnmapMemory(device, stagingMemory);
+
+	// Regions of the buffer to copy for each mip level
+	std::vector<VkBufferImageCopy> bufferCopyRegions;
+	uint32_t offset = 0;
+
+	for (uint32_t uFace = 0; uFace < m_uFaces; uFace++)
+	{
+		for (uint32_t uLevel = 0; uLevel < Texture.levels(); uLevel++)
+		{
+			VkBufferImageCopy bufferCopyRegion = {};
+			bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			bufferCopyRegion.imageSubresource.mipLevel = uLevel;
+			bufferCopyRegion.imageSubresource.baseArrayLayer = uFace;
+			bufferCopyRegion.imageSubresource.layerCount = 1;
+			glm::tvec3<uint32> LevelExtent(Texture.extent(uLevel));
+			bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
+			bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
+			bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
+			bufferCopyRegion.bufferOffset = offset;
+
+			bufferCopyRegions.push_back(bufferCopyRegion);
+
+			offset += static_cast<uint32_t>(Texture.size(uLevel));
+		}
+	}
+
+	// Set the target texture as optimal tiled
+	VkImageCreateInfo imageCreateInfo = {};
+	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	imageCreateInfo.imageType = eVKImageType;
+	imageCreateInfo.format = eFormatVK;
+	imageCreateInfo.mipLevels = (uint32)Texture.levels();
+	imageCreateInfo.arrayLayers = m_uFaces;
+	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageCreateInfo.extent = { m_uWidth, m_uHeight, m_uDepth };
+	imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	imageCreateInfo.flags = eVKImageViewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+
+	res = vkCreateImage(device, &imageCreateInfo, nullptr, &m_image);
+
+	vkGetImageMemoryRequirements(device, m_image, &memReqs);
+
+	memAllocInfo.allocationSize = memReqs.size;
+	memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	m_memoryAlloc.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)memReqs.alignment, false);
+	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
+
+	res = vkBindImageMemory(device, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
+
+	VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	// Image barrier for optimal image
+	VkImageSubresourceRange subresourceRange = {};
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresourceRange.baseMipLevel = 0;
+	subresourceRange.levelCount = (uint32)Texture.levels();
+	subresourceRange.layerCount = m_uFaces;
+
+	// Set the image layout to transfer destination before copying the image
+	SetImageLayout(copyCmd, m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
+
+	// Copy the image
+	vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
+
+	// All mip levels have been copied so change to read only
+	m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	SetImageLayout(copyCmd, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
+
+	devicePS.FlushCommandBuffer(copyCmd, true);
+
+	// Clean up staging resources
+	vkFreeMemory(device, stagingMemory, nullptr);
+	vkDestroyBuffer(device, stagingBuffer, nullptr);
+
+	// The image view
+	VkImageViewCreateInfo view = {};
+	view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	view.viewType = eVKImageViewType;
+	view.format = eFormatVK;
+	view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+
+	view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	view.subresourceRange.baseMipLevel = 0;
+	view.subresourceRange.baseArrayLayer = 0;
+	view.subresourceRange.layerCount = m_uFaces;
+	view.subresourceRange.levelCount = (uint32)Texture.levels();
+	view.image = m_image;
+	res = vkCreateImageView(device, &view, nullptr, &m_imageView);
+
+	return true;
+}
+
 bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 {
 	bool bReturn = true;
 	{
-		VkResult res;
 		//mem::setConventionalMemManagement(true);
 		usg::File texFile(szFileName);
 		void* scratchMemory = NULL;
 		ScratchRaw::Init(&scratchMemory, texFile.GetSize(), 4);
 		texFile.Read(texFile.GetSize(), scratchMemory);
-		gli::texture Texture = gli::load((char*)scratchMemory, texFile.GetSize());
-
-		VkFormatProperties formatProperties;
-		VkFormat eFormatVK = GetFormatGLI(Texture.format());
-
-		glm::tvec3<uint32> const Extent(Texture.extent());
-		uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
-		m_uWidth = Extent.x;
-		m_uHeight = Extent.y;
-		m_uDepth = Extent.z;
-		m_uFaces = FaceTotal;
-		m_uMips = static_cast<uint32>(Texture.layers());
-
-		vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormatVK, &formatProperties);
-		GFXDevice_ps& devicePS = pDevice->GetPlatform();
-		VkDevice device = devicePS.GetVKDevice();
-
-		VkMemoryAllocateInfo memAllocInfo = {};
-		memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		VkMemoryRequirements memReqs = {};
-
-		VkImageType eVKImageType = VK_IMAGE_TYPE_2D;
-		VkImageViewType eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
-		if (m_uHeight > 1)
-		{
-			if (m_uDepth > 1)
-			{
-				eVKImageType = VK_IMAGE_TYPE_3D;
-				eVKImageViewType = VK_IMAGE_VIEW_TYPE_3D;
-			}
-			else if (m_uFaces > 1)
-			{
-				eVKImageType = VK_IMAGE_TYPE_2D;
-				eVKImageViewType = VK_IMAGE_VIEW_TYPE_CUBE;
-			}
-			else
-			{
-				eVKImageType = VK_IMAGE_TYPE_2D;
-				eVKImageViewType = VK_IMAGE_VIEW_TYPE_2D;
-			}
-		}
-		else
-		{
-			eVKImageType = VK_IMAGE_TYPE_1D;
-			eVKImageViewType = VK_IMAGE_VIEW_TYPE_1D;
-		}
-
-		// Create a staging area that contains the raw image data
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingMemory;
-
-		VkBufferCreateInfo bufferCreateInfo = {};
-		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferCreateInfo.size = Texture.size();
-		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		res = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &stagingBuffer);
-
-		vkGetBufferMemoryRequirements(device, stagingBuffer, &memReqs);
-
-		memAllocInfo.allocationSize = memReqs.size;
-		memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		res = vkAllocateMemory(device, &memAllocInfo, nullptr, &stagingMemory);
-		res = vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0);
-
-		// Copy texture data into staging buffer
-		uint8_t *data;
-		res = vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void **)&data);
-		memcpy(data, Texture.data(), Texture.size());
-		vkUnmapMemory(device, stagingMemory);
-
-		// Regions of the buffer to copy for each mip level
-		std::vector<VkBufferImageCopy> bufferCopyRegions;
-		uint32_t offset = 0;
-
-		for (uint32_t uFace = 0; uFace < m_uFaces; uFace++)
-		{
-			for (uint32_t uLevel = 0; uLevel < Texture.levels(); uLevel++)
-			{
-				VkBufferImageCopy bufferCopyRegion = {};
-				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-				bufferCopyRegion.imageSubresource.mipLevel = uLevel;
-				bufferCopyRegion.imageSubresource.baseArrayLayer = uFace;
-				bufferCopyRegion.imageSubresource.layerCount = 1;
-				glm::tvec3<uint32> LevelExtent(Texture.extent(uLevel));
-				bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
-				bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
-				bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
-				bufferCopyRegion.bufferOffset = offset;
-
-				bufferCopyRegions.push_back(bufferCopyRegion);
-
-				offset += static_cast<uint32_t>(Texture.size(uLevel));
-			}
-		}
-
-		// Set the target texture as optimal tiled
-		VkImageCreateInfo imageCreateInfo = {};
-		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageCreateInfo.imageType = eVKImageType;
-		imageCreateInfo.format = eFormatVK;
-		imageCreateInfo.mipLevels = (uint32)Texture.levels();
-		imageCreateInfo.arrayLayers = m_uFaces;
-		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { m_uWidth, m_uHeight, m_uDepth };
-		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageCreateInfo.flags = eVKImageViewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
-
-		res = vkCreateImage(device, &imageCreateInfo, nullptr, &m_image);
-
-		vkGetImageMemoryRequirements(device, m_image, &memReqs);
-
-		memAllocInfo.allocationSize = memReqs.size;
-		memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		m_memoryAlloc.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)memReqs.alignment, false);
-		pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
-
-		res = vkBindImageMemory(device, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
-
-		VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-		// Image barrier for optimal image
-		VkImageSubresourceRange subresourceRange = {};
-		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		subresourceRange.baseMipLevel = 0;
-		subresourceRange.levelCount = (uint32)Texture.levels();
-		subresourceRange.layerCount = m_uFaces;
-
-		// Set the image layout to transfer destination before copying the image
-		SetImageLayout(copyCmd,	m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
-
-		// Copy the image
-		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
-
-		// All mip levels have been copied so change to read only
-		m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		SetImageLayout(copyCmd,	m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_imageLayout, subresourceRange);
-
-		devicePS.FlushCommandBuffer(copyCmd, true);
-
-		// Clean up staging resources
-		vkFreeMemory(device, stagingMemory, nullptr);
-		vkDestroyBuffer(device, stagingBuffer, nullptr);
-
-		// The image view
-		VkImageViewCreateInfo view = {};
-		view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		view.viewType = eVKImageViewType;
-		view.format = eFormatVK;
-		view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
-
-		view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		view.subresourceRange.baseMipLevel = 0;
-		view.subresourceRange.baseArrayLayer = 0;
-		view.subresourceRange.layerCount = m_uFaces;
-		view.subresourceRange.levelCount = (uint32)Texture.levels();
-		view.image = m_image;
-		res = vkCreateImageView(device, &view, nullptr, &m_imageView);
-
+		
+		bReturn = LoadWithGLI(pDevice, scratchMemory, texFile.GetSize());
 	}
 	//mem::setConventionalMemManagement(false);
 	return bReturn;

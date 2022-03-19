@@ -74,6 +74,16 @@ bool Texture::Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLoca
 	return bLoaded;
 }
 
+bool Texture::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
+{
+	m_name = pFileHeader->szName;
+	SetupHash(m_name.c_str());
+	bool bLoaded = m_platform.Load(pDevice, pData, pFileHeader->uDataSize);
+	SetReady(true);
+	return bLoaded;
+}
+
+
 
 }
 

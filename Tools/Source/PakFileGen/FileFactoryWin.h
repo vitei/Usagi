@@ -12,7 +12,7 @@ public:
 	FileFactoryWin();
 	virtual ~FileFactoryWin();
 
-	virtual bool LoadFile(const char* szFileName, YAML::Node node) override;
+	virtual std::string LoadFile(const char* szFileName, YAML::Node node) override;
 
 protected:
 	struct TextureEntry : public ResourceEntry
@@ -26,9 +26,9 @@ protected:
 		std::vector<char> memory;
 	};
 
-	bool LoadTGA(const char* szFileName, YAML::Node node);
+	std::string LoadTGA(const char* szFileName, YAML::Node node);
 	bool LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
-	bool LoadDDS(const char* szFileName, YAML::Node node);
+	std::string LoadDDS(const char* szFileName, YAML::Node node);
 
 private:
 	gli::format GetTexFormat(const char* szDstFormat);

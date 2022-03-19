@@ -35,6 +35,7 @@ public:
 	ModelResource();
 	virtual ~ModelResource();
 
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
 	bool Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem );
 	void Cleanup(GFXDevice* pDevice);
 	uint32 GetMeshCount() const { return m_uMeshCount; }
@@ -61,6 +62,7 @@ public:
 	const static ResourceType StaticResType = ResourceType::MODEL;
 
 private:
+	bool Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem);
 
 	void SetupMeshes(const string& modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
 	void SetupMesh(const string & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );

@@ -110,6 +110,19 @@ static const EnumTable g_wrapTable[]
 		return true;
 	}
 
+	bool MaterialOverrides::Init(const YAML::Node* pNode, const char* szDefaultPak, const char* szDefaultEffect, DependencyTracker* pDependencies)
+	{
+		m_pDependencies = pDependencies;
+		strcpy_s(m_defaultPak, szDefaultPak);
+		strcpy_s(m_defaultEffect, szDefaultEffect);
+
+		m_mainNode = *pNode;
+
+		m_overrides = m_mainNode["MaterialOverrides"];
+
+		return m_overrides;
+	}
+
 	void MaterialOverrides::InitDefault(const char* szMaterialName, const std::vector<std::string>& definesIn, exchange::Material* pMatOut)
 	{
 		std::string effectSet = m_defaultPak;

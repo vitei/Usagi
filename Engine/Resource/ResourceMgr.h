@@ -44,6 +44,8 @@ public:
 	CustomEffectResHndl			GetCustomEffectRes(GFXDevice* pDevice, const char* szFileName);
 
 	void LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName);
+	void LoadPackage(usg::GFXDevice* pDevice, const char* szFullName);
+
 
 	// We can't return this as const as we need to iterate through it
 	ProtocolBufferFile* GetBufferedFile(const char* szFileName);

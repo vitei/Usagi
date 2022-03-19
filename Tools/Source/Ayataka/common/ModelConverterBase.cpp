@@ -75,25 +75,52 @@ void ModelConverterBase::StoreCollisionBinary(bool bBigEndian)
 
 uint32 ModelConverterBase::GetAnimationCount() const
 {
-	return m_cmdl.GetAnimationNum();
+	return m_cmdl.GetAnimationNum() + m_cmdl.GetMatAnimationNum();
 }
 
-const char* ModelConverterBase::GetAnimName(uint32 uAnim) const
+std::string ModelConverterBase::GetAnimName(uint32 uAnim) const
 {
-	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
-	return pAnim->GetName();
+	if (uAnim < m_cmdl.GetAnimationNum())
+	{
+		::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+		return std::string(pAnim->GetName()) + ".vskla";
+	}
+	else
+	{
+		uAnim -= m_cmdl.GetAnimationNum();
+		::exchange::MaterialAnimation* pAnim = m_cmdl.GetMatAnimation(uAnim);
+		return std::string(pAnim->GetName()) + ".vmata";
+	}
 }
 
 size_t ModelConverterBase::GetAnimBinarySize(uint32 uAnim) const
 {
-	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
-	return pAnim->GetBinarySize();
+	if (uAnim < m_cmdl.GetAnimationNum())
+	{
+		::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+		return pAnim->GetBinarySize();
+	}
+	else
+	{
+		uAnim -= m_cmdl.GetAnimationNum();
+		::exchange::MaterialAnimation* pAnim = m_cmdl.GetMatAnimation(uAnim);
+		return pAnim->GetBinarySize();
+	}
 }
 
 void ModelConverterBase::ExportAnimation(uint32 uAnim, void* pData, size_t destSize)
 {
-	::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
-	pAnim->Export(pData, destSize);
+	if (uAnim < m_cmdl.GetAnimationNum())
+	{
+		::exchange::Animation* pAnim = m_cmdl.GetAnimation(uAnim);
+		pAnim->Export(pData, destSize);
+	}
+	else
+	{
+		uAnim -= m_cmdl.GetAnimationNum();
+		::exchange::MaterialAnimation* pAnim = m_cmdl.GetMatAnimation(uAnim);
+		return pAnim->Export(pData, destSize);
+	}
 }
 
 void ModelConverterBase::ExportAnimations(const aya::string& path)
@@ -132,6 +159,35 @@ void ModelConverterBase::ExportStoredBinary(const aya::string& path)
 		}
 	}
 	fclose( fp );
+}
+
+const char* ModelConverterBase::GetTextureFormat(std::string texName)
+{
+	for (uint32 i = 0; i < m_cmdl.GetMaterialNum(); i++)
+	{
+		for (uint32 uTex = 0; uTex < usg::exchange::Material::textures_max_count; uTex++)
+		{
+			if (m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureName[0] != '\0')
+			{
+				std::string name = m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureName;
+				if (name == texName)
+				{
+					const char* szHint = "BC3-srgb";
+					const char* szName = m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureHint;
+					if (strcmp(szName, "NormalMap") == 0)
+					{
+						szHint = "BC5";
+					}
+					else if (strcmp(szName, "SpecularColor") == 0)
+					{
+						szHint = "BC3";
+					}
+					return szHint;
+				}
+			}
+		}
+	}
+	return "BC3-srgb";
 }
 
 std::vector< std::string > ModelConverterBase::GetTextureNames() const

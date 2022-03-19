@@ -22,6 +22,7 @@ public:
 	SkeletalAnimationResource();
 	virtual ~SkeletalAnimationResource();
 
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
 	bool Load(const char* szName);
 	
 	// Note reference index is the index of the bones referenced by the animation, not the index within the skeleton

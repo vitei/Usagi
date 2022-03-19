@@ -66,6 +66,9 @@ public:
 	void AddKeyFrame( const usg::exchange::CurveKeyFrame& keyFrame );
 
 	void Export(const char* path);
+	void Export(void* pDest, size_t destSize);
+	size_t GetBinarySize() const;
+
 	void ReverseCoordinate(void);
 	void ReverseCurve(MaterialAnimation::Curve& curve);
 

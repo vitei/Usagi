@@ -78,10 +78,10 @@ void ResourceMgr::Cleanup(usg::GFXDevice* pDevice)
 	}
 }
 
-void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName)
+void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szFullName)
 {
-	usg::string name = szPath;
-	name += szName;
+	usg::string name = szFullName;
+
 	name += ".pak";
 	ResourcePakHndl hndl = m_pImpl->resources.GetResourceHndl(name.c_str(), ResourceType::PAK_FILE);
 	// Only load if we don't already have one
@@ -109,6 +109,14 @@ void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const
 		}
 	}
 	// Nothing on PC yet so no assert
+
+}
+
+void ResourceMgr::LoadPackage(usg::GFXDevice* pDevice, const char* szPath, const char* szName)
+{
+	usg::string name = szPath;
+	name += szName;
+	LoadPackage(pDevice, name.c_str());
 }
 
 

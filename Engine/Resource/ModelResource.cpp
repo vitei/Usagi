@@ -140,32 +140,16 @@ ModelResource::~ModelResource()
 }
 
 
-bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem )
+bool ModelResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 {
-	m_bNeedsRootNode = false;
-	m_uBoneNodes = 0;
+	// TODO: Pass in the dependencies and use them to set the textures once we no longer support loose files
+	return Load(pDevice, (uint8*)pData, pFileHeader->uDataSize, pFileHeader->szName, true);
+}
 
-	m_bInstance = false;// bInstance;
-	string path = szFileName;
-	str::TruncateToPath(path);
-
-	ResourceMgr::Inst()->LoadPackage(pDevice, path.c_str(), "resources.pak");
-
-	File modelFile(szFileName, FILE_ACCESS_READ );
-	
-	if( !modelFile.IsOpen() )
-	{
-		// We couldn't find this file.
-		ASSERT( 0 );
-		return false;
-	}
-
-	uint8* p = NULL;
-	ScratchObj<uint8> scratchModel( p, (uint32)modelFile.GetSize(), FILE_READ_ALIGN );
-	modelFile.Read( modelFile.GetSize(), p );
-
+bool ModelResource::Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem)
+{
 	// Set up the indices
-	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>(p);
+	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>(pData);
 	if (pHeader->rigidBoneIndices_count)
 	{
 		m_rigidBoneIndices.resize(pHeader->rigidBoneIndices_count);
@@ -185,11 +169,38 @@ bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInst
 	}
 
 	m_name = szFileName;
-	SetupHash( m_name.c_str() );
-	SetupMeshes( path, pDevice, p, bFastMem );
-	SetupSkeleton( p );
+	SetupHash(m_name.c_str());
+	SetupMeshes(szFileName, pDevice, pData, bFastMem);
+	SetupSkeleton(pData);
 
 	SetReady(true);
+
+	return true;
+}
+
+
+bool ModelResource::Load( GFXDevice* pDevice, const char* szFileName, bool bInstance, bool bFastMem )
+{
+	m_bNeedsRootNode = false;
+	m_uBoneNodes = 0;
+
+	m_bInstance = false;// bInstance;
+
+	File modelFile(szFileName, FILE_ACCESS_READ );
+	
+	if( !modelFile.IsOpen() )
+	{
+		// We couldn't find this file.
+		ASSERT( 0 );
+		return false;
+	}
+
+	uint8* p = NULL;
+	ScratchObj<uint8> scratchModel( p, (uint32)modelFile.GetSize(), FILE_READ_ALIGN );
+	modelFile.Read( modelFile.GetSize(), p );
+
+	Load(pDevice, p, modelFile.GetSize(), szFileName, bFastMem);
+
 	return true;
 }
 

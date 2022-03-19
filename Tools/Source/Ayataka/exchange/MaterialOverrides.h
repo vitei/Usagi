@@ -17,6 +17,9 @@ public:
 	// We will re-load the material definition as needed as it may be overriden
 	bool Init(const char* szFileName, const char* szDefaultPak, const char* szDefaultEffect, DependencyTracker* pDependencies);
 
+	bool Init(const YAML::Node* pNode, const char* szDefaultPak, const char* szDefaultEffect, DependencyTracker* pDependencies);
+
+
 	void InitDefault(const char* szMaterialName, const std::vector<std::string>& defines, ::exchange::Material* pMatOut);
 
 	void ApplyOverrides(const char* szMaterialName, ::exchange::Material* pMatOut);

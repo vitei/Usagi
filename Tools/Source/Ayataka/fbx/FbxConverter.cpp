@@ -60,7 +60,7 @@ FbxConverter::~FbxConverter()
 {
 }
 
-int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSkeletonOnly, DependencyTracker* pDependencies)
+int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSkeletonOnly, DependencyTracker* pDependencies, const YAML::Node* pOptions)
 {
 	FbxManager*		sdkManager;
 	FbxScene*		scene;
@@ -112,12 +112,19 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 		}
 	}
 
-	aya::string overridePath = path;
-	found = overridePath.find_last_of(".");
-	overridePath = overridePath.substr(0, found);
-	overridePath += ".yml";
 	MaterialOverrides overrides;
-	overrides.Init(overridePath.c_str(), "Model", "FBXDefault", pDependencies);
+	if (!pOptions)
+	{
+		aya::string overridePath = path;
+		found = overridePath.find_last_of(".");
+		overridePath = overridePath.substr(0, found);
+		overridePath += ".yml";
+		overrides.Init(overridePath.c_str(), "Model", "FBXDefault", pDependencies);
+	}
+	else
+	{
+		overrides.Init(pOptions, "Model", "FBXDefault", pDependencies);
+	}
 	FbxLoad fbxLoader;
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);

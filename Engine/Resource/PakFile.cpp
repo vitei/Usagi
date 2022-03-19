@@ -11,7 +11,10 @@
 #include "Engine/Graphics/Effects/ConstantSet.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Effects/Shader.h"
+#include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Resource/ModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
+#include "Engine/Resource/SkeletalAnimationResource.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Memory/ScratchRaw.h"
@@ -89,6 +92,18 @@ namespace usg
 		case usg::ResourceType::CUSTOM_EFFECT:
 		{
 			return vnew(ALLOC_OBJECT)CustomEffectResource;
+		}
+		case usg::ResourceType::TEXTURE:
+		{
+			return vnew(ALLOC_OBJECT)Texture;
+		}
+		case usg::ResourceType::MODEL:
+		{
+			return vnew(ALLOC_OBJECT)ModelResource;
+		}
+		case usg::ResourceType::SKEL_ANIM:
+		{
+			return vnew(ALLOC_OBJECT)SkeletalAnimationResource;
 		}
 		default:
 			ASSERT(false);

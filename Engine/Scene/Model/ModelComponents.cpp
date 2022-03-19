@@ -16,6 +16,10 @@ namespace usg
 	{
 		auto pModelMgr = handles.pModelMgr;
 		ASSERT(pModelMgr);
+		if (p->pakName[0] != '\0')
+		{
+			handles.pResourceMgr->LoadPackage(handles.pDevice, p->pakName);
+		}
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(handles.pResourceMgr, p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);

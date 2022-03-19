@@ -17,6 +17,7 @@ public:
 	Texture(void);
 	virtual ~Texture(void);
 
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) override;
 	bool Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLocation = GPU_LOCATION_FASTMEM);
 	void UpdateTextureID();
 

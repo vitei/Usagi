@@ -1,7 +1,7 @@
 #ifndef CMDL_H
 #define CMDL_H
 
-#include "OwnSTLDecl.h"
+#include "../OwnSTLDecl.h"
 #include "Engine/Graphics/Lights/LightSpec.pb.h"
 #include <float.h>
 #include <stdint.h>

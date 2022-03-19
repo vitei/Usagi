@@ -47,27 +47,31 @@ FileFactoryWin::~FileFactoryWin()
 
 }
 
-bool FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
+std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 {
+	std::string name;
 	if (HasExtension(szFileName, "tga"))
 	{
-		LoadTGA(szFileName, node);
+		name = LoadTGA(szFileName, node);
 	}
 	else if (HasExtension(szFileName, "dds"))
 	{
-		LoadDDS(szFileName, node);
+		name = LoadDDS(szFileName, node);
 	}
 	else if (HasExtension(szFileName, "wav"))
 	{
-		LoadRawFile(szFileName);
+		name = LoadRawFile(szFileName);
 	}
 	else
 	{
 		return FileFactory::LoadFile(szFileName, node);
 	}
 
-	AddDependency(szFileName);
-	return true;
+	if (name.size() > 0)
+	{
+		AddDependency(szFileName);
+	}
+	return name;
 }
 
 
@@ -75,7 +79,7 @@ bool FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 bool FileFactoryWin::LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture)
 {
 	const usg::TGAFile::Header& header = tga.GetHeader();
-	uint32 uSize = (header.uBitsPerPixel * header.uWidth * header.uHeight);
+	uint32 uSize = ((header.uBitsPerPixel/8) * header.uWidth * header.uHeight);
 	glm::u8 * LinearAddress = texture[0].data<glm::u8>();
 	memcpy(LinearAddress, tga.GetData(), uSize);
 
@@ -84,14 +88,28 @@ bool FileFactoryWin::LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& text
 }
 
 
-bool FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
+std::string FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
 {
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	std::string outName = relativeNameNoExt + ".ktx";
+
+	// Already references
+	if (HasDestResource(outName))
+	{
+		return outName;
+	}
 
 	usg::TGAFile file;
+	if (!file.Load(szFileName))
+	{
+		return "";
+	}
 
 	gli::format eFormat = gli::FORMAT_BGRA8_UNORM_PACK8;
+
+	const usg::TGAFile::Header& header = file.GetHeader();
+
 	if (file.GetHeader().uBitsPerPixel == 24)
 	{
 		eFormat = gli::FORMAT_BGR8_UNORM_PACK8;
@@ -101,10 +119,11 @@ bool FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
 		eFormat = gli::FORMAT_R8_UNORM_PACK8;
 	}
 
-	const usg::TGAFile::Header& header = file.GetHeader();
 	gli::texture2d texture = gli::texture2d(eFormat, gli::texture2d::extent_type(file.GetHeader().uWidth, file.GetHeader().uHeight));
 
 	LoadUncompressedTGA(file, texture);
+
+
 
 	TextureSettings textureSettings = GetTextureSettings(node);
 	// We want to convert TGA if no conversion settings specified otherwise we'd end up with nothing but uncompressed giant textures
@@ -122,7 +141,7 @@ bool FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
 
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
-	pTexture->SetName(relativeNameNoExt + ".ktx", usg::ResourceType::TEXTURE);
+	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
 	bool bResult = gli::save_ktx(texture, pTexture->memory);
 	if (!bResult)
 	{
@@ -133,29 +152,49 @@ bool FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
 		m_resources.push_back(pTexture);
 	}
 
-	return bResult;
+	return bResult ? outName : "";
 }
 
-bool FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
+std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 {
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	std::string outName(relativeNameNoExt + ".ktx");
+
+	if (HasDestResource(outName))
+	{
+		return outName;
+	}
+
 
 	gli::texture texture = gli::load(szFileName);
 
+	if (texture.empty())
+	{
+		// Assume failed to load
+		return "";
+	}
+
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
-	pTexture->SetName(relativeNameNoExt + ".ktx", usg::ResourceType::TEXTURE);
+	pTexture->SetName(outName.c_str(), usg::ResourceType::TEXTURE);
 
 	TextureSettings textureSettings = GetTextureSettings(node);
 	gli::format eTargetFormat = GetTexFormat(textureSettings.format.c_str());
-	if (textureSettings.bConvert)
+	if (eTargetFormat == texture.format())
+	{
+		textureSettings.bConvert = false;
+	}
+	if (textureSettings.bConvert || textureSettings.bGenMips)
 	{
 		if (texture.max_face() == 1)
 		{
 			gli::texture2d texSrc(texture);
 
-			texSrc = gli::convert(texSrc, eTargetFormat);
+			if (textureSettings.bConvert)
+			{
+				texSrc = gli::convert(texSrc, eTargetFormat);
+			}
 
 			if (textureSettings.bGenMips && (texSrc.max_layer() == 1))
 			{
@@ -167,7 +206,11 @@ bool FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 		else if (texture.max_face() == 6)
 		{
 			gli::texture_cube texCube(texture);
-			texCube =  gli::convert(texCube, eTargetFormat);
+
+			if (textureSettings.bConvert)
+			{
+				texCube = gli::convert(texCube, eTargetFormat);
+			}
 
 			if (textureSettings.bGenMips && (texCube.max_layer() == 1))
 			{
@@ -188,7 +231,7 @@ bool FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 	{
 		m_resources.push_back(pTexture);
 	}
-	return bResult;
+	return bResult ? outName : "";
 }
 
 gli::format FileFactoryWin::GetTexFormat(const char* szDstFormat)

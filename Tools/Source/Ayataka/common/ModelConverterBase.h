@@ -1,7 +1,9 @@
 #ifndef MODELCONVERTERBASE_H
 #define MODELCONVERTERBASE_H
 
-#include "cmdl/Cmdl.h"
+#include "../cmdl/Cmdl.h"
+#include <yaml-cpp/yaml.h>
+
 
 class DependencyTracker;
 
@@ -11,7 +13,7 @@ public:
 	ModelConverterBase();
 	virtual ~ModelConverterBase();
 
-	virtual int  Load( const aya::string& path, bool bAsCollision, bool bSkeletonOnly, DependencyTracker* pDependencies ) = 0;
+	virtual int  Load( const aya::string& path, bool bAsCollision, bool bSkeletonOnly, DependencyTracker* pDependencies, const YAML::Node* pOptions = nullptr) = 0;
 	virtual void Process( void ) = 0;
 	void Store( size_t alignment, bool bSwapEndian );
 	void StoreCollisionBinary( bool bBigEndian );
@@ -28,10 +30,12 @@ public:
 
 	uint32 GetAnimationCount() const;
 	size_t GetAnimBinarySize(uint32 uAnim) const;
-	const char* GetAnimName(uint32 uAnim) const;
+	std::string GetAnimName(uint32 uAnim) const;
 	void ExportAnimation(uint32 uAnim, void* pData, size_t destSize);
 
+
 	std::vector< std::string > GetTextureNames() const;
+	const char* GetTextureFormat(std::string texName);
 
 protected:
 	void SetNameFromPath( const char* path );
