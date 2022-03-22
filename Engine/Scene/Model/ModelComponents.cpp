@@ -12,20 +12,27 @@
 
 namespace usg
 {
+	void LoadModelPak(ComponentLoadHandles& handles, const char* szPakName, const char* szModelName)
+	{
+		if (szPakName && szPakName[0] != '\0')
+		{
+			handles.pResourceMgr->LoadPackage(handles.pDevice, szPakName);
+		}
+		else
+		{
+			usg::string implicitPak = usg::string("Models/") + szModelName;
+			str::TruncateExtension(implicitPak);
+			handles.pResourceMgr->LoadPackage(handles.pDevice, implicitPak.c_str());
+		}
+	}
+
 	void InitModel(Component<ModelComponent>& p, ComponentLoadHandles& handles)
 	{
 		auto pModelMgr = handles.pModelMgr;
 		ASSERT(pModelMgr);
-		if (p->pakName[0] != '\0')
-		{
-			handles.pResourceMgr->LoadPackage(handles.pDevice, p->pakName);
-		}
-		else
-		{
-			usg::string implicitPak = usg::string("Models/") + p->name;
-			str::TruncateExtension(implicitPak);
-			handles.pResourceMgr->LoadPackage(handles.pDevice, implicitPak.c_str());
-		}
+	
+		LoadModelPak(handles, p->pakName, p->name);
+
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(handles.pResourceMgr, p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);
@@ -149,6 +156,8 @@ namespace usg
 			// FIXME: Ordering of these loads is important...
 			Required<usg::ModelComponent> model;
 			handles.GetComponent(p.GetEntity(), model);
+
+			LoadModelPak(handles, model->pakName, model->name);
 
 			Required<ActiveDevice, FromSelfOrParents> device;
 			bool bDidGetComponents = handles.GetComponent(p.GetEntity(), device);

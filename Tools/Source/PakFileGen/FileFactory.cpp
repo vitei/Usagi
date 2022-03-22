@@ -257,7 +257,7 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 
 	PureBinaryEntry* pModel = new PureBinaryEntry;
 	pModel->srcName = szFileName;
-	pModel->SetName(fileNameBase + ".vmdl", usg::ResourceType::MODEL);
+	pModel->SetName(fileNameBase + ".vmdf", usg::ResourceType::MODEL);
 	pModel->binarySize = (uint32)pConverter->GetBinarySize();
 	pModel->binary = new uint8[pModel->binarySize];
 

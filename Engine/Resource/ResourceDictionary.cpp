@@ -49,7 +49,16 @@ void ResourceDictionary::cleanup( void )
 
 NameHash ResourceDictionary::calcNameHash( const char* name )
 {
-	return crc32( name );
+	usg::string adjName = name;
+	adjName.make_lower();
+	for (memsize i = 0; i < adjName.size(); i++)
+	{
+		if (adjName[i] == '\\')
+		{
+			adjName[i] = '/';
+		}
+	}
+	return crc32(adjName.c_str());
 }
 
 DataHash ResourceDictionary::searchDataHashByName( const char* name )
