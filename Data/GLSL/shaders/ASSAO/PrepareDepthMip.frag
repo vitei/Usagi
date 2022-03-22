@@ -2,8 +2,6 @@
 #include "../includes/assao.inc"
 
 
-ATTRIB_LOC(0) in vec2 vo_vTexCoord;
-
 SAMPLER_LOC(1, 0) uniform sampler2D g_ViewspaceDepthSource;   // corresponds to SSAO_TEXTURE_SLOT0
 SAMPLER_LOC(1, 1) uniform sampler2D g_ViewspaceDepthSource1;   // corresponds to SSAO_TEXTURE_SLOT1
 SAMPLER_LOC(1, 2) uniform sampler2D g_ViewspaceDepthSource2;   // corresponds to SSAO_TEXTURE_SLOT2

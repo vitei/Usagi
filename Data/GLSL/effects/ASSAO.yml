@@ -1,6 +1,6 @@
 Effects:
-  - { name: Apply,             vert: PostFX/fullscreen,        frag: ASSAO/Apply }      
-  - { name: GenImportanceMap,  vert: PostFX/fullscreen,        frag: ASSAO/GenImportanceMap }    
+  - { name: Apply,             vert: PostFX/fullscreenNoUV,    frag: ASSAO/Apply }      
+  - { name: GenImportanceMap,  vert: PostFX/fullscreenNoUV,    frag: ASSAO/GenImportanceMap }    
   - { name: NonSmartApply,     vert: PostFX/fullscreen,        frag: ASSAO/NonSmartApply }  
   - { name: NonSmartBlur,      vert: PostFX/fullscreen,        frag: ASSAO/NonSmartBlur }   
   - { name: NonSmartHalfApply, vert: PostFX/fullscreen,        frag: ASSAO/NonSmartHalfApply }  
@@ -11,21 +11,21 @@ Effects:
   - { name: SmartBlur,         vert: PostFX/fullscreen,        frag: ASSAO/SmartBlur }  
   - { name: SmartBlurWide,     vert: PostFX/fullscreen,        frag: ASSAO/SmartBlurWide }  
   - name: PrepareDepths     
-    vert: PostFX/fullscreen
+    vert: PostFX/fullscreenNoUV
     frag: ASSAO/PrepareDepths
     has_default: true
     define_sets:
       -  name: "lin"
          defines: LINEAR_DEPTH=1    
   - name: PrepareDepthsHalf
-    vert: PostFX/fullscreen
+    vert: PostFX/fullscreenNoUV
     frag: ASSAO/PrepareDepthsHalf 
     has_default: true
     define_sets:
       -  name: "lin"
          defines: LINEAR_DEPTH=1       
   - name: PrepareDepthMip
-    vert: PostFX/fullscreen
+    vert: PostFX/fullscreenNoUV
     frag: ASSAO/PrepareDepthMip
     has_default: false
     define_sets:

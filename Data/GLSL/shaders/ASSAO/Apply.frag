@@ -2,8 +2,6 @@
 #include "../includes/assao.inc"
 
 
-ATTRIB_LOC(0) in vec2 vo_vTexCoord;
-
 SAMPLER_LOC(1, 0) uniform sampler2DArray g_FinalSSAO;   
 
 

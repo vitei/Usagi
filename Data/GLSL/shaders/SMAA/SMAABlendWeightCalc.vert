@@ -33,10 +33,9 @@
 ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
-AT_LCMP(0, 0) out vec4 vo_vPosition;
-AT_LCMP(1, 0) out vec2 vo_vTexCoord;
-AT_LCMP(1, 2) out vec2 vo_vPixCoord;
-AT_LCMP(2, 0) out vec4 vo_vOffset[3];
+AT_LCMP(0, 0) out vec2 vo_vTexCoord;
+AT_LCMP(0, 2) out vec2 vo_vPixCoord;
+AT_LCMP(1, 0) out vec4 vo_vOffset[3];
 
 
 void main(void)
@@ -47,8 +46,6 @@ void main(void)
 
     vo_vTexCoord = GetRTUV( vec2(0.5, 0.5) * vPosition.xy + vec2(0.5, 0.5) );
     
-
-	vo_vPosition 	= vPosition;    
 
     vo_vPixCoord = vo_vTexCoord * vScreenMetrics.zw;
 

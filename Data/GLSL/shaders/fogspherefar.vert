@@ -7,8 +7,8 @@ ATTRIB_LOC(0) in vec3 ao_position;
 
 // Output attributes
 ATTRIB_LOC(0) out vec3 vo_vTexCoord;
-ATTRIB_LOC(1) out vec4 vo_vScreenTex;
-ATTRIB_LOC(2) out vec3 vo_vViewRay;
+//ATTRIB_LOC(1) out vec4 vo_vScreenTex;
+//ATTRIB_LOC(2) out vec3 vo_vViewRay;
 
 void main(void)
 {
@@ -17,8 +17,8 @@ void main(void)
 	vec4 vViewPos = vec4(vPosition, 1.0) * mViewMat;
 	vec4 vProjPos = vec4( vViewPos.xyz, 1.0 ) * mProjMat;
 
-	vo_vScreenTex = vProjPos;
-	vo_vViewRay = vViewPos.xyz;
+//	vo_vScreenTex = vProjPos;
+//	vo_vViewRay = vViewPos.xyz;
 
 	gl_Position = vProjPos;
 
