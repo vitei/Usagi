@@ -54,6 +54,7 @@ message MeshCollider
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required string szCollisionModel = 1 [(nanopb).max_size = 64];
+	required string szPakName = 9 [(nanopb).max_size = 64];
 	required string szMeshName = 2 [(nanopb).max_size = 32];
 	required bool bConvex = 3 [default = false];
 	required Vector3f vCenter = 4;

@@ -28,7 +28,7 @@ FileFactory::PureBinaryEntry::~PureBinaryEntry()
 
 FileFactory::FileFactory()
 {
-	usg::mem::InitialiseDefault();
+
 }
 
 FileFactory::~FileFactory()
@@ -202,7 +202,7 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string fileNameBase;
 
-	if (node["NameInPak"])
+	if (node && node["NameInPak"])
 	{
 		std::string nameOverride = node["NameInPak"].as<std::string>();
 		fileNameBase = RemoveFileName(relativePath) + "/" + nameOverride;
@@ -223,7 +223,7 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 	skelName = skelDir + skelName;
 
 	bool bAsCollision = false;
-	if (node["IsCollision"])
+	if (node && node["IsCollision"])
 	{
 		bAsCollision = node["IsCollision"].as<bool>();
 	}
@@ -232,6 +232,7 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 	ModelConverterBase* pConverter = vnew(usg::ALLOC_OBJECT) FbxConverter;
 	int ret = pConverter->Load(szFileName, bAsCollision, false, &dependencies, &node);
 	if (ret != 0) {
+		FATAL_RELEASE(false, "Failed to find model %s", szFileName);
 		vdelete pConverter;
 		return false;
 	}
@@ -288,22 +289,27 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 		std::string fileName = fullDir + ".tga";
 
 		// Disabling tga for now, gli can't compress. Alternative needed
-		//fopen_s(&pFile, fileName.c_str(), "rb");
-		//if(!pFile)
+		fopen_s(&pFile, fileName.c_str(), "rb");
+		if(!pFile)
 		{
 			fileName = fullDir + ".dds";
+			fopen_s(&pFile, fileName.c_str(), "rb");
 		}
 
-		std::string outName = LoadFile(fileName.c_str(), node);
-
-		if (outName.size())
+		if (pFile)
 		{
-			pModel->AddDependency(outName.c_str(), "Texture");
+			fclose(pFile);
+			std::string outName = LoadFile(fileName.c_str(), node);
+
+			if (outName.size())
+			{
+				pModel->AddDependency(outName.c_str(), "Texture");
+			}
 		}
 	} 
 
 
-	m_resources.push_back(pModel);
+	m_resources.push_back(pModel); 
 
 
 	return pModel->GetName();

@@ -89,6 +89,9 @@ The build process has not been improved or significantly modified and currently 
    Make sure that you select the option to add a path variable  
    https://www.python.org/downloads/
 
+1. Install **Vulkan SDK**.  
+   https://vulkan.lunarg.com/sdk/home#windows
+
 1. Clone an Usagi based Project  
    For example [UsagiTest](https://github.com/vitei/UsagiTest)  
    Always clone Usagi repos recursively as we make heavy use of submodules  

@@ -16,8 +16,8 @@ def build_pc_data(config, n, platform)
   textures = build_pc_textures(config, n)
   data_deps.merge textures
 
-  models = build_pc_models(config, n)
-  data_deps.merge models
+  #models = build_pc_models(config, n)
+  #data_deps.merge models
 
   fonts = build_fonts(config, n)
   data_deps.merge fonts
@@ -45,6 +45,9 @@ def process_data(config, platform, n)
 
   audio = build_paks_for_audio(config, n, platform) #build_audio(config, n)
   data_deps.merge audio
+
+  models = build_paks_for_models(config, n, platform)
+  data_deps.merge models
 
   # find once, and pass around the array into build rule functions
   protocol_ruby_classes = find_protocol_ruby_classes(config)
@@ -166,15 +169,27 @@ def build_paks_for_audio(config, n, platform)
   end
 end
 
+def build_paks_for_models(config, n, platform)
+  targets = FileList["Data/Models/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
+    output = ("#{config.model_out_dir}/" + input.sub(/^Data\/Models\//, '')).sub(".yml", ".pak")
+    defines = ""
+    n.build('pak_file_def', {output => [input]},
+        { :implicit_deps => [config.resource_packer],
+          :variables => {'out' => to_windows_path(output),
+        'in' => input,
+        'platform' => config.target_platform } } )
 
+    output
+  end
+end
 
 
 def build_pc_textures(config, n)
   game_textures = build_pc_textures_for_dir(config, n, config.textures_dir(false))
   engine_textures = build_pc_textures_for_dir(config, n, config.textures_dir)
 
-  model_textures = build_pc_model_textures_for_dir(config, n, config.model_dir)
-  game_textures + engine_textures + model_textures
+  #model_textures = build_pc_model_textures_for_dir(config, n, config.model_dir)
+  game_textures + engine_textures# + model_textures
 end
 
 def build_pc_model_textures_for_dir(config, n, textures_dir)

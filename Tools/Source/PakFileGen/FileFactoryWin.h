@@ -2,6 +2,7 @@
 #include "FileFactory.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "Engine/Core/stl/map.h"
+#include "compressonator.h"
 #include <gli/gli.hpp>
 #include <sstream>
 
@@ -26,12 +27,16 @@ protected:
 		std::vector<char> memory;
 	};
 
-	std::string LoadTGA(const char* szFileName, YAML::Node node);
-	bool LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture);
-	std::string LoadDDS(const char* szFileName, YAML::Node node);
+	std::string LoadTexture(const char* szFileName, YAML::Node node);
 
 private:
-	gli::format GetTexFormat(const char* szDstFormat);
+	struct TexFormat
+	{
+		CMP_FORMAT format;
+		bool bSRGB;
+	};
 
-	usg::map< usg::string, gli::format >	m_texFormats;
+	TexFormat GetTexFormat(const char* szDstFormat);
+
+	usg::map< usg::string, TexFormat >	m_texFormats;
 };

@@ -9,37 +9,42 @@ FileFactoryWin::FileFactoryWin() :
 	FileFactory()
 {
 	// 565 compressed
-	m_texFormats["BC1-srgb"] = gli::format::FORMAT_RGBA_DXT1_SRGB_BLOCK8;
-	m_texFormats["BC1"] = gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8;
+	m_texFormats["BC1-srgb"] = { CMP_FORMAT::CMP_FORMAT_BC1, true };
+	m_texFormats["BC1"] = { CMP_FORMAT::CMP_FORMAT_BC1, false };
 
 	// 565 compressed + 4 bit alpha
-	m_texFormats["BC2-srgb"] = gli::format::FORMAT_RGBA_DXT3_SRGB_BLOCK16;
-	m_texFormats["BC2"] = gli::format::FORMAT_RGBA_DXT3_UNORM_BLOCK16;
+	m_texFormats["BC2-srgb"] = { CMP_FORMAT::CMP_FORMAT_BC2, true };
+	m_texFormats["BC2"] = { CMP_FORMAT::CMP_FORMAT_BC2, false };
 
 	// 565 compressed + 8 bit alpha
-	m_texFormats["BC3-srgb"] = gli::format::FORMAT_RGBA_DXT5_SRGB_BLOCK16;
-	m_texFormats["BC3"] = gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16;
+	m_texFormats["BC3-srgb"] = { CMP_FORMAT::CMP_FORMAT_BC3, true };
+	m_texFormats["BC3"] = { CMP_FORMAT::CMP_FORMAT_BC3, false };
 
 	// 8 bit compressed grayscale
-	m_texFormats["BC4"] = gli::format::FORMAT_R_ATI1N_UNORM_BLOCK8;
+	m_texFormats["BC4"] = { CMP_FORMAT::CMP_FORMAT_BC4, false };
 
 	// 88 two color channels
-	m_texFormats["BC5"] = gli::format::FORMAT_RG_ATI2N_UNORM_BLOCK16;
+	m_texFormats["BC5"] = { CMP_FORMAT::CMP_FORMAT_BC5, false };
 
 	// Three color channels, 4-7bits + 0-8 bits of alpha
-	m_texFormats["BC7-srgb"] = gli::format::FORMAT_RGBA_BP_SRGB_BLOCK16;
-	m_texFormats["BC7"] = gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16;
+	m_texFormats["BC7-srgb"] = { CMP_FORMAT::CMP_FORMAT_BC7, true };
+	m_texFormats["BC7"] = { CMP_FORMAT::CMP_FORMAT_BC7, false };
+
+	// rgb, half float hdr
+	m_texFormats["BC6"] = { CMP_FORMAT::CMP_FORMAT_BC6H, false };
 
 	// Uncompressed 888
-	m_texFormats["rgb"] = gli::format::FORMAT_BGR8_UNORM_PACK8;
-	m_texFormats["srgb"] = gli::format::FORMAT_BGR8_SRGB_PACK8;
+	m_texFormats["rgb"] = { CMP_FORMAT::CMP_FORMAT_BGR_888, false };
+	m_texFormats["srgb"] = { CMP_FORMAT::CMP_FORMAT_BGR_888, false };
 
 	// Uncompressed 8888
-	m_texFormats["rgba"] = gli::format::FORMAT_BGRA8_UNORM_PACK8;
-	m_texFormats["srgba"] = gli::format::FORMAT_BGRA8_SRGB_PACK8;
+	m_texFormats["rgba"] = { CMP_FORMAT::CMP_FORMAT_ABGR_8888, false };
+	m_texFormats["srgba"] = { CMP_FORMAT::CMP_FORMAT_ABGR_8888, false };
 
 	// Uncompressed 8
-	m_texFormats["r"] = gli::format::FORMAT_L8_UNORM_PACK8;
+	m_texFormats["r"] = { CMP_FORMAT::CMP_FORMAT_R_8, false };
+
+	CMP_InitFramework();
 }
 
 FileFactoryWin::~FileFactoryWin()
@@ -50,13 +55,9 @@ FileFactoryWin::~FileFactoryWin()
 std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 {
 	std::string name;
-	if (HasExtension(szFileName, "tga"))
+	if (HasExtension(szFileName, "tga") || HasExtension(szFileName, "dds"))
 	{
-		name = LoadTGA(szFileName, node);
-	}
-	else if (HasExtension(szFileName, "dds"))
-	{
-		name = LoadDDS(szFileName, node);
+		name = LoadTexture(szFileName, node);
 	}
 	else if (HasExtension(szFileName, "wav"))
 	{
@@ -75,24 +76,18 @@ std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 }
 
 
-// TODO: Move these functions to the tga file class
-bool FileFactoryWin::LoadUncompressedTGA(usg::TGAFile& tga, gli::texture2d& texture)
+
+bool CompressionCallback(CMP_FLOAT fProgress, CMP_DWORD_PTR pUser1, CMP_DWORD_PTR pUser2)
 {
-	const usg::TGAFile::Header& header = tga.GetHeader();
-	uint32 uSize = ((header.uBitsPerPixel/8) * header.uWidth * header.uHeight);
-	glm::u8 * LinearAddress = texture[0].data<glm::u8>();
-	memcpy(LinearAddress, tga.GetData(), uSize);
-
-
-	return true;
+	return false;
 }
 
-
-std::string FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
+std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 {
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	std::string outName = relativeNameNoExt + ".ktx";
+	std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
 
 	// Already references
 	if (HasDestResource(outName))
@@ -100,147 +95,110 @@ std::string FileFactoryWin::LoadTGA(const char* szFileName, YAML::Node node)
 		return outName;
 	}
 
-	usg::TGAFile file;
-	if (!file.Load(szFileName))
-	{
+	CMP_MipSet MipSetIn;
+	memset(&MipSetIn, 0, sizeof(CMP_MipSet));
+	CMP_ERROR cmp_status = CMP_LoadTexture(szFileName, &MipSetIn);
+	if (cmp_status != CMP_OK) {
+		std::printf("Error %d: Loading source file!\n", cmp_status);
 		return "";
 	}
 
-	gli::format eFormat = gli::FORMAT_BGRA8_UNORM_PACK8;
-
-	const usg::TGAFile::Header& header = file.GetHeader();
-
-	if (file.GetHeader().uBitsPerPixel == 24)
-	{
-		eFormat = gli::FORMAT_BGR8_UNORM_PACK8;
-	}
-	else if (file.GetHeader().uBitsPerPixel == 8)
-	{
-		eFormat = gli::FORMAT_R8_UNORM_PACK8;
-	}
-
-	gli::texture2d texture = gli::texture2d(eFormat, gli::texture2d::extent_type(file.GetHeader().uWidth, file.GetHeader().uHeight));
-
-	LoadUncompressedTGA(file, texture);
-
-
-
 	TextureSettings textureSettings = GetTextureSettings(node);
-	// We want to convert TGA if no conversion settings specified otherwise we'd end up with nothing but uncompressed giant textures
-	textureSettings.bConvert = true;
+	TexFormat format = GetTexFormat(textureSettings.format.c_str());
+	// Fails to build mips on compressed formats
+	textureSettings.bGenMips &= MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC;
 
-	gli::format eTargetFormat = GetTexFormat(textureSettings.format.c_str());
-	if (textureSettings.bConvert)
+	if (MipSetIn.m_nMipLevels <= 1 && textureSettings.bGenMips)
 	{
-		texture = gli::convert(texture, eTargetFormat);
+		CMP_INT nMinSize = CMP_CalcMinMipSize(MipSetIn.m_nHeight, MipSetIn.m_nWidth, 10);
+		CMP_GenerateMIPLevels(&MipSetIn, nMinSize);
 	}
-	if (textureSettings.bGenMips)
+
+	KernelOptions   kernel_options;
+	memset(&kernel_options, 0, sizeof(KernelOptions));
+
+
+	kernel_options.format = format.format;   // Set the format to process
+	kernel_options.fquality = 0.05f;		 // Set the quality of the result
+	kernel_options.threads = 0;              // Auto setting
+	//kernel_options.width = MipSetIn.dwWidth;
+	//kernel_options.height = MipSetIn.dwHeight;
+	kernel_options.srcformat = MipSetIn.m_format;
+	kernel_options.useSRGBFrames = format.bSRGB;
+
+	if (format.format == CMP_FORMAT_BC1)
 	{
-		texture = gli::generate_mipmaps(texture, gli::FILTER_LINEAR);
+		// Enable punch through alpha setting
+		kernel_options.bc15.useAlphaThreshold = true;
+		kernel_options.bc15.alphaThreshold = 128;
+
+		// Enable setting channel weights
+		kernel_options.bc15.useChannelWeights = true;
+		kernel_options.bc15.channelWeights[0] = 0.3086f;
+		kernel_options.bc15.channelWeights[1] = 0.6094f;
+		kernel_options.bc15.channelWeights[2] = 0.0820f;
 	}
+
+	CMP_MipSet MipSetCmp;
+
+	memsize pos = 0;
+	std::string tmpPath = RemoveFileName(tmpFileName);
+	do
+	{
+		pos = tmpPath.find_first_of("\\/", pos + 1);
+		CreateDirectory(tmpPath.substr(0, pos).c_str(), NULL);
+	} while (pos != std::string::npos);
+
+	// Only compress if the original isn't (i.e. we're loading dds). This is mainly due to compressonator
+	// being a buggy crashy pos.
+	if (MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC)
+	{
+		memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
+
+		cmp_status = CMP_ProcessTexture(&MipSetIn, &MipSetCmp, kernel_options, CompressionCallback);
+		if (cmp_status != CMP_OK)
+		{
+			// Failed
+			return "";
+		}
+
+		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetCmp);
+
+	}
+	else
+	{
+		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetIn);
+	}
+
+
+	gli::texture ktx = gli::load(tmpFileName.c_str());
+	DeleteFile(tmpFileName.c_str());
 
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
 	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
-	bool bResult = gli::save_ktx(texture, pTexture->memory);
+	bool bResult = gli::save_ktx(ktx, pTexture->memory);
 	if (!bResult)
 	{
 		delete pTexture;
-	}
-	else
-	{
-		m_resources.push_back(pTexture);
-	}
-
-	return bResult ? outName : "";
-}
-
-std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
-{
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
-	std::string relativeNameNoExt = RemoveExtension(relativePath);
-	std::string outName(relativeNameNoExt + ".ktx");
-
-	if (HasDestResource(outName))
-	{
-		return outName;
-	}
-
-
-	gli::texture texture = gli::load(szFileName);
-
-	if (texture.empty())
-	{
-		// Assume failed to load
 		return "";
 	}
-
-	TextureEntry* pTexture = new TextureEntry;
-	pTexture->srcName = szFileName;
-	pTexture->SetName(outName.c_str(), usg::ResourceType::TEXTURE);
-
-	TextureSettings textureSettings = GetTextureSettings(node);
-	gli::format eTargetFormat = GetTexFormat(textureSettings.format.c_str());
-	if (eTargetFormat == texture.format())
-	{
-		textureSettings.bConvert = false;
-	}
-	if (textureSettings.bConvert || textureSettings.bGenMips)
-	{
-		if (texture.max_face() == 1)
-		{
-			gli::texture2d texSrc(texture);
-
-			if (textureSettings.bConvert)
-			{
-				texSrc = gli::convert(texSrc, eTargetFormat);
-			}
-
-			if (textureSettings.bGenMips && (texSrc.max_layer() == 1))
-			{
-				texSrc = gli::generate_mipmaps(texSrc, gli::FILTER_LINEAR);
-			}
-
-			texture = gli::texture(texSrc);
-		}
-		else if (texture.max_face() == 6)
-		{
-			gli::texture_cube texCube(texture);
-
-			if (textureSettings.bConvert)
-			{
-				texCube = gli::convert(texCube, eTargetFormat);
-			}
-
-			if (textureSettings.bGenMips && (texCube.max_layer() == 1))
-			{
-				texCube = gli::generate_mipmaps(texCube, gli::FILTER_LINEAR);
-			}
-
-			texture = gli::texture(texCube);
-		}
-
-	}
-
-	bool bResult = gli::save_ktx(texture, pTexture->memory);
-	if (!bResult)
-	{
-		delete pTexture;
-	}
 	else
 	{
 		m_resources.push_back(pTexture);
 	}
+
 	return bResult ? outName : "";
 }
 
-gli::format FileFactoryWin::GetTexFormat(const char* szDstFormat)
+
+FileFactoryWin::TexFormat FileFactoryWin::GetTexFormat(const char* szDstFormat)
 {
 	auto itr = m_texFormats.find(usg::string(szDstFormat));
 	if (itr == m_texFormats.end())
 	{
 		FATAL_RELEASE(false, "Invalid format %s", szDstFormat);
-		return gli::FORMAT_BGRA8_UNORM_PACK8;
+		return { CMP_FORMAT::CMP_FORMAT_BC7, true };
 	}
 	return (*itr).second;
 }

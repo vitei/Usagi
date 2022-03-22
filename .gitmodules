@@ -28,3 +28,6 @@
 [submodule "Engine/ThirdParty/meshoptimizer"]
 	path = Engine/ThirdParty/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer.git
+[submodule "Engine/ThirdParty/compressonator"]
+	path = Engine/ThirdParty/compressonator
+	url = https://github.com/GPUOpen-Tools/compressonator.git

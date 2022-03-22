@@ -20,6 +20,12 @@ namespace usg
 		{
 			handles.pResourceMgr->LoadPackage(handles.pDevice, p->pakName);
 		}
+		else
+		{
+			usg::string implicitPak = usg::string("Models/") + p->name;
+			str::TruncateExtension(implicitPak);
+			handles.pResourceMgr->LoadPackage(handles.pDevice, implicitPak.c_str());
+		}
 		p.GetRuntimeData().pModel = pModelMgr->GetModel(handles.pResourceMgr, p->name, p->bDynamic, p->bPerBoneCulling);
 		Optional<VisibilityComponent> visibility;
 		handles.GetComponent(p.GetEntity(), visibility);

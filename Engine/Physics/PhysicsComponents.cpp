@@ -945,6 +945,11 @@ namespace usg
 			c.Modify().bConvex = true;
 		}
 
+		if (c->szPakName[0] != '\0')
+		{
+			handles.pResourceMgr->LoadPackage(handles.pDevice, c->szPakName);
+		}
+
 		PhysXMeshCache* pMeshCache = handles.pPhysicsScene->pMeshCache;
 		if (c->bConvex)
 		{

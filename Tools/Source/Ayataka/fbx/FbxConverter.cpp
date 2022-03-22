@@ -113,7 +113,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	}
 
 	MaterialOverrides overrides;
-	if (!pOptions)
+	if (!pOptions || !(*pOptions) )
 	{
 		aya::string overridePath = path;
 		found = overridePath.find_last_of(".");

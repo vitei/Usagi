@@ -190,8 +190,13 @@ module GeneratorUtil
            "$ruby #{config.vpb_converter} #{config.vpb_converter_opts} #{config.script_dep_opt} $require_all_pb_opt -o $out $in",
            {:description => 'VPB $out', :dependencies => :gcc})
 
-        n.rule('pak_file', "#{config.resource_packer} $in -o$out -p$platform  #{config.cmdl_converter_dep_opts}",
-           {:dependencies => :gcc, :description => 'pack_file $in'})        
+    # single file
+    n.rule('pak_file', "#{config.resource_packer} $in -o$out -p$platform  #{config.cmdl_converter_dep_opts}",
+       {:dependencies => :gcc, :description => 'pack_file $in'})     
+
+    # group of files defined by yml
+    n.rule('pak_file_def', "#{config.resource_packer} $in -o$out -p$platform -def #{config.cmdl_converter_dep_opts}",
+       {:dependencies => :gcc, :description => 'pack_file $in'})               
 
   end
 
