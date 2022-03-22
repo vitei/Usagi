@@ -16,7 +16,9 @@ namespace usg
 	{
 		if (szPakName && szPakName[0] != '\0')
 		{
-			handles.pResourceMgr->LoadPackage(handles.pDevice, szPakName);
+			usg::string packName = "Models/";
+			packName += szPakName;
+			handles.pResourceMgr->LoadPackage(handles.pDevice, packName.c_str());
 		}
 		else
 		{
