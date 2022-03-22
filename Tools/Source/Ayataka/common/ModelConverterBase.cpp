@@ -172,22 +172,23 @@ const char* ModelConverterBase::GetTextureFormat(std::string texName)
 				std::string name = m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureName;
 				if (name == texName)
 				{
-					const char* szHint = "BC3-srgb";
+					// FIXME: Better options
+					const char* szHint = "BC7-srgb";
 					const char* szName = m_cmdl.GetMaterialPtr(i)->pb().textures[uTex].textureHint;
 					if (strcmp(szName, "NormalMap") == 0)
 					{
-						szHint = "BC5";
+						szHint = "BC7";//"BC5";
 					}
 					else if (strcmp(szName, "SpecularColor") == 0)
 					{
-						szHint = "BC3";
+						szHint = "BC7";//"BC3";
 					}
 					return szHint;
 				}
 			}
 		}
 	}
-	return "BC3-srgb";
+	return "BC7-srgb";
 }
 
 std::vector< std::string > ModelConverterBase::GetTextureNames() const

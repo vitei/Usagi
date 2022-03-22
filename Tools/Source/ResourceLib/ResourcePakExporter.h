@@ -11,6 +11,7 @@ struct DependencyEntry
 	std::string usage;
 	uint32 fileNameCRC;
 	uint32 usageCRC;
+	uint32 fileNameCRCNoExt;
 };
 
 struct ResourceEntry
@@ -31,7 +32,10 @@ struct ResourceEntry
 	void SetName(const std::string& fileName, usg::ResourceType eType)
 	{
 		name = fileName;
+		std::string noExt = fileName.substr(0, fileName.find_last_of("."));
+
 		uFileCRC = utl::CRC32(fileName.c_str());
+		uFileCRCNoExt = utl::CRC32(noExt.c_str());
 		resourceType = eType;
 	}
 	void AddDependency(const std::string& fileName, const std::string& usage)
@@ -40,12 +44,17 @@ struct ResourceEntry
 		entry.fileName = fileName;
 		entry.usage = usage;
 		entry.fileNameCRC = utl::CRC32(fileName.c_str());
+
+		std::string noExt = fileName.substr(0, fileName.find_last_of("."));
+		entry.fileNameCRCNoExt = utl::CRC32(noExt.c_str());
+
 		entry.usageCRC = utl::CRC32(usage.c_str());
 		dependencies.push_back(entry);
 	}
 	const std::vector<DependencyEntry>& GetDeps() const { return dependencies; }
 	const std::string& GetName() const { return name; }
 	uint32 GetNameCRC() const { return uFileCRC; }
+	uint32 GetNameCRCNoExt() const { return uFileCRCNoExt;  }
 	usg::ResourceType GetResourceType() const { return resourceType; }
 
 	bool operator<(const ResourceEntry &rhs) const
@@ -63,11 +72,13 @@ struct ResourceEntry
 		return false;
 	}
 
+
 private:
 	std::vector<DependencyEntry> dependencies;
 	std::string name;
 	usg::ResourceType resourceType;
 	uint32 uFileCRC;
+	uint32 uFileCRCNoExt;
 };
 
 inline bool ComparePointers(const ResourceEntry * const & a, const ResourceEntry * const & b)
@@ -127,6 +138,7 @@ namespace ResourcePakExporter
 			usg::PakFileDecl::FileInfo fileInfo;
 			strcpy_s(fileInfo.szName, entries[i]->GetName().c_str());
 			fileInfo.CRC = utl::CRC32(fileInfo.szName);
+			fileInfo.CRCNoExt = entries[i]->GetNameCRCNoExt();
 			fileInfo.uCustomHeaderSize = entries[i]->GetCustomHeaderSize();
 			fileInfo.uDependenciesCount = (uint32)entries[i]->GetDeps().size();
 			fileInfo.uDataSize = entries[i]->GetDataSize();
@@ -167,6 +179,7 @@ namespace ResourcePakExporter
 					dep.FileCRC = depItr.fileNameCRC;
 					dep.UsageCRC = depItr.usageCRC;
 					dep.PakIndex = USG_INVALID_ID;
+					dep.FileCRCNoExt = depItr.fileNameCRCNoExt;
 					for (size_t depId = 0; depId < entries.size(); depId++)
 					{
 						if (entries[depId]->GetNameCRC() == depItr.fileNameCRC)

@@ -105,9 +105,39 @@ VkFormat GetFormatGLI(uint32 uFormat)
 		ASSERT(false);	// See what we end up getting passed through
 	}
 
-	return VK_FORMAT_R8G8B8_SNORM;
+	return VK_FORMAT_R8G8B8_UNORM;
 }
 
+
+VkFormat GetFormatGLIForcedSRGB(uint32 uFormat)
+{
+	switch (uFormat)
+	{
+	case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8:
+		return VK_FORMAT_BC1_RGBA_SRGB_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT3_SRGB_BLOCK16:
+		return VK_FORMAT_BC2_UNORM_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16:
+		return VK_FORMAT_BC3_SRGB_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT5_SRGB_BLOCK16:
+		return VK_FORMAT_BC3_SRGB_BLOCK;
+	case gli::format::FORMAT_BGR8_UNORM_PACK8:
+		return VK_FORMAT_B8G8R8_SRGB;
+	case gli::format::FORMAT_RG8_UNORM_PACK8:
+		return VK_FORMAT_R8G8_SRGB;
+	case gli::format::FORMAT_RGBA8_UNORM_PACK8:
+		return VK_FORMAT_R8G8B8A8_SRGB;
+	case gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16:
+		return VK_FORMAT_BC7_SRGB_BLOCK;
+	case gli::format::FORMAT_BGRA8_UNORM_PACK8:
+		return VK_FORMAT_B8G8R8A8_SRGB;
+	
+	default:
+		break;
+	}
+
+	return GetFormatGLI(uFormat);
+}
 
 VkImageUsageFlags GetImageUsage(uint32 uUsage)
 {
@@ -656,9 +686,9 @@ void Texture_ps::Cleanup(GFXDevice* pDevice)
 }
 
 
-bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize)
+bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const PakFileDecl::TextureHeader* pHeader)
 {
-	return LoadWithGLI(pDevice, pData, (memsize)uSize);
+	return LoadWithGLI(pDevice, pData, (memsize)uSize, pHeader->bForceSRGB);
 }
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
@@ -683,14 +713,14 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 }
 
 
-bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize)
+bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB)
 {
 	VkResult res;
 
 	gli::texture Texture = gli::load((char*)pData, uSize);
 
 	VkFormatProperties formatProperties;
-	VkFormat eFormatVK = GetFormatGLI(Texture.format());
+	VkFormat eFormatVK = bForceSRGB ? GetFormatGLIForcedSRGB(Texture.format()) : GetFormatGLI(Texture.format());
 
 	glm::tvec3<uint32> const Extent(Texture.extent());
 	uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
@@ -865,7 +895,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
 		ScratchRaw::Init(&scratchMemory, texFile.GetSize(), 4);
 		texFile.Read(texFile.GetSize(), scratchMemory);
 		
-		bReturn = LoadWithGLI(pDevice, scratchMemory, texFile.GetSize());
+		bReturn = LoadWithGLI(pDevice, scratchMemory, texFile.GetSize(), false);
 	}
 	//mem::setConventionalMemManagement(false);
 	return bReturn;

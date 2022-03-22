@@ -36,6 +36,7 @@ namespace usg
 		file.Read(m_header.referencedBones * sizeof(m_pBoneDescriptions[0]), m_pBoneDescriptions);
 		file.Read(m_header.referencedBones * m_header.frameCount * sizeof(m_pBoneAnimFrames[0]), m_pBoneAnimFrames);
 
+		SetupHash(szName);
 
 		return true;
 	}
@@ -58,6 +59,8 @@ namespace usg
 
 		memsize animFramesSize = m_header.referencedBones * m_header.frameCount * sizeof(m_pBoneAnimFrames[0]);
 		memcpy(m_pBoneAnimFrames, pSrc, animFramesSize);
+
+		SetupHash(pFileHeader->szName);
 
 		return true;
 	}

@@ -143,10 +143,10 @@ ModelResource::~ModelResource()
 bool ModelResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 {
 	// TODO: Pass in the dependencies and use them to set the textures once we no longer support loose files
-	return Load(pDevice, (uint8*)pData, pFileHeader->uDataSize, pFileHeader->szName, true);
+	return Load(pDevice, (uint8*)pData, pFileHeader->uDataSize, pFileHeader->szName, true, pDependencies);
 }
 
-bool ModelResource::Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem)
+bool ModelResource::Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem, const class FileDependencies* pDependencies)
 {
 	// Set up the indices
 	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>(pData);
@@ -170,7 +170,7 @@ bool ModelResource::Load(GFXDevice* pDevice, uint8* pData, memsize size, const c
 
 	m_name = szFileName;
 	SetupHash(m_name.c_str());
-	SetupMeshes(szFileName, pDevice, pData, bFastMem);
+	SetupMeshes(szFileName, pDevice, pData, bFastMem, pDependencies);
 	SetupSkeleton(pData);
 
 	SetReady(true);
@@ -214,7 +214,7 @@ void ModelResource::Cleanup(GFXDevice* pDevice)
 }
 
 
-void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem )
+void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem, const class FileDependencies* pDependencies)
 {
 	usg::exchange::ModelHeader* pHeader = reinterpret_cast<usg::exchange::ModelHeader*>( p );
 
@@ -244,7 +244,7 @@ void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, ui
 			}
 		}
 
-		SetupMesh(modelDir, pDevice, pHeader, n, bFastMem);
+		SetupMesh(modelDir, pDevice, pHeader, n, bFastMem, pDependencies);
 
 		m_uMeshCount++;
 	}
@@ -402,7 +402,7 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 }
 
 
-void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem )
+void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem, const class FileDependencies* pDependencies)
 {
 	uint8* pT = reinterpret_cast<uint8*>( pHeader );
 
@@ -602,7 +602,14 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 
 				// First check the models local textures
-				m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.c_str(), false, eGPULocation);
+				if (pDependencies)
+				{
+					m_meshArray[m_uMeshCount].pTextures[uIndex] = pDependencies->GetDependencyByCRCAndType(utl::CRC32(pathName.c_str()), ResourceType::TEXTURE);
+				}
+				if (m_meshArray[m_uMeshCount].pTextures[uIndex].get() == nullptr)
+				{
+					m_meshArray[m_uMeshCount].pTextures[uIndex] = ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, pathName.c_str(), false, eGPULocation);
+				}
 				if (m_meshArray[m_uMeshCount].pTextures[uIndex].get() == nullptr)
 				{
 					// Fallback to absolute path, passing in true for replace missing texture just in case

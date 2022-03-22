@@ -20,14 +20,16 @@ protected:
 	{
 		virtual const void* GetData() override { return memory.data(); }
 		virtual uint32 GetDataSize() override { return (uint32)memory.size(); };
-		virtual const void* GetCustomHeader() { return nullptr; }
-		virtual uint32 GetCustomHeaderSize() { return 0; }
+		virtual const void* GetCustomHeader() { return &m_header; }
+		virtual uint32 GetCustomHeaderSize() { return sizeof(m_header); }
 
 
 		std::vector<char> memory;
+		usg::PakFileDecl::TextureHeader m_header;
 	};
 
 	std::string LoadTexture(const char* szFileName, YAML::Node node);
+	std::string LoadDDS(const char* szFileName, YAML::Node node);
 
 private:
 	struct TexFormat

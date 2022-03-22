@@ -33,6 +33,7 @@ namespace usg
 		{
 			char			szName[128];
 			uint32			CRC;
+			uint32			CRCNoExt;
 			uint32			uTotalFileInfoSize;
 			uint32			uCustomHeaderSize;	// Straight after file info
 			uint32			uDependenciesCount;	// After custom header
@@ -46,13 +47,21 @@ namespace usg
 		struct Dependency
 		{
 			uint32 FileCRC;
-			uint32 PakIndex;	// USG_INVALID_ID if not present in this pak file
-			uint32 UsageCRC;	// Hint to the resource how this is to be used
+			uint32 PakIndex;		// USG_INVALID_ID if not present in this pak file
+			uint32 UsageCRC;		// Hint to the resource how this is to be used
+			uint32 FileCRCNoExt;	// Useful when grabbing references non platform side
+			uint32 uPad[3] = {};
 		};
 
 		struct ShaderEntry
 		{
 			ShaderType	eShaderType;
+		};
+
+		struct TextureHeader
+		{
+			bool bForceSRGB = false;
+			uint8 uPad[3] = { 0 };
 		};
 
 		template <class HeaderType>

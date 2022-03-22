@@ -34,7 +34,7 @@ public:
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 
 	bool Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation);
-	bool Load(GFXDevice* pDevice, const void* pData, uint32 uSize);
+	bool Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const PakFileDecl::TextureHeader* pHeader);
 	void SetRawData(GFXDevice* pDevice, GFXContext* pCtx, void* pData);
 
 	static bool FileExists(const char* szFileName);
@@ -61,7 +61,7 @@ public:
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
-	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize);
+	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB);
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
 	void InitStaging(GFXDevice* pDevice);
 	void FreeStaging(GFXDevice* pDevice);

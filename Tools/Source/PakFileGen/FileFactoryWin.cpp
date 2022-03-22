@@ -55,9 +55,13 @@ FileFactoryWin::~FileFactoryWin()
 std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 {
 	std::string name;
-	if (HasExtension(szFileName, "tga") || HasExtension(szFileName, "dds"))
+	if (HasExtension(szFileName, "tga"))
 	{
 		name = LoadTexture(szFileName, node);
+	}
+	else if (HasExtension(szFileName, "dds"))
+	{
+		name = LoadDDS(szFileName, node);
 	}
 	else if (HasExtension(szFileName, "wav"))
 	{
@@ -80,6 +84,38 @@ std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 bool CompressionCallback(CMP_FLOAT fProgress, CMP_DWORD_PTR pUser1, CMP_DWORD_PTR pUser2)
 {
 	return false;
+}
+
+// We don't send these through compressonator as we assume it's been formatted/ had mips set
+std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
+{
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	std::string outName = relativeNameNoExt + ".ktx";
+	
+	// Already references
+	if (HasDestResource(outName))
+	{
+		return outName;
+	}
+
+	gli::texture ktx = gli::load(szFileName);
+
+	TextureEntry* pTexture = new TextureEntry;
+	pTexture->srcName = szFileName;
+	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
+	bool bResult = gli::save_ktx(ktx, pTexture->memory);
+	if (!bResult)
+	{
+		delete pTexture;
+		return "";
+	}
+	else
+	{
+		m_resources.push_back(pTexture);
+	}
+
+	return outName;
 }
 
 std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
@@ -177,6 +213,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
 	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
+	pTexture->m_header.bForceSRGB = format.bSRGB;
 	bool bResult = gli::save_ktx(ktx, pTexture->memory);
 	if (!bResult)
 	{

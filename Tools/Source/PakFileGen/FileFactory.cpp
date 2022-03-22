@@ -268,10 +268,12 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 	{
 		PureBinaryEntry* pAnim = new PureBinaryEntry;
 		pAnim->srcName = szFileName;
-		pAnim->SetName(fileNameBase + ".vskla", usg::ResourceType::SKEL_ANIM);
+		pAnim->SetName(fileNameBase + "." + pConverter->GetAnimName(i), usg::ResourceType::SKEL_ANIM);
 		pAnim->binarySize = (uint32)pConverter->GetAnimBinarySize(i);
 		pAnim->binary = new uint8[pModel->binarySize];
 		pConverter->ExportAnimation(i, pAnim->binary, (size_t)pAnim->binarySize);
+
+		m_resources.push_back(pAnim);
 	}
 
 	pConverter->ExportBoneHierarchy(skelDir.c_str());

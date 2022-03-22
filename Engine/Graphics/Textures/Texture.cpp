@@ -2,6 +2,7 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Core/String/String_Util.h"
 #include "Texture.h" 
 
 namespace usg {
@@ -76,9 +77,13 @@ bool Texture::Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLoca
 
 bool Texture::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 {
+	// Remove extension
+	// FIXME: More consistency over asset names
 	m_name = pFileHeader->szName;
+	str::TruncateExtension(m_name);
 	SetupHash(m_name.c_str());
-	bool bLoaded = m_platform.Load(pDevice, pData, pFileHeader->uDataSize);
+	const PakFileDecl::TextureHeader* pHdr = PakFileDecl::GetCustomHeader<PakFileDecl::TextureHeader>(pFileHeader);
+	bool bLoaded = m_platform.Load(pDevice, pData, pFileHeader->uDataSize, pHdr);
 	SetReady(true);
 	return bLoaded;
 }

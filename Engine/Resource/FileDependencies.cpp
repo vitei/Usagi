@@ -39,6 +39,7 @@ namespace usg
 			}
 			dep.uFileCRC = pDependencies[i].FileCRC;
 			dep.uUsageCRC = pDependencies[i].UsageCRC;
+			dep.uFileCRCNoExt = pDependencies[i].FileCRCNoExt;
 		}
 	}
 	
@@ -87,6 +88,18 @@ namespace usg
 		for (auto& dep : m_dependencies)
 		{
 			if (dep.resHandle->GetResourceType() == eType)
+			{
+				return dep.resHandle;
+			}
+		}
+		return BaseResHandle(nullptr);
+	}
+
+	BaseResHandle FileDependencies::GetDependencyByCRCAndType(uint32 uFileCRCNoExt, ResourceType eType) const
+	{
+		for (auto& dep : m_dependencies)
+		{
+			if (dep.resHandle->GetResourceType() == eType && (uFileCRCNoExt == dep.uFileCRCNoExt))
 			{
 				return dep.resHandle;
 			}

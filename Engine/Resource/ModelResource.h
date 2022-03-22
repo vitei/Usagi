@@ -62,10 +62,10 @@ public:
 	const static ResourceType StaticResType = ResourceType::MODEL;
 
 private:
-	bool Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem);
+	bool Load(GFXDevice* pDevice, uint8* pData, memsize size, const char* szFileName, bool bFastMem, const class FileDependencies* pDependencies = nullptr);
 
-	void SetupMeshes(const string& modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem );
-	void SetupMesh(const string & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem );
+	void SetupMeshes(const string& modelDir, GFXDevice* pDevice, uint8* p, bool bFastMem, const class FileDependencies* pDependencies);
+	void SetupMesh(const string & modelDir, GFXDevice* pDevice, usg::exchange::ModelHeader* pHeader, uint32 meshIndex, bool bFastMem, const class FileDependencies* pDependencies);
 	void SetupSkeleton( uint8* p );
 	void CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial);
 	float GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType);
