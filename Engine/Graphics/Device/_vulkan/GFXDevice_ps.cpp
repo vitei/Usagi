@@ -87,14 +87,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugString(VkFlags msgFlags, VkDebugRep
 {
 	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
 	DEBUG_PRINT("%s: %s\n", pLayerPrefix, pMsg);
-	return 1;
+	return VK_FALSE;
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugBreak(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
 {
 	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
 	ASSERT_MSG(false, "%s: %s\n", pLayerPrefix, pMsg);
-	return 1;
+	return VK_FALSE;
 }
 #endif
 
@@ -434,7 +434,10 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkDebugReportCallbackCreateInfoEXT callback = {
 		VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
 		NULL,                                                       // pNext
-		VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+		VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |	// Need to improve the model shaders before we can re-enable
+		VK_DEBUG_REPORT_WARNING_BIT_EXT |
+		VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+		VK_DEBUG_REPORT_DEBUG_BIT_EXT,
 		VkDebugString,                                        // pfnCallback
 		NULL                                                        // pUserData
 	};
