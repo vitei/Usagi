@@ -23,6 +23,13 @@ struct Vector4i
 	int		w;
 };
 
+struct Vector3i
+{
+	int		x;
+	int		y;
+	int		z;
+};
+
 struct Vector2i
 {
 	Vector2i() {}

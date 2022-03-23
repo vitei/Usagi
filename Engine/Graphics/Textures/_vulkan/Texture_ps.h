@@ -5,6 +5,7 @@
 #define _USG_GRAPHICS_PC_TEXTURE_H
 
 #include "Engine/Graphics/RenderConsts.h"
+#include "Engine/Graphics/Effects/EffectVariables.h"
 #include "Engine/Graphics/Textures/ImageViewDef.h"
 #include <vulkan/vulkan.h>
 #include API_HEADER(Engine/Graphics/Device, VkMemAllocator.h)
@@ -62,6 +63,8 @@ private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
 	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx = false);
+	bool LoadKTX(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB);
+	bool LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSize, void* pData, const vector< Vector3i >& extents, const vector<uint32>& mipSizes);
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
 	void InitStaging(GFXDevice* pDevice);
 	void FreeStaging(GFXDevice* pDevice);

@@ -712,23 +712,12 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 	return false;
 }
 
-
-bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx)
+// Assumes, width, height, depth and faces have been set
+bool Texture_ps::LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSize, void* pData, const vector< Vector3i >& extents, const vector<uint32>& levelSizes)
 {
 	VkResult res;
 
-	gli::texture Texture = bForceKtx ? gli::load_ktx((char*)pData, uSize) : gli::load((char*)pData, uSize);
-
 	VkFormatProperties formatProperties;
-	VkFormat eFormatVK = bForceSRGB ? GetFormatGLIForcedSRGB(Texture.format()) : GetFormatGLI(Texture.format());
-
-	glm::tvec3<uint32> const Extent(Texture.extent());
-	uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
-	m_uWidth = Extent.x;
-	m_uHeight = Extent.y;
-	m_uDepth = Extent.z;
-	m_uFaces = FaceTotal;
-	m_uMips = static_cast<uint32>(Texture.layers());
 
 	vkGetPhysicalDeviceFormatProperties(pDevice->GetPlatform().GetPrimaryGPU(), eFormatVK, &formatProperties);
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
@@ -770,7 +759,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 
 	VkBufferCreateInfo bufferCreateInfo = {};
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferCreateInfo.size = Texture.size();
+	bufferCreateInfo.size = dataSize;
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -787,7 +776,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 	// Copy texture data into staging buffer
 	uint8_t* data;
 	res = vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data);
-	memcpy(data, Texture.data(), Texture.size());
+	memcpy(data, pData, dataSize);
 	vkUnmapMemory(device, stagingMemory);
 
 	// Regions of the buffer to copy for each mip level
@@ -796,22 +785,21 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 
 	for (uint32_t uFace = 0; uFace < m_uFaces; uFace++)
 	{
-		for (uint32_t uLevel = 0; uLevel < Texture.levels(); uLevel++)
+		for (uint32_t uLevel = 0; uLevel < extents.size(); uLevel++)
 		{
 			VkBufferImageCopy bufferCopyRegion = {};
 			bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			bufferCopyRegion.imageSubresource.mipLevel = uLevel;
 			bufferCopyRegion.imageSubresource.baseArrayLayer = uFace;
 			bufferCopyRegion.imageSubresource.layerCount = 1;
-			glm::tvec3<uint32> LevelExtent(Texture.extent(uLevel));
-			bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(LevelExtent.x);
-			bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(LevelExtent.y);
-			bufferCopyRegion.imageExtent.depth = static_cast<uint32_t>(LevelExtent.z);
+			bufferCopyRegion.imageExtent.width = extents[uLevel].x;
+			bufferCopyRegion.imageExtent.height = extents[uLevel].y;
+			bufferCopyRegion.imageExtent.depth = extents[uLevel].z;
 			bufferCopyRegion.bufferOffset = offset;
 
 			bufferCopyRegions.push_back(bufferCopyRegion);
 
-			offset += static_cast<uint32_t>(Texture.size(uLevel));
+			offset += static_cast<uint32_t>(levelSizes[uLevel]);
 		}
 	}
 
@@ -820,7 +808,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageCreateInfo.imageType = eVKImageType;
 	imageCreateInfo.format = eFormatVK;
-	imageCreateInfo.mipLevels = (uint32)Texture.levels();
+	imageCreateInfo.mipLevels = m_uMips;
 	imageCreateInfo.arrayLayers = m_uFaces;
 	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -848,7 +836,7 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 	VkImageSubresourceRange subresourceRange = {};
 	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresourceRange.baseMipLevel = 0;
-	subresourceRange.levelCount = (uint32)Texture.levels();
+	subresourceRange.levelCount = m_uMips;
 	subresourceRange.layerCount = m_uFaces;
 
 	// Set the image layout to transfer destination before copying the image
@@ -878,11 +866,45 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 	view.subresourceRange.baseMipLevel = 0;
 	view.subresourceRange.baseArrayLayer = 0;
 	view.subresourceRange.layerCount = m_uFaces;
-	view.subresourceRange.levelCount = (uint32)Texture.levels();
+	view.subresourceRange.levelCount = m_uMips;
 	view.image = m_image;
 	res = vkCreateImageView(device, &view, nullptr, &m_imageView);
 
 	return true;
+}
+
+
+
+
+bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx)
+{
+	gli::texture Texture = bForceKtx ? gli::load_ktx((char*)pData, uSize) : gli::load((char*)pData, uSize);
+
+	VkFormat eFormatVK = bForceSRGB ? GetFormatGLIForcedSRGB(Texture.format()) : GetFormatGLI(Texture.format());
+
+	glm::tvec3<uint32> const Extent(Texture.extent());
+	uint32 const FaceTotal = static_cast<uint32>(Texture.layers() * Texture.faces());
+	m_uWidth = Extent.x;
+	m_uHeight = Extent.y;
+	m_uDepth = Extent.z;
+	m_uFaces = FaceTotal;
+	m_uMips = static_cast<uint32>(Texture.levels());
+
+	vector<Vector3i> extents;
+	vector<uint32> sizes;
+	for (uint32_t uLevel = 0; uLevel < Texture.levels(); uLevel++)
+	{
+		glm::tvec3<uint32> LevelExtent(Texture.extent(uLevel));
+		Vector3i out;
+		out.x = LevelExtent[0];
+		out.y = LevelExtent[1];
+		out.z = LevelExtent[2];
+		extents.push_back(out);
+		sizes.push_back((uint32)Texture.size(uLevel));
+	}
+
+
+	return LoadInt(pDevice, eFormatVK, Texture.size(), Texture.data(), extents, sizes);
 }
 
 bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const char* szFileName)
