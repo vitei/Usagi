@@ -75,10 +75,12 @@ Matrix4x4 Bone::GetDefaultMatrix(bool bIncludeParents) const
 {
 	usg::Matrix4x4 mat = Matrix4x4::Identity();
 	const usg::SkeletonResource::Bone* pBone = m_pResource;
+	const Bone* pParent = m_pParent;
 	while (pBone)
 	{
 		mat = mat * pBone->mMatrix;
-		pBone = pBone->parentIndex != USG_INVALID_ID ? m_pParent->GetResource() : nullptr;
+		pBone = pBone->parentIndex != USG_INVALID_ID ? pParent->GetResource() : nullptr;
+		pParent = pParent ? pParent->m_pParent : nullptr;
 	}
 	return mat;
 }

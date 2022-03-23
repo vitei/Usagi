@@ -4,6 +4,7 @@
 #include "Engine/GUI/GuiItems.h"
 #include "Engine/GUI/GuiWindow.h"
 #include "Engine/GUI/IMGuiRenderer.h"
+#include "Engine/Core/stl/map.h"
 #include "FileList.h"
 
 namespace usg
@@ -37,6 +38,8 @@ private:
 
 
 	FileList<MAX_FILE_COUNT>	m_modelFileList;
+	usg::vector< char >			m_modelList;
+	usg::map< usg::string, usg::string >	m_paksForModels;
 	usg::GUIComboBox			m_loadFilePaths;
 	usg::GUIButton				m_loadButton;
 	usg::GUICheckBox			m_visible;

@@ -32,7 +32,7 @@ public:
 
 protected:
 
-	string					m_name;
+	string						m_name;
 	particles::EffectGroup		m_definition;		
 };
 

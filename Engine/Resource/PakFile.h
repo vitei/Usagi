@@ -10,6 +10,7 @@
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Resource/PakDecl.h"
 #include "Engine/Core/stl/map.h"
+#include "Engine/Core/stl/string.h"
 #include "CustomEffectDecl.h"
 
 namespace usg
@@ -46,7 +47,7 @@ namespace usg
 		PakFileRaw();
 		~PakFileRaw();
 
-		bool Load(const char* szFileName);
+		bool Load(const char* szFileName, bool bHeadersOnly = false);
 
 		struct FileRef
 		{
@@ -57,6 +58,7 @@ namespace usg
 
 		bool GetFile(const char* szName, FileRef& refOut) const;
 		bool GetFile(uint32 uFileCRC, FileRef& refOut) const;
+		void GetFilesOfType(ResourceType eType, usg::vector< string >& namesOut);
 
 	private:
 		map<uint32, FileRef > m_files;

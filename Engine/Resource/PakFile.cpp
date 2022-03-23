@@ -25,7 +25,7 @@
 #include "PakDecl.h"
 #include "PakFile.h"
 
-#define PAK_FILE_TIMINGS 1
+#define PAK_FILE_TIMINGS 0
 
 namespace usg
 {
@@ -235,7 +235,19 @@ namespace usg
 		}
 	}
 
-	bool PakFileRaw::Load(const char* szFileName)
+	void PakFileRaw::GetFilesOfType(ResourceType eType, usg::vector< string >& namesOut)
+	{
+		for (auto itr : m_files)
+		{
+			if (itr.second.pFileHeader->uResourceType == (uint32)eType)
+			{
+				namesOut.push_back(itr.second.pFileHeader->szName);
+			}
+		}
+	}
+
+
+	bool PakFileRaw::Load(const char* szFileName, bool bHeadersOnly)
 	{
 		File pakFile(szFileName);
 
@@ -253,6 +265,10 @@ namespace usg
 		size_t pakSize = pakFile.GetSize();
 		size_t uPersistentDataSize = header.uResDataOffset == USG_INVALID_ID ? 0 : (uint32)pakFile.GetSize() - header.uResDataOffset;
 		uint32 uTempDataSize = uPersistentDataSize > 0 ? header.uResDataOffset : (uint32)pakFile.GetSize();
+		if (bHeadersOnly)
+		{
+			uTempDataSize = header.uTempDataOffset;
+		}
 
 		m_pData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_LOADING, uTempDataSize);
 
@@ -269,8 +285,8 @@ namespace usg
 		for (uint32 i = 0; i < header.uFileCount; i++)
 		{
 			FileRef fileRef;
-			fileRef.pData = ((uint8*)m_pData) + pFileInfo->uDataOffset;
-			fileRef.pDependencies = PakFileDecl::GetDependencies(pFileInfo);
+			fileRef.pData = bHeadersOnly ? nullptr : ((uint8*)m_pData) + pFileInfo->uDataOffset;
+			fileRef.pDependencies = bHeadersOnly ? nullptr : PakFileDecl::GetDependencies(pFileInfo);
 			fileRef.pFileHeader = pFileInfo;
 
 			ASSERT(m_files.find(fileRef.pFileHeader->CRC) == m_files.end());

@@ -2,6 +2,7 @@
 #include "../ResourceLib/ResourcePakExporter.h"
 #include "Engine/Scene/Model/Model.pb.h"
 #include "Engine/Graphics/Materials/Material.pb.h"
+#include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Audio/AudioBank.pb.h"
 #include "../Ayataka/common/ModelConverterBase.h"
 #include "../Ayataka/fbx/FbxConverter.h"
@@ -77,6 +78,54 @@ FileFactory::TextureSettings FileFactory::GetTextureSettings(const YAML::Node& n
 	return ret;
 }
 
+
+std::string FileFactory::LoadParticleEffect(const char* szFileName)
+{
+	LoadRawFile(szFileName, usg::ResourceType::PARTICLE_EFFECT);
+}
+
+std::string FileFactory::LoadParticleEmitter(const char* szFileName)
+{
+	usg::particles::EmitterEmission			emissionDef;
+
+	usg::ProtocolBufferFile emitterVPB(szFileName);
+	bool bReadSucceeded = emitterVPB.Read(&emissionDef);
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(szFileName, usg::ResourceType::PARTICLE_EMITTER);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return "";
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	for (uint32 i = 0; i < emissionDef.textureData_count; i++)
+	{
+		const char* szTexName = emissionDef.textureData[i].name;
+
+		YAML::Node out;
+		out.force_insert("format", "BC7");
+		out.force_insert("mips", true);
+		AddTextureDependecy(szTexName, pFileEntry, out);
+	}
+
+	m_resources.push_back(pFileEntry);
+
+	return szFileName;
+}
+
 std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 {
 	// Note we don't have .wav files here as the sound bank adds them
@@ -114,10 +163,10 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 			outName = LoadRawFile(szFileName);
 			break;
 		case VpbType::VPB_EMITTER:
-			//outName = LoadEmitter(szFileName);
+			outName = LoadParticleEmitter(szFileName);
 			break;
 		case VpbType::VPB_EFFECT:
-			//outName = LoadEffect(szFileName);
+			outName = LoadParticleEffect(szFileName);
 			break;
 		default:
 			ASSERT(false);
@@ -334,28 +383,8 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 			out.force_insert("format", pConverter->GetTextureFormat(itr));
 			out.force_insert("mips", true);
 
-			FILE* pFile = nullptr;
-			std::string fullDir = m_rootDir + relativePath + itr;
-			std::string fileName = fullDir + ".tga";
-
-			// Disabling tga for now, gli can't compress. Alternative needed
-			fopen_s(&pFile, fileName.c_str(), "rb");
-			if (!pFile)
-			{
-				fileName = fullDir + ".dds";
-				fopen_s(&pFile, fileName.c_str(), "rb");
-			}
-
-			if (pFile)
-			{
-				fclose(pFile);
-				std::string outName = LoadFile(fileName.c_str(), node);
-
-				if (outName.size())
-				{
-					pModel->AddDependency(outName.c_str(), "Texture");
-				}
-			}
+			std::string fullDir = relativePath + itr;
+			AddTextureDependecy(fullDir.c_str(), pModel, out);
 		}
 	}
 
@@ -364,6 +393,33 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 
 
 	return pModel->GetName();
+}
+
+
+void FileFactory::AddTextureDependecy(const char* szTexName, ResourceEntry* pEntry, YAML::Node details)
+{
+	FILE* pFile = nullptr;
+	std::string fullDir = m_rootDir + szTexName;
+	std::string fileName = fullDir + ".tga";
+
+	// Disabling tga for now, gli can't compress. Alternative needed
+	fopen_s(&pFile, fileName.c_str(), "rb");
+	if (!pFile)
+	{
+		fileName = fullDir + ".dds";
+		fopen_s(&pFile, fileName.c_str(), "rb");
+	}
+
+	if (pFile)
+	{
+		fclose(pFile);
+		std::string outName = LoadFile(fileName.c_str(), node);
+
+		if (outName.size())
+		{
+			pEntry->AddDependency(outName.c_str(), "Texture");
+		}
+	}
 }
 
 bool FileFactory::HasSrcResource(std::string srcName)

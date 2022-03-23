@@ -16,9 +16,15 @@ public:
 	void Init(const char* rootPath, const char* tempDir, const char* pakName);
 	virtual std::string LoadFile(const char* szFileName, YAML::Node node);
 	// Just load the wav for most platforms but support conversion
-	virtual std::string LoadWavFile(const char* szFileName);
+	std::string LoadWavFile(const char* szFileName);
+
+	std::string LoadParticleEffect(const char* szFileName);
+	std::string LoadParticleEmitter(const char* szFileName);
+
 	void ExportResources(const char* szFileName);
 	void WriteDependencies(const char* szFileName);
+
+	void AddTextureDependecy(const char* szTexName, ResourceEntry* pEntry, YAML::Node details);
 
 protected:
 

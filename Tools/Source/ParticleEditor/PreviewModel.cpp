@@ -4,6 +4,7 @@
 #include "Engine/HID/Input.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Scene/Model/Model.h"
+#include "Engine/Resource/PakFile.h"
 #include "Engine/Scene/Model/Bone.h"
 #include "PreviewModel.h"
 
@@ -34,8 +35,37 @@ void PreviewModel::Init(usg::GFXDevice* pDevice, usg::Scene* pScene)
 	m_visible.Init("Show", true);
 	m_visible.SetSameLine(true);
 
-	m_modelFileList.Init("Models", ".vmdf", true);
-	m_loadFilePaths.Init("Load Dir", m_modelFileList.GetFileNamesRaw(), 0);
+	m_modelFileList.Init("Models", ".pak", true);
+
+	for (uint32 i=0; i<m_modelFileList.GetFileCount(); i++)
+	{
+		usg::PakFileRaw pak;
+		usg::string path = "Models/";
+		path += m_modelFileList.GetFileName(i);
+		pak.Load(path.c_str(), true);
+
+		usg::vector< usg::string > modelNames;
+		pak.GetFilesOfType(usg::ResourceType::MODEL, modelNames);
+		for (auto itr : modelNames)
+		{
+			// Remove Models/
+			usg::string name = itr.substr(7);
+
+			usg::string pak = usg::string("Models/") + m_modelFileList.GetFileName(i);
+			str::TruncateExtension(pak);
+			m_paksForModels[name] = pak;
+
+			for (auto var : name)
+			{
+				m_modelList.push_back(var);
+			}
+			m_modelList.push_back('\0');
+		}
+	}
+	m_modelList.push_back('\0');
+
+
+	m_loadFilePaths.Init("Load Dir", m_modelList.data(), 0);
 
 	m_loadButton.Init("Load");
 	m_loadButton.SetSameLine(true);
@@ -68,6 +98,8 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 			m_pModel->Cleanup(pDevice);
 			vdelete m_pModel;
 		}
+
+		usg::ResourceMgr::Inst()->LoadPackage(pDevice, m_paksForModels[modelName].c_str());
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
 		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.c_str(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
