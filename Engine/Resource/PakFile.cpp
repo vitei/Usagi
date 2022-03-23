@@ -25,7 +25,7 @@
 #include "PakDecl.h"
 #include "PakFile.h"
 
-#define PAK_FILE_TIMINGS 0
+#define PAK_FILE_TIMINGS 1
 
 namespace usg
 {

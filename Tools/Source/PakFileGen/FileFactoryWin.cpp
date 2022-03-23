@@ -91,7 +91,7 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 {
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
-	std::string outName = relativeNameNoExt + ".ktx";
+	std::string outName = relativeNameNoExt + ".vtx";
 	
 	// Already references
 	if (HasDestResource(outName))
@@ -107,7 +107,7 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 
 	gli::texture dds = gli::load(szFileName);
 
-	gli::save_ktx(dds, pTexture->memory);
+	pTexture->Init(dds, false);
 
 	m_resources.push_back(pTexture);
 
@@ -119,7 +119,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 {
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
-	std::string outName = relativeNameNoExt + ".ktx";
+	std::string outName = relativeNameNoExt + ".vtx";
 	std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
 
 	// Already references
@@ -210,19 +210,11 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
 	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
-	pTexture->m_header.bForceSRGB = format.bSRGB;
-	bool bResult = gli::save_ktx(ktx, pTexture->memory);
-	if (!bResult)
-	{
-		delete pTexture;
-		return "";
-	}
-	else
-	{
-		m_resources.push_back(pTexture);
-	}
+	pTexture->Init(ktx, format.bSRGB);
 
-	return bResult ? outName : "";
+	m_resources.push_back(pTexture);
+
+	return outName;
 }
 
 

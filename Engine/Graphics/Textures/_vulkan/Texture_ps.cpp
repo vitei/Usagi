@@ -115,11 +115,9 @@ VkFormat GetFormatGLIForcedSRGB(uint32 uFormat)
 	{
 	case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8:
 		return VK_FORMAT_BC1_RGBA_SRGB_BLOCK;
-	case gli::format::FORMAT_RGBA_DXT3_SRGB_BLOCK16:
-		return VK_FORMAT_BC2_UNORM_BLOCK;
+	case gli::format::FORMAT_RGBA_DXT3_UNORM_BLOCK16:
+		return VK_FORMAT_BC2_SRGB_BLOCK;
 	case gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16:
-		return VK_FORMAT_BC3_SRGB_BLOCK;
-	case gli::format::FORMAT_RGBA_DXT5_SRGB_BLOCK16:
 		return VK_FORMAT_BC3_SRGB_BLOCK;
 	case gli::format::FORMAT_BGR8_UNORM_PACK8:
 		return VK_FORMAT_B8G8R8_SRGB;
@@ -688,7 +686,31 @@ void Texture_ps::Cleanup(GFXDevice* pDevice)
 
 bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const PakFileDecl::TextureHeader* pHeader)
 {
-	return LoadWithGLI(pDevice, pData, (memsize)uSize, pHeader->bForceSRGB, true);
+	m_uWidth = pHeader->uWidth;
+	m_uHeight = pHeader->uHeight;
+	m_uDepth = pHeader->uDepth;
+	m_uFaces = pHeader->uFaces;
+	m_uMips = pHeader->uMips;
+
+	const uint8* pHdrData = (const uint8*)pHeader;
+	const PakFileDecl::TexLayerInfo* pLayers = (const PakFileDecl::TexLayerInfo*)(pHdrData + sizeof(PakFileDecl::TextureHeader));
+
+	vector<Vector3i> extents;
+	vector<uint32> sizes;
+
+	for (uint32_t uLevel = 0; uLevel < m_uMips; uLevel++)
+	{
+		Vector3i out;
+		out.x = pLayers[uLevel].uWidth;
+		out.y = pLayers[uLevel].uHeight;
+		out.z = pLayers[uLevel].uDepth;
+		extents.push_back(out);
+		sizes.push_back(pLayers[uLevel].uSize);
+	}
+
+
+	return LoadInt(pDevice, (VkFormat)pHeader->uIntFormat, uSize, (void*)pData, extents, sizes);
+
 }
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)

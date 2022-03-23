@@ -91,13 +91,13 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 	{
 		switch(GetYmlType(szFileName))
 		{
-		case YML_VPB:
+		case YmlType::YML_VPB:
 			outName = LoadYMLVPBFile(szFileName);
 			break;
-		case YML_ENTITY:
+		case YmlType::YML_ENTITY:
 			outName = LoadYMLEntityFile(szFileName);
 			break;
-		case YML_AUDIO:
+		case YmlType::YML_AUDIO:
 			// Implicitly packages all wav files used by this sound bank
 			outName = LoadYMLAudioFile(szFileName);
 			break;
@@ -114,10 +114,10 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 			outName = LoadRawFile(szFileName);
 			break;
 		case VpbType::VPB_EMITTER:
-			outName = LoadEmitter(szFileName);
+			//outName = LoadEmitter(szFileName);
 			break;
 		case VpbType::VPB_EFFECT:
-			outName = LoadEffect(szFileName);
+			//outName = LoadEffect(szFileName);
 			break;
 		default:
 			ASSERT(false);

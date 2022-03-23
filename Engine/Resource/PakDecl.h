@@ -58,16 +58,29 @@ namespace usg
 			ShaderType	eShaderType;
 		};
 
+		struct TexLayerInfo
+		{
+			uint32 uWidth = 0;
+			uint32 uHeight = 0;
+			uint32 uDepth = 0;
+			uint32 uSize = 0;
+		};
+
 		struct TextureHeader
 		{
-			bool bForceSRGB = false;
-			uint8 uPad[3] = { 0 };
+			uint32 uWidth = 0;
+			uint32 uHeight = 0;
+			uint32 uDepth = 0;
+			uint32 uFaces = 0;
+			uint32 uMips = 0;
+			uint32 uIntFormat = 0;
 		};
 
 		template <class HeaderType>
 		inline const HeaderType* GetCustomHeader(const FileInfo* pFileInfo)
 		{
-			ASSERT(sizeof(HeaderType) == pFileInfo->uCustomHeaderSize);
+			// Maybe be larger if extra info follows
+			ASSERT(sizeof(HeaderType) <= pFileInfo->uCustomHeaderSize);
 			return (HeaderType*)(((uint8*)pFileInfo) + sizeof(FileInfo));
 		}
 
