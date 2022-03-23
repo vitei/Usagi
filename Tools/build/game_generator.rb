@@ -52,8 +52,8 @@ def process_data(config, platform, n)
   # find once, and pass around the array into build rule functions
   protocol_ruby_classes = find_protocol_ruby_classes(config)
 
-  collision = build_collision_models(config, platform, n)
-  data_deps.merge collision
+#  collision = build_collision_models(config, platform, n)
+#  data_deps.merge collision
 
   entities = build_engine_entities(config, n, protocol_ruby_classes)
   data_deps.merge entities

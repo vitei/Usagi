@@ -48,6 +48,8 @@ public:
 	CollisionModelResource();
 	virtual ~CollisionModelResource();
 	void Init(const char* szName);
+	bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData);
+
 #if 0 // deprecated
 	bool ClipLine(const Vector3f &p1, const Vector3f &p2, Intersect &intersect) const;
 	bool ClipLine(const Vector3f &vFrom, const Vector3f &vTo, const Vector3f &vDir, float fClosest, Intersect &intersect) const;
@@ -101,6 +103,7 @@ public:
 	const static ResourceType StaticResType = ResourceType::COLLISION;
 
 private:
+	void Init(const uint32* pData);
 	const SubmeshData* GetSubmeshData(const char* szName) const;
 	const SubmeshData* GetSubmeshData(const uint32 uMeshNameHash) const;
 	void UpdateSubmeshAABBs();

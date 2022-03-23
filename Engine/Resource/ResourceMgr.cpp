@@ -137,7 +137,7 @@ EffectHndl ResourceMgr::GetEffect(GFXDevice* pDevice, const char* szEffectName)
 
 CollisionModelResHndl ResourceMgr::GetCollisionModel(const char* szFileName)
 {
-	usg::string u8Name = szFileName;
+	usg::string u8Name = m_modelDir + szFileName;
 	CollisionModelResHndl pModel = m_pImpl->resources.GetResourceHndl(u8Name, ResourceType::COLLISION);
 
 	// TODO: Remove from the final build, should load in blocks

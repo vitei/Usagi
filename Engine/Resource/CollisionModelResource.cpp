@@ -232,25 +232,10 @@ namespace usg{
 		return BoneDataSource(uBoneNameHash, *this);
 	}
 
-	void CollisionModelResource::Init(const char* szName)
+	void CollisionModelResource::Init(const uint32* pData)
 	{
 		static const uint32 AyatakaMagicNumber = utl::CRC32("AyatakaCollisionModel");
 
-		char name[256];
-		str::ParseVariableArgsC(name, 256, "Models/%s", szName);
-
-		File dataFile(name);
-
-		ScratchRaw dataBuffer;
-		const size_t uFileSize = dataFile.GetSize();
-
-		dataBuffer.Init(uFileSize, 4);
-		dataFile.Read(uFileSize, dataBuffer.GetRawData());
-
-		m_name = szName;
-		SetupHash(m_name.c_str());
-
-		uint32* pData = reinterpret_cast<uint32*>(dataBuffer.GetRawData());
 		const uint32 uMagicNumber = pData[0];
 		const uint32 uFileVersion = pData[1];
 		const uint32 uSubmeshCount = pData[2];
@@ -272,8 +257,8 @@ namespace usg{
 			uBegin = uEnd;
 		}
 
-		const uint8* pRawData = (const uint8*)dataBuffer.GetRawData();
-		size_t uPos = sizeof(uint32)*(2 + 1 + uSubmeshCount*2);
+		const uint8* pRawData = (const uint8*)pData;
+		size_t uPos = sizeof(uint32) * (2 + 1 + uSubmeshCount * 2);
 
 		ALIGNED_VAR(CollisionQuadTreeHeader, FILE_READ_ALIGN, header);
 		usg::MemCpy(&header, pRawData + uPos, sizeof(CollisionQuadTreeHeader));
@@ -286,9 +271,9 @@ namespace usg{
 		m_fRadius = (m_vMax - m_vMin).Magnitude() * 0.5f;
 
 		m_uTriangles = header.uTriangles;
-		m_pTriangles = (TriangleIndices*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(TriangleIndices)*header.uTriangles, FILE_READ_ALIGN);
-		m_pTriangleNormals = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f)*header.uTriangles, FILE_READ_ALIGN);
-		m_pVertices = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f)*header.uVertices, FILE_READ_ALIGN);
+		m_pTriangles = (TriangleIndices*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(TriangleIndices) * header.uTriangles, FILE_READ_ALIGN);
+		m_pTriangleNormals = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f) * header.uTriangles, FILE_READ_ALIGN);
+		m_pVertices = (Vector3f*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_COLLISION, sizeof(Vector3f) * header.uVertices, FILE_READ_ALIGN);
 		m_uVertices = header.uVertices;
 
 		/*if (header.uTriangles >= 32)
@@ -318,6 +303,36 @@ namespace usg{
 
 		SetReady(true);
 		UpdateSubmeshAABBs();
+	}
+
+	bool CollisionModelResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
+	{
+		SetupHash(pFileHeader->szName);
+
+		Init((uint32*)pData);
+
+		return true;
+	}
+
+	void CollisionModelResource::Init(const char* szName)
+	{
+
+		char name[256];
+		str::ParseVariableArgsC(name, 256, "Models/%s", szName);
+
+		File dataFile(name);
+
+		ScratchRaw dataBuffer;
+		const size_t uFileSize = dataFile.GetSize();
+
+		dataBuffer.Init(uFileSize, 4);
+		dataFile.Read(uFileSize, dataBuffer.GetRawData());
+
+		m_name = szName;
+		SetupHash(m_name.c_str());
+
+		uint32* pData = reinterpret_cast<uint32*>(dataBuffer.GetRawData());
+		Init(pData);
 	}
 
 	const CollisionModelResource::SubmeshData* CollisionModelResource::GetSubmeshData(const char* szName) const

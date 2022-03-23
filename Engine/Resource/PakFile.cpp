@@ -13,13 +13,17 @@
 #include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Textures/Texture.h"
 #include "Engine/Resource/ModelResource.h"
+#include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Resource/SkeletalAnimationResource.h"
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Core/File/File.h"
 #include "Engine/Memory/ScratchRaw.h"
+#include "Engine/Core/Timer/ProfilingTimer.h"
 #include "PakDecl.h"
 #include "PakFile.h"
+
+#define PAK_FILE_TIMINGS 0
 
 namespace usg
 {
@@ -38,9 +42,25 @@ namespace usg
 
 	void PakFile::Load(GFXDevice* pDevice, const char* szFileName)
 	{
+		ProfilingTimer loadTimer;
+
 		SetupHash(szFileName);
+
+#if PAK_FILE_TIMINGS
+		loadTimer.ClearAndStart();
+#endif
+
 		File pakFile(szFileName);
 
+#if PAK_FILE_TIMINGS
+		loadTimer.Stop();
+		LOG_MSG(DEBUG_MSG_RELEASE, "Opened %s in %f milliseconds\n", szFileName, loadTimer.GetTotalMilliSeconds());
+#endif
+
+
+#if PAK_FILE_TIMINGS
+		loadTimer.ClearAndStart();
+#endif
 		PakFileDecl::ResourcePakHdr		header;
 
 		pakFile.Read(sizeof(header), &header);
@@ -51,27 +71,52 @@ namespace usg
 			ASSERT(false);
 			return;
 		}
+#if PAK_FILE_TIMINGS
+		loadTimer.Stop();
+		LOG_MSG(DEBUG_MSG_RELEASE, "Read header %s in %f milliseconds\n", szFileName, loadTimer.GetTotalMilliSeconds());
+#endif
 
 		size_t pakSize = pakFile.GetSize();
 		size_t uPersistentDataSize = header.uResDataOffset == USG_INVALID_ID ? 0 : (uint32)pakFile.GetSize() - header.uResDataOffset;
 		uint32 uTempDataSize = uPersistentDataSize > 0 ? header.uResDataOffset : (uint32)pakFile.GetSize();
 
-
+#if PAK_FILE_TIMINGS
+		loadTimer.ClearAndStart();
+#endif
 		ScratchRaw scratch(uTempDataSize, FILE_READ_ALIGN);
+#if PAK_FILE_TIMINGS
+		loadTimer.Stop();
+		LOG_MSG(DEBUG_MSG_RELEASE, "Allocated data for %s in %f milliseconds\n", szFileName, loadTimer.GetTotalMilliSeconds());
+#endif
 
+
+#if PAK_FILE_TIMINGS
+		loadTimer.ClearAndStart();
+#endif
 		pakFile.Read(uTempDataSize, scratch.GetRawData());
-
+#if PAK_FILE_TIMINGS
+		loadTimer.Stop();
+		LOG_MSG(DEBUG_MSG_RELEASE, "Read file %s in %f milliseconds\n", szFileName, loadTimer.GetTotalMilliSeconds());
+#endif
 		if (uPersistentDataSize > 0)
 		{
 			m_pPersistantData = mem::Alloc(MEMTYPE_STANDARD, ALLOC_OBJECT, uPersistentDataSize, FILE_READ_ALIGN);
 			pakFile.Read(uPersistentDataSize, m_pPersistantData);
 		}
+
 	
 
 		const PakFileDecl::FileInfo* pFileInfo = scratch.GetDataAtOffset<PakFileDecl::FileInfo>(sizeof(PakFileDecl::ResourcePakHdr));
 		for (uint32 i = 0; i < header.uFileCount; i++)
 		{
+#if PAK_FILE_TIMINGS
+			loadTimer.ClearAndStart();
+#endif
 			LoadFile(pDevice, header.uResDataOffset, pFileInfo, scratch.GetRawData());
+#if PAK_FILE_TIMINGS
+			loadTimer.Stop();
+			LOG_MSG(DEBUG_MSG_RELEASE, "Processed sub file %s in %f milliseconds\n", pFileInfo->szName, loadTimer.GetTotalMilliSeconds());
+#endif
 			pFileInfo = (PakFileDecl::FileInfo*)((uint8*)pFileInfo + pFileInfo->uTotalFileInfoSize);
 		}
 		
@@ -104,6 +149,10 @@ namespace usg
 		case usg::ResourceType::SKEL_ANIM:
 		{
 			return vnew(ALLOC_OBJECT)SkeletalAnimationResource;
+		}
+		case usg::ResourceType::COLLISION:
+		{
+			return vnew(ALLOC_OBJECT)CollisionModelResource;
 		}
 		default:
 			ASSERT(false);

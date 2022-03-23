@@ -257,58 +257,68 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 
 	PureBinaryEntry* pModel = new PureBinaryEntry;
 	pModel->srcName = szFileName;
-	pModel->SetName(fileNameBase + ".vmdf", usg::ResourceType::MODEL);
+	if (bAsCollision)
+	{
+		pModel->SetName(fileNameBase + ".coll", usg::ResourceType::COLLISION);
+	}
+	else
+	{
+		pModel->SetName(fileNameBase + ".vmdf", usg::ResourceType::MODEL);
+	}
 	pModel->binarySize = (uint32)pConverter->GetBinarySize();
 	pModel->binary = new uint8[pModel->binarySize];
 
 
 	pConverter->ExportStoredBinary(pModel->binary, (memsize)pModel->binarySize);
 
-	for (uint32 i = 0; i < pConverter->GetAnimationCount(); i++)
+	if (!bAsCollision)
 	{
-		PureBinaryEntry* pAnim = new PureBinaryEntry;
-		pAnim->srcName = szFileName;
-		pAnim->SetName(fileNameBase + "." + pConverter->GetAnimName(i), usg::ResourceType::SKEL_ANIM);
-		pAnim->binarySize = (uint32)pConverter->GetAnimBinarySize(i);
-		pAnim->binary = new uint8[pModel->binarySize];
-		pConverter->ExportAnimation(i, pAnim->binary, (size_t)pAnim->binarySize);
-
-		m_resources.push_back(pAnim);
-	}
-
-	pConverter->ExportBoneHierarchy(skelDir.c_str());
-
-
-	std::vector<std::string> textureList = pConverter->GetTextureNames();
-	for (auto itr : textureList)
-	{
-		YAML::Node out;
-		out.force_insert("format", pConverter->GetTextureFormat(itr));
-		out.force_insert("mips", true);
-
-		FILE* pFile = nullptr;
-		std::string fullDir = m_rootDir + relativePath + itr;
-		std::string fileName = fullDir + ".tga";
-
-		// Disabling tga for now, gli can't compress. Alternative needed
-		fopen_s(&pFile, fileName.c_str(), "rb");
-		if(!pFile)
+		for (uint32 i = 0; i < pConverter->GetAnimationCount(); i++)
 		{
-			fileName = fullDir + ".dds";
-			fopen_s(&pFile, fileName.c_str(), "rb");
+			PureBinaryEntry* pAnim = new PureBinaryEntry;
+			pAnim->srcName = szFileName;
+			pAnim->SetName(fileNameBase + "." + pConverter->GetAnimName(i), usg::ResourceType::SKEL_ANIM);
+			pAnim->binarySize = (uint32)pConverter->GetAnimBinarySize(i);
+			pAnim->binary = new uint8[pModel->binarySize];
+			pConverter->ExportAnimation(i, pAnim->binary, (size_t)pAnim->binarySize);
+
+			m_resources.push_back(pAnim);
 		}
 
-		if (pFile)
-		{
-			fclose(pFile);
-			std::string outName = LoadFile(fileName.c_str(), node);
+		pConverter->ExportBoneHierarchy(skelDir.c_str());
 
-			if (outName.size())
+
+		std::vector<std::string> textureList = pConverter->GetTextureNames();
+		for (auto itr : textureList)
+		{
+			YAML::Node out;
+			out.force_insert("format", pConverter->GetTextureFormat(itr));
+			out.force_insert("mips", true);
+
+			FILE* pFile = nullptr;
+			std::string fullDir = m_rootDir + relativePath + itr;
+			std::string fileName = fullDir + ".tga";
+
+			// Disabling tga for now, gli can't compress. Alternative needed
+			fopen_s(&pFile, fileName.c_str(), "rb");
+			if (!pFile)
 			{
-				pModel->AddDependency(outName.c_str(), "Texture");
+				fileName = fullDir + ".dds";
+				fopen_s(&pFile, fileName.c_str(), "rb");
+			}
+
+			if (pFile)
+			{
+				fclose(pFile);
+				std::string outName = LoadFile(fileName.c_str(), node);
+
+				if (outName.size())
+				{
+					pModel->AddDependency(outName.c_str(), "Texture");
+				}
 			}
 		}
-	} 
+	}
 
 
 	m_resources.push_back(pModel); 

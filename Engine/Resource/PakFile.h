@@ -37,7 +37,6 @@ namespace usg
 		void*							m_pPersistantData;
 
 		usg::map<uint32, BaseResHandle>	m_resources;
-
 	};
 
 	// For loading outside of the resource manager

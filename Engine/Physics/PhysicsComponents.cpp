@@ -947,7 +947,9 @@ namespace usg
 
 		if (c->szPakName[0] != '\0')
 		{
-			handles.pResourceMgr->LoadPackage(handles.pDevice, c->szPakName);
+			usg::string fullName = "Models/";
+			fullName += c->szPakName;
+			handles.pResourceMgr->LoadPackage(handles.pDevice, fullName.c_str());
 		}
 
 		PhysXMeshCache* pMeshCache = handles.pPhysicsScene->pMeshCache;

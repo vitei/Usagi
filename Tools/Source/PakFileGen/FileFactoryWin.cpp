@@ -104,20 +104,12 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;
 	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
-	FILE* pFileOut = nullptr;
 
-	fopen_s(&pFileOut, szFileName, "rb");
-	if (!pFileOut)
-	{
-		delete pTexture;
-		return outName;
-	}
+	gli::texture dds = gli::load(szFileName);
 
-	fseek(pFileOut, 0, SEEK_END);
-	pTexture->memory.resize( ftell(pFileOut) );
-	fseek(pFileOut, 0, SEEK_SET);
-	fread(&pTexture->memory[0], 1, pTexture->memory.size(), pFileOut);
-	fclose(pFileOut);
+	gli::save_ktx(dds, pTexture->memory);
+
+	m_resources.push_back(pTexture);
 
 
 	return outName;

@@ -688,7 +688,7 @@ void Texture_ps::Cleanup(GFXDevice* pDevice)
 
 bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const PakFileDecl::TextureHeader* pHeader)
 {
-	return LoadWithGLI(pDevice, pData, (memsize)uSize, pHeader->bForceSRGB);
+	return LoadWithGLI(pDevice, pData, (memsize)uSize, pHeader->bForceSRGB, true);
 }
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
@@ -713,11 +713,11 @@ bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eL
 }
 
 
-bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB)
+bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx)
 {
 	VkResult res;
 
-	gli::texture Texture = gli::load((char*)pData, uSize);
+	gli::texture Texture = bForceKtx ? gli::load_ktx((char*)pData, uSize) : gli::load((char*)pData, uSize);
 
 	VkFormatProperties formatProperties;
 	VkFormat eFormatVK = bForceSRGB ? GetFormatGLIForcedSRGB(Texture.format()) : GetFormatGLI(Texture.format());

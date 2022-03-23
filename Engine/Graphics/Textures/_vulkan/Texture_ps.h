@@ -61,7 +61,7 @@ public:
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
-	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB);
+	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx = false);
 	void InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage);
 	void InitStaging(GFXDevice* pDevice);
 	void FreeStaging(GFXDevice* pDevice);
