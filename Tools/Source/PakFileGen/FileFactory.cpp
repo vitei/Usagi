@@ -87,10 +87,6 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 		// Process the fbx file
 		outName = LoadModel(szFileName, node);
 	}
-	else if (HasExtension(szFileName, "vpb"))
-	{
-		outName = LoadRawFile(szFileName);
-	}
 	else if (HasExtension(szFileName, "yml"))
 	{
 		switch(GetYmlType(szFileName))
@@ -109,6 +105,23 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 			ASSERT(false);
 		}
 
+	}
+	else if (HasExtension(szFileName, "vpb"))
+	{
+		switch (GetVpbType(szFileName))
+		{
+		case VpbType::VPB_RAW:
+			outName = LoadRawFile(szFileName);
+			break;
+		case VpbType::VPB_EMITTER:
+			outName = LoadEmitter(szFileName);
+			break;
+		case VpbType::VPB_EFFECT:
+			outName = LoadEffect(szFileName);
+			break;
+		default:
+			ASSERT(false);
+		}
 	}
 	else
 	{
@@ -131,32 +144,58 @@ FileFactory::YmlType FileFactory::GetYmlType(const char* szFileName)
 		memsize lastPath = path.find_last_of("\\/");
 		if (lastPath == std::string::npos)
 		{
-			return YML_VPB;
+			return YmlType::YML_VPB;
 		}
 		std::string cmpPath = path.substr(lastPath + 1);
 		if (cmpPath == "Entities")
 		{
-			return YML_ENTITY;
+			return YmlType::YML_ENTITY;
 		}
 		else if(cmpPath == "Audio")
 		{
-			return YML_AUDIO;
+			return YmlType::YML_AUDIO;
 		}
 
 		lastPath = path.find_last_of("\\/");
 		if(lastPath == std::string::npos )
 		{
-			return YML_VPB;
+			return YmlType::YML_VPB;
 		}
 
 		path = path.substr(0, lastPath);
 	}
 
-	return YML_VPB;
+	return YmlType::YML_VPB;
+}
+
+FileFactory::VpbType FileFactory::GetVpbType(const char* szFileName)
+{
+	std::string path = RemoveFileName(szFileName);
+	while (path.size() > 0)
+	{
+		memsize lastPath = path.find_last_of("\\/");
+		if (lastPath == std::string::npos)
+		{
+			return VpbType::VPB_RAW;
+		}
+		std::string cmpPath = path.substr(lastPath + 1);
+		if (cmpPath == "Effects")
+		{
+			return VpbType::VPB_EFFECT;
+		}
+		else if (cmpPath == "Emitters")
+		{
+			return VpbType::VPB_EMITTER;
+		}
+
+		path = path.substr(0, lastPath);
+	}
+
+	return VpbType::VPB_RAW;
 }
 
 
-std::string FileFactory::LoadRawFile(const char* szFileName)
+std::string FileFactory::LoadRawFile(const char* szFileName, usg::ResourceType eType)
 {
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 

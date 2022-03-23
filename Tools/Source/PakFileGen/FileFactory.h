@@ -37,11 +37,18 @@ protected:
 		uint32 binarySize;
 	};
 
-	enum YmlType
+	enum class YmlType : uint32
 	{
 		YML_VPB = 0,
 		YML_ENTITY,
 		YML_AUDIO
+	};
+
+	enum class VpbType : uint32
+	{
+		VPB_RAW = 0,
+		VPB_EFFECT,
+		VPB_EMITTER
 	};
 
 	struct TextureSettings
@@ -58,11 +65,12 @@ protected:
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
 	void AddDependenciesFromDepTracker(DependencyTracker& tracker);
-	std::string LoadRawFile(const char* szFileName);
+	std::string LoadRawFile(const char* szFileName, usg::ResourceType eType = usg::ResourceType::UNDEFINED);
 	std::string LoadYMLVPBFile(const char* szFileName);
 	std::string LoadYMLEntityFile(const char* szFileName);
 	std::string LoadYMLAudioFile(const char* szFileName);
 	YmlType GetYmlType(const char* szFileName);
+	VpbType GetVpbType(const char* szFileName);
 
 
 	std::string RemoveExtension(const std::string& fileName);

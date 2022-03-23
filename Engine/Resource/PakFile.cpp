@@ -12,6 +12,8 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Resource/ParticleEffectResource.h"
+#include "Engine/Resource/ParticleEmitterResource.h"
 #include "Engine/Resource/ModelResource.h"
 #include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
@@ -153,6 +155,14 @@ namespace usg
 		case usg::ResourceType::COLLISION:
 		{
 			return vnew(ALLOC_OBJECT)CollisionModelResource;
+		}
+		case usg::ResourceType::PARTICLE_EFFECT:
+		{
+			return vnew(ALLOC_OBJECT)ParticleEffectResource;
+		}
+		case usg::ResourceType::PARTICLE_EMITTER:
+		{
+			return vnew(ALLOC_OBJECT)ParticleEmitterResource;
 		}
 		default:
 			ASSERT(false);
