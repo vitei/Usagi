@@ -30,7 +30,7 @@ FileFactory::PureBinaryEntry::~PureBinaryEntry()
 
 FileFactory::FileFactory()
 {
-
+	usg::ScratchRaw::InitMemory(1024 * 1024);
 }
 
 FileFactory::~FileFactory()
@@ -457,20 +457,22 @@ bool FileFactory::HasDestResource(std::string dstName)
 std::string FileFactory::LoadYMLLayout(const char* szFileName)
 {
 	std::stringstream command;
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	std::string outDir = relativeNameNoExt + ".vpb";
 	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
 	std::string depFileName = tempFileName + ".d";
 
-	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+	command << "ruby Usagi/Tools/ruby/yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
 	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
 
 	system(command.str().c_str());
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->SetName(outDir.c_str(), usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->bKeepMemory = true;
 
 	FILE* pFileOut = nullptr;
 
@@ -488,27 +490,39 @@ std::string FileFactory::LoadYMLLayout(const char* szFileName)
 	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
 	fclose(pFileOut);
 
-	usg::ProtocolBufferFile pbFile(tempFileName.c_str());
-
 	usg::UIDef* pUI;
-	usg::ScratchObj<usg::UIDef>  chainMem(pUI, 1);
+	std::vector< std::string > textures;
+	{
+		usg::ProtocolBufferFile pbFile(tempFileName.c_str());
+
+		usg::ScratchObj<usg::UIDef>  chainMem(pUI, 1);
+		pbFile.Read(pUI);
+
+		for (uint32 i = 0; i < pUI->buttonDefinitions_count; i++)
+		{
+			std::string fullDir = relativePath + pUI->buttonDefinitions[i].textureName;
+			textures.push_back(fullDir);
+		}
+
+		for (uint32 i = 0; i < pUI->windows_count; i++)
+		{
+			const usg::UIWindowDef* pDef = &pUI->windows[i];
+
+			for (uint32 j = 0; j < pDef->imageItems_count; j++)
+			{
+				std::string fullDir = relativePath + pDef->imageItems[j].textureName;
+				textures.push_back(fullDir);
+			}
+		}
+	}
 
 	YAML::Node out;
 	out.force_insert("format", "BC7");
 	out.force_insert("mips", true);
 
-	for (uint32 i = 0; i < pUI->buttonDefinitions_count; i++)
+	for (auto itr : textures)
 	{
-		AddTextureDependecy(pUI->buttonDefinitions[i].textureName, pFileEntry, out);
-	}
-
-	for (uint32 i = 0; i < pUI->windows_count; i++)
-	{
-		const usg::UIWindowDef* pDef = &pUI->windows[i];
-		for (uint32 j = 0; j < pDef->buttonItems_count; j++)
-		{
-			AddTextureDependecy(pDef->buttonItems[i].name, pFileEntry, out);
-		}
+		AddTextureDependecy(itr.c_str(), pFileEntry, out);
 	}
 
 	m_resources.push_back(pFileEntry);
@@ -522,7 +536,7 @@ std::string FileFactory::LoadYMLLayout(const char* szFileName)
 std::string FileFactory::LoadYMLEntityFile(const char* szFileName)
 {
 	std::stringstream command;
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
@@ -570,13 +584,13 @@ std::string FileFactory::LoadYMLEntityFile(const char* szFileName)
 std::string FileFactory::LoadYMLVPBFile(const char* szFileName)
 {
 	std::stringstream command;
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
 	std::string depFileName = tempFileName + ".d";
 
-	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+	command << "ruby Usagi/Tools/ruby/yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
 	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
 
 	system(command.str().c_str());
@@ -584,6 +598,7 @@ std::string FileFactory::LoadYMLVPBFile(const char* szFileName)
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
 	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->bKeepMemory = true;
 
 	FILE* pFileOut = nullptr;
 

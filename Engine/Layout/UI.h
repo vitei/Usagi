@@ -46,6 +46,7 @@ namespace usg
 		// Use the same pipeline between windows, but each has their own matrix
 		UIWindow				m_parentWindow;
 		usg::PipelineStateHndl	m_pipelineHndl;
+		usg::string				m_dirName;
 	};
 
 }

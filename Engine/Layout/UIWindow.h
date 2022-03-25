@@ -70,7 +70,8 @@ namespace usg
 		UIWindow();
 		virtual ~UIWindow();
 
-		void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, bool bOffscreen);
+		void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass,
+			const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen);
 		void SetPos(usg::Vector2f vPos);
 		void SetSize(usg::Vector2f vSize);
 		void SetItemPos(const char* szName, usg::Vector2f vPos, bool bRelative);
@@ -188,6 +189,7 @@ namespace usg
 
 		usg::vector<UIWindow*>		m_children;
 		usg::string					m_name;
+		usg::string					m_path;
 		usg::Matrix4x4				m_localMatrix;
 		usg::Matrix4x4				m_globalMatrix;
 		UIHorAlign					m_horAlign;

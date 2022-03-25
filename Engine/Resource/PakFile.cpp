@@ -210,6 +210,8 @@ namespace usg
 		else
 		{
 			pBaseRes = vnew(ALLOC_LOADING) ProtocolBufferFile(pData, pFileInfo->uDataSize);
+			ProtocolBufferFile* pFile = (ProtocolBufferFile*)pBaseRes;
+			pFile->SetupHash(pFileInfo->szName);
 		}
 	
 		m_resources[pFileInfo->CRC] = BaseResHandle(pBaseRes);

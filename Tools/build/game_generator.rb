@@ -49,6 +49,9 @@ def process_data(config, platform, n)
   models = build_paks_for_models(config, n, platform)
   data_deps.merge models
 
+  layouts = build_paks_for_layouts(config, n, platform)
+  data_deps.merge layouts
+
   # find once, and pass around the array into build rule functions
   protocol_ruby_classes = find_protocol_ruby_classes(config)
 
@@ -174,6 +177,20 @@ def build_paks_for_models(config, n, platform)
     output = ("#{config.model_out_dir}/" + input.sub(/^Data\/Models\//, '')).sub(".yml", ".pak")
     defines = ""
     n.build('pak_file_def', {output => [input]},
+        { :implicit_deps => [config.resource_packer],
+          :variables => {'out' => to_windows_path(output),
+        'in' => input,
+        'platform' => config.target_platform } } )
+
+    output
+  end
+end
+
+def build_paks_for_layouts(config, n, platform)
+  targets = FileList["Data/Layout/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
+    output = ("#{config.layout_out_dir}/" + input.sub(/^Data\/Layout\//, '')).sub(".yml", ".pak")
+    defines = ""
+    n.build('pak_file', {output => [input]},
         { :implicit_deps => [config.resource_packer],
           :variables => {'out' => to_windows_path(output),
         'in' => input,

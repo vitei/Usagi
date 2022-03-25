@@ -18,6 +18,13 @@ namespace usg
 
 	void UI::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const char* szName, bool bOffscreen)
 	{
+		m_dirName = szName;
+		str::TruncateToPath(m_dirName);
+		m_dirName += "/";
+
+		usg::string pakName = szName;
+		str::TruncateExtension(pakName);
+		pRes->LoadPackage(pDevice, pakName.c_str());
 		usg::ProtocolBufferFile* pFile = pRes->GetBufferedFile(szName);
 		if (!pFile)
 		{
@@ -30,7 +37,7 @@ namespace usg
 
 		bool bReadSucceeded = pFile->Read(pUI);
 
-		m_parentWindow.Init(pDevice, pRes, renderPass, nullptr, *pUI, pUI->windows[0], bOffscreen);
+		m_parentWindow.Init(pDevice, pRes, renderPass, nullptr, *pUI, pUI->windows[0], m_dirName, bOffscreen);
 
 		for (uint32 i = 1; i < pUI->windows_count; i++)
 		{

@@ -185,7 +185,7 @@ namespace str
 		{
 			if (dest.at(i) == '\\' || dest.at(i) == '/')
 			{
-				dest = dest.substr(0, i-1);
+				dest = dest.substr(0, i);
 				break;
 			}
 		}

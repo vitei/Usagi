@@ -33,7 +33,7 @@ UIWindow::~UIWindow()
 	
 }
 
-void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, bool bOffscreen)
+void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen)
 {
 	m_windowPos = windowDef.vPos;
 	m_windowSize = windowDef.vSize;
@@ -42,6 +42,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 	m_name = windowDef.name;
 	m_renderPass = renderPass;
 	m_bEnabled = windowDef.bEnabled;
+	m_path = path;
 
 	m_uItemCounts[UI_ITEM_IMAGE] = windowDef.imageItems_count;
 	m_uItemCounts[UI_ITEM_TEXT] = windowDef.textItems_count;
@@ -136,7 +137,8 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 		for (memsize i = 0; i < uImageCount; i++)
 		{
 			m_pUIItemsDefs[i].descriptor.Init(pDevice, runtimeRes->GetDescriptorLayoutHndl());
-			m_pUIItemsDefs[i].descriptor.SetImageSamplerPairAtBinding(0, pRes->GetTexture(pDevice, m_pUIItemsDefs[i].def.textureName), linear);
+			usg::string fullPath = m_path + m_pUIItemsDefs[i].def.textureName;
+			m_pUIItemsDefs[i].descriptor.SetImageSamplerPairAtBinding(0, pRes->GetTextureAbsolutePath(pDevice, fullPath.c_str()), linear);
 			m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
 			// TODO: Get material indices, worst case scenario each element needs its own descriptor set
 		}
@@ -1181,7 +1183,7 @@ void UIWindow::CleanUpRecursive(usg::GFXDevice* pDevice)
 UIWindow* UIWindow::CreateChildWindow(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIDef& def, const UIWindowDef& windowDef, bool bOffscreen)
 {
 	UIWindow* pChild = vnew(usg::ALLOC_OBJECT)UIWindow;
-	pChild->Init(pDevice, pRes, renderPass, this, def, windowDef, bOffscreen);
+	pChild->Init(pDevice, pRes, renderPass, this, def, windowDef, m_path, bOffscreen);
 
 	m_children.push_back(pChild);
 	return pChild;

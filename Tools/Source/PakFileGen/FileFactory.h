@@ -39,8 +39,13 @@ protected:
 		virtual uint32 GetCustomHeaderSize() { return 0; }
 
 
+		virtual bool KeepDataAfterLoading() { return bKeepMemory; }
+
+
+
 		void* binary;
 		uint32 binarySize;
+		bool bKeepMemory = false;
 	};
 
 	enum class YmlType : uint32

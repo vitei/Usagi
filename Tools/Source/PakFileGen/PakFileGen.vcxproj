@@ -189,6 +189,9 @@
     <ProjectReference Include="..\..\..\_build\projects\Engine\Memory\Memory.vcxproj">
       <Project>{1c319d5b-0060-4653-9000-2ed6c92acaef}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\_build\projects\Engine\Particles\Particles.vcxproj">
+      <Project>{10466b50-9371-4f53-815b-a024dd74c7e7}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\_build\projects\Engine\Physics\Physics.vcxproj">
       <Project>{41e78c13-bdda-4803-9fe5-1fa6b7607685}</Project>
     </ProjectReference>

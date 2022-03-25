@@ -524,6 +524,11 @@ def shader_pack
     "#{romfiles_dir}/Models"
   end
 
+  def layout_out_dir
+    "#{romfiles_dir}/Layout"
+  end
+
+
   def custom_effect_out_dir
     "#{romfiles_dir}/CustomFX"
   end
