@@ -1,0 +1,131 @@
+import 'nanopb.proto';
+import 'Engine/Maths/Maths.proto';
+import 'Engine/Graphics/Color.proto';
+
+package usg;
+
+enum UIHorAlign {
+	Left = 0;			
+	Right = 1;			
+	CenterH = 2;			
+};
+
+enum UIVertAlign {
+	Top = 0;			
+	Bottom = 1;			
+	CenterV = 2;			
+};
+
+enum UIButtonType
+{
+	Select = 0;
+	Toggle = 1;
+	Decrement = 2;
+	Increment = 3;
+};
+
+
+message ImageDef
+{
+	required string name = 1 [(nanopb).max_size = 64];
+	required string textureName = 2 [(nanopb).max_size = 64];
+	required usg.Vector2f vPos = 3;
+	required usg.Vector2f vSize = 4;
+	required usg.Vector2f vUVMin = 5;
+	required usg.Vector2f vUVMax = 6;
+	required usg.Color cColor = 7;
+	required UIHorAlign eHAlign = 8 [default = Left];
+	required UIVertAlign eVAlign = 9 [default = Top];
+	required string tags = 10 [(nanopb).max_size = 64];
+}
+
+message ButtonTemplateDef
+{
+	required string templateName = 1 [(nanopb).max_size = 64];
+	required string textureName = 2 [(nanopb).max_size = 64];
+	required uint32 uFramesHor = 3 [default = 1];
+	required uint32 uFramesVer = 4 [default = 1];
+	required uint32 uActivateFrameId = 5 [default = 0];
+	required uint32 uActivateFrameCnt = 6 [default = 1];
+	required uint32 uDeactivateFrameId = 7 [default = 0];
+	required uint32 uDeactivateFrameCnt = 8 [default = 1];
+	required uint32 uHighlightActiveFrameId = 9 [default = 0];
+	required uint32 uHighlightActiveFrameCnt = 10 [default = 1];
+	required uint32 uHighlightInactiveFrameId = 11 [default = 0];
+	required uint32 uHighlightInactiveFrameCnt = 12 [default = 1];
+	required usg.Color cEnabledColor = 13;
+	required usg.Color cDisabledColor = 14;
+	required usg.Color cHighlightColor = 15;
+	required usg.Color cNoHighlightColor = 16;
+	required uint32 uPressedSoundId = 17 [default = 0];
+	required float fFrameRate = 18 [default = 30];
+	required uint32 uTotalFrames = 19 [default = 0];	
+	required UIButtonType eType = 20 [default=Toggle];
+}
+
+message ButtonInstanceDef
+{
+	required string name = 1 [(nanopb).max_size = 64];
+	required string templateName = 2 [(nanopb).max_size = 64];
+	required usg.Vector2f vPos = 3;
+	required usg.Vector2f vSize = 4;
+	required UIHorAlign eHAlign = 5 [default = Left];
+	required UIVertAlign eVAlign = 6 [default = Top];
+	required bool bActive = 7 [default = false];
+	required string tags = 8 [(nanopb).max_size = 64];
+	required uint32 uGroupId = 9 [default = 0];
+	required uint32 uActionCRC = 10;
+}
+
+message TextItemDef
+{
+	required string name = 1 [(nanopb).max_size = 64];
+	required uint32 keyStringCRC = 2;
+	required usg.Vector2f vPos = 3;
+	required usg.Color cColor = 4;
+	required UIHorAlign eHAlign = 5 [default = Left];
+	required UIVertAlign eVAlign = 6 [default = Top];
+	required float fMaxWidth = 7 [default=1000.0];
+	required usg.Color cBgColor = 8;
+	required usg.Color cHighlightColor = 9;
+	required float fScale = 10 [default=1.0];
+	required string tags = 11 [(nanopb).max_size = 64];
+	required uint32 uActionCRC = 12;
+}
+
+// User implementable widgets that don't fit within the standard HUD elements
+message CustomItemDef
+{
+	required string name = 1 [(nanopb).max_size = 64];
+	required usg.Vector2f vPos = 2;
+	required usg.Vector2f vSize = 3;
+	required usg.Color cColor = 4;
+	required UIHorAlign eHAlign = 5;
+	required UIVertAlign eVAlign = 6;
+	required string tags = 7 [(nanopb).max_size = 64];
+}
+
+message UIWindowDef
+{
+    required string name = 1 [(nanopb).max_size = 64];
+	required string parentName = 2 [(nanopb).max_size = 64];
+	required usg.Vector2f vPos = 3;
+	required usg.Vector2f vSize = 4;
+	required UIHorAlign eHAlign = 5 [default = Left];
+	required UIVertAlign eVAlign = 6 [default = Top];
+
+	repeated ImageDef  imageItems = 8 [(nanopb).max_count = 64];
+	repeated TextItemDef textItems = 9 [(nanopb).max_count = 64];
+	repeated ButtonInstanceDef  buttonItems = 10 [(nanopb).max_count = 64];
+	repeated CustomItemDef customItems = 11 [(nanopb).max_count = 8];
+
+	required bool bEnabled = 12 [default = true];
+}
+
+
+message UIDef
+{
+	repeated UIWindowDef  windows = 1 [(nanopb).max_count = 32];
+
+	repeated ButtonTemplateDef buttonDefinitions = 2 [(nanopb).max_count = 32];
+}

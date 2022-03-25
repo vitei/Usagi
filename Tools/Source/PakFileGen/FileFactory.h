@@ -47,7 +47,8 @@ protected:
 	{
 		YML_VPB = 0,
 		YML_ENTITY,
-		YML_AUDIO
+		YML_AUDIO,
+		YML_LAYOUT
 	};
 
 	enum class VpbType : uint32
@@ -75,6 +76,7 @@ protected:
 	std::string LoadYMLVPBFile(const char* szFileName);
 	std::string LoadYMLEntityFile(const char* szFileName);
 	std::string LoadYMLAudioFile(const char* szFileName);
+	std::string LoadYMLLayout(const char* szFileName);
 	YmlType GetYmlType(const char* szFileName);
 	VpbType GetVpbType(const char* szFileName);
 

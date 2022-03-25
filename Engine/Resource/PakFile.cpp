@@ -12,6 +12,7 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Effects/Shader.h"
 #include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Resource/ParticleEffectResource.h"
 #include "Engine/Resource/ParticleEmitterResource.h"
 #include "Engine/Resource/ModelResource.h"
@@ -199,9 +200,18 @@ namespace usg
 		}
 
 		// FIXME: Make the init function virtual to save this mess
-		ResourceBase* pBaseRes = CreateResource((usg::ResourceType)pFileInfo->uResourceType);
+		ResourceBase* pBaseRes = nullptr;
+		
+		if ((usg::ResourceType)pFileInfo->uResourceType != usg::ResourceType::PROTOCOL_BUFFER)
+		{
+			pBaseRes = CreateResource((usg::ResourceType)pFileInfo->uResourceType);
+			pBaseRes->Init(pDevice, pFileInfo, &deps, pData);
+		}
+		else
+		{
+			pBaseRes = vnew(ALLOC_LOADING) ProtocolBufferFile(pData, pFileInfo->uDataSize);
+		}
 	
-		pBaseRes->Init(pDevice, pFileInfo, &deps, pData);
 		m_resources[pFileInfo->CRC] = BaseResHandle(pBaseRes);
 	}
 

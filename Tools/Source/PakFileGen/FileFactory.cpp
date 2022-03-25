@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Materials/Material.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
 #include "Engine/Audio/AudioBank.pb.h"
+#include "Engine/Layout/UI.pb.h"
 #include "../Ayataka/common/ModelConverterBase.h"
 #include "../Ayataka/fbx/FbxConverter.h"
 #include <algorithm>
@@ -81,7 +82,7 @@ FileFactory::TextureSettings FileFactory::GetTextureSettings(const YAML::Node& n
 
 std::string FileFactory::LoadParticleEffect(const char* szFileName)
 {
-	LoadRawFile(szFileName, usg::ResourceType::PARTICLE_EFFECT);
+	return LoadRawFile(szFileName, usg::ResourceType::PARTICLE_EFFECT);
 }
 
 std::string FileFactory::LoadParticleEmitter(const char* szFileName)
@@ -150,6 +151,9 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 			// Implicitly packages all wav files used by this sound bank
 			outName = LoadYMLAudioFile(szFileName);
 			break;
+		case YmlType::YML_LAYOUT:
+			outName = LoadYMLLayout(szFileName);
+			break;
 		default:
 			ASSERT(false);
 		}
@@ -203,6 +207,10 @@ FileFactory::YmlType FileFactory::GetYmlType(const char* szFileName)
 		else if(cmpPath == "Audio")
 		{
 			return YmlType::YML_AUDIO;
+		}
+		else if (cmpPath == "Layout")
+		{
+			return YmlType::YML_LAYOUT;
 		}
 
 		lastPath = path.find_last_of("\\/");
@@ -413,7 +421,7 @@ void FileFactory::AddTextureDependecy(const char* szTexName, ResourceEntry* pEnt
 	if (pFile)
 	{
 		fclose(pFile);
-		std::string outName = LoadFile(fileName.c_str(), node);
+		std::string outName = LoadFile(fileName.c_str(), details);
 
 		if (outName.size())
 		{
@@ -444,6 +452,70 @@ bool FileFactory::HasDestResource(std::string dstName)
 		}
 	}
 	return false;
+}
+
+std::string FileFactory::LoadYMLLayout(const char* szFileName)
+{
+	std::stringstream command;
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size() + 1);
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	relativePath = RemoveFileName(relativePath) + "/";
+	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
+	std::string depFileName = tempFileName + ".d";
+
+	command << "Usagi\\Tools\\ruby\\yml2vpb.rb -o" << tempFileName.c_str() << " --MF " << depFileName.c_str() << " -RUsagi/_build/ruby -R_build/ruby" " -d Data/Components/Defaults.yml " << szFileName;
+	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
+
+	system(command.str().c_str());
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, tempFileName.c_str(), "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return false;
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	usg::ProtocolBufferFile pbFile(tempFileName.c_str());
+
+	usg::UIDef* pUI;
+	usg::ScratchObj<usg::UIDef>  chainMem(pUI, 1);
+
+	YAML::Node out;
+	out.force_insert("format", "BC7");
+	out.force_insert("mips", true);
+
+	for (uint32 i = 0; i < pUI->buttonDefinitions_count; i++)
+	{
+		AddTextureDependecy(pUI->buttonDefinitions[i].textureName, pFileEntry, out);
+	}
+
+	for (uint32 i = 0; i < pUI->windows_count; i++)
+	{
+		const usg::UIWindowDef* pDef = &pUI->windows[i];
+		for (uint32 j = 0; j < pDef->buttonItems_count; j++)
+		{
+			AddTextureDependecy(pDef->buttonItems[i].name, pFileEntry, out);
+		}
+	}
+
+	m_resources.push_back(pFileEntry);
+
+	AddDependenciesFromDepFile(depFileName.c_str(), pFileEntry);
+
+	return pFileEntry->GetName();
 }
 
 
