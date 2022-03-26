@@ -708,8 +708,9 @@ bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const
 		sizes.push_back(pLayers[uLevel].uSize);
 	}
 
+	VkFormat eFormat = GetFormatGLI((gli::format)pHeader->uIntFormat);
 
-	return LoadInt(pDevice, (VkFormat)pHeader->uIntFormat, uSize, (void*)pData, extents, sizes);
+	return LoadInt(pDevice, eFormat, uSize, (void*)pData, extents, sizes);
 
 }
 

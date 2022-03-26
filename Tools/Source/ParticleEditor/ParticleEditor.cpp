@@ -106,6 +106,9 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 	uint32 uWidth;
 	uint32 uHeight;
 
+	pResMgr->LoadPackage(pDevice, "textures/EngineTextures");
+	pResMgr->LoadPackage(pDevice, "textures/EditorTextures");
+
 	m_hwnd = pDevice->GetDisplay(0)->GetHandle();
 	pDevice->GetDisplay(0)->GetDisplayDimensions(uWidth, uHeight, false);
 	

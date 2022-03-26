@@ -106,13 +106,21 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 	pTexture->SetName(outName, usg::ResourceType::TEXTURE);
 
 	gli::texture dds = gli::load(szFileName);
+	if (dds.size() > 0)
+	{
 
-	pTexture->Init(dds, false);
+		pTexture->Init(dds, false);
 
-	m_resources.push_back(pTexture);
+		m_resources.push_back(pTexture);
 
 
-	return outName;
+		return outName;
+	}
+	else
+	{
+		LOG_MSG(false, "Unable to load texture %s", szFileName);
+		return "";
+	}
 }
 
 std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)

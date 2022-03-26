@@ -141,7 +141,8 @@ int main(int argc, char *argv[])
 	}
 
 	std::string rootDir = "Data/";
-	std::string rootPath = std::string(input).substr( 0, input.find_first_of(rootDir) + rootDir.size());
+	memsize first = input.find(rootDir);
+	std::string rootPath = std::string(input).substr( 0, first + rootDir.size());
 
 
 	g_pFileFactory->Init(rootPath.c_str(), tempDir.c_str(), outputFile.c_str());

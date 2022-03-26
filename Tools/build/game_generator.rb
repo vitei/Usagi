@@ -13,8 +13,13 @@ def build_pc_data(config, n, platform)
   shaders = build_pc_shaders(config, n, platform)
   data_deps.merge shaders
 
-  textures = build_pc_textures(config, n)
-  data_deps.merge textures
+  #textures = build_pc_textures(config, n)
+  #data_deps.merge textures
+
+  game_textures = build_paks_for_textures(config, n, platform, config.textures_dir(false))
+  engine_textures = build_paks_for_textures(config, n, platform, config.textures_dir)
+  data_deps.merge game_textures
+  data_deps.merge engine_textures
 
   #models = build_pc_models(config, n)
   #data_deps.merge models
@@ -209,6 +214,24 @@ def build_pc_textures(config, n)
   game_textures + engine_textures# + model_textures
 end
 
+
+def build_paks_for_textures(config, n, platform, textures_dir)
+  targets = FileList["#{textures_dir}/**/*.yml"].map do |input|
+    tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
+    path = Pathname.new(input)
+    tex = path.relative_path_from(Pathname(textures_dir)).sub_ext('')
+    output = "#{config.textures_out_dir}/#{tex}.pak"
+    
+    n.build('pak_file_def', {output => [input]},
+        { :implicit_deps => [config.resource_packer],
+          :variables => {'out' => "#{config.textures_out_dir}/#{tex}.pak",
+        'in' => input,
+        'platform' => config.target_platform } } )
+
+  output
+  end
+end
+
 def build_pc_model_textures_for_dir(config, n, textures_dir)
   targets = FileList["#{textures_dir}/**/*.dds"].map do |input|
     tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
@@ -223,6 +246,9 @@ def build_pc_model_textures_for_dir(config, n, textures_dir)
 
   targets.map{|i, o| o}
 end
+
+
+
 
 def build_pc_textures_for_dir(config, n, textures_dir)
   targets = FileList["#{textures_dir}/**/*.tga", "#{textures_dir}/**/*.dds", "#{textures_dir}/**/*.ktx"].map do |input|

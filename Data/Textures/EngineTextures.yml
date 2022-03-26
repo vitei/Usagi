@@ -1,0 +1,13 @@
+Resources:
+  - File: B42.dds
+  - File: black_default.dds
+  - File: FilmNoise.dds
+  - File: missing_texture.dds
+  - File: normal_default.dds
+  - File: SMAA_AreaTex.dds
+  - File: SMAA_SearchTex.dds
+  - File: white_cube.dds
+  - File: white_default.dds
+  - File: particles/water_circle.dds
+  - File: ribbon/round_quarter.dds
+  - File: ribbon/trail.dds
