@@ -21,6 +21,25 @@ namespace usg{
 
     }
 
+	bool ParticleEmitterResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader,
+		const class FileDependencies* pDependencies, const void* pData)
+	{
+		SetupHash(pFileHeader->szName);
+		ProtocolBufferFile emitterVPB( (void*)pData, (memsize)pFileHeader->uDataSize);
+		bool bReadSucceeded = emitterVPB.Read(&m_emissionDef);
+		ASSERT(bReadSucceeded);
+		bReadSucceeded &= emitterVPB.Read(&m_shapeDef);
+
+		if (!bReadSucceeded)
+		{
+			return false;
+		}
+
+		Load(pDevice);
+
+		return true;
+	}
+
 	bool ParticleEmitterResource::Load(GFXDevice* pDevice, const char* szFileName)
 	{
 		SetupHash(szFileName);

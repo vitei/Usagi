@@ -16,10 +16,13 @@ def build_pc_data(config, n, platform)
   #textures = build_pc_textures(config, n)
   #data_deps.merge textures
 
-  game_textures = build_paks_for_textures(config, n, platform, config.textures_dir(false))
-  engine_textures = build_paks_for_textures(config, n, platform, config.textures_dir)
+  game_textures = build_paks_for_directory(config, n, platform, config.textures_dir(false), config.textures_out_dir)
+  engine_textures = build_paks_for_directory(config, n, platform, config.textures_dir, config.textures_out_dir)
   data_deps.merge game_textures
   data_deps.merge engine_textures
+
+  particle_paks = build_paks_for_directory(config, n, platform, "Data/Particle/", config.particle_out_dir)
+  data_deps.merge particle_paks
 
   #models = build_pc_models(config, n)
   #data_deps.merge models
@@ -81,8 +84,8 @@ def process_data(config, platform, n)
   lua_scripts = build_lua_scripts(config, n)
   data_deps.merge lua_scripts
 
-  emitters = build_emitters(config, n)
-  data_deps.merge emitters
+  #emitters = build_emitters(config, n)
+  #data_deps.merge emitters
 
   vpb_files = build_vpb_files(config, n, protocol_ruby_classes)
   data_deps.merge vpb_files
@@ -191,6 +194,8 @@ def build_paks_for_models(config, n, platform)
   end
 end
 
+
+
 def build_paks_for_layouts(config, n, platform)
   targets = FileList["Data/Layout/**/*.yml"].exclude{|f| File.directory?(f)}.map do |input|
     output = ("#{config.layout_out_dir}/" + input.sub(/^Data\/Layout\//, '')).sub(".yml", ".pak")
@@ -215,12 +220,12 @@ def build_pc_textures(config, n)
 end
 
 
-def build_paks_for_textures(config, n, platform, textures_dir)
+def build_paks_for_directory(config, n, platform, textures_dir, out_dir)
   targets = FileList["#{textures_dir}/**/*.yml"].map do |input|
     tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
     path = Pathname.new(input)
     tex = path.relative_path_from(Pathname(textures_dir)).sub_ext('')
-    output = "#{config.textures_out_dir}/#{tex}.pak"
+    output = "#{out_dir}/#{tex}.pak"
     
     n.build('pak_file_def', {output => [input]},
         { :implicit_deps => [config.resource_packer],

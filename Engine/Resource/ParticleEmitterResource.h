@@ -22,6 +22,9 @@ public:
 	ParticleEmitterResource();
     virtual ~ParticleEmitterResource();
 
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader,
+		const class FileDependencies* pDependencies, const void* pData) override;
+
 	bool Load(GFXDevice* pDevice, const char* szFileName);
 
 	const particles::EmitterEmission& GetEmissionDetails() const { return m_emissionDef;  }

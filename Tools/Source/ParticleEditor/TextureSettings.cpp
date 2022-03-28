@@ -39,7 +39,7 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", true, usg::GPU_LOCATION_STANDARD);
 	vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 	m_texture.Init(pDevice, "Particle tex", vTextureSize, m_pTexture);
-	m_fileList.Init("Textures/particles/", ".dds");
+	m_fileList.Init("../../Data/Particle/textures/", ".dds");
 	m_fileListBox.Init("Texture Select", m_fileList.GetFileNamesRaw());
 	m_repeat.Init("Repeat X, Y", defaultRepeat, 2, 1, 32);
 	m_repeat.SetToolTip("Number of sub images in the image along X and Y");
@@ -223,12 +223,15 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 	m_fileList.Update();
 	for(uint32 i=0; i<m_fileList.GetFileCount(); i++)
 	{
-		usg::string name = "particles/";
-		name += m_fileList.GetFileName(i);
+		usg::string name = m_fileList.GetFileName(i);
 		str::TruncateExtension(name);
-		if(name == textureVars.name)
+		usg::string cmpName = textureVars.name;
+		if(name == cmpName)
 		{
 			m_fileListBox.SetSelected(i);
+			str::Copy(textureVars.name, name.c_str(), sizeof(textureVars.name));
+			m_textureName = cmpName;
+
 			break;
 		}
 	}
@@ -282,16 +285,18 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 	{
 		m_textureName = m_fileList.GetFileName(m_fileListBox.GetSelected());
 		usg::Vector2f vTextureSize(64.f, 64.f);
-		usg::string texName = "particles/";
+		usg::string texName = "../../Data/particle/textures/";
 		texName += m_fileList.GetFileName(m_fileListBox.GetSelected());
 		// The resource manager adds the extension
 		str::TruncateExtension(texName);
-		m_pTexture = usg::ResourceMgr::Inst()->GetTexture(pDevice, texName.c_str(), usg::GPU_LOCATION_STANDARD);
+		m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, texName.c_str(), true, usg::GPU_LOCATION_STANDARD);
 		vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 		m_texture.SetTexture(pDevice, m_pTexture);
 		m_texture.SetSize(vTextureSize);
 		pEffect->GetMaterial().SetTexture(0, m_pTexture, m_sampler);
-		str::Copy(textureVars.name, texName.c_str(), sizeof(textureVars.name));
+		usg::string texNoExt = m_textureName;
+		str::TruncateExtension(texNoExt);
+		str::Copy(textureVars.name, texNoExt.c_str(), sizeof(textureVars.name));
 		bAnimAltered = true;
 		m_bForceReload = false;
 	}

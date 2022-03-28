@@ -281,7 +281,7 @@ FontHndl ResourceMgr::GetFont( GFXDevice* pDevice, const char* szFontName )
 
 ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const char* szFileName)
 {
-	usg::string path = "Particle/";
+	usg::string path = "Particle/Emitters/";
 	path += szFileName;
 	path += ".pem";
 	ParticleEmitterResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::PARTICLE_EMITTER);
@@ -308,7 +308,7 @@ ParticleEmitterResHndl ResourceMgr::GetParticleEmitter(GFXDevice* pDevice, const
 
 ParticleEffectResHndl ResourceMgr::GetParticleEffect(const char* szFileName)
 {
-	usg::string path = "Particle/";
+	usg::string path = "Particle/Effects/";
 	path += szFileName;
 	path += ".pfx";
 	ParticleEffectResHndl pEffect = m_pImpl->resources.GetResourceHndl(path.c_str(), ResourceType::PARTICLE_EFFECT);

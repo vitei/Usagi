@@ -46,7 +46,8 @@ void PreviewWindow::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRenderer,
 	vSize.Assign(400.f, 400.f);
 	uint32 uEffectFlags = usg::PostFXSys::EFFECT_DEFERRED_SHADING | usg::PostFXSys::EFFECT_SKY_FOG | usg::PostFXSys::EFFECT_SMAA | usg::PostFXSys::EFFECT_BLOOM;
 	m_postFX.Init(pDevice, usg::ResourceMgr::Inst(), (uint32)vSize.x, (uint32)vSize.y, uEffectFlags);
-	m_postFX.SetSkyTexture(pDevice, usg::ResourceMgr::Inst()->GetTexture(pDevice, "purplenebula"));
+
+	m_postFX.SetSkyTexture(pDevice, usg::ResourceMgr::Inst()->GetTexture(pDevice, "nebula"));
 	m_texture.Init(pDevice, "Preview", vSize, m_postFX.GetFinalRT()->GetColorTexture());
 
 	usg::AABB worldBounds;

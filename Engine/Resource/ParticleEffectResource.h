@@ -20,6 +20,8 @@ public:
     ParticleEffectResource();
     virtual ~ParticleEffectResource();
 
+	virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, 
+		const class FileDependencies* pDependencies, const void* pData) override;
 	bool Load(const char* szFileName);
 
 	const particles::EffectGroup& GetEffectGroup() const { return m_definition; }

@@ -3,6 +3,7 @@
 #include "Engine/Scene/Model/Model.pb.h"
 #include "Engine/Graphics/Materials/Material.pb.h"
 #include "Engine/Particles/Scripted/ScriptEmitter.pb.h"
+#include "Engine/Particles/Scripted/EffectGroup.pb.h"
 #include "Engine/Audio/AudioBank.pb.h"
 #include "Engine/Layout/UI.pb.h"
 #include "../Ayataka/common/ModelConverterBase.h"
@@ -82,19 +83,82 @@ FileFactory::TextureSettings FileFactory::GetTextureSettings(const YAML::Node& n
 
 std::string FileFactory::LoadParticleEffect(const char* szFileName)
 {
-	return LoadRawFile(szFileName, usg::ResourceType::PARTICLE_EFFECT);
+	std::string outName = std::string(szFileName).substr(m_rootDir.size());
+	outName = RemoveExtension(outName);
+	outName += ".pfx";
+	std::string path = RemoveFileName(szFileName);
+
+	if (path.find("Effects") != std::string::npos)
+	{
+		path = path.substr(0, path.find("Effects"));
+	}
+
+
+	if (HasSrcResource(szFileName))
+	{
+		return outName;
+	}
+
+	usg::particles::EffectGroup			effectDef;
+
+	usg::ProtocolBufferFile effectVPB(szFileName);
+	bool bReadSucceeded = effectVPB.Read(&effectDef);
+
+	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
+	pFileEntry->srcName = szFileName;
+	pFileEntry->SetName(outName.c_str(), usg::ResourceType::PARTICLE_EFFECT);
+
+	FILE* pFileOut = nullptr;
+
+	fopen_s(&pFileOut, szFileName, "rb");
+	if (!pFileOut)
+	{
+		delete pFileEntry;
+		return "";
+	}
+
+	fseek(pFileOut, 0, SEEK_END);
+	pFileEntry->binarySize = ftell(pFileOut);
+	fseek(pFileOut, 0, SEEK_SET);
+	pFileEntry->binary = new uint8[pFileEntry->binarySize];
+	fread(pFileEntry->binary, 1, pFileEntry->binarySize, pFileOut);
+	fclose(pFileOut);
+
+	for (uint32 i = 0; i < effectDef.emitters_count; i++)
+	{
+		const char* szEmitterName = effectDef.emitters[i].emitterName;
+		std::string emitterPath = path + "Emitters/";
+		emitterPath += szEmitterName; 
+		emitterPath += ".vpb";
+
+		YAML::Node out;
+		LoadFile(emitterPath.c_str(), out);
+	}
+
+	m_resources.push_back(pFileEntry);
+
+	return szFileName;
 }
 
 std::string FileFactory::LoadParticleEmitter(const char* szFileName)
 {
 	usg::particles::EmitterEmission			emissionDef;
+	std::string outName = std::string(szFileName).substr(m_rootDir.size());
+	std::string path = 
+	outName = RemoveExtension(outName);
+	outName += ".pem";
+
+	if (HasSrcResource(szFileName))
+	{
+		return outName;
+	}
 
 	usg::ProtocolBufferFile emitterVPB(szFileName);
 	bool bReadSucceeded = emitterVPB.Read(&emissionDef);
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->SetName(szFileName, usg::ResourceType::PARTICLE_EMITTER);
+	pFileEntry->SetName(outName.c_str(), usg::ResourceType::PARTICLE_EMITTER);
 
 	FILE* pFileOut = nullptr;
 
@@ -116,15 +180,18 @@ std::string FileFactory::LoadParticleEmitter(const char* szFileName)
 	{
 		const char* szTexName = emissionDef.textureData[i].name;
 
+		usg::string path = "particle/Textures/";
+		path += szTexName;
+
 		YAML::Node out;
 		out.force_insert("format", "BC7");
 		out.force_insert("mips", true);
-		AddTextureDependecy(szTexName, pFileEntry, out);
+		AddTextureDependecy(path.c_str(), pFileEntry, out);
 	}
 
 	m_resources.push_back(pFileEntry);
 
-	return szFileName;
+	return outName;
 }
 
 std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)

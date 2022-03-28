@@ -143,6 +143,9 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 
 	m_editorShapes.Init(pDevice, &m_emitterPreview.GetScene());
 
+	// FIXME: Remove hardcoding of effects pak
+	pResMgr->LoadPackage(pDevice, "particle/Effects");
+
 	m_emitter.Alloc(pDevice, &m_emitterPreview.GetScene().GetParticleMgr(), "water_halo", true );
 	m_emitter.Init(pDevice, &m_emitterPreview.GetEffect());
 	m_emitterWindow.GetVariables() = m_emitter.GetDefinition();

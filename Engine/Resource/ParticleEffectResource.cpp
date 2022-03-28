@@ -15,6 +15,21 @@ namespace usg{
 
     }
 
+	bool ParticleEffectResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader,
+		const class FileDependencies* pDependencies, const void* pData)
+	{
+		m_name = pFileHeader->szName;
+		str::RemovePath(m_name);
+		str::TruncateExtension(m_name);
+		SetupHash(pFileHeader->szName);
+
+		ProtocolBufferFile effectVPB((void*)pData, (memsize)pFileHeader->uDataSize);
+
+		bool bReadSucceeded = effectVPB.Read(&m_definition);
+		SetReady(true);
+		return bReadSucceeded;
+	}
+
 	bool ParticleEffectResource::Load(const char* szFileName)
 	{
 		m_name = szFileName;
