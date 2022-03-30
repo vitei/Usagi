@@ -19,6 +19,19 @@ public:
 
 	void Init(const char* szDirectory, const char* requiredExt, bool bSubDirectories = false)
 	{
+		m_cmpExt.clear();
+		if (requiredExt && requiredExt[0] != '\0')
+		{
+			m_cmpExt.push_back(requiredExt);
+		}
+		m_directory = szDirectory;
+		m_bSubDirectories = bSubDirectories;
+
+		Update();
+	}
+
+	void Init(const char* szDirectory, const usg::vector< usg::string >& requiredExt, bool bSubDirectories = false)
+	{
 		m_cmpExt = requiredExt;
 		m_directory = szDirectory;
 		m_bSubDirectories = bSubDirectories;
@@ -31,7 +44,16 @@ public:
 	{
 		// file object contains relative path in the case of 
 		// directory iterators (i.e. just the file name)
-		if (m_cmpExt.length() == 0 || file.extension() == m_cmpExt.c_str())
+		bool bValidFile = m_cmpExt.empty();
+		for (auto itr : m_cmpExt)
+		{
+			if (file.extension() == itr.c_str())
+			{
+				bValidFile = true;
+			}
+		}
+
+		if (bValidFile)
 		{
 			FileType parentPath = file.parent_path();
 			usg::string rootPath = parentPath.generic_u8string().c_str();
@@ -86,8 +108,8 @@ private:
 	uint32					m_uFileNameCount;
 	bool					m_bSubDirectories;
 
-	usg::string				m_cmpExt;
-	usg::string				m_directory;
+	usg::vector< usg::string >	m_cmpExt;
+	usg::string					m_directory;
 	
 };
 

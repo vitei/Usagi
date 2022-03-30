@@ -119,6 +119,8 @@ void mem::Cleanup()
 {
 	// FIXME: Free the heaps we've allocated!!!!!!!!!
 	mem::ps::Cleanup();
+	// Anything after this point was external to our memory management
+	mem::setConventionalMemManagement(true);
 }
 
 

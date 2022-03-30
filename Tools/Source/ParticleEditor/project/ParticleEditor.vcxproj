@@ -110,7 +110,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(USAGI_DIR)\Engine\ThirdParty\compressonator\cmp_compressonatorlib;$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;_DEBUG;NW_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -118,8 +118,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CMP_Framework_MTd.lib;shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib;$(USAGI_DIR)\Engine\ThirdParty\compressonator\Build\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
@@ -156,7 +156,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(USAGI_DIR)\Engine\ThirdParty\compressonator\cmp_compressonatorlib;$(SolutionDir);$(USAGI_DIR);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(NW4F_ROOT)\Library\snd\include;$(NW4F_ROOT)\Library\sys\include;$(NW4F_ROOT)\Library\WinExt\include;%(AdditionalIncludeDirectories);$(CTRMW_CFL_ROOT)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(DEFINES);_CRT_SECURE_NO_WARNINGS;PARTICLE_EDITOR;PLATFORM_PC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -166,8 +166,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CMP_Framework_MT.lib;shlwapi.lib;dxguid.lib;dinput8.lib;vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib;$(USAGI_DIR)\Engine\ThirdParty\compressonator\Build\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>

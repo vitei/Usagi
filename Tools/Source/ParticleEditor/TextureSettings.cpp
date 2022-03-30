@@ -4,6 +4,7 @@
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Graphics/Textures/TGAFile.h"
 #include "TextureSettings.h"
+#include "compressonator.h"
 #include "gli/gli.hpp"
 
 
@@ -39,7 +40,10 @@ void TextureSettings::Init(usg::GFXDevice* pDevice, usg::IMGuiRenderer* pRendere
 	m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, "Textures/missing_texture", true, usg::GPU_LOCATION_STANDARD);
 	vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());
 	m_texture.Init(pDevice, "Particle tex", vTextureSize, m_pTexture);
-	m_fileList.Init("../../Data/Particle/textures/", ".dds");
+	usg::vector< usg::string > extensions;
+	extensions.push_back(".dds");
+	extensions.push_back(".tga");
+	m_fileList.Init("../../Data/Particle/textures/", extensions);
 	m_fileListBox.Init("Texture Select", m_fileList.GetFileNamesRaw());
 	m_repeat.Init("Repeat X, Y", defaultRepeat, 2, 1, 32);
 	m_repeat.SetToolTip("Number of sub images in the image along X and Y");
@@ -263,7 +267,51 @@ void TextureSettings::SetWidgetsFromDefinition(usg::particles::EmitterEmission& 
 	}
 }
 
+bool CompressionCallback(CMP_FLOAT fProgress, CMP_DWORD_PTR pUser1, CMP_DWORD_PTR pUser2)
+{
+	return false;
+}
 
+
+// Internally we can't work with TGA files, so convert them when an image is selected
+void TextureSettings::ConvertTGA(usg::GFXDevice* pDevice, const usg::string& name, const usg::string& outName)
+{
+	CMP_MipSet MipSetIn;
+	memset(&MipSetIn, 0, sizeof(CMP_MipSet));
+	CMP_ERROR cmp_status = CMP_LoadTexture(name.c_str(), &MipSetIn);
+	if (cmp_status != CMP_OK) {
+		return;
+	}
+
+	CMP_INT nMinSize = CMP_CalcMinMipSize(MipSetIn.m_nHeight, MipSetIn.m_nWidth, 10);
+	CMP_GenerateMIPLevels(&MipSetIn, nMinSize);
+
+#if 0
+	KernelOptions   kernel_options;
+	memset(&kernel_options, 0, sizeof(KernelOptions));
+
+	// Final version will be compressed but we can be slow
+	kernel_options.format = CMP_FORMAT::CMP_FORMAT_ABGR_8888;   // Set the format to process
+	kernel_options.fquality = 0.05f;		 // Set the quality of the result
+	kernel_options.threads = 0;              // Auto setting
+	kernel_options.srcformat = MipSetIn.m_format;
+	kernel_options.useSRGBFrames = false;
+
+	CMP_MipSet MipSetCmp;
+
+	memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
+
+	cmp_status = CMP_ProcessTexture(&MipSetIn, &MipSetCmp, kernel_options, CompressionCallback);
+	if (cmp_status != CMP_OK)
+	{
+		// Failed
+		return;
+	}
+
+	cmp_status = CMP_SaveTexture(outName.c_str(), &MipSetCmp);
+#endif
+	cmp_status = CMP_SaveTexture(outName.c_str(), &MipSetIn);
+}
 
 bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, usg::ScriptEmitter* pEffect, float fElapsed)
 {
@@ -288,6 +336,16 @@ bool TextureSettings::Update(usg::GFXDevice* pDevice, usg::particles::EmitterEmi
 		usg::string texName = "../../Data/particle/textures/";
 		texName += m_fileList.GetFileName(m_fileListBox.GetSelected());
 		// The resource manager adds the extension
+		if (str::EndsWithToken(texName.c_str(), ".tga"))
+		{
+			usg::string outName = "../_dump/";
+			CreateDirectory(outName.c_str(), 0);
+			outName += m_fileList.GetFileName(m_fileListBox.GetSelected());
+			str::TruncateExtension(outName);
+			outName += ".dds";
+			ConvertTGA(pDevice, texName, outName);
+			texName = outName;
+		}
 		str::TruncateExtension(texName);
 		m_pTexture = usg::ResourceMgr::Inst()->GetTextureAbsolutePath(pDevice, texName.c_str(), true, usg::GPU_LOCATION_STANDARD);
 		vTextureSize.x *= ((float)m_pTexture->GetWidth()/(float)m_pTexture->GetHeight());

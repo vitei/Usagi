@@ -102,7 +102,7 @@ void PreviewModel::Update(usg::GFXDevice* pDevice, float fElapsed)
 		usg::ResourceMgr::Inst()->LoadPackage(pDevice, m_paksForModels[modelName].c_str());
 
 		m_pModel = vnew(usg::ALLOC_OBJECT) usg::Model;
-		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.c_str(), false, usg::RenderMask::RENDER_MASK_ALL, true, false);
+		m_pModel->Load(pDevice, m_pScene, usg::ResourceMgr::Inst(), modelName.c_str(), false, true, true, false);
 	}
 	if (m_pModel)
 	{

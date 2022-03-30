@@ -27,6 +27,7 @@ public:
 
 private:
 	virtual void MultiLoadCallback(const char* szName, const usg::vector<usg::FilePathResult>& results);
+	void ConvertTGA(usg::GFXDevice* pDevice, const usg::string& name, const usg::string& outName);
 
 	void UpdateAnimFrames(usg::GFXDevice* pDevice);
 	void SetAnimPreview(usg::GFXDevice* pDevice, usg::particles::EmitterEmission& structData, float fElapsed);
