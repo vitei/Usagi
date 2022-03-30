@@ -62,11 +62,15 @@ void ShadowContext::Init(const Camera* pCamera)
 	m_searchObject.SetFrustum(&m_pCamera->GetFrustum());
 }
 
-void ShadowContext::SetNonShadowFlags(uint32 uFlags)
+void ShadowContext::SetShadowFlags(uint32 uFlags)
 {
 	m_searchObject.SetMask(uFlags);
 }
 
+void ShadowContext::SetShadowExcludeFlags(uint32 uFlags)
+{
+	m_searchObject.SetExclFlags(uFlags);
+}
 
 void ShadowContext::Update(GFXDevice* pDevice)
 {

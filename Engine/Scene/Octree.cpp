@@ -459,10 +459,12 @@ void Octree::Node::GetVisibleList(SearchFrustum& object)
 		OctreeComponent* pComponent = m_pGeomList;
 		uint32 uMask = object.GetMask();
 		uint32 uReq = object.GetReqFlags();
+		uint32 uExcl = object.GetExclFlags();
 
 		while (pComponent)
 		{
-			if ((uMask & pComponent->uTestMask) != 0 && ((uReq & pComponent->uTestMask) == uReq) )
+			if ((uMask & pComponent->uTestMask) != 0 && ((uReq & pComponent->uTestMask) == uReq)
+				&& ((uExcl & pComponent->uTestMask) == 0) )
 			{
 				if (pFrustum->IsSphereInFrustum(pComponent->pNode->GetWorldSphere()))
 				{
@@ -526,7 +528,9 @@ const AABB& Octree::GetWorldBounds() const
 
 Octree::SearchObject::SearchObject()
 {
-
+	m_uExclFlags = 0;
+	m_uReqFlags = 0;
+	m_uMask = 0xffffffff;
 }
 
 Octree::SearchObject::~SearchObject()

@@ -35,9 +35,14 @@ public:
 
 	void DrawScene(GFXContext* pContext);
 
-	void SetNonShadowFlags(uint32 uFlags)
+	void SetShadowFlags(uint32 uFlags)
 	{
 		m_searchObject.SetMask(uFlags);
+	}
+
+	void SetShadowExcludeFlags(uint32 uFlags)
+	{
+		m_searchObject.SetExclFlags(uFlags);
 	}
 
 protected:

@@ -38,7 +38,8 @@ public:
 	const ConstantSet* GetShadowConstants() { return &m_readConstants; }
 	const TextureHndl GetShadowTexture() { return m_depthBuffer.GetTexture(); }
 
-	void SetNonShadowFlags(uint32 uFlags);
+	void SetShadowCastFlags(uint32 uFlags);
+	void SetShadowExcludeFlags(uint32 uFlags);
 
 private:
 

@@ -112,11 +112,19 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 }
 
 
-void PointLight::SetNonShadowFlags(uint32 uFlags)
+void PointLight::SetShadowCastFlags(uint32 uFlags)
 {
 	if (m_pShadow)
 	{
-		m_pShadow->SetNonShadowFlags(uFlags);
+		m_pShadow->SetShadowCastFlags(uFlags);
+	}
+}
+
+void PointLight::SetShadowExcludeFlags(uint32 uFlags)
+{
+	if (m_pShadow)
+	{
+		m_pShadow->SetShadowExcludeFlags(uFlags);
 	}
 }
 

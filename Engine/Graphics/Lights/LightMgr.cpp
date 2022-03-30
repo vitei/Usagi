@@ -50,17 +50,17 @@ void LightMgr::SetShadowCastingFlags(uint32 uFlags)
 	m_uShadowCastingFlags = uFlags;
 	for (auto itr : m_dirLights.GetActiveLights())
 	{
-		itr->SetNonShadowFlags(uFlags);
+		itr->SetShadowCastFlags(uFlags);
 	}
 
 	for (auto itr : m_pointLights.GetActiveLights())
 	{
-		itr->SetNonShadowFlags(uFlags);
+		itr->SetShadowCastFlags(uFlags);
 	}
 
 	for (auto itr : m_spotLights.GetActiveLights())
 	{
-		itr->SetNonShadowFlags(uFlags);
+		itr->SetShadowCastFlags(uFlags);
 	}
 }
 
@@ -258,7 +258,7 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 	if(szName)
 		pLight->SetName(szName);
 
-	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
+	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
 	if (bSupportsShadow)
 		m_uShadowedDirLights++;
@@ -283,7 +283,7 @@ PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, co
 	if(szName)
 		pLight->SetName(szName);
 
-	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
+	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
 	return pLight;
 }
@@ -300,7 +300,7 @@ SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, cons
 	if(szName)
 		pLight->SetName(szName);
 
-	pLight->SetNonShadowFlags(m_uShadowCastingFlags);
+	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
 
 	return pLight;
@@ -511,6 +511,7 @@ Light* LightMgr::CreateLight(GFXDevice* pDevice, ResourceMgr* pResMgr, const Lig
 		newLight->SetDiffuse(light.base.diffuse);
 		newLight->SetAmbient(light.base.ambient);
 		newLight->SetSpecularColor(light.base.specular);
+		newLight->SetShadowExcludeFlags(light.base.uShadowExclFlags);
 		newLight->SwitchOn(true);
 	}
 

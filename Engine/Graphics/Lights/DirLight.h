@@ -33,7 +33,7 @@ public:
 	const ShadowCascade* GetCascade() const { return m_pShadowCascade; }
 	ShadowCascade* GetCascade() { return m_pShadowCascade; }
 
-	void SetNonShadowFlags(uint32 uFlags);
+	void SetShadowCastFlags(uint32 uFlags);
 
 	bool operator < (const DirLight& rhs) const;
 protected:

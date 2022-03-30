@@ -120,9 +120,14 @@ namespace usg
 		m_readConstants.UpdateData(pDevice);
 	}
 
-	void ProjectionShadow::SetNonShadowFlags(uint32 uFlags)
+	void ProjectionShadow::SetShadowCastFlags(uint32 uFlags)
 	{
-		m_pSceneContext->SetNonShadowFlags(uFlags);
+		m_pSceneContext->SetShadowFlags(uFlags);
+	}
+
+	void ProjectionShadow::SetShadowExcludeFlags(uint32 uFlags)
+	{
+		m_pSceneContext->SetShadowExcludeFlags(uFlags);
 	}
 
 	

@@ -47,12 +47,14 @@ module ComponentExtractor
       @atten_enabled = false
       @atten_start = 0.0
       @atten_end = 10000.0
+      @excl_flags = 0x00001000;
     end
 
     def to_object
 
       base = { 'kind' => @type, 'ambient' => @ambient,
-        'diffuse' => @diffuse, 'specular' => @specular, 'bShadow' => @has_shadow }
+        'diffuse' => @diffuse, 'specular' => @specular, 'bShadow' => @has_shadow,
+        'uShadowExclFlags' => @excl_flags }
       atten = { 'bEnabled' => @atten_enabled, 'fNear' => @atten_start, 'fFar' => @atten_end }
       spot = { 'fInnerAngle' => @inner_angle, 'fOuterAngle' => @outer_angle }
       spec = {'direction' => @direction, 'base' => base, 'atten' => atten, 'spot' => spot}

@@ -44,7 +44,8 @@ public:
 	bool IsInRange(AABB& testBox);
 	bool IsInVolume(const Vector4f& vPos) const;
 
-	void SetNonShadowFlags(uint32 uFlags);
+	void SetShadowCastFlags(uint32 uFlags);
+	void SetShadowExcludeFlags(uint32 uFlags);
 
 	void GPUUpdate(GFXDevice* pDevice) override;
 	bool ShadowRender(GFXContext* pContext) override;

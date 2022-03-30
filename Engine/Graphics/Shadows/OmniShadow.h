@@ -38,7 +38,9 @@ public:
 
 	TextureHndl GetShadowTexture();
 
-	void SetNonShadowFlags(uint32 uFlags);
+	void SetShadowCastFlags(uint32 uFlags);
+	void SetShadowExcludeFlags(uint32 uFlags);
+
 
 
 	enum

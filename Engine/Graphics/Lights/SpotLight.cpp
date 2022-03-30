@@ -80,11 +80,19 @@ SpotLight::~SpotLight(void)
 }
 
 
-void SpotLight::SetNonShadowFlags(uint32 uFlags)
+void SpotLight::SetShadowCastFlags(uint32 uFlags)
 {
 	if (m_pShadow)
 	{
-		m_pShadow->SetNonShadowFlags(uFlags);
+		m_pShadow->SetShadowCastFlags(uFlags);
+	}
+}
+
+void SpotLight::SetShadowExcludeFlags(uint32 uFlags)
+{
+	if (m_pShadow)
+	{
+		m_pShadow->SetShadowExcludeFlags(uFlags);
 	}
 }
 

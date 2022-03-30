@@ -81,11 +81,11 @@ const Vector4f& DirLight::GetDirection() const
 	return m_direction;
 }
 
-void DirLight::SetNonShadowFlags(uint32 uFlags)
+void DirLight::SetShadowCastFlags(uint32 uFlags)
 {
 	if (m_pShadowCascade)
 	{
-		m_pShadowCascade->SetNonShadowFlags(uFlags);
+		m_pShadowCascade->SetShadowCastFlags(uFlags);
 	}
 }
 

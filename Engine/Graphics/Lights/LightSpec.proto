@@ -30,11 +30,12 @@ message HemisphericalLightSpec {
 
 message LightSpecBase
 {
-	required LightKind kind     = 1;
-	required Color ambient      = 2;
-	required Color diffuse      = 3;
-	required Color specular     = 4;
-	required bool  bShadow 		= 5;	
+	required LightKind kind			= 1;
+	required Color ambient			= 2;
+	required Color diffuse			= 3;
+	required Color specular		    = 4;
+	required bool  bShadow	 		= 5;	
+	required uint32 uShadowExclFlags= 6;
 };
 
 message LightSpecAttenuation

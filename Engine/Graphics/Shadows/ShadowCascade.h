@@ -33,7 +33,7 @@ public:
 	virtual void CreateShadowTex(GFXContext* pContext);
 	virtual void Finished(GFXContext* pContext);
 
-	void SetNonShadowFlags(uint32 uFlags);
+	void SetShadowCastFlags(uint32 uFlags);
 
 	const ConstantSet* GetShadowReadConstants() const { return &m_readConstants; }
 	ShadowContext* GetContext(uint32 uContext) { return m_pSceneContext[uContext]; }
