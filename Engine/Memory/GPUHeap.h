@@ -10,6 +10,7 @@
 
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Memory/MemAllocator.h"
+#include "Engine/Core/stl/list.h"
 
 namespace usg {
 
@@ -29,6 +30,8 @@ public:
 	void RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
 	bool CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator);
 
+	void MergeMemory(uint32 uCurrentFrame);
+
 private:
 	
 	struct BlockInfo
@@ -37,17 +40,13 @@ private:
 		void*			pLocation;
 		memsize			uSize;
 
-		BlockInfo*		pNext;
-		BlockInfo*		pPrev;
-
-		BlockInfo*		pListNext;
-		BlockInfo*		pListPrev;
+		bool operator <(const BlockInfo& rhs) { return pLocation < rhs.pLocation; }
 
 		uint32			uFreeFrame;
 		bool			bValid;
 	};
 
-	void SwitchList(BlockInfo* pInfo, BlockInfo** ppSrcList, BlockInfo** ppDstList);
+	void SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList);
 	BlockInfo* PopList(BlockInfo** ppSrcList, BlockInfo** ppDstList);
 	bool CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame);
 
@@ -59,10 +58,11 @@ private:
 	uint32		m_uMaxAllocs;
 	BlockInfo*	m_memoryBlocks;
 
-	BlockInfo*	m_pFreeList;
-	BlockInfo*	m_pUnusedList;
-	BlockInfo*	m_pAllocList;
+	usg::list< BlockInfo* >	m_freeList;
+	usg::list< BlockInfo* >	m_unusedList;
+	usg::list< BlockInfo* >	m_allocList;
 	bool		m_bDelayFree;
+	int			m_iMergeFrames;
 };
 
 }

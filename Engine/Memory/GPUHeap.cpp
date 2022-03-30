@@ -11,6 +11,7 @@ GPUHeap::GPUHeap()
 {
 	//MemClear(m_memoryBlocks, sizeof(BlockInfo*)*MAX_GPU_ALLOCATIONS);
 	m_memoryBlocks = NULL;
+	m_iMergeFrames = 0;
 }
 
 GPUHeap::~GPUHeap()
@@ -35,23 +36,18 @@ void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs, bool bDelayFree
 		pInfo->uSize		= 0;
 		pInfo->bValid		= false;
 
-		pInfo->pListNext	= i < (uMaxAllocs-1) ? &m_memoryBlocks[i+1] : NULL;	
-		pInfo->pListPrev	= i > 0 ? &m_memoryBlocks[i-1] : NULL;
-
-		pInfo->pNext	= NULL;	
-		pInfo->pPrev	= NULL;
 		pInfo->uFreeFrame = USG_INVALID_ID;
 	}
 
 	m_memoryBlocks[0].uSize		= uSize;
 	m_memoryBlocks[0].pLocation	= m_pHeapMem;
 	m_memoryBlocks[0].bValid		= true;
-	m_memoryBlocks[0].pListNext		= NULL;
-	m_memoryBlocks[0].pListPrev		= NULL;
 
-	m_pAllocList = NULL;
-	m_pFreeList = &m_memoryBlocks[0];
-	m_pUnusedList = &m_memoryBlocks[1];
+	m_freeList.push_back(&m_memoryBlocks[0]);
+	for (uint32 i = 1; i < uMaxAllocs; i++)
+	{
+		m_unusedList.push_back(&m_memoryBlocks[i]);
+	}
 }
 
 bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
@@ -75,56 +71,9 @@ bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
 	return false;
 }
 
-void GPUHeap::SwitchList(BlockInfo* pInfo, BlockInfo** ppSrcList, BlockInfo** ppDstList)
-{
-	ASSERT(pInfo!=NULL);
 
-	// Fist take us out of the list
-	if(pInfo->pListNext)
-	{
-		pInfo->pListNext->pListPrev = pInfo->pListPrev;
-	}
-	if(pInfo->pListPrev)
-	{
-		pInfo->pListPrev->pListNext = pInfo->pListNext;
-	}
 
-	// Update the pointer if necessary
-	if(*ppSrcList == pInfo)
-	{
-		*ppSrcList = pInfo->pListNext;
-	}
-	
-	pInfo->pListPrev = NULL;
-	pInfo->pListNext = *ppDstList;
-	if(*ppDstList)
-	{
-		(*ppDstList)->pListPrev = pInfo;
-	}
-	*ppDstList = pInfo;
-}
 
-GPUHeap::BlockInfo* GPUHeap::PopList(BlockInfo** ppSrcList, BlockInfo** ppDstList)
-{
-	BlockInfo* pReturn = *ppSrcList;
-	if(pReturn)
-	{
-		*ppSrcList = pReturn->pListNext;
-		if(*ppSrcList)
-		{
-			(*ppSrcList)->pListPrev = NULL;
-		}
-		pReturn->pListPrev = NULL;
-		pReturn->pListNext = *ppDstList;
-		if(*ppDstList)
-		{
-			(*ppDstList)->pListPrev = pReturn;
-		}
-		*ppDstList = pReturn;
-	}
-
-	return pReturn;
-}
 
 void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
@@ -132,9 +81,7 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 	uint32 uSpace = (uint32)AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 	uint32 uCurrentFrame = pDevice->GetFrameCount();
 
-	BlockInfo* pInfo = m_pFreeList;
-
-	while(pInfo)
+	for( auto pInfo : m_freeList)
 	{
 		ASSERT(pInfo->bValid);
 
@@ -146,13 +93,12 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 				pSmallest = pInfo;
 			}
 		}
-		pInfo = pInfo->pListNext;
 	}
 
 	if(pSmallest)
 	{
 		pSmallest->pAllocator = pAllocator;
-		SwitchList(pSmallest, &m_pFreeList, &m_pAllocList);
+		SwitchList(pSmallest, m_freeList, m_allocList);
 		AllocMemory(pSmallest);
 		return;
 	}
@@ -160,10 +106,23 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 	ASSERT(false);
 }
 
+void GPUHeap::SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList)
+{
+	srcList.remove(pInfo);
+
+	if (&dstList == &m_freeList)
+	{
+		dstList.insert(eastl::lower_bound(dstList.begin(), dstList.end(), pInfo), pInfo);
+	}
+	else
+	{
+		dstList.push_back(pInfo);
+	}
+}
+
 void GPUHeap::RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
-	BlockInfo* pInfo = m_pAllocList;
-	while(pInfo)
+	for(auto pInfo : m_allocList)
 	{
 		if( pInfo->pAllocator == pAllocator )
 		{
@@ -174,7 +133,6 @@ void GPUHeap::RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 			pInfo->uFreeFrame = pDevice->GetFrameCount();
 			return;
 		}
-		pInfo = pInfo->pListNext;
 	}
 
 	ASSERT(false);
@@ -195,7 +153,9 @@ void GPUHeap::ReleaseAll()
 
 GPUHeap::BlockInfo* GPUHeap::FindUnusedBlock()
 {
-	return PopList(&m_pUnusedList, &m_pFreeList);
+	BlockInfo* front = m_unusedList.front();
+	m_unusedList.pop_front();
+	return front;
 }
 
 void GPUHeap::AllocMemory(BlockInfo* pInfo)
@@ -216,22 +176,18 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 	{
 		BlockInfo* pNext = FindUnusedBlock();
 	
-		if(pInfo->pNext)
-		{
-			pInfo->pNext->pPrev = pNext;
-		}
+		m_freeList.push_back(pNext);
+
 		pNext->bValid = true;
 		pNext->uSize = pInfo->uSize - blockSize;
 		pNext->pLocation = (void*)(((memsize)pInfo->pLocation)+blockSize);
-		pNext->pPrev = pInfo;
-		pNext->pNext = pInfo->pNext;
 		pNext->pAllocator = NULL;
-
-		pInfo->pNext = pNext;
 		pInfo->uSize = blockSize;
 	}
 
 	pAllocator->Allocated(pData);
+
+	m_iMergeFrames = GFX_NUM_DYN_BUFF;
 }
 
 void GPUHeap::FreeMemory(BlockInfo* pInfo)
@@ -241,50 +197,53 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 	MemAllocator* pAllocator = pInfo->pAllocator;
 	pInfo->pAllocator = NULL;
 
-	SwitchList(pInfo, &m_pAllocList, &m_pFreeList);
-	// If the next block is empty then take over it's memory
-	if(pInfo->pNext && pInfo->pNext->pAllocator == NULL)
-	{
-		pInfo->uSize += pInfo->pNext->uSize;
-		pInfo->pNext->bValid = false;
-		SwitchList(pInfo->pNext, &m_pFreeList, &m_pUnusedList);
-		pInfo->pNext = pInfo->pNext->pNext;
-		if(pInfo->pNext)
-		{
-			// Hook up the next pointer
-			pInfo->pNext->pPrev = pInfo;
-		}
-	}
-
-	// If the previous block is empty then have it take over our memory
-	if(pInfo->pPrev && pInfo->pPrev->pAllocator == NULL)
-	{
-		BlockInfo* pPrev = pInfo->pPrev;
-		pPrev->uSize += pInfo->uSize;
-		pInfo->bValid = false;
-		pPrev->pNext = pInfo->pNext;
-		SwitchList(pInfo, &m_pFreeList, &m_pUnusedList);
-		if(pPrev->pNext)
-		{
-			// Hook up the next pointer
-			pPrev->pNext->pPrev = pPrev;
-		}
-	}
+	SwitchList(pInfo, m_allocList, m_freeList);
 
 	pAllocator->Released();
+
+	m_iMergeFrames = GFX_NUM_DYN_BUFF;
 }
+
+void GPUHeap::MergeMemory(uint32 uCurrentFrame)
+{
+	if (m_iMergeFrames <= 0)
+		return;
+	BlockInfo* pPrev = nullptr;
+	for (auto itr : m_freeList)
+	{
+		if (pPrev && CanAlloc(uCurrentFrame, pPrev->uFreeFrame) && CanAlloc(uCurrentFrame, itr->uFreeFrame) )
+		{
+			uint8* pPrevEnd = ((uint8*)pPrev->pLocation) + pPrev->uSize;
+			uint8* pCurr = (uint8*)itr->pLocation;
+
+			if (pPrevEnd == pCurr)
+			{
+				pPrev->uSize += itr->uSize;
+				SwitchList(itr, m_freeList, m_unusedList);
+				// There will usually be space so don't go overboard trying to free
+				return;
+			}
+		}
+
+		pPrev = itr;
+	}
+
+	m_iMergeFrames--;
+}
+
 
 bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
 	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 	uint32 uCurrentFrame = pDevice->GetFrameCount();
 
-	BlockInfo* pInfo = m_pFreeList;
-
-	if(!m_pUnusedList)
+	if (m_freeList.empty())
 		return false;
 
-	while(pInfo)
+	if(m_unusedList.empty())
+		return false;
+
+	for(auto pInfo : m_freeList)
 	{
 		ASSERT(pInfo->bValid);
 		ASSERT(pInfo->pAllocator==NULL);
@@ -293,7 +252,6 @@ bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 		{
 			return true;
 		}
-		pInfo = pInfo->pListNext;
 	}
 
 	return false;

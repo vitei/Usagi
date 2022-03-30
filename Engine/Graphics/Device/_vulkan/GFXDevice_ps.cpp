@@ -783,6 +783,14 @@ void GFXDevice_ps::End()
 
 	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
 	ASSERT(res == VK_SUCCESS);
+
+	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
+	{
+		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
+		{
+			m_memoryPools[type].heaps[i]->MergeMemory(m_pParent->GetFrameCount());
+		}
+	}
 }
 
  

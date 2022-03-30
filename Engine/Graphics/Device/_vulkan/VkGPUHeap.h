@@ -15,7 +15,7 @@ namespace usg {
 class VkMemAllocator;
 class GFXDevice;
 
-class VkGPUHeap : protected GPUHeap
+class VkGPUHeap : public GPUHeap
 {
 	typedef GPUHeap Inherited;
 public:
