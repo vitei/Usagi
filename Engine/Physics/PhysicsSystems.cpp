@@ -535,6 +535,31 @@ namespace usg
 				ASSERT(pRigidDynamic != nullptr);
 				pRigidDynamic->setAngularVelocity(ToPhysXVec3(evt.vVelocity));
 			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetMaxAngularVelocity& evt)
+			{
+				if (!inputs.rigidBody->bDynamic || inputs.rigidBody->bKinematic)
+				{
+					return;
+				}
+				ASSERT(inputs.rigidBody->bDynamic);
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(pRigidDynamic != nullptr);
+				pRigidDynamic->setMaxAngularVelocity(evt.fMax);
+			} 
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetMaxLinearVelocity& evt)
+			{
+				if (!inputs.rigidBody->bDynamic || inputs.rigidBody->bKinematic)
+				{
+					return;
+				}
+				ASSERT(inputs.rigidBody->bDynamic);
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(pRigidDynamic != nullptr);
+				pRigidDynamic->setMaxLinearVelocity(evt.fMax);
+			}
+
 		};
 		
 		class RigidBodyUpdateWorldMatrix : public System

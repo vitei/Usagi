@@ -207,6 +207,18 @@ namespace usg
 		}
 
 		template<typename T>
+		float GetLinearDamping(Required<RigidBody, T> rigidBody)
+		{
+			if (rigidBody->bDynamic)
+			{
+				physx::PxRigidDynamic* pRigidDynamic = rigidBody.GetRuntimeData().pRigidActor->template is<physx::PxRigidDynamic>();
+				ASSERT(pRigidDynamic != nullptr);
+				return pRigidDynamic->getLinearDamping();
+			}
+			return 0.0f;
+		}
+
+		template<typename T>
 		Vector3f GetAngularVelocity(Required<RigidBody, T> rigidBody)
 		{
 			if (rigidBody->bDynamic)

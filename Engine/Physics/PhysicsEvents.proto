@@ -37,6 +37,16 @@ message SetLinearVelocity
 	required usg.Vector3f vVelocity = 1;
 }
 
+message SetMaxLinearVelocity
+{
+	required float fMax = 1;
+}
+
+message SetMaxAngularVelocity
+{
+	required float fMax = 1;
+}
+
 message AddLinearVelocity
 {
 	required usg.Vector3f vVelocity = 1;
