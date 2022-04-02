@@ -64,6 +64,8 @@ namespace usg
 
 		void PreloadAssetsFromTemplate(const char* szFilename, ComponentLoadHandles& handles);
 		void PreloadAssetsFromFile(ProtocolBufferFile& file, ComponentLoadHandles& handles);
+		// If we made changes outside of spawning
+		void ForceCallOnLoaded(Entity e);
 	private:
 		void HandleSpawnRequests();
 		void RegisterComponents();

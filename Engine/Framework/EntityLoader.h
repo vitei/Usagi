@@ -21,6 +21,7 @@ namespace usg
 		ComponentEntity* SpawnEntityFromTemplate(const char* szFilename, ComponentEntity* parent, const EntitySpawnParams& spawnParams);
 
 		void ApplyTemplateToEntity(const char* szFilename, ComponentEntity* root);
+		void ForceCallOnLoaded(Entity e);
 	private:
 		ComponentManager& m_componentManager;
 		SystemCoordinator& m_systemCoordinator;

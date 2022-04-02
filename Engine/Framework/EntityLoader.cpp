@@ -29,4 +29,9 @@ namespace usg
 	{
 		return m_componentManager.SpawnEntityFromTemplate(szFilename, parent, spawnParams);
 	}
+
+	void EntityLoader::ForceCallOnLoaded(Entity e)
+	{
+		m_componentManager.ForceCallOnLoaded(e);
+	}
 }

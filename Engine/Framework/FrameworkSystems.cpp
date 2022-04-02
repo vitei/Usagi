@@ -50,6 +50,7 @@ namespace usg
 			struct Outputs
 			{
 				Required<StateComponent> state;
+				Required<MaxLifetime>	maxLife;
 				Optional<HealthComponent> health;
 			};
 
@@ -68,6 +69,11 @@ namespace usg
 						outputs.state.Modify().current = STATUS_DEAD;
 					}
 				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetMaxLifetime& setLifespan)
+			{
+				outputs.maxLife.Modify().fMaxLifetime = setLifespan.lifetime;
 			}
 		};
 

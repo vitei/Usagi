@@ -463,6 +463,13 @@ namespace usg
 		m_systemCoordinator.LoadAndAttachComponent(hdr, file, e);
 	}
 
+	void ComponentManager::ForceCallOnLoaded(Entity e)
+	{
+		ComponentLoadHandles handles;
+		FillComponentLoadHandles(handles, e);
+		RecursivelyCallOnLoaded(e, handles);
+	}
+
 	void ComponentManager::RecursivelyCallOnLoaded(Entity e, ComponentLoadHandles& handles)
 	{
 		m_systemCoordinator.CallOnLoaded(e, handles);

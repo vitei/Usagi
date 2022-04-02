@@ -23,6 +23,12 @@ message IncreaseHealthEvent
 	required float amount = 1;
 }
 
+message SetMaxLifetime
+{
+	option (nanopb_msgopt).lua_send = true;
+	
+	required float lifetime = 1;
+}
 
 message SetHealthEvent
 {
