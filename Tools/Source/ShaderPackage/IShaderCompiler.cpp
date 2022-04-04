@@ -229,7 +229,7 @@ bool ParseManually(const char* szFileName, const char* szDefines, const class Ma
 			else
 			{
 				// FIXME: Mem leak
-				FATAL_RELEASE(false, "Missing include file %s\n", szFileName);
+				FATAL_RELEASE(false, "Missing include file %s in %s\n", szPragma, szFileName);
 				return false;
 			}
 		}

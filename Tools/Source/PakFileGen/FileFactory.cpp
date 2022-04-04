@@ -384,6 +384,8 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 		skelName = skelName.substr(pos + 7);
 	}
 	skelName = skelDir + skelName;
+	skelName = RemoveExtension(skelName);
+	skelName += ".vmdf.xml";
 
 	bool bAsCollision = false;
 	if (node && node["IsCollision"])
@@ -448,7 +450,14 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 			m_resources.push_back(pAnim);
 		}
 
-		pConverter->ExportBoneHierarchy(skelDir.c_str());
+		skelDir = RemoveFileName(skelName);
+		do
+		{
+			pos = skelDir.find_first_of("\\/", pos + 1);
+			CreateDirectory(skelDir.substr(0, pos).c_str(), NULL);
+		} while (pos != std::string::npos);
+
+		pConverter->ExportBoneHierarchy(skelName.c_str());
 
 
 		std::vector<std::string> textureList = pConverter->GetTextureNames();

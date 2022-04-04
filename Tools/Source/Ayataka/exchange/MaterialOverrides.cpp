@@ -195,12 +195,14 @@ static const EnumTable g_wrapTable[]
 		if (fopen_s(&pFile, emuPath.c_str(), "r") != 0)
 		{
 			emuPath = szUsagiPath;
-			emuPath += "..\\Data\\GLSL\\effects\\";
+			emuPath = emuPath.substr(0, emuPath.find("Usagi"));
+			emuPath += "\\Data\\GLSL\\effects\\";
 			emuPath += effectSet;
 			emuPath += ".yml";
-			if (!fopen_s(&pFile, emuPath.c_str(), "r"))
+			int ret = 0;
+			if (ret = fopen_s(&pFile, emuPath.c_str(), "r") != 0)
 			{
-				FATAL_RELEASE(false, "Could not find effect %s\n", effectName.c_str());
+				FATAL_RELEASE(false, "Could not find effect %s, error %d\n", effectSet.c_str(), ret);
 				return;
 			}
 			fclose(pFile);

@@ -633,6 +633,10 @@ int MaterialDefinitionExporter::Load(const char* path, const std::string& define
 int MaterialDefinitionExporter::Load(const char* path, const char* effect, const std::vector<std::string>& defineSets)
 {
 	YAML::Node mainNode = YAML::LoadFile(path);
+
+	if (mainNode.IsNull())
+		return -1;
+
 	YAML::Node customFX = mainNode["CustomEffects"];
 	YAML::Node effects = mainNode["Effects"];
 	std::string defines;
