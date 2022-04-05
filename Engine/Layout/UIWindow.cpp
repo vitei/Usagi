@@ -558,8 +558,10 @@ void UIWindow::SetItemPos(uint32 uIndex, enum UIItemType eType, const usg::Vecto
 	case UI_ITEM_IMAGE:
 	{
 		ImageDef& def = m_pUIItemsDefs[uIndex].def;
-		usg::Vector2f vAdjPos = GetPos(bRelative ? def.vPos + vPos : vPos, def.vSize, def.eHAlign, def.eVAlign, this);
-		m_vertices[uIndex].vPosition.Assign(vAdjPos.x, vAdjPos.y, 0.0f);
+		ImageDef& defOut = m_pUIItemsDefs[uIndex].defOverride;
+		usg::Vector2f vAdjPos = bRelative ? def.vPos + vPos : vPos;
+		defOut.vPos = vAdjPos;
+		//m_vertices[uIndex].vPosition.Assign(vAdjPos.x, vAdjPos.y, 0.0f);
 		m_bVertsDirty = true;
 		break;
 	}
