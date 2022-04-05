@@ -79,6 +79,12 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		SetPriority(pMesh->priority);
 	}
 
+	// FIXME: We shouldn't be creating this mesh at all
+	if (bDepth && !pMesh->renderSets[ModelResource::Mesh::RS_DEPTH].pipeline.pEffect)
+	{
+		return;
+	}
+
 	RenderPassHndl renderPass = pScene->GetRenderPasses(0).GetRenderPass(*this);
 
 	if (bDepth)
@@ -109,13 +115,27 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	}
 
 	// FIXME: Single verts for omni depth!
-	m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline);
+	if (pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline.pEffect)
+	{
+		m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline);
+	}
 
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
 
 	// FIXME: Get the index from the custom fx declaration
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+
+	uint32 uFirstValid = 0;
+	for (uint32 i = 0; i < ModelResource::Mesh::RS_COUNT; i++)
+	{
+		if (pMesh->renderSets[i].pipeline.pEffect)
+		{
+			uFirstValid = i;
+			break;
+		}
+	}
+
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 
 	switch (pMesh->primitive.eSkinningMode)
 	{

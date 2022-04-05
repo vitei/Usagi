@@ -32,28 +32,37 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 				passDefines.push_back(itr);
 			}
 		}
-		m_materialDef[pass].Load(szPakName, szEffectName, defines);
-
-		for (uint32 i = 0; i < m_materialDef[pass].GetConstantSetCount(); i++)
+		if (m_materialDef[pass].Load(szPakName, szEffectName, defines) >= 0)
 		{
-			AddConstantSet(m_materialDef[pass].GetConstantSetName(i), pass, m_materialDef[pass].GetConstantSetSize(i));
-			m_materialDef[pass].CopyDefaultData(i, GetConstantSetData(pass, i));
-		}
 
-		std::string name;
-		name = szEffectName;
-		for (auto itr : passDefines)
-		{
-			if(itr.size() > 0)
+			for (uint32 i = 0; i < m_materialDef[pass].GetConstantSetCount(); i++)
 			{
-				name += std::string(".");
-				name += itr;
+				AddConstantSet(m_materialDef[pass].GetConstantSetName(i), pass, m_materialDef[pass].GetConstantSetSize(i));
+				m_materialDef[pass].CopyDefaultData(i, GetConstantSetData(pass, i));
 			}
+
+			std::string name;
+			name = szEffectName;
+			for (auto itr : passDefines)
+			{
+				if (itr.size() > 0)
+				{
+					name += std::string(".");
+					name += itr;
+				}
+			}
+
+			std::string pakName = szPakName;
+			size_t uLast = name.find_last_of("/") != std::string::npos ? pakName.find_last_of("/") : pakName.find_last_of("\\");
+			pakName = pakName.substr(uLast + 1, pakName.size() - 4 - uLast - 1);
+				// FIXME: Pack name from input
+			sprintf_s(m_material.renderPasses[pass].effectName, "%s.%s", pakName.c_str(), name.c_str());
 		}
-	//	size_t uLast = name.find_last_of("/") != std::string::npos ? name.find_last_of("/") : name.find_last_of("\\");
-	//	name = name.substr(uLast + 1, name.size() - 5 - uLast);
-		// FIXME: Pack name from input
-		sprintf_s(m_material.renderPasses[pass].effectName, "%s%s", "Model.", name.c_str());
+		else
+		{
+			// Invalid pass
+			m_material.renderPasses[pass].effectName[0] = '\0';
+		}
 
 	}
 

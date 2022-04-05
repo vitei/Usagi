@@ -427,8 +427,15 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	for(uint32 i=0; i<usg::exchange::_Material_RenderPass_count; i++)
 	{
-		effects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[i].effectName);
-		m_meshArray[m_uMeshCount].renderSets[i].effectRuntime.Init(pDevice, effects[i]->GetCustomEffect());
+		// For quicker turn around allow effects that don't support shadowing etc
+		if (pMaterial->renderPasses[i].effectName[0] != '\0')
+		{
+			effects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[i].effectName);
+			if (effects[i])
+			{
+				m_meshArray[m_uMeshCount].renderSets[i].effectRuntime.Init(pDevice, effects[i]->GetCustomEffect());
+			}
+		}
 	}
 
 	PipelineStateDecl pipelineState;
@@ -439,7 +446,17 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	ASSERT(uCount <= maxElements);
 
-	memsize uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, effects[usg::exchange::Material_RenderPass_DEFAULT]->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
+	memsize uVertexSize = 0;
+	uint32 uFirstValidPass = 0;
+	for (uint32 i = 0; i < usg::exchange::_Material_RenderPass_count; i++)
+	{
+		if (effects[i] != nullptr)
+		{
+			uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, effects[i]->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
+			uFirstValidPass = i;
+			break;
+		}
+	}
 
 	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
@@ -458,7 +475,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	// TODO: Implement skinning
 	m_meshArray[m_uMeshCount].name = pInitialMesh[meshIndex].name;
 	m_meshArray[m_uMeshCount].uLodIndex = 0;
-	const char* szLod = strstr(pInitialMesh[meshIndex].name, "LOD");
+	const char* szLod = strstr(pInitialMesh[meshIndex].name, "LOD");  
 	if( szLod )
 	{
 		m_meshArray[m_uMeshCount].uLodIndex  = szLod[3] - '0';
@@ -505,43 +522,52 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	rasterizerDecl.fDepthBias = static_cast<float>( pMaterial->rasterizer.polygonOffsetUnit );
 
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFAULT];
-	m_meshArray[m_uMeshCount].matName = pMaterial->materialName;
+	if (pipelineState.pEffect)
+	{
+		m_meshArray[m_uMeshCount].matName = pMaterial->materialName;
 
-	pipelineState.alphaState.uColorTargets = 2;
-	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
+		pipelineState.alphaState.uColorTargets = 2;
+		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
+	}
 
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFERRED];
-	pipelineState.alphaState.uColorTargets = 5;
-	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEFERRED, pipelineState);
-	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
+	if(pipelineState.pEffect != nullptr)
+	{
+		pipelineState.alphaState.uColorTargets = 5;
+		InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEFERRED, pipelineState);
+		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
+	}
 
 	pipelineState.alphaState.uColorTargets = 1;
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_TRANSPARENT];
-	if (m_meshArray[m_uMeshCount].layer < RenderLayer::LAYER_TRANSLUCENT)
+	if (pipelineState.pEffect != nullptr)
 	{
-		// FIXME: Default blend settings for now, just here to handle our issues with default imported blender materials
-		alphaDecl.bBlendEnable = true;
-		alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
-		alphaDecl.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
-		alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
+		/*if (m_meshArray[m_uMeshCount].layer < RenderLayer::LAYER_TRANSLUCENT)
+		{
+			// FIXME: Default blend settings for now, just here to handle our issues with default imported blender materials
+			alphaDecl.bBlendEnable = false;
+			alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
+			alphaDecl.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
+			alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
-		alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_ADD;
-		alphaDecl.srcBlendAlpha = usg::BLEND_FUNC_ZERO;
-		alphaDecl.dstBlendAlpha = usg::BLEND_FUNC_ONE;
+			alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_ADD;
+			alphaDecl.srcBlendAlpha = usg::BLEND_FUNC_ZERO;
+			alphaDecl.dstBlendAlpha = usg::BLEND_FUNC_ONE;
+		}*/
+		pipelineState.depthState.bDepthWrite = false;
+		InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_TRANSPARENT, pipelineState);
+		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
 	}
-	pipelineState.depthState.bDepthWrite = false;
-	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_TRANSPARENT, pipelineState);
-	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
 
 	
 	// FIXME: FXRunTime per type
-	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].renderSets[0].effectRuntime;
+	CustomEffectRuntime& fxRunTime = m_meshArray[m_uMeshCount].renderSets[uFirstValidPass].effectRuntime;
 
-	for (uint32 i = 0; i < pMaterial->renderPasses[0].constants_count; i++)
+	for (uint32 i = 0; i < pMaterial->renderPasses[uFirstValidPass].constants_count; i++)
 	{
 		// Override the default values if we have them
-		void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->renderPasses[0].constants[i].uOffset);
-		fxRunTime.SetSetData(i, pData, pMaterial->renderPasses[0].constants[i].uSize);
+		void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->renderPasses[uFirstValidPass].constants[i].uOffset);
+		fxRunTime.SetSetData(i, pData, pMaterial->renderPasses[uFirstValidPass].constants[i].uSize);
 	}
 	// The w is scaling of the vertex color, if 0 the vertex color is ignored
 	fxRunTime.SetVariable("iBoneCount", GetBoneIndexCount(pShape));
@@ -621,7 +647,10 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		}
 	}
 
-	CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial);
+	if (effects[usg::exchange::Material_RenderPass_DEPTH] != nullptr)
+	{
+		CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial);
+	}
 }
 
 

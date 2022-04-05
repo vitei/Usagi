@@ -213,8 +213,18 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
 		DescriptorSet& descSet = m_meshArray[i]->GetDescriptorSet();
 		// FIXME: Use the correct indicies
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[0].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+		uint32 uFirstValid = 0;
+		for (uint32 i = 0; i < ModelResource::Mesh::RS_COUNT; i++)
+		{
+			if (pMesh->renderSets[i].pipeline.pEffect)
+			{
+				uFirstValid = i;
+				break;
+			}
+		}
+
+		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
 		for (uint32 i = 0; i < ModelResource::Mesh::MAX_UV_STAGES; i++)
 		{
 			if (pMesh->pTextures[i])
@@ -241,9 +251,25 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 		if (m_depthMeshArray)
 		{
 			DescriptorSet& depthDesc = m_depthMeshArray[i]->GetDescriptorSet();
-			depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[0].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
-			m_depthMeshArray[i]->ResetOverrides();
-			m_depthMeshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
+
+			if (depthDesc.GetValid())
+			{
+				// FIXME: Per pass effect runtime
+				uint32 uFirstValid = 0;
+				for (uint32 i = 0; i < ModelResource::Mesh::RS_COUNT; i++)
+				{
+					if (pMesh->renderSets[i].pipeline.pEffect)
+					{
+						uFirstValid = i;
+						break;
+					}
+				}
+
+				depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+
+				m_depthMeshArray[i]->ResetOverrides();
+				m_depthMeshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
+			}
 		}
 	}
 }
@@ -306,10 +332,22 @@ void Model::InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 i)
 	const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
 	//ASSERT(m_bDynamic);
 	// Below this point is for dynamic overrides
+	// FIXME: Different runtimes per render type
+
+	uint32 uFirstValid = 0;
+	for (uint32 i = 0; i < ModelResource::Mesh::RS_COUNT; i++)
+	{
+		if (pMesh->renderSets[i].pipeline.pEffect)
+		{
+			uFirstValid = i;
+			break;
+		}
+	}
+
 	if (m_bDynamic)
 	{
 		// Copy the override constant sets (only doing material, not lighting atm)
-		m_pOverrideMaterials[i].customFX.Init(pDevice, &pMesh->renderSets[0].effectRuntime);
+		m_pOverrideMaterials[i].customFX.Init(pDevice, &pMesh->renderSets[uFirstValid].effectRuntime);
 		m_pOverrideMaterials[i].customFX.GPUUpdate(pDevice);
 
 		// Add the UV sets to the model for updating of the texture matrices
