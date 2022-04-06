@@ -69,6 +69,7 @@ message StateComponent
 message HealthComponent
 {
 	required float  fLife = 1  [default = 1.0];
+	required float  fMaxLife = 2  [default = 1.0];
 	required uint32 uKillerTeam = 4 [default = 0];
 	required sint64 iKillerNUID = 5 [default = 0];
 }

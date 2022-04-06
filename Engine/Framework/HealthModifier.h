@@ -24,7 +24,7 @@ protected:
 		damageEvt.fPrev = health.fLife;
 		damageEvt.fNew = fNewValue;
 		health.fLife = damageEvt.fNew;
-		health.fLife = Math::Clamp(health.fLife, 0.0f, 1.0f);
+		health.fLife = Math::Clamp(health.fLife, 0.0f, health.fMaxLife);
 
 		if (!Math::IsEqual(damageEvt.fPrev, damageEvt.fNew))
 		{
