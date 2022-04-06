@@ -32,11 +32,11 @@ protected:
 
 			if(pNUID != NULL)
 			{
-				pEventManager->RegisterNetworkEventWithEntity(*pNUID, damageEvt, ON_ENTITY | ON_CHILDREN);
+				pEventManager->RegisterNetworkEventWithEntity(*pNUID, damageEvt, ON_ENTITY);
 			}
 			else
 			{
-				pEventManager->RegisterEventWithEntity(entity, damageEvt, ON_ENTITY | ON_CHILDREN);
+				pEventManager->RegisterEventWithEntity(entity, damageEvt, ON_ENTITY);
 			}
 		}
 	}
