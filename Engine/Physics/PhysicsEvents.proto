@@ -37,6 +37,16 @@ message SetLinearVelocity
 	required usg.Vector3f vVelocity = 1;
 }
 
+message OverrideLinearDamping
+{
+	required float fDamping = 1;
+}
+
+message RestoreLinearDamping
+{
+
+}
+
 message SetMaxLinearVelocity
 {
 	required float fMax = 1;
