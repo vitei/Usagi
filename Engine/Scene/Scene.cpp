@@ -100,6 +100,7 @@ Scene::Scene()
 	m_uPVSCount = 0;
 	m_vTransformOffset.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pImpl = vnew(ALLOC_OBJECT) PIMPL;
+	m_fTime = 0.0f;
 }
 
 
@@ -374,6 +375,7 @@ void Scene::DeleteShadowContext(ShadowContext* pRemove)
 
 void Scene::TransformUpdate(float fElapsed)
 {
+	m_fTime += fElapsed;
 	m_pImpl->profileTimers[TIMER_PRE_CULL].ClearAndStart();
 	for (FastPool<ScTransformNode>::Iterator it = m_pImpl->transformNodes.Begin(); !it.IsEnd(); ++it)
 	{

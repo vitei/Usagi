@@ -8,14 +8,14 @@
 
 struct Cascade
 {
-	mat4		mCascadeMtx[CASCADE_COUNT];
-    mat4        mCascadeMtxInvView[CASCADE_COUNT];
-	vec4		vSplitDistance;
-    vec4        vFadeSplitDist;
-    vec4        vInvFadeLength;
-	vec4		vDepthBias;
-    vec4        vSampleRange;
-    vec2        vInvShadowDim;
+	mat4 mCascadeMtx[CASCADE_COUNT];
+   mat4 mCascadeMtxInvView[CASCADE_COUNT];
+	vec4 vSplitDistance;
+   vec4 vFadeSplitDist;
+   vec4 vInvFadeLength;
+	vec4 vDepthBias;
+   vec4 vSampleRange;
+   vec2 vInvShadowDim;
 };
 
 #ifndef SHADOW_PASS
@@ -40,7 +40,8 @@ BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals
 	vec4	vShadowColor;
 	vec4	vFrustumPlanes[6];
 	vec2	vViewportDim;
-	float   fTargetAspect;
+	float fTargetAspect;
+	float fGlobalTime;
 };
 #elif defined(OMNI_DEPTH)
 BUFFER_LAYOUT(0, UBO_GLOBAL_ID) uniform Globals

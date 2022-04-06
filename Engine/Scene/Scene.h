@@ -83,6 +83,9 @@ public:
 
 	const Camera*	GetSceneCamera(uint32 uIndex) const;
 
+	// Used for effects, do not rely on for gameplay
+	float  		    GetTime() const { return m_fTime; }
+
 	ParticleMgr&	GetParticleMgr();
 	const RenderPassHndl& GetShadowRenderPass() const;
 #ifndef FINAL_BUILD
@@ -126,6 +129,7 @@ private:
 	SceneDebugStats				m_debugStats;
 	uint32						m_uFrame;
 	uint32						m_uPVSCount;
+	float32 					m_fTime;
 	bool						m_bShowBounds;
 	Vector4f					m_vTransformOffset;
 

@@ -62,6 +62,7 @@ namespace usg {
 		Vector4f	vFrustumPlanes[6];
 		Vector2f	vViewportDim;
 		float		fAspect;
+		float		fGlobalTime;
 	};
 
 	static const ShaderConstantDecl g_globalSceneCBDecl[] =
@@ -85,6 +86,7 @@ namespace usg {
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vFrustumPlanes,	CT_VECTOR_4, 6),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, vViewportDim,		CT_VECTOR_2, 1),
 		SHADER_CONSTANT_ELEMENT(GlobalConstants, fAspect,			CT_FLOAT, 1),
+		SHADER_CONSTANT_ELEMENT(GlobalConstants, fGlobalTime,		CT_FLOAT, 1),
 		SHADER_CONSTANT_END()
 	};
 
@@ -344,6 +346,7 @@ namespace usg {
 			m_pImpl->fog[0].GetColor().FillV4(globalData->vFogColor);
 			pCamera->GetViewMatrix((ViewType)i).GetInverse(globalData->mInvViewMat);
 			globalData->vShadowColor = m_shadowColor;
+			globalData->fGlobalTime = pScene->GetTime();
 			if (m_pImpl->pPostFXSys)
 			{
 				globalData->fAspect = m_pImpl->pPostFXSys->GetInitialRT()->GetWidth() / (float)m_pImpl->pPostFXSys->GetInitialRT()->GetHeight();
