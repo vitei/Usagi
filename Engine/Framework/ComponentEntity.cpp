@@ -87,7 +87,13 @@ void ComponentEntity::SetComponent(uint32 uCompIndex, ComponentType *pComp)
 	uint32 bitfieldIndex = uCompIndex % BITFIELD_LENGTH;
 	if (pComp!=nullptr)
 	{
-		ASSERT(!m_pComponents.Exists(uCompID));
+		// When merging we often want to be able to replace an existing component
+		// ASSERT(!m_pComponents.Exists(uCompID));
+		if (m_pComponents.Exists(uCompID))
+		{
+			ComponentType* value = m_pComponents.Delete(uCompID);
+			UnlinkComponent(value);
+		}
 		m_pComponents.Insert(uCompID, pComp);
 		LinkComponent(pComp);
 	}
