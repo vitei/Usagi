@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Audio/Audio.h"
 #include "Audio_ps.h"
+#include "AudioFilter_ps.h"
 #include "AudioEffect_ps.h"
 #include "AudioRoom_ps.h"
 
@@ -42,20 +43,31 @@ namespace usg{
 
 		usg::vector<XAUDIO2_EFFECT_DESCRIPTOR> descriptors;
 
-		for (uint32 i = 0; i < pDef->effectCrcs_count; i++)
+		for (uint32 i = 0; i < pDef->effectCRCs_count; i++)
 		{
-			AudioEffect_ps* pEffect = (AudioEffect_ps*)pAudio->GetEffect(pDef->effectCrcs[i]);
+			AudioEffect_ps* pEffect = (AudioEffect_ps*)pAudio->GetEffect(pDef->effectCRCs[i]);
 			IUnknown* pXAPO = pEffect->CreateEffect();
 
 			XAUDIO2_EFFECT_DESCRIPTOR descriptor;
-			descriptor.InitialState = uChannelCount;
-			descriptor.OutputChannels = 1;
+			descriptor.InitialState = true;
+			descriptor.OutputChannels = uChannelCount;
 			descriptor.pEffect = pXAPO;
 
 			descriptors.push_back(descriptor);
 
 			m_effects.push_back(pXAPO);
 		}
+
+		if (pDef->filterCRC)
+		{
+			AudioFilter_ps* pFilter = (AudioFilter_ps*)pAudio->GetFilter(pDef->filterCRC);
+
+			if (pFilter)
+			{
+				m_pSubmixVoice->SetFilterParameters(&pFilter->GetParameters());
+			}
+		}
+
 
 		if (descriptors.size() > 0)
 		{
@@ -66,9 +78,9 @@ namespace usg{
 			m_pSubmixVoice->SetEffectChain(&chain);
 		}
 
-		for (uint32 i = 0; i < pDef->effectCrcs_count; i++)
+		for (uint32 i = 0; i < pDef->effectCRCs_count; i++)
 		{
-			AudioEffect_ps* pEffect = (AudioEffect_ps*)pAudio->GetEffect(pDef->effectCrcs[i]);
+			AudioEffect_ps* pEffect = (AudioEffect_ps*)pAudio->GetEffect(pDef->effectCRCs[i]);
 			m_pSubmixVoice->SetEffectParameters(i, &pEffect->GetParams(), sizeof(pEffect->GetParams()));
 		}
 

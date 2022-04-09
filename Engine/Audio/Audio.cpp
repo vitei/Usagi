@@ -276,13 +276,6 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	m_archives.push_back(archive);
 
 	// We do the init after as there may be inter-referencing
-	for (uint32 i = 0; i < uRooms; i++)
-	{
-		const AudioRoomDef* pRoomDef = &bank.rooms[i];
-		archive.ppAudioRooms[i]->Init(pRoomDef, this);
-
-	}
-
 	for (uint32 i = 0; i < uEffects; i++)
 	{
 		const ReverbEffectDef* pReverbDef = &bank.reverbs[i];
@@ -294,6 +287,13 @@ void Audio::LoadSoundArchive(const char* pszArchiveName, const char* pszLocalize
 	{
 		const AudioFilterDef* pDef = &bank.filters[i];
 		archive.ppAudioFilters[i]->Init(pDef, this);
+	}
+
+	for (uint32 i = 0; i < uRooms; i++)
+	{
+		const AudioRoomDef* pRoomDef = &bank.rooms[i];
+		archive.ppAudioRooms[i]->Init(pRoomDef, this);
+
 	}
 
 	for (uint32 i = 0; i < uCount; i++)
