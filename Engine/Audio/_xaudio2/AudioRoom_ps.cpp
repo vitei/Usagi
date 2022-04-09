@@ -39,7 +39,13 @@ namespace usg{
 
 		uint32 uChannelCount = pAudioPS->GetChannelCount(pAudio->GetChannelConfig());
 
-		HRESULT hr = pAudioPS->GetEngine()->CreateSubmixVoice(&m_pSubmixVoice, uChannelCount, 48000);
+		UINT32 flags = 0;
+		if (pDef->filterCRC)
+		{
+			flags |= XAUDIO2_VOICE_USEFILTER;
+		}
+		HRESULT hr = pAudioPS->GetEngine()->CreateSubmixVoice(&m_pSubmixVoice, uChannelCount, 48000, flags);
+		HRCHECK(hr);
 
 		usg::vector<XAUDIO2_EFFECT_DESCRIPTOR> descriptors;
 
@@ -64,7 +70,9 @@ namespace usg{
 
 			if (pFilter)
 			{
-				m_pSubmixVoice->SetFilterParameters(&pFilter->GetParameters());
+				hr = m_pSubmixVoice->SetFilterParameters(&pFilter->GetParameters());
+				HRCHECK(hr);
+
 			}
 		}
 
@@ -75,13 +83,14 @@ namespace usg{
 			chain.EffectCount = (uint32)descriptors.size();
 			chain.pEffectDescriptors = &descriptors[0];
 
-			m_pSubmixVoice->SetEffectChain(&chain);
+			hr = m_pSubmixVoice->SetEffectChain(&chain);
 		}
 
 		for (uint32 i = 0; i < pDef->effectCRCs_count; i++)
 		{
 			AudioEffect_ps* pEffect = (AudioEffect_ps*)pAudio->GetEffect(pDef->effectCRCs[i]);
-			m_pSubmixVoice->SetEffectParameters(i, &pEffect->GetParams(), sizeof(pEffect->GetParams()));
+			hr = m_pSubmixVoice->SetEffectParameters(i, &pEffect->GetParams(), sizeof(pEffect->GetParams()));
+			HRCHECK(hr);
 		}
 
 	}
