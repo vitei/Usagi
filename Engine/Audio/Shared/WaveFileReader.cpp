@@ -18,6 +18,19 @@ struct WaveChunk
 	uint32 size;
 };
 
+
+struct CuePoint
+{
+	uint32 ID;
+	uint32 position;
+	uint32 chunkId;
+    uint32 chunkStart;
+	uint32 blockStart;
+	uint32 sampleStart;
+};
+
+
+
 struct RIFFMIDISample
 {
 	uint32        manufacturerId;
@@ -195,6 +208,24 @@ void WaveFileReader::ReadInfo()
 			SeekPos(smplPos + chunk.size);
 
 		}
+        else if (chunk.tag == GetTagValue("cue "))
+        {
+            uint32 uCueCount;
+            Read(sizeof(uCueCount), (void*)&uCueCount);
+
+            m_bLooped = uCueCount >= 2;
+            for (uint32 i = 0; i < uCueCount; i++)
+            {
+                CuePoint point;
+                Read(sizeof(CuePoint), (void*)&point);
+
+                if (i == 0)
+                    m_loopStart = point.sampleStart;
+                else if (i == 1)
+                    m_loopLength = point.sampleStart - m_loopStart + 1;
+            }
+
+        }
         // Skip over everything else
         else
         {
