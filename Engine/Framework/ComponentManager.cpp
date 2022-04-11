@@ -516,7 +516,11 @@ namespace usg
 				if (spawnParams.HasGlobalTransform())
 				{
 					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
-					vSpawnPos -= scene->vOriginOffset;
+					m_componentLoadHandles.GetComponent(e, scene);
+					if (scene.IsValid())
+					{
+						vSpawnPos -= scene->vOriginOffset;
+					}
 				}
 
 				if (trans.IsValid())
