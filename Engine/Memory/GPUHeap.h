@@ -33,7 +33,8 @@ public:
 	void MergeMemory(uint32 uCurrentFrame);
 
 private:
-	
+	CriticalSection	m_criticalSection;
+
 	struct BlockInfo
 	{
 		MemAllocator* 	pAllocator; // If NULL this is a free block

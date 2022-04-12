@@ -22,6 +22,8 @@ GPUHeap::~GPUHeap()
 
 void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs, bool bDelayFree)
 {
+	m_criticalSection.Initialize();
+
 	m_pHeapMem = pMem;
 	m_bDelayFree = bDelayFree;
 	m_memoryBlocks = (BlockInfo*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_SYSTEM, sizeof(BlockInfo)*uMaxAllocs, 4, false);
@@ -52,6 +54,8 @@ void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs, bool bDelayFree
 
 bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	if (!m_bDelayFree)
 	{
 		return true;
@@ -77,6 +81,8 @@ bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
 
 void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	BlockInfo* pSmallest = NULL;
 	uint32 uSpace = (uint32)AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 	uint32 uCurrentFrame = pDevice->GetFrameCount();
@@ -122,6 +128,8 @@ void GPUHeap::SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg
 
 void GPUHeap::RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	for(auto pInfo : m_allocList)
 	{
 		if( pInfo->pAllocator == pAllocator )
@@ -206,6 +214,8 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 
 void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	if (m_iMergeFrames <= 0)
 		return;
 	BlockInfo* pPrev = nullptr;
