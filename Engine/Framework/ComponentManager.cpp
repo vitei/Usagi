@@ -515,8 +515,8 @@ namespace usg
 				usg::Vector3f vSpawnPos = spawnParams.GetTransform().position;
 				if (spawnParams.HasGlobalTransform())
 				{
-					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
-					m_componentLoadHandles.GetComponent(e, scene);
+ 					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
+					m_componentLoadHandles.GetComponent(parent, scene);
 					if (scene.IsValid())
 					{
 						vSpawnPos -= scene->vOriginOffset;
@@ -624,7 +624,12 @@ namespace usg
 	{
 		m_componentLoadHandles.pDevice = pDevice;
 		m_componentLoadHandles.pResourceMgr = pRes;
-		m_componentLoadHandles.pScene = pScene;
+		m_componentLoadHandles.pScene = pScene; 
+	}
+
+	void ComponentManager::UpdateDefaultHandles(Entity parent)
+	{
+		FillComponentLoadHandles(m_componentLoadHandles, parent);
 	}
 
 	void ComponentManager::FillComponentLoadHandles(ComponentLoadHandles& handlesOut, Entity parent)
@@ -633,6 +638,7 @@ namespace usg
 		handlesOut.pScene = m_componentLoadHandles.pScene;
 		handlesOut.pModelMgr = m_componentLoadHandles.pModelMgr ;
 		handlesOut.pResourceMgr = m_componentLoadHandles.pResourceMgr;
+		handlesOut.pPhysicsScene = m_componentLoadHandles.pPhysicsScene;
 
 		if (parent)
 		{

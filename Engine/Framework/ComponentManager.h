@@ -31,6 +31,7 @@ namespace usg
 		~ComponentManager();
 
 		void RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene);
+		void UpdateDefaultHandles(Entity parent);
 
 		void TriggerAllSignals(float32 fElapsed);
 		void TriggerGPUSignals(GFXDevice* pDevice);
