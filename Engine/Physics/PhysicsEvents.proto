@@ -15,6 +15,7 @@ message FullPhysicsSync
 	required usg.Quaternionf	qRotation				= 2;
 	required usg.Vector3f		vVelocity				= 3;
 	required usg.Vector3f		vTorque					= 4;
+	required bool				bGlobalSpace			= 5 [default = false];
 }
 
 message ApplyForce

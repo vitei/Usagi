@@ -449,6 +449,7 @@ namespace usg
 			{
 				Required<RigidBody> rigidBody;
 				Required<DynamicBodyTag> dynamicTag;
+				Required<SceneComponent, FromSelfOrParents> visualScene;
 			};
 
 			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
@@ -485,7 +486,25 @@ namespace usg
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const FullPhysicsSync& msg)
 			{
-				ASSERT(false && "Not implemented as of yet");
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(inputs.rigidBody->bDynamic);
+
+				physx::PxTransform globalPose;
+				physx::PxTransform prevPos = pRigidDynamic->getGlobalPose();
+				globalPose.p = ToPhysXVec3(msg.vPosition);
+				globalPose.q = ToPhysXQuaternion(msg.qRotation);
+				if (msg.bGlobalSpace)
+				{
+					globalPose.p -= ToPhysXVec3(inputs.visualScene->vOriginOffset);
+				}
+
+				pRigidDynamic->setGlobalPose(globalPose);
+				physx::PxTransform newPose = pRigidDynamic->getGlobalPose();
+				pRigidDynamic->clearForce();
+				pRigidDynamic->clearTorque();
+				pRigidDynamic->setLinearVelocity(ToPhysXVec3(msg.vVelocity));
+				pRigidDynamic->setAngularVelocity(ToPhysXVec3(msg.vTorque));
+
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ApplyTorque& evt)
