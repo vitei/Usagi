@@ -72,50 +72,38 @@ Quaternionf Quaternionf::GetNormalised() const
 
 void Quaternionf::FillFromMatrix(const Matrix3x3& mat)
 {
-	int i, maxi;
-	float maxdiag, S, trace;
-	trace = mat.M[0][0] + mat.M[1][1] + mat.M[2][2] + 1.0f;
-	if (trace > Math::EPSILON)
+	float trace = mat.M[0][0] + mat.M[1][1] + mat.M[2][2]; 
+	if (trace > 0)
 	{
-		x = (mat.M[1][2] - mat.M[2][1]) / (2.0f * sqrtf(trace));
-		y = (mat.M[2][0] - mat.M[0][2]) / (2.0f * sqrtf(trace));
-		z = (mat.M[0][1] - mat.M[1][0]) / (2.0f * sqrtf(trace));
-		w = sqrtf(trace) / 2.0f;
-		return;
+		float s = 0.5f / sqrtf(trace + 1.0f);
+		w = 0.25f / s;
+		x = (mat.M[1][2] - mat.M[2][1]) * s;
+		y = (mat.M[2][0] - mat.M[0][2]) * s;
+		z = (mat.M[0][1] - mat.M[1][0]) * s;
 	}
-	maxi = 0;
-	maxdiag = mat.M[0][0];
-	for (i = 1; i < 3; i++)
+	else
 	{
-		if (mat.M[i][i] > maxdiag)
-		{
-			maxi = i;
-			maxdiag = mat.M[i][i];
+		if (mat.M[0][0] > mat.M[1][1] && mat.M[0][0] > mat.M[2][2]) {
+			float s = 2.0f * sqrtf(1.0f + mat.M[0][0] - mat.M[1][1] - mat.M[2][2]);
+			w = (mat.M[1][2] - mat.M[2][1]) / s;
+			x = 0.25f * s;
+			y = (mat.M[1][0] + mat.M[0][1]) / s;
+			z = (mat.M[2][0] + mat.M[0][2]) / s;
 		}
-	}
-	switch (maxi)
-	{
-	case 0:
-		S = 2.0f * sqrtf(1.0f + mat.M[0][0] - mat.M[1][1] - mat.M[2][2]);
-		x = 0.25f * S;
-		y = (mat.M[0][1] + mat.M[1][0]) / S;
-		z = (mat.M[0][2] + mat.M[2][0]) / S;
-		w = (mat.M[1][2] - mat.M[2][1]) / S;
-		break;
-	case 1:
-		S = 2.0f * sqrtf(1.0f + mat.M[1][1] - mat.M[0][0] - mat.M[2][2]);
-		x = (mat.M[0][1] + mat.M[1][0]) / S;
-		y = 0.25f * S;
-		z = (mat.M[1][2] + mat.M[2][1]) / S;
-		w = (mat.M[2][0] - mat.M[0][2]) / S;
-		break;
-	case 2:
-		S = 2.0f * sqrtf(1.0f + mat.M[2][2] - mat.M[0][0] - mat.M[1][1]);
-		x = (mat.M[0][2] + mat.M[2][0]) / S;
-		y = (mat.M[1][2] + mat.M[2][1]) / S;
-		z = 0.25f * S;
-		w = (mat.M[0][1] - mat.M[1][0]) / S;
-		break;
+		else if (mat.M[1][1] > mat.M[2][2]) {
+			float s = 2.0f * sqrtf(1.0f + mat.M[1][1] - mat.M[0][0] - mat.M[2][2]);
+			w = (mat.M[2][0] - mat.M[0][2]) / s;
+			x = (mat.M[1][0] + mat.M[0][1]) / s;
+			y = 0.25f * s;
+			z = (mat.M[2][1] + mat.M[1][2]) / s;
+		}
+		else {
+			float s = 2.0f * sqrtf(1.0f + mat.M[2][2] - mat.M[0][0] - mat.M[1][1]);
+			w = (mat.M[0][1] - mat.M[1][0]) / s;
+			x = (mat.M[2][0] + mat.M[0][2]) / s;
+			y = (mat.M[2][1] + mat.M[1][2]) / s;
+			z = 0.25f * s;
+		}
 	}
 
 	// Getting slight rounding errors through
@@ -124,52 +112,39 @@ void Quaternionf::FillFromMatrix(const Matrix3x3& mat)
 
 void Quaternionf::FillFromMatrix(const Matrix4x4 &mat)
 {
-	int i, maxi;
-	float maxdiag, S, trace;
-	trace = mat.M[0][0] + mat.M[1][1] + mat.M[2][2] + 1.0f;
-	if ( trace > Math::EPSILON)
+	float trace = mat.M[0][0] + mat.M[1][1] + mat.M[2][2];
+	if (trace > 0)
 	{
-		x = ( mat.M[1][2] - mat.M[2][1] ) / ( 2.0f * sqrtf(trace) );
-		y = ( mat.M[2][0] - mat.M[0][2] ) / ( 2.0f * sqrtf(trace) );
-		z = ( mat.M[0][1] - mat.M[1][0] ) / ( 2.0f * sqrtf(trace) );
-		w = sqrtf(trace) / 2.0f;
-		return;
+		float s = 0.5f / sqrtf(trace + 1.0f);
+		w = 0.25f / s;
+		x = (mat.M[1][2] - mat.M[2][1]) * s;
+		y = (mat.M[2][0] - mat.M[0][2]) * s;
+		z = (mat.M[0][1] - mat.M[1][0]) * s;
 	}
-	maxi = 0;
-	maxdiag = mat.M[0][0];
-	for (i=1; i<3; i++)
+	else
 	{
-		if ( mat.M[i][i] > maxdiag )
-		{
-			maxi = i;
-			maxdiag = mat.M[i][i];
+		if (mat.M[0][0] > mat.M[1][1] && mat.M[0][0] > mat.M[2][2]) {
+			float s = 2.0f * sqrtf(1.0f + mat.M[0][0] - mat.M[1][1] - mat.M[2][2]);
+			w = (mat.M[1][2] - mat.M[2][1]) / s;
+			x = 0.25f * s;
+			y = (mat.M[1][0] + mat.M[0][1]) / s;
+			z = (mat.M[2][0] + mat.M[0][2]) / s;
+		}
+		else if (mat.M[1][1] > mat.M[2][2]) {
+			float s = 2.0f * sqrtf(1.0f + mat.M[1][1] - mat.M[0][0] - mat.M[2][2]);
+			w = (mat.M[2][0] - mat.M[0][2]) / s;
+			x = (mat.M[1][0] + mat.M[0][1]) / s;
+			y = 0.25f * s;
+			z = (mat.M[2][1] + mat.M[1][2]) / s;
+		}
+		else {
+			float s = 2.0f * sqrtf(1.0f + mat.M[2][2] - mat.M[0][0] - mat.M[1][1]);
+			w = (mat.M[0][1] - mat.M[1][0]) / s;
+			x = (mat.M[2][0] + mat.M[0][2]) / s;
+			y = (mat.M[2][1] + mat.M[1][2]) / s;
+			z = 0.25f * s;
 		}
 	}
-	switch( maxi )
-	{
-		case 0:
-			S = 2.0f * sqrtf(1.0f + mat.M[0][0] - mat.M[1][1] - mat.M[2][2]);
-			x = 0.25f * S;
-			y = ( mat.M[0][1] + mat.M[1][0] ) / S;
-			z = ( mat.M[0][2] + mat.M[2][0] ) / S;
-			w = ( mat.M[1][2] - mat.M[2][1] ) / S;
-		break;
-		case 1:
-			S = 2.0f * sqrtf(1.0f + mat.M[1][1] - mat.M[0][0] - mat.M[2][2]);
-			x = ( mat.M[0][1] + mat.M[1][0] ) / S;
-			y = 0.25f * S;
-			z = ( mat.M[1][2] + mat.M[2][1] ) / S;
-			w = ( mat.M[2][0] - mat.M[0][2] ) / S;
-		break;
-		case 2:
-			S = 2.0f * sqrtf(1.0f + mat.M[2][2] - mat.M[0][0] - mat.M[1][1]);
-			x = ( mat.M[0][2] + mat.M[2][0] ) / S;
-			y = ( mat.M[1][2] + mat.M[2][1] ) / S;
-			z = 0.25f * S;
-			w = ( mat.M[0][1] - mat.M[1][0] ) / S;
-		break;
-	}
-
 	// Getting slight rounding errors through
 	Normalise();
 }

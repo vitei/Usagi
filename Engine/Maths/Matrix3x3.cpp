@@ -64,9 +64,9 @@ void Matrix3x3::Orthonormalize()
 	usg::Vector3f vUpVec = vUp().GetNormalised();
 	usg::Vector3f vForward = vFace().GetNormalised();
 
-	usg::Vector3f vRight = CrossProduct(vUpVec, vForward);
+	usg::Vector3f vRight = CrossProduct(vUpVec, vForward).GetNormalised();
 
-	usg::Vector3f vUp = CrossProduct(vForward, vRight);
+	usg::Vector3f vUp = CrossProduct(vForward, vRight).GetNormalised();
 
 	_11 = vRight.x;
 	_12 = vRight.y;

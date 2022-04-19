@@ -99,6 +99,7 @@ public:
 	void DirectionalRandomVector(const Vector3f &dir, float radius);
 	void VLerp(Vector3f a, Vector3f b, float frac);
 
+
 	float GetDistanceFrom( const Vector3f &vec ) const;
 	float GetXZDistanceFrom( const Vector3f &vec ) const;
 	// To avoid the costly sqrt function when the actual value isn't that important
@@ -485,6 +486,15 @@ inline void Vector3f::VLerp(Vector3f a, Vector3f b, float frac)
 	z = Math::Lerp(a.z, b.z, frac);
 }
 
+
+static Vector3f Slerp(const Vector3f& a, const Vector3f& b, float t)
+{
+	float fOmega = acosf(DotProduct(a.GetNormalisedIfNZero(), b.GetNormalisedIfNZero()));
+	float fSinOmega = sinf(fOmega);
+	Vector3f weightedA = a * (sinf(fOmega * (1.0f - t)) / fSinOmega);
+	Vector3f weightedB = b * (sinf(fOmega * (t)) / fSinOmega);
+	return weightedA + weightedB;
+}
 
 
 }
