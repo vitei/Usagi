@@ -122,11 +122,11 @@ public:
 
 	union
 	{
-		float m_xyz[3];
 		struct
 		{
 			float x, y, z;
 		};
+		float m_xyz[3];
 	};
 };
 

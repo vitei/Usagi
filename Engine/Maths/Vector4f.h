@@ -79,12 +79,11 @@ public:
 	
 	union
 	{
-		float m_xyzw[4];
-		
-		struct 
+		struct
 		{
 			float x, y, z, w;
 		};
+		float m_xyzw[4];
 	};
 };
 

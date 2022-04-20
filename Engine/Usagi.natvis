@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+     This is a Microsoft natvis file, which allows visualization of complex variables in the
+     Microsoft debugger starting with VS2012. It's a successor to the AutoExp.dat file format. 
+
+     This file needs to go into your C:\Users\<user>\Documents\Visual Studio 2011\Visualizers\
+     folder. Microsoft documentation states that it should go into a 2012 folder, but testing 
+     in June of 2013 suggests that it still needs to be the 2011 folder.
+
+     You don't need to restart Visual Studio to use it, you just need to restart the debug 
+     session. You can have multiple .natvis files and they will all be used.
+
+	 VS2017 natvis documentation:
+	https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects
+-->
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+
+<Type Name="usg::RequiredWrapper&lt;*&gt;">
+	<DisplayString Condition="m_pComponent!=nullptr"> {*m_pComponent} </DisplayString>
+	<Expand>
+		<ExpandedItem>m_pComponent</ExpandedItem>
+	</Expand>
+</Type>
+
+<Type Name="usg::Component&lt;*&gt;">
+	<DisplayString>{m_data}</DisplayString>
+	<Expand>
+		<ExpandedItem>m_data</ExpandedItem>
+		<Item Name="Runtime">m_runtimeData</Item>
+	</Expand>
+</Type>
+
+
+</AutoVisualizer>
