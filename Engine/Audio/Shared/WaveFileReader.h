@@ -59,9 +59,7 @@ private:
 	sint64 m_DataSize;
 	sint64 m_DataOffset;
 	sint64 m_ReadPosition;
-	sint32 m_ChannelCount;
 	sint32 m_SampleRate;
-	sint32 m_QuantumBits;
 	sint32 m_TransRate;
 private:
 	void ReadInfo();

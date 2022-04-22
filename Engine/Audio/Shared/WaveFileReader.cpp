@@ -69,7 +69,7 @@ WaveFileReader::WaveFileReader() :
 	m_pData(nullptr), m_pCurr(nullptr), m_bOwnsData(false),
 	m_bLooped(false), m_loopStart(0), m_loopLength(0),
     m_DataSize(0), m_DataOffset(0), m_ReadPosition(0),
-    m_ChannelCount(0), m_SampleRate(0), m_QuantumBits(0)
+    m_SampleRate(0)
 {
 }
 
@@ -77,7 +77,7 @@ WaveFileReader::WaveFileReader(const char* pPathName) :
 	m_pData(nullptr), m_pCurr(nullptr), m_bOwnsData(false),
 	m_bLooped(false), m_loopStart(0), m_loopLength(0),
     m_DataSize(0), m_DataOffset(0), m_ReadPosition(0),
-    m_ChannelCount(0), m_SampleRate(0), m_QuantumBits(0)
+    m_SampleRate(0)
 {
     Initialize(pPathName);
 }
@@ -122,9 +122,7 @@ void WaveFileReader::Finalize()
 		m_pData = nullptr;
         m_DataSize = 0;
         m_DataOffset = 0;
-        m_ChannelCount = 0;
         m_SampleRate = 0;
-        m_QuantumBits = 0;
         m_TransRate = 0;
         m_bLooped = false;
         m_loopStart = 0;
