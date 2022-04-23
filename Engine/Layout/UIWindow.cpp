@@ -332,7 +332,7 @@ int UIWindow::GetTextAlign(UIHorAlign eHorAlign, UIVertAlign eVerAlign)
 		ASSERT(false);
 	}
 
-	switch (eHorAlign)
+	switch (eVerAlign)
 	{
 	case UIVertAlign::UIVertAlign_Top:
 		iAlign |= usg::TextAlign::kTextAlignVOriginTop;
@@ -1005,10 +1005,7 @@ void UIWindow::UpdateButtons(float fElapsed)
 
 void UIWindow::Update(const UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults)
 {
-	//if (!m_bEnabled)
-		//return;
-
-	if (m_bEnabled)
+	if (m_bEnabled || m_bFirst)
 	{
 		if (m_bMatrixDirty)
 		{
@@ -1094,8 +1091,8 @@ void UIWindow::UpdateMatrix(const UIWindow* pParent)
 
 void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 {
-	//if (!m_bEnabled)
-		//return;
+	if (!m_bEnabled && !m_bFirst)
+		return;
 
 	// No GPU work if no renderables
 	if (m_bMatrixDirty && m_windowConstants.GetSize() > 0) 
@@ -1138,6 +1135,7 @@ void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 
 	m_bVertsDirty = false;
 	m_bMatrixDirty = false;
+	m_bFirst = false;
 }
 
 void UIWindow::CleanUpRecursive(usg::GFXDevice* pDevice)

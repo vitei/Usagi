@@ -215,6 +215,7 @@ namespace usg
 		bool						m_bMatrixDirty;
 		bool						m_bVertsDirty;
 		bool						m_bEnabled;
+		bool						m_bFirst;
 	};
 
 }
