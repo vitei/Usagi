@@ -16,6 +16,8 @@ class Thread_ps
 public:
 	static const size_t DEFAULT_THREAD_STACK_SIZE = 0;	// Default
 	static const int	DEFAULT_THREAD_PRIORITY = THREAD_PRIORITY_NORMAL;
+	static const int	HIGH_THREAD_PRIORITY = THREAD_PRIORITY_ABOVE_NORMAL;
+
 
 	Thread_ps() { m_hThread = NULL; }
 
