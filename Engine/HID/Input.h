@@ -21,7 +21,7 @@ class Input
 public:	
 	static void Init();
 	static void Cleanup();
-	static void RenumberGamepads();
+	static void RenumberGamepads(uint32 uPrefferedCaps = 0xFFFFFFFF);
 	static void Update(usg::GFXDevice* pDevice);
 	static void RegisterGamepad(IGamepad* pGamepad);
 
@@ -34,6 +34,7 @@ public:
 	static Microphone* GetMicrophone(uint32 uMicrophone);
 
 	static Input_ps&	GetPlatform();
+
 private:
 };
 

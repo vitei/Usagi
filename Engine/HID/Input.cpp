@@ -29,7 +29,7 @@ void Input::Cleanup()
 	g_platform.Cleanup();
 }
 
-void Input::RenumberGamepads()
+void Input::RenumberGamepads(uint32 uPrefferedCaps)
 {
 	if(!g_bInitCalled)
 		return;
@@ -40,7 +40,21 @@ void Input::RenumberGamepads()
 	g_uGamepads = 0;
 	for (auto it : gamepads)
 	{
-		g_gamepads[g_uGamepads++].BindHardware(it);
+		if ((it->GetCaps() & uPrefferedCaps) == uPrefferedCaps)
+		{
+			g_gamepads[g_uGamepads++].BindHardware(it);
+		}
+
+		if (g_uGamepads == MAX_CONTROLLERS)
+			break;
+	}
+
+	for (auto it : gamepads)
+	{
+		if ((it->GetCaps() & uPrefferedCaps) != uPrefferedCaps)
+		{
+			g_gamepads[g_uGamepads++].BindHardware(it);
+		}
 
 		if (g_uGamepads == MAX_CONTROLLERS)
 			break;
