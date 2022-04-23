@@ -876,7 +876,7 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 				case UI_ITEM_BUTTON:				
 					if( !IsPair(itr.uItemIdx) )
 					{
-						SetButtonHighlighted(itr.uItemIdx, bHighlighted, pResults);	
+						bColorChanged |= SetButtonHighlighted(itr.uItemIdx, bHighlighted, pResults);	
 					}
 					break;
 				default:
@@ -897,6 +897,10 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 
 	}
 
+	if (bColorChanged)
+	{
+		m_bVertsDirty = true;
+	}
 	
 }
 
