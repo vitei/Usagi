@@ -37,14 +37,15 @@ namespace usg
 			m_buttons[MOUSE_BUTTON_RIGHT] = false;
 			m_buttons[MOUSE_BUTTON_MIDDLE] = false;
 		}
-		ScreenToClient(m_hwnd, &mousePos);
+
+ 		ScreenToClient(m_hwnd, &mousePos);
 		m_fAxis[MOUSE_DELTA_X] = m_fAxis[MOUSE_POS_X] - (float)mousePos.x;
 		m_fAxis[MOUSE_DELTA_Y] = m_fAxis[MOUSE_POS_Y] - (float)mousePos.y;
 		m_fAxis[MOUSE_POS_X] = (float)mousePos.x;
 		m_fAxis[MOUSE_POS_Y] = (float)mousePos.y;
 
-		float fWidth = (float)(screen.right - screen.left);
-		float fHeight = (float)(screen.bottom - screen.top);
+		float fWidth = (float)(client.right - client.left);
+		float fHeight = (float)(client.bottom - client.top);
 
 		m_fAxis[MOUSE_NORM_POS_X] = ((m_fAxis[MOUSE_POS_X] / fWidth) * 2.0f) - 1.0f;
 		m_fAxis[MOUSE_NORM_ASPECT_POS_X] = usg::Math::Clamp(m_fAxis[MOUSE_NORM_POS_X] * fWidth/fHeight, -1.0f, 1.0f);
