@@ -50,6 +50,9 @@ message AddSubCameraRenderMask
 message SetShadowQuality
 {
 	required uint32 uShadowQuality =1 [default =0];
+	required bool bEnableDirShadow = 2 [default = true];
+	required bool bEnablePointShadow = 3 [default = true];
+	required bool bEnableSpotShadow = 4 [default = true];
 }
 
 

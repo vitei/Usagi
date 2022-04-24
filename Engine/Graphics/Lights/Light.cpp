@@ -58,7 +58,7 @@ void Light::EnableShadow(bool bEnable)
 	ASSERT(m_bSupportsShadow);
 	if (m_bSupportsShadow)
 	{
-		m_bShadowEnabled = true;
+		m_bShadowEnabled = bEnable;
 	}
 }
 

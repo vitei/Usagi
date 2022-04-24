@@ -89,6 +89,11 @@ namespace usg
 			{
 				outputs.sceneComp.GetRuntimeData().bNeedsShadowUpdate = true;
 				outputs.sceneComp.GetRuntimeData().shadowQuality.uShadowQuality = evt.uShadowQuality;
+				outputs.sceneComp.GetRuntimeData().shadowQuality.bDirectionalShadows = evt.bEnableDirShadow;
+				outputs.sceneComp.GetRuntimeData().shadowQuality.bPointShadows = evt.bEnablePointShadow;
+
+				outputs.sceneComp.GetRuntimeData().shadowQuality.bSpotShadows = evt.bEnableSpotShadow;
+
 			}
 			
 

@@ -87,16 +87,53 @@ void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& set
 		&& m_qualitySettings.bPointShadows == settings.bPointShadows
 		&& m_qualitySettings.bSpotShadows == settings.bSpotShadows)
 		return;
-	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
-	m_qualitySettings = settings;
-	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
+	m_uShadowMapRes = g_uShadowResMap[settings.uShadowQuality];
 
-	InitShadowCascade(pDevice, ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights);
+	bool bUpdateCascade = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bDirectionalShadows;
+	m_qualitySettings = settings;
+
+
+	m_uShadowedDirLights = 0;
+	for (auto itr : m_dirLights.GetActiveLights())
+	{
+		if (itr->SupportsShadow())
+		{
+			itr->EnableShadow(settings.bDirectionalShadows);
+			if (settings.bDirectionalShadows)
+			{
+				m_uShadowedDirLights++;
+			}
+		}
+	}
+
+	if (bUpdateCascade && m_uShadowedDirLights > 0)
+	{
+		InitShadowCascade(pDevice, ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights);
+	}
+
+	for (auto itr : m_pointLights.GetActiveLights())
+	{
+		if (itr->SupportsShadow())
+		{
+			itr->EnableShadow(settings.bPointShadows);
+		}
+	}
+
+	for (auto itr : m_spotLights.GetActiveLights())
+	{
+		if (itr->SupportsShadow())
+		{
+			itr->EnableShadow(settings.bSpotShadows);
+		}
+	}
+
+
 }
 
 
 void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 {
+	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
 	if (m_cascadeBuffer.GetWidth() != m_uShadowMapRes || uLayers != m_cascadeBuffer.GetSlices())
 	{
 		m_cascadeBuffer.Cleanup(pDevice);
@@ -252,7 +289,7 @@ void LightMgr::ViewShadowRender(GFXContext* pContext, Scene* pScene, ViewContext
 
 DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bDirectionalShadows);	
+	DirLight* pLight = m_dirLights.GetLight(pDevice, m_pParent, bSupportsShadow);	
 
 	ASSERT(pLight);
 
@@ -262,7 +299,10 @@ DirLight* LightMgr::AddDirectionalLight(GFXDevice* pDevice, bool bSupportsShadow
 	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
 	if (bSupportsShadow)
+	{
+		pLight->EnableShadow(m_qualitySettings.bDirectionalShadows);
 		m_uShadowedDirLights++;
+	}
 
 	if (m_cascadeBuffer.GetSlices() < ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights)
 	{
@@ -280,11 +320,13 @@ void LightMgr::RemoveDirLight(DirLight* pLight)
 
 PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bPointShadows);
+	PointLight* pLight = m_pointLights.GetLight(pDevice, m_pParent, bSupportsShadow);
 	if(szName)
 		pLight->SetName(szName);
 
 	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
+	if(bSupportsShadow)
+		pLight->EnableShadow(m_qualitySettings.bPointShadows);
 
 	return pLight;
 }
@@ -297,12 +339,14 @@ void LightMgr::RemovePointLight(PointLight* pLight)
 
 SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
+	SpotLight* pLight = m_spotLights.GetLight(pDevice, m_pParent, bSupportsShadow);
 	if(szName)
 		pLight->SetName(szName);
-
+	
 	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
+	if (bSupportsShadow)
+		pLight->EnableShadow(m_qualitySettings.bSpotShadows );
 
 	return pLight;
 }
@@ -315,7 +359,7 @@ void LightMgr::RemoveSpotLight(SpotLight* pLight)
 
 ProjectionLight* LightMgr::AddProjectionLight(GFXDevice* pDevice, bool bSupportsShadow, const char* szName)
 {
-	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow && m_qualitySettings.bSpotShadows);
+	ProjectionLight* pLight = m_projLights.GetLight(pDevice, m_pParent, bSupportsShadow);
 	if(szName)
 		pLight->SetName(szName);
 	return pLight;	

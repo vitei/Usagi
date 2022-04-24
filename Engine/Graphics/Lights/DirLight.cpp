@@ -44,7 +44,7 @@ void DirLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 
 void DirLight::UpdateCascade(const usg::Camera& camera, uint32 uContextId)
 {
-	if (m_pShadowCascade)
+	if (GetShadowEnabled())
 	{
 		m_pShadowCascade->Update(camera);
 	}
@@ -53,7 +53,7 @@ void DirLight::UpdateCascade(const usg::Camera& camera, uint32 uContextId)
 
 void DirLight::GPUUpdate(GFXDevice* pDevice)
 {
-	if (m_pShadowCascade)
+	if (GetShadowEnabled())
 	{
 		m_pShadowCascade->GPUUpdate(pDevice);
 	}
@@ -61,7 +61,7 @@ void DirLight::GPUUpdate(GFXDevice* pDevice)
 
 bool DirLight::ShadowRender(GFXContext* pContext)
 {
-	if (m_pShadowCascade)
+	if (GetShadowEnabled())
 	{
 		m_pShadowCascade->CreateShadowTex(pContext);
 		return true;
