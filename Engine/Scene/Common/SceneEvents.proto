@@ -47,6 +47,11 @@ message AddSubCameraRenderMask
 	required uint32 uSubMasks = 3 [default = 0];
 }
 
+message SetShadowQuality
+{
+	required uint32 uShadowQuality =1 [default =0];
+}
+
 
 message ShiftWorldOrigin
 {

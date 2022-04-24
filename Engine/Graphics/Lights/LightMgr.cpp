@@ -20,10 +20,10 @@ namespace usg {
 
 static const uint32 g_uShadowResMap[] =
 {
-	1024,
-	1536,
+	4096,
 	2048,
-	4096
+	1536,
+	1024,
 };
 
 LightMgr::LightMgr(void):
@@ -82,15 +82,16 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 
 void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& settings)
 {
+	if (m_qualitySettings.uShadowQuality == settings.uShadowQuality
+		&& m_qualitySettings.bDirectionalShadows == settings.bDirectionalShadows
+		&& m_qualitySettings.bPointShadows == settings.bPointShadows
+		&& m_qualitySettings.bSpotShadows == settings.bSpotShadows)
+		return;
 	// TODO: Handle resizing after layers have been created (could be a useful performance optimization)
 	m_qualitySettings = settings;
 	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
 
-	if (m_cascadeBuffer.GetSlices() > 1)
-	{
-		m_cascadeBuffer.Resize(pDevice, m_uShadowMapRes, m_uShadowMapRes);
-		m_cascadeTarget.Resize(pDevice);
-	}
+	InitShadowCascade(pDevice, ShadowCascade::CASCADE_COUNT * m_uShadowedDirLights);
 }
 
 

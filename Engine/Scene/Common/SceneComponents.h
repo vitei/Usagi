@@ -6,6 +6,7 @@
 
 #include "Engine/Framework/Component.h"
 #include "Engine/Physics/CollisionMeshHitResult.h"
+#include "Engine/Graphics/Lights/LightMgr.h"
 
 
 namespace usg
@@ -20,6 +21,9 @@ namespace usg
 	struct RuntimeData<usg::Components::SceneComponent>
 	{
 		usg::Scene*				pScene;
+
+		usg::LightMgr::QualitySettings	shadowQuality;
+		bool							bNeedsShadowUpdate = false;
 	};
 
 	template<>

@@ -87,7 +87,7 @@ void ShadowCascade::AssignRenderTarget(RenderTarget* pTarget, uint32 uStartIndex
 	m_uGroupHeight = m_pRenderTarget->GetHeight();
 
 	const float32 fScale = (float)m_uGroupWidth / 2048.0f;
-	const float32 fPartSize[] = { 30.0f, 160.0f, 400.0f, 1000.f };
+	const float32 fPartSize[] = { 40.0f, 120.0f, 400.0f, 1000.f };
 
 	for (uint32 i = 0; i < CASCADE_COUNT; i++)
 	{

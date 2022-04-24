@@ -70,6 +70,12 @@ namespace usg
 			static  void GPUUpdate(const Inputs& inputs, Outputs& outputs, GPUHandles* pGPUData)
 			{
 				Scene* scene = outputs.sceneComp.GetRuntimeData().pScene;
+				if (outputs.sceneComp.GetRuntimeData().bNeedsShadowUpdate)
+				{
+					scene->GetLightMgr().SetQualitySettings(pGPUData->pDevice, outputs.sceneComp.GetRuntimeData().shadowQuality);
+					outputs.sceneComp.GetRuntimeData().bNeedsShadowUpdate = false;
+				}
+
 				scene->Update(pGPUData->pDevice);
 			}
 
@@ -78,6 +84,12 @@ namespace usg
 				outputs.sceneComp.Modify().vOriginOffset += event.vShift;
 			}
 
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetShadowQuality& evt)
+			{
+				outputs.sceneComp.GetRuntimeData().bNeedsShadowUpdate = true;
+				outputs.sceneComp.GetRuntimeData().shadowQuality.uShadowQuality = evt.uShadowQuality;
+			}
 			
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetViewContextMask& event)
@@ -289,6 +301,7 @@ namespace usg
 					outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
 				}
 			}
+
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::EnableCamera& evt)
 			{
