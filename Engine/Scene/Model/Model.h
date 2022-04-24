@@ -56,6 +56,7 @@ public:
 	void SetFade(bool bFade, float fAlpha = 1.0f);
 	void RemoveOverrides(GFXDevice* pDevice);
 	void SetRenderMask(uint32 uRenderMask);
+	uint32 GetRenderMask() const { return m_uRenderMask; }
 	void EnableShadow(GFXDevice* pDevice, bool bEnable);
 
 	void SetTextureTranslate(const char* szName, uint32 uTexId, float fX, float fY, IdentifierType eNameType = IDENTIFIER_MATERIAL);

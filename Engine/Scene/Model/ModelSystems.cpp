@@ -114,6 +114,11 @@ namespace usg
 				outputs.model.GetRuntimeData().pModel->SetRenderMask(event.uRenderMask);
 			}
 
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::AddSubModelRenderMask& evt)
+			{
+				outputs.model.GetRuntimeData().pModel->SetRenderMask( (outputs.model.GetRuntimeData().pModel->GetRenderMask() | evt.uAddRenderMask) & ~evt.uSubRenderMask);
+			}
+
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetMeshRenderLayer& event)
 			{
 				Model::RenderMesh* Mesh = outputs.model.GetRuntimeData().pModel->GetRenderMesh(event.meshName);

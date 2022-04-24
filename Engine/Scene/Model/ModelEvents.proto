@@ -52,6 +52,12 @@ message UpdateModelRenderMask
 	required uint32 uRenderMask = 1;
 }
 
+message AddSubModelRenderMask
+{
+	required uint32 uAddRenderMask = 1 [default = 0];
+	required uint32 uSubRenderMask = 2 [default = 0];
+}
+
 message SetMeshRenderLayer
 {
 	required string meshName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
