@@ -20,16 +20,7 @@ namespace usg {
 
 	DescriptorSet_ps::~DescriptorSet_ps()
 	{
-		if (m_pImages)
-		{
-			vdelete[] m_pImages;
-			m_pImages = nullptr;
-		}
-		if (m_pWrites)
-		{
-			vdelete[] m_pWrites;
-			m_pWrites = nullptr;
-		}
+
 	}
 
 	void DescriptorSet_ps::Init(GFXDevice* pDevice, DescriptorSetLayout* pLayout)
@@ -62,6 +53,17 @@ namespace usg {
 				pLayout->GetPlatform().FreeDescriptorSet(pDevice, m_descSet[i]);
 			}
 			m_bValid = false;
+		}
+
+		if (m_pImages)
+		{
+			vdelete[] m_pImages;
+			m_pImages = nullptr;
+		}
+		if (m_pWrites)
+		{
+			vdelete[] m_pWrites;
+			m_pWrites = nullptr;
 		}
 	}
 

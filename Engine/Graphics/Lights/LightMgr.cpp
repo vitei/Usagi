@@ -89,6 +89,8 @@ void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& set
 		return;
 	m_uShadowMapRes = g_uShadowResMap[settings.uShadowQuality];
 
+	bool bUpdatePointLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bPointShadows;
+	bool bUpdateSpotLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bSpotShadows;
 	bool bUpdateCascade = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bDirectionalShadows;
 	m_qualitySettings = settings;
 
@@ -116,6 +118,10 @@ void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& set
 		if (itr->SupportsShadow())
 		{
 			itr->EnableShadow(settings.bPointShadows);
+			if (bUpdatePointLights)
+			{
+				itr->InitShadowQuality(pDevice, m_pParent, settings.uShadowQuality);
+			}
 		}
 	}
 
@@ -124,6 +130,10 @@ void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& set
 		if (itr->SupportsShadow())
 		{
 			itr->EnableShadow(settings.bSpotShadows);
+			if (bUpdateSpotLights)
+			{
+				itr->InitShadowQuality(pDevice, m_pParent, settings.uShadowQuality);
+			}
 		}
 	}
 
@@ -328,6 +338,9 @@ PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, co
 	if(bSupportsShadow)
 		pLight->EnableShadow(m_qualitySettings.bPointShadows);
 
+	if (m_qualitySettings.uShadowQuality != 1)
+		pLight->InitShadowQuality(pDevice, m_pParent, m_qualitySettings.uShadowQuality);
+
 	return pLight;
 }
 
@@ -347,6 +360,9 @@ SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, cons
 
 	if (bSupportsShadow)
 		pLight->EnableShadow(m_qualitySettings.bSpotShadows );
+
+	if (m_qualitySettings.uShadowQuality != 1)
+		pLight->InitShadowQuality(pDevice, m_pParent, m_qualitySettings.uShadowQuality);
 
 	return pLight;
 }

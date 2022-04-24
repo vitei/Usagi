@@ -50,6 +50,8 @@ public:
 	void GPUUpdate(GFXDevice* pDevice) override;
 	bool ShadowRender(GFXContext* pContext) override;
 
+	void InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQuality);
+
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();
 

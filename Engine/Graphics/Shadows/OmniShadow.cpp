@@ -65,6 +65,11 @@ namespace usg
 			pScene->DeleteOmniShadowContext(m_pShadowContext);
 			m_pShadowContext = nullptr;
 		}
+
+		m_pShadowContext = nullptr;
+		m_bEnableUpdate = true;
+		m_bNothingVisible = false;
+		m_bFirst = true;
 	}
 
 	void OmniShadow::EnableUpdate(bool bEnable)

@@ -92,25 +92,40 @@ void PointLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 
 	if (bSupportsShadow)
 	{
-		m_pShadow = vnew(ALLOC_OBJECT) OmniShadow;
-		m_pShadow->Init(pDevice, pScene, 1024, 1024);
-
-		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
-		samp.bEnableCmp = true;
-		samp.eCmpFnc = CF_LESS;
-
-		desc = pDevice->GetDescriptorSetLayout(g_pointLightShadowDesc);
-		m_descriptorSetShadow.Init(pDevice, desc);
-		m_descriptorSetShadow.SetConstantSet(0, &m_constants);
-		m_descriptorSetShadow.SetImageSamplerPair(1, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
-		m_descriptorSetShadow.UpdateDescriptors(pDevice);
-
-
+		InitShadowQuality(pDevice, pScene, 1);
 	}
 
 	Light::Init(pDevice, pScene, bSupportsShadow);
 }
 
+
+void PointLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQuality)
+{
+	uint32 uDimPerQuality[] = {1536, 1024, 512, 256};
+	uQuality = Math::Clamp(uQuality, 0U, (uint32)ARRAY_SIZE(uDimPerQuality));
+
+
+	if (m_pShadow)
+	{
+		m_descriptorSetShadow.Cleanup(pDevice);
+		m_pShadow->Cleanup(pDevice, pScene);
+		vdelete m_pShadow;
+		m_pShadow = nullptr;
+	}
+
+	m_pShadow = vnew(ALLOC_OBJECT) OmniShadow;
+	m_pShadow->Init(pDevice, pScene, uDimPerQuality[uQuality], uDimPerQuality[uQuality]);
+
+	SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
+	samp.bEnableCmp = true;
+	samp.eCmpFnc = CF_LESS;
+
+	DescriptorSetLayoutHndl desc = pDevice->GetDescriptorSetLayout(g_pointLightShadowDesc);
+	m_descriptorSetShadow.Init(pDevice, desc);
+	m_descriptorSetShadow.SetConstantSet(0, &m_constants);
+	m_descriptorSetShadow.SetImageSamplerPair(1, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
+	m_descriptorSetShadow.UpdateDescriptors(pDevice);
+}
 
 void PointLight::SetShadowCastFlags(uint32 uFlags)
 {

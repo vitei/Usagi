@@ -106,21 +106,37 @@ void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 
 	if (bSupportsShadow)
 	{
-		m_pShadow = vnew(ALLOC_OBJECT) ProjectionShadow;
-		m_pShadow->Init(pDevice, pScene, 1024, 1024);
-		SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
-		samp.bEnableCmp = true;
-		samp.eCmpFnc = CF_LESS;
-
-		desc = pDevice->GetDescriptorSetLayout(g_spotLightShadowDescDecl);
-		m_descriptorSetShadow.Init(pDevice, desc);
-		m_descriptorSetShadow.SetConstantSet(0, &m_constants);
-		m_descriptorSetShadow.SetConstantSet(1, m_pShadow->GetShadowConstants());
-		m_descriptorSetShadow.SetImageSamplerPair(2, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
-		m_descriptorSetShadow.UpdateDescriptors(pDevice);
+		InitShadowQuality(pDevice, pScene, 1);
 	}
 
 	Light::Init(pDevice, pScene, bSupportsShadow);
+}
+
+
+void SpotLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQuality)
+{
+	uint32 uDimPerQuality[] = { 1536, 1024, 512, 256 };
+	uQuality = Math::Clamp(uQuality, 0U, (uint32)ARRAY_SIZE(uDimPerQuality));
+
+	if (m_pShadow)
+	{
+		m_descriptorSetShadow.Cleanup(pDevice);
+		m_pShadow->Cleanup(pDevice, pScene);
+		m_pShadow = nullptr;
+	}
+
+	m_pShadow = vnew(ALLOC_OBJECT) ProjectionShadow;
+	m_pShadow->Init(pDevice, pScene, uDimPerQuality[uQuality], uDimPerQuality[uQuality]);
+	SamplerDecl samp(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
+	samp.bEnableCmp = true;
+	samp.eCmpFnc = CF_LESS;
+
+	DescriptorSetLayoutHndl desc = pDevice->GetDescriptorSetLayout(g_spotLightShadowDescDecl);
+	m_descriptorSetShadow.Init(pDevice, desc);
+	m_descriptorSetShadow.SetConstantSet(0, &m_constants);
+	m_descriptorSetShadow.SetConstantSet(1, m_pShadow->GetShadowConstants());
+	m_descriptorSetShadow.SetImageSamplerPair(2, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
+	m_descriptorSetShadow.UpdateDescriptors(pDevice);
 }
 
 void SpotLight::Cleanup(GFXDevice* pDevice, Scene* pScene)

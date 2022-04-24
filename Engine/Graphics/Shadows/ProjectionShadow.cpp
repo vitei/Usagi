@@ -65,6 +65,7 @@ namespace usg
 		{
 			pScene->DeleteShadowContext(m_pSceneContext);
 		}
+		m_bNothingVisible = false;
 	}
 
 	void ProjectionShadow::EnableUpdate(bool bEnable)

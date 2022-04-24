@@ -27,10 +27,10 @@ public:
 	SpotLight();
 	virtual ~SpotLight(void);
 
-	virtual void	Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
+	virtual void Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow) override;
 	virtual void Cleanup(GFXDevice* pDevice, Scene* pScene) override;
-	virtual void	SetPosition(const Vector4f &position);
-	virtual void 	SetDirection(const Vector4f &direction);
+	virtual void SetPosition(const Vector4f &position);
+	virtual void SetDirection(const Vector4f &direction);
 	void 	SetOuterCutoff(float fOuterCutoff);
 	void	SetInnerCutoff(float fInnerCutoff);
 
@@ -58,6 +58,8 @@ public:
 	const ConstantSet* GetConstantSet() const { return &m_constants; }
 	const DescriptorSet* GetDescriptorSet(bool bWidthShadow) const;
 	const ProjectionShadow* GetShadow() const { return m_pShadow; }
+
+	void InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQuality);
 
 	static const DescriptorDeclaration* GetDescriptorDecl();
 	static const DescriptorDeclaration* GetDescriptorDeclShadow();
