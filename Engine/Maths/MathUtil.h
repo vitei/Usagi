@@ -13,8 +13,7 @@ namespace usg{
 
 namespace Math
 {
-	const float targetFPS = 60.0f;
-	const float pi = 3.14159265f;
+	const float pi = 3.14159265358979323846f;
 	const float pi_over_2 = 1.5707963267f;
 	const float three_pi_over_2 = 4.71238898f;
 	const float two_pi = 6.28318530f;
@@ -40,10 +39,7 @@ namespace Math
 		return( number * number );
 	}
 
-	inline float GetTargetFPS()
-	{
-		return targetFPS;
-	}
+
 
 	inline bool IsNaN(const float value)
 	{
