@@ -63,6 +63,14 @@ static const EnumTable g_alphaTestTable[]
 	{ nullptr, 0 }
 };
 
+static const EnumTable g_cullFaceTable[]
+{
+	{ "Front", usg::CULL_FACE_FRONT },
+	{ "Back", usg::CULL_FACE_BACK },
+	{ "None", usg::CULL_FACE_NONE },
+	{ nullptr, 0 }
+};
+
 
 // Generally no good reason to override what is coming in from the model
 #if 0
@@ -259,6 +267,7 @@ static const EnumTable g_wrapTable[]
 			StringToValue(g_FuncTable, alphaNode["alphaDestFunc"], *(uint32*)&alpha.alphaDestFunc);
 			StringToValue(g_opTable, alphaNode["alphaOp"], *(uint32*)&alpha.alphaOp); 
 			StringToValue(g_alphaTestTable, alphaNode["alphaTestFunc"], *(uint32*)&alpha.alphaTestFunc);
+
 			if (alphaNode["alphaTestReference"])
 			{
 				alpha.alphaTestReference = alphaNode["alphaTestReference"].as<float>();
@@ -269,6 +278,8 @@ static const EnumTable g_wrapTable[]
 		{
 			pMatOut->pb().rasterizer.blendEnabled = material["Transparent"].as<bool>();
 		}
+
+		StringToValue(g_cullFaceTable, material["CullFace"], *(uint32*)&pMatOut->pb().rasterizer.cullFace);
 
 		YAML::Node layer = material["Layer"];
 		if (layer)

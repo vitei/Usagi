@@ -89,6 +89,7 @@ exchange::Shape* GetShape( usg::exchange::ModelHeader* pHeader, uint32 index )
 
 void SetupAlphaStateDecl( AlphaStateDecl& decl, const exchange::Rasterizer& rasterizer )
 {
+	// Note Vulkan will not obey these! Leaving here incase of any legacy platforms
 	if( rasterizer.attribute & ( 1 << exchange::Rasterizer_Attribute_ALPHA_TEST_ENABLE ) )
 	{
 		decl.eAlphaTest = static_cast<AlphaTest>( rasterizer.alphaState.alphaTestFunc );

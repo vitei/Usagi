@@ -38,6 +38,25 @@ layout(location = 0) out vec4 colorOut;
 #endif
 
 
+void CheckForDiscard(float fAlpha, float fAlphaRef, int iAlphaCmp)
+{
+	switch(iAlphaCmp)
+	{
+		case 0:
+			if(fAlpha < fAlphaRef)
+				discard;
+			break;
+		case 1:
+			if(fAlpha == fAlphaRef)
+				discard;
+			break;
+		case 2:
+			if(fAlpha > fAlphaRef)
+				discard;
+			break;			
+	}
+}
+
 // Entry point
 void main(void)
 {
@@ -118,6 +137,11 @@ void main(void)
 
 	//vOut.xyz += rim;
 	//vOut.xyz += ApplyHemisphereLighting(vec3(0.4)*vSpecular.rgb, vNormal);
+
+
+#ifdef ALPHA_TEST
+	CheckForDiscard(vDiffuse.a * uMaterial.alpha, uMaterial.alphaRef, uMaterial.alphaCmp);
+#endif
 
 #ifdef DEFERRED_SHADING
 	// TODO: Make all specular single channel only

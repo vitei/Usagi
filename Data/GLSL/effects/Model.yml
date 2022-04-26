@@ -42,6 +42,8 @@ CustomEffects:
           - { type: bool,   name: bSpecMap,       default: false } # 68
           - { type: bool,   name: bEmissiveMap,   default: false } # 72            
           - { type: bool,   name: bReflectionMap, default: false } # 76
+          - { type: float,  name: alphaRef,       count: 1, default: 1.0 } # 80
+          - { type: int,    name: alphaCmp,       count: 1, default: 0 } # 84 // Less, Equal, Greater
       - binding: Custom0
         shaderType: VS 
         Variables:
@@ -65,6 +67,14 @@ Effects:
         defines: HAS_BUMP
       - name: skel.bump
         defines: HAS_SKELETON HAS_BUMP
+      - name: alphaTest
+        defines: ALPHA_TEST        
+      - name: skel.alphaTest
+        defines: HAS_SKELETON ALPHA_TEST
+      - name: bump.alphaTest
+        defines: HAS_BUMP ALPHA_TEST
+      - name: skel.bump.alphaTest
+        defines: HAS_SKELETON HAS_BUMP ALPHA_TEST
   - name: FBXDefault
     vert: models/fbxdefault
     geom: shadows/depthwriteomni
@@ -77,3 +87,7 @@ Effects:
     global_sets:  
       - name: skel
         defines: HAS_SKELETON        
+      - name: alphaTest
+        defines: ALPHA_TEST        
+      - name: skel.alphaTest
+        defines: HAS_SKELETON ALPHA_TEST      
