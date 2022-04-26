@@ -66,7 +66,7 @@ namespace usg{
 
 		inline float GetColorIndex() const;
 		inline float GetEmissionLife() const;
-		void InitEmissionPosAndVelocity(Vector3f& vPosOut, Vector3f& vVelocityOut) const;
+		void InitEmissionPosAndVelocity(Vector3f& vPosOut, Vector3f& vVelocityOut, const usg::Matrix4x4& mCurrMat) const;
 		float GetEffectTime() const { return m_fEffectTime; }
 
 		const particles::EmitterEmission& GetEmissionDef() const { return m_emissionDef; }

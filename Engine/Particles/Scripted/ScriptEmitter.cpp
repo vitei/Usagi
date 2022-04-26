@@ -664,7 +664,7 @@ namespace usg
 	float ScriptEmitter::InitParticleData(void* pData, void* pMetaData, float fLerp)
 	{
 		Matrix4x4 mParentMat = m_mWorldMatrix;
-		//mParentMat.SetPos(Lerp(m_vPrevPos, mParentMat.vPos(), fLerp));
+		mParentMat.SetPos(Lerp(m_vPrevPos, mParentMat.vPos(), fLerp));
 		const particles::EmitterEmission& res = m_emissionDef;
 		Particle::ScriptedParticle& out = *(Particle::ScriptedParticle*)pData;
 	
@@ -678,7 +678,7 @@ namespace usg
 		out.fLifeStart = m_fEffectTime;
 		out.fInvLife = 1.0f/fLife;
 
-		InitEmissionPosAndVelocity(out.vPos, out.vVelocity);
+		InitEmissionPosAndVelocity(out.vPos, out.vVelocity, mParentMat);
 
 		const particles::ParticleRotation& rotDef = m_emissionDef.particleRotation;
 
@@ -759,10 +759,8 @@ namespace usg
 	}
 
 
-	void ScriptEmitter::InitEmissionPosAndVelocity(Vector3f& vPosOut, Vector3f& vVelocityOut) const
+	void ScriptEmitter::InitEmissionPosAndVelocity(Vector3f& vPosOut, Vector3f& vVelocityOut, const usg::Matrix4x4& mCurrMat) const
 	{
-		Matrix4x4 mParentMat = m_mWorldMatrix;
-
 		const EmitterShape* pShape = GetEmitterShape();
 
 		// Firstly get a position and velocity as defined by the emitters shape
@@ -812,8 +810,8 @@ namespace usg
 
 
 		// Finally transform the position and the direction by the emitters matrix
-		vPosOut = vPosOut * mParentMat;
-		vVelocityOut = mParentMat.TransformVec3(vVelocityOut, 0.0f);
+		vPosOut = vPosOut * mCurrMat;
+		vVelocityOut = mCurrMat.TransformVec3(vVelocityOut, 0.0f);
 
 		if(m_emissionDef.bInheritVelocity)
 		{

@@ -78,7 +78,7 @@ uint32 SpriteEmitter::EmitParticle(uint32 uCount)
 		return 0;
 
 	float fLerpInc = 1.0f/(float)uCount;
-	float fLerp = 0.0f;
+	float fLerp = fLerpInc;
 	while(uCount)
 	{
 		bool bFound = false;

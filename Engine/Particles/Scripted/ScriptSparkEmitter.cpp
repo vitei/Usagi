@@ -45,7 +45,7 @@ namespace usg
 		// TODO: Add these settings to the definition file
 		out.vWidth.Assign(0.5f, 0.5f);
 		
-		InitEmissionPosAndVelocity(out.vPos[0], meta.vVelocity);
+		InitEmissionPosAndVelocity(out.vPos[0], meta.vVelocity, mParentMat);
 		for(uint32 i=1; i<Particle::ScriptedTrailParticle::POS_COUNT; i++)
 		{
 			// Have all vertices match the initial position so we create degenerate triangles
