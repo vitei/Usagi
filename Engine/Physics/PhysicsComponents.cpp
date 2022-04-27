@@ -670,6 +670,7 @@ namespace usg
 			pJoint->setProjectionLinearTolerance(c->fProjectionLinearTolerance);
 			pJoint->setProjectionAngularTolerance(c->fProjectionAngularTolerance);
 			pJoint->setConstraintFlag(physx::PxConstraintFlag::ePROJECTION, true);
+			pJoint->setConstraintFlag(physx::PxConstraintFlag::eVISUALIZATION, true);
 		}
 		pJoint->userData = c.GetEntity();
 	}
