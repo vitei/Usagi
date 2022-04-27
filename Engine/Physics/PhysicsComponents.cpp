@@ -112,7 +112,7 @@ namespace usg
 		while (e->GetParentEntity() != parent)
 		{
 			physx::PxTransform parentTrans = ToPhysXTransform(GetTransform(e->GetParentEntity(), handles));
-			trans = trans.transform(parentTrans);
+			trans = parentTrans.transform(trans);
 			e = e->GetParentEntity();
 		}
 		// Some propagated error
