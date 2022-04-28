@@ -104,17 +104,16 @@ void SpotLight::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)
 	m_descriptorSet.SetConstantSet(0, &m_constants);
 	m_descriptorSet.UpdateDescriptors(pDevice);
 
-	if (bSupportsShadow)
-	{
-		InitShadowQuality(pDevice, pScene, 1);
-	}
-
 	Light::Init(pDevice, pScene, bSupportsShadow);
+
 }
 
 
 void SpotLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQuality)
 {
+	if (!SupportsShadow())
+		return;
+
 	uint32 uDimPerQuality[] = { 1536, 1024, 512, 256 };
 	uQuality = Math::Clamp(uQuality, 0U, (uint32)ARRAY_SIZE(uDimPerQuality));
 

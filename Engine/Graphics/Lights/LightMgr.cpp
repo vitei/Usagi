@@ -335,11 +335,11 @@ PointLight* LightMgr::AddPointLight(GFXDevice* pDevice, bool bSupportsShadow, co
 		pLight->SetName(szName);
 
 	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
-	if(bSupportsShadow)
-		pLight->EnableShadow(m_qualitySettings.bPointShadows);
-
-	if (m_qualitySettings.uShadowQuality != 1)
+	if (bSupportsShadow)
+	{
 		pLight->InitShadowQuality(pDevice, m_pParent, m_qualitySettings.uShadowQuality);
+		pLight->EnableShadow(m_qualitySettings.bPointShadows);
+	}
 
 	return pLight;
 }
@@ -359,10 +359,11 @@ SpotLight* LightMgr::AddSpotLight(GFXDevice* pDevice, bool bSupportsShadow, cons
 	pLight->SetShadowCastFlags(m_uShadowCastingFlags);
 
 	if (bSupportsShadow)
-		pLight->EnableShadow(m_qualitySettings.bSpotShadows );
-
-	if (m_qualitySettings.uShadowQuality != 1)
+	{
 		pLight->InitShadowQuality(pDevice, m_pParent, m_qualitySettings.uShadowQuality);
+
+		pLight->EnableShadow(m_qualitySettings.bSpotShadows);
+	}
 
 	return pLight;
 }
