@@ -86,6 +86,7 @@ namespace usg
 					static constexpr uint32 NotifySecond = 2;
 					Vector3f vNormal;
 					Vector3f vIntersectionPoint;
+					Vector3f vImpulse;
 					float fDepth;
 					uint32 uMaterialFlags[2];
 					uint32 uBitmask;

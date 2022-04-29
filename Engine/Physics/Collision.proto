@@ -8,6 +8,7 @@ package usg;
 
 message Collision
 {
+	required usg.Vector3f vImpulse = 10;
 	required float fDepth = 11;
 	required usg.Vector3f vIntersectionPoint = 12;
 	required usg.Vector3f vNormal = 13;

@@ -303,6 +303,7 @@ namespace usg
 						newCollision.fDepth = m_contactPoints[j].separation;
 						newCollision.vNormal = ToUsgVec3(m_contactPoints[j].normal)*fNormalMul;
 						newCollision.vIntersectionPoint = ToUsgVec3(m_contactPoints[j].position);
+						newCollision.vImpulse = ToUsgVec3(m_contactPoints[j].impulse);
 						newCollision.uMaterialFlags[bSwap ? 1 : 0] = physics::details::FetchMaterialFlags(pairs[i].shapes[0], m_contactPoints[j].internalFaceIndex0);
 						newCollision.uMaterialFlags[bSwap ? 0 : 1] = physics::details::FetchMaterialFlags(pairs[i].shapes[1], m_contactPoints[j].internalFaceIndex1);
 					}
@@ -545,6 +546,7 @@ namespace usg
 				Collision usgCol;
 				usgCol.fDepth = contact.fDepth;
 				usgCol.vIntersectionPoint = contact.vIntersectionPoint;
+				usgCol.vImpulse = contact.vImpulse;
 				usgCol.bFirstContact = data.bFirstContact;
 				if (data.uNotifyFirstTick == rtd.uTick - 1)
 				{
