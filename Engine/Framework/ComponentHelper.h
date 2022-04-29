@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Engine/Core/stl/set.h"
 
 
 namespace usg
@@ -14,7 +14,7 @@ namespace usg
 	{
 		void(*Init)();
 		void(*CallOnLoaded)(ComponentEntity* e, ComponentLoadHandles& handles);
-		void(*PreloadComponentAssets)(const ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles);
+		void(*PreloadComponentAssets)(const ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 		void(*LoadAndAttachComponent)(ProtocolBufferFile& file, ComponentEntity* pEntity);
 	};
 }

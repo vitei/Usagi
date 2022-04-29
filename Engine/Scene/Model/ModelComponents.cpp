@@ -93,11 +93,13 @@ namespace usg
 	}
 
 	template<>
-	void PreloadComponentAssets<ModelComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles)
+	void PreloadComponentAssets<ModelComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 	{
 		ModelComponent component;
 		bool readSuccess = file.Read(&component);
 		ASSERT(readSuccess);
+
+		LoadModelPak(handles, component.pakName, component.name);
 
 		handles.pModelMgr->PreloadModel(handles.pResourceMgr, component.name, component.bDynamic, component.bPerBoneCulling, component.uPreloadCount);
 	}
@@ -139,7 +141,7 @@ namespace usg
 	}
 
 	template<>
-	void PreloadComponentAssets<ModelAnimComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles)
+	void PreloadComponentAssets<ModelAnimComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 	{
 		ModelAnimComponent component;
 		bool readSuccess = file.Read(&component);

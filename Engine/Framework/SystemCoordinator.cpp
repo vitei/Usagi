@@ -336,7 +336,7 @@ void SystemCoordinator::CleanupComponents(ComponentLoadHandles& handles)
 	GameComponentMgr::Cleanup(handles);
 }
 
-void SystemCoordinator::PreloadComponentAssets(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles)
+void SystemCoordinator::PreloadComponentAssets(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 {
 	if (m_pInternalData->componentHashLookUp.count(hdr.id) == 0)
 	{
@@ -346,7 +346,7 @@ void SystemCoordinator::PreloadComponentAssets(const usg::ComponentHeader& hdr, 
 	const uint32 uComponentID = m_pInternalData->componentHashLookUp[hdr.id];
 	if(m_pInternalData->componentHelpers[uComponentID].PreloadComponentAssets != nullptr)
 	{
-		m_pInternalData->componentHelpers[uComponentID].PreloadComponentAssets(hdr, file, handles);
+		m_pInternalData->componentHelpers[uComponentID].PreloadComponentAssets(hdr, file, handles, referencedEntities);
 	}
 }
 

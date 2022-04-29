@@ -32,10 +32,10 @@ namespace usg
 	void ClearModel(Component<ModelComponent>& p, ComponentLoadHandles& handles);
 
 	template<>
-	void PreloadComponentAssets<ModelComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles);
+	void PreloadComponentAssets<ModelComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 
 	template<>
-	void PreloadComponentAssets<ModelAnimComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles);
+	void PreloadComponentAssets<ModelAnimComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 
 }
 

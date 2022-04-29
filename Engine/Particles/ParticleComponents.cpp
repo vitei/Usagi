@@ -1,4 +1,5 @@
 #include "Engine/Common/Common.h"
+#include "Engine/Core/stl/set.h"
 #include "Engine/Particles/ParticleComponents.pb.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Resource/ResourceMgr.h"
@@ -22,7 +23,7 @@ namespace usg
 	}
 
 	template<>
-	void PreloadComponentAssets<ParticleComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles)
+	void PreloadComponentAssets<ParticleComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 	{
 		ParticleComponent component;
 		bool readSuccess = file.Read(&component);

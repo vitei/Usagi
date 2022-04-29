@@ -45,7 +45,7 @@ public:
 
 	void RegisterComponent(uint32 uComponentId, uint32 uComponentHash, const ComponentHelper& h);
 	template<typename COMPONENT> void RegisterComponent();
-	void PreloadComponentAssets(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles);
+	void PreloadComponentAssets(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 	void LoadAndAttachComponent(const ComponentHeader& hdr, ProtocolBufferFile& file, Entity pEntity);
 	void LoadEntityInitializerEvents(ProtocolBufferFile& file, Entity e);
 	void CallOnLoaded(ComponentEntity* e, ComponentLoadHandles& handles);

@@ -14,6 +14,7 @@
 #include "Engine/Framework/SystemCoordinator.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
+#include "Engine/Core/stl/set.h"
 #include "Engine/Framework/EntitySpawnParams.h"
 
 namespace usg
@@ -63,8 +64,8 @@ namespace usg
 		LuaVM& GetLuaVM() { return m_lua; }
 		SystemCoordinator& GetCoordinator() { return m_systemCoordinator; }
 
-		void PreloadAssetsFromTemplate(const char* szFilename, ComponentLoadHandles& handles);
-		void PreloadAssetsFromFile(ProtocolBufferFile& file, ComponentLoadHandles& handles);
+		void PreloadAssetsFromTemplate(const char* szFilename);
+		void PreloadAssetsFromFile(ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 		// If we made changes outside of spawning
 		void ForceCallOnLoaded(Entity e);
 	private:

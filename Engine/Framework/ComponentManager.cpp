@@ -234,7 +234,7 @@ namespace usg
 		}
 	}
 
-	void ComponentManager::PreloadAssetsFromTemplate(const char* szFilename, ComponentLoadHandles& handles)
+	void ComponentManager::PreloadAssetsFromTemplate(const char* szFilename)
 	{
 		ASSERT(szFilename != NULL);
 		ProtocolBufferFile* pFile = m_componentLoadHandles.pResourceMgr->GetBufferedFile(szFilename);
@@ -243,10 +243,14 @@ namespace usg
 		bool bReadSucceeded = pFile->Read(&fileHeader);
 		ASSERT(bReadSucceeded);
 
-		PreloadAssetsFromFile(*pFile, handles);
+		ComponentLoadHandles handles;
+		FillComponentLoadHandles(handles, ComponentEntity::GetRoot());
+
+		usg::set<usg::string> referencedEntities;
+		PreloadAssetsFromFile(*pFile, handles, referencedEntities);
 	}
 
-	void ComponentManager::PreloadAssetsFromFile(usg::ProtocolBufferFile& file, ComponentLoadHandles& handles)
+	void ComponentManager::PreloadAssetsFromFile(usg::ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 	{
 		EntityHeader header;
 		bool bReadSucceeded = file.Read(&header);
@@ -256,12 +260,24 @@ namespace usg
 
 		while (file.Read(&hdr))
 		{
-			m_systemCoordinator.PreloadComponentAssets(hdr, file, handles);
+			m_systemCoordinator.PreloadComponentAssets(hdr, file, handles, referencedEntities);
+		}
+
+		// We don't care about initializer events in pre-loading, but we do have to skip over them
+		InitializerEventHeader eventHeader;
+		while (file.Read(&eventHeader))
+		{
+			file.AdvanceBytes(eventHeader.byteLength);
 		}
 
 		for (uint32 j = 0; j < header.childEntityCount; j++)
 		{
-			PreloadAssetsFromFile(file, handles);
+			PreloadAssetsFromFile(file, handles, referencedEntities);
+		}
+	
+		for (auto& itr : referencedEntities)
+		{
+			PreloadAssetsFromTemplate(itr.c_str());
 		}
 	}
 

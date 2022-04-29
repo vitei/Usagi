@@ -6,6 +6,7 @@
 
 #include "Engine/Framework/SystemKey.h"
 #include "Engine/Framework/Component.pb.h"
+#include "Engine/Core/stl/set.h"
 #include "Engine/Core/String/StringCRC.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Memory/UnTypesafeFastPool.h"
@@ -261,7 +262,7 @@ inline void OnLoaded(Component<T>&, ComponentLoadHandles& handles, bool bWasPrev
 // without attaching it to any entity.
 class GFXDevice;
 template<typename T>
-inline void PreloadComponentAssets(const ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles)
+inline void PreloadComponentAssets(const ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities)
 {
 	file.AdvanceBytes(hdr.byteLength);
 }

@@ -19,7 +19,7 @@ namespace usg
 	void PreloadEffect(usg::GFXDevice* pDevice, const char* szName);
 
 	template<>
-	void PreloadComponentAssets<ParticleComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles);
+	void PreloadComponentAssets<ParticleComponent>(const usg::ComponentHeader& hdr, ProtocolBufferFile& file, ComponentLoadHandles& handles, usg::set<usg::string>& referencedEntities);
 }
 
 
