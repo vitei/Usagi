@@ -61,7 +61,7 @@ void Input::RenumberGamepads(uint32 uPrefferedCaps)
 	}
 }
 
-void Input::Update(GFXDevice* pDevice)
+void Input::Update(GFXDevice* pDevice, float fDelta)
 {
 	if(!g_bInitCalled)
 		return;
@@ -70,7 +70,7 @@ void Input::Update(GFXDevice* pDevice)
 
 	for (uint32 i = 0; i < g_uGamepads; i++)
 	{
-		g_gamepads[i].Update(pDevice);
+		g_gamepads[i].Update(pDevice, fDelta);
 	}
 }
 

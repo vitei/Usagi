@@ -22,7 +22,7 @@ public:
 	static void Init();
 	static void Cleanup();
 	static void RenumberGamepads(uint32 uPrefferedCaps = 0xFFFFFFFF);
-	static void Update(usg::GFXDevice* pDevice);
+	static void Update(usg::GFXDevice* pDevice, float fDelta);
 	static void RegisterGamepad(IGamepad* pGamepad);
 
 	static Gamepad*	GetGamepad(uint32 uGamepad);

@@ -67,11 +67,38 @@ void Gamepad::GetMatrix(Matrix4x4& out, GamepadHand eHand)
 	out = m_deviceState.rightHand;
 }
 
-void Gamepad::Update(usg::GFXDevice* pDevice)
+void Gamepad::Update(usg::GFXDevice* pDevice, float fDelta)
 {
+	float fLeft = 0.0f; 
+	float fRight = 0.0f;
+	vector<uint32> eraseList;
+	for (auto& itr : m_vibrations)
+	{
+		fLeft += itr.second.fLeftStrength;//Math::Max(fLeft, itr.second.fLeftStrength);
+		fRight += itr.second.fRightStrength;//Math::Max(fLeft, itr.second.fRightStrength);
+
+		if (itr.second.fDuration >= 0.0f)
+		{
+			itr.second.fDuration -= fDelta;
+			if (itr.second.fDuration <= 0.0f)
+			{
+				eraseList.push_back(itr.first);
+			}
+		}
+	}
+
+	fLeft = Math::Clamp01(fLeft);
+	fRight = Math::Clamp01(fRight);
+
+	for (auto itr : eraseList)
+	{
+		m_vibrations.erase(itr);
+	}
+
 	if (m_pIGamepad)
 	{
 		m_pIGamepad->Update(pDevice, m_deviceState);
+		m_pIGamepad->Vibrate(fLeft, fRight);
 		m_bConnected = m_pIGamepad->IsConnected();
 
 	}
@@ -100,6 +127,42 @@ void Gamepad::BindHardware(IGamepad* pGamepad)
 		m_uCaps = m_pIGamepad->GetCaps();
 		m_bConnected = m_pIGamepad->IsConnected();
 	}
+}
+
+uint32 Gamepad::Vibrate(float fLeft, float fRight, float fDuration)
+{
+	VibrationData data;
+	data.fLeftStrength = fLeft;
+	data.fRightStrength = fRight;
+	data.fDuration = fDuration;
+	uint32 uId = Math::Rand();
+	m_vibrations[uId] = data;
+
+	return uId;
+}
+
+void Gamepad::UpdateVibration(uint32 uHandle, float fLeft, float fRight)
+{
+	auto& itr = m_vibrations.find(uHandle);
+	if (itr != m_vibrations.end())
+	{
+		itr->second.fLeftStrength = fLeft;
+		itr->second.fRightStrength = fRight;
+	}
+}
+
+void Gamepad::StopEffect(uint32 uHandle)
+{
+	auto& itr = m_vibrations.find(uHandle);
+	if (itr != m_vibrations.end())
+	{
+		m_vibrations.erase(itr);
+	}
+}
+
+void Gamepad::StopAllVibrations()
+{
+	m_vibrations.clear();
 }
 
 }

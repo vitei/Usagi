@@ -31,7 +31,7 @@ namespace usg
 		virtual void Update(usg::GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) = 0;
 		virtual void ResetGyro() {}
 		virtual void ResetGyroDirection() {}
-	
+		virtual void Vibrate(float fLeft, float fRight) {}
 
 
 	};

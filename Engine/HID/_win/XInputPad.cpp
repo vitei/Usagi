@@ -106,7 +106,7 @@ void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 		deviceStateOut.uButtonsDown |= (1 << (GAMEPAD_BUTTON_ZR - 1));
 }
 
-void XInputPad::Vibrate(int leftVal, int rightVal)
+void XInputPad::VibrateInt(int leftVal, int rightVal)
 {
     // Create a Vibraton State
     XINPUT_VIBRATION Vibration;
@@ -120,5 +120,13 @@ void XInputPad::Vibrate(int leftVal, int rightVal)
     XInputSetState(m_xinputID, &Vibration);
 }
 
+
+void XInputPad::Vibrate(float fLeft, float fRight)
+{
+	int iLeft = (int)(fLeft * 65535.f);
+	int iRight = (int)(fRight * 65535.f);
+
+	VibrateInt(iLeft, iRight);
+}
 
 }

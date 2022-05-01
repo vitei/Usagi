@@ -13,6 +13,7 @@
 #include "Engine/Core/File/File.h"
 #include "Engine/Maths/MathUtil.h"
 #include "Engine/Physics/PhysX.h"
+#include "Engine/Core/Timer/Timer.h"
 #include "Engine/Core/Modules/ModuleManager.h"
 #include "Engine/Resource/ResourceMgr.h"
 #if (defined PLATFORM_PC || defined PLATFORM_SWITCH_EMU)
@@ -27,6 +28,7 @@ void		EngineCleanup();
 
 static GFXDevice*	g_pGFXDevice = nullptr;
 static bool			g_gameExit = false;
+static Timer		g_timer;
 
 bool GameExit()
 {
@@ -63,8 +65,8 @@ bool GameInit()
 
 void GameLoop()
 {
-	Input::Update(g_pGFXDevice);
-	// FIXME: Remove timing from this input (not needed)
+	g_timer.Update();
+	Input::Update(g_pGFXDevice, g_timer.GetDeltaRealTime());
 	game->Update(g_pGFXDevice);
 	if(GFX::HasFocus())
 	{

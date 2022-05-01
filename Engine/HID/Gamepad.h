@@ -10,6 +10,7 @@
 #include "Engine/HID/InputDefines.h"
 #include "Engine/HID/InputStructs.h"
 #include "Engine/Maths/Matrix4x4.h"
+#include "Engine/Core/stl/map.h"
 
 namespace usg
 {
@@ -35,8 +36,13 @@ namespace usg
 		void ResetGyroDirection();
 
 		// A variety of different input devices which we want to be able to use through much the same interface
-		void Update(usg::GFXDevice* pDevice);
+		void Update(usg::GFXDevice* pDevice, float fElapsed);
 
+		// Durations < 0.0f will never end and must be stoppped via handle
+		uint32 Vibrate(float fLeft, float fRight, float fDuration);
+		void UpdateVibration(uint32 uHandle, float fLeft, float fRight);
+		void StopEffect(uint32 uHandle);
+		void StopAllVibrations();
 	protected:
 		IGamepad*	m_pIGamepad;
 
@@ -44,6 +50,14 @@ namespace usg
 		uint32		m_uCaps;
 		bool		m_bConnected;
 
+		struct VibrationData
+		{
+			float fDuration = 0.0f;
+			float fLeftStrength = 0.0f;
+			float fRightStrength = 0.0f;
+		};
+
+		map<uint32, VibrationData> m_vibrations;
 	};
 
 

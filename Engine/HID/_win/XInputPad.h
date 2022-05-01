@@ -24,11 +24,12 @@ public:
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 	void TryReconnect();
 	virtual const char* GetModuleName() const { return "XInputPad"; }
+	virtual void Vibrate(float fLeft, float fRight) override;
 
 private:
 	float GetAxisWithDeadZone(SHORT value, SHORT deadzone);
 	// Call with zero to cease vibration
-	void Vibrate(int leftVal, int rightVal);
+	void VibrateInt(int leftVal, int rightVal);
 
 	bool			m_bConnected;
 	uint32			m_xinputID;
