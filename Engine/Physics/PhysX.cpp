@@ -445,9 +445,11 @@ namespace usg
 		rtd.vehicleData.pVehicleBatchQuery = VehicleSceneQueryData::SetUpBatchedSceneQuery(0, *rtd.vehicleData.pVehicleSceneQueryData, rtd.pScene);
 		rtd.vehicleData.pFrictionPairs = CreateFrictionPairs(Required<PhysicsScene>(p));
 
+#ifndef FINAL_BUILD
 		rtd.debugStats.Init(rtd.pScene);
 
 		DebugStats::Inst()->RegisterGroup(&rtd.debugStats);
+#endif
 
 	}
 
@@ -455,7 +457,9 @@ namespace usg
 	{
 		auto& rtd = p.GetRuntimeData().GetData();
 
+#ifndef FINAL_BUILD
 		DebugStats::Inst()->DeregisterGroup(&rtd.debugStats);
+#endif
 
 
 		rtd.addActorList.clear();

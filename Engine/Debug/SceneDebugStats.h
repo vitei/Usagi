@@ -6,6 +6,8 @@
 #ifndef USG_DEBUG_SCENE_DEBUG_STATS_H
 #define USG_DEBUG_SCENE_DEBUG_STATS_H
 
+#ifndef FINAL_BUILD
+
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 #include "Engine/Core/String/FixedString.h"
 #include "Engine/Graphics/Color.h"
@@ -96,5 +98,7 @@ namespace usg
 	};
 
 }
+
+#endif	// FINAL_BUILD
 
 #endif // USG_DEBUG_STAT_GROUP_H

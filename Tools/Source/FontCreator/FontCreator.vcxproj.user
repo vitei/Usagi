@@ -12,4 +12,10 @@
     <LocalDebuggerEnvironment>PATH=%PATH%;$(LocalDebuggerWorkingDirectory)</LocalDebuggerEnvironment>
     <LocalDebuggerCommandArguments>Data\Fonts\FontDef.yml _romfiles\win\Fonts\</LocalDebuggerCommandArguments>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <LocalDebuggerWorkingDirectory>$(USAGI_DIR)\..\</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerEnvironment>PATH=%PATH%;$(LocalDebuggerWorkingDirectory)</LocalDebuggerEnvironment>
+    <LocalDebuggerCommandArguments>Data\Fonts\FontDef.yml _romfiles\win\Fonts\</LocalDebuggerCommandArguments>
+  </PropertyGroup>
 </Project>

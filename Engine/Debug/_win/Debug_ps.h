@@ -49,7 +49,7 @@ inline void ASSERT(bool condition)
 	if ( (condition) == false) return (value) ;
 
 #define ASSERT(cond) (void)0
-#define ASSERT_MSG(cond) (void)0
+#define ASSERT_MSG(cond, ... ) (void)0
 #endif
 
 

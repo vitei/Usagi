@@ -83,6 +83,9 @@ public:
 
 	void Init(GFXDevice* pDevice, DebugRender* pRender) {}
 	void Update(float fElapsed) {}
+	void RegisterCPUTimer(const ProfilingTimer* pTimer) {}
+
+	void Draw() {}
 
 	void PreDraw(GFXDevice* pDevice) {}
 	void PostDraw(GFXDevice* pDevice) {}

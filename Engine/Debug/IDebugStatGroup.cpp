@@ -6,7 +6,7 @@
 
 namespace usg {
 
-
+#ifndef FINAL_BUILD
 	IDebugStatGroup::~IDebugStatGroup()
 	{
 		if (m_pOwner)
@@ -14,6 +14,7 @@ namespace usg {
 			m_pOwner->DeregisterGroup(this);
 		}
 	}
+#endif
 
 
 }

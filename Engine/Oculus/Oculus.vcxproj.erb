@@ -17,6 +17,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{<%= project_guid %>}</ProjectGuid>
@@ -32,6 +36,10 @@
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
@@ -100,6 +108,20 @@
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OCULUS_SDK_DIR)\LibOVR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;DLL_MEM_MANAGEMENT;NDEBUG;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2017</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LibOVR.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>vulkan-1.lib;opengl32.lib;glu32.lib;Winmm.lib;$(OCULUS_SDK_DIR)\LibOVR\Lib\Windows\x64\Release\VS2017\LibOVR.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
+    </Link>
+  </ItemDefinitionGroup>  
 
 <% if project_root.include?('ThirdParty') %>
   <ItemDefinitionGroup>
@@ -123,6 +145,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\_romfiles\win\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <OutDir>$(SolutionDir)\_romfiles\win\</OutDir>
+  </PropertyGroup>  
 
 <ItemGroup>
   <ClCompile Include="..\..\..\..\Engine\$(ProjectName)\_exclude\stdafx.cpp">

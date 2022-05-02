@@ -47,7 +47,9 @@ namespace usg
 			set<physx::PxAggregate*> addAggregateList;
 			set<physx::PxAggregate*> removeAggregateList;
 
+#ifndef FINAL_BUILD
 			PhysicsDebugStats debugStats;
+#endif
 
 			struct
 			{

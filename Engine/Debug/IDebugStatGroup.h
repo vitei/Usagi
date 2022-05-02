@@ -6,6 +6,7 @@
 #ifndef USG_DEBUG_STAT_GROUP_H
 #define USG_DEBUG_STAT_GROUP_H
 
+#ifndef FINAL_BUILD
 
 namespace usg {
 
@@ -47,5 +48,7 @@ private:
 };
 
 }
+
+#endif
 
 #endif // USG_DEBUG_STAT_GROUP_H

@@ -158,7 +158,7 @@ static Allocator* GetGlobalAllocator(MemType eHeap)
 static uint8 s_nexHackBuffer[512];
 static uint8* s_pNexBufferPointer = s_nexHackBuffer;
 
-void* mem::Alloc(MemType eHeap, MemAllocType eType, memsize uSize, uint32 uAlign, bool bNotifyGPU)
+void* mem::Alloc(MemType eHeap, MemAllocType eType, memsize uSize, memsize uAlign, bool bNotifyGPU)
 {
 #ifdef PLATFORM_PC
 	if (usg::mem::s_bConventionalMemManagement)
@@ -182,7 +182,7 @@ void* mem::Alloc(MemType eHeap, MemAllocType eType, memsize uSize, uint32 uAlign
 			return pReturn;
 		}
 	#endif
-		return g_allocators.pAllocators[eHeap]->Alloc(eType, uSize, uAlign);
+		return g_allocators.pAllocators[eHeap]->Alloc(eType, uSize, (uint32)uAlign);
 	}
 }
 

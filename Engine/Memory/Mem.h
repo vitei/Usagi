@@ -44,7 +44,7 @@ namespace mem
 	void Cleanup();
 	Allocator* GetAllocator(MemType eType);
 
-	void* Alloc(MemType eHeap, MemAllocType eType, size_t uSize, uint32 uAlign = 8, bool bNotifyGPU = false);
+	void* Alloc(MemType eHeap, MemAllocType eType, memsize uSize, memsize uAlign = 8, bool bNotifyGPU = false);
 
 	void Free(MemType eHeap, void*, bool bNotifyGPU = false);
 
@@ -137,7 +137,7 @@ inline void operator delete(void* pData, size_t align, usg::MemAllocType eType, 
 }
 #endif
 
-inline void* operator new(size_t size, uint32 uAlign, usg::MemAllocType eType, usg::Allocator* pAllocator, const char* szFileName) NEW_THROW
+inline void* operator new(size_t size, size_t uAlign, usg::MemAllocType eType, usg::Allocator* pAllocator, const char* szFileName) NEW_THROW
 {
 	void* pData = pAllocator->Alloc(eType, static_cast<uint32>(size), uAlign);
 	return pData;

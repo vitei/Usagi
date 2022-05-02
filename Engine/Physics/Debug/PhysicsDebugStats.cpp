@@ -12,6 +12,8 @@
 #include "Engine/Scene/Scene.h"
 #include "PhysicsDebugStats.h"
 
+#ifndef FINAL_BUILD
+
 namespace usg {
 
 	PhysicsDebugStats::PhysicsDebugStats() :
@@ -139,3 +141,5 @@ namespace usg {
 	}
 
 }
+
+#endif

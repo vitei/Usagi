@@ -26,7 +26,7 @@ extern "C"
 #endif
 void cDebugprintf(const char *file, int line, const char* func, unsigned int uFlags,const char *format, ...);
 #else
-static inline void cDebugprintf(const char *file, int line, const char* func, uint32 uFlags, const char *format, ...) {}
+static inline void cDebugprintf(const char* file, int line, const char* func, unsigned int uFlags, const char* format, ...) {}
 #endif
 
 #endif

@@ -11,6 +11,8 @@
 #include "Engine/Scene/Scene.h"
 #include "SceneDebugStats.h"
 
+#ifndef FINAL_BUILD
+
 namespace usg {
 
 	SceneDebugStats::SceneDebugStats() :
@@ -297,3 +299,5 @@ namespace usg {
 	}
 
 }
+
+#endif

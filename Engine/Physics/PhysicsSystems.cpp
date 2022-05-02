@@ -14,6 +14,7 @@
 #include "Engine/Physics/PhysicsComponents.pb.h"
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Debug/GlobalDebugStats.h"
+#include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Debug/DebugStats.h"
 #include "Engine/Physics/PhysX.h"
 #include <limits>
@@ -438,6 +439,25 @@ namespace usg
 				physx::PxRigidDynamic* pRigidDynamic = (physx::PxRigidDynamic*)rtd.pActor;
 				const physx::PxTransform kinematicTargetTransform = ToPhysXTransform(*inputs.transform);
 				pRigidDynamic->setKinematicTarget(kinematicTargetTransform);
+			}
+		};
+
+
+		class HandleShapeEvents : public System
+		{
+		public:
+
+			struct Outputs
+			{
+				Required<SphereCollider> sphereCollider;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ResizeSphere& evt)
+			{
+				outputs.sphereCollider.Modify().fRadius = evt.fNewRadius;
+				outputs.sphereCollider.GetRuntimeData().pShape->setGeometry(physx::PxSphereGeometry(evt.fNewRadius));
 			}
 		};
 

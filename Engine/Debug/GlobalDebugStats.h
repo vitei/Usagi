@@ -9,6 +9,7 @@
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 #include "Engine/Core/String/FixedString.h"
 
+#ifndef FINAL_BUILD
 
 namespace usg
 {
@@ -78,5 +79,7 @@ namespace usg
 	};
 
 }
+
+#endif
 
 #endif // USG_DEBUG_STAT_GROUP_H

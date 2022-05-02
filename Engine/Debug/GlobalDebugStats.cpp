@@ -10,6 +10,8 @@
 #include "Engine/Core/Timer/ProfilingTimer.h"
 #include "GlobalDebugStats.h"
 
+#ifndef FINAL_BUILD
+
 namespace usg {
 
 	GlobalDebugStats::GlobalDebugStats() :
@@ -267,3 +269,5 @@ namespace usg {
 
 
 }
+
+#endif

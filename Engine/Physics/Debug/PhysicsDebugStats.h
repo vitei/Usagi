@@ -9,6 +9,8 @@
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 #include "Engine/Graphics/Color.h"
 
+#ifndef FINAL_BUILD
+
 namespace physx
 {
 	class PxScene;
@@ -53,5 +55,7 @@ namespace usg
 	};
 
 }
+
+#endif
 
 #endif // USG_DEBUG_STAT_GROUP_H

@@ -7,6 +7,8 @@
 #ifndef USG_DEBUG_STATS_VULKAN_H
 #define USG_DEBUG_STATS_VULKAN_H
 
+#ifndef FINAL_BUILD
+
 #include "Engine/Debug/Rendering/IDebugStatGroup.h"
 
 namespace usg {
@@ -33,5 +35,8 @@ private:
 };
 
 } // namespace usagi
+
+
+#endif
 
 #endif // USG_DEBUG_STATS_VULKAN_H

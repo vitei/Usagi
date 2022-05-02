@@ -126,7 +126,9 @@ private:
 	PIMPL*						m_pImpl;
 	
 	GFXDevice*					m_pDevice;
+#ifndef FINAL_BUILD
 	SceneDebugStats				m_debugStats;
+#endif
 	uint32						m_uFrame;
 	uint32						m_uPVSCount;
 	float32 					m_fTime;

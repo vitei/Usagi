@@ -131,8 +131,11 @@ void Scene::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const AABB& worldBoun
 	m_pImpl->particleSystem.Init(pDevice, this, pSet);
 	m_pImpl->debug3D.Init(pDevice, this, pResMgr);
 
+#ifndef FINAL_BUILD
 	m_debugStats.Init(&m_pImpl->debug3D, this);
+
 	DebugStats::Inst()->RegisterGroup(&m_debugStats);
+#endif
 
 	RegisterTimers();
 }
@@ -166,7 +169,9 @@ void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
 void Scene::Cleanup(GFXDevice* pDevice)
 {
 	m_pImpl->debug3D.Cleanup(pDevice);
+#ifndef FINAL_BUILD
 	m_debugStats.Cleanup(pDevice);
+#endif
 	m_pImpl->particleSystem.Cleanup(pDevice, this);
 	m_pImpl->lightMgr.Cleanup(pDevice);
 	ASSERT(m_pImpl->viewContexts.Size() == 0);

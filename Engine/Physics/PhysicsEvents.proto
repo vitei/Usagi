@@ -94,3 +94,9 @@ message PhysicsSceneDirty
 {
 
 }
+
+
+message ResizeSphere
+{
+	required float fNewRadius = 1;
+}
