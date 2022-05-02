@@ -12,18 +12,6 @@ message CollisionMasks
 	required uint32 uFilter = 5 [default = 0xffffffff];
 }
 
-message Sphere
-{
-	required Vector3f centre = 1;
-	required float radius = 2;
-}
-
-message Box
-{
-	required Vector3f vCenter  = 1;
-	required Matrix3x3 mAxes  = 2;
-	required Vector3f vExtents = 3;
-}
 
 message QuadTreeHandle
 {

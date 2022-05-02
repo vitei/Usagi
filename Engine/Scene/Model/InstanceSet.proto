@@ -7,6 +7,12 @@ import "Engine/Physics/CollisionData.proto";
 
 package usg.model;
 
+message InstSphere
+{
+	required Vector3f centre = 1;
+	required float radius = 2;
+}
+
 message Instance {
 	required Vector3f center = 1;
 	required Vector3f rotation = 2;
@@ -16,7 +22,7 @@ message Instance {
 
 message InstanceSet {
 	required string modelName = 1 [(nanopb).max_size = 64];
-	required Components.Sphere boundingSphere = 2;
+	required InstSphere boundingSphere = 2;
 	repeated Instance instances = 3 [(nanopb).decoder = "PBChunkedArray<ALLOC_GEOMETRY_DATA, 32>"];
 };
 

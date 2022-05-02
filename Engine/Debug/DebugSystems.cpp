@@ -23,47 +23,9 @@
 namespace usg
 {
 	
-	class DebugShapeRenderer
-	{
-	protected:
-		static void RenderDebugShape(const DebugRenderData& debug, const usg::Components::Sphere& sphere, const Optional<MatrixComponent>& matrix)
-		{
-#ifndef FINAL_BUILD
-			if (DebugStats::Inst()->GetCurrentType() != debug.page) { return; }
-
-			const Vector3f centre = matrix.Exists()
-				? matrix.Force()->matrix.TransformVec3(sphere.centre)
-				: sphere.centre;
-
-			DEBUG_PRINT("Rendering sphere at %0.02f %0.02f %0.02f \n", centre.x, centre.y, centre.z);
-			Debug3D::GetRenderer()->AddSphere(centre, sphere.radius, debug.color);
-#endif
-		}
-	};
 
 	namespace Systems
 	{
-
-		class RenderDebugSphere : public System, public DebugShapeRenderer
-		{
-		public:
-			typedef Components::Sphere ShapeTP;
-			struct Inputs
-			{
-				Optional<MatrixComponent> matrix;
-
-				Required<DebugRenderData> debug;
-				Required<ShapeTP>         shape;
-			};
-
-			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
-
-
-			static void Run(const Inputs& in, Outputs&, float)
-			{
-				RenderDebugShape(*in.debug, *in.shape, in.matrix);
-			}
-		};
 
 
 		class DebugPauseEventHandler : public usg::System

@@ -20,7 +20,7 @@ class Camera;
 class PostFXSys;
 class SceneSearchObject;
 class RenderGroup;
-
+class Sphere;
 
 class SceneContext 
 {
