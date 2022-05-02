@@ -139,7 +139,7 @@ inline void operator delete(void* pData, size_t align, usg::MemAllocType eType, 
 
 inline void* operator new(size_t size, size_t uAlign, usg::MemAllocType eType, usg::Allocator* pAllocator, const char* szFileName) NEW_THROW
 {
-	void* pData = pAllocator->Alloc(eType, static_cast<uint32>(size), uAlign);
+	void* pData = pAllocator->Alloc(eType, size, static_cast<uint32>(uAlign));
 	return pData;
 }
 
