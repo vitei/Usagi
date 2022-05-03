@@ -22,14 +22,14 @@ RenderTarget_ps::RenderTarget_ps()
 	, m_uWidth(0)
 	, m_uHeight(0)
 {
-
+	MemClear(&m_fbCreateInfo, sizeof(m_fbCreateInfo));
 	MemClear(&m_colorClearValues, sizeof(m_colorClearValues));
 }
 
 RenderTarget_ps::~RenderTarget_ps()
 {
-	MemClear(&m_fbCreateInfo, sizeof(m_fbCreateInfo));
 	ASSERT(m_framebuffer == VK_NULL_HANDLE);
+
 }
 
 
