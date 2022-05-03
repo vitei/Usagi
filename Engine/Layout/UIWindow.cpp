@@ -30,7 +30,7 @@ UIWindow::UIWindow()
 
 UIWindow::~UIWindow()
 {
-	
+	ASSERT(m_pUIItemsDefs == nullptr);
 }
 
 void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen)
@@ -143,7 +143,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 			// TODO: Get material indices, worst case scenario each element needs its own descriptor set
 		}
 
-		m_vertexData.Init(pDevice, nullptr, (uint32)(sizeof(VertexData)), (uint32)uImageCount, "UIWindow", usg::GPU_USAGE_DYNAMIC);
+		m_vertexData.Init(pDevice, nullptr, (uint32)(sizeof(VertexData)), (uint32)uImageCount, m_name.c_str() , usg::GPU_USAGE_DYNAMIC);
 
 		usg::PipelineStateDecl pipeline;
 		pipeline.ePrimType = usg::PT_POINTS;

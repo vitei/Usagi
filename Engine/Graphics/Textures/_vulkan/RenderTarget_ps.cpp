@@ -29,6 +29,7 @@ RenderTarget_ps::RenderTarget_ps()
 RenderTarget_ps::~RenderTarget_ps()
 {
 	MemClear(&m_fbCreateInfo, sizeof(m_fbCreateInfo));
+	ASSERT(m_framebuffer == VK_NULL_HANDLE);
 }
 
 
@@ -144,6 +145,8 @@ void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPas
 {
 	Cleanup(pDevice);
 	m_fbCreateInfo.renderPass = renderPass.GetContents()->GetPass();
+
+	usg::GFXDevice_ps& devicePS = pDevice->GetPlatform();
 
 	VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &m_fbCreateInfo, NULL, &m_framebuffer);
 	ASSERT(res == VK_SUCCESS);

@@ -79,7 +79,7 @@ inline void VertexBuffer::Init(GFXDevice* pDevice, const void* const pVerts, uin
 	m_bStatic = eUsage == GPU_USAGE_STATIC;
 	m_pszName = pszName;
 	ASSERT( !m_bStatic || pVerts!=NULL );
-	m_platform.Init(pDevice, pVerts, uVertSize*uVertCount, eUsage, eLocation);
+	m_platform.Init(pDevice, pVerts, uVertSize*uVertCount, pszName, eUsage, eLocation);
 }
 
 inline void VertexBuffer::SetContents(GFXDevice* pDevice, const void* const pData, uint32 uVertCount)

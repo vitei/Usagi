@@ -86,7 +86,8 @@ public:
 	void ReqDestroyDescriptorSetLayout(VkDescriptorSetLayout layout);
 	void ReqDestroyDescriptorSetPool(VkDescriptorPool pool);
 	void ReqDestroyFrameBuffer(VkFramebuffer frameBuffer);
-
+	void ReqDestroyShader(VkShaderModule shader);
+	void ReqDestroyPipelineLayout(VkPipelineLayout layout);
 
 private:
 	void EnumerateDisplays();
@@ -115,7 +116,9 @@ private:
 		RESOURCE_IMAGE,
 		RESOURCE_DESCRIPTOR_LAYOUT,
 		RESOURCE_DESCRIPTOR_POOL,
-		RESOURCE_FRAME_BUFFER
+		RESOURCE_FRAME_BUFFER,
+		RESOURCE_SHADER_MODULE,
+		RESOURCE_PIPELINE_LAYOUT
 	};
 
 
@@ -145,6 +148,8 @@ private:
 			VkImage					image;
 			VkDescriptorPool		pool;
 			VkDescriptorSetLayout	layout;
+			VkShaderModule			shader;
+			VkPipelineLayout		pipelineLayout;
 			struct Descriptor
 			{
 				// TODO: The device should probably own the pools

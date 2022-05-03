@@ -29,7 +29,7 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
 	m_createInfo.lineWidth = decl.fLineWidth;
 	//m_createInfo.lineWidth = 1.0f;
 
-	if (decl.bWireframe && decl.bLineSmooth)
+	if (decl.bLineSmooth)
 	{
 		m_createInfo.pNext = &m_lineState;
 		m_lineState.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT;

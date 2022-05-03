@@ -209,10 +209,11 @@ void GFXDevice_ps::Cleanup(GFXDevice* pParent)
 {
 	vkDestroyCommandPool(m_vkDevice, m_cmdPool, NULL);
 	vkDeviceWaitIdle(m_vkDevice);
+
+	vkDestroyFence(m_vkDevice, m_drawFence, NULL);
 	// Cleanup any requested destroys before destroying the device
 	CleanupDestroyRequests();
 
-	m_criticalSection.Finalize();
 }
 
 GFXDevice_ps::~GFXDevice_ps()
@@ -236,7 +237,8 @@ GFXDevice_ps::~GFXDevice_ps()
 		mem::Free(MEMTYPE_STANDARD, m_pQueueProps);
 		m_pQueueProps = NULL;
 	}
-	
+	m_criticalSection.Finalize();
+
 }
 
 void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
@@ -273,6 +275,12 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 				break;
 				case RESOURCE_DESCRIPTOR_POOL:
 					vkDestroyDescriptorPool(m_vkDevice, req.resource.pool, nullptr);
+					break;
+				case RESOURCE_SHADER_MODULE:
+					vkDestroyShaderModule(m_vkDevice, req.resource.shader, nullptr);
+					break;
+				case RESOURCE_PIPELINE_LAYOUT:
+					vkDestroyPipelineLayout(m_vkDevice, req.resource.pipelineLayout, nullptr);
 					break;
 				default:
 					ASSERT(false);
@@ -351,7 +359,11 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
+#ifndef FINAL_BUILD
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
 	
 	// Check to see if an HMD has been loaded and grab the extensions
 	uint32 uHMDId = IHeadMountedDisplay::GetModuleTypeNameStatic();
@@ -505,8 +517,10 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	VkPhysicalDeviceFeatures enabledFeatures = {};
 	VkPhysicalDeviceFeatures supportedFeatures = {};
+	VkPhysicalDeviceLimits limits = {};
 
 	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
+
 
 	// FIXME: Set up additional enabled features
 	enabledFeatures.samplerAnisotropy = VK_TRUE;
@@ -518,6 +532,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	enabledFeatures.fillModeNonSolid = VK_TRUE;
 	enabledFeatures.independentBlend = VK_TRUE;
 	enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
+	enabledFeatures.wideLines = VK_TRUE;
 
 
 
@@ -548,9 +563,13 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
+	VkPhysicalDeviceLineRasterizationFeaturesEXT lineFeatures = {};
+	lineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT;
+	lineFeatures.smoothLines = true;
+
 	VkDeviceCreateInfo device_info = {};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	device_info.pNext = NULL;
+	device_info.pNext = &lineFeatures;
 	device_info.queueCreateInfoCount = 1;
 	device_info.pQueueCreateInfos = &m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
@@ -916,12 +935,32 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	return false;
 }
 
+void GFXDevice_ps::ReqDestroyPipelineLayout(VkPipelineLayout layout)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_PIPELINE_LAYOUT;
+	req.resource.pipelineLayout = layout;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
 void GFXDevice_ps::ReqDestroyFrameBuffer(VkFramebuffer frameBuffer)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);
 	DestroyRequest req;
 	req.eResourceType = RESOURCE_FRAME_BUFFER;
 	req.resource.frameBuffer = frameBuffer;
+	req.uDestroyReqFrame = m_pParent->GetFrameCount();
+	m_destroyQueue.push(req);
+}
+
+void GFXDevice_ps::ReqDestroyShader(VkShaderModule shader)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+	DestroyRequest req;
+	req.eResourceType = RESOURCE_SHADER_MODULE;
+	req.resource.shader = shader;
 	req.uDestroyReqFrame = m_pParent->GetFrameCount();
 	m_destroyQueue.push(req);
 }

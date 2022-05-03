@@ -18,7 +18,7 @@ VertexBuffer_ps::VertexBuffer_ps()
 
 VertexBuffer_ps::~VertexBuffer_ps()
 {
-	
+	ASSERT(m_uBufferCount == 0);
 }
 
 
@@ -131,7 +131,7 @@ void VertexBuffer_ps::CleanupStaging(GFXDevice* pDevice)
 	m_bUseStaging = false;
 }
 
-void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation)
+void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, const char* pszName, GPUUsage eUpdateType, GPULocation eLocation)
 {
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
 
@@ -194,6 +194,20 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 		// There should be no additional requests to update this data so get the memory back
 		CleanupStaging(pDevice);
 	}
+
+#ifndef FINAL_BUILD
+	if (pszName && m_buffer[0])
+	{
+		PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(pDevice->GetPlatform().GetVKInstance(), "vkSetDebugUtilsObjectNameEXT");
+
+		VkDebugUtilsObjectNameInfoEXT name = {};
+		name.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+		name.objectType = VK_OBJECT_TYPE_BUFFER;
+		name.objectHandle = (uint64_t)m_buffer[0];
+		name.pObjectName = pszName;
+		pfnSetDebugUtilsObjectNameEXT(deviceVK, &name);
+	}
+#endif
 }
 
 

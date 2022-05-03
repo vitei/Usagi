@@ -156,6 +156,7 @@ RasterizerStateDecl::RasterizerStateDecl()
 	eCullFace = CULL_FACE_BACK;
 	fDepthBias	= 0.0f;
 	fLineWidth = 1.0f;
+	bLineSmooth = false;
 	bUseDepthBias = false;
 	bMultisample = false;
 	bWireframe = false;
@@ -180,10 +181,12 @@ bool RasterizerStateDecl::operator==(const RasterizerStateDecl& rhs) const
 		}
 	}
 
-	return ( eCullFace == rhs.eCullFace
+	return (eCullFace == rhs.eCullFace
 		&& bMultisample == rhs.bMultisample
 		&& bWireframe == rhs.bWireframe
-		&& uPatchControlPoints == rhs.uPatchControlPoints );
+		&& uPatchControlPoints == rhs.uPatchControlPoints
+		&& bLineSmooth == rhs.bLineSmooth
+		&& fLineWidth == rhs.fLineWidth);
 }
 
 RenderPassDecl::Attachment::Attachment()

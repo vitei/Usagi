@@ -109,7 +109,7 @@ public:
 		{
 			m_pairings[i].state->Cleanup(pDevice);
 		}
-		ClearDynamicResources();
+		ClearAllResources();
 	}
 
 	void ClearDynamicResources(usg::GFXDevice* pDevice)
@@ -188,7 +188,7 @@ void RenderStateMgr::Cleanup(GFXDevice* pDevice)
 	m_pImpl->pipelines.ClearAllResources(pDevice);
 	m_pImpl->renderPasses.ClearAllResources(pDevice);
 	m_pImpl->descriptorLayouts.ClearAllResources(pDevice);
-	m_pImpl->pipelineLayouts.ClearAllResources();
+	m_pImpl->pipelineLayouts.ClearAllResources(pDevice);
 }
 
 AlphaStateHndl RenderStateMgr::GetAlphaState(const AlphaStateDecl* pDecl, GFXDevice* pDevice)

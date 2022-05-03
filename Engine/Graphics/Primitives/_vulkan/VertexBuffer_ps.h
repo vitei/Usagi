@@ -18,7 +18,7 @@ public:
 	VertexBuffer_ps();
 	~VertexBuffer_ps();
 
-	void Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, GPUUsage eUpdateType, GPULocation eLocation);
+	void Init(GFXDevice* pDevice, const void* const pVerts, uint32 uDataSize, const char* pszName, GPUUsage eUpdateType, GPULocation eLocation);
 	void Cleanup(GFXDevice* pDevice);
 	void SetContents(GFXDevice* pDevice, const void* const pData, uint32 uVertCount);
 

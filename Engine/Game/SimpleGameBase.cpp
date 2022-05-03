@@ -110,6 +110,12 @@ namespace usg
 
 	void SimpleGameBase::Cleanup(usg::GFXDevice* pDevice)
 	{
+		if (m_pTransitionMode)
+		{
+			m_pTransitionMode->Cleanup(pDevice);
+			vdelete m_pTransitionMode;
+			m_pTransitionMode = nullptr;
+		}
 		if (m_pActiveMode)
 		{
 			pDevice->WaitIdle();

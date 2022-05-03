@@ -579,6 +579,15 @@ namespace usg
 		m_importanceMapADesc.Cleanup(pDevice);
 		m_importanceMapBDesc.Cleanup(pDevice);
 
+		m_fourDepthRT.Cleanup(pDevice);
+		m_twoDepthRT.Cleanup(pDevice);
+		m_pingPongRT1.Cleanup(pDevice);
+		m_pingPongRT2.Cleanup(pDevice);
+		m_finalResultsRT.Cleanup(pDevice);
+
+		m_importanceMapRT.Cleanup(pDevice);
+		m_importanceMapPongRT.Cleanup(pDevice);
+
 
 		m_constants.Cleanup(pDevice);
 		m_prepareDepthDesc.Cleanup(pDevice);

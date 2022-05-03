@@ -89,6 +89,8 @@ void Display_ps::Cleanup(usg::GFXDevice* pDevice)
 		vkDestroySurfaceKHR(pDevice->GetPlatform().GetVKInstance(), m_surface, nullptr);
 		m_surface = VK_NULL_HANDLE;
 	}
+
+	vkDestroySemaphore(pDevice->GetPlatform().GetVKDevice(), m_imageAcquired, nullptr);
 }
 
 Display_ps::~Display_ps()
