@@ -173,6 +173,16 @@ void Audio::DisableEffect(const AudioType eType, uint32 uEffectCRC)
 	}
 }
 
+void Audio::OriginOffset(usg::Vector3f vOffset)
+{
+	for (FastPool<ActorData>::DynamicIterator it = m_actors.BeginDynamic(); !it.IsEnd(); ++it)
+	{
+		ActorData* pActor = (*it);
+		usg::Vector3f vPos = pActor->actor.GetPosition() - vOffset;
+		pActor->actor.SetPosition(vPos);
+	}
+}
+
 void Audio::LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount)
 {
 #if !DISABLE_SOUND

@@ -12,6 +12,7 @@
 #include "Engine/Graphics/Lights/DirLight.h"
 #include "Engine/Graphics/Lights/PointLight.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Audio/Audio.h"
 #include "Engine/Graphics/Shadows/ShadowCascade.h"
 #include "Engine/Graphics/GPUUpdate.h"
 #include "Engine/Framework/EventManager.h"
@@ -82,6 +83,8 @@ namespace usg
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::ShiftWorldOrigin& event)
 			{
 				outputs.sceneComp.Modify().vOriginOffset += event.vShift;
+
+				Audio::Inst()->OriginOffset(event.vShift);
 			}
 
 

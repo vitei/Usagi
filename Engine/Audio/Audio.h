@@ -65,6 +65,7 @@ public:
 
 	void LoadCustomArchive(const char* pszArchiveName, CustomSound* pSounds, uint32 uCount);
 
+	void OriginOffset(usg::Vector3f vOrigin);
 	AudioType GetAudioType(uint32 uSoundId);
 	float GetVolume(uint32 uSoundId);
 	SoundHandle PrepareCustomStream(const StreamingSoundDef& def, float fVolume = 1.0f);
