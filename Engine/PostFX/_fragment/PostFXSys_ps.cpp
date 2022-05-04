@@ -478,7 +478,7 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 	flags.uClearFlags = RenderTarget::RT_FLAG_COLOR_1 | RenderTarget::RT_FLAG_DS;
 
 	usg::RenderTarget* pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
-	pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), &m_depthStencil);
+	pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), &m_depthStencil, "PostFX Chain");
 
 	// Linear depth needs to clear to 1
 	pTarget->SetClearColor(Color(1.0f, 0.f, 0.0f, 0.0f), 1);
@@ -541,7 +541,7 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 		{
 			pTarget = vnew(ALLOC_GFX_RENDER_TARGET)RenderTarget;
 			DepthStencilBuffer* pDS = m_activeEffects[i]->WritesTexture(PostEffect::Input::Depth) ? &m_depthStencil : nullptr;
-			pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), pDS);
+			pTarget->InitMRT(pDevice, (uint32)pBuffers.size(), pBuffers.data(), pDS, "Post FX Chain");
 			pTarget->InitRenderPass(pDevice, flags);
 			m_dynamicTargets.push_back(pTarget);
 		}

@@ -58,6 +58,7 @@ public:
 	VkImageView CreateImageView(GFXDevice* pDevice, uint32 uLayer, uint32 uMip) const;
 
 	VkImageView GetImageView(GFXDevice* pDevice, const ImageViewDef& def) const;
+	void SetName(GFXDevice* pDevice, const char* szFileName);
 
 private:
 	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);

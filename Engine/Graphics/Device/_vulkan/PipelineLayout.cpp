@@ -19,8 +19,7 @@ PipelineLayout::PipelineLayout() :
 
 PipelineLayout::~PipelineLayout()
 {
-	// FIXME: Needs a cleanup function
-	//vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	ASSERT(m_layout == VK_NULL_HANDLE);
 }
 	
 

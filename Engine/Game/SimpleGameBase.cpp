@@ -128,6 +128,7 @@ namespace usg
 			mem::FreeToLastTag();
 		}
 
+		m_pInternalData->m_pInitThread->Cleanup(pDevice);
 
 		usg::Fader::Inst()->CleanUpDeviceData(pDevice);
 		usg::Fader::Cleanup();

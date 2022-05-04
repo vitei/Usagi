@@ -114,9 +114,9 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 	m_brightPassTex.Init(pDevice, uScrWidth / 4, uScrHeight / 4, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 	m_bloomSourceTex.Init(pDevice, uScrWidth / 8, uScrHeight / 8, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
 
-	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex);
-	m_brightPassRT.Init(pDevice, &m_brightPassTex);
-	m_bloomSourceRT.Init(pDevice, &m_bloomSourceTex);
+	m_scaledSceneRT.Init(pDevice, &m_scaledSceneTex, nullptr, "Bloom Scaled");
+	m_brightPassRT.Init(pDevice, &m_brightPassTex, nullptr, "Bloom Bright");
+	m_bloomSourceRT.Init(pDevice, &m_bloomSourceTex, nullptr, "Bloom Source");
 	RenderTarget::RenderPassFlags flags;
 	flags.uClearFlags = 0;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_COLOR_0;
@@ -128,7 +128,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 	for (int i = 0; i < BLOOM_PASS_TEXTURES; i++)
 	{
 		m_bloomTex[i].Init(pDevice, uScrWidth / 8, uScrHeight / 8, ColorFormat::RGB_HDR, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR);
-		m_bloomRT[i].Init(pDevice, &m_bloomTex[i]);
+		m_bloomRT[i].Init(pDevice, &m_bloomTex[i], nullptr, "Bloom RT");
 		m_bloomRT[i].InitRenderPass(pDevice, flags);
 	}
 

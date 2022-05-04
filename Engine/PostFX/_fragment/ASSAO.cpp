@@ -235,19 +235,19 @@ namespace usg
 			pBuffers[i] = &m_halfDepthTargets[i];
 		}
 
-		m_fourDepthRT.InitMRT(pDevice, DEPTH_COUNT, pBuffers, nullptr );
+		m_fourDepthRT.InitMRT(pDevice, DEPTH_COUNT, pBuffers, nullptr, "ASSAO Four");
 		pBuffers[1] = &m_halfDepthTargets[3];	// Demo uses 0 and 3, we'll do the same to avoid confusion for now
-		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr);
+		m_twoDepthRT.InitMRT(pDevice, 2, pBuffers, nullptr, "ASSAO Two");
 
 		m_pingPongCB1.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
 		m_pingPongCB2.Init(pDevice, halfSize.x, halfSize.y, ColorFormat::RG_8);
-		m_pingPongRT1.Init(pDevice, &m_pingPongCB1);
-		m_pingPongRT2.Init(pDevice, &m_pingPongCB2);
+		m_pingPongRT1.Init(pDevice, &m_pingPongCB1, nullptr, "ASSAO Ping 1");
+		m_pingPongRT2.Init(pDevice, &m_pingPongCB2, nullptr, "ASSAO Ping 2");
 
 		m_importanceMapCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
 		m_importanceMapPongCB.Init(pDevice, quarterSize.x, quarterSize.y, ColorFormat::R_8);
-		m_importanceMapRT.Init(pDevice, &m_importanceMapCB);
-		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB); 
+		m_importanceMapRT.Init(pDevice, &m_importanceMapCB, nullptr, "ASSAO Importance");
+		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB, nullptr, "ASSAO Pong");
 
 		m_loadTargetCB.Init(pDevice, 1, 1, ColorFormat::R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
 
@@ -264,7 +264,7 @@ namespace usg
 
 
 		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, ColorFormat::RG_8);
-		m_finalResultsRT.Init(pDevice, &m_finalResultsCB);
+		m_finalResultsRT.Init(pDevice, &m_finalResultsCB, nullptr, "ASSAO Final");
 
 		RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = 0;

@@ -32,7 +32,6 @@ RenderTarget_ps::~RenderTarget_ps()
 
 }
 
-
 void RenderTarget_ps::InitMRT(GFXDevice* pDevice, uint32 uColorCount, ColorBuffer** ppColorBuffers, DepthStencilBuffer* pDepth)
 {
 	// The depth stencil is the last bound attachment
@@ -164,7 +163,8 @@ void RenderTarget_ps::RenderPassUpdated(usg::GFXDevice* pDevice, const RenderPas
 		VkResult res = vkCreateFramebuffer(pDevice->GetPlatform().GetVKDevice(), &itr.createInfo, NULL, &itr.frameBuffer);
 		ASSERT(res == VK_SUCCESS);
 	}
-
+	if(m_name.size() > 0)
+		SetName(pDevice, m_name.c_str());
 }
 
 void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
@@ -192,6 +192,50 @@ void RenderTarget_ps::FreeFramebuffers(GFXDevice* pDevice)
 			itr.frameBuffer = VK_NULL_HANDLE;
 		}
 	}
+}
+
+void RenderTarget_ps::SetName(GFXDevice* pDevice, const char* szFileName)
+{
+#ifndef FINAL_BUILD
+	if (szFileName == nullptr)
+		return;
+
+	m_name = szFileName;
+
+	if (m_framebuffer == VK_NULL_HANDLE)
+		return;
+
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+	VkDevice device = devicePS.GetVKDevice();
+
+	PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(pDevice->GetPlatform().GetVKInstance(), "vkSetDebugUtilsObjectNameEXT");
+
+	VkDebugUtilsObjectNameInfoEXT name = {};
+	name.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+	name.objectType = VK_OBJECT_TYPE_FRAMEBUFFER;
+	name.objectHandle = (uint64_t)m_framebuffer;
+	name.pObjectName = szFileName;
+	pfnSetDebugUtilsObjectNameEXT(device, &name);
+
+	for (auto& itr : m_layerInfo)
+	{
+		if (itr.frameBuffer != VK_NULL_HANDLE)
+		{
+			name.objectHandle = (uint64_t)m_framebuffer;
+			pfnSetDebugUtilsObjectNameEXT(device, &name);
+		}
+	}
+
+	for (auto& itr : m_mipInfo)
+	{
+		if (itr.frameBuffer != VK_NULL_HANDLE)
+		{
+			name.objectHandle = (uint64_t)m_framebuffer;
+			pfnSetDebugUtilsObjectNameEXT(device, &name);
+		}
+	}
+
+#endif
 }
 
 

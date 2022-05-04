@@ -40,6 +40,17 @@ namespace usg
 		m_bPauseMode = bPauseMode;
 	}
 
+	void InitThread::Cleanup(usg::GFXDevice* pDevice)
+	{
+		for (auto itr : m_pausedModes)
+		{
+			itr.second->Cleanup(pDevice);
+			vdelete itr.second;
+
+		}
+		m_pausedModes.clear();
+	}
+
 	void InitThread::NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight)
 	{
 		for (auto itr : m_pausedModes)

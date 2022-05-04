@@ -62,6 +62,7 @@ void ColorBuffer_ps::InitExViews(GFXDevice* pDevice)
 			}
 		}
 	}
+	m_texture.GetPlatform().SetName(pDevice, "ColorBuffer");
 }
 
 void ColorBuffer_ps::FreeExViews(GFXDevice* pDevice)

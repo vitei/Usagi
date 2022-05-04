@@ -37,13 +37,13 @@ namespace usg {
 	}
 
 
-	void RenderTarget::Init(usg::GFXDevice* pDevice, ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth)
+	void RenderTarget::Init(usg::GFXDevice* pDevice, ColorBuffer* pColorBuffer, DepthStencilBuffer* pDepth, const char* szName)
 	{
 		uint32 uColCount = pColorBuffer != NULL ? 1 : 0;
-		InitMRT(pDevice, uColCount, &pColorBuffer, pDepth);
+		InitMRT(pDevice, uColCount, &pColorBuffer, pDepth, szName);
 	}
 
-	void RenderTarget::InitMRT(usg::GFXDevice* pDevice, uint32 uColCount, ColorBuffer** ppColorBuffer, DepthStencilBuffer* pDepth)
+	void RenderTarget::InitMRT(usg::GFXDevice* pDevice, uint32 uColCount, ColorBuffer** ppColorBuffer, DepthStencilBuffer* pDepth, const char* szName)
 	{
 		m_uTargetMask = 0;
 		m_uTargetCount = uColCount;
@@ -58,6 +58,7 @@ namespace usg {
 		ASSERT(ConfirmCompataible(ppColorBuffer[0], pDepth));
 
 		m_platform.InitMRT(pDevice, uColCount, ppColorBuffer, pDepth);
+		m_platform.SetName(pDevice, szName);
 	}
 
 	void RenderTarget::Cleanup(GFXDevice* pDevice)

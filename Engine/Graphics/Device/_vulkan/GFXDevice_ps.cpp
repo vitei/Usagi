@@ -214,6 +214,14 @@ void GFXDevice_ps::Cleanup(GFXDevice* pParent)
 	// Cleanup any requested destroys before destroying the device
 	CleanupDestroyRequests();
 
+	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
+	{
+		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
+		{
+			m_memoryPools[type].heaps[i]->FreeData(m_vkDevice);
+		}
+	}
+	vkDestroyPipelineCache(m_vkDevice, m_pipelineCache, nullptr);
 }
 
 GFXDevice_ps::~GFXDevice_ps()
@@ -240,6 +248,7 @@ GFXDevice_ps::~GFXDevice_ps()
 	m_criticalSection.Finalize();
 
 }
+
 
 void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 {	

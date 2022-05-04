@@ -35,6 +35,7 @@ public:
 
 	const Viewport& GetViewport() const { return m_fullScreenVP; }
 	void SetInUse(bool bInUse) {}
+	void SetName(GFXDevice* pDevice, const char* pszName);
 
 	void EndDraw() { }
 	
@@ -53,6 +54,7 @@ private:
 		VkFramebuffer			frameBuffer;
 	};
 	// Color + depth for the clear
+	usg::string				m_name;
 	VkFramebufferCreateInfo m_fbCreateInfo;
 	vector<SubBufferInfo> m_layerInfo;
 	vector<SubBufferInfo> m_mipInfo;

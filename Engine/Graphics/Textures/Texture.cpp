@@ -84,6 +84,7 @@ bool Texture::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader,
 	SetupHash(m_name.c_str());
 	const PakFileDecl::TextureHeader* pHdr = PakFileDecl::GetCustomHeader<PakFileDecl::TextureHeader>(pFileHeader);
 	bool bLoaded = m_platform.Load(pDevice, pData, pFileHeader->uDataSize, pHdr);
+	m_platform.SetName(pDevice, m_name.c_str());
 	SetReady(true);
 	return bLoaded;
 }

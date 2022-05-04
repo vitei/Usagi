@@ -70,7 +70,7 @@ void LightMgr::Init(GFXDevice* pDevice, Scene* pParent)
 
 	// Set up an initial dummy array for binding purposes
 	m_cascadeBuffer.InitArray(pDevice, 32, 32, 2, DepthFormat::DEPTH_32F, SAMPLE_COUNT_1_BIT);//DF_DEPTH_32F); //DF_DEPTH_24
-	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+	m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer, "Cascade buffer");
 	usg::RenderTarget::RenderPassFlags flags;
 	flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 	flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;
@@ -149,7 +149,7 @@ void LightMgr::InitShadowCascade(GFXDevice* pDevice, uint32 uLayers)
 		m_cascadeBuffer.Cleanup(pDevice);
 		m_cascadeTarget.Cleanup(pDevice);
 		m_cascadeBuffer.InitArray(pDevice, m_uShadowMapRes, m_uShadowMapRes, uLayers, DepthFormat::DEPTH_32F);
-		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer);
+		m_cascadeTarget.Init(pDevice, NULL, &m_cascadeBuffer, "Cascade");
 		usg::RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = RenderTarget::RT_FLAG_DEPTH;
 		flags.uStoreFlags = RenderTarget::RT_FLAG_DEPTH;

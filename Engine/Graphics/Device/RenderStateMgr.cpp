@@ -433,7 +433,7 @@ void RenderStateMgr::ClearDynamicResources(usg::GFXDevice* pDevice)
 	m_pImpl->pipelines.ClearDynamicResources(pDevice);
 	m_pImpl->renderPasses.ClearDynamicResources(pDevice);
 	m_pImpl->descriptorLayouts.ClearDynamicResources(pDevice);
-	m_pImpl->pipelineLayouts.ClearDynamicResources();
+	m_pImpl->pipelineLayouts.ClearDynamicResources(pDevice);
 
 	for (uint32 i = m_pImpl->uDynamicBindingStart; i < m_pImpl->uInputBindings; i++)
 	{

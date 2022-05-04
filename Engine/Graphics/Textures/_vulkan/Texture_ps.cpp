@@ -198,6 +198,8 @@ Texture_ps::~Texture_ps()
 
 void Texture_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight, uint32 uArrayCount, VkImageViewType eViewType, VkFormat eFormat, VkImageUsageFlags eUsage)
 {
+	Cleanup(pDevice);
+
 	VkImageCreateInfo image_create_info = {};
 
 	VkFormatProperties props;
@@ -334,6 +336,8 @@ void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWi
 
 void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uMipmaps, void* pPixels, TextureDimensions eTexDim, uint32 uTextureFlags)
 {
+	Cleanup(pDevice);
+
 	// It should either be a color attachment or have data in it
 	//ASSERT( ((uTextureFlags & TU_FLAG_COLOR_ATTACHMENT)!=0) != (pPixels!=nullptr));
 	ASSERT(eTexDim == TD_TEXTURE2D);	// Doesn't support anything but 2D textures atm
@@ -659,6 +663,7 @@ void Texture_ps::ClearViews(GFXDevice* pDevice)
 	VkDevice vKDevice = pDevice->GetPlatform().GetVKDevice();
 
 	pDevice->GetPlatform().ReqDestroyImageView(m_imageView);
+	m_imageView = VK_NULL_HANDLE;
 
 	for (auto& itr : m_customViews)
 	{
@@ -712,6 +717,34 @@ bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const
 
 	return LoadInt(pDevice, eFormat, uSize, (void*)pData, extents, sizes);
 
+
+}
+
+void Texture_ps::SetName(GFXDevice* pDevice, const char* szFileName)
+{
+#ifndef FINAL_BUILD
+	if (m_image == VK_NULL_HANDLE)
+		return; 
+
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+	VkDevice device = devicePS.GetVKDevice();
+
+	PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(pDevice->GetPlatform().GetVKInstance(), "vkSetDebugUtilsObjectNameEXT");
+
+	VkDebugUtilsObjectNameInfoEXT name = {};
+	name.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+	name.objectType = VK_OBJECT_TYPE_IMAGE;
+	name.objectHandle = (uint64_t)m_image;
+	name.pObjectName = szFileName;
+	pfnSetDebugUtilsObjectNameEXT(device, &name);
+
+	if (m_imageView)
+	{
+		name.objectType = VK_OBJECT_TYPE_IMAGE_VIEW;
+		name.objectHandle = (uint64_t)m_imageView;
+		pfnSetDebugUtilsObjectNameEXT(device, &name);
+	}
+#endif
 }
 
 bool Texture_ps::Load(GFXDevice* pDevice, const char* szFileName, GPULocation eLocation)
