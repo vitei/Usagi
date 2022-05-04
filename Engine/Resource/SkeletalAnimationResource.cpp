@@ -17,8 +17,17 @@ namespace usg
 	
 	SkeletalAnimationResource::~SkeletalAnimationResource()
 	{
-		m_pBoneAnimFrames = nullptr;
-		m_pBoneDescriptions = nullptr;
+		if (m_pBoneAnimFrames)
+		{
+			vdelete[] m_pBoneAnimFrames;
+			m_pBoneAnimFrames = nullptr;
+		}
+
+		if (m_pBoneDescriptions)
+		{
+			vdelete[] m_pBoneDescriptions;
+			m_pBoneDescriptions = nullptr;
+		}
 	}
 
 	bool SkeletalAnimationResource::Load(const char* szName)

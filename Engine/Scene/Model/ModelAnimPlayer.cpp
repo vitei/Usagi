@@ -21,6 +21,7 @@ namespace usg
 		m_uStateCount = 0;
 		m_uConditionCount = 0;
 		m_uConditionValues = 0;
+		m_pBoneInfo = nullptr;
 		for (uint32 uState = 0; uState < MAX_STATES; uState++)
 		{
 			StateInfo& destState = m_states[uState];
@@ -31,34 +32,33 @@ namespace usg
 
 	ModelAnimPlayer::~ModelAnimPlayer()
 	{
-		if (m_pBoneInfo)
-		{
-			vdelete[] m_pBoneInfo;
-		}
+		CleanUp();
+	}
+
+	void ModelAnimPlayer::CleanUp()
+	{
 		for (uint32 uState = 0; uState < m_uStateCount; uState++)
 		{
 			StateInfo& destState = m_states[uState];
 			if (destState.pAnimation)
 			{
+				destState.pAnimation->Reset();
+
 				vdelete destState.pAnimation;
 				destState.pAnimation = NULL;
 			}
 
-		}
-
-	}
-
-	void ModelAnimPlayer::Reset()
-	{
-		for (uint32 uState = 0; uState < m_uStateCount; uState++)
-		{
-			StateInfo& destState = m_states[uState];
-			AnimationMotion* pAnimDest = destState.pAnimation;
-			pAnimDest->Reset();
-		
 			destState.szName[0] = '\0';
 			destState.uTransitions = 0;
+
 		}
+
+		if (m_pBoneInfo)
+		{
+			vdelete[] m_pBoneInfo;
+			m_pBoneInfo = nullptr;
+		}
+
 		m_uStateCount = 0;
 		m_uConditionCount = 0;
 		m_uConditionValues = 0;
@@ -70,6 +70,7 @@ namespace usg
 		m_bRecalculateWeighting = true;
 
 	}
+
 
 	uint32 ModelAnimPlayer::GetStateIndex(SkeletalAnim::AnimChain &chain, const char* szName)
 	{
@@ -206,7 +207,7 @@ namespace usg
 	bool ModelAnimPlayer::Init(const SkeletonResource* pSkeleton, const char* szAnimChainName, bool bDefaultToBindPose)
 	{
 		// Make sure to reset any previous data, we can re-use these anim players
-		Reset();
+		CleanUp();
 
 		m_pResource = pSkeleton;
 		// First determine all the bones potentially updated by the anim set

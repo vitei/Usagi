@@ -15,7 +15,7 @@ namespace usg
 
 	SkeletalAnimation::SkeletalAnimation()
 	{
-		m_pBoneInfo = NULL;
+		m_pBoneInfo = nullptr;
 		Reset();
 	}
 

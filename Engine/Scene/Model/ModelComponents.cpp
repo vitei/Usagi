@@ -137,7 +137,6 @@ namespace usg
 	template<>
 	void OnActivate<ModelAnimComponent>(Component<ModelAnimComponent>& p)
 	{
-		p.GetRuntimeData().pAnimPlayer = vnew(usg::ALLOC_GEOMETRY_DATA) usg::ModelAnimPlayer();
 	}
 
 	template<>
@@ -154,7 +153,10 @@ namespace usg
 	void OnLoaded<ModelAnimComponent>(Component<ModelAnimComponent>& p, ComponentLoadHandles& handles,
 	                                         bool bWasPreviouslyCalled)
 	{
-		// TODO: check bWasPreviouslyCalled ?
+		if (!bWasPreviouslyCalled)
+		{
+			p.GetRuntimeData().pAnimPlayer = vnew(usg::ALLOC_GEOMETRY_DATA) usg::ModelAnimPlayer();
+		}
 		if (p->name[0] != '\0')
 		{
 			// FIXME: Ordering of these loads is important...

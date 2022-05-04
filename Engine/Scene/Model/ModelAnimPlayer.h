@@ -29,7 +29,6 @@ public:
 
 	// Give a root bone name if only updating a sub-element
 	bool Init(const SkeletonResource* pSkeleton, const char* szAnimChain, bool bDefaultToBindPose);
-	void Reset();
 
 	void Update(float fElapsed);
 	const SkeletalAnimationResource::Transform* GetTransform(uint32 uBoneIndex);
@@ -45,6 +44,7 @@ public:
 	bool IsInState(const char* szName) const;
 
 private:
+	void CleanUp();
 	uint32 GetConditionIndex(const char* szName);
 	uint32 GetConditionIndex(uint32 uNameHash);
 	uint32 GetEventIndex(const char* szName);
