@@ -1171,6 +1171,12 @@ void UIWindow::CleanUpRecursive(usg::GFXDevice* pDevice)
 		m_pTextItemDefs = nullptr;
 	}
 
+	if (m_pButtonDefs)
+	{
+		vdelete[] m_pButtonDefs;
+		m_pButtonDefs = nullptr;
+	}
+
 	// We don't delete the pItem its self, assuming handled externally
 	if (m_pCustomItemDefs)
 	{

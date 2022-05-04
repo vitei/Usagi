@@ -169,8 +169,7 @@ void SystemCoordinator::Cleanup(ComponentLoadHandles& handles)
 	vdelete m_pInternalData;
 	m_pInternalData = nullptr;
 
-	// HACK: Add back when StringPointerHash iterator is fixed
-	// m_memPool.FreeGroup(0);
+	m_memPool.FreeGroup(0);
 	mem::Free(MEMTYPE_STANDARD, m_pMemPoolBuffer);
 	m_pMemPoolBuffer = nullptr;
 }

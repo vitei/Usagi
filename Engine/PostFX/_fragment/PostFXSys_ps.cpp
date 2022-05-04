@@ -418,7 +418,6 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 
 	for (memsize i = 0; i < m_activeEffects.size(); i++)
 	{
-		RenderTarget* pTarget = vnew(ALLOC_OBJECT) RenderTarget();
 		if( m_activeEffects[i]->RequiresHDR() )
 		{
 			iFinalHDRTarget = Math::Max(iFinalHDRTarget, (int)i);

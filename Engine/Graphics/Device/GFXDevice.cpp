@@ -48,6 +48,8 @@ GFXDevice::~GFXDevice()
 	for (uint32 i = 0; i < m_uDisplayCount; i++)
 	{
 		m_pDisplays[i]->Cleanup(this);
+		vdelete m_pDisplays[i];
+		m_pDisplays[i] = nullptr;
 	}
 
 	m_pImpl->renderStates.Cleanup(this);

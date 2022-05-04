@@ -132,6 +132,7 @@ namespace usg
 
 		usg::Fader::Inst()->CleanUpDeviceData(pDevice);
 		usg::Fader::Cleanup();
+		usg::MusicManager::Cleanup();
 		m_debugRender.Cleanup(pDevice);
 	}
 

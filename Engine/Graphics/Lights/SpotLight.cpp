@@ -121,6 +121,7 @@ void SpotLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQua
 	{
 		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
+		vdelete m_pShadow;
 		m_pShadow = nullptr;
 	}
 

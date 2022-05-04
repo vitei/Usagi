@@ -86,7 +86,7 @@ void ShadowContext::Update(GFXDevice* pDevice)
 	m_globalConstants.UpdateData(pDevice);
 	m_descriptorSet.UpdateDescriptors(pDevice);
 
-	for (list<RenderGroup*>::iterator it = GetVisibleGroups().begin(); it != GetVisibleGroups().end(); ++it)
+	for (auto it = GetVisibleGroups().begin(); it != GetVisibleGroups().end(); ++it)
 	{
 		RenderGroup* pGroup = *it;
 		uint32 uNodeCount = pGroup->GetLODEntryCount(0);

@@ -219,6 +219,8 @@ void GFXDevice_ps::Cleanup(GFXDevice* pParent)
 		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
 		{
 			m_memoryPools[type].heaps[i]->FreeData(m_vkDevice);
+			vdelete m_memoryPools[type].heaps[i];
+			m_memoryPools[type].heaps[i] = nullptr;
 		}
 	}
 	vkDestroyPipelineCache(m_vkDevice, m_pipelineCache, nullptr);

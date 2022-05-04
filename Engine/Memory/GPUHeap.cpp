@@ -16,7 +16,11 @@ GPUHeap::GPUHeap()
 
 GPUHeap::~GPUHeap()
 {
-
+	if (m_memoryBlocks)
+	{
+		mem::Free(m_memoryBlocks);
+		m_memoryBlocks = nullptr;
+	}
 }
 
 

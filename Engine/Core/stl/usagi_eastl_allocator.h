@@ -160,7 +160,7 @@
 					delete[](char*)pOriginalAllocation;
 				}
 			#else
-				delete[](char*)p;
+				usg::mem::Free(p);
 			#endif
 		}
 

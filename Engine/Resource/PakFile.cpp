@@ -39,7 +39,11 @@ namespace usg
 
 	PakFile::~PakFile()
 	{
-		
+		if (m_pPersistantData)
+		{
+			mem::Free(m_pPersistantData);
+			m_pPersistantData = nullptr;
+		}
 	}
 
 
@@ -209,7 +213,7 @@ namespace usg
 		}
 		else
 		{
-			pBaseRes = vnew(ALLOC_LOADING) ProtocolBufferFile(pData, pFileInfo->uDataSize);
+			pBaseRes = vnew(ALLOC_OBJECT) ProtocolBufferFile(pData, pFileInfo->uDataSize);
 			ProtocolBufferFile* pFile = (ProtocolBufferFile*)pBaseRes;
 			pFile->SetupHash(pFileInfo->szName);
 		}

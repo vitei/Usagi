@@ -57,7 +57,7 @@ public:
 protected:
 	void SetDeviceDataLoaded() { m_bDeviceDataValid = true; }
 	void Init(const Camera* pCamera, uint32 uRenderMask);
-	list<RenderGroup*>&	GetVisibleGroups() { return m_visibleGroups; }
+	vector<RenderGroup*>&	GetVisibleGroups() { return m_visibleGroups; }
 
 private:
 	uint32					m_uVisiblePVSCount;
@@ -67,7 +67,7 @@ private:
 	bool					m_bDeviceDataValid;
 
 	// The visible lists for this context
-	list<RenderGroup*>		m_visibleGroups;
+	vector<RenderGroup*>		m_visibleGroups;
 };
 
 inline void SceneContext::AddToDrawList(RenderGroup* pGroup)
