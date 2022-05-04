@@ -55,6 +55,8 @@ void ConstantSet::AppendDeclaration(const ShaderConstantDecl* pDecl)
 
 void ConstantSet::Init(GFXDevice* pDevice, const ShaderConstantDecl* pDecl, GPUUsage eUsage, void* pData)
 {
+	// For safety
+	Cleanup(pDevice);
 	// FIXME: This is only safe as long as it's not a dynamically loaded declaration!
 	// We should pass in a flag saying whether or not to copy this data
 	m_pDecl		= pDecl;

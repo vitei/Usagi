@@ -446,6 +446,8 @@ void Texture_ps::InitStaging(GFXDevice* pDevice)
 
 	VkResult res = vkCreateBuffer(devicePS, &bufferCreateInfo, nullptr, &m_staging.buffer);
 
+	pDevice->GetPlatform().SetObjectDebugName((uint64)m_staging.buffer, VK_OBJECT_TYPE_BUFFER, "Texture staging");
+
 	vkGetBufferMemoryRequirements(devicePS, m_staging.buffer, &m_staging.memReq);
 
 	VkMemoryAllocateInfo memAllocInfo = {};

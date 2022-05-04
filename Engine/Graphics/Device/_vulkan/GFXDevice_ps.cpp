@@ -303,6 +303,20 @@ void GFXDevice_ps::CleanupDestroyRequests(uint32 uMaxFrameId)
 	}
 }
 
+
+void GFXDevice_ps::SetObjectDebugName(uint64 handle, VkObjectType eType, const char* szName)
+{
+	// TODO: Cache function
+	PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(m_instance, "vkSetDebugUtilsObjectNameEXT");
+
+	VkDebugUtilsObjectNameInfoEXT name = {};
+	name.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+	name.objectType = eType;
+	name.objectHandle = handle;
+	name.pObjectName = szName;
+	pfnSetDebugUtilsObjectNameEXT(m_vkDevice, &name);
+}
+
 void GetHMDExtensionsForType(IHeadMountedDisplay* pHmd, IHeadMountedDisplay::ExtensionType eType, vector<const char*>& extensions)
 {
 	if (pHmd)

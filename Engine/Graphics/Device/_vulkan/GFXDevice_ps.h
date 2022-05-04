@@ -88,6 +88,7 @@ public:
 	void ReqDestroyFrameBuffer(VkFramebuffer frameBuffer);
 	void ReqDestroyShader(VkShaderModule shader);
 	void ReqDestroyPipelineLayout(VkPipelineLayout layout);
+	void SetObjectDebugName(uint64 handle, VkObjectType eType, const char* szName);
 
 private:
 	void EnumerateDisplays();

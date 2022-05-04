@@ -59,10 +59,12 @@ ConstantSet_ps::ConstantSet_ps()
 
 ConstantSet_ps::~ConstantSet_ps()
 {
+	ASSERT(m_buffer == VK_NULL_HANDLE);
 	utl::SafeArrayDelete(&m_pVarData);
 }
 
-void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage)
+
+ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage eUsage)
 {
 	// TODO: Obey usage so we don't allocate extra memory for static buffers
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
@@ -92,6 +94,7 @@ void ConstantSet_ps::Init(GFXDevice* pDevice, const ConstantSet& owner, GPUUsage
 
 	VkResult eResult = vkCreateBuffer(devicePS.GetVKDevice(), &bufCreateInfo, nullptr, &m_buffer);
 	ASSERT(eResult == VK_SUCCESS);
+	pDevice->GetPlatform().SetObjectDebugName((uint64)m_buffer, VK_OBJECT_TYPE_BUFFER, "Constant set buffer");
 
 	vkGetBufferMemoryRequirements(devicePS.GetVKDevice(), m_buffer, &memReqs);
 	memAlloc.allocationSize = memReqs.size;
@@ -127,11 +130,10 @@ void ConstantSet_ps::Cleanup(GFXDevice* pDevice)
 {
 	// Not valid if the owner isn't
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
-	if (m_pOwner && m_buffer != VK_NULL_HANDLE)
+	if (m_buffer != VK_NULL_HANDLE)
 	{
 		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer);
 		m_buffer = VK_NULL_HANDLE;
-		m_pOwner = nullptr;
 	}
 
 	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);

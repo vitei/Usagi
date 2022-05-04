@@ -64,9 +64,11 @@ namespace usg
 		if (m_pSceneContext)
 		{
 			pScene->DeleteShadowContext(m_pSceneContext);
+			m_pSceneContext = nullptr;
 		}
 		m_depthBuffer.Cleanup(pDevice);
 		m_depthTarget.Cleanup(pDevice);
+		m_readConstants.Cleanup(pDevice);
 		m_bNothingVisible = false;
 	}
 

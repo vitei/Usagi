@@ -196,16 +196,12 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 	}
 
 #ifndef FINAL_BUILD
-	if (pszName && m_buffer[0])
+	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
-		PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(pDevice->GetPlatform().GetVKInstance(), "vkSetDebugUtilsObjectNameEXT");
-
-		VkDebugUtilsObjectNameInfoEXT name = {};
-		name.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-		name.objectType = VK_OBJECT_TYPE_BUFFER;
-		name.objectHandle = (uint64_t)m_buffer[0];
-		name.pObjectName = pszName;
-		pfnSetDebugUtilsObjectNameEXT(deviceVK, &name);
+		if (pszName)
+		{
+			pDevice->GetPlatform().SetObjectDebugName((uint64)m_buffer[i], VK_OBJECT_TYPE_BUFFER, pszName);
+		}
 	}
 #endif
 }

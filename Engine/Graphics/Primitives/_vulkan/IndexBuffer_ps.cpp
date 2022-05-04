@@ -41,6 +41,8 @@ void IndexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
 		err = vkCreateBuffer(deviceVK, &buf_info, NULL, &m_stagingBuffer[i]);
+
+		pDevice->GetPlatform().SetObjectDebugName((uint64)m_stagingBuffer[i], VK_OBJECT_TYPE_BUFFER, "Index staging");
 		ASSERT(!err);
 	}
 
@@ -86,6 +88,8 @@ void IndexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, boo
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
 		err = vkCreateBuffer(deviceVK, &buf_info, NULL, &m_buffer[i]);
+
+		pDevice->GetPlatform().SetObjectDebugName((uint64)m_buffer[i], VK_OBJECT_TYPE_BUFFER, "Index buffer");
 		ASSERT(!err);
 	}
 

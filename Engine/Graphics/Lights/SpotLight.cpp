@@ -146,6 +146,7 @@ void SpotLight::Cleanup(GFXDevice* pDevice, Scene* pScene)
 	{
 		m_descriptorSetShadow.Cleanup(pDevice);
 		m_pShadow->Cleanup(pDevice, pScene);
+		vdelete m_pShadow;
 		m_pShadow = nullptr;
 	}
 }
