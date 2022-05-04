@@ -21,6 +21,7 @@ DepthStencilBuffer_ps::DepthStencilBuffer_ps()
 DepthStencilBuffer_ps::~DepthStencilBuffer_ps()
 {
 	m_textureHndl.reset(NULL);
+	ASSERT(m_pLayerViews == nullptr);
 }
 
 
@@ -44,6 +45,7 @@ void DepthStencilBuffer_ps::InitArray(GFXDevice* pDevice, uint32 uWidth, uint32 
 	m_uHeight = uHeight;
 	
 	m_texture.GetPlatform().InitArray(pDevice, eFormat, uWidth, uHeight, uSlices, uFlags);
+	m_texture.GetPlatform().SetName(pDevice, "Depth Buffer");
 
 	InitLayerViews(pDevice);
 
@@ -58,6 +60,8 @@ void DepthStencilBuffer_ps::InitCube(GFXDevice* pDevice, uint32 uWidth, uint32 u
 	m_uHeight = uHeight;
 
 	m_texture.GetPlatform().InitCubeMap(pDevice, eFormat, uWidth, uHeight, uFlags);
+	m_texture.GetPlatform().SetName(pDevice, "Depth Buffer");
+
 	ASSERT(m_pLayerViews == nullptr);
 	InitLayerViews(pDevice);
 

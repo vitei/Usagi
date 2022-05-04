@@ -74,6 +74,13 @@ void ColorBuffer_ps::FreeExViews(GFXDevice* pDevice)
 			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pExtraViews[i], nullptr);
 		}
 	}
+
+	if (m_pExtraViews)
+	{
+		vdelete[] m_pExtraViews;
+		m_pExtraViews = nullptr;
+	}
+	
 }
 
 void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
@@ -86,11 +93,7 @@ void ColorBuffer_ps::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 
 void ColorBuffer_ps::Cleanup(GFXDevice* pDevice)
 {
-	if (m_pExtraViews)
-	{
-		vdelete[] m_pExtraViews;
-		m_pExtraViews = nullptr;
-	}
+	FreeExViews(pDevice);
 	m_texture.Cleanup(pDevice);
 }
 
