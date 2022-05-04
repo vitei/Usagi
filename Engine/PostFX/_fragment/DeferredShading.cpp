@@ -166,6 +166,9 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadow");
 	m_sphereShaders.pLightingShadowEffect.decl = pipelineDecl;
 
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Point.shadowLow");
+	m_sphereShaders.pLightingShadowLowEffect.decl = pipelineDecl;
+
 	// Fixme no spec versions
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDecl());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot");
@@ -174,6 +177,9 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(SpotLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadow");
 	m_spotShaders.pLightingShadowEffect.decl = pipelineDecl;
+
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Spot.shadowLow");
+	m_spotShaders.pLightingShadowLowEffect.decl = pipelineDecl;
 
 
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDecl());
@@ -184,6 +190,9 @@ void DeferredShading::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSy
 	pipelineDecl.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ProjectionLight::GetDescriptorDeclShadow());
 	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadow");
 	m_projShaders.pLightingShadowEffect.decl = pipelineDecl;
+
+	pipelineDecl.pEffect = pRes->GetEffect(pDevice, "Deferred.Projection.shadowLow");
+	m_projShaders.pLightingShadowLowEffect.decl = pipelineDecl;
 
 	// Front face
 	rasDecl.eCullFace = CULL_FACE_BACK;
@@ -317,6 +326,10 @@ void DeferredShading::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 		m_sphereShaders.pLightingShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingShadowEffect.decl);
 		m_spotShaders.pLightingShadowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingShadowEffect.decl);
 
+		m_projShaders.pLightingShadowLowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_projShaders.pLightingShadowLowEffect.decl);
+		m_sphereShaders.pLightingShadowLowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_sphereShaders.pLightingShadowLowEffect.decl);
+		m_spotShaders.pLightingShadowLowEffect.state = pDevice->GetPipelineState(renderPassHndl, m_spotShaders.pLightingShadowLowEffect.decl);
+
 		m_pDestTarget = pDst;
 	}
 }
@@ -398,15 +411,16 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
 		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
 		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
-		
+		bool bSmoothShadow = (*it)->GetShadowQuality() < 2;
+
 		switch( eClass )
 		{
 			// FIXME: Spec shader being picked on r, used to be a single values
 			case PC_IN_FRONT:
-				DrawLightVolume(pContext, mesh, m_sphereShaders, (*it)->GetSpecular().r() > 0.0f, (*it)->GetShadowEnabled());
+				DrawLightVolume(pContext, mesh, m_sphereShaders, (*it)->GetSpecular().r() > 0.0f, (*it)->GetShadowEnabled(), bSmoothShadow);
 				break;
 			case PC_ON_PLANE:
-				DrawLightVolumeFarPlane(pContext,mesh, m_sphereShaders, (*it)->GetSpecular().r() > 0.0f, (*it)->GetShadowEnabled());
+				DrawLightVolumeFarPlane(pContext,mesh, m_sphereShaders, (*it)->GetSpecular().r() > 0.0f, (*it)->GetShadowEnabled(), bSmoothShadow);
 				break;
 			default:
 				ASSERT(false);
@@ -424,14 +438,16 @@ bool DeferredShading::Draw(GFXContext* pContext, RenderContext& renderContext)
 		PlaneClass eClass = farPlane.GetSpherePlaneClass( (*it)->GetColSphere());
 		mesh.pDescriptorSet = (*it)->GetDescriptorSet(false);
 		mesh.pShadowDescriptorSet = (*it)->GetDescriptorSet(true);
+		bool bSmoothShadow = (*it)->GetShadowQuality() < 2;
+
 
 		switch( eClass )
 		{
 			case PC_IN_FRONT:
-				DrawLightVolume(pContext, mesh, m_spotShaders, true, (*it)->GetShadowEnabled());
+				DrawLightVolume(pContext, mesh, m_spotShaders, true, (*it)->GetShadowEnabled(), bSmoothShadow);
 				break;
 			case PC_ON_PLANE:
-				DrawLightVolumeFarPlane(pContext, mesh, m_spotShaders, true, (*it)->GetShadowEnabled());
+				DrawLightVolumeFarPlane(pContext, mesh, m_spotShaders, true, (*it)->GetShadowEnabled(), bSmoothShadow);
 				break;
 			default:
 				ASSERT(false);
@@ -499,7 +515,7 @@ void DeferredShading::DrawProjectionLights(GFXContext* pContext)
 }
 
 
-void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular, bool bShadow)
+void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular, bool bShadow, bool bSmoothShadow)
 {
 	// Fill the stencil buffer for the back faces
 	pContext->SetPipelineState(shaders.pStencilWriteEffect.state);
@@ -508,9 +524,15 @@ void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh
 	
 
 	// Perform the lighting pass
-	if (bShadow)
+	if (bShadow && bSmoothShadow)
 	{
 		pContext->SetPipelineState(shaders.pLightingShadowEffect.state);
+		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
+	}
+	else if (bShadow)
+	{
+		pContext->SetPipelineState(shaders.pLightingShadowLowEffect.state);
+		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 	}
 	else if (bSpecular)
 	{
@@ -525,13 +547,18 @@ void DeferredShading::DrawLightVolume(GFXContext* pContext, const MeshData& mesh
 	DrawMesh(pContext, mesh);
 }
 
-void DeferredShading::DrawLightVolumeFarPlane(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular, bool bShadow)
+void DeferredShading::DrawLightVolumeFarPlane(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular, bool bShadow, bool bSmoothShadow)
 {
 	// Single pass only, draw if it passes the depth test and it's not an area tagged as sky
 
-	if (bShadow)
+	if (bShadow && bSmoothShadow)
 	{
 		pContext->SetPipelineState(shaders.pLightingFarPlaneShadowEffect.state);
+		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
+	}
+	else if (bShadow)
+	{
+		pContext->SetPipelineState(shaders.pLightingFarPlaneShadowLowEffect.state);
 		pContext->SetDescriptorSet(mesh.pShadowDescriptorSet, 2);
 	}
 	else if (bSpecular)

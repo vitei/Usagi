@@ -136,6 +136,8 @@ void SpotLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQua
 	m_descriptorSetShadow.SetConstantSet(1, m_pShadow->GetShadowConstants());
 	m_descriptorSetShadow.SetImageSamplerPair(2, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
 	m_descriptorSetShadow.UpdateDescriptors(pDevice);
+
+	m_uShadowQuality = uQuality;
 }
 
 void SpotLight::Cleanup(GFXDevice* pDevice, Scene* pScene)

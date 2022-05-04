@@ -102,7 +102,11 @@ void main(void)
     float fShadow = 1.0f;
 #ifdef SHADOW_READ
 	vec3 vWorldPos = (vec4(vPos,1.0) * mInvViewMat).xyz;
-    fShadow = ShadowCalculationSoft(vWorldPos);//ShadowCalculation(vWorldPos);
+#ifdef SHADOW_LOW
+	fShadow = ShadowCalculation(vWorldPos);
+#else
+    fShadow = ShadowCalculationSoft(vWorldPos);
+#endif
 #endif
 	vec3 vDiffColor = ((light.vColorSpec.xyz * nDotLD * (fShadow)) + light.vAmbient.rgb) * fAttenuation;
 

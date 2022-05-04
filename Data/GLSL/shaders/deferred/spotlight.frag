@@ -66,7 +66,11 @@ void main(void)
 
 	// TODO: Specular
 #ifdef SHADOW_READ
+#ifdef SHADOW_LOW
+	float fShadow = ShadowCalculation(vPos);
+#else
 	float fShadow = ShadowCalculationSoft(vPos);
+#endif
 	fAttenuation *= fShadow;
 	vSpecColor *= fShadow;
 #endif

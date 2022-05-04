@@ -63,10 +63,12 @@ public:
 	// To avoid updating lights when not rendering
 	void SetVisibleFrame(uint32 uFrame) { m_uVisibleFrame = uFrame; }
 	uint32 GetVisibleFrame() { return m_uVisibleFrame; }
+	uint32 GetShadowQuality() const { return m_uShadowQuality; }
 protected:
 
 	usg::string		m_name;
 	uint32			m_uVisibleFrame;
+	uint32			m_uShadowQuality;
 	// RGB, specular power
 	Color			m_colour;
 	Color			m_ambient;

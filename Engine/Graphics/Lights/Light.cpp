@@ -12,15 +12,17 @@ m_eType(eType)
 {
 	m_bActive = false;
 	m_bDirty = false;
+	m_uShadowQuality = 0;
 	m_uVisibleFrame = USG_INVALID_ID;
 	m_specular.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 	m_ambient.Assign(0.0f, 0.0f, 0.0f, 0.0f);
+	m_bShadowEnabled = false;
+	m_bSupportsShadow = false;
 }
 
 Light::~Light()
 {
-	m_bShadowEnabled = false;
-	m_bSupportsShadow = false;
+
 }
 
 void Light::Init(GFXDevice* pDevice, Scene* pScene, bool bSupportsShadow)

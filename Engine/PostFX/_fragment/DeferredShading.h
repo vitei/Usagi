@@ -46,9 +46,11 @@ private:
 		Pipeline	pLightingEffect;
 		Pipeline	pLightingNoSpecEffect;
 		Pipeline	pLightingShadowEffect;
+		Pipeline	pLightingShadowLowEffect;
 		Pipeline	pLightingFarPlaneEffect;
 		Pipeline	pLightingFarPlaneNoSpecEffect;
 		Pipeline	pLightingFarPlaneShadowEffect;
+		Pipeline	pLightingFarPlaneShadowLowEffect;
 		Pipeline	pStencilWriteEffect;
 	};
 
@@ -65,8 +67,8 @@ private:
 	void MakeFrustum(GFXDevice* pDevice);
 
 	void DrawProjectionLights(GFXContext* pContext);
-	void DrawLightVolume(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular = true, bool bShadow = false);
-	void DrawLightVolumeFarPlane(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular = true, bool bShadow = false);
+	void DrawLightVolume(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular = true, bool bShadow = false, bool bSmoothShadow = true);
+	void DrawLightVolumeFarPlane(GFXContext* pContext, const MeshData& mesh, const VolumeShader& shaders, bool bSpecular = true, bool bShadow = false, bool bSmoothShadow = true);
 
 	void DrawMesh(GFXContext* pContext, const MeshData& mesh);
 

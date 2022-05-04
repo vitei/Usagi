@@ -124,6 +124,8 @@ void PointLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQu
 	m_descriptorSetShadow.SetConstantSet(0, &m_constants);
 	m_descriptorSetShadow.SetImageSamplerPair(1, m_pShadow->GetShadowTexture(), pDevice->GetSampler(samp));
 	m_descriptorSetShadow.UpdateDescriptors(pDevice);
+
+	m_uShadowQuality = uQuality;
 }
 
 void PointLight::SetShadowCastFlags(uint32 uFlags)
