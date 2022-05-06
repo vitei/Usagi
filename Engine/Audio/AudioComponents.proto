@@ -32,6 +32,11 @@ message PitchModulator
 	required float  fPrevPitch = 4 [default=1.0];
 	required float  fTargetPitch = 5 [default=1.0];
 	required float	fLerpTime = 6 [default=1.0];
+	required float	fTargetAdditionalPitch = 7 [default=0.0];	// For manipulating
+	required float	fAdditionalPitch = 8 [default=0.0];	
+	required float	fAdditionalPitchChangeRate = 9 [default=1.0];	
+	required float	fTargetVolume = 10 [default=-1.0]; // <0 to disable overrides
+	required float  fVolumeChangeRate = 11 [default=1.0];
 }
 
 message AudioTypeComponent

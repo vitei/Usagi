@@ -53,7 +53,20 @@ namespace usg
 						pitchOut.fLerpTime = fCountDown;
 					}
 					float fPitch = Math::Lerp(fTargetPitch, fPrevPitch, fCountDown / fLerpTime);
-					outputs.sound.GetRuntimeData().hndl.SetPitch(fPitch);
+					float fAdditionalPitch = Math::AccelerateToValue(inputs.pitch->fAdditionalPitch, inputs.pitch->fTargetAdditionalPitch, fDelta * inputs.pitch->fAdditionalPitchChangeRate);
+					outputs.pitch.Modify().fAdditionalPitch = fAdditionalPitch;
+
+
+					outputs.sound.GetRuntimeData().hndl.SetPitch(fPitch + fAdditionalPitch);
+
+
+					if (inputs.pitch->fTargetVolume >= 0.0f)
+					{
+						float fCurrentVolume = inputs.sound.GetRuntimeData().hndl.GetVolume();
+						fCurrentVolume = Math::AccelerateToValue(fCurrentVolume, inputs.pitch->fTargetVolume, fDelta * inputs.pitch->fVolumeChangeRate);
+						outputs.sound.GetRuntimeData().hndl.SetVolume(fCurrentVolume);
+
+					}
 
 					pitchOut.fCountdown = fCountDown;
 				}
