@@ -15,6 +15,7 @@ void SoundFile::InitInt(const SoundFileDef* pSoundFile, const string& strName, A
 	m_fInitVolume = pSoundFile->volume;
 	m_fMinDistance = pSoundFile->minDistance;
 	m_fMaxDistance = pSoundFile->maxDistance;
+	m_fLowPassAttenFactor = pSoundFile->lowPassAttenFactor;
 	m_eType = pSoundFile->eType;
 	m_strName = strName;
 	m_eFalloff = pSoundFile->has_eFalloff ? pSoundFile->eFalloff : AudioFalloff_AUDIO_FALLOFF_LINEAR;

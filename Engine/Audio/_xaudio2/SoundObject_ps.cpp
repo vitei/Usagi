@@ -47,6 +47,9 @@ SoundObject_ps::SoundObject_ps()
 	m_bPaused = false;
 	m_bCustomData = false;
 	m_pCallback = nullptr;
+	m_defaultLowPass.Type = XAUDIO2_FILTER_TYPE::LowPassFilter; 
+	m_defaultLowPass.Frequency = 1.0f;
+	m_defaultLowPass.OneOverQ = 1.0f;
 }
 
 SoundObject_ps::~SoundObject_ps()
@@ -126,12 +129,23 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 		return;
 	}
 
+	else
+	{
+		m_defaultLowPass.Frequency = 1.0f;
+		m_defaultLowPass.OneOverQ = 1.0f;
+	}
+
 	if (m_pSoundFile)
 	{
 		if (m_pSoundFile->GetFilter())
 		{
 			AudioFilter_ps* pFilterPS = (AudioFilter_ps*)m_pSoundFile->GetFilter();
 			m_pSourceVoice->SetFilterParameters(&pFilterPS->GetParameters());
+			if(pFilterPS->GetParameters().Type == m_defaultLowPass.Type)
+			{
+				m_defaultLowPass.Frequency = pFilterPS->GetParameters().Frequency;
+				m_defaultLowPass.OneOverQ = pFilterPS->GetParameters().OneOverQ;
+			}
 		}
 
 		usg::vector<XAUDIO2_EFFECT_DESCRIPTOR> descriptors;
@@ -288,9 +302,19 @@ void SoundObject_ps::Update(const SoundObject* pParent)
 	}
 	
 	float fVolume = pParent->GetAdjVolume() * pParent->GetAttenMul();
+
+	XAUDIO2_FILTER_PARAMETERS lowPass = m_defaultLowPass;
+	lowPass.Frequency *= pParent->GetLowPassFrequency();
+	if (lowPass.Frequency < 1.0f)
+	{
+		m_pSourceVoice->SetFilterParameters(&lowPass);
+	}
+
 	//ASSERT(fVolume >= 0.0f && fVolume <= 1.0f);
 	m_pSourceVoice->SetVolume(pParent->GetAdjVolume() * pParent->GetAttenMul());
 	m_pSourceVoice->SetFrequencyRatio(pParent->GetPitch() * pParent->GetDopplerFactor());
+
+
 	// TODO: Would need interal handling
 	//m_pSourceVoice->SetPriority( pParent->GetPriority() );
 

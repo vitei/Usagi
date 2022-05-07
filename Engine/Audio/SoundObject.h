@@ -49,6 +49,7 @@ public:
 	float GetAdjVolume() const { return m_fScaledFileVolume * m_fVolume * m_fade.GetCurrentVolume();  }
 	bool GetLooping() const;
 	float GetRandomPitch() const { return m_pSoundFile->GetInitialPitch(); }
+	float GetLowPassFrequency() const;
 
 	SoundActorHandle GetSoundActor() { return m_soundActor; }
 

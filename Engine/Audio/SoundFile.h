@@ -35,6 +35,7 @@ public:
 	float GetMaxDistance() const { return m_fMaxDistance; }
 	float GetMinDistance() const { return m_fMinDistance; }
 	float GetDopplerFactor() const { return m_fDopplerFactor; }
+	float GetLowPassAttenFactor() const { return m_fLowPassAttenFactor; }
 	const string& GetName() const { return m_strName; }
 	AudioFalloff GetFalloff() const { return m_eFalloff;  }
 	uint32 GetPriority() const { return m_uPriority; }
@@ -53,6 +54,7 @@ protected:
 	float			m_fMaxDistance;
 	float			m_fPitchRandomise;
 	float			m_fDopplerFactor;
+	float 			m_fLowPassAttenFactor;
 	float			m_fPitch;
 	uint32			m_uCRC;
 	uint32			m_uPriority;

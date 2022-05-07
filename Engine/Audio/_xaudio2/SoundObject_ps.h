@@ -26,6 +26,7 @@ public:
 	bool IsPlaying() const;
 	bool IsPaused() const { return m_bPaused; }
 	bool IsReady() const { return true; }
+	void SetLowPassFrequency(float fFreq);
 
 	void BindWaveFile(WaveFile& waveFile, uint32 uPriority);
 	void SetActiveTrack(uint32 uTrack, float fLerpTime) {  }
@@ -44,6 +45,7 @@ private:
 	bool					m_bLooping;
 	bool					m_bPositional;
 	IXAudio2SourceVoice*	m_pSourceVoice;
+	XAUDIO2_FILTER_PARAMETERS m_defaultLowPass;
 	XAUDIO2_BUFFER			m_buffer;
 	uint32					m_uChannels;
 	bool					m_bPaused;

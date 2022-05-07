@@ -73,6 +73,13 @@ void SoundObject::Stop(float fTime)
 	}
 }
 
+float SoundObject::GetLowPassFrequency() const
+{
+	if(!m_pSoundFile)
+		return 1.0f;
+
+	return Math::Lerp(1.0f, GetAttenMul(), m_pSoundFile->GetLowPassAttenFactor());
+}
 
 void SoundObject::Pause(float fTime)
 {
