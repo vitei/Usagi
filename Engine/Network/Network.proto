@@ -10,17 +10,20 @@ enum NUID
 	INVALID = -1;
 }
 
+// The unique identifier of this entity
 message NetworkUID
 {
 	option (nanopb_msgopt).lua_generate = true;
 	required sint64 gameUID = 1;
 }
 
+// The ID of the owning entity (e.g. the firer of a missile, ourselves if the same)
 message NetworkOwner
 {
 	required sint64 ownerUID = 1;
 }
 
+// Filled by NetworkManager->GetUID(), unique ID for the spawning machine
 message NetworkClient
 {
 	required sint64 clientUID = 1;
