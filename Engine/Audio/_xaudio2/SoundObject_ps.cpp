@@ -101,7 +101,7 @@ void SoundObject_ps::BindWaveFile(WaveFile &waveFile, uint32 uPriority)
 	XAUDIO2_VOICE_SENDS SFXSendList = { 1, &SFXSend };
 
 	HRESULT result = audioPS.GetEngine()->CreateSourceVoice(&m_pSourceVoice, &waveFile.GetFormat(),
-		0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr, &SFXSendList, NULL);
+		XAUDIO2_VOICE_USEFILTER, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr, &SFXSendList, NULL);
 	if( FAILED( result ) )
 	{
 		ASSERT(false);
@@ -305,13 +305,14 @@ void SoundObject_ps::Update(const SoundObject* pParent)
 
 	XAUDIO2_FILTER_PARAMETERS lowPass = m_defaultLowPass;
 	lowPass.Frequency *= pParent->GetLowPassFrequency();
-	if (lowPass.Frequency < 1.0f)
+	m_pSourceVoice->SetFilterParameters(&lowPass);
+
 	{
 		m_pSourceVoice->SetFilterParameters(&lowPass);
 	}
 
 	//ASSERT(fVolume >= 0.0f && fVolume <= 1.0f);
-	m_pSourceVoice->SetVolume(pParent->GetAdjVolume() * pParent->GetAttenMul());
+	m_pSourceVoice->SetVolume(fVolume);
 	m_pSourceVoice->SetFrequencyRatio(pParent->GetPitch() * pParent->GetDopplerFactor());
 
 
