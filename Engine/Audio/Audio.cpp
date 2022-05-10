@@ -982,7 +982,7 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			{
 				// TODO: Expose
 				float fBase = 0.2f;
-				float fAtten = (powf(fBase, fLerp) - fBase) * (1.f / (1.0f - fBase));
+				fAtten = (powf(fBase, fLerp) - fBase) * (1.f / (1.0f - fBase));
 				break;
 			}
 			default:
