@@ -976,11 +976,15 @@ void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject
 			switch (pSoundFile->GetFalloff())
 			{
 			case AUDIO_FALLOFF_LINEAR:
-				fAtten = 1.0f - (fDistance / fRange);
+				fAtten = 1.0f - fLerp;
 				break;
 			case AUDIO_FALLOFF_LOGARITHMIC:
-				fAtten = powf(0.5f, fLerp);
+			{
+				// TODO: Expose
+				float fBase = 0.2f;
+				float fAtten = (powf(fBase, fLerp) - fBase) * (1.f / (1.0f - fBase));
 				break;
+			}
 			default:
 				ASSERT(false);
 			}
