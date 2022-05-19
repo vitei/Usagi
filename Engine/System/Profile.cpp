@@ -42,7 +42,7 @@ const char* Profile::GetPlayerName()
 	return m_platform.GetPlayerName();
 }
 
-const Texture* Profile::GetPlayerImage()
+TextureHndl Profile::GetPlayerImage()
 {
 	return m_platform.GetPlayerImage();
 }

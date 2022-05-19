@@ -20,7 +20,6 @@ Profile_ps::~Profile_ps()
 
 void Profile_ps::Init(GFXDevice* pDevice)
 {
-	ResourceMgr::Inst()->GetTexture(pDevice, "pcmii");
 }
 
 bool Profile_ps::IsGuest()
@@ -43,9 +42,9 @@ const char* Profile_ps::GetPlayerName()
 	return "Doomguy";
 }
 
-const Texture* Profile_ps::GetPlayerImage()
+const TextureHndl Profile_ps::GetPlayerImage()
 {
-	return m_pTexture;
+	return TextureHndl();
 
 }
 

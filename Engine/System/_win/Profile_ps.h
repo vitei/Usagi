@@ -6,6 +6,7 @@
 #define _USG_SYSTEM_PROFILE_PS_H_
 
 #include "Engine/Graphics/Textures/Texture.h"
+#include "Engine/Resource/ResourceDecl.h"
 
 namespace usg {
 
@@ -20,13 +21,12 @@ public:
 	bool IsProfileSelected();
 	bool DisplayProfileSelectScreen();
 	const char* GetPlayerName();
-	const Texture* GetPlayerImage();
+	const TextureHndl GetPlayerImage();
 
 
 private:
 	PRIVATIZE_COPY(Profile_ps)
 
-	const Texture*	m_pTexture;
 	const char*		m_szName;
 };
 

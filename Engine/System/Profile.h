@@ -21,7 +21,7 @@ public:
 	bool IsProfileSelected();
 	bool DisplayProfileSelectScreen();
 	const char* GetPlayerName();
-	const Texture* GetPlayerImage();
+	TextureHndl GetPlayerImage();
 
 
 private:
