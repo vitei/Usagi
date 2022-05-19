@@ -12,12 +12,21 @@
 #include OS_HEADER(Engine/Core, WinUtil.h)
 #include OS_HEADER(Engine/HID, Input_ps.h)
 
-bool	 g_bFullScreen = false;
-uint32 g_uWindowWidth = 1280;
-uint32 g_uWindowHeight = 720;
 
 
 WINDOWPLACEMENT g_OldWindowPlacement = { sizeof(g_OldWindowPlacement) };
+
+using namespace usg;
+
+// Declare the games main function
+namespace usg
+{
+	bool GameMain(const char** dllModules, uint32 uModuleCount);
+	bool GameExit();
+	void GameMessage(const uint32 messageID, const void* const pParameters);
+
+}
+
 
 using namespace usg;
 
@@ -64,21 +73,47 @@ static void ToggleFullScreen(const HWND hwnd)
 	GameMessage('WSZE', nullptr);
 }
 
+void UpdateCursorClamp(HWND hwnd)
+{
+	RECT screen;
+	GetWindowRect(hwnd, &screen);
+	ClipCursor(&screen);
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	static const WPARAM VK_RESERVED = 0xFF;
 	static bool bIsSizing = false;
+	static bool bIsActive = false;
+	static bool bIsActiveApp = false;
+	static bool bHasFocus = false;
 
 	switch (msg)
 	{
 		case WM_CREATE:
 			break;
 
+		case WM_ACTIVATEAPP:
+		{
+			bIsActiveApp = wparam ? true : false;
+			break;
+		}
+
+		case WM_ACTIVATE:
+		{
+			if (wparam & WA_ACTIVE || wparam & WA_CLICKACTIVE)
+			{
+				bIsActive = true;
+			}
+			else
+			{
+				bIsActive = false;
+			}
+			break;
+		}
 		case WM_PAINT:
 			{
-				PAINTSTRUCT ps;
-				BeginPaint(hwnd, &ps);
-				EndPaint(hwnd, &ps);
+				ValidateRect(hwnd, NULL);
 			}
 			break;
 
@@ -99,7 +134,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 					if (wparam == VK_F11)
 					{
-						ToggleFullScreen(hwnd);
+						// Removing this as it's now on the menu
+						//ToggleFullScreen(hwnd);
+						//UpdateCursorClamp(hwnd);
 					}
 				}
 
@@ -114,6 +151,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			}
 			else if (!bIsSizing)
 			{
+				GameMessage('ONSZ', nullptr);
 				GameMessage('WSZE', nullptr);
 			}
 		}
@@ -126,11 +164,16 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		break;
 		case WM_EXITSIZEMOVE:
 		{
+			if (wparam == SIZE_RESTORED)
+			{
+
+			}
 			if (wparam != SIZE_MINIMIZED)
 			{
+				GameMessage('ONSZ', nullptr);
 				GameMessage('WSZE', nullptr);
 			}
-
+			UpdateCursorClamp(hwnd);
 			bIsSizing = false;
 		}
 		break;
@@ -186,6 +229,26 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			}
 			break;
 
+		case WM_XBUTTONDOWN:
+		{
+			DWORD fwButton = GET_XBUTTON_WPARAM(wparam);
+			Input::GetPlatform().RegisterMouseButtonChange(2 + fwButton, true);
+		}
+		break;
+
+		case WM_XBUTTONUP:
+		{
+			DWORD fwButton = GET_XBUTTON_WPARAM(wparam);
+			Input::GetPlatform().RegisterMouseButtonChange(2 + fwButton, false);
+		}
+		break;
+
+		case WM_MOUSEWHEEL:
+			{
+				Input::GetPlatform().RegisterMouseWheel((long)wparam);
+			}
+			break;
+
 		case WM_DESTROY:
 			GameExit();
 			break;
@@ -197,24 +260,29 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			break;
 	}
 
-	return (DefWindowProc(hwnd, msg, wparam, lparam));
+
+	WINUTIL::SetInFocus((bIsActive&& bIsActiveApp));
+	if( (!bIsActive || !bIsActiveApp) && bHasFocus )
+	{
+		ClipCursor(nullptr);
+		bHasFocus = false;
+	}
+	else if((bIsActive && bIsActiveApp) && !bHasFocus)
+	{
+		UpdateCursorClamp(hwnd);
+		ShowCursor(FALSE);
+		bHasFocus = true;
+	}
+
+	return DefWindowProc(hwnd, msg, wparam, lparam);
 
 }
+
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpcmdline, int ncmdshow)
 {
 	WINUTIL::Init(hInstance);
-
-	usg::DisplaySettings settings;
-	settings.uX = 0; settings.uY = 0; settings.uWidth = g_uWindowWidth; settings.uHeight = g_uWindowHeight;
-	settings.bWindowed = !g_bFullScreen; settings.hardwareHndl = nullptr;
-	str::Copy(settings.name, "Virtual Screen", sizeof(settings.name));
-	const WindHndl hndl = WINUTIL::CreateDisplayWindow("Usagi", &settings, false);
-
-#ifndef USE_VULKAN
-	GFXDevice_ps::InitOGLContext(hndl, 1);
-#endif
 
 	usg::OS::Initialize();
 	GameMain(nullptr, 0);

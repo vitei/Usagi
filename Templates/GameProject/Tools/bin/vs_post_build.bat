@@ -7,18 +7,19 @@ copy %USAGI_DIR%\Engine\ThirdParty\glew\bin\release\%2\glew32.dll %1
 
 if "%2" == "x64" (
 	if "%3" == "Debug" (
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3CommonDEBUG_x64.dll %1
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3CookingDEBUG_x64.dll %1
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3DEBUG_x64.dll %1
-		copy %USAGI_PHYSICS%\..\PxShared\bin\vc15win64\PxFoundationDEBUG_x64.dll %1
-		copy %USAGI_PHYSICS%\..\PxShared\bin\vc15win64\PxPvdSDKDEBUG_x64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysX_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXCommon_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXCooking_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXDevice64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXFoundation_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXGpu_64.dll %1
 	)
-	if "%3" == "Release" (
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3Common_x64.dll %1
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3Cooking_x64.dll %1
-		copy %USAGI_PHYSICS%\Bin\vc15win64\PhysX3_x64.dll %1
-		copy %USAGI_PHYSICS%\..\PxShared\bin\vc15win64\PxFoundation_x64.dll %1
-		copy %USAGI_PHYSICS%\..\PxShared\bin\vc15win64\PxPvdSDK_x64.dll %1
+	else (
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysX_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCommon_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCooking_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXDevice64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXFoundation_64.dll %1
+		copy %USAGI_DIR%\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXGpu_64.dll %1
 	)
-	copy %USAGI_PHYSICS%\Bin\vc15win64\nvToolsExt64_1.dll %1
 )

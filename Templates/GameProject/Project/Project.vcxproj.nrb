@@ -6,6 +6,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|x64">
+      <Configuration>Final</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -22,12 +26,18 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -38,42 +48,45 @@
     <Import Project="$(USAGI_DIR)\Engine\ConditionalProps.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-
   <PropertyGroup>
     <OutDir>$(SolutionDir)\_rom\$(PlatformName)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)_build\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <CodeAnalysisRuleSet>..\..\..\Usagi\Engine\AnalysisRuleSet.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <CodeAnalysisRuleSet>..\..\..\Usagi\Engine\AnalysisRuleSet.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-
- <ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets />
+    <CodeAnalysisRuleSet>..\..\..\Usagi\Engine\AnalysisRuleSet.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
     <PreBuildEvent>
       <Command>$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform)</Command>
       <Message>Rake (Always run because of dummy output)</Message>
       <Outputs>dummy.dummy</Outputs>
     </PreBuildEvent>
- </ItemDefinitionGroup>
-
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <DisableSpecificWarnings>4305;4577;4595;4819</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26495;4305;4577;4595;4819</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
       <TreatSpecificWarningsAsErrors>
       </TreatSpecificWarningsAsErrors>
@@ -83,11 +96,11 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Debug\PhysX_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Debug\PhysXCommon_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Debug\PhysXCooking_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Debug\PhysXCommon_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Debug\PhysXFoundation_64.lib;$(USAGI_STL_LIB)\x64\Debug\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysX_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXCooking_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXExtensions_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXVehicle_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXPvdSDK_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXCommon_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Debug\PhysXFoundation_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX64</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib;$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Copy DLLs to Executable directory</Message>
@@ -97,20 +110,19 @@
       <EnableDpiAwareness>true</EnableDpiAwareness>
     </Manifest>
   </ItemDefinitionGroup>
-  
- <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PLATFORM_PC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>false</ExceptionHandling>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <DisableSpecificWarnings>4305;4577;4595;4819</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26495;4305;4577;4595;4819</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
       <TreatSpecificWarningsAsErrors>
       </TreatSpecificWarningsAsErrors>
@@ -120,23 +132,71 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\glew\lib\x64\glew32.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Release\PhysX_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Release\PhysXCommon_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Release\PhysXCooking_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Release\PhysXCommon_64.lib;$(USAGI_DIR)\Tools\bin\PhysX\x64\Release\PhysXFoundation_64.lib;$(USAGI_STL_LIB)\x64\Release\EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysX_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCooking_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXExtensions_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXVehicle_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXPvdSDK_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCommon_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXFoundation_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib</AdditionalLibraryDirectories>      
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib;$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Copy DLLs to Executable directory</Message>
       <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\_build\win\$(Configuration);$(USAGI_DIR)\_build\win\$(Configuration);$(USAGI_DIR)\_includes;$(SolutionDir)\_includes;$(USAGI_DIR)\Engine\ThirdParty\pthread-w32\include\;$(SolutionDir);$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_PC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DisableSpecificWarnings>26495;4305;4577;4595;4819</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatSpecificWarningsAsErrors>
+      </TreatSpecificWarningsAsErrors>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Engine/Common/Common.h</PrecompiledHeaderFile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>vulkan-1.lib;xaudio2.lib;opengl32.lib;glu32.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;Winmm.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysX_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCooking_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXExtensions_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXVehicle_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXPvdSDK_static_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXCommon_64.lib;$(USAGI_DIR)\Engine\ThirdParty\PhysX\physx\bin\win.x86_64.vc142.mt\Release\PhysXFoundation_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Lib;$(SolutionDir)\ThirdParty\ffmpeg-4.2-win64-dev\lib</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy DLLs to Executable directory</Message>
+      <Command>call $(SolutionDir)\Tools\bin\vs_post_build.bat $(OutputPath) $(Platform) $(Configuration) $(SolutionDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <PropertyGroup>
-    <SourceDir>$(SolutionDir)<%= project_dir %></SourceDir>
-    <PBProjectDir>$(SolutionDir)_build\proto\<%= project_dir %></PBProjectDir>
+    <SourceDir>$(SolutionDir)WingIV\</SourceDir>
+    <PBProjectDir>$(SolutionDir)_build\proto\WingIV\</PBProjectDir>
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
 
   <ItemGroup>
 <% for @src in proto_sources %>
@@ -237,4 +297,13 @@
   <Target Name="RakeClean" BeforeTargets="Clean">
     <Exec Command="$(SolutionDir)Tools\bin\rake_vs.bat $(Configuration) $(Platform) clean_bp" />
   </Target>
+<ItemGroup>
+    <Image Include="..\..\..\Platform\Respace4.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\Platform\WingIV.rc" />
+  </ItemGroup>
+  <ItemGroup>
+  <ClInclude Include="..\..\..\Platform\resource.h" />
+  </ItemGroup>
 </Project>
