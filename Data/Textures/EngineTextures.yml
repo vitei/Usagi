@@ -1,7 +1,7 @@
 Resources:
   - File: B42.dds
   - File: black_default.dds
-  - File: FilmNoise.dds
+#  - File: FilmNoise.dds  // Moved out of repo due to size
   - File: missing_texture.dds
   - File: normal_default.dds
   - File: SMAA_AreaTex.dds
