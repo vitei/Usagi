@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Layout/StringTable.h"
 #include "Engine/Common/Common.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Core/ProtocolBuffers.h"
 #include "Engine/Core/ProtocolBuffers/ProtocolBufferFile.h"
 #include "Engine/Memory/Mem.h"
@@ -28,11 +29,13 @@ void StringTable::Init(const char* szFilename, Region region, Language language)
 {
 	string path;
 	CreatePathToStringsFile(path, szFilename, region, language);
-	ASSERT(File::FileStatus(path.c_str()) == FILE_STATUS_VALID);
-	ProtocolBufferFile file(path.c_str());
+	//ASSERT(File::FileStatus(path.c_str()) == FILE_STATUS_VALID);
+	usg::ProtocolBufferFile* pFile = usg::ResourceMgr::Inst()->GetBufferedFile(path.c_str());
+
+	ASSERT(pFile);
 
 	m_keystringCount = 0;
-	file.Read(&m_table);
+	pFile->Read(&m_table);
 	bool bInsertSucceeded = false;
 
 	for (auto itr = m_table.textStyles.Begin(); !itr.IsEnd(); ++itr)

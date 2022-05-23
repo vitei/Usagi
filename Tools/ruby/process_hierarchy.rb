@@ -242,7 +242,8 @@ def create_bone_hierarchy(model_component)
   extensions = {'.vmdf' => '.vmdf.xml'}
 
   path = path.sub_ext(extensions[path.extname])
-  Tracker::DepSet.instance.addDep(modelDepPath.to_path)
+
+  Tracker::DepSet.instance.addDep(path.to_path)
 
   if path.file?
     hierarchy = SkeletonExtractor::extract(path.to_path)

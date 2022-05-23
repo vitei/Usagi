@@ -73,6 +73,7 @@ namespace usg
 
 	void SimpleGameBase::PostSplashInit(usg::GFXDevice* pDevice, ResourceMgr* pResMgr)
 	{
+		pResMgr->LoadPackage(pDevice, "EngineEntities");
 		pResMgr->LoadPackage(pDevice, "textures/EngineTextures");
 
 		// A bunch of stuff to hide behind the splash screen

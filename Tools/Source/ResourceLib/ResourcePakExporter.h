@@ -102,6 +102,7 @@ namespace ResourcePakExporter
 			uTmpOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
 		}
 
+		bool bHasKeepData = false;
 		uint32 uKeepOffset = uTmpOffset;
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
@@ -109,9 +110,13 @@ namespace ResourcePakExporter
 			{
 				uKeepOffset += entries[i]->GetDataSize();
 			}
+			else
+			{
+				bHasKeepData = true;
+			}
 		}
 
-		if (uKeepOffset == uTmpOffset)
+		if (!bHasKeepData)
 		{
 			uKeepOffset = USG_INVALID_ID;
 		}

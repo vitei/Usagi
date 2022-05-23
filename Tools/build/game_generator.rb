@@ -21,9 +21,6 @@ def build_pc_data(config, n, platform)
   data_deps.merge game_textures
   data_deps.merge engine_textures
 
-  particle_paks = build_paks_for_directory(config, n, platform, "Data/Particle/", config.particle_out_dir)
-  data_deps.merge particle_paks
-
   #models = build_pc_models(config, n)
   #data_deps.merge models
 
@@ -66,12 +63,6 @@ def process_data(config, platform, n)
 #  collision = build_collision_models(config, platform, n)
 #  data_deps.merge collision
 
-  entities = build_engine_entities(config, n, protocol_ruby_classes)
-  data_deps.merge entities
-
-  entities = build_entities(config, n, protocol_ruby_classes)
-  data_deps.merge entities
-
   levels = build_levels(config, n, protocol_ruby_classes)
   data_deps.merge levels
 
@@ -87,8 +78,27 @@ def process_data(config, platform, n)
   #emitters = build_emitters(config, n)
   #data_deps.merge emitters
 
-  vpb_files = build_vpb_files(config, n, protocol_ruby_classes)
-  data_deps.merge vpb_files
+  if config.build != "final"
+    entities = build_engine_entities(config, n, protocol_ruby_classes)
+    data_deps.merge entities
+
+    entities = build_entities(config, n, protocol_ruby_classes)
+    data_deps.merge entities
+
+    vpb_files = build_vpb_files(config, n, protocol_ruby_classes)
+    data_deps.merge vpb_files
+  else
+
+    particle_paks = build_paks_for_directory(config, n, platform, "Data/Particle/", config.particle_out_dir)
+    data_deps.merge particle_paks
+
+    game_paks = build_paks_for_directory_non_recursive(config, n, platform, "Data/", "#{config.romfiles_dir}")
+    data_deps.merge game_paks
+
+    engine_paks = build_paks_for_directory_non_recursive(config, n, platform, "Usagi/Data/", "#{config.romfiles_dir}")
+    data_deps.merge engine_paks
+
+  end
 
 
   # FIXME: Letter list
@@ -220,6 +230,24 @@ def build_pc_textures(config, n)
 end
 
 
+def build_paks_for_directory_non_recursive(config, n, platform, input_dir, out_dir)
+  targets = FileList["#{input_dir}/*.yml"].map do |input|
+    tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
+    path = Pathname.new(input)
+    tex = path.relative_path_from(Pathname(input_dir)).sub_ext('')
+    output = "#{out_dir}/#{tex}.pak"
+    
+    n.build('pak_file_def', {output => [input]},
+        { :implicit_deps => [config.resource_packer],
+          :variables => {'out' => output,
+        'in' => input,
+        'platform' => config.target_platform } } )
+
+  output
+  end
+end
+
+
 def build_paks_for_directory(config, n, platform, textures_dir, out_dir)
   targets = FileList["#{textures_dir}/**/*.yml"].map do |input|
     tex, ext = input.match(/\/([^\/]*)\.([^.\/]*)$/).captures
@@ -229,7 +257,7 @@ def build_paks_for_directory(config, n, platform, textures_dir, out_dir)
     
     n.build('pak_file_def', {output => [input]},
         { :implicit_deps => [config.resource_packer],
-          :variables => {'out' => "#{config.textures_out_dir}/#{tex}.pak",
+          :variables => {'out' => output,
         'in' => input,
         'platform' => config.target_platform } } )
 

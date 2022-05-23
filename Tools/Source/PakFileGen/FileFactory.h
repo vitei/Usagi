@@ -26,6 +26,11 @@ public:
 
 	void AddTextureDependecy(const char* szTexName, ResourceEntry* pEntry, YAML::Node details);
 
+	// Looks at a timestamps to determine is a rebuild is necessary, should be called for time consuming files
+	// particluarly those in mega pak files
+	bool FileDirty(const char* szInName, const char* szOutName, const char* szDepName);
+	std::string GetBuildFileName(const char* szInName);
+
 protected:
 
 	struct PureBinaryEntry : public ResourceEntry

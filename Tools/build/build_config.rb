@@ -504,6 +504,10 @@ def shader_pack
     "#{romfiles_dir}/Audio"
   end
 
+  def entities_out
+    "#{romfiles_dir}/Entities.pak"
+  end  
+
   def skeleton_out_dir
     "#{BUILD_DIR}/skel"
   end

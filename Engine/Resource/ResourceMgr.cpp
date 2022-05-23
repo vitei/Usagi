@@ -178,10 +178,13 @@ ProtocolBufferFile* ResourceMgr::GetBufferedFile(const char* szFileName)
 
 	if(!pFile)
 	{
-		m_pImpl->resources.StartLoad();
-		pFile = vnew(ALLOC_RESOURCE_MGR) ProtocolBufferFile(szFileName, FILE_ACCESS_READ, FILE_TYPE_RESOURCE);
-		pFile->SetupHash(szFileName);
-		m_pImpl->resources.AddResource(pFile);
+		if(usg::File::FileStatus(szFileName) == usg::FILE_STATUS_VALID)
+		{
+			m_pImpl->resources.StartLoad();
+			pFile = vnew(ALLOC_RESOURCE_MGR) ProtocolBufferFile(szFileName, FILE_ACCESS_READ, FILE_TYPE_RESOURCE);
+			pFile->SetupHash(szFileName);
+			m_pImpl->resources.AddResource(pFile);
+		}
 	}
 
 	if(pFile)

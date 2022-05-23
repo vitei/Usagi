@@ -179,6 +179,7 @@ int main(int argc, char *argv[])
 			if (file)
 			{
 				std::string fileName = path + "/" +  file.as<std::string>();
+				std::replace(fileName.begin(), fileName.end(), '\\', '/');
 				ProcessFile(fileName, data);
 			}
 		}

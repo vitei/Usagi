@@ -608,6 +608,75 @@ std::string FileFactory::LoadYMLLayout(const char* szFileName)
 	return pFileEntry->GetName();
 }
 
+std::string FileFactory::GetBuildFileName(const char* szInName)
+{
+	std::string out = szInName;
+	if(out.find("_build") != std::string::npos)
+	{
+		return out;
+	}
+	
+	std::string relativePath = out.substr(m_rootDir.size());
+	const char* szExt = GetExtension(relativePath.c_str());
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	out = m_tempDir + relativeNameNoExt;
+
+	if( strcmp(szExt, "yml") == 0)
+	{
+		return m_tempDir + relativeNameNoExt + ".vpb";
+	}
+	
+	return m_tempDir + relativePath;
+}
+
+bool FileFactory::FileDirty(const char* szInName, const char* szOutName, const char* szDepName)
+{
+	// This is something of a hack, required because hierarchies are small enough that they need to live in one pak file
+	// but time consuming enough to process that we don't want to rebuild all of them when one file changes.
+	// Really we want to strip out the old asset processing and replace it entirely with the file factory
+	std::ifstream outStream(szOutName);
+	if(!outStream)
+		return true;
+
+	// FIXME: Not portable
+	TCHAR szExeFileName[MAX_PATH];
+	GetModuleFileName(NULL, szExeFileName, MAX_PATH);
+
+	auto writeTime = std::filesystem::last_write_time(szOutName);
+	auto srcTime = std::filesystem::last_write_time(szInName);
+	auto exeTime = std::filesystem::last_write_time(szExeFileName);
+
+	if(writeTime < srcTime)
+		return true;
+
+	if(writeTime < exeTime)
+		return true;
+
+	if(!szDepName)
+		return false;
+
+	std::ifstream depStream(szDepName);
+
+	if(!depStream)
+		return false;	// Assuming no deps
+	std::string outName;
+	std::getline(depStream, outName, '\\');
+	
+	while(depStream >> outName)
+	{		
+		std::string fileName = GetBuildFileName(outName.c_str());
+		std::string depFile = fileName + ".d";
+		if(FileDirty(outName.c_str(), szOutName, depFile.c_str()))
+		{
+			return true;
+		}
+
+		std::getline(depStream, outName, '\\');
+	}
+
+	return false;
+	
+}
 
 std::string FileFactory::LoadYMLEntityFile(const char* szFileName)
 {
@@ -615,10 +684,10 @@ std::string FileFactory::LoadYMLEntityFile(const char* szFileName)
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
 	relativePath = RemoveFileName(relativePath) + "/";
-	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
+	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vent";
 	std::string depFileName = tempFileName + ".d";
 
-	command << "Usagi\\Tools\\ruby\\process_hierarchy.rb" 
+	command << "ruby Usagi\\Tools\\ruby\\process_hierarchy.rb" 
 		<< " -IData/Entities" 
 		<< " -RUsagi/_build/ruby -R_build/ruby"
 		<< " -d Data/Components/Defaults.yml " 
@@ -628,11 +697,19 @@ std::string FileFactory::LoadYMLEntityFile(const char* szFileName)
 		<< szFileName;
 	CreateDirectory(RemoveFileName(tempFileName).c_str(), 0);
 
-	system(command.str().c_str());
+	// Check if it's already in the build directory as hierarchies are slow
+	
+	bool bRunCommand = FileDirty(szFileName, tempFileName.c_str(), depFileName.c_str());
+	
+	if(bRunCommand)
+	{
+		system(command.str().c_str());
+	}
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->SetName(relativeNameNoExt + ".vent", usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->bKeepMemory = true;
 
 	FILE* pFileOut = nullptr;
 
@@ -662,7 +739,6 @@ std::string FileFactory::LoadYMLVPBFile(const char* szFileName)
 	std::stringstream command;
 	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
 	std::string relativeNameNoExt = RemoveExtension(relativePath);
-	relativePath = RemoveFileName(relativePath) + "/";
 	std::string tempFileName = m_tempDir + relativeNameNoExt + ".vpb";
 	std::string depFileName = tempFileName + ".d";
 
@@ -673,7 +749,7 @@ std::string FileFactory::LoadYMLVPBFile(const char* szFileName)
 
 	PureBinaryEntry* pFileEntry = new PureBinaryEntry;
 	pFileEntry->srcName = szFileName;
-	pFileEntry->SetName(relativePath, usg::ResourceType::PROTOCOL_BUFFER);
+	pFileEntry->SetName(relativeNameNoExt + ".vpb", usg::ResourceType::PROTOCOL_BUFFER);
 	pFileEntry->bKeepMemory = true;
 
 	FILE* pFileOut = nullptr;
