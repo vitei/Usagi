@@ -89,10 +89,6 @@ The build process has not been improved or significantly modified and currently 
    Make sure that you select the option to add a path variable  
    https://www.python.org/downloads/
 
-1. Install **CMake**.  
-   Make sure that you select the option to add a path variable  
-   https://cmake.org/download/
-
 1. Install **Vulkan SDK**.  
    https://vulkan.lunarg.com/sdk/home#windows
 
@@ -115,10 +111,6 @@ The build process has not been improved or significantly modified and currently 
    If python packages fail to install confirm your python version  
    Pay attention to which environmet variables EnvironmentSetup.exe failed to set  
    Note you must run environment setup whenever you switch to running a different Usagi project in order to set the correct USAGI_DIR env variable  
-
-1. Build PhysX debug and release:
-   Engine\ThirdParty\PhysX\physx\compiler\vc16win64\PhysXSDK.sln  
-   If gems fail to install confirm your ruby version  
 
 1. **Optional** If you installed the oculus sdk manually add the following environment variable 
    EnvironmentSetup.exe may have been able to automatically find and add them if they were in ../../OculusSDK  

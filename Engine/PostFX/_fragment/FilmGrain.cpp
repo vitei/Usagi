@@ -98,7 +98,8 @@ void FilmGrain::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys
 
 	m_constantSet.Init(pDevice, g_filmGrainConstantDef);
 	
-	usg::TextureHndl vol = pResource->GetTexture(pDevice, "effects/FilmNoise");
+	usg::ResourceMgr* pRes = usg::ResourceMgr::Inst();
+	usg::TextureHndl vol = pRes->GetTexture(pDevice, "FilmNoise");
 	m_material.SetTexture(1, vol, sampLin);
 	m_material.SetConstantSet(SHADER_CONSTANT_MATERIAL, &m_constantSet);
 
