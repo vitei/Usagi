@@ -78,6 +78,9 @@ def process_data(config, platform, n)
   #emitters = build_emitters(config, n)
   #data_deps.merge emitters
 
+  particle_paks = build_paks_for_directory(config, n, platform, "Data/Particle/", config.particle_out_dir)
+  data_deps.merge particle_paks
+
   if config.build != "final"
     entities = build_engine_entities(config, n, protocol_ruby_classes)
     data_deps.merge entities
@@ -88,9 +91,6 @@ def process_data(config, platform, n)
     vpb_files = build_vpb_files(config, n, protocol_ruby_classes)
     data_deps.merge vpb_files
   else
-
-    particle_paks = build_paks_for_directory(config, n, platform, "Data/Particle/", config.particle_out_dir)
-    data_deps.merge particle_paks
 
     game_paks = build_paks_for_directory_non_recursive(config, n, platform, "Data/", "#{config.romfiles_dir}")
     data_deps.merge game_paks
