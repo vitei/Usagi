@@ -59,7 +59,7 @@ float XInputPad::GetAxisWithDeadZone(SHORT value, SHORT deadzone)
 	{
 		float fSign = Math::Sign(value);
 		float fDead = fSign * deadzone;
-		return ((float)value - fDead)/(32768.f - fDead);
+		return ((float)value - fDead)/(32768.f - deadzone);
 	}
 	
 	return 0.0f;
