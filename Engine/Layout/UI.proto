@@ -37,6 +37,7 @@ message ImageDef
 	required UIHorAlign eHAlign = 8 [default = Left];
 	required UIVertAlign eVAlign = 9 [default = Top];
 	required string tags = 10 [(nanopb).max_size = 64];
+	required bool bVisible = 11 [default = true];
 }
 
 message ButtonTemplateDef
@@ -91,6 +92,7 @@ message TextItemDef
 	required float fScale = 10 [default=1.0];
 	required string tags = 11 [(nanopb).max_size = 64];
 	required uint32 uActionCRC = 12;
+	required bool bVisible = 13 [default = true];
 }
 
 // User implementable widgets that don't fit within the standard HUD elements

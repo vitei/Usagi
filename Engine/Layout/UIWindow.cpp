@@ -493,6 +493,37 @@ const char* UIWindow::GetOriginalText(uint32 uTextIdx) const
 	return m_pTextItemDefs[uTextIdx].originalText.c_str();
 }
 
+
+void UIWindow::SetItemVisible(uint32 uIndex, enum UIItemType eType, bool bVisible)
+{
+	switch (eType)
+	{
+	case UI_ITEM_IMAGE:
+	{
+		ImageDef& defOverride = m_pUIItemsDefs[uIndex].defOverride;
+		defOverride.bVisible = bVisible;
+
+		break;
+	}
+	case UI_ITEM_BUTTON:
+	{
+		memsize uImageId = m_uItemCounts[UI_ITEM_IMAGE] + uIndex;
+		ImageDef& defOverride = m_pUIItemsDefs[uImageId].defOverride;
+		defOverride.bVisible = bVisible;
+
+		break;
+	}
+	case UI_ITEM_TEXT:
+	{
+		TextItemDef& def = m_pTextItemDefs[uIndex].def;
+		def.bVisible = bVisible;
+		break;
+	}
+	default:
+		ASSERT(false);
+	}
+}
+
 void UIWindow::SetItemSize(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vSize, bool bRelative)
 {
 	switch (eType)
@@ -520,6 +551,7 @@ bool UIWindow::IsMouseInRangeOfButton(uint32 uButton)
 {
 	uint32 uIndex = m_uItemCounts[UI_ITEM_IMAGE] + uButton;
 	
+
 	const VertexData& vert = m_vertices[uIndex];
 	// We use the vertices because they have been aligned
 	if (m_vMousePos.x >= vert.vPosition.x
@@ -536,6 +568,9 @@ bool UIWindow::IsMouseInRangeOfButton(uint32 uButton)
 bool UIWindow::IsMouseInRangeOfText(uint32 uText)
 {
 	uint32 uIndex = m_uItemCounts[UI_ITEM_TEXT];
+
+	if(!m_pTextItemDefs[uText].def.bVisible)
+		return false;
 
 	usg::Vector2f vMin, vMax;
 	m_pTextItemDefs[uText].text.GetBounds(vMin, vMax);
@@ -1230,8 +1265,11 @@ void UIWindow::Draw(usg::GFXContext* pContext)
 
 		for (uint32 i = 0; i < (uint32)m_vertices.size(); i++)
 		{
-			pContext->SetDescriptorSet(&m_pUIItemsDefs[i].descriptor, 1);
-			pContext->DrawImmediate(1, i);
+			if(m_pUIItemsDefs[i].defOverride.bVisible)
+			{
+				pContext->SetDescriptorSet(&m_pUIItemsDefs[i].descriptor, 1);
+				pContext->DrawImmediate(1, i);
+			}
 		}
 	}
 
@@ -1246,8 +1284,11 @@ void UIWindow::Draw(usg::GFXContext* pContext)
 
 	for (uint32 i = 0; i < m_uItemCounts[UI_ITEM_TEXT]; i++)
 	{
-		pContext->SetDescriptorSet(&m_descriptor, 0);
-		m_pTextItemDefs[i].text.Draw(pContext);
+		if(m_pTextItemDefs[i].def.bVisible)
+		{
+			pContext->SetDescriptorSet(&m_descriptor, 0);
+			m_pTextItemDefs[i].text.Draw(pContext);
+		}
 	}
 
 	// Then the children

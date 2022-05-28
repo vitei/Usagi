@@ -38,6 +38,7 @@ namespace usg
 		void SetText(const UIItemRef& ref, const char* szNewText);
 		void SetText(const UIItemRef& ref, uint32 uKeyStringCRC);
 		void SetButtonEnabled(const UIItemRef& ref, bool bEnabled);
+		void SetItemVisible(const UIItemRef& ref, bool bVisible);
 		void SetUVRange(const UIItemRef& ref, const usg::Vector2f& vUVMin, const usg::Vector2f& vUVMax);
 		void RegisterCustomItem(CustomUIItem* pItem, const UIItemRef& ref);
 		bool IsRefValid(const UIItemRef& ref) const;

@@ -112,6 +112,15 @@ namespace usg
 	}
 
 
+	void UI::SetItemVisible(const UIItemRef& ref, bool bVisible)
+	{
+		if (!IsRefValid(ref))
+			return;
+
+
+		ref.pWindow->SetItemVisible(ref.uItemIdx, ref.eType, bVisible);
+	}
+
 	void UI::SetButtonEnabled(const UIItemRef& ref, bool bEnabled)
 	{
 		if (!IsRefValid(ref) || ref.eType != UI_ITEM_BUTTON)

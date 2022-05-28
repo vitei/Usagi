@@ -92,6 +92,8 @@ namespace usg
 		void SetUVRange(uint32 uIndex, const usg::Vector2f& vUVMin, const usg::Vector2f& vUVMax);
 		void SetItemPos(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vPos, bool bRelative);
 		void SetItemSize(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vSize, bool bRelative);
+		void SetItemVisible(uint32 uIndex, enum UIItemType eType, bool bVisible);
+
 		void SetItemColor(uint32 uIndex, enum UIItemType eType, const usg::Color& cColor);
 		void SetButtonEnabled(uint32 uIndex, bool bEnabled);
 		void RegisterCustomItem(uint32 uIndex, class CustomUIItem* pItem);
