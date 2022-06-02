@@ -18,8 +18,8 @@ namespace usg {
 	const char* g_szFileDir[FILE_TYPE_COUNT] = 
 	{
 		"",
-		"..\\_savedata\\",
-		"..\\_dump\\",
+		"_savedata\\",
+		"_dump\\",
 		"_savedata\\"
 	};
 
