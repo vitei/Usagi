@@ -62,6 +62,7 @@ public:
 	bool Is3DEnabled() const;
 	void WaitIdle();
 
+	bool IsMultiThreaded() const;
 
 	void FinishedStaticLoad();
 	void ClearDynamicResources();

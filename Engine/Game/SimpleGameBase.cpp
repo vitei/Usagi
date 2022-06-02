@@ -146,10 +146,15 @@ namespace usg
 		}
 		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode(), PauseCurrentMode());
 #ifdef USE_THREADED_LOADING
-		m_pInternalData->m_pInitThread->StartThread(4096 * 10, -10);
-#else
-		m_pInternalData->m_pInitThread->Run();
+		if(pDevice->IsMultiThreaded())
+		{
+			m_pInternalData->m_pInitThread->StartThread(4096 * 10, -10);
+		}
+		else
 #endif
+		{
+			m_pInternalData->m_pInitThread->Run();
+		}
 
 	}
 
@@ -225,7 +230,7 @@ namespace usg
 			}
 			if (!m_pTransitionMode->ShouldHold()
 #ifdef USE_THREADED_LOADING
-					&& m_pInternalData->m_pInitThread->IsThreadEnd()
+					&& (m_pInternalData->m_pInitThread->IsThreadEnd() || !pDevice->IsMultiThreaded() )
 #endif
 				)
 			{

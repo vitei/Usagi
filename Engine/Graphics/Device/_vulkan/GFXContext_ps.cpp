@@ -37,7 +37,7 @@ namespace usg {
 	void GFXContext_ps::Init(GFXDevice* pDevice, GFXContext* pParent, bool bDeferred, uint32 uSizeMul)
 	{
 		// We want a different command pool per context as we may have them on seperate threads
-		m_cmdPool = pDevice->GetPlatform().CreateCommandPool();
+		m_cmdPool = pDevice->GetPlatform().CreateCommandPool(GFXDevice_ps::QUEUE_TYPE_GRAPHICS);
 
 		VkResult err;
 		VkCommandBufferAllocateInfo cmd = {};

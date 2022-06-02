@@ -2,6 +2,8 @@
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
 #include "Engine/Common/Common.h"
+#include "Engine/Graphics/Device/GFXDevice.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include API_HEADER(Engine/Graphics/Device, RasterizerState.h)
 
 namespace usg {
@@ -29,7 +31,7 @@ void RasterizerState::Init(GFXDevice* pDevice, const RasterizerStateDecl &decl, 
 	m_createInfo.lineWidth = decl.fLineWidth;
 	//m_createInfo.lineWidth = 1.0f;
 
-	if (decl.bLineSmooth)
+	if (decl.bLineSmooth && pDevice->GetPlatform().HasLineSmooth())
 	{
 		m_createInfo.pNext = &m_lineState;
 		m_lineState.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT;

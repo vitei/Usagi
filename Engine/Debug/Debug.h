@@ -32,9 +32,9 @@ void FatalInFinal(const char *file, int line, const char* func, const char *form
 #endif
 
 #ifndef FINAL_BUILD
-#define FATAL_RELEASE(in, format, ...) { if(in == false) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, format, __VA_ARGS__); } }
+#define FATAL_RELEASE(in, format, ...) { if(!(in)) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, format, __VA_ARGS__); } }
 #else
-#define FATAL_RELEASE(in, format, ...) { if(in == false) { FatalInFinal(__FILE__, __LINE__, __FUNCTION__, format, __VA_ARGS__); } }
+#define FATAL_RELEASE(in, format, ...) { if(!(in)) { FatalInFinal(__FILE__, __LINE__, __FUNCTION__, format, __VA_ARGS__); } }
 #endif
 
 #endif

@@ -47,8 +47,16 @@ public:
 	
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }
 
+
+	enum QueueType
+	{
+		QUEUE_TYPE_GRAPHICS = 0,
+		QUEUE_TYPE_TRANSFER,
+		QUEUE_TYPE_COUNT
+	};
+
 	VkCommandPool& GetCommandPool() { return m_cmdPool;  }
-	VkCommandPool CreateCommandPool();
+	VkCommandPool CreateCommandPool(QueueType eQueueType);
 	VkDevice& GetVKDevice() { return m_vkDevice;  }
 	VkInstance& GetVKInstance() { return m_instance;  }
 	uint32 GetQueueFamilyCount() const { return m_uQueueFamilyCount; }
@@ -90,6 +98,9 @@ public:
 	void ReqDestroyPipelineLayout(VkPipelineLayout layout);
 	void SetObjectDebugName(uint64 handle, VkObjectType eType, const char* szName);
 
+	const VkPhysicalDeviceFeatures& GetEnabledFeatures() const { return m_enabledFeatures; }
+	bool HasLineSmooth() const { return m_bHasLineSmooth; }
+	bool IsMultiThreaded() const { return m_queue[QUEUE_TYPE_GRAPHICS] != m_queue[QUEUE_TYPE_TRANSFER]; }
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
@@ -102,12 +113,6 @@ private:
 		CALLBACK_COUNT = 2
 	};
 
-	enum QueueType
-	{
-		QUEUE_TYPE_GRAPHICS = 0,
-		QUEUE_TYPE_TRANSFER,
-		QUEUE_TYPE_COUNT
-	};
 
 	enum ResourceType
 	{
@@ -176,6 +181,8 @@ private:
 	VkCommandPool						m_cmdPool;
 	VkDevice							m_vkDevice;
 	VkInstance							m_instance;
+	VkPhysicalDeviceFeatures			m_enabledFeatures = {};
+
 
 	VkPhysicalDevice					m_primaryPhysicalDevice;
 	VkPhysicalDevice					m_gpus[MAX_GPU_COUNT];
@@ -183,7 +190,7 @@ private:
 	VkQueueFamilyProperties*			m_pQueueProps;
 	uint32								m_uQueueFamilyCount;
 	VkQueue								m_queue[QUEUE_TYPE_COUNT];
-	VkDeviceQueueCreateInfo				m_queueInfo;
+	VkDeviceQueueCreateInfo				m_queueInfo[QUEUE_TYPE_COUNT];
 
 
 	VkPipelineCache						m_pipelineCache;
@@ -195,6 +202,7 @@ private:
 	MemoryPool							m_memoryPools[VK_MAX_MEMORY_TYPES];
 
 	float		m_fGPUTime;
+	bool		m_bHasLineSmooth;
 };
 
 }

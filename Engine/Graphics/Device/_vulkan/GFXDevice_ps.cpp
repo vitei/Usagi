@@ -203,6 +203,7 @@ GFXDevice_ps::GFXDevice_ps()
 	m_pQueueProps = NULL;
 	m_uDisplayCount = 0;
 	m_fGPUTime = 0.0f;
+	m_bHasLineSmooth = false;
 }
 
 void GFXDevice_ps::Cleanup(GFXDevice* pParent)
@@ -456,12 +457,12 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	res = vkCreateInstance(&inst_info, NULL, &m_instance);
 	if (res == VK_ERROR_INCOMPATIBLE_DRIVER)
 	{
-		ASSERT_MSG(false, "cannot find a compatible Vulkan ICD\n");
+		FATAL_RELEASE(false, "cannot find a compatible Vulkan ICD\n");
 		return;
 	}
 	else if (res)
 	{
-		ASSERT_MSG(false, "unknown error\n");
+		FATAL_RELEASE(false, "unknown error\n");
 		return;
 	}
 
@@ -491,10 +492,10 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	// Enumerate the available GPUs
 	uint32 gpu_count = 1;
 	res = vkEnumeratePhysicalDevices(m_instance, &gpu_count, NULL);
-	ASSERT(gpu_count > 0);
+	FATAL_RELEASE(gpu_count > 0, "GPU not found");
 	m_uGPUCount = Math::Min((uint32)gpu_count, (uint32)MAX_GPU_COUNT);
 	res = vkEnumeratePhysicalDevices(m_instance, &m_uGPUCount, m_gpus);
-	ASSERT(!res && m_uGPUCount >= 1);
+	FATAL_RELEASE(!res && m_uGPUCount >= 1, "Couldn't get GPU");
 
 	for (uint32 i = 0; i < m_uGPUCount; i++)
 	{
@@ -503,7 +504,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 
 	// Init the device
-	memset(&m_queueInfo, 0, sizeof(m_queueInfo));
+	memset(m_queueInfo, 0, sizeof(m_queueInfo));
 
 	if (GetHMDPhysicalDeviceVKFn)
 	{
@@ -522,56 +523,102 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	//vkGetPhysicalDeviceFeatures 
 
-	bool bFound = false;
+	bool bFoundGFX = false;
+	bool bFoundTrans = false;
+	bool bSharedQueue = false;
+
 	for (unsigned int i = 0; i < m_uQueueFamilyCount; i++)
 	{
 		// TODO: We could use different queue families for the queues. The loading one only needs the transfer bit
-		if (m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && m_pQueueProps[i].queueCount >= 2)
+		if (!bFoundGFX && m_pQueueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && m_pQueueProps[i].queueCount >= 1)
 		{
-			m_queueInfo.queueFamilyIndex = i;
-			bFound = true;
-			break;
+			m_queueInfo[QUEUE_TYPE_GRAPHICS].queueFamilyIndex = i;
+			bFoundGFX = true;
 		}
+
+		if (!bFoundTrans && m_pQueueProps[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+		{
+			if(m_pQueueProps[i].queueCount > 1 || !bFoundGFX || i != m_queueInfo[QUEUE_TYPE_GRAPHICS].queueFamilyIndex || m_uQueueFamilyCount == 1)
+			{
+				m_queueInfo[QUEUE_TYPE_TRANSFER].queueFamilyIndex = i;
+				bFoundTrans = true;
+			}
+		}
+
 	}
 
-	FATAL_RELEASE(bFound, "No valid queue family with enough queues");
+	FATAL_RELEASE(bFoundGFX, "No valid graphics queue");
+	FATAL_RELEASE(bFoundTrans, "No valid transfer queue");
 
+	bSharedQueue = m_queueInfo[QUEUE_TYPE_TRANSFER].queueFamilyIndex == m_queueInfo[QUEUE_TYPE_GRAPHICS].queueFamilyIndex
+			&& m_pQueueProps[m_queueInfo[QUEUE_TYPE_TRANSFER].queueFamilyIndex].queueCount < 2;
+
+	uint32 uQueueSets = 1;
+	if (m_queueInfo[QUEUE_TYPE_TRANSFER].queueFamilyIndex != m_queueInfo[QUEUE_TYPE_GRAPHICS].queueFamilyIndex)
+	{
+		uQueueSets = 2;
+	}
 	float queue_priorities[QUEUE_TYPE_COUNT] = { 0.0, 0.0 };	// The relative priority of work submitted to each of the queues
-	m_queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	m_queueInfo.pNext = NULL;
-	m_queueInfo.queueCount = QUEUE_TYPE_COUNT;
-	m_queueInfo.pQueuePriorities = queue_priorities;
+	m_queueInfo[QUEUE_TYPE_GRAPHICS].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	m_queueInfo[QUEUE_TYPE_GRAPHICS].pNext = NULL;
+	m_queueInfo[QUEUE_TYPE_GRAPHICS].queueCount = uQueueSets == 1 && !bSharedQueue ? QUEUE_TYPE_COUNT : 1;
+	m_queueInfo[QUEUE_TYPE_GRAPHICS].pQueuePriorities = queue_priorities;
 
-	VkPhysicalDeviceFeatures enabledFeatures = {};
+
+	m_queueInfo[QUEUE_TYPE_TRANSFER].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	m_queueInfo[QUEUE_TYPE_TRANSFER].pNext = NULL;
+	m_queueInfo[QUEUE_TYPE_TRANSFER].queueCount = 1;
+	m_queueInfo[QUEUE_TYPE_TRANSFER].pQueuePriorities = queue_priorities;
+
 	VkPhysicalDeviceFeatures supportedFeatures = {};
 	VkPhysicalDeviceLimits limits = {};
 
 	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
 
+	FATAL_RELEASE(supportedFeatures.samplerAnisotropy, "No anisotropy");
+
+	FATAL_RELEASE(supportedFeatures.geometryShader, "No geometry shader support");
+	FATAL_RELEASE(supportedFeatures.multiDrawIndirect, "No multi draw indirect");
+	FATAL_RELEASE(supportedFeatures.textureCompressionBC, "No BC compression");
+	FATAL_RELEASE(supportedFeatures.independentBlend, "No independent blend");
+
+
 
 	// FIXME: Set up additional enabled features
-	enabledFeatures.samplerAnisotropy = VK_TRUE;
-	enabledFeatures.geometryShader = VK_TRUE;
-	enabledFeatures.tessellationShader = VK_TRUE;
-	enabledFeatures.multiDrawIndirect = VK_TRUE;
-	enabledFeatures.shaderStorageImageMultisample = VK_TRUE;
-	enabledFeatures.textureCompressionBC = VK_TRUE;
-	enabledFeatures.fillModeNonSolid = VK_TRUE;
-	enabledFeatures.independentBlend = VK_TRUE;
-	enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
-	enabledFeatures.wideLines = VK_TRUE;
+	m_enabledFeatures.samplerAnisotropy = VK_TRUE;
+	m_enabledFeatures.geometryShader = VK_TRUE;
+	m_enabledFeatures.tessellationShader = VK_TRUE && supportedFeatures.tessellationShader;
+	m_enabledFeatures.multiDrawIndirect = VK_TRUE;
+	m_enabledFeatures.shaderStorageImageMultisample = VK_TRUE && supportedFeatures.shaderStorageImageMultisample;
+	m_enabledFeatures.textureCompressionBC = VK_TRUE;
+	m_enabledFeatures.fillModeNonSolid = VK_TRUE && supportedFeatures.fillModeNonSolid;
+	m_enabledFeatures.independentBlend = VK_TRUE;
+	m_enabledFeatures.fragmentStoresAndAtomics = VK_TRUE && supportedFeatures.fragmentStoresAndAtomics;
+	m_enabledFeatures.wideLines = VK_TRUE && supportedFeatures.wideLines;
 
+
+	VkBool32* pSupBools = (VkBool32*)&supportedFeatures;
+	VkBool32* pEnbBools = (VkBool32*)&m_enabledFeatures;
+	for (uint32 i = 0; i < sizeof(supportedFeatures) / sizeof(VkBool32); i++)
+	{
+		if( pEnbBools[i] && !pSupBools[i])
+		{
+			FATAL_RELEASE(false, "Enabled %d but not valid", i);
+		}
+	}
 
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
-#ifdef USE_DEBUG_MARKERS
-	
-	bool bExtensionPresent = false;
+
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, nullptr);
 	usg::vector<VkExtensionProperties> deviceExt(extensionCount);
 	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, deviceExt.data());
+
+#ifdef USE_DEBUG_MARKERS
+
+	bool bExtensionPresent = false;
 	for (auto extension : deviceExt) {
 		if (strcmp(extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0) {
 			bExtensionPresent = true;
@@ -586,7 +633,14 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 #endif
 
 	// Smooth lines are hugely helpful, but not online until 1.1.117
-	extensions.push_back("VK_EXT_line_rasterization");
+	for (auto extension : deviceExt) {
+		if (strcmp(extension.extensionName, "VK_EXT_line_rasterization") == 0) {
+			extensions.push_back("VK_EXT_line_rasterization");
+			m_bHasLineSmooth = true;
+			break;
+		}
+	}
+
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
@@ -596,40 +650,56 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	VkDeviceCreateInfo device_info = {};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	device_info.pNext = &lineFeatures;
-	device_info.queueCreateInfoCount = 1;
-	device_info.pQueueCreateInfos = &m_queueInfo;
+	device_info.pNext = m_bHasLineSmooth ? &lineFeatures : nullptr;
+	device_info.queueCreateInfoCount = uQueueSets;
+	device_info.pQueueCreateInfos = m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
 	device_info.ppEnabledExtensionNames = extensions.data();
 	device_info.enabledLayerCount = validationLayerCount;
 	device_info.ppEnabledLayerNames = validationLayerNames;
-	device_info.pEnabledFeatures = &enabledFeatures;
+	device_info.pEnabledFeatures = &m_enabledFeatures;
 
 	// Issue with the allocators atm so disabling for now
 	res = vkCreateDevice(m_primaryPhysicalDevice, &device_info, nullptr/*&m_allocCallbacks*/, &m_vkDevice);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "Failed to create device Error %d", res);
 
 
 
 	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 	res = vkCreatePipelineCache(m_vkDevice, &pipelineCacheCreateInfo, nullptr, &m_pipelineCache);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "Failed to create pipeline cache");
 
 	EnumerateDisplays();
 
-	m_cmdPool = CreateCommandPool();
+	m_cmdPool = CreateCommandPool(QUEUE_TYPE_TRANSFER);
 
+	usg::vector<uint32> indices;
+	for (uint32 i = 0; i < uQueueSets; i++)
+	{
+		indices.push_back(0);
+	}
 	for(int i=0; i<QUEUE_TYPE_COUNT; i++)
 	{
-		vkGetDeviceQueue(m_vkDevice, m_queueInfo.queueFamilyIndex, i, &m_queue[i]);
+		if(i > 0 && bSharedQueue)
+			break;
+		int index = indices[m_queueInfo[i].queueFamilyIndex];
+		vkGetDeviceQueue(m_vkDevice, m_queueInfo[i].queueFamilyIndex, index, &m_queue[i]);
+		indices[m_queueInfo[i].queueFamilyIndex]++;
+	}
+
+	if (bSharedQueue)
+	{
+		m_queue[QUEUE_TYPE_TRANSFER] = m_queue[QUEUE_TYPE_GRAPHICS];
 	}
 
 	VkFenceCreateInfo fenceInfo;
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.pNext = NULL;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-	vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
+	res = vkCreateFence(m_vkDevice, &fenceInfo, NULL, &m_drawFence);
+	FATAL_RELEASE(res == VK_SUCCESS, "Failed to create fence");
+
 
 	//ASSERT(false);	// Need to set up the copy command buffer
 
@@ -664,21 +734,21 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 }
 
-VkCommandPool GFXDevice_ps::CreateCommandPool()
+VkCommandPool GFXDevice_ps::CreateCommandPool(QueueType eQueueType)
 {
 	// Create a command pool to allocate our command buffer from
 	VkCommandPoolCreateInfo cmd_pool_info = {};
 	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	cmd_pool_info.pNext = NULL;
-	cmd_pool_info.queueFamilyIndex = m_queueInfo.queueFamilyIndex;
+	cmd_pool_info.queueFamilyIndex = m_queueInfo[eQueueType].queueFamilyIndex;
 	// We will have short lived cmd buffers (for file loading), and reuse them
 	// TODO: Perhaps we want multiple command pools?
 	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	VkCommandPool pool;
 	VkResult res = vkCreateCommandPool(m_vkDevice, &cmd_pool_info, NULL, &pool);
-	ASSERT(res == VK_SUCCESS);
-
+	FATAL_RELEASE(res == VK_SUCCESS, "Failed to create command pool");
+	
 	return pool;
 }
 

@@ -130,6 +130,11 @@ PipelineStateHndl GFXDevice::GetPipelineState(const RenderPassHndl& hndl, const 
 }
 
 
+bool GFXDevice::IsMultiThreaded() const
+{
+	return m_pImpl->platform.IsMultiThreaded();
+}
+
 bool GFXDevice::ChangePipelineStateRenderPass(const RenderPassHndl& renderPass, PipelineStateHndl& hndlInOut)
 {
 	if (!renderPass.IsValid())
