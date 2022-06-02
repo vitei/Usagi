@@ -596,18 +596,6 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	m_enabledFeatures.fragmentStoresAndAtomics = VK_TRUE && supportedFeatures.fragmentStoresAndAtomics;
 	m_enabledFeatures.wideLines = VK_TRUE && supportedFeatures.wideLines;
 
-
-	VkBool32* pSupBools = (VkBool32*)&supportedFeatures;
-	VkBool32* pEnbBools = (VkBool32*)&m_enabledFeatures;
-	for (uint32 i = 0; i < sizeof(supportedFeatures) / sizeof(VkBool32); i++)
-	{
-		if( pEnbBools[i] && !pSupBools[i])
-		{
-			FATAL_RELEASE(false, "Enabled %d but not valid", i);
-		}
-	}
-
-
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
 
