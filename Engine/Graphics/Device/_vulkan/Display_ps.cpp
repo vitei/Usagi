@@ -195,6 +195,21 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	InitFrameBuffers(pDevice);
 }
 
+bool Display_ps::GetFallbackPresentMode(VkPresentModeKHR& eModeInOut)
+{
+	switch (eModeInOut)
+	{
+	case VK_PRESENT_MODE_MAILBOX_KHR:
+		eModeInOut = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+		return true;
+	case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+		eModeInOut = VK_PRESENT_MODE_FIFO_KHR;
+		return true;
+	}
+
+	return false;
+}
+
 
 void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 {
@@ -310,17 +325,28 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 	uint32 uHMDCount = ModuleManager::Inst()->GetNumberOfInterfacesForType(IHeadMountedDisplay::GetModuleTypeNameStatic());
 	
-	// Setting to FIFO for now as it frame caps and the physics code can't handle variable frame rates
 	VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 	VkPresentModeKHR desiredSwapchainPresentMode = uHMDCount > 0 ? VK_PRESENT_MODE_IMMEDIATE_KHR : g_presentMapping[m_eVsync];
 
-	for (size_t i = 0; i < presentModeCount; i++)
+	bool bFound = false;
+
+	do
 	{
-		if (presentModes[i] == desiredSwapchainPresentMode)
+		for (size_t i = 0; i < presentModeCount; i++)
 		{
-			swapchainPresentMode = desiredSwapchainPresentMode;
-			break;
+			if (presentModes[i] == desiredSwapchainPresentMode)
+			{
+				swapchainPresentMode = desiredSwapchainPresentMode;
+				bFound = true;
+				break;
+			}
 		}
+	}
+	while (!bFound && GetFallbackPresentMode(desiredSwapchainPresentMode));
+
+	if (!bFound)
+	{
+		desiredSwapchainPresentMode = presentModes[0];
 	}
 
 	// Determine the number of VkImage's to use in the swap chain (we desire to

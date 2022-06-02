@@ -49,6 +49,7 @@ private:
 	void CreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChainImageViews(GFXDevice* pDevice);
 	ColorFormat GetColorFormat(VkFormat eFormat);
+	bool GetFallbackPresentMode(VkPresentModeKHR& eModeInOut);
 
 	enum 
 	{
