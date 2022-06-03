@@ -282,8 +282,8 @@ size_t File_ps::NumberOfFilesInDirectory(const char* szDirName, FILE_TYPE eFileT
 
 FILE_INIT_RESULT File_ps::InitFileSystem()
 {
-	CreateDirectory("..\\_savedata", 0);
-	CreateDirectory("..\\_dump", 0);
+	CreateDirectory("_savedata", 0);
+	CreateDirectory("_dump", 0);
 
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED |COINIT_DISABLE_OLE1DDE);
 
