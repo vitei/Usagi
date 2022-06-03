@@ -165,7 +165,10 @@ int main(int argc, char *argv[])
 
 		YAML::Node mainNode = YAML::LoadFile(input.c_str());
 		if (!mainNode)
+		{
+			RELEASE_WARNING("Unable to parse %s", input.c_str());
 			return -1;
+		}
 
 		YAML::Node resources = mainNode["Resources"];
 		if (!resources)
