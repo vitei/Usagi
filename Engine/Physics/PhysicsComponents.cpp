@@ -747,7 +747,13 @@ namespace usg
 		q2 = mMat;
 		
 		t2.q = ToPhysXQuaternion(q2);
+
+
+		t2.q.normalize();
+		t1.q.normalize();
 		
+		ASSERT(t2.isValid() && t1.isValid());
+
 		auto pJoint = physx::PxRevoluteJointCreate(*handles.pPhysicsScene->pPhysics, pActor1, t1, pActor2, t2);
 		c.GetRuntimeData().pJoint = pJoint;
 
