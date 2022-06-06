@@ -100,6 +100,8 @@ public:
 	const TextureHndl& GetLinearDepthTex() const { return m_platform.GetLinearDepthTex();  }
 	const TextureHndl& GetDummyDepth() { return m_dummyDepth; }
 
+	void ForceUpdateRenderPasses(GFXDevice* pDevice) { m_platform.ForceUpdateRenderPasses(pDevice); }
+
 protected:
 	PRIVATIZE_COPY(PostFXSys)
 

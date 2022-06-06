@@ -562,6 +562,11 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 
 }
 
+void PostFXSys_ps::ForceUpdateRenderPasses(GFXDevice* pDevice)
+{
+	m_renderPasses.UpdateEnd(pDevice);
+}
+
 void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*>& pBuffers, int iFinalHdr, memsize& hdrIdx, memsize& ldrIdx)
 {
 	// TODO: We could probably refactor to remove these dependencies so long as we keep the ordering ok

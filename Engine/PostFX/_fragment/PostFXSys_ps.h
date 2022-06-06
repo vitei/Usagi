@@ -70,6 +70,8 @@ public:
 	RenderTarget* GetInitialRT();
 	RenderTarget* GetFinalRT();
 
+	void ForceUpdateRenderPasses(GFXDevice* pDevice);
+
 protected:
 	PRIVATIZE_COPY(PostFXSys_ps)
 
