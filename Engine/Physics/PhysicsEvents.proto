@@ -48,6 +48,16 @@ message RestoreLinearDamping
 
 }
 
+message OverrideAngularDamping
+{
+	required float fDamping = 1;
+}
+
+message RestoreAngularDamping
+{
+
+}
+
 message SetMaxLinearVelocity
 {
 	required float fMax = 1;

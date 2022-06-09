@@ -57,6 +57,11 @@ void WaveFile::ProcessWaveFile(WaveFileReader& reader, const SoundFileDef* pDef,
 	InitInt(pDef, szName, pAudio);
 }
 
+float WaveFile::GetDuration() const
+{
+	return (float)m_uSize / (float)( (m_format.wBitsPerSample / 8) * m_format.nChannels * m_format.nSamplesPerSec );
+}
+
 
 void WaveFile::InitRaw(const SoundFileDef* pDef, const void* pData, size_t rawDataSize, Audio* pAudio)
 {

@@ -25,6 +25,8 @@ namespace usg
 		virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio);
 		virtual void Cleanup(Audio* pAudio) {}
 		virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional);
+		virtual float GetDuration() const;
+		
 		BYTE* GetData() { return m_pData; }
 		WAVEFORMATEX& GetFormat() { return m_format; }
 		uint32 GetSize() const { return m_uSize; }

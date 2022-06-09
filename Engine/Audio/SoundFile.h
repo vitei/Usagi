@@ -25,6 +25,7 @@ public:
 	virtual void InitRaw(const SoundFileDef* pSoundFile, const void* pData, size_t rawDataSize, Audio* pAudio) = 0;
 	virtual void Cleanup(Audio* pAudio) = 0;
 	virtual void BindToSoundObject(class SoundObject* pSoundObject, bool bPositional) = 0;
+	virtual float GetDuration() const { return 0.0f; }
 	
 	virtual ~SoundFile() {};
 

@@ -923,6 +923,17 @@ void Audio::CalculateInnerPanning(float fAzimuthalAngle, PanningData& panning, f
 
 }
 
+float Audio::GetAudioDuration(uint32 uSoundId)
+{
+	SoundFile* pFile = m_soundHashes[uSoundId];
+	if (pFile)
+	{
+		return pFile->GetDuration();
+	}
+
+	return 0.0f;
+}
+
 void Audio::SetMixParams(const Vector3f& vPos, const Vector3f& vVel, SoundObject* object)
 {
 //	float fVolume;
