@@ -24,46 +24,15 @@ namespace usg
 
 	}
 
-	void MusicManager::PlayMusic(uint32 uSoundId, float fVolume, FADE_TYPE eFadeIn, FADE_TYPE eFadeOut, float fFadeTime, uint32 uCrossFadeId)
+	void MusicManager::PlayMusic(uint32 uSoundId, float fVolume, FADE_TYPE eFadeIn, FADE_TYPE eFadeOut, float fFadeTime, bool bResume)
 	{
-		if(uSoundId == m_uSoundId)
-		{
-			m_musicHndl.SetActiveTrack(uCrossFadeId, fFadeTime);
-			return;
-		}
-
 		if (m_prevMusicHndl.IsValid() && m_uPrevSoundId != uSoundId)
 		{
 			// Safety check incase we tried to crossfade multiple sounds in a very brief period
 			m_prevMusicHndl.Stop();
 			m_prevMusicHndl.RemoveRef();
+			m_uPrevSoundId = USG_INVALID_ID;
 		}
-
-		/*if (uCrossFadeId == USG_INVALID_ID && m_crossFadeHndl.IsValid())
-		{
-			// Not referenced from here anymore
-			m_crossFadeHndl.RemoveRef();
-		}
-
-		if (m_uSoundId != uCrossFadeId && uCrossFadeId != m_uCrossFadeId && uCrossFadeId != USG_INVALID_ID)
-		{
-			m_crossFadeHndl = Audio::Inst()->PrepareSound(uCrossFadeId, 0.0f, false);
-		}*/
-
-	/*	if (uCrossFadeId == m_uSoundId)
-		{
-			// Cross fade override
-			eFadeIn = FADE_TYPE_FADE;
-			eFadeOut = FADE_TYPE_FADE;
-			fFadeTime = 1.0f;
-		}*/
-		
-	//	if (uCrossFadeId != USG_INVALID_ID && m_prevMusicHndl.IsValid() == false)
-		//{
-			// Kick off the cross fade in the background
-//			m_prevMusicHndl = Audio::Inst()->PrepareSound(uCrossFadeId, 0.0f, true);
-	//		m_uPrevSoundId = uCrossFadeId;
-//		}
 
 		m_fTargetVolume = fVolume;
 
@@ -71,7 +40,30 @@ namespace usg
 		//if(uSoundId != m_uCrossFadeId)
 		{
 
-			if (m_musicHndl.IsValid())
+			bool bDidResume = false;
+			if (uSoundId == m_uPrevSoundId && m_prevMusicHndl.IsValid() && bResume)
+			{
+				// Swap the sounds around
+				usg::SoundHandle music = m_musicHndl;
+				m_musicHndl = m_prevMusicHndl;
+				m_prevMusicHndl = music; 
+				m_uPrevSoundId = m_uSoundId;
+				m_uSoundId = uSoundId;
+
+				if (eFadeIn != FADE_TYPE_WAIT)
+				{
+					m_musicHndl.Start();
+				}
+				else
+				{
+					m_musicHndl.SetVolume(fVolume);
+				}
+
+				m_eFadeOut = eFadeOut;
+				bDidResume = true;
+
+			}
+			else if (m_musicHndl.IsValid())
 			{
 				StopMusic(eFadeOut, fFadeTime);
 			}
@@ -81,22 +73,23 @@ namespace usg
 				eFadeIn = FADE_TYPE_NONE;
 			}
 
-			switch (eFadeIn)
+			if(!bDidResume)
 			{
-			case FADE_TYPE_NONE:
-				m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, fVolume, true);	// Just play immediately at full volume
-				//m_crossFadeHndl.Start();
-				break;
-			case FADE_TYPE_FADE:
-				m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, 0.0f, true);
-				break;
-			case FADE_TYPE_WAIT:
-				m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, fVolume, false);	// Waiting on the music being faded out to end
-				break;
+				switch (eFadeIn)
+				{
+				case FADE_TYPE_NONE:
+					m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, fVolume, true);	// Just play immediately at full volume
+					break;
+				case FADE_TYPE_FADE:
+					m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, 0.0f, true);
+					break;
+				case FADE_TYPE_WAIT:
+					m_musicHndl = Audio::Inst()->Prepare2DSound(uSoundId, fVolume, false);	// Waiting on the music being faded out to end
+					break;
+				}
 			}
 		}
 
-		m_musicHndl.SetActiveTrack(uCrossFadeId, fFadeTime);
 		m_fFadeInRate = fFadeTime;
 		//m_uCrossFadeId = uCrossFadeId;
 		m_fTargetVolume = fVolume;
@@ -179,12 +172,12 @@ namespace usg
 				if (m_eFadeIn == FADE_TYPE_WAIT)
 				{
 					m_musicHndl.Start();
-					//m_crossFadeHndl.Start();
 					m_eFadeIn = FADE_TYPE_NONE;
 				}
 
-				// Don't remove the previous sound if its out cross fade id
-				if(m_uPrevSoundId != m_uCrossFadeId)
+				// Don't remove the previous sound if its looping incase of resume
+				// TODO: Should maybe pause?
+				if (!m_prevMusicHndl.GetLooping())
 				{
 					m_prevMusicHndl.Stop();
 					m_prevMusicHndl.RemoveRef();
@@ -193,6 +186,7 @@ namespace usg
 				else
 				{
 					m_prevMusicHndl.SetVolume(0.0f);
+					m_prevMusicHndl.Pause(0.0f);
 				}
 			}
 			else

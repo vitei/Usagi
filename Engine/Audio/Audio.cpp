@@ -693,6 +693,19 @@ float Audio::GetVolume(const AudioType eType)
 	return m_fVolume[eType];
 }
 
+uint32 Audio::GetPlayingCount(AudioType eType)
+{
+	uint32 uRet = 0;
+	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
+	{
+		if ((*it)->object.IsPlaying() && (*it)->object.GetAudioType() == eType)
+		{
+			uRet++;
+		}
+	}
+	return uRet;
+}
+
 void Audio::StopAll(AudioType eType, float fTime)
 {
 	for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)

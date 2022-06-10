@@ -84,6 +84,7 @@ public:
 	void StopAll(AudioType eType, float fTime=0.2f);
 	void PauseAll(AudioType eType, float fTime = 0.2f);
 	void ResumeAll(AudioType eType, float fTime = 0.2f);
+	uint32 GetPlayingCount(AudioType eType);
 	void StartUsingHeadset(IHeadMountedDisplay* pHMD);
 
 	SoundActorHandle CreateSoundActor(const Vector3f &vPos);

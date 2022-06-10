@@ -24,6 +24,7 @@ public:
 	void SetPitch(float fPitch);
 	float GetRandomPitch() const;
 	float GetVolume() const;
+	bool GetLooping() const;
 	bool IsValid() const { return GetPointer()!=NULL; }
 	void SetActiveTrack(uint32 uTrack, float fFadeTime);
 	void SubmitData(void* pData, memsize size);
@@ -115,6 +116,16 @@ inline bool SoundHandle::IsPlaying() const
 	if(pObject)
 	{
 		return pObject->IsPlaying();
+	}
+	return false;
+}
+
+inline bool SoundHandle::GetLooping() const
+{
+	const SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		return pObject->GetLooping();
 	}
 	return false;
 }
