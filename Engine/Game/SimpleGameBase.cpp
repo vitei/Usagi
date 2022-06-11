@@ -180,6 +180,12 @@ namespace usg
 #endif
 		}
 
+#ifdef USE_THREADED_LOADING
+		bool bThreadedLoad = pDevice->IsMultiThreaded();
+#else
+		bool bThreadedLoad = false;
+#endif
+
 		PreModeUpdate(fElapsed);
 
 		switch (m_eState)
@@ -203,7 +209,7 @@ namespace usg
 				// DeInitHomeButtonDisabledAnimation();
 				m_eState = STATE_TRANSITION;
 				m_pTransitionMode->Reset();
-				if( DrawLoadingScreen() )
+				if( DrawLoadingScreen() && bThreadedLoad )
 				{
 					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
 				}
@@ -219,6 +225,11 @@ namespace usg
 			{
 				StartNextMode(pDevice);
 				m_eState = STATE_LOADING;
+
+				if(!bThreadedLoad)
+				{
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+				}
 				// Normally we would fade in, but we are doing that manually due to the connection method;
 			}
 			break;
@@ -229,11 +240,10 @@ namespace usg
 				m_pTransitionMode->SetNextModeReady(m_pInternalData->m_pInitThread->IsThreadEnd());
 			}
 			if (!m_pTransitionMode->ShouldHold()
-#ifdef USE_THREADED_LOADING
-					&& (m_pInternalData->m_pInitThread->IsThreadEnd() || !pDevice->IsMultiThreaded() )
-#endif
+					&& (!bThreadedLoad || (m_pInternalData->m_pInitThread->IsThreadEnd() || !pDevice->IsMultiThreaded()))
 				)
 			{
+	
 				m_pInternalData->m_pInitThread->JoinThread();	// Make sure to finalize so we can re-use it
 				m_eState = STATE_END_LOADING;
 				if(DrawLoadingScreen())
