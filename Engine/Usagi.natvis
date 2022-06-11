@@ -25,6 +25,14 @@
 	</Expand>
 </Type>
 
+
+<Type Name="usg::OptionalWrapper&lt;*&gt;">
+	<DisplayString Condition="m_pComponent!=nullptr"> {*m_pComponent} </DisplayString>
+	<Expand>
+		<ExpandedItem>m_pComponent</ExpandedItem>
+	</Expand>
+</Type>
+
 <Type Name="usg::Component&lt;*&gt;">
 	<DisplayString>{m_data}</DisplayString>
 	<Expand>
