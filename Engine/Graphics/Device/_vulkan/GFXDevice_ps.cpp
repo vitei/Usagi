@@ -1091,7 +1091,7 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 		return true;
 	}
 
-	ASSERT(false);
+	FATAL_RELEASE(false, "Unable to allocate requested GPU memory");
 
 	return false;
 }

@@ -39,6 +39,8 @@ public:
 		bool	bDirectionalShadows = true;
 		bool	bSpotShadows = true;
 		bool	bPointShadows = true;
+		bool	bPointLights = true;
+		bool	bSpotLights = true;
 		uint32	uShadowQuality = 1;	// 0-3
 	};
 

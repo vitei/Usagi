@@ -417,6 +417,9 @@ void LightMgr::GetActiveDirLights(list<DirLight*>& lightsOut) const
 void LightMgr::GetPointLightsInView(const Camera* pCamera, list<PointLight*>& lightsOut) const
 {
 	lightsOut.clear();
+
+	if(!m_qualitySettings.bPointLights)
+		return;
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_pointLights.GetActiveLights().begin(); it!=m_pointLights.GetActiveLights().end(); ++it)
 	{
@@ -436,6 +439,9 @@ void LightMgr::GetPointLightsInView(const Camera* pCamera, list<PointLight*>& li
 void LightMgr::GetSpotLightsInView(const Camera* pCamera, list<SpotLight*>& lightsOut) const
 {
 	lightsOut.clear();
+
+	if (!m_qualitySettings.bSpotLights)
+		return;
 	// TODO: Give the point lights transforms and bounding volumes
 	for (auto it = m_spotLights.GetActiveLights().begin(); it != m_spotLights.GetActiveLights().end(); ++it)
 	{

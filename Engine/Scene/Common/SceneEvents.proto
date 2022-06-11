@@ -53,6 +53,9 @@ message SetShadowQuality
 	required bool bEnableDirShadow = 2 [default = true];
 	required bool bEnablePointShadow = 3 [default = true];
 	required bool bEnableSpotShadow = 4 [default = true];
+
+	required bool bEnablePointLights = 5 [default = true];
+	required bool bEnableSpotLights = 6 [default = true];
 }
 
 
