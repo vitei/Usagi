@@ -83,6 +83,8 @@ public:
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[(uint32)eFormat]; }
 	ColorFormat GetUSGFormat(VkFormat eFormat);
 
+	VkFormat GetDepthFormat(DepthFormat eFormat) { return m_depthFormats[(uint32)eFormat]; }
+
 	// Need to avoid raw allocations and pool them together. Should potentially explicitly declare type too (constant set, texture etc)
 	bool AllocateMemory(VkMemAllocator* pAllocInOut);
 	void FreeMemory(VkMemAllocator* pAllocInOut);
@@ -104,6 +106,7 @@ public:
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
+	bool DepthFormatSupported(VkFormat eFormat);
 	void CleanupDestroyRequests(uint32 uMaxFrameId = UINT_MAX);
 
 	enum
@@ -169,6 +172,7 @@ private:
 	CriticalSection						m_criticalSection;
 	usg::queue<DestroyRequest>			m_destroyQueue;
 	VkFormat							m_colorFormats[ColorFormat::COUNT];
+	VkFormat							m_depthFormats[DepthFormat::COUNT];
 
 	GFXDevice*							m_pParent;
 	VkFence								m_drawFence;

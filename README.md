@@ -120,7 +120,7 @@ The build process has not been improved or significantly modified and currently 
 
 1. Follow the instructions in that projects README.md  
 
-Current Version 0.2.5
+Current Version 0.3.0
 ----------------------
 
 With v0.2 the engine was switched from OpenGL to Vulkan  
@@ -128,6 +128,7 @@ v0.2.1 enables Vulkan validation and has addressed the issues that presented. It
 v0.2.2 enables per project post process effects
 v0.2.3 upgrades to PhysX 4.0 and simplifies installation
 v0.2.5 tackled additional validation issues presented by the latest Vulkan SDK, added effect comprehensive effect definitions and significantly reduced buffer allocations which would present an issue in larger projects. It also dealt with timing issues surrounding releasing assets. Finally it added an implementation of Adaptive Screen Space Ambient Occlusion.
+v0.3.0 added PakFiles for faster grouped loading. They will automatically import dependencies such as textures and should load significantly more quickly. They do not have yet a global table so pak file names must currently be specified with assets. It also introduced automatic render target management for more flexible post process control.
 
 
 Issues

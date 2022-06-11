@@ -324,13 +324,13 @@ void Texture_ps::InitArray(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidt
 void Texture_ps::InitArray(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uSlices, uint32 uTextureFlags)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(uTextureFlags);
-	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, uSlices, VK_IMAGE_VIEW_TYPE_2D_ARRAY, pDevice->GetPlatform().GetDepthFormat(eFormat), imageUsage);
 }
 
 void Texture_ps::InitCubeMap(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, uint32 uHeight, uint32 uTextureFlags)
 {
 	VkImageUsageFlags imageUsage = GetImageUsage(uTextureFlags);
-	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, gDepthFormatViewMap[(uint32)eFormat], imageUsage);
+	InitArray(pDevice, uWidth, uHeight, 6, VK_IMAGE_VIEW_TYPE_CUBE, pDevice->GetPlatform().GetDepthFormat(eFormat), imageUsage);
 }
 
 
@@ -529,7 +529,7 @@ void Texture_ps::Init(GFXDevice* pDevice, DepthFormat eFormat, uint32 uWidth, ui
 {
 	ASSERT(uTextureFlags & TU_FLAG_DEPTH_ATTACHMENT);
 	// Check for support
-	const VkFormat depth_format = gDepthFormatViewMap[(uint32)eFormat];
+	const VkFormat depth_format = pDevice->GetPlatform().GetDepthFormat(eFormat);
 
     VkFormatProperties props;
 	VkImageCreateInfo image_create_info = {};

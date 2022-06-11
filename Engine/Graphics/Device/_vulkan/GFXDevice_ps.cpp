@@ -56,9 +56,9 @@ static const VkFormat gColorFormatMap[]=
 
 static_assert(ARRAY_SIZE(gColorFormatMap) == (uint32)usg::ColorFormat::COUNT, "Mismatch on color format mapping size");
 
-static const uint32 gMaxColorFormatFallbacks = 3;
+static const uint32 gMaxFormatFallbacks = 3;
 
-static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
+static const VkFormat gFallbackColorFormatMap[][gMaxFormatFallbacks] =
 {
 	{ VK_FORMAT_B8G8R8A8_UNORM },																			// TF_RGBA_8888
 	{ VK_FORMAT_B5G5R5A1_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// TG_RGBA_5551
@@ -80,6 +80,31 @@ static const VkFormat gFallbackColorFormatMap[][gMaxColorFormatFallbacks] =
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
+static const VkFormat gDepthFormatMap[] =
+{
+	VK_FORMAT_X8_D24_UNORM_PACK32,		// DF_DEPTH_24,	 // Not technically supported
+	VK_FORMAT_D24_UNORM_S8_UINT,		// DF_DEPTH_24_S8,
+	VK_FORMAT_D16_UNORM,				// DF_DEPTH_16,
+	VK_FORMAT_D32_SFLOAT,				// DF_DEPTH_32F,
+	VK_FORMAT_X8_D24_UNORM_PACK32		// DF_DEPTH_32	// There is no 32 unorm
+};
+
+
+
+static_assert(ARRAY_SIZE(gDepthFormatMap) == (uint32)usg::DepthFormat::COUNT, "Mismatch on color format mapping size");
+
+
+
+static const VkFormat gFallbackDepthFormatMap[][gMaxFormatFallbacks] =
+{
+	{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D16_UNORM },					// DF_DEPTH_24,	 // Not technically supported
+	{ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D16_UNORM_S8_UINT	},	// DF_DEPTH_24_S8,
+	{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D16_UNORM_S8_UINT	},					// DF_DEPTH_16,
+	{ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_X8_D24_UNORM_PACK32, VK_FORMAT_D16_UNORM	},				// DF_DEPTH_32F,
+	{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D16_UNORM },		// DF_DEPTH_32	// There is no 32 unorm// DEPTH_24_S8,
+	{ },									// INVALID
+
+};
 
 
 #ifdef USE_VK_DEBUG_EXTENSIONS
@@ -204,6 +229,7 @@ GFXDevice_ps::GFXDevice_ps()
 	m_uDisplayCount = 0;
 	m_fGPUTime = 0.0f;
 	m_bHasLineSmooth = false;
+
 }
 
 void GFXDevice_ps::Cleanup(GFXDevice* pParent)
@@ -570,31 +596,39 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	m_queueInfo[QUEUE_TYPE_TRANSFER].queueCount = 1;
 	m_queueInfo[QUEUE_TYPE_TRANSFER].pQueuePriorities = queue_priorities;
 
-	VkPhysicalDeviceFeatures supportedFeatures = {};
+	VkPhysicalDeviceFeatures2 supportedFeatures = {};
+	supportedFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+
+	VkPhysicalDeviceLineRasterizationFeaturesEXT lineSupport = {};
+	lineSupport.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT;
+
+	supportedFeatures.pNext = &lineSupport;
+
 	VkPhysicalDeviceLimits limits = {};
 
-	vkGetPhysicalDeviceFeatures(m_primaryPhysicalDevice, &supportedFeatures);
+	vkGetPhysicalDeviceFeatures2(m_primaryPhysicalDevice, &supportedFeatures);
 
-	FATAL_RELEASE(supportedFeatures.samplerAnisotropy, "No anisotropy");
+	FATAL_RELEASE(supportedFeatures.features.samplerAnisotropy, "No anisotropy");
 
-	FATAL_RELEASE(supportedFeatures.geometryShader, "No geometry shader support");
-	FATAL_RELEASE(supportedFeatures.multiDrawIndirect, "No multi draw indirect");
-	FATAL_RELEASE(supportedFeatures.textureCompressionBC, "No BC compression");
-	FATAL_RELEASE(supportedFeatures.independentBlend, "No independent blend");
+	FATAL_RELEASE(supportedFeatures.features.geometryShader, "No geometry shader support");
+	FATAL_RELEASE(supportedFeatures.features.multiDrawIndirect, "No multi draw indirect");
+	FATAL_RELEASE(supportedFeatures.features.textureCompressionBC, "No BC compression");
+	FATAL_RELEASE(supportedFeatures.features.independentBlend, "No independent blend");
 
 
 
 	// FIXME: Set up additional enabled features
 	m_enabledFeatures.samplerAnisotropy = VK_TRUE;
 	m_enabledFeatures.geometryShader = VK_TRUE;
-	m_enabledFeatures.tessellationShader = VK_TRUE && supportedFeatures.tessellationShader;
+	m_enabledFeatures.tessellationShader = VK_TRUE && supportedFeatures.features.tessellationShader;
 	m_enabledFeatures.multiDrawIndirect = VK_TRUE;
-	m_enabledFeatures.shaderStorageImageMultisample = VK_TRUE && supportedFeatures.shaderStorageImageMultisample;
+	m_enabledFeatures.shaderStorageImageMultisample = VK_TRUE && supportedFeatures.features.shaderStorageImageMultisample;
 	m_enabledFeatures.textureCompressionBC = VK_TRUE;
-	m_enabledFeatures.fillModeNonSolid = VK_TRUE && supportedFeatures.fillModeNonSolid;
+	m_enabledFeatures.fillModeNonSolid = VK_TRUE && supportedFeatures.features.fillModeNonSolid;
 	m_enabledFeatures.independentBlend = VK_TRUE;
-	m_enabledFeatures.fragmentStoresAndAtomics = VK_TRUE && supportedFeatures.fragmentStoresAndAtomics;
-	m_enabledFeatures.wideLines = VK_TRUE && supportedFeatures.wideLines;
+	m_enabledFeatures.fragmentStoresAndAtomics = VK_TRUE && supportedFeatures.features.fragmentStoresAndAtomics;
+	m_enabledFeatures.wideLines = VK_TRUE && supportedFeatures.features.wideLines;
+
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
@@ -621,24 +655,28 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 #endif
 
 	// Smooth lines are hugely helpful, but not online until 1.1.117
-	for (auto extension : deviceExt) {
-		if (strcmp(extension.extensionName, "VK_EXT_line_rasterization") == 0) {
-			extensions.push_back("VK_EXT_line_rasterization");
-			m_bHasLineSmooth = true;
-			break;
+	if(lineSupport.smoothLines)
+	{
+		for (auto extension : deviceExt) {
+			if (strcmp(extension.extensionName, "VK_EXT_line_rasterization") == 0) {
+				extensions.push_back("VK_EXT_line_rasterization");
+				m_bHasLineSmooth = true;
+				break;
+			}
 		}
 	}
+
 
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
 
 	VkPhysicalDeviceLineRasterizationFeaturesEXT lineFeatures = {};
 	lineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT;
-	lineFeatures.smoothLines = true;
+	lineFeatures.smoothLines = lineSupport.smoothLines;
 
 	VkDeviceCreateInfo device_info = {};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	device_info.pNext = m_bHasLineSmooth ? &lineFeatures : nullptr;
+	device_info.pNext = m_bHasLineSmooth ? &lineSupport : nullptr;
 	device_info.queueCreateInfoCount = uQueueSets;
 	device_info.pQueueCreateInfos = m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
@@ -700,7 +738,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 		else
 		{
 			m_colorFormats[i] = VK_FORMAT_UNDEFINED;
-			for (int j = 0; j < gMaxColorFormatFallbacks; j++)
+			for (int j = 0; j < gMaxFormatFallbacks; j++)
 			{
 				if (gFallbackColorFormatMap[i][j] == VK_FORMAT_UNDEFINED)
 				{
@@ -717,6 +755,36 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 			{
 				DEBUG_PRINT("Unsupported color format and all fallbacks failed\n");
 				m_colorFormats[i] = VK_FORMAT_R8G8B8A8_UNORM;
+			}
+		}
+	}
+
+	for (uint32 i = 0; i < int(DepthFormat::COUNT); i++)
+	{
+		if (gDepthFormatMap[i] == VK_FORMAT_UNDEFINED || DepthFormatSupported(gColorFormatMap[i]))
+		{
+			m_depthFormats[i] = gDepthFormatMap[i];
+		}
+		else
+		{
+			m_depthFormats[i] = VK_FORMAT_UNDEFINED;
+			for (int j = 0; j < gMaxFormatFallbacks; j++)
+			{
+				if (gFallbackDepthFormatMap[i][j] == VK_FORMAT_UNDEFINED)
+				{
+					break;
+				}
+
+				if (DepthFormatSupported(gFallbackDepthFormatMap[i][j]))
+				{
+					m_depthFormats[i] = gFallbackDepthFormatMap[i][j];
+					break;
+				}
+			}
+			if (m_depthFormats[i] == VK_FORMAT_UNDEFINED)
+			{
+				DEBUG_PRINT("Unsupported depth format and all fallbacks failed\n");
+				m_depthFormats[i] = VK_FORMAT_D16_UNORM;
 			}
 		}
 	}
@@ -746,6 +814,14 @@ bool GFXDevice_ps::ColorFormatSupported(VkFormat eFormat)
 	VkFormatProperties props;
 	vkGetPhysicalDeviceFormatProperties(m_primaryPhysicalDevice, eFormat, &props);
 	return ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) != 0);
+}
+
+
+bool GFXDevice_ps::DepthFormatSupported(VkFormat eFormat)
+{
+	VkFormatProperties props;
+	vkGetPhysicalDeviceFormatProperties(m_primaryPhysicalDevice, eFormat, &props);
+	return ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) != 0);
 }
 
 void GFXDevice_ps::EnumerateDisplays()
