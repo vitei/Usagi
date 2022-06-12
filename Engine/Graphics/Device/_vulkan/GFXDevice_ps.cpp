@@ -761,7 +761,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	for (uint32 i = 0; i < int(DepthFormat::COUNT); i++)
 	{
-		if (gDepthFormatMap[i] == VK_FORMAT_UNDEFINED || DepthFormatSupported(gColorFormatMap[i]))
+		if (gDepthFormatMap[i] == VK_FORMAT_UNDEFINED || DepthFormatSupported(gDepthFormatMap[i]))
 		{
 			m_depthFormats[i] = gDepthFormatMap[i];
 		}
@@ -1082,7 +1082,7 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 		uSize = usg::Math::Max(uSize, uImageSize);
 		pHeap->AllocData(m_vkDevice, uMemType, uSize, pAllocInOut->NeedsDynamicCPUMap());
 		uHeap = (uint32)(m_memoryPools[uMemType].heaps.size());
-		m_memoryPools[uMemType].heaps.push_back(pHeap);
+ 		m_memoryPools[uMemType].heaps.push_back(pHeap);
 	}
 
 	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(m_pParent, pAllocInOut) )
