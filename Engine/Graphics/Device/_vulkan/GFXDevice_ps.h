@@ -82,6 +82,7 @@ public:
 
 	VkFormat GetColorFormat(ColorFormat eFormat) { return m_colorFormats[(uint32)eFormat]; }
 	ColorFormat GetUSGFormat(VkFormat eFormat);
+	memsize GetMemorySize() const { return m_uMemSize; }
 
 	VkFormat GetDepthFormat(DepthFormat eFormat) { return m_depthFormats[(uint32)eFormat]; }
 
@@ -205,8 +206,9 @@ private:
 
 	MemoryPool							m_memoryPools[VK_MAX_MEMORY_TYPES];
 
-	float		m_fGPUTime;
-	bool		m_bHasLineSmooth;
+	float								m_fGPUTime;
+	bool								m_bHasLineSmooth;
+	memsize								m_uMemSize;
 };
 
 }

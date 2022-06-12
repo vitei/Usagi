@@ -229,6 +229,7 @@ GFXDevice_ps::GFXDevice_ps()
 	m_uDisplayCount = 0;
 	m_fGPUTime = 0.0f;
 	m_bHasLineSmooth = false;
+	m_uMemSize = 0;
 
 }
 
@@ -539,6 +540,21 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	else
 	{
 		m_primaryPhysicalDevice = m_gpus[0];
+	}
+
+	{
+		VkPhysicalDeviceMemoryProperties prop;
+		vkGetPhysicalDeviceMemoryProperties(m_primaryPhysicalDevice, &prop);
+
+		m_uMemSize = 0;
+		for (uint32 i = 0; i < prop.memoryHeapCount; i++)
+		{
+			if(prop.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+			{
+				m_uMemSize += prop.memoryHeaps[i].size;
+			}
+		}
+
 	}
 
 	vkGetPhysicalDeviceQueueFamilyProperties(m_primaryPhysicalDevice, &m_uQueueFamilyCount, NULL);
@@ -1085,7 +1101,7 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
  		m_memoryPools[uMemType].heaps.push_back(pHeap);
 	}
 
-	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(m_pParent, pAllocInOut) )
+ 	if(m_memoryPools[uMemType].heaps[uHeap]->CanAllocate(m_pParent, pAllocInOut) )
 	{
 		m_memoryPools[uMemType].heaps[uHeap]->AddAllocator(m_pParent, pAllocInOut);
 		return true;

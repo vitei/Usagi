@@ -705,7 +705,28 @@ bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const
 	vector<Vector3i> extents;
 	vector<uint32> sizes;
 
-	for (uint32_t uLevel = 0; uLevel < m_uMips; uLevel++)
+	// TODO: Need streaming
+	bool bForceLowerMip = false;
+	uint32 uFirstLevel = 0;
+	memsize uLowMemorySize = 4294967296;
+	memsize uMemSize = pDevice->GetPlatform().GetMemorySize();
+	if (uMemSize < uLowMemorySize && m_uWidth > 2046 && m_uMips > 1)
+	{
+		bForceLowerMip = true;
+	}
+
+	if (bForceLowerMip)
+	{
+		m_uMips--;
+		m_uWidth = pLayers[1].uWidth;
+		m_uHeight = pLayers[1].uHeight;
+		uFirstLevel = 1;
+
+		pData = (void*)((uint8*)pData +  pLayers[0].uSize);
+		uSize -= pLayers[0].uSize;
+	}
+
+	for (uint32_t uLevel = uFirstLevel; uLevel < pHeader->uMips; uLevel++)
 	{
 		Vector3i out;
 		out.x = pLayers[uLevel].uWidth;
@@ -716,6 +737,7 @@ bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const
 	}
 
 	VkFormat eFormat = GetFormatGLI((gli::format)pHeader->uIntFormat);
+
 
 	return LoadInt(pDevice, eFormat, uSize, (void*)pData, extents, sizes);
 
@@ -960,7 +982,6 @@ bool Texture_ps::LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSiz
 		extents.push_back(out);
 		sizes.push_back((uint32)Texture.size(uLevel));
 	}
-
 
 	return LoadInt(pDevice, eFormatVK, Texture.size(), Texture.data(), extents, sizes);
 }
