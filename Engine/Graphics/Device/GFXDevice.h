@@ -63,6 +63,7 @@ public:
 	void WaitIdle();
 
 	bool IsMultiThreaded() const;
+	memsize GetMemorySize() const;
 
 	void FinishedStaticLoad();
 	void ClearDynamicResources();

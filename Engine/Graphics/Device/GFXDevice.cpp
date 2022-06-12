@@ -224,6 +224,11 @@ void GFXDevice::FinishedStaticLoad()
 	m_pImpl->platform.FinishedStaticLoad();
 }
 
+memsize GFXDevice::GetMemorySize() const
+{
+	return m_pImpl->platform.GetMemorySize();
+}
+
 void GFXDevice::ClearDynamicResources()
 {
 	m_pImpl->renderStates.ClearDynamicResources(this);
