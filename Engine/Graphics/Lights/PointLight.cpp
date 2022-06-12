@@ -100,7 +100,7 @@ void PointLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQu
 	if (!SupportsShadow())
 		return;
 
-	uint32 uDimPerQuality[] = {1536, 1024, 512, 256};
+	uint32 uDimPerQuality[] = {1024, 512, 128, 64};
 	uQuality = Math::Clamp(uQuality, 0U, (uint32)ARRAY_SIZE(uDimPerQuality));
 
 

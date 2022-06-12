@@ -114,7 +114,7 @@ void SpotLight::InitShadowQuality(GFXDevice* pDevice, Scene* pScene, uint32 uQua
 	if (!SupportsShadow())
 		return;
 
-	uint32 uDimPerQuality[] = { 1536, 1024, 512, 256 };
+	uint32 uDimPerQuality[] = { 1280, 1024, 512, 64 };
 	uQuality = Math::Clamp(uQuality, 0U, (uint32)ARRAY_SIZE(uDimPerQuality));
 
 	if (m_pShadow)
