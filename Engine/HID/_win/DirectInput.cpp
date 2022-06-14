@@ -220,6 +220,15 @@ namespace usg
 		return false;
 	}
 
+	usg::string DirectInput::GetName(uint32 uIdx) const
+	{
+		if (uIdx < m_joysticks.size())
+		{
+			return m_joysticks[uIdx].productName;
+		}
+		return "";
+	}
+
 	BOOL DirectInput::DeviceEnumCallback(const DIDEVICEINSTANCE* pInst)
 	{
 		DeviceInfo* pInfo = GetDevice(pInst->tszInstanceName);

@@ -25,6 +25,7 @@ namespace usg
 		~Gamepad();
 
 		bool GetButtonDown(uint32 uButtonShift, ButtonState eState=BUTTON_STATE_PRESSED) const;
+
 		float GetAxisValue(uint32 eAxis) const;
 		bool GetScreenTouch(Vector2f& posOut) const { posOut = m_deviceState.vTouchPos; return m_deviceState.bScreenTouch; }
 		void GetMatrix(Matrix4x4& out, GamepadHand eHand = GamepadHand::Left);
@@ -43,6 +44,8 @@ namespace usg
 		void UpdateVibration(uint32 uHandle, float fLeft, float fRight);
 		void StopEffect(uint32 uHandle);
 		void StopAllVibrations();
+
+		const char* GetName() const;
 	protected:
 		IGamepad*	m_pIGamepad;
 

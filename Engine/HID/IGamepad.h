@@ -28,10 +28,12 @@ namespace usg
 
 		virtual uint32 GetCaps() const = 0;
 		virtual bool IsConnected() const = 0;
+		virtual const char* GetProductName() const = 0;
 		virtual void Update(usg::GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) = 0;
 		virtual void ResetGyro() {}
 		virtual void ResetGyroDirection() {}
 		virtual void Vibrate(float fLeft, float fRight) {}
+
 
 
 	};

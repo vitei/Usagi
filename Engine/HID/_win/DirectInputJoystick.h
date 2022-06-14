@@ -22,6 +22,7 @@ public:
 	void Init(DirectInput* pInput, uint32 uDeviceNum);
 	virtual uint32 GetCaps() const override;
 	virtual bool IsConnected() const { return m_bConnected; }
+	virtual const char* GetProductName() const { return m_name.c_str(); }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 	void TryReconnect(DirectInput* pInput);
 	virtual const char* GetModuleName() const { return "DirectInputJoystick"; }
@@ -30,6 +31,8 @@ private:
 	void SetDeadzone(float fDeadZone);
 	float GetAxis(DIJOYSTATE2& js, int iAxis);
 	bool IsPovInRange(DWORD povVal, DWORD targVal);
+	void GetPovData(DWORD pov, bool& bUp, bool& bRight, bool& bDown, bool& bleft, float& fOut);
+
 	struct Range
 	{
 		long min;
@@ -42,6 +45,7 @@ private:
 	uint32					m_uNumButtons;
 	uint32					m_uNumAxes;
 	uint32					m_uCaps;
+	usg::string				m_name;
 	bool					m_bConnected;
 	bool					m_bIsGamepad;
 

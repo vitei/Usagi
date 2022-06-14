@@ -50,7 +50,9 @@ enum GamepadCaps
 	CAP_RIGHT_STICK = (1<<4),
 	CAP_GAMEPAD = (1<<5),
 	CAP_POV = (1<<6),
-	CAP_VIRTUAL_PAD = (1<<7)
+	CAP_POV2 = (1 << 7),
+	CAP_POV3 = (1 << 8),
+	CAP_VIRTUAL_PAD = (1<<9)
 };
 
 }

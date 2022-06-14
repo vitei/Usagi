@@ -89,7 +89,7 @@ void VirtualGamepad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateO
 	{
 		if(m_pKeyboard->GetKey(pMapping->keyboardKey, BUTTON_STATE_HELD))
 		{
-			deviceStateOut.uButtonsDown |= (1 << (pMapping->buttonMap - 1));
+			deviceStateOut.uButtonsDown |= pMapping->buttonMap;//(1 << (pMapping->buttonMap - 1));
 		}
 		pMapping++;
 	}
@@ -99,7 +99,7 @@ void VirtualGamepad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateO
 	{
 		if(Input::GetPlatform().GetMouseButtonDown(pMouseMapping->mouseButton))
 		{
-			deviceStateOut.uButtonsDown |= (1 << (pMapping->buttonMap - 1));
+			deviceStateOut.uButtonsDown |= pMapping->buttonMap;//(1 << (pMapping->buttonMap - 1));
 		}
 		pMouseMapping++;
 	}

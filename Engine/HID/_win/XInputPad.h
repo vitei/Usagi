@@ -21,6 +21,7 @@ public:
 	void Init(uint32 uPadNum);
 	virtual uint32 GetCaps() const override { return CAP_LEFT_STICK | CAP_RIGHT_STICK | CAP_GAMEPAD; }
 	virtual bool IsConnected() const { return m_bConnected; }
+	virtual const char* GetProductName() const { return "XInput"; }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
 	void TryReconnect();
 	virtual const char* GetModuleName() const { return "XInputPad"; }

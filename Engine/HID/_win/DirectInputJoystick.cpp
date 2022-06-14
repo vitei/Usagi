@@ -144,10 +144,15 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			{
 				m_uCaps |= CAP_POV;
 			}
+			if (diCaps.dwPOVs > 1)
+			{
+				m_uCaps |= CAP_POV2;
+			}
 			m_uNumAxes = diCaps.dwAxes;
 			m_uNumButtons = diCaps.dwButtons;
 		}
 		m_bConnected = true;
+		m_name = pInput->GetName(m_uInputId);
 	}
 }
 
@@ -329,33 +334,76 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 		}
 
+		bool bLeft, bRight, bUp, bDown;
+		float fPovAxis;
+
 		if (m_uCaps & CAP_POV)
 		{
-			if (js.rgdwPOV[0] & 0xf0000000)
-			{
-				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = -1.0f;
-			}
-			else
-			{
-				deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = ((float)js.rgdwPOV[0])/100.f;
+			GetPovData(js.rgdwPOV[0], bLeft, bRight, bUp, bDown, fPovAxis);
 
-				if(IsPovInRange(js.rgdwPOV[0], 0))
-				{
-					deviceStateOut.uButtonsDown = (1<<JOYSTICK_BUTTON_POV_UP);
-				}
-				else if (IsPovInRange(js.rgdwPOV[0], 9000))
-				{
-					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_RIGHT);
-				}
-				else if (IsPovInRange(js.rgdwPOV[0], 18000))
-				{
-					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_DOWN);
-				}
-				else if (IsPovInRange(js.rgdwPOV[0], 27000))
-				{
-					deviceStateOut.uButtonsDown = (1 << JOYSTICK_BUTTON_POV_LEFT);
-				}
-			}
+			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = fPovAxis;
+
+			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV_UP : 0;
+			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV_RIGHT : 0;
+			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV_DOWN : 0;
+			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV_LEFT : 0;
+		}
+
+		if (m_uCaps & CAP_POV2)
+		{
+			GetPovData(js.rgdwPOV[1], bLeft, bRight, bUp, bDown, fPovAxis);
+
+			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV2_ANGLE] = fPovAxis;
+
+			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV2_UP : 0;
+			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV2_RIGHT : 0;
+			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV2_DOWN : 0;
+			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV2_LEFT : 0;
+		}
+
+		if (m_uCaps & CAP_POV3)
+		{
+			GetPovData(js.rgdwPOV[1], bLeft, bRight, bUp, bDown, fPovAxis);
+
+			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV3_ANGLE] = fPovAxis;
+
+			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV3_UP : 0;
+			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV3_RIGHT : 0;
+			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV3_DOWN : 0;
+			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV3_LEFT : 0;
+		}
+
+	}
+}
+
+void DirectInputJoystick::GetPovData(DWORD pov, bool& bUp, bool& bRight, bool& bDown, bool& bLeft, float& fOut)
+{
+	bUp = bRight = bDown = bLeft = false; 
+	fOut = -1.0f;
+
+	if (pov & 0xf0000000)
+	{
+		fOut = -1.0f;
+	}
+	else
+	{
+		fOut = ((float)pov) / 100.f;
+
+		if (IsPovInRange(pov, 0))
+		{
+			bUp = true;
+		}
+		else if (IsPovInRange(pov, 9000))
+		{
+			bRight = true;
+		}
+		else if (IsPovInRange(pov, 18000))
+		{
+			bDown = true;
+		}
+		else if (IsPovInRange(pov, 27000))
+		{
+			bLeft = true;
 		}
 	}
 }

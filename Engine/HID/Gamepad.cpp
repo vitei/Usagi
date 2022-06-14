@@ -23,9 +23,18 @@ Gamepad::~Gamepad()
 
 }
 
+const char* Gamepad::GetName() const
+{
+	if (m_pIGamepad)
+	{
+		return m_pIGamepad->GetProductName();
+	}
+	return "";
+}
+
 bool Gamepad::GetButtonDown(uint32 uButtonShift, ButtonState eState) const
 {
-	uint32 uButtonMask = 1 << (uButtonShift - 1);
+	uint32 uButtonMask = uButtonShift;//1 << (uButtonShift - 1);
 
 	switch(eState)
 	{

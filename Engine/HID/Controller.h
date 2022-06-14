@@ -81,7 +81,7 @@ protected:
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
 
-	void AddPadToggleToPrev(GamepadButton eButton, bool bReverseToggle);
+	void AddPadToggleToPrev(uint32 eButton, bool bReverseToggle);
 	void AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle);
 	void AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle);
 

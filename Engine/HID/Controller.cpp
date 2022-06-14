@@ -470,12 +470,12 @@ bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& 
 }
 
 
-void Controller::AddPadToggleToPrev(GamepadButton eButton, bool bReverseToggle)
+void Controller::AddPadToggleToPrev(uint32 eButton, bool bReverseToggle)
 {
 	memsize index = m_details.size();
 	ASSERT(index > 0);
 	m_details[index - 1].toggleType = INPUT_TYPE_BUTTON;
-	m_details[index - 1].uInputToggle = (uint32)eButton;
+	m_details[index - 1].uInputToggle = eButton;
 	m_details[index - 1].bReverseToggle = bReverseToggle;
 }
 

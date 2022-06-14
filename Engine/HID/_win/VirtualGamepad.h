@@ -25,6 +25,7 @@ public:
 	virtual uint32 GetCaps() const override { return CAP_POINTER|CAP_LEFT_STICK|CAP_RIGHT_STICK|CAP_VIRTUAL_PAD; }
 	virtual bool IsConnected() const { return true; }
 	virtual void Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut) override;
+	virtual const char* GetProductName() const { return "VirtualGamepad"; }
 
 	virtual const char* GetModuleName() const { return "VirtualGamepad"; }
 private:

@@ -94,16 +94,16 @@ void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 	{
 		if(pMapping->uXInputID & m_controllerState.Gamepad.wButtons)
 		{
-			deviceStateOut.uButtonsDown |= (1 << (pMapping->uAbstractID - 1));
+			deviceStateOut.uButtonsDown |= pMapping->uAbstractID;//(1 << (pMapping->uAbstractID - 1));
 		}
 		pMapping++;
 	}
 
 	if(m_controllerState.Gamepad.bLeftTrigger)
-		deviceStateOut.uButtonsDown |= (1 << (GAMEPAD_BUTTON_ZL - 1));
+		deviceStateOut.uButtonsDown |= GAMEPAD_BUTTON_ZL;
 
 	if(m_controllerState.Gamepad.bRightTrigger)
-		deviceStateOut.uButtonsDown |= (1 << (GAMEPAD_BUTTON_ZR - 1));
+		deviceStateOut.uButtonsDown |= GAMEPAD_BUTTON_ZR;
 }
 
 void XInputPad::VibrateInt(int leftVal, int rightVal)

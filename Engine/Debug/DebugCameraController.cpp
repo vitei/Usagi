@@ -28,9 +28,9 @@ void DebugCameraController::Init()
 	Inherited::CreateAxisFromButtonPair(GAMEPAD_BUTTON_DOWN, GAMEPAD_BUTTON_UP, m_axes[DEBUG_CAM_AXIS_MOVE_Z]);
 	Inherited::CreateAxisFromButtonPair(GAMEPAD_BUTTON_ZL, GAMEPAD_BUTTON_ZR, m_axes[DEBUG_CAM_AXIS_MOVE_Z]);
 
-	Inherited::CreateKeyMapping(GAMEPAD_BUTTON_THUMB_R, m_buttons[DEBUG_CAM_BOOL_INCR_SPEED]);
-	Inherited::CreateKeyMapping(GAMEPAD_BUTTON_RIGHT, m_buttons[DEBUG_CAM_BOOL_INCR_SPEED]);
-	Inherited::CreateKeyMapping(GAMEPAD_BUTTON_LEFT, m_buttons[DEBUG_CAM_BOOL_DECR_SPEED]);
+	Inherited::CreateButtonMapping(GAMEPAD_BUTTON_THUMB_R, m_buttons[DEBUG_CAM_BOOL_INCR_SPEED]);
+	Inherited::CreateButtonMapping(GAMEPAD_BUTTON_RIGHT, m_buttons[DEBUG_CAM_BOOL_INCR_SPEED]);
+	Inherited::CreateButtonMapping(GAMEPAD_BUTTON_LEFT, m_buttons[DEBUG_CAM_BOOL_DECR_SPEED]);
 }
 
 void DebugCameraController::Update(float timeDelta)
