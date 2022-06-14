@@ -138,6 +138,7 @@ namespace usg
 				e->AttachToNode(ComponentEntity::GetRoot());
 			}
 			e->m_uSpawnFrame = m_uFrameCounter;
+			ForceCallOnLoaded(e);
 		}
 	}
 
