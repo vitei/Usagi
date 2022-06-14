@@ -188,6 +188,7 @@ void RibbonTrail::SetDeclaration(GFXDevice* pDevice, const particles::RibbonData
 	pConsts->fLineWidth = pDecl->fLineWidth;
 	m_constantSet.Unlock();
 
+	m_vLocalPos = pDecl->vPosition;
 	m_fBaseLineWidth = pDecl->fLineWidth;
 	m_fScale = m_fBaseLineWidth;	// Assume no scale override
 
@@ -248,7 +249,8 @@ bool RibbonTrail::Update(float fElapsed)
 	m_fTimeAccum = 0.0f;
 
 	float fLength  = 0.0f;
-	usg::Vector3f vPos = GetParent()->GetPosition(1.0f).v3();
+	;
+	usg::Vector3f vPos = GetParent()->GetMatrix().TransformVec3(m_vLocalPos, 1.0f);
 	if(!bFirst)
 	{
 		fLength = vPos.GetDistanceFrom(m_vPrevPos);

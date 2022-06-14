@@ -54,6 +54,7 @@ protected:
 	usg::IndexBuffer			m_indices;
 	RibbonTrailVertex			m_capVertex;
 
+	usg::Vector3f				m_vLocalPos;
 	usg::Vector3f				m_vPrevPos;
 	float						m_fEffectTime;
 	float						m_fCountdown;
