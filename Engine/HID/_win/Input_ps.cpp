@@ -38,8 +38,11 @@ void Input_ps::GetActiveGamepads(usg::vector<IGamepad*>& gamepads)
 	if (m_xboxPad.IsConnected())
 		gamepads.push_back(&m_xboxPad);
 
-	if (m_pJoystick->IsConnected())
-		gamepads.push_back(m_pJoystick);
+	for(auto itr : m_pJoysticks)
+	{
+		if (itr && itr->IsConnected())
+			gamepads.push_back(itr);
+	}
 
 	if (m_virtualGamepad.IsConnected())
 		gamepads.push_back(&m_virtualGamepad);
@@ -49,11 +52,11 @@ void Input_ps::GetActiveGamepads(usg::vector<IGamepad*>& gamepads)
 void Input_ps::Init()
 {
 	m_pDirectInput = vnew(ALLOC_OBJECT)DirectInput;
-	m_pJoystick = vnew(ALLOC_OBJECT)DirectInputJoystick;
 	m_pDirectInput->Init();
-	if (m_pDirectInput->GetJoystickCount() > 0)
+	for (memsize i= 0; i< m_pDirectInput->GetJoystickCount() && i< MAX_DI_DEVICES; i++)
 	{
-		m_pJoystick->Init(m_pDirectInput, 0);
+		m_pJoysticks[i] =vnew(ALLOC_OBJECT)DirectInputJoystick;
+		m_pJoysticks[i]->Init(m_pDirectInput, (uint32)i);
 	}
 
 #ifdef USE_DIRECT_INPUT_MOUSE
@@ -79,16 +82,29 @@ void Input_ps::Cleanup()
 		vdelete m_pDirectInput;
 		m_pDirectInput = nullptr;
 	}
-	if (m_pJoystick)
+	for(int i=0; i<MAX_DI_DEVICES; i++)
 	{
-		vdelete m_pJoystick;
-		m_pJoystick = nullptr;
+		if (m_pJoysticks[i])
+		{
+			vdelete m_pJoysticks[i];
+			m_pJoysticks[i] = nullptr;
+		}
 	}
 }
 
 void Input_ps::RegisterDeviceChange()
 {
 	m_xboxPad.TryReconnect();
+
+	// Add more joysticks if needed
+	for (memsize i = 0; i < m_pDirectInput->GetJoystickCount() && i<MAX_DI_DEVICES; i++)
+	{
+		if(m_pJoysticks[i] == nullptr)
+		{
+			m_pJoysticks[i] = vnew(ALLOC_OBJECT)DirectInputJoystick;
+			m_pJoysticks[i]->Init(m_pDirectInput, (uint32)i);
+		}
+	}
 }
 
 void Input_ps::RegisterGamepad(IGamepad* pGamepad)

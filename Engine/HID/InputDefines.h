@@ -52,7 +52,9 @@ enum GamepadCaps
 	CAP_POV = (1<<6),
 	CAP_POV2 = (1 << 7),
 	CAP_POV3 = (1 << 8),
-	CAP_VIRTUAL_PAD = (1<<9)
+	CAP_VIRTUAL_PAD = (1<<9),
+	CAP_HOTAS_THROTTLE = (1<<10),
+	CAP_JOYSTICK = (1<<11)
 };
 
 }

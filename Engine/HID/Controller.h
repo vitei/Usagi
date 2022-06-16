@@ -47,6 +47,7 @@ protected:
 			axisType = AXIS_TYPE_NONE;
 			bReverse = false;
 			bReverseToggle = false;
+			uSubDevice = 0;
 			uInputIdA = USG_INVALID_ID;
 			uInputIdB = USG_INVALID_ID;
 		}
@@ -56,6 +57,9 @@ protected:
 		bool			bReverse;
 		bool			bUseToggle;
 		bool			bReverseToggle;
+
+		// For multiple joysticks on one set of mappings
+		uint32			uSubDevice;
 
 		// Should only have two inputs when mapping a button pair onto an axis
 		uint32			uInputIdA;
@@ -70,13 +74,13 @@ protected:
 	bool	GetValueAsBool( ControllerDetail &detail );
 	float	GetValueAsFloat( ControllerDetail &detail );
 
-	bool CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
+	bool CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED, uint32 uSubDevice = 0);
 	bool CreateKeyMapping(uint8 uKey, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
-	bool CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
+	bool CreateAxisMapping(uint32 uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uDeviceIdx = 0);
 	bool CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	bool CreateButtonFromAxis(GamepadAxis uAxis,  AxisType eType, MappingOutput& detailOut);
-	bool CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
+	bool CreateAxisFromButtonPair(uint32 uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uSubDevice = 0);
 	bool CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
@@ -86,7 +90,7 @@ protected:
 	void AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle);
 
 	uint32	GetGamepadId() { return m_uGamepadId; }
-	Gamepad* GetGamepad() { return m_pGamepad; }
+	Gamepad* GetGamepad(uint32 uSubDevice = 0);
 	void SetGamepad(uint32 uGamepadId);
 
 private:
@@ -98,7 +102,6 @@ private:
 	bool IsToggleValid(ControllerDetail& detail);
 
 	vector<ControllerDetail> m_details;
-	Gamepad*				m_pGamepad;
 	Keyboard*				m_pKeyboard;
 	Mouse*					m_pMouse;
 	uint32					m_uGamepadId;

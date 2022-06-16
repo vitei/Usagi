@@ -220,6 +220,15 @@ namespace usg
 		return false;
 	}
 
+	bool DirectInput::IsThrottle(uint32 uIdx) const
+	{
+		if (uIdx < m_joysticks.size())
+		{
+			return m_joysticks[uIdx].bIsThrottle;
+		}
+		return false;
+	}
+
 	usg::string DirectInput::GetName(uint32 uIdx) const
 	{
 		if (uIdx < m_joysticks.size())
@@ -242,7 +251,31 @@ namespace usg
 				pInfo->productName = pInst->tszProductName;
 				pInfo->instanceName = pInst->tszInstanceName;
 				pInfo->guid = pInst->guidInstance;
-				pInfo->bIsGamepad = pInst->guidProduct.Data1 == 0x05C4054C;
+
+				switch (pInst->guidProduct.Data1)
+				{
+				case 0x0ba0054c: 
+				case 0x05C4054C: 
+				case 0x09cc054c: 
+				case 0x0ce6054c: 
+					pInfo->bIsGamepad = true;
+				default:
+					pInfo->bIsGamepad = false;
+				}
+
+				switch (pInst->guidProduct.Data1)
+				{
+				case 0xb687044f:
+					pInfo->bIsThrottle = true;
+				default:
+					pInfo->bIsThrottle = false;
+				}
+
+				if ( str::Find( pInfo->productName.c_str(), "Throttle") != nullptr)
+				{
+					pInfo->bIsThrottle = true;
+				}
+
 			}
 			pInfo->bConnected = true;
 		}

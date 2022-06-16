@@ -71,7 +71,8 @@ private:
 	
 	enum
 	{
-		MAX_EXTERNAL_PADS = 4
+		MAX_EXTERNAL_PADS = 4,
+		MAX_DI_DEVICES = 4
 	};
 
 	VirtualGamepad	m_virtualGamepad;
@@ -91,7 +92,7 @@ private:
 
 	XInputPad		m_xboxPad;
 	DirectInput*	m_pDirectInput;
-	DirectInputJoystick*	m_pJoystick;
+	DirectInputJoystick*	m_pJoysticks[MAX_DI_DEVICES];
 	IGamepad*		m_pExternalPads[MAX_EXTERNAL_PADS];
 	uint32			m_uExternalPads;
 

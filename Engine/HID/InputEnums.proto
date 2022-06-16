@@ -25,6 +25,23 @@ enum OutputType
     OUTPUT_TYPE_NONE = 2;
 };
 
+enum JoystickAxis
+{
+    option (nanopb_enumopt).long_names = false;
+
+    JOYSTICK_AXIS_STICK_X = 0;
+    JOYSTICK_AXIS_STICK_Y = 1;
+    JOYSTICK_AXIS_RUDDER = 2;
+    JOYSTICK_AXIS_THROTTLE = 3;
+    JOYSTICK_AXIS_PEDAL_LEFT = 4;
+    JOYSTICK_AXIS_PEDAL_RIGHT = 5;
+    JOYSTICK_AXIS_PEDAL_SLIDE = 6;
+
+    JOYSTICK_AXIS_POV_ANGLE = 7;
+    JOYSTICK_AXIS_POV2_ANGLE = 8;
+    JOYSTICK_AXIS_POV3_ANGLE = 9;
+};
+
 enum GamepadAxis
 {
     option (nanopb_enumopt).long_names = false;
@@ -54,9 +71,8 @@ enum GamepadAxis
 
     GAMEPAD_AXIS_SCROLL_X = 20;
     GAMEPAD_AXIS_SCROLL_Y = 21;
-    GAMEPAD_AXIS_POV_ANGLE = 22;
-    GAMEPAD_AXIS_POV2_ANGLE = 23;
-    GAMEPAD_AXIS_NONE = 24;
+
+    GAMEPAD_AXIS_NONE = 22;
 };
 
 

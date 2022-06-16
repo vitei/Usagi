@@ -57,7 +57,6 @@ Controller::Controller(uint32 uGamepadId):
 m_uGamepadId(uGamepadId),
 m_boolDeadZone(0.15f)
 {
-	m_pGamepad = Input::GetGamepad(uGamepadId);
 	m_pKeyboard = Input::GetKeyboard();
 	m_pMouse = Input::GetMouse();
 }
@@ -65,7 +64,6 @@ m_boolDeadZone(0.15f)
 void Controller::SetGamepad(uint32 uGamepadId)
 {
 	m_uGamepadId = uGamepadId;
-	m_pGamepad = Input::GetGamepad(uGamepadId);
 }
 
 Controller::~Controller(void)
@@ -78,6 +76,11 @@ void Controller::ResetDetails()
 	m_details.clear();
 }
 
+Gamepad* Controller::GetGamepad(uint32 uSubDevice) 
+{
+	return Input::GetGamepad(m_uGamepadId + uSubDevice);
+}
+
 void Controller::ClearMappingSet(MappingOutput* pOutputs, uint32 uCount)
 {
 	for(uint32 i=0; i<uCount; i++)
@@ -88,7 +91,6 @@ void Controller::ClearMappingSet(MappingOutput* pOutputs, uint32 uCount)
 
 void Controller::Update( float timeDelta )
 {
-	m_pGamepad = Input::GetGamepad(m_uGamepadId);	// Update so we can connect mid game
 	m_sinceLastFrame = timeDelta;
 	for(memsize i=0; i<m_details.size(); i++)
 	{
@@ -134,7 +136,10 @@ bool Controller::IsToggleValid(ControllerDetail& detail)
 		case INPUT_TYPE_KEY:
 			return detail.bReverseToggle != m_pKeyboard->GetKey( detail.uInputToggle );
 		case INPUT_TYPE_BUTTON: 
-			return detail.bReverseToggle != m_pGamepad->GetButtonDown( detail.uInputToggle, usg::BUTTON_STATE_HELD );
+		{
+			Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
+			return detail.bReverseToggle != (pGamepad && pGamepad->GetButtonDown( detail.uInputToggle, usg::BUTTON_STATE_HELD ));
+		}
 		case INPUT_TYPE_MOUSE_BUTTON:
 			return detail.bReverseToggle != m_pMouse->GetButton( (MouseButton)detail.uInputToggle, BUTTON_STATE_HELD );
 		default:
@@ -154,9 +159,10 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 	case INPUT_TYPE_MOUSE_AXIS:
 		{
 			float fOutput = 0.0f;
-			if (detail.deviceType == INPUT_TYPE_MOUSE_AXIS)
+			if (detail.deviceType != INPUT_TYPE_MOUSE_AXIS)
 			{
-				fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+				Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
+				fOutput = pGamepad ? pGamepad->GetAxisValue(detail.uInputIdA) : 0.0f;
 			}
 			else
 			{
@@ -178,10 +184,11 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 		}
 		break;
 	case INPUT_TYPE_BUTTON:
-		if(m_pGamepad)
-			return m_pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState);
-		else
-			return false;
+	{
+		Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
+
+		return pGamepad ? pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState) : false;
+	}
 	case INPUT_TYPE_KEY:
 		return m_pKeyboard ? m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_MOUSE_BUTTON:
@@ -209,26 +216,29 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 		fValue *= detail.pResult->fStickyRate;
 	}
 
+
+
 	// This case is easy if we're dealing with a button press
 	switch( detail.deviceType )
 	{
 	case INPUT_TYPE_BUTTON:
 		{
-			if(m_pGamepad)
+			Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
+			if(pGamepad)
 			{
 				switch( detail.axisType )
 				{
 					case AXIS_TYPE_ABSOLUTE:
 						{
-							float fOutput = m_pGamepad->GetButtonDown( detail.uInputIdB, BUTTON_STATE_HELD ) ? fValue : 0.0f;
-							fOutput += m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD ) ? -fValue : 0.0f;
+							float fOutput = pGamepad->GetButtonDown( detail.uInputIdB, BUTTON_STATE_HELD ) ? fValue : 0.0f;
+							fOutput += pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD ) ? -fValue : 0.0f;
 							return fOutput;
 						}
 					case AXIS_TYPE_POSITIVE:
 					case AXIS_TYPE_ABSOLUTE_TO_POSITIVE:
-						return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+						return pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
 					case AXIS_TYPE_NEGATIVE:
-						return m_pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
+						return pGamepad->GetButtonDown( detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
 					default:
 						ASSERT(false);
 					break;
@@ -242,9 +252,10 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 			float fOutput = 0.0f;
 			if (detail.deviceType == INPUT_TYPE_AXIS)
 			{
-				if(m_pGamepad)
+				Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
+				if(pGamepad)
 				{
-					fOutput = m_pGamepad->GetAxisValue(detail.uInputIdA);
+					fOutput = pGamepad->GetAxisValue(detail.uInputIdA);
 				}
 			}
 			else
@@ -321,17 +332,18 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 	}
 }
 
-bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& output, ButtonState eInputState)
+bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, ButtonState eInputState /*= BUTTON_STATE_PRESSED*/, uint32 uSubDevice /*= 0*/)
 {
 	ControllerDetail detail;
-	detail.pResult		= &output;
-	output.eOutput		= OUTPUT_TYPE_BOOL;
-	output.Clear();
+	detail.pResult		= &detailOut;
+	detailOut.eOutput		= OUTPUT_TYPE_BOOL;
+	detailOut.Clear();
 	detail.deviceType	= INPUT_TYPE_BUTTON;
 	detail.axisType		= AXIS_TYPE_POSITIVE;
 	detail.uInputIdA	= uButton;
 	detail.uInputIdB	= GAMEPAD_BUTTON_NONE;
 	detail.eInputState  = eInputState;
+	detail.uSubDevice	= uSubDevice;
 
 	m_details.push_back(detail);
 
@@ -373,18 +385,19 @@ bool Controller::CreateMouseButtonMapping(MouseButton eButton, MappingOutput& ou
 	return true;
 }
 
-bool Controller::CreateAxisMapping(GamepadAxis uAxis, AxisType eType, MappingOutput& output, float fStickyRate, bool bReverse)
+bool Controller::CreateAxisMapping(uint32 uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate /*= 0.0f*/, bool bReverse /*= false*/, uint32 uDeviceIdx /*= 0*/)
 {
 	ControllerDetail detail;
-	detail.pResult		= &output;
+	detail.pResult		= &detailOut;
 	detail.pResult->fStickyRate = fStickyRate;
-	output.eOutput		= OUTPUT_TYPE_FLOAT;
-	output.Clear();
-	output.data.fValue = 0.0f;
+	detailOut.eOutput		= OUTPUT_TYPE_FLOAT;
+	detailOut.Clear();
+	detailOut.data.fValue = 0.0f;
 	detail.deviceType	= INPUT_TYPE_AXIS;
 	detail.axisType		= eType;
 	detail.bReverse		= bReverse;
 	detail.uInputIdA	= uAxis;
+	detail.uSubDevice	= uDeviceIdx;
 	detail.uInputIdB	= _GamepadAxis_count;
 
 	m_details.push_back(detail);
@@ -429,20 +442,21 @@ bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, Mappi
 	return true;
 }
 
-bool Controller::CreateAxisFromButtonPair(GamepadButton uButtonA, GamepadButton uButtonB, MappingOutput& output, float fStickyRate, bool bReverse)
+bool Controller::CreateAxisFromButtonPair(uint32 uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate /*= 0.0f*/, bool bReverse /*= false*/, uint32 uSubDevice /*= 0*/)
 {
 	ControllerDetail detail;
-	detail.pResult		= &output;
+	detail.pResult		= &detailOut;
 	detail.pResult->fStickyRate = fStickyRate;
-	output.eOutput		= OUTPUT_TYPE_FLOAT;
-	output.Clear();
-	output.data.fValue = 0.0f;
+	detailOut.eOutput		= OUTPUT_TYPE_FLOAT;
+	detailOut.Clear();
+	detailOut.data.fValue = 0.0f;
 
 	detail.deviceType	= INPUT_TYPE_BUTTON;
 	detail.axisType		= AXIS_TYPE_ABSOLUTE;
 	detail.bReverse		= bReverse;
 	detail.uInputIdA	= uButtonA;
 	detail.uInputIdB	= uButtonB;
+	detail.uSubDevice	= uSubDevice;
 
 	m_details.push_back(detail);
 

@@ -29,7 +29,7 @@ void Input::Cleanup()
 	g_platform.Cleanup();
 }
 
-void Input::RenumberGamepads(uint32 uPrefferedCaps)
+void Input::RenumberGamepads(usg::vector<uint32> uCapRequestList)
 {
 	if(!g_bInitCalled)
 		return;
@@ -38,27 +38,47 @@ void Input::RenumberGamepads(uint32 uPrefferedCaps)
 	usg::vector<IGamepad*> gamepads;
 	g_platform.GetActiveGamepads(gamepads);
 	g_uGamepads = 0;
-	for (auto it : gamepads)
-	{
-		if ((it->GetCaps() & uPrefferedCaps) == uPrefferedCaps)
-		{
-			g_gamepads[g_uGamepads++].BindHardware(it);
-		}
 
-		if (g_uGamepads == MAX_CONTROLLERS)
-			break;
+	usg::vector<bool> bound;
+	bound.resize(gamepads.size());
+	for (memsize i=0; i<bound.size(); i++)
+	{
+		bound[i] = false;
 	}
 
-	for (auto it : gamepads)
+	if(uCapRequestList.size() > 0)
 	{
-		if ((it->GetCaps() & uPrefferedCaps) != uPrefferedCaps)
+		for (auto it : uCapRequestList)
+		{
+			for(memsize i=0; i<gamepads.size(); i++)
+			{
+				if(bound[i])
+					continue;
+
+				uint32 uPrefferedCaps = it;
+				if ((gamepads[i]->GetCaps() & uPrefferedCaps) == uPrefferedCaps)
+				{
+					bound[i] = true;
+					g_gamepads[g_uGamepads++].BindHardware(gamepads[i]);
+				}
+
+				if (g_uGamepads == MAX_CONTROLLERS)
+					break;
+			}
+		}
+	}
+	else
+	{
+		// Bind everything in any order
+		for (auto it : gamepads)
 		{
 			g_gamepads[g_uGamepads++].BindHardware(it);
-		}
 
-		if (g_uGamepads == MAX_CONTROLLERS)
-			break;
+			if (g_uGamepads == MAX_CONTROLLERS)
+				break;
+		}
 	}
+
 }
 
 void Input::Update(GFXDevice* pDevice, float fDelta)

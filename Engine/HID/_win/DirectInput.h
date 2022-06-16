@@ -27,6 +27,8 @@ namespace usg {
 		bool HasDevice(const char* szName);
 		bool IsDeviceConnected(uint32 uIdx) const;
 		bool IsGamepad(uint32 uIdx) const;
+		bool IsThrottle(uint32 uIdx) const;
+
 		usg::string GetName(uint32 uIdx) const;
 		GUID GetGUIDForDevice(uint32 uIdx) const;
 		void UpdateConnectedDevices();
@@ -41,6 +43,7 @@ namespace usg {
 			usg::string				productName;
 			GUID					guid;
 			bool					bIsGamepad;
+			bool					bIsThrottle;
 			bool					bConnected;
 		};
 

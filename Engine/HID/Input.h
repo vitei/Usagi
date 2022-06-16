@@ -21,7 +21,7 @@ class Input
 public:	
 	static void Init();
 	static void Cleanup();
-	static void RenumberGamepads(uint32 uPrefferedCaps = 0xFFFFFFFF);
+	static void RenumberGamepads(usg::vector<uint32> uCapListRequest = usg::vector<uint32>());
 	static void Update(usg::GFXDevice* pDevice, float fDelta);
 	static void RegisterGamepad(IGamepad* pGamepad);
 

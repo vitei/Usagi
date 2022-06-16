@@ -34,11 +34,23 @@ namespace usg{
 
 	static const AxisMapping g_axisMappingJoy[] =
 	{
-		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
-		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
-		{ GAMEPAD_AXIS_RIGHT_X,			DIJOFS_RZ, 1.0f },
-		{ GAMEPAD_AXIS_RIGHT_Y,			DIJOFS_SLIDER(0), -1.0f },
-		{ GAMEPAD_AXIS_NONE,		0 }
+		{ JOYSTICK_AXIS_STICK_X,			DIJOFS_X, 1.0f },
+		{ JOYSTICK_AXIS_STICK_Y,			DIJOFS_Y, -1.0f },
+		{ JOYSTICK_AXIS_RUDDER,				DIJOFS_RZ, 1.0f },
+		{ JOYSTICK_AXIS_THROTTLE,			DIJOFS_SLIDER(0), -1.0f },
+		{ GAMEPAD_AXIS_NONE,				0 }
+	};
+
+	static const AxisMapping g_axisMappingThrottle[] =
+	{
+		{ JOYSTICK_AXIS_STICK_X,			DIJOFS_X, 1.0f },
+		{ JOYSTICK_AXIS_STICK_Y,			DIJOFS_Y, -1.0f },
+		{ JOYSTICK_AXIS_THROTTLE,			DIJOFS_Z, -1.0f },
+		{ JOYSTICK_AXIS_RUDDER,				DIJOFS_RZ, 1.0f },
+		{ JOYSTICK_AXIS_PEDAL_LEFT,			DIJOFS_RX, -1.0f },
+		{ JOYSTICK_AXIS_PEDAL_RIGHT,		DIJOFS_RY, -1.0f },
+		{ JOYSTICK_AXIS_PEDAL_SLIDE,		DIJOFS_SLIDER(1), -1.0f },
+		{ GAMEPAD_AXIS_NONE,				0 }
 	};
 
 
@@ -94,6 +106,11 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 	{
 		m_bConnected = false;
 		m_bIsGamepad = pInput->IsGamepad(m_uInputId);
+
+		if (pInput->IsThrottle(m_uInputId))
+		{
+			m_uCaps |= CAP_HOTAS_THROTTLE;
+		}
 		
 		if (m_bIsGamepad)
 		{
@@ -125,7 +142,6 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 		}
 
 		m_pDevice->Acquire();
-		SetDeadzone(0.05f);
 
 		DIDEVCAPS diCaps;
 		diCaps.dwSize = sizeof(DIDEVCAPS);
@@ -148,9 +164,26 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			{
 				m_uCaps |= CAP_POV2;
 			}
+			if (diCaps.dwPOVs > 2)
+			{
+				m_uCaps |= CAP_POV3;
+			}
 			m_uNumAxes = diCaps.dwAxes;
 			m_uNumButtons = diCaps.dwButtons;
 		}
+
+		if ((m_uCaps & CAP_POV))
+		{
+			if ((m_uCaps & (CAP_HOTAS_THROTTLE | CAP_GAMEPAD)) == 0)
+			{
+				// Assume we are joystick
+				m_uCaps |= CAP_JOYSTICK;
+			}
+		}
+
+		SetDeadzone(0.05f);
+
+
 		m_bConnected = true;
 		m_name = pInput->GetName(m_uInputId);
 	}
@@ -183,6 +216,12 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 	DIpdw.diph.dwObj = DIJOFS_RZ;
 	m_pDevice->SetProperty(DIPROP_DEADZONE, &DIpdw.diph);
 
+	DIpdw.diph.dwObj = DIJOFS_SLIDER(0);
+	m_pDevice->SetProperty(DIPROP_DEADZONE, &DIpdw.diph);
+
+	DIpdw.diph.dwObj = DIJOFS_SLIDER(1);
+	m_pDevice->SetProperty(DIPROP_DEADZONE, &DIpdw.diph);
+
 	DIPROPRANGE range;
 	range.diph.dwSize = sizeof(DIPROPRANGE);
 	range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
@@ -197,6 +236,13 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 				break;
 
 			range.diph.dwObj = g_axisMappingPad[i].uDirectInputId;
+		}
+		else if ((m_uCaps & CAP_HOTAS_THROTTLE) != 0)
+		{
+			if (g_axisMappingThrottle[i].uAbstractID == GAMEPAD_AXIS_NONE)
+				break;
+
+			range.diph.dwObj = g_axisMappingThrottle[i].uDirectInputId;
 		}
 		else
 		{
@@ -213,7 +259,7 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 			m_axisRanges[i].max = range.lMax;
 		}
 	}
-}
+} 
 
 bool DirectInputJoystick::IsPovInRange(DWORD povVal, DWORD targVal)
 {
@@ -325,12 +371,13 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 	}
 	else
 	{
+		const AxisMapping* pMapping = (m_uCaps & CAP_HOTAS_THROTTLE) != 0 ? g_axisMappingThrottle : g_axisMappingJoy;
 		for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
 		{
-			if (g_axisMappingJoy[i].uAbstractID == GAMEPAD_AXIS_NONE)
+			if (pMapping[i].uAbstractID == GAMEPAD_AXIS_NONE)
 				break;
 
-			deviceStateOut.fAxisValues[g_axisMappingJoy[i].uAbstractID] = GetAxis(js, i);
+			deviceStateOut.fAxisValues[pMapping[i].uAbstractID] = GetAxis(js, i);
 
 		}
 
@@ -339,9 +386,9 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 		if (m_uCaps & CAP_POV)
 		{
-			GetPovData(js.rgdwPOV[0], bLeft, bRight, bUp, bDown, fPovAxis);
+			GetPovData(js.rgdwPOV[0], bUp, bRight, bDown, bLeft, fPovAxis);
 
-			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV_ANGLE] = fPovAxis;
+			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV_ANGLE] = fPovAxis;
 
 			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV_UP : 0;
 			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV_RIGHT : 0;
@@ -351,9 +398,9 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 		if (m_uCaps & CAP_POV2)
 		{
-			GetPovData(js.rgdwPOV[1], bLeft, bRight, bUp, bDown, fPovAxis);
+			GetPovData(js.rgdwPOV[1], bUp, bRight, bDown, bLeft, fPovAxis);
 
-			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV2_ANGLE] = fPovAxis;
+			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV2_ANGLE] = fPovAxis;
 
 			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV2_UP : 0;
 			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV2_RIGHT : 0;
@@ -363,9 +410,9 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 		if (m_uCaps & CAP_POV3)
 		{
-			GetPovData(js.rgdwPOV[1], bLeft, bRight, bUp, bDown, fPovAxis);
+			GetPovData(js.rgdwPOV[2], bUp, bRight, bDown, bLeft, fPovAxis);
 
-			deviceStateOut.fAxisValues[GAMEPAD_AXIS_POV3_ANGLE] = fPovAxis;
+			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV3_ANGLE] = fPovAxis;
 
 			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV3_UP : 0;
 			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV3_RIGHT : 0;
@@ -411,6 +458,8 @@ void DirectInputJoystick::GetPovData(DWORD pov, bool& bUp, bool& bRight, bool& b
 float DirectInputJoystick::GetAxis(DIJOYSTATE2& js, int iAxis)
 {
 	const AxisMapping* pMapping = m_bIsGamepad ? &g_axisMappingPad[iAxis] : &g_axisMappingJoy[iAxis];
+	if((m_uCaps & CAP_HOTAS_THROTTLE) != 0)
+		pMapping = &g_axisMappingThrottle[iAxis];
 	long value = *((long*)((uint8*)(&js) + pMapping->uDirectInputId));
 	float range = (float)m_axisRanges[iAxis].max - (float)m_axisRanges[iAxis].min;
 
