@@ -60,6 +60,7 @@ protected:
 
 		// For multiple joysticks on one set of mappings
 		uint32			uSubDevice;
+		uint32			uToggleSubDevice;
 
 		// Should only have two inputs when mapping a button pair onto an axis
 		uint32			uInputIdA;
@@ -79,13 +80,13 @@ protected:
 	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateAxisMapping(uint32 uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uDeviceIdx = 0);
 	bool CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
-	bool CreateButtonFromAxis(GamepadAxis uAxis,  AxisType eType, MappingOutput& detailOut);
-	bool CreateAxisFromButtonPair(uint32 uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uSubDevice = 0);
+	bool CreateButtonFromAxis(uint32 uAxis,  AxisType eType, MappingOutput& detailOut);
+	bool CreateAxisFromButtonPair(uint32 uButtonA, uint32 uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uSubDevice = 0);
 	bool CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
 
-	void AddPadToggleToPrev(uint32 eButton, bool bReverseToggle);
+	void AddPadToggleToPrev(uint32 eButton, uint32 uSubDevice, bool bReverseToggle);
 	void AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle);
 	void AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle);
 
@@ -100,6 +101,8 @@ private:
 	};
 
 	bool IsToggleValid(ControllerDetail& detail);
+	bool IsToggleValidInt(ControllerDetail& detail);
+
 
 	vector<ControllerDetail> m_details;
 	Keyboard*				m_pKeyboard;

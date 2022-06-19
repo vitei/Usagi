@@ -127,25 +127,52 @@ void Controller::Update( float timeDelta )
 	}
 }
 
-bool Controller::IsToggleValid(ControllerDetail& detail)
+bool Controller::IsToggleValidInt(ControllerDetail& detail)
 {
 	switch (detail.toggleType)
 	{
-		case INPUT_TYPE_NONE:
-			return true;
-		case INPUT_TYPE_KEY:
-			return detail.bReverseToggle != m_pKeyboard->GetKey( detail.uInputToggle );
-		case INPUT_TYPE_BUTTON: 
-		{
-			Gamepad* pGamepad = GetGamepad(detail.uSubDevice);
-			return detail.bReverseToggle != (pGamepad && pGamepad->GetButtonDown( detail.uInputToggle, usg::BUTTON_STATE_HELD ));
-		}
-		case INPUT_TYPE_MOUSE_BUTTON:
-			return detail.bReverseToggle != m_pMouse->GetButton( (MouseButton)detail.uInputToggle, BUTTON_STATE_HELD );
-		default:
-			ASSERT(false);
-			return false;
+	case INPUT_TYPE_NONE:
+		return true;
+	case INPUT_TYPE_KEY:
+		return detail.bReverseToggle != m_pKeyboard->GetKey(detail.uInputToggle);
+	case INPUT_TYPE_BUTTON:
+	{
+		Gamepad* pGamepad = GetGamepad(detail.uToggleSubDevice);
+		return detail.bReverseToggle != (pGamepad && pGamepad->GetButtonDown(detail.uInputToggle, usg::BUTTON_STATE_HELD));
 	}
+	case INPUT_TYPE_MOUSE_BUTTON:
+		return detail.bReverseToggle != m_pMouse->GetButton((MouseButton)detail.uInputToggle, BUTTON_STATE_HELD);
+	default:
+		ASSERT(false);
+		return false;
+	}
+}
+
+bool Controller::IsToggleValid(ControllerDetail& detail)
+{
+	// First iterate through the other details
+	for (auto& itr : m_details)
+	{
+		if (&itr != &detail)
+		{
+			if (itr.uInputIdA == detail.uInputIdA)
+			{
+				if (itr.toggleType != INPUT_TYPE_NONE && (itr.deviceType == detail.deviceType) && (itr.uSubDevice == detail.uSubDevice)
+					&& ((itr.uInputToggle != detail.uInputToggle) || detail.toggleType == INPUT_TYPE_NONE) )
+				{
+					// Block if another function that requires a toggle is active
+					if (IsToggleValidInt(itr))
+					{
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+
+	return IsToggleValidInt(detail);
+
 }
 
 bool Controller::GetValueAsBool( ControllerDetail &detail )
@@ -425,12 +452,12 @@ bool Controller::CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, Mapping
 }
 
 
-bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, MappingOutput& output )
+bool Controller::CreateButtonFromAxis( uint32 uAxis,  AxisType eType, MappingOutput& detailOut )
 {
 	ControllerDetail detail;
-	detail.pResult		= &output;
-	output.eOutput		= OUTPUT_TYPE_BOOL;
-	output.Clear();
+	detail.pResult		= &detailOut;
+	detailOut.eOutput		= OUTPUT_TYPE_BOOL;
+	detailOut.Clear();
 
 	detail.deviceType	= INPUT_TYPE_AXIS;
 	detail.axisType		= eType;
@@ -442,7 +469,7 @@ bool Controller::CreateButtonFromAxis( GamepadAxis uAxis,  AxisType eType, Mappi
 	return true;
 }
 
-bool Controller::CreateAxisFromButtonPair(uint32 uButtonA, GamepadButton uButtonB, MappingOutput& detailOut, float fStickyRate /*= 0.0f*/, bool bReverse /*= false*/, uint32 uSubDevice /*= 0*/)
+bool Controller::CreateAxisFromButtonPair(uint32 uButtonA, uint32 uButtonB, MappingOutput& detailOut, float fStickyRate /*= 0.0f*/, bool bReverse /*= false*/, uint32 uSubDevice /*= 0*/)
 {
 	ControllerDetail detail;
 	detail.pResult		= &detailOut;
@@ -484,13 +511,14 @@ bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& 
 }
 
 
-void Controller::AddPadToggleToPrev(uint32 eButton, bool bReverseToggle)
+void Controller::AddPadToggleToPrev(uint32 eButton, uint32 uToggleSubDevice, bool bReverseToggle)
 {
 	memsize index = m_details.size();
 	ASSERT(index > 0);
 	m_details[index - 1].toggleType = INPUT_TYPE_BUTTON;
 	m_details[index - 1].uInputToggle = eButton;
 	m_details[index - 1].bReverseToggle = bReverseToggle;
+	m_details[index - 1].uToggleSubDevice = uToggleSubDevice;
 }
 
 void Controller::AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle)
@@ -500,6 +528,8 @@ void Controller::AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle)
 	m_details[index - 1].toggleType = INPUT_TYPE_MOUSE_BUTTON;
 	m_details[index - 1].uInputToggle = (uint32)eButton;
 	m_details[index - 1].bReverseToggle = bReverseToggle;
+	m_details[index - 1].uToggleSubDevice = 0;
+
 }
 
 void Controller::AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle)
@@ -509,6 +539,8 @@ void Controller::AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle)
 	m_details[index - 1].toggleType = INPUT_TYPE_KEY;
 	m_details[index - 1].uInputToggle = (uint32)uKey;
 	m_details[index - 1].bReverseToggle = bReverseToggle;
+	m_details[index - 1].uToggleSubDevice = 0;
+
 }
 
 

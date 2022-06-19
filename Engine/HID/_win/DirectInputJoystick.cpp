@@ -36,20 +36,12 @@ namespace usg{
 	{
 		{ JOYSTICK_AXIS_STICK_X,			DIJOFS_X, 1.0f },
 		{ JOYSTICK_AXIS_STICK_Y,			DIJOFS_Y, -1.0f },
-		{ JOYSTICK_AXIS_RUDDER,				DIJOFS_RZ, 1.0f },
-		{ JOYSTICK_AXIS_THROTTLE,			DIJOFS_SLIDER(0), -1.0f },
-		{ GAMEPAD_AXIS_NONE,				0 }
-	};
-
-	static const AxisMapping g_axisMappingThrottle[] =
-	{
-		{ JOYSTICK_AXIS_STICK_X,			DIJOFS_X, 1.0f },
-		{ JOYSTICK_AXIS_STICK_Y,			DIJOFS_Y, -1.0f },
-		{ JOYSTICK_AXIS_THROTTLE,			DIJOFS_Z, -1.0f },
-		{ JOYSTICK_AXIS_RUDDER,				DIJOFS_RZ, 1.0f },
-		{ JOYSTICK_AXIS_PEDAL_LEFT,			DIJOFS_RX, -1.0f },
-		{ JOYSTICK_AXIS_PEDAL_RIGHT,		DIJOFS_RY, -1.0f },
-		{ JOYSTICK_AXIS_PEDAL_SLIDE,		DIJOFS_SLIDER(1), -1.0f },
+		{ JOYSTICK_AXIS_STICK_Z,			DIJOFS_Y, 1.0f },
+		{ JOYSTICK_AXIS_STICK_RX,			DIJOFS_RX, 1.0f },
+		{ JOYSTICK_AXIS_STICK_RY,			DIJOFS_RY, 1.0f },
+		{ JOYSTICK_AXIS_STICK_RZ,			DIJOFS_RZ, 1.0f },
+		{ JOYSTICK_AXIS_STICK_SLIDER_1,		DIJOFS_SLIDER(0), 1.0f},
+		{ JOYSTICK_AXIS_STICK_SLIDER_2,		DIJOFS_SLIDER(0), 1.0f},
 		{ GAMEPAD_AXIS_NONE,				0 }
 	};
 
@@ -237,13 +229,6 @@ void DirectInputJoystick::SetDeadzone(float fDeadZone)
 
 			range.diph.dwObj = g_axisMappingPad[i].uDirectInputId;
 		}
-		else if ((m_uCaps & CAP_HOTAS_THROTTLE) != 0)
-		{
-			if (g_axisMappingThrottle[i].uAbstractID == GAMEPAD_AXIS_NONE)
-				break;
-
-			range.diph.dwObj = g_axisMappingThrottle[i].uDirectInputId;
-		}
 		else
 		{
 			if (g_axisMappingJoy[i].uAbstractID == GAMEPAD_AXIS_NONE)
@@ -371,7 +356,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 	}
 	else
 	{
-		const AxisMapping* pMapping = (m_uCaps & CAP_HOTAS_THROTTLE) != 0 ? g_axisMappingThrottle : g_axisMappingJoy;
+		const AxisMapping* pMapping = g_axisMappingJoy;
 		for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
 		{
 			if (pMapping[i].uAbstractID == GAMEPAD_AXIS_NONE)
@@ -457,9 +442,9 @@ void DirectInputJoystick::GetPovData(DWORD pov, bool& bUp, bool& bRight, bool& b
 
 float DirectInputJoystick::GetAxis(DIJOYSTATE2& js, int iAxis)
 {
+	if(m_axisRanges[iAxis].max == m_axisRanges[iAxis].min)
+		return 0.0f;
 	const AxisMapping* pMapping = m_bIsGamepad ? &g_axisMappingPad[iAxis] : &g_axisMappingJoy[iAxis];
-	if((m_uCaps & CAP_HOTAS_THROTTLE) != 0)
-		pMapping = &g_axisMappingThrottle[iAxis];
 	long value = *((long*)((uint8*)(&js) + pMapping->uDirectInputId));
 	float range = (float)m_axisRanges[iAxis].max - (float)m_axisRanges[iAxis].min;
 
