@@ -13,7 +13,11 @@ namespace usg
 
 	UI::~UI()
 	{
-
+		for (auto itr : m_parentWindows)
+		{
+			vdelete itr;
+		}
+		m_parentWindows.clear();
 	}
 
 	void UI::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const char* szName, bool bOffscreen)
@@ -37,10 +41,22 @@ namespace usg
 
 		bool bReadSucceeded = pFile->Read(pUI);
 
-		m_parentWindow.Init(pDevice, pRes, renderPass, nullptr, *pUI, pUI->windows[0], m_dirName, bOffscreen);
-
-		for (uint32 i = 1; i < pUI->windows_count; i++)
+		for (uint32 i = 0; i < pUI->windows_count; i++)
 		{
+			if(pUI->windows[i].parentName[0] == '\0')
+			{
+				UIWindow* pParent = vnew(ALLOC_OBJECT)UIWindow;
+				pParent->Init(pDevice, pRes, renderPass, nullptr, *pUI, pUI->windows[i], m_dirName, bOffscreen);
+				m_parentWindows.push_back(pParent);
+			}
+		}
+
+		for (uint32 i = 0; i < pUI->windows_count; i++)
+		{
+			// We've already done parents
+			if (pUI->windows[i].parentName[0] == '\0')
+				continue;
+
 			UIWindow* pParent = GetWindow(pUI->windows[i].parentName);
 			if (pParent)
 			{
@@ -65,10 +81,13 @@ namespace usg
 	bool UI::GetItemRef(const char* szName, UIItemType eType, UIItemRef& out)
 
 	{
-		if (m_parentWindow.GetItemRef(szName, eType, out))
+		for (auto itr : m_parentWindows)
 		{
-			out.eType = eType;
-			return true;
+			if (itr->GetItemRef(szName, eType, out))
+			{
+				out.eType = eType;
+				return true;
+			}
 		}
 		return false;
 	}
@@ -189,29 +208,44 @@ namespace usg
 
 	void UI::Cleanup(usg::GFXDevice* pDevice)
 	{
-		m_parentWindow.CleanUpRecursive(pDevice);
+		for(auto itr : m_parentWindows)
+		{
+			itr->CleanUpRecursive(pDevice);
+		}
 	}
 
 	void UI::GPUUpdate(usg::GFXDevice* pDevice)
 	{
-		m_parentWindow.GPUUpdate(pDevice);
+		for (auto itr : m_parentWindows)
+		{
+			itr->GPUUpdate(pDevice);
+		}
 	}
 
 	bool UI::Update(float fElapsed, const UIInput* pInput, UIResults* pResults)
 	{
-		m_parentWindow.Update(nullptr, fElapsed, pInput, pResults);
+		for (auto itr : m_parentWindows)
+		{
+			itr->Update(nullptr, fElapsed, pInput, pResults);
+		}
 		return true;
 	}
 
 
 	void UI::SetHUDItemPos(const char* szName, usg::Vector2f vPos, bool bRelative)
 	{
-		m_parentWindow.SetItemPos(szName, vPos, bRelative);
+		for (auto itr : m_parentWindows)
+		{
+			itr->SetItemPos(szName, vPos, bRelative);
+		}
 	}
 
 	bool UI::Draw(usg::GFXContext* pContext)
 	{
-		m_parentWindow.Draw(pContext);
+		for (auto itr : m_parentWindows)
+		{
+			itr->Draw(pContext);
+		}
 
 		return true;
 	}
@@ -223,11 +257,19 @@ namespace usg
 
 	UIWindow* UI::GetWindow(const usg::string& name)
 	{
-		if (name == m_parentWindow.GetName())
+		for (auto itr : m_parentWindows)
 		{
-			return &m_parentWindow;
+			if (name == itr->GetName())
+			{
+				return itr;
+			}
+			UIWindow* pChild = itr->GetChildWindow(name);
+			if(pChild)
+			{
+				return pChild;
+			}
 		}
-		return m_parentWindow.GetChildWindow(name);
+		return nullptr;
 	}
 
 }

@@ -858,8 +858,12 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 			switch (itr.eType)
 			{
 				case UI_ITEM_TEXT:
-					bHighlighted |= IsMouseInRangeOfText( itr.uItemIdx );
+				{
+					bool bOver = IsMouseInRangeOfText( itr.uItemIdx );
+					bHighlighted |= bOver;
+	
 					break;
+				}
 				case UI_ITEM_BUTTON:
 				{
 					bool bOver = IsMouseInRangeOfButton(itr.uItemIdx);
@@ -898,6 +902,12 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 				default:
 					break;
 				}
+			}
+
+			// For text without pairing
+			if (eAction == UI_ACTION_NONE)
+			{
+				eAction = UI_ACTION_ACTIVATED;
 			}
 		}
 		else if (eAction == UI_ACTION_NONE && bHighlighted != m_actionData[i].bHighlighted)
