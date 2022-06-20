@@ -49,11 +49,11 @@ namespace usg
 
 		m_fAxis[MOUSE_NORM_POS_X] = ((m_fAxis[MOUSE_POS_X] / fWidth) * 2.0f) - 1.0f;
 		m_fAxis[MOUSE_NORM_ASPECT_POS_X] = usg::Math::Clamp(m_fAxis[MOUSE_NORM_POS_X] * fWidth/fHeight, -1.0f, 1.0f);
-		m_fAxis[MOUSE_NORM_POS_Y] = ((m_fAxis[MOUSE_POS_Y] / fHeight) * 2.0f) - 1.0f;
+		m_fAxis[MOUSE_NORM_POS_Y] = -(((m_fAxis[MOUSE_POS_Y] / fHeight) * 2.0f) - 1.0f);
 
 		m_fAxis[MOUSE_DELTA_X_NORM] = ((m_fAxis[MOUSE_DELTA_X] / fWidth) * 2.0f) - 1.0f;
 		m_fAxis[MOUSE_DELTA_X_NORM_ASPECT_X] = usg::Math::Clamp(((m_fAxis[MOUSE_DELTA_X] / fHeight) * 2.0f) - 1.0f, -1.0f, 1.0f);
-		m_fAxis[MOUSE_DELTA_Y_NORM] = ((m_fAxis[MOUSE_DELTA_Y] / fHeight) * 2.0f) - 1.0f;
+		m_fAxis[MOUSE_DELTA_Y_NORM] = -(((m_fAxis[MOUSE_DELTA_Y] / fHeight) * 2.0f) - 1.0f);
 
 		long mouseWheel = m_pOwner->GetMouseWheel();
 		if(abs(mouseWheel) > 0)
