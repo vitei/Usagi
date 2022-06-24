@@ -24,7 +24,7 @@ message TextStyle {
 
 message KeyStringDef {
 	required string key = 1 [(nanopb).max_size = 32];
-	required string text = 2 [(nanopb).max_size = 140];
+	required string text = 2 [(nanopb).max_size = 256];
 	required uint32 styleCRC = 3;
 };
 
