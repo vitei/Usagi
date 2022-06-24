@@ -59,6 +59,9 @@ void DebugStats::Cleanup(GFXDevice* pDevice)
 
 void DebugStats::Draw()
 {
+	if(m_uActiveType >= m_debugStats.size())
+		return;
+
 	m_debugStats[m_uActiveType]->Draw(m_pRender);
 
 	usg::string warningString;
