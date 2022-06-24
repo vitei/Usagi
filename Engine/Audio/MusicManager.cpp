@@ -90,7 +90,7 @@ namespace usg
 			}
 		}
 
-		m_fFadeInRate = fFadeTime;
+		m_fFadeInRate = fFadeTime > 0.0f ? 1.f/fFadeTime : 100.f;
 		//m_uCrossFadeId = uCrossFadeId;
 		m_fTargetVolume = fVolume;
 		m_eFadeIn = eFadeIn;
