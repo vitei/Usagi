@@ -160,17 +160,19 @@ namespace usg
 		if (p->name[0] != '\0')
 		{
 			// FIXME: Ordering of these loads is important...
-			Required<usg::ModelComponent> model;
+			Required<usg::ModelComponent, FromSelfOrParents> model;
 			handles.GetComponent(p.GetEntity(), model);
 
 			LoadModelPak(handles, model->pakName, model->name);
 
 			Required<ActiveDevice, FromSelfOrParents> device;
 			bool bDidGetComponents = handles.GetComponent(p.GetEntity(), device);
-			ASSERT(bDidGetComponents);
-
-			ModelResHndl pResource = ResourceMgr::Inst()->GetModel(device.GetRuntimeData().pDevice, model.Modify().name, true);
-			p.GetRuntimeData().pAnimPlayer->Init(pResource->GetDefaultSkeleton(), p->name, true);
+			if(bDidGetComponents)
+			{
+				// Because of how we attach entities atm this may fail first time
+				ModelResHndl pResource = ResourceMgr::Inst()->GetModel(device.GetRuntimeData().pDevice, model->name, true);
+				p.GetRuntimeData().pAnimPlayer->Init(pResource->GetDefaultSkeleton(), p->name, true);
+			}
 		}
 	}
 
