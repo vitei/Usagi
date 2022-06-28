@@ -96,4 +96,17 @@ void main(void)
 
 	gl_Position			= vProjPos;
 #endif
+
+// FIXME: This should probably be in a custom code section
+#ifdef CLIP_PLANE
+	if(uVSMaterial.bClipPlane)
+	{
+		gl_ClipDistance[0] = dot(uVSMaterial.clipPlane, vWorldPos);
+	}
+	else
+	{
+		gl_ClipDistance[0] = 0.0;
+	}
+#endif
+
 }

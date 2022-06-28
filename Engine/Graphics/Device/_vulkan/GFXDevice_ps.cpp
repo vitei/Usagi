@@ -630,6 +630,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	FATAL_RELEASE(supportedFeatures.features.multiDrawIndirect, "No multi draw indirect");
 	FATAL_RELEASE(supportedFeatures.features.textureCompressionBC, "No BC compression");
 	FATAL_RELEASE(supportedFeatures.features.independentBlend, "No independent blend");
+	FATAL_RELEASE(supportedFeatures.features.shaderClipDistance, "No shader clip distance");
 
 
 
@@ -644,6 +645,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	m_enabledFeatures.independentBlend = VK_TRUE;
 	m_enabledFeatures.fragmentStoresAndAtomics = VK_TRUE && supportedFeatures.features.fragmentStoresAndAtomics;
 	m_enabledFeatures.wideLines = VK_TRUE && supportedFeatures.features.wideLines;
+	m_enabledFeatures.shaderClipDistance = VK_TRUE;
 
 
 	extensions.clear();

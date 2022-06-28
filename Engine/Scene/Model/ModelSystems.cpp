@@ -109,6 +109,11 @@ namespace usg
 				outputs.model.GetRuntimeData().pModel->OverrideVariable(event.varName, event.fScalar, 0);
 			}
 
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::OverrideModelBoolEvent& event)
+			{
+				outputs.model.GetRuntimeData().pModel->OverrideVariable(event.varName, event.bBool, 0);
+			}
+
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::UpdateModelRenderMask& event)
 			{
 				outputs.model.GetRuntimeData().pModel->SetRenderMask(event.uRenderMask);

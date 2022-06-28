@@ -899,6 +899,8 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 	{
 		if (m_pOverrideMaterials[uMesh].customFX.SetVariable(szVarName, pData, uSize, 0))
 		{
+			// FIXME: Requesting override on both for now, should check which set it's owned by
+			m_meshArray[uMesh]->RequestOverride(0);
 			m_meshArray[uMesh]->RequestOverride(1);
 		}
 	}

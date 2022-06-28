@@ -26,6 +26,8 @@ CustomEffects:
          - { type: mat3x4,   name: mTexMatrix,    count: 4  }  # 0
          - { type: int,      name: iBoneCount,    count: 1, default: 0  }  # 0
          - { type: bool,     name: bBumpMap,      count: 1, default: false  }  # 0
+         - { type: vec4,     name: clipPlane,      count: 1 }  # CLIP_PLANE
+         - { type: bool,     name: bClipPlane,     count: 1, default: false }
       - name: uMaterial
         binding: Material1
         shaderType: PS
@@ -61,6 +63,7 @@ Effects:
       - name: translucent
         defines: TRANSLUCENT_PASS
     global_sets:  # A variant of all the above with these sets will be automatically added
+      # FIXME: Need automatic combinations as this is already bloating out of control
       - name: skel
         defines: HAS_SKELETON
       - name: bump
@@ -75,6 +78,22 @@ Effects:
         defines: HAS_BUMP ALPHA_TEST
       - name: skel.bump.alphaTest
         defines: HAS_SKELETON HAS_BUMP ALPHA_TEST
+      - name: clip
+        defines: CLIP_PLANE        
+      - name: skel.clip
+        defines: HAS_SKELETON CLIP_PLANE
+      - name: bump.clip
+        defines: HAS_BUMP CLIP_PLANE
+      - name: skel.bump.clip
+        defines: HAS_SKELETON HAS_BUMP CLIP_PLANE
+      - name: alphaTest.clip
+        defines: ALPHA_TEST CLIP_PLANE       
+      - name: skel.alphaTest.clip
+        defines: HAS_SKELETON ALPHA_TEST CLIP_PLANE
+      - name: bump.alphaTest.clip
+        defines: HAS_BUMP ALPHA_TEST CLIP_PLANE
+      - name: skel.bump.alphaTest.clip
+        defines: HAS_SKELETON HAS_BUMP ALPHA_TEST CLIP_PLANE
   - name: FBXDefault
     vert: models/fbxdefault
     geom: shadows/depthwriteomni
@@ -90,4 +109,12 @@ Effects:
       - name: alphaTest
         defines: ALPHA_TEST        
       - name: skel.alphaTest
-        defines: HAS_SKELETON ALPHA_TEST      
+        defines: HAS_SKELETON ALPHA_TEST  
+      - name: clip
+        defines: CLIP_PLANE                
+      - name: skel.clip
+        defines: HAS_SKELETON CLIP_PLANE       
+      - name: alphaTest.clip
+        defines: ALPHA_TEST CLIP_PLANE        
+      - name: skel.alphaTest.clip
+        defines: HAS_SKELETON ALPHA_TEST CLIP_PLANE          

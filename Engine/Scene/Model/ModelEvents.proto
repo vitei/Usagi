@@ -40,6 +40,14 @@ message OverrideModelScalarEvent
 	required float fScalar = 2;
 }
 
+message OverrideModelBoolEvent
+{
+	// TODO: Replace material name with hash
+	required string varName = 1 [(nanopb).max_size = 32, (nanopb).has_max_size = true];
+	required bool bBool = 2;
+}
+
+
 
 message ModifyAnimationConditionEvent
 {
