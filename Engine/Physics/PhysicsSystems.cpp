@@ -734,7 +734,7 @@ namespace usg
 			};
 
 			DECLARE_SYSTEM(SYSTEM_TRANSFORM_RIGIDBODIES)
-			EXCLUSION(IfHas<SleepTag, FromSelf>, IfHas<TransformComponent, FromParents>)
+			EXCLUSION(IfHas<SleepTag, FromSelf>, IfHas<TransformComponent, FromParents>, IfHas<KinematicBodyTag, FromSelf>)
 
 			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
