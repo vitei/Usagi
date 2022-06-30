@@ -54,6 +54,7 @@ ConstantSet_ps::ConstantSet_ps()
 	m_buffer = VK_NULL_HANDLE;
 	m_uActiveBuffer	= 0;
 	m_pVarData		= 0;
+	m_uGPUSize = 0;
 	m_uBufferCount = 0;
 }
 

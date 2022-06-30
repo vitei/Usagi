@@ -22,6 +22,7 @@ UIWindow::UIWindow()
 	m_bMatrixDirty = true;
 	m_bVertsDirty = true;
 	m_bEnabled = true;
+	m_bFirst = true;
 	for (int i = 0; i < UI_ITEM_INVALID; i++)
 	{
 		m_uItemCounts[i] = 0;

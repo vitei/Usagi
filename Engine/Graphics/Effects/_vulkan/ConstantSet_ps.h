@@ -74,7 +74,7 @@ private:
 
 	VariableData*				m_pVarData;
 	void*						m_pBoundGPUData;
-	uint32						m_uOffsets[GFX_NUM_DYN_BUFF];
+	uint32						m_uOffsets[GFX_NUM_DYN_BUFF] = {};
 	uint32						m_uBufferCount;
 
 	VkDescriptorBufferInfo		m_descriptor[GFX_NUM_DYN_BUFF];
