@@ -1,5 +1,6 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Audio/Audio.h"
+#include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Audio/AudioComponents.pb.h"
 
 namespace usg
@@ -23,6 +24,21 @@ namespace usg
 	{
 		// We shouldn't continuing holding a reference to this actor
 		s.GetRuntimeData().hndl.RemoveRef();
+	}
+
+	template<>
+	void OnLoaded<SoundActorComponent>(Component<SoundActorComponent>& p, ComponentLoadHandles& handles,
+		bool bWasPreviouslyCalled)
+	{
+		Entity ent = p.GetEntity();
+
+		Required<MatrixComponent, FromSelfOrParents> mat;
+		handles.GetComponent(ent, mat);
+
+		if(mat.IsValid())
+		{
+			p.GetRuntimeData().hndl.SetPosition(mat->matrix.vPos().v3());
+		}
 	}
 
 	template<>

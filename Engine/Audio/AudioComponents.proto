@@ -15,6 +15,7 @@ message SoundActorComponent
 {
 	option (nanopb_msgopt).has_onactivate = true;
 	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
 }
 
 message AudioListenerComponent
