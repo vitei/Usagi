@@ -44,17 +44,19 @@ namespace usg
 
 		void Destroy(GFXDevice* pDevice)
 		{
+			// Sometimes the model mgr gets cleaned up first
+			for (auto it = m_inUseList.begin(); it != m_inUseList.end(); ++it)
+			{
+				Free(*it);
+			}
+
+
 			InstanceType* pReturn = NULL;
 			for (auto it = m_freeList.begin(); it != m_freeList.end(); ++it)
 			{
 				(*it)->Cleanup(pDevice);
 			}
 
-			// Sometimes the model mgr gets cleaned up first
-			for (auto it = m_inUseList.begin(); it != m_inUseList.end(); ++it)
-			{
-				(*it)->Cleanup(pDevice);
-			}
 		}
 
 

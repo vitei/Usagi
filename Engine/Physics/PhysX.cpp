@@ -557,8 +557,11 @@ namespace usg
 					usgCol.vNormal = -contact.vNormal;
 					usgCol.uMaterialFlags = contact.uMaterialFlags[1];
 					CollisionMasks* pMasks = GameComponents<CollisionMasks>::GetComponentData(pair.second);
-					OnCollisionSignal onCollisionSignal(pair.second, usgCol, pMasks->uGroup);
-					systemCoordinator.Trigger(pair.first, onCollisionSignal, ON_ENTITY);
+					if(pMasks)
+					{
+						OnCollisionSignal onCollisionSignal(pair.second, usgCol, pMasks->uGroup);
+						systemCoordinator.Trigger(pair.first, onCollisionSignal, ON_ENTITY);
+					}
 				}
 
 				if (data.uNotifySecondTick == rtd.uTick - 1)
@@ -566,8 +569,11 @@ namespace usg
 					usgCol.vNormal = contact.vNormal;
 					usgCol.uMaterialFlags = contact.uMaterialFlags[0];
 					CollisionMasks* pMasks = GameComponents<CollisionMasks>::GetComponentData(pair.first);
-					OnCollisionSignal onCollisionSignal(pair.first, usgCol, pMasks->uGroup);
-					systemCoordinator.Trigger(pair.second, onCollisionSignal, ON_ENTITY);
+					if(pMasks)
+					{
+						OnCollisionSignal onCollisionSignal(pair.first, usgCol, pMasks->uGroup);
+						systemCoordinator.Trigger(pair.second, onCollisionSignal, ON_ENTITY);
+					}
 				}
 			}
 		}
