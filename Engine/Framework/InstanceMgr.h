@@ -31,6 +31,10 @@ namespace usg
 
 		virtual void Free(InstanceType* pInstance)
 		{
+			// Model mgr getting cleaned up first
+			if(m_inUseList.empty())
+				return;
+
 			if (!pInstance)
 				return;
 
@@ -45,10 +49,11 @@ namespace usg
 		void Destroy(GFXDevice* pDevice)
 		{
 			// Sometimes the model mgr gets cleaned up first
-			for (auto it = m_inUseList.begin(); it != m_inUseList.end(); ++it)
+			for (auto it = m_inUseList.rbegin(); it != m_inUseList.rend(); ++it)
 			{
 				Free(*it);
 			}
+			m_inUseList.clear();
 
 
 			InstanceType* pReturn = NULL;
