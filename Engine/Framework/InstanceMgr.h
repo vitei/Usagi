@@ -20,7 +20,7 @@ namespace usg
 	class InstanceMgr
 	{
 	public:
-		InstanceMgr(void): m_pool(50, true) {  }
+		InstanceMgr(void) : m_pDevice(nullptr), m_pScene(nullptr) {  }
 		~InstanceMgr(void) {} 
 
 		void Init(GFXDevice* pDevice, Scene* pScene)
@@ -62,6 +62,13 @@ namespace usg
 				(*it)->Cleanup(pDevice);
 			}
 
+			// No longer using a pool
+			for (auto it = m_freeList.begin(); it != m_freeList.end(); ++it)
+			{
+				vdelete *it;
+			}
+			m_freeList.clear();
+
 		}
 
 
@@ -90,7 +97,6 @@ namespace usg
 		GFXDevice*					m_pDevice;
 		Scene*						m_pScene;
 
-		FastPool<InstanceType>		m_pool;
 		usg::list<InstanceType*>	m_inUseList;
 		usg::list<InstanceType*>	m_freeList;
 

@@ -28,7 +28,7 @@ namespace usg
 		if(!pModel)	// Handle creating a new instance
 		{
 			// We need a new model
-			pModel = m_pool.Alloc();
+			pModel = vnew(ALLOC_OBJECT) Model;
 			if(pModel)
 			{
 				pModel->Load(m_pDevice, m_pScene, pResMgr, szModelName, bDynamic, true, m_bAutoTransform, bPerBoneCulling);
