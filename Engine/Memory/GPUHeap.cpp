@@ -118,7 +118,12 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 
 void GPUHeap::SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList)
 {
-	srcList.remove(pInfo);
+	auto itr = eastl::find(srcList.begin(), srcList.end(), pInfo);
+	ASSERT(itr != srcList.end());
+	srcList.erase(itr);
+
+	itr = eastl::find(srcList.begin(), srcList.end(), pInfo);
+	ASSERT(itr == srcList.end());
 
 	if (&dstList == &m_freeList)
 	{
@@ -223,6 +228,7 @@ void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 	if (m_iMergeFrames <= 0)
 		return;
 	BlockInfo* pPrev = nullptr;
+
 	for (auto itr : m_freeList)
 	{
 		if (pPrev && CanAlloc(uCurrentFrame, pPrev->uFreeFrame) && CanAlloc(uCurrentFrame, itr->uFreeFrame) )
