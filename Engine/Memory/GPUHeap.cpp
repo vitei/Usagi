@@ -233,6 +233,10 @@ void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 			if (pPrevEnd == pCurr)
 			{
 				pPrev->uSize += itr->uSize;
+				itr->uSize = 0;
+				itr->pLocation = nullptr;
+				itr->uFreeFrame = USG_INVALID_ID;
+				itr->bValid = false;
 				SwitchList(itr, m_freeList, m_unusedList);
 				// There will usually be space so don't go overboard trying to free
 				return;
