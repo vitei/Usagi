@@ -153,23 +153,30 @@ namespace usg
 	{
 		bool bIsNull = p.GetRuntimeData().pCamera == NULL;
 
-		if (bWasPreviouslyCalled && !bIsNull)
+		Required<usg::SceneComponent, FromSelfOrParents> Scene;
+		handles.GetComponent(p.GetEntity(), Scene);
+
+		if (!bWasPreviouslyCalled && bIsNull)
 		{
-			return;
+
+			usg::Matrix4x4 m = usg::Matrix4x4::Identity();
+			p.GetRuntimeData().pCamera = vnew(ALLOC_OBJECT) usg::StandardCamera;
+			p.GetRuntimeData().pCamera->SetUp(m, p->fAspectRatio, p->fFOV, p->fNearPlaneDist, p->fFarPlaneDist);
+			p.GetRuntimeData().pCamera->SetRenderMask(p->uRenderMask);
+			p.GetRuntimeData().pCamera->SetID(p->uCamId);
+
+			handles.pScene->AddCamera(p.GetRuntimeData().pCamera);
+			if(p->bForceSwitch)
+			{
+				handles.pScene->SetActiveCamera(p->uCamId, 0);
+			}
+			p.Modify().bActive = handles.pScene->GetViewContext(0)->GetCamera() == p.GetRuntimeData().pCamera;
 		}
 
-		usg::Matrix4x4 m = usg::Matrix4x4::Identity();
-		p.GetRuntimeData().pCamera = vnew(ALLOC_OBJECT) usg::StandardCamera;
-		p.GetRuntimeData().pCamera->SetUp(m, p->fAspectRatio, p->fFOV, p->fNearPlaneDist, p->fFarPlaneDist);
-		p.GetRuntimeData().pCamera->SetRenderMask(p->uRenderMask);
-		p.GetRuntimeData().pCamera->SetID(p->uCamId);
-
-		handles.pScene->AddCamera(p.GetRuntimeData().pCamera);
-		if(p->bForceSwitch)
+		if (Scene.IsValid())
 		{
-			handles.pScene->SetActiveCamera(p->uCamId, 0);
+			p.Modify().fAspectRatio = Scene->fAspectRatio;
 		}
-		p.Modify().bActive = handles.pScene->GetViewContext(0)->GetCamera() == p.GetRuntimeData().pCamera;
 
 	}
 

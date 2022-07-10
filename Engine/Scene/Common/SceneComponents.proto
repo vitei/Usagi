@@ -17,6 +17,7 @@ message SceneComponent
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required usg.Vector3f vOriginOffset = 1;
+	required float fAspectRatio = 2 [default = 1.77777778];
 }
 
 message LightComponent

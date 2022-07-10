@@ -87,6 +87,11 @@ namespace usg
 				Audio::Inst()->OriginOffset(event.vShift);
 			}
 
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetAspectRatio& event)
+			{
+				outputs.sceneComp.Modify().fAspectRatio = event.fAspectRatio;
+			}
+
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const usg::SetShadowQuality& evt)
 			{
