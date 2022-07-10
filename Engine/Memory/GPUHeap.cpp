@@ -258,6 +258,8 @@ void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 
 bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 	uint32 uCurrentFrame = pDevice->GetFrameCount();
 

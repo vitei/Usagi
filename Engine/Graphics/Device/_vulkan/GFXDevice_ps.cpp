@@ -984,6 +984,8 @@ void GFXDevice_ps::End()
 
 	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
 	{
+		CriticalSection::ScopedLock lock(m_criticalSection);
+
 		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
 		{
 			m_memoryPools[type].heaps[i]->MergeMemory(m_pParent->GetFrameCount());
@@ -1076,6 +1078,8 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 
 bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	uint32 uHeap = USG_INVALID_ID;
 	uint32 uMemType = pAllocInOut->GetPoolId();
 	
@@ -1209,6 +1213,8 @@ void GFXDevice_ps::ReqDestroyDescriptorSetPool(VkDescriptorPool pool)
 
 void GFXDevice_ps::FreeMemory(VkMemAllocator* pAllocInOut)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	uint32 uMemType = pAllocInOut->GetPoolId();
 	for (uint32 i = 0; i < m_memoryPools[uMemType].heaps.size(); i++)
 	{
