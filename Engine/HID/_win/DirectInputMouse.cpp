@@ -117,6 +117,28 @@ namespace usg
 			m_buttons[i] = ms.rgbButtons[i] & 0x80;
 		}
 
+
+		// Add in any events for our buttons so we don't miss any pressed/released in a single frame
+		for (int i = 0; i < (int)m_objectDataSize; i++)
+		{
+			switch (m_objectData[i].dwOfs)
+			{
+			case DIMOFS_BUTTON0:
+				m_buttons[MOUSE_BUTTON_LEFT] |= (m_objectData[i].dwData & 0x80) != 0; break;
+			case DIMOFS_BUTTON1:
+				m_buttons[MOUSE_BUTTON_RIGHT] |= (m_objectData[i].dwData & 0x80) != 0; break;
+			case DIMOFS_BUTTON2:
+				m_buttons[MOUSE_BUTTON_MIDDLE] |= (m_objectData[i].dwData & 0x80) != 0; break;
+			case DIMOFS_BUTTON3:
+				m_buttons[MOUSE_BUTTON_X1] |= (m_objectData[i].dwData & 0x80) != 0; break;
+			case DIMOFS_BUTTON4:
+				m_buttons[MOUSE_BUTTON_X2] |= (m_objectData[i].dwData & 0x80) != 0; break;
+			default:
+				break;
+			}
+		}
+
+
 		RECT screen;
 		GetWindowRect(m_pInput->GetWindow(), &screen);
 
@@ -130,11 +152,11 @@ namespace usg
 
 		m_fAxis[MOUSE_NORM_POS_X] = ((m_fAxis[MOUSE_POS_X] / fWidth) * 2.0f) - 1.0f;
 		m_fAxis[MOUSE_NORM_ASPECT_POS_X] = usg::Math::Clamp(((m_fAxis[MOUSE_POS_X] / fHeight) * 2.0f) - 1.0f, -1.0f, 1.0f);
-		m_fAxis[MOUSE_NORM_POS_Y] = ((m_fAxis[MOUSE_POS_Y] / fHeight) * 2.0f) - 1.0f;
+		m_fAxis[MOUSE_NORM_POS_Y] = -(((m_fAxis[MOUSE_POS_Y] / fHeight) * 2.0f) - 1.0f);
 
 		m_fAxis[MOUSE_DELTA_X_NORM] = ((m_fAxis[MOUSE_DELTA_X] / fWidth) * 2.0f) - 1.0f;
 		m_fAxis[MOUSE_DELTA_X_NORM_ASPECT_X] = usg::Math::Clamp(((m_fAxis[MOUSE_DELTA_X] / fHeight) * 2.0f) - 1.0f, -1.0f, 1.0f);
-		m_fAxis[MOUSE_DELTA_Y_NORM] = ((m_fAxis[MOUSE_DELTA_Y] / fHeight) * 2.0f) - 1.0f;
+		m_fAxis[MOUSE_DELTA_Y_NORM] = -(((m_fAxis[MOUSE_DELTA_Y] / fHeight) * 2.0f) - 1.0f);
 
 		long mouseWheel = ms.lZ;
 		if (abs(mouseWheel) > 0)

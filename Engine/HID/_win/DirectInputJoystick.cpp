@@ -10,7 +10,7 @@
 
 namespace usg{
 
-	struct AxisMapping
+	struct ButtonMapping
 	{
 		uint32	uAbstractID;
 		long	uDirectInputId;
@@ -23,7 +23,7 @@ namespace usg{
 		uint32	uDirectInputId;
 	};
 
-	static const AxisMapping g_axisMappingPad[] =
+	static const ButtonMapping g_axisMappingPad[] =
 	{
 		{ GAMEPAD_AXIS_LEFT_X,			DIJOFS_X, 1.0f },
 		{ GAMEPAD_AXIS_LEFT_Y,			DIJOFS_Y, -1.0f },
@@ -32,7 +32,7 @@ namespace usg{
 		{ GAMEPAD_AXIS_NONE,		0 }
 	};
 
-	static const AxisMapping g_axisMappingJoy[] =
+	static const ButtonMapping g_axisMappingJoy[] =
 	{
 		{ JOYSTICK_AXIS_STICK_X,			DIJOFS_X, 1.0f },
 		{ JOYSTICK_AXIS_STICK_Y,			DIJOFS_Y, -1.0f },
@@ -356,7 +356,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 	}
 	else
 	{
-		const AxisMapping* pMapping = g_axisMappingJoy;
+		const ButtonMapping* pMapping = g_axisMappingJoy;
 		for (int i = 0; i < GAMEPAD_AXIS_NONE; i++)
 		{
 			if (pMapping[i].uAbstractID == GAMEPAD_AXIS_NONE)
@@ -444,7 +444,7 @@ float DirectInputJoystick::GetAxis(DIJOYSTATE2& js, int iAxis)
 {
 	if(m_axisRanges[iAxis].max == m_axisRanges[iAxis].min)
 		return 0.0f;
-	const AxisMapping* pMapping = m_bIsGamepad ? &g_axisMappingPad[iAxis] : &g_axisMappingJoy[iAxis];
+	const ButtonMapping* pMapping = m_bIsGamepad ? &g_axisMappingPad[iAxis] : &g_axisMappingJoy[iAxis];
 	long value = *((long*)((uint8*)(&js) + pMapping->uDirectInputId));
 	float range = (float)m_axisRanges[iAxis].max - (float)m_axisRanges[iAxis].min;
 

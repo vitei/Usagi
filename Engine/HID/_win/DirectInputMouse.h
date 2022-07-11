@@ -26,7 +26,7 @@ public:
 private:
 	DirectInput*			m_pInput = nullptr;
 	LPDIRECTINPUTDEVICE8	m_pDevice = nullptr;
-	DIDEVICEOBJECTDATA		m_objectData[16] = {};
+	DIDEVICEOBJECTDATA		m_objectData[64] = {};
 	DWORD					m_objectDataSize = 0;
 	HANDLE					m_hEvent;
 	RECT					m_cage;

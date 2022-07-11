@@ -14,7 +14,7 @@
 #include OS_HEADER(Engine/HID, DirectInput.h)
 #include OS_HEADER(Engine/HID, DirectInputJoystick.h)
 
-#define USE_DIRECT_INPUT_KB
+#define USE_DIRECT_INPUT_KB  
 #define USE_DIRECT_INPUT_MOUSE
 
 #ifdef USE_DIRECT_INPUT_MOUSE
