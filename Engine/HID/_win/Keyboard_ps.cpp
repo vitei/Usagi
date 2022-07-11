@@ -15,6 +15,9 @@ namespace usg
 			m_keysDown[i] = m_pOwner->GetKeyDown(i);
 		}
 
+		// We never get a key event about this
+		m_keysDown[VK_MENU] = (GetKeyState(VK_MENU) & 0x8000) != 0;
+
 		m_bToggles[KEYBOARD_TOGGLE_CTRL] = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
 		m_bToggles[KEYBOARD_TOGGLE_SHIFT] = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 		m_bToggles[KEYBOARD_TOGGLE_ALT] = (GetKeyState(VK_MENU) & 0x8000) != 0;

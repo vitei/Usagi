@@ -21,10 +21,13 @@ public:
 	bool Init(DirectInput* pInput, uint32 uDeviceNum = 0);
 
 	void Update();
+	bool Acquire();
 
 private:
-	DirectInput*			m_pInput;
-	LPDIRECTINPUTDEVICE8	m_pDevice;
+	DirectInput*			m_pInput = nullptr;
+	LPDIRECTINPUTDEVICE8	m_pDevice = nullptr;
+	DIDEVICEOBJECTDATA		m_objectData[16] = {};
+	DWORD					m_objectDataSize = 0;
 	HANDLE					m_hEvent;
 	RECT					m_cage;
 };

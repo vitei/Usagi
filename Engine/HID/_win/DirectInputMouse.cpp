@@ -65,22 +65,29 @@ namespace usg
 			return false;
 		}
 
-		m_pDevice->Acquire();
-
+		Acquire();
 
 		return true;
 
 	}
+
+	bool DirectInputMouse::Acquire()
+	{
+		if (SUCCEEDED(m_pDevice->Acquire()))
+		{
+			return true;
+		}
+		return false;
+	}
+
 
 	void DirectInputMouse::Update()
 	{
 		for (uint32 i = 0; i < MOUSE_BUTTON_NONE; i++)
 		{
 			m_prevButtons[i] = m_buttons[i];
+			m_buttons[i] = false;
 		}
-
-		DIDEVICEOBJECTDATA od[16];
-		DWORD dwNumElem = 16;
 
 		bool bCage = (m_cage.right != -1);
 
@@ -92,11 +99,22 @@ namespace usg
 
 		HRESULT hr;
 		hr = m_pDevice->GetDeviceState(size, &ms);
-
-
-		for(int i=0; i<MOUSE_BUTTON_NONE; i++)
+		if (FAILED(hr))
 		{
-			m_buttons[i] = ms.rgbButtons[od[i].dwData & 0x80];
+			if (!Acquire())
+			{
+				return;
+			}
+			hr = m_pDevice->GetDeviceState(size, &ms);
+		}
+
+		m_objectDataSize = ARRAY_SIZE(m_objectData);
+		m_pDevice->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), m_objectData, &m_objectDataSize, 0);
+
+
+		for(int i=0; i<MOUSE_BUTTON_NONE && i < (int)m_objectDataSize; i++)
+		{
+			m_buttons[i] = ms.rgbButtons[i] & 0x80;
 		}
 
 		RECT screen;

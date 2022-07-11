@@ -46,8 +46,10 @@ protected:
 			eInputState = BUTTON_STATE_PRESSED;
 			axisType = AXIS_TYPE_NONE;
 			bReverse = false;
+			bUseToggle = false;
 			bReverseToggle = false;
 			uSubDevice = 0;
+			uInputToggle = 0;
 			uInputIdA = USG_INVALID_ID;
 			uInputIdB = USG_INVALID_ID;
 		}

@@ -209,12 +209,21 @@ namespace usg
 
 	void DirectInputKeyboard::Update()
 	{
-		char keys[KEYBOARD_KEY_COUNT];
+		char keys[KEYBOARD_KEY_COUNT] = {};
 
 		m_pDevice->Poll();
 
 		HRESULT hr;
 		hr = m_pDevice->GetDeviceState(sizeof(keys), keys);
+		if (FAILED(hr))
+		{
+			HRESULT hr = m_pDevice->Acquire();
+			if (SUCCEEDED(hr))
+			{
+				hr = m_pDevice->GetDeviceState(sizeof(keys), keys);
+			}
+		}
+
 
 		for(uint32 i=0; i<KEYBOARD_KEY_COUNT; i++)
 		{

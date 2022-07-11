@@ -134,7 +134,7 @@ bool Controller::IsToggleValidInt(ControllerDetail& detail)
 	case INPUT_TYPE_NONE:
 		return true;
 	case INPUT_TYPE_KEY:
-		return detail.bReverseToggle != m_pKeyboard->GetKey(detail.uInputToggle);
+		return detail.bReverseToggle != m_pKeyboard->GetKey(detail.uInputToggle, usg::BUTTON_STATE_HELD);
 	case INPUT_TYPE_BUTTON:
 	{
 		Gamepad* pGamepad = GetGamepad(detail.uToggleSubDevice);

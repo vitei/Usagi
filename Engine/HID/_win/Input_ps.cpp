@@ -149,7 +149,7 @@ void Input_ps::RegisterInputChar(char16 uChar)
 
 void Input_ps::RegisterHwnd(uint32 uDisplay, HWND hwnd)
 {
-#ifndef USE_DIRECT_INPUT
+#ifndef USE_DIRECT_INPUT_MOUSE
 	m_mouse.SetHWND(hwnd);
 #endif
 }
