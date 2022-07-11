@@ -32,9 +32,9 @@ private:
 	// Call with zero to cease vibration
 	void VibrateInt(int leftVal, int rightVal);
 
-	bool			m_bConnected;
-	uint32			m_xinputID;
-	XINPUT_STATE	m_controllerState;
+	bool			m_bConnected = false;
+	uint32			m_xinputID = 0;
+	XINPUT_STATE	m_controllerState = {};
 };
  
 }
