@@ -31,6 +31,33 @@ static const EnumTable g_FuncTable[] =
 	{ nullptr, 0 }
 };
 
+
+static const EnumTable g_stencilFuncTable[]
+{
+	{ "Keep", usg::STENCIL_OP_KEEP },
+	{ "Zero", usg::STENCIL_OP_ZERO },
+	{ "Replace", usg::STENCIL_OP_REPLACE },
+	{ "Incr", usg::STENCIL_OP_INCR },
+	{ "Decr", usg::STENCIL_OP_DECR },
+	{ "Invert", usg::STENCIL_OP_INVERT },
+	{ "IncrWrap", usg::STENCIL_OP_INCR_WRAP },
+	{ "DecrWrap", usg::STENCIL_OP_DECR_WRAP },
+	{ nullptr, 0 }
+};
+
+static const EnumTable g_stencilOpTable[]
+{
+	{ "Never", usg::STENCIL_TEST_NEVER },
+	{ "Always", usg::STENCIL_TEST_ALWAYS },
+	{ "Equal", usg::STENCIL_TEST_EQUAL },
+	{ "NotEqual", usg::STENCIL_TEST_NOTEQUAL },
+	{ "Less", usg::STENCIL_TEST_LESS },
+	{ "LessOrEqual", usg::STENCIL_TEST_LEQUAL },
+	{ "Greater", usg::STENCIL_TEST_GREATER },
+	{ "GreateOrEqual", usg::STENCIL_TEST_GEQUAL },
+	{ nullptr, 0 }
+};
+
 static const EnumTable g_opTable[]
 {
 	{ "Add", usg::BLEND_EQUATION_ADD },
@@ -274,6 +301,38 @@ static const EnumTable g_wrapTable[]
 			}
 			
 		}
+
+		YAML::Node stencilNode = material["StencilStateGroup"];
+		if (stencilNode)
+		{
+			usg::exchange::StencilState& stencil = pMatOut->pb().rasterizer.stencilTest;
+
+			if(stencilNode["enable"])
+			{
+				stencil.isEnable = stencilNode["enable"].as<bool>();
+			}
+			if (stencilNode["write"])
+			{
+				stencil.isEnable = stencilNode["write"].as<bool>();
+			}
+			StringToValue(g_stencilFuncTable, stencilNode["testFunc"], *(uint32*)&stencil.func);
+			StringToValue(g_stencilOpTable, stencilNode["passOp"], *(uint32*)&stencil.passOperation);
+			StringToValue(g_stencilOpTable, stencilNode["failOp"], *(uint32*)&stencil.failOperation);
+			StringToValue(g_stencilOpTable, stencilNode["depthFailOp"], *(uint32*)&stencil.zFailOperation);
+			if (stencilNode["readMask"])
+			{
+				stencil.readMask = stencilNode["readMask"].as<uint32>();
+			}
+			if (stencilNode["writeMask"])
+			{
+				stencil.writeMask = stencilNode["writeMask"].as<uint32>();
+			}
+			if (stencilNode["ref"])
+			{
+				stencil.ref = stencilNode["ref"].as<uint32>();
+			}
+		}
+
 		if (material["Transparent"])
 		{
 			pMatOut->pb().rasterizer.blendEnabled = material["Transparent"].as<bool>();

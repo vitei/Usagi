@@ -287,6 +287,11 @@ VkImageView Texture_ps::GetImageView(GFXDevice* pDevice, const ImageViewDef& def
 	view_info.subresourceRange.baseMipLevel = def.uBaseMip;
 	view_info.subresourceRange.levelCount = def.uMipCount == USG_INVALID_ID ? m_uMips - def.uBaseMip : Math::Min(def.uMipCount, m_uMips - def.uBaseMip);
 
+	if(def.bStencilRead)
+	{
+		view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+
 	VkImageView view;
 	VkResult res = vkCreateImageView(pDevice->GetPlatform().GetVKDevice(), &view_info, NULL, &view);
 	ASSERT(res == VK_SUCCESS);

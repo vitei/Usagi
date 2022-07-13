@@ -71,6 +71,25 @@ enum AlphaTest
 	ALPHA_TEST_FORCE_SIZE = 0x7FFFFFFF;
 };
 
+
+
+enum StencilTest
+{
+	option (nanopb_enumopt).long_names = false;
+
+	STENCIL_TEST_NEVER = 0;
+	STENCIL_TEST_ALWAYS = 1;
+	STENCIL_TEST_EQUAL = 2;
+	STENCIL_TEST_NOTEQUAL = 3;
+	STENCIL_TEST_LESS = 4;
+	STENCIL_TEST_LEQUAL = 5;
+	STENCIL_TEST_GREATER = 6;
+	STENCIL_TEST_GEQUAL = 7;
+
+	STENCIL_TEST_FORCE_SIZE = 0x7FFFFFFF;
+};
+
+
 enum DepthTest
 {
 	option (nanopb_enumopt).long_names = false;

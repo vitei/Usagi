@@ -17,6 +17,7 @@ public:
 	uint32 uMipCount = USG_INVALID_ID;
 	uint32 uBaseLayer = 0;
 	uint32 uLayerCount = USG_INVALID_ID;
+	bool bStencilRead = false;
 
 	bool IsDefault() const
 	{
@@ -28,7 +29,8 @@ public:
 		return (uBaseMip == rhs.uBaseMip
 				&& uMipCount == rhs.uMipCount
 				&& uBaseLayer == rhs.uBaseLayer
-				&& uLayerCount == rhs.uLayerCount);
+				&& uLayerCount == rhs.uLayerCount
+				&& bStencilRead == rhs.bStencilRead);
 	}
 
 	static ImageViewDef Default() { return ImageViewDef(); }

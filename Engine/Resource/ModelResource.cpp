@@ -113,14 +113,14 @@ void SetupAlphaStateDecl( AlphaStateDecl& decl, const exchange::Rasterizer& rast
 	}
 }
 
-void SetupDepthStencilStateDecl( DepthStencilStateDecl& decl, const exchange::StencilTest& stencilTest )
+void SetupDepthStencilStateDecl( DepthStencilStateDecl& decl, const exchange::StencilState& stencilTest )
 {
 	if( stencilTest.isEnable )
 	{
 		decl.bStencilEnable = true;
 		decl.eStencilTest = static_cast<StencilTest>( stencilTest.func );
 
-		decl.SetMask(stencilTest.mask, stencilTest.mask, stencilTest.ref);
+		decl.SetMask(stencilTest.readMask, stencilTest.writeMask, stencilTest.ref);
 		decl.SetOperation((StencilOp)stencilTest.passOperation, (StencilOp)stencilTest.failOperation, (StencilOp)stencilTest.zFailOperation);
 	}
 }
@@ -507,9 +507,6 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	depthDecl.bDepthEnable = ( pMaterial->rasterizer.attribute & 1 << exchange::Rasterizer_Attribute_DEPTH_TEST_ENABLE ? true : false );
 	depthDecl.eDepthFunc = static_cast<DepthTest>( pMaterial->rasterizer.depthTestFunc );
 	SetupDepthStencilStateDecl( depthDecl, pMaterial->rasterizer.stencilTest );
-	depthDecl.SetMask(0x0, STENCIL_MASK_GEOMETRY, STENCIL_GEOMETRY);
-	depthDecl.SetOperation(STENCIL_OP_REPLACE, STENCIL_OP_KEEP, STENCIL_OP_KEEP);
-	depthDecl.bStencilEnable = true;
 
 	AlphaStateDecl& alphaDecl = pipelineState.alphaState;
 	SetupAlphaStateDecl( alphaDecl, pMaterial->rasterizer );

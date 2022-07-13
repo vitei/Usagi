@@ -52,20 +52,21 @@ message Rasterizer {
 	required uint32 isPolygonOffsetEnable = 6 [default = 0];
 	required int32 polygonOffsetUnit = 7 [default = 0];
 
-	required StencilTest stencilTest = 8;
+	required StencilState stencilTest = 8;
 
 	required uint32 colorMask = 9 [default = 15]; // 0xF MASK_ALL
 }
 
 
-message StencilTest {
-	required uint32 isEnable = 1 [default = 0];
-	required uint32 func = 2 [default = 0];
-	required uint32 ref = 3 [default = 0];
-	required uint32 mask = 4 [default = 0];
-	required uint32 failOperation = 5 [default = 0];
-	required uint32 zFailOperation = 6 [default = 0];
-	required uint32 passOperation = 7 [default = 0];
+message StencilState {
+	required uint32 isEnable = 1 [default = 1];
+	required StencilTest func = 2 [default = STENCIL_TEST_ALWAYS];
+	required uint32 ref = 3 [default = 0x80];
+	required uint32 readMask = 4 [default = 0];
+	required uint32 writeMask = 5 [default = 0x80];
+	required StencilOp failOperation = 6 [default = STENCIL_OP_KEEP];
+	required StencilOp zFailOperation = 7 [default = STENCIL_OP_KEEP];
+	required StencilOp passOperation = 8 [default = STENCIL_OP_REPLACE];
 }
 
 enum Material_Constant{
