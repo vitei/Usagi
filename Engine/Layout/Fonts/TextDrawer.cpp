@@ -241,7 +241,7 @@ namespace usg
 					{
 						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
 						U8Char thisChar(szTxtTmp, uByteCount);
-						if (uByteCount == 1 && *szTxtTmp == ' ')
+						if ( (uByteCount == 1 && *szTxtTmp == ' ') || uByteCount > 1)
 						{
 							*szTxtTmp = '\n';
 							fTmpWidth = 0.0f;
