@@ -7,6 +7,7 @@ enum Region
 	JAPAN = 0;
 	AMERICA = 1;
 	EUROPE = 2;
+	CHINA = 3;
 }
 
 enum Language
@@ -18,6 +19,7 @@ enum Language
 	GERMAN = 4;
 	ITALIAN = 5;
 	DUTCH = 6;
+	CHINESE = 7;
 }
 
 // This message can be used to override the locale for

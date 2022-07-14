@@ -12,7 +12,7 @@ namespace usg
 
 inline const char* NameForRegion(Region region)
 {
-	const char* szRegions[_Region_ARRAYSIZE] = {"JP", "US", "EU"};
+	const char* szRegions[_Region_ARRAYSIZE] = {"JP", "US", "EU", "CN"};
 	ASSERT(region < _Region_ARRAYSIZE);
 
 	return szRegions[region];
@@ -21,7 +21,7 @@ inline const char* NameForRegion(Region region)
 inline const char* NameForLanguage(Language language)
 {
 	const char* szLanguages[_Language_ARRAYSIZE] =
-		{"Japanese", "English", "French", "Spanish", "German", "Italian", "Dutch"};
+		{"Japanese", "English", "French", "Spanish", "German", "Italian", "Dutch", "Chinese"};
 	ASSERT(language < _Language_ARRAYSIZE);
 
 	return szLanguages[language];
