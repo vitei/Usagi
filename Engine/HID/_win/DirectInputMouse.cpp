@@ -35,7 +35,7 @@ namespace usg
 			return false;
 		}
 
-		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)))
+		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_EXCLUSIVE)))
 		{
 			return false;
 		}
