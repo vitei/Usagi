@@ -21,10 +21,10 @@ THIS SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.*/
 
 #define SHARPNESS 8.0 //4.0
-//#define EDGE_THRESHOLD 0.25  // Less aliasing, softer
-#define EDGE_THRESHOLD 0.25   // More aliasing, sharper
+#define EDGE_THRESHOLD 0.125  // Less aliasing, softer
+//#define EDGE_THRESHOLD 0.25   // More aliasing, sharper
 
-#define EDGE_THRESHOLD_MIN 0.05
+#define EDGE_THRESHOLD_MIN 0.166 //0.05
 #define GREEN_AS_LUMA 1
 
 #ifndef PLATFORM_PC

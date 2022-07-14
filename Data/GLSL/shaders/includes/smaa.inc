@@ -34,6 +34,8 @@
  * macros will be ignored if set in the "Configurable Defines" section.
  */
 
+#define SMAA_PRESET_ULTRA
+
 #if defined(SMAA_PRESET_LOW)
 #define SMAA_THRESHOLD 0.15
 #define SMAA_MAX_SEARCH_STEPS 4
