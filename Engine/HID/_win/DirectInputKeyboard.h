@@ -28,6 +28,8 @@ private:
 	LPDIRECTINPUTDEVICE8	m_pDevice;
 	HANDLE					m_hEvent;
 	RECT					m_cage;
+	DIDEVICEOBJECTDATA		m_objectData[64] = {};
+	DWORD					m_objectDataSize = 0;
 };
 
 }

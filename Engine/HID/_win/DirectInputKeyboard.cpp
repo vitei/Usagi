@@ -27,8 +27,8 @@ namespace usg
 		{ DIK_8, '8' },
 		{ DIK_9, '9' },
 		{ DIK_0, '0' },
-		{ DIK_MINUS, '-' },
-		{ DIK_EQUALS, '=' },
+		{ DIK_MINUS, VK_OEM_MINUS },
+		{ DIK_EQUALS, VK_OEM_PLUS },
 		{ DIK_BACK, VK_BACK },
 		{ DIK_TAB, VK_TAB },
 		{ DIK_Q, 'Q' },
@@ -171,7 +171,7 @@ namespace usg
 			return false;
 		}
 
-		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)))
+		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_EXCLUSIVE)))
 		{
 			return false;
 		}
@@ -224,6 +224,9 @@ namespace usg
 			}
 		}
 
+		m_objectDataSize = ARRAY_SIZE(m_objectData);
+		m_pDevice->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), m_objectData, &m_objectDataSize, 0);
+
 
 		for(uint32 i=0; i<KEYBOARD_KEY_COUNT; i++)
 		{
@@ -248,11 +251,25 @@ namespace usg
 		m_bToggles[KEYBOARD_TOGGLE_SHIFT] = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 		m_bToggles[KEYBOARD_TOGGLE_ALT] = (GetKeyState(VK_MENU) & 0x8000) != 0;
 
+
+		m_uInputChars = 0;
+		for (uint32 i = 0; i < m_objectDataSize; i++)
+		{
+			DWORD key = m_objectData[i].dwOfs;
+			if (m_objectData[i].dwData & 0x80 && m_uInputChars < MAX_INPUT_CHARS)
+			{
+				m_inputChars[m_uInputChars] = (char16)key;
+				m_uInputChars++;
+			}
+		}
+		
+		#if 0
 		m_uInputChars = m_pOwner->GetInputChars();
 		for(uint32 i=0; i<m_uInputChars; i++)
 		{
 			m_inputChars[i] = m_pOwner->GetInputChar(i);
 		}
+		#endif
 	}
 
 }

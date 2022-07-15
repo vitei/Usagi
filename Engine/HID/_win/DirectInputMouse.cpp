@@ -112,7 +112,7 @@ namespace usg
 		m_pDevice->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), m_objectData, &m_objectDataSize, 0);
 
 
-		for(int i=0; i<MOUSE_BUTTON_NONE && i < (int)m_objectDataSize; i++)
+		for(int i=0; i<MOUSE_BUTTON_NONE; i++)
 		{
 			m_buttons[i] = ms.rgbButtons[i] & 0x80;
 		}
