@@ -29,6 +29,7 @@ private:
 	DIDEVICEOBJECTDATA		m_objectData[64] = {};
 	DWORD					m_objectDataSize = 0;
 	HANDLE					m_hEvent;
+	HWND					m_hwnd;
 	RECT					m_cage;
 };
 

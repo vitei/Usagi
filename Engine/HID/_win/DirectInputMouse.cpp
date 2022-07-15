@@ -35,10 +35,20 @@ namespace usg
 			return false;
 		}
 
-		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_EXCLUSIVE)))
+		DWORD CoopLevel = DISCL_FOREGROUND;
+		#ifdef FINAL_BUILD
+			// Makes debugging a pain
+			CoopLevel |= DISCL_EXCLUSIVE;
+		#else
+			CoopLevel |= DISCL_NONEXCLUSIVE;
+		#endif
+		HRESULT hr = m_pDevice->SetCooperativeLevel(pInput->GetWindow(), CoopLevel);
+		if (FAILED(hr))
 		{
 			return false;
 		}
+
+		m_hwnd = pInput->GetWindow();
 
 		if (!(m_hEvent = CreateEvent(NULL, FALSE, FALSE, NULL)))
 		{
@@ -73,6 +83,9 @@ namespace usg
 
 	bool DirectInputMouse::Acquire()
 	{
+		if(GetForegroundWindow() != m_hwnd)
+			return false;
+
 		if (SUCCEEDED(m_pDevice->Acquire()))
 		{
 			return true;
