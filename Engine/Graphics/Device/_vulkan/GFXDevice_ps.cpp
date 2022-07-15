@@ -482,15 +482,28 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	VkResult res;
 
 	res = vkCreateInstance(&inst_info, NULL, &m_instance);
-	if (res == VK_ERROR_INCOMPATIBLE_DRIVER)
+	switch (res )
 	{
+	case VK_ERROR_INCOMPATIBLE_DRIVER:
 		FATAL_RELEASE(false, "cannot find a compatible Vulkan ICD\n");
 		return;
-	}
-	else if (res)
-	{
-		FATAL_RELEASE(false, "unknown error\n");
+	case VK_ERROR_OUT_OF_HOST_MEMORY:
+		FATAL_RELEASE(false, "Out of host memory\n");
 		return;
+	case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+		FATAL_RELEASE(false, "Out of device memory\n");
+		return;
+	case VK_ERROR_INITIALIZATION_FAILED:
+		FATAL_RELEASE(false, "Initialization failed\n");
+		return;
+	case VK_ERROR_LAYER_NOT_PRESENT:
+		FATAL_RELEASE(false, "Layer not present\n");
+		return;
+	case VK_ERROR_EXTENSION_NOT_PRESENT:
+		FATAL_RELEASE(false, "Extension not present\n");
+	case VK_SUCCESS:
+	default:
+		break;
 	}
 
 	PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallback = VK_NULL_HANDLE;
