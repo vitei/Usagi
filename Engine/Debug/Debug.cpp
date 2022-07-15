@@ -96,7 +96,7 @@ extern "C" void cDebugprintf(const char *szFile, int line, const char* func, uin
 
 }
 #else
-void FatalInFinal(const char *szFile, int line, const char* func, const char *format, ...)
+void FatalInFinal(const char *format, ...)
 {
 	va_list vlist;
 	va_start( vlist, format );

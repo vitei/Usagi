@@ -15,7 +15,7 @@
 // Cache the debug log on all versions of the game except for the final rom
 void DumpDebugLog(const char* szBuildId = NULL);
 #else
-void FatalInFinal(const char *file, int line, const char* func, const char *format, ...);
+void FatalInFinal(const char *format, ...);
 #endif
 
 #ifndef FINAL_BUILD
@@ -34,7 +34,7 @@ void FatalInFinal(const char *file, int line, const char* func, const char *form
 #ifndef FINAL_BUILD
 #define FATAL_RELEASE(in, format, ...) { if(!(in)) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, format, __VA_ARGS__); } }
 #else
-#define FATAL_RELEASE(in, format, ...) { if(!(in)) { FatalInFinal(__FILE__, __LINE__, __FUNCTION__, format, __VA_ARGS__); } }
+#define FATAL_RELEASE(in, format, ...) { if(!(in)) { FatalInFinal(format, __VA_ARGS__); } }
 #endif
 
 #endif
