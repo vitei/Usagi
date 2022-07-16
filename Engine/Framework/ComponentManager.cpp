@@ -147,8 +147,6 @@ namespace usg
 		HandleSpawnRequests();
 		CheckEntities();
 
-		// GetEventManager().TriggerEvents(m_systemCoordinator, rootEntity);
-
 		while (m_catchupEntities.NumEntities() > 0)
 		{
 			usg::pair<Entity, double> catchupEntity = m_catchupEntities.Pop();
@@ -175,6 +173,9 @@ namespace usg
 
 		LateUpdateSignal lateUpdateSignal(fElapsed);
 		m_systemCoordinator.TriggerFromRoot(rootEntity, lateUpdateSignal);
+
+		// Second load of events to handle late update signals
+		GetEventManager().TriggerEvents(m_systemCoordinator, rootEntity, m_uFrameCounter);
 
 	}
 
@@ -370,10 +371,11 @@ namespace usg
 			e->ClearChildrenChanged();
 		}
 
-		if (e->GetSpawnFrame() == m_uFrameCounter)
-		{
-			m_eventManager.TriggerEventsForEntity(m_systemCoordinator, e, ComponentEntity::GetRoot());
-		}
+		// If we call early some setup, such as transforms, won't be ready
+		//if (e->GetSpawnFrame() == m_uFrameCounter)
+		//{
+			//m_eventManager.TriggerEventsForEntity(m_systemCoordinator, e, ComponentEntity::GetRoot());
+		//}
 	}
 
 	void ComponentManager::CheckEntities()
