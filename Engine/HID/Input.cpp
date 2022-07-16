@@ -3,12 +3,15 @@
 ****************************************************************************/
 #include "Engine/Common/Common.h"
 #include OS_HEADER(Engine/HID, Input_ps.h)
+#include <EASTL/sort.h>
 #include "Input.h"
 
 namespace usg{
 
 static Input_ps	g_platform; 
 static bool g_bInitCalled = false;
+static EvaluatePad g_fnEvaluate = Input::DefaultEvaluate;
+
 enum
 {
 	MAX_CONTROLLERS = 8,
@@ -29,56 +32,40 @@ void Input::Cleanup()
 	g_platform.Cleanup();
 }
 
-void Input::RenumberGamepads(usg::vector<uint32> uCapRequestList)
+void Input::DeviceChange()
+{
+	g_platform.RegisterDeviceChange();
+
+	RenumberGamepads(g_fnEvaluate);
+}
+
+void Input::RenumberGamepads(EvaluatePad fnEvaluatePad)
 {
 	if(!g_bInitCalled)
 		return;
 
-	g_platform.RegisterDeviceChange();
+	g_fnEvaluate = fnEvaluatePad;
+
 	usg::vector<IGamepad*> gamepads;
 	g_platform.GetActiveGamepads(gamepads);
 	g_uGamepads = 0;
 
-	usg::vector<bool> bound;
-	bound.resize(gamepads.size());
-	for (memsize i=0; i<bound.size(); i++)
-	{
-		bound[i] = false;
-	}
+	eastl::sort(gamepads.begin(), gamepads.end(), [fnEvaluatePad](IGamepad* pPadA, IGamepad* pPadB) { return bool(fnEvaluatePad(pPadA) > fnEvaluatePad(pPadB)); } );
 
-	if(uCapRequestList.size() > 0)
+	for(auto itr : gamepads)
 	{
-		for (auto it : uCapRequestList)
+		if (fnEvaluatePad(itr) >= 0)
 		{
-			for(memsize i=0; i<gamepads.size(); i++)
-			{
-				if(bound[i])
-					continue;
-
-				uint32 uPrefferedCaps = it;
-				if ((gamepads[i]->GetCaps() & uPrefferedCaps) == uPrefferedCaps)
-				{
-					bound[i] = true;
-					g_gamepads[g_uGamepads++].BindHardware(gamepads[i]);
-				}
-
-				if (g_uGamepads == MAX_CONTROLLERS)
-					break;
-			}
+			g_gamepads[g_uGamepads++].BindHardware(itr);
 		}
-	}
-	else
-	{
-		// Bind everything in any order
-		for (auto it : gamepads)
+		else
 		{
-			g_gamepads[g_uGamepads++].BindHardware(it);
-
-			if (g_uGamepads == MAX_CONTROLLERS)
-				break;
+			break;
 		}
-	}
 
+		if (g_uGamepads == MAX_CONTROLLERS)
+			break;
+	}
 }
 
 void Input::Update(GFXDevice* pDevice, float fDelta)

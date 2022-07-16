@@ -16,12 +16,14 @@ class Keyboard;
 class Mouse;
 class IGamepad;
 
+typedef int (*EvaluatePad) (const IGamepad* pDad);
+
 class Input
 {
 public:	
 	static void Init();
 	static void Cleanup();
-	static void RenumberGamepads(usg::vector<uint32> uCapListRequest = usg::vector<uint32>());
+	static void RenumberGamepads(EvaluatePad fnEvaluatePad = DefaultEvaluate);
 	static void Update(usg::GFXDevice* pDevice, float fDelta);
 	static void RegisterGamepad(IGamepad* pGamepad);
 
@@ -34,6 +36,10 @@ public:
 	static Microphone* GetMicrophone(uint32 uMicrophone);
 
 	static Input_ps&	GetPlatform();
+
+	static void DeviceChange();
+
+	static int DefaultEvaluate(const IGamepad* pPad) { return 1; }
 
 private:
 };

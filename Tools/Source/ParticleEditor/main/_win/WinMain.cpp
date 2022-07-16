@@ -146,7 +146,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	case WM_DEVICECHANGE:
 	{
-		Input::RenumberGamepads();
+		Input::DeviceChange();
 	}
 	break;
 
