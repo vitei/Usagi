@@ -66,6 +66,7 @@ namespace usg
 			// We can't clear the memory if we are pausing
 			if(!m_bPauseMode)
 			{
+				(*m_ppLoadMode)->Cleanup(m_pDevice);
 				vdelete *m_ppLoadMode;
 			}
 			if (m_pausedModes.empty())

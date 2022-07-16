@@ -979,6 +979,7 @@ void GFXDevice_ps::Begin()
 
 void GFXDevice_ps::End()
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
 	// For now just submit our immediate context
 	VkSubmitInfo submitInfo = {};
 	VkCommandBuffer buffers[] = { m_pParent->GetImmediateCtxt()->GetPlatform().GetVkCmdBuffer() };
@@ -1278,6 +1279,8 @@ VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bo
 
 void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 {
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
 	if (commandBuffer == VK_NULL_HANDLE)
 	{
 		return;
