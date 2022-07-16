@@ -62,6 +62,7 @@ public:
 	bool Is3DEnabled() const;
 	void WaitIdle();
 
+	void ForceDisableThreading();
 	bool IsMultiThreaded() const;
 	memsize GetMemorySize() const;
 
@@ -87,6 +88,7 @@ private:
 	uint32					m_uDisplayCount;
 	uint32					m_uFrameCount;
 	uint32					m_uAllocId;	// Currently 0 = static, 1 = dynamic
+	bool					m_bDisableThreading;
 };
 
 inline Display* GFXDevice::GetDisplay(uint32 uIndex)

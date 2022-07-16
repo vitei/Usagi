@@ -32,6 +32,7 @@ GFXDevice::GFXDevice()
 	, m_uDisplayCount(0)
 	, m_uFrameCount(0)
 	, m_uAllocId(0)
+	, m_bDisableThreading(false)
 {
 	m_pImpl = vnew(ALLOC_OBJECT) PIMPL;
 }
@@ -130,8 +131,16 @@ PipelineStateHndl GFXDevice::GetPipelineState(const RenderPassHndl& hndl, const 
 }
 
 
+void GFXDevice::ForceDisableThreading()
+{
+	m_bDisableThreading = true;
+}
+
 bool GFXDevice::IsMultiThreaded() const
 {
+	if(m_bDisableThreading)
+		return false;
+
 	return m_pImpl->platform.IsMultiThreaded();
 }
 
