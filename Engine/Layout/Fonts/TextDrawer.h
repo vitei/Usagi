@@ -46,7 +46,7 @@ namespace usg
 
 		enum
 		{
-			MAX_CHARS = 200,
+			MAX_CHARS = 256,
 			MAX_CHAR_VERTICES = MAX_CHARS,
 			MAX_INDICES = MAX_CHARS,
 			MAX_LINES = 20
