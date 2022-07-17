@@ -45,6 +45,8 @@ namespace usg
 			{
 				Required<Lifetime>		lifetime;
 				Required<MaxLifetime>	maxLife;
+				Required<usg::EntityID>	self;
+				Required<EventManagerHandle, FromSelfOrParents> eventManager;
 			};
 
 			struct Outputs
@@ -66,13 +68,16 @@ namespace usg
 					}
 					else
 					{
-						outputs.state.Modify().current = STATUS_DEAD;
+						// We want the event
+						usg::KillEntityEvent killEntity;
+						inputs.eventManager->handle->RegisterEventWithEntity(inputs.self->id, killEntity, ON_ENTITY);
 					}
 				}
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetMaxLifetime& setLifespan)
 			{
+
 				outputs.maxLife.Modify().fMaxLifetime = setLifespan.lifetime;
 			}
 		};
