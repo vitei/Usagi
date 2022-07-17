@@ -70,17 +70,14 @@ ConstantSet_ps::~ConstantSet_ps()
 	// TODO: Obey usage so we don't allocate extra memory for static buffers
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
 	memsize uPerBufferAlign = devicePS.GetPhysicalProperties(0)->limits.minUniformBufferOffsetAlignment;
+	uPerBufferAlign = Math::Max(uPerBufferAlign, sizeof(usg::Matrix4x4));
 	m_pOwner = &owner;	
 
 	m_uBufferCount = GFX_NUM_DYN_BUFF;
 
 	InitOffsets( m_pOwner->GetDeclaration() );
 	memsize uUnAlignedSize = m_uGPUSize;
-	if (m_uBufferCount > 1)
-	{
-		m_uGPUSize = AlignSizeUp(m_uGPUSize, uPerBufferAlign);
-	}
-
+	m_uGPUSize = AlignSizeUp(m_uGPUSize, uPerBufferAlign);
 
 	VkMemoryRequirements memReqs;
 	VkMemoryAllocateInfo memAlloc = {};

@@ -5,6 +5,8 @@
 #include "Engine/Memory/GPUHeap.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 
+#define MERGE_DELAY 10	// 10 frames
+
 namespace usg {
 
 GPUHeap::GPUHeap()
@@ -65,7 +67,7 @@ bool GPUHeap::CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame)
 		return true;
 	}
 
-	if ( (uFreeFrame+ GFX_NUM_DYN_BUFF) < uCurrentFrame )
+	if ( (uFreeFrame+ MERGE_DELAY) < uCurrentFrame)
 	{
 		return true;
 	}
@@ -184,7 +186,7 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 	void* pData = NULL;
 
 	pData = (void*)AlignAddress((memsize)pInfo->pLocation, uAlign);
-	memsize blockSize = ((memsize)pData) + uSize;
+	memsize blockSize = ((memsize)pData) + AlignSizeUp(uSize, uAlign);
 	blockSize -= (memsize)pInfo->pLocation;
 	pInfo->pAllocator = pAllocator;
 
@@ -204,7 +206,7 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 
 	pAllocator->Allocated(pData);
 
-	m_iMergeFrames = GFX_NUM_DYN_BUFF;
+	m_iMergeFrames = MERGE_DELAY;
 }
 
 void GPUHeap::FreeMemory(BlockInfo* pInfo)
@@ -218,7 +220,7 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 
 	pAllocator->Released();
 
-	m_iMergeFrames = GFX_NUM_DYN_BUFF;
+	m_iMergeFrames = MERGE_DELAY;
 }
 
 void GPUHeap::MergeMemory(uint32 uCurrentFrame)
@@ -241,7 +243,7 @@ void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 				pPrev->uSize += itr->uSize;
 				itr->uSize = 0;
 				itr->pLocation = nullptr;
-				itr->uFreeFrame = USG_INVALID_ID;
+				itr->uFreeFrame = usg::Math::Max(itr->uFreeFrame, pPrev->uFreeFrame);
 				itr->bValid = false;
 				SwitchList(itr, m_freeList, m_unusedList);
 				// There will usually be space so don't go overboard trying to free

@@ -54,10 +54,7 @@ void VertexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
 
 	VkDeviceSize size = mem_alloc.allocationSize;
 	m_uBufferSize = AlignSizeUp(size, mem_reqs.alignment);
-	if (m_uBufferCount > 1)
-	{
-		size = m_uBufferSize * m_uBufferCount;
-	}
+	size = m_uBufferSize * m_uBufferCount;
 
 	m_stagingMemoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
 	pDevice->GetPlatform().AllocateMemory(&m_stagingMemoryAlloc);
