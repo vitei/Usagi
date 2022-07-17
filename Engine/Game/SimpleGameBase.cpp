@@ -167,7 +167,7 @@ namespace usg
 		if(m_eState != STATE_SPLASH)
 		{
 			m_debug.Update(fElapsed);
-#ifdef PLATFORM_PC
+#if (defined PLATFORM_PC && !defined FINAL_BUILD)
 			if (usg::Input::GetGamepad(0) &&
 				usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_START, usg::BUTTON_STATE_HELD) && usg::Input::GetGamepad(0)->GetButtonDown(usg::GAMEPAD_BUTTON_SELECT, usg::BUTTON_STATE_HELD))
 			{
@@ -284,6 +284,8 @@ namespace usg
 	//----------------------------------------------------
 	void SimpleGameBase::Draw(usg::GFXDevice* pDevice)
 	{
+		HandleMessages(pDevice);
+
 		usg::Display* pDisplay = pDevice->GetDisplay(0);
 		usg::IHeadMountedDisplay* pHMD = pDevice->GetHMD();
 		usg::Mode* pRenderMode = nullptr;
@@ -324,54 +326,85 @@ namespace usg
 		pImmContext->End();
 		pDevice->End();
 		m_cpuTimer.Start();
+
 	}
 	//----------------------------------------------------
+
+	void SimpleGameBase::HandleMessages(usg::GFXDevice* pDevice)
+	{
+		while(!m_messages.empty())
+		{
+			DWORD messageID = m_messages.top();
+			m_messages.pop();
+
+			switch (messageID)
+			{
+			case 'WSZE':
+			{
+				usg::Display* const pDisplay = pDevice->GetDisplay(0);
+				if (pDisplay)
+				{
+					uint32 uWidth, uHeight;
+					uint32 uWidthOld, uHeightOld;
+
+					pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
+					pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
+					pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
+					// Could be an eroneous call if restoring from being minimized
+					if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
+					{
+						m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+					}
+					if (m_pTransitionMode)
+					{
+						m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
+					}
+					if (m_pInternalData->m_pInitThread)
+					{
+						m_pInternalData->m_pInitThread->NotifyResize(pDevice, 0, uWidth, uHeight);
+					}
+				}
+			}
+			break;
+		
+			case 'DCNG':
+			{
+				// Input device changed
+				if (m_pActiveMode)
+				{
+					m_pActiveMode->NotifyDeviceChange();
+				}
+			}
+			break;
+			default:
+				// Does nothing
+				break;
+			}
+		}
+	}
+
 	void SimpleGameBase::OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters)
 	{
 		switch (messageID)
 		{
-		case 'WSZE':
-		{
-			usg::Display* const pDisplay = pDevice->GetDisplay(0);
-			if(pDisplay)
+			case 'ONSZ':
 			{
-				uint32 uWidth, uHeight;
-				uint32 uWidthOld, uHeightOld;
-
-				pDisplay->GetDisplayDimensions(uWidthOld, uHeightOld, false);
-				pDisplay->Resize(pDevice); // Before obtaining dimensions, we need to force display to update internal size
-				pDisplay->GetDisplayDimensions(uWidth, uHeight, false);
-				// Could be an eroneous call if restoring from being minimized
-				if (m_pActiveMode && (uWidthOld != uWidth || uHeightOld != uHeight))
-				{
-					m_pActiveMode->NotifyResize(pDevice, 0, uWidth, uHeight);
-				}
-				if(m_pTransitionMode)
-				{
-					m_pTransitionMode->NotifyResize(pDevice, 0, uWidth, uHeight);
-				}
-				if(m_pInternalData->m_pInitThread)
-				{
-					m_pInternalData->m_pInitThread->NotifyResize(pDevice, 0, uWidth, uHeight);
-				}
+				// About to resize
+				pDevice->WaitIdle();
 			}
-		}
-		break;
-		case 'WMIN':
-		{
-			usg::Display* const pDisplay = pDevice->GetDisplay(0);
-			if(pDisplay)
-				pDisplay->Minimized(pDevice);
-
-		}
-		case 'ONSZ':
-		{
-			// About to resize
-			pDevice->WaitIdle();
-		}
-		break;
-		default:
-			// Does nothing
+			break;
+			case 'WMIN':
+			{
+				usg::Display* const pDisplay = pDevice->GetDisplay(0);
+				if (pDisplay)
+					pDisplay->Minimized(pDevice);
+				pDevice->WaitIdle();
+			}
+			break;
+			default:
+			{
+				m_messages.push(messageID);
+			}
 			break;
 		}
 	}

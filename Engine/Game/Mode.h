@@ -37,6 +37,7 @@ namespace usg
 		virtual bool FinalTargetIsDisplay() const { return false; }
 
 		virtual void NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight) {}
+		virtual void NotifyDeviceChange() {}
 	
 	};
 }

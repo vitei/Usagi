@@ -5,6 +5,7 @@
 #include "Engine/Game/GameInterface.h"
 #include "Engine/Core/Timer/Timer.h"
 #include "Engine/Debug/DebugStats.h"
+#include "Engine/Core/stl/stack.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
 #include "Engine/Game/InitThread.h"
 #include "Engine/Game/ModeTransition.h"
@@ -28,6 +29,8 @@ namespace usg
 		virtual void OnMessage(usg::GFXDevice* const pDevice, const uint32 messageID, const void* const pParameters) override;
 	
 	protected:
+		void HandleMessages(usg::GFXDevice* pDevice);
+
 		virtual bool DrawLoadingScreen() const { return true; }
 		virtual bool PauseCurrentMode() const { return false; }
 		virtual void PreModeUpdate(float fElapsed) {}
@@ -60,6 +63,8 @@ namespace usg
 		usg::Timer				m_timer;
 		usg::ProfilingTimer		m_cpuTimer;
 		State					m_eState;
+		usg::stack<DWORD>		m_messages;
+
 
 		struct InternalData;
 		usg::unique_ptr<InternalData> m_pInternalData;
