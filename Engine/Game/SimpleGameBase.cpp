@@ -374,6 +374,10 @@ namespace usg
 				{
 					m_pActiveMode->NotifyDeviceChange();
 				}
+				if (m_pInternalData->m_pInitThread)
+				{
+					m_pInternalData->m_pInitThread->NotifyDeviceChange();
+				}
 			}
 			break;
 			default:

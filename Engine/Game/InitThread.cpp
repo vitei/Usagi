@@ -59,6 +59,14 @@ namespace usg
 		}
 	}
 
+	void InitThread::NotifyDeviceChange()
+	{
+		for (auto itr : m_pausedModes)
+		{
+			itr.second->NotifyDeviceChange();
+		}
+	}
+
 	void InitThread::Run()
 	{
 		if (*m_ppLoadMode)
