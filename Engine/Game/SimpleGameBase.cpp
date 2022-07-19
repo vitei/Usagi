@@ -164,7 +164,7 @@ namespace usg
 		usg::Fader::Inst()->Update(fElapsed);
 		usg::Fader::Inst()->GPUUpdate(pDevice);
 
-		if(m_eState != STATE_SPLASH)
+		if(m_eState == STATE_ACTIVE)
 		{
 			m_debug.Update(fElapsed);
 #if (defined PLATFORM_PC && !defined FINAL_BUILD)
@@ -319,7 +319,8 @@ namespace usg
 		usg::Fader::Inst()->Draw(pImmContext, true);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
-		m_debug.PostDraw(pDevice);
+		if(m_eState == STATE_ACTIVE)
+			m_debug.PostDraw(pDevice);
 		m_debugRender.Clear();
 
 		m_cpuTimer.Pause();
