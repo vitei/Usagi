@@ -76,6 +76,7 @@ message ButtonInstanceDef
 	required string tags = 8 [(nanopb).max_size = 64];
 	required uint32 uGroupId = 9 [default = 0];
 	required uint32 uActionCRC = 10;
+	required bool bVisible = 11 [default = true];
 }
 
 message TextItemDef

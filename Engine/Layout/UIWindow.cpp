@@ -115,7 +115,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 				strcpy_s(m_pUIItemsDefs[uImageId].def.tags, pInstDef->tags);
 				m_pUIItemsDefs[uImageId].def.vPos = pInstDef->vPos;
 				m_pUIItemsDefs[uImageId].def.vSize = pInstDef->vSize;
-				m_pUIItemsDefs[uImageId].def.bVisible = true;
+				m_pUIItemsDefs[uImageId].def.bVisible = pInstDef->bVisible;
 				m_pButtonDefs[i].uActiveFrame = bActive ? pDef->uHighlightActiveFrameId : pDef->uHighlightInactiveFrameId;
 				m_pButtonDefs[i].eAnimState = bActive ? ButtonAnimState::BUTTON_ANIM_STATE_ACTIVE : ButtonAnimState::BUTTON_ANIM_STATE_DEACTIVATED;
 				
@@ -554,6 +554,8 @@ bool UIWindow::IsMouseInRangeOfButton(uint32 uButton)
 {
 	uint32 uIndex = m_uItemCounts[UI_ITEM_IMAGE] + uButton;
 	
+	if (!m_pUIItemsDefs[uIndex].defOverride.bVisible)
+		return false;
 
 	const VertexData& vert = m_vertices[uIndex];
 	// We use the vertices because they have been aligned
