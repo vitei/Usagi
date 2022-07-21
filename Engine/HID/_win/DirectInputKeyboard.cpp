@@ -139,6 +139,7 @@ namespace usg
 		{ DIK_INSERT, VK_INSERT },
 		{ DIK_DELETE, VK_DELETE },
 		{ DIK_DIVIDE, '/' },
+		{ DIK_SYSRQ, VK_PRINT }
 	};
 
 	// Unmapped keys
