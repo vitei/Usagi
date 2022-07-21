@@ -15,7 +15,11 @@
 #include OS_HEADER(Engine/HID, DirectInputJoystick.h)
 
 #define USE_DIRECT_INPUT_KB  
+
+#ifdef FINAL_BUILD
+// The DI mouse is better for shipped builds but a pain when debugging/ in tools
 #define USE_DIRECT_INPUT_MOUSE
+#endif
 
 #ifdef USE_DIRECT_INPUT_MOUSE
 #include OS_HEADER(Engine/HID, DirectInputMouse.h)
