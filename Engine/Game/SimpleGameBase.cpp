@@ -145,6 +145,12 @@ namespace usg
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)
 	{
+		if (m_pActiveMode && !PauseCurrentMode())
+		{
+			m_pActiveMode->Cleanup(pDevice);
+			vdelete m_pActiveMode;
+			m_pActiveMode = nullptr;
+		}
 		m_pInternalData->m_pInitThread->SetNextMode(&m_pActiveMode, GetNextMode(), PauseCurrentMode());
 #ifdef USE_THREADED_LOADING
 		if(pDevice->IsMultiThreaded())
