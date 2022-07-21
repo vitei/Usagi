@@ -76,6 +76,7 @@ private:
 	uint32				m_uActiveImage;
 	ColorFormat			m_eSwapChainFormat;
 	VkFormat			m_eVkSwapChainFormat;
+	std::thread			m_screenshotThread;
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
 	bool				m_bHDR;

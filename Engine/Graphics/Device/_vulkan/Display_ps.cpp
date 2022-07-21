@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/Device/IHeadMountedDisplay.h"
 #include "Engine/Graphics/GFX.h"
+#include <thread>
 #include "Engine/Core/Modules/ModuleManager.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
@@ -80,6 +81,11 @@ void Display_ps::DestroySwapChain(GFXDevice* pDevice)
 
 void Display_ps::Cleanup(usg::GFXDevice* pDevice)
 {
+	if (m_screenshotThread.joinable())
+	{
+		m_screenshotThread.join();
+	}
+
 	if (m_swapChain != VK_NULL_HANDLE)
 	{
 		DestroySwapChain(pDevice);
@@ -628,8 +634,99 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_imageAcquired, (VkFence)nullptr, &m_uActiveImage);
 }
 
+void WriteTexture(usg::string szFileName, VkDevice device, uint32 uWidth, uint32 uHeight, const uint8* pData, bool bColorSwizzle, VkDeviceMemory dstImageMemory, VkImage dstImage, int iRowPitch)
+{
+	uint8* pBMPData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_TEXTURE, (uWidth * uHeight * 3) + sizeof(BITMAPINFOHEADER));
+
+
+	for (uint32_t y = 0; y < uHeight; y++)
+	{
+		uint32 uLine = uHeight - y - 1;
+		uint8* pDest = &pBMPData[uWidth * uLine * 3];
+		uint32* row = (uint32*)pData;
+		for (uint32_t x = 0; x < uWidth; x++)
+		{
+			if (bColorSwizzle)
+			{
+				pDest[0] = *((uint8*)row + 2);
+				pDest[1] = *((uint8*)row + 1);
+				pDest[2] = *((uint8*)row + 0);
+			}
+			else
+			{
+				pDest[0] = *((uint8*)row + 0);
+				pDest[1] = *((uint8*)row + 1);
+				pDest[2] = *((uint8*)row + 2);
+			}
+			pDest += 3;
+			row++;
+		}
+		pData += iRowPitch;
+	}
+
+	BITMAPINFOHEADER info = { };
+
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	info.biWidth = uWidth;
+	info.biHeight = uHeight;
+	info.biPlanes = 1;
+	info.biBitCount = 24;
+	info.biCompression = BI_RGB;
+	info.biXPelsPerMeter = 1;
+	info.biYPelsPerMeter = 1;
+	info.biClrImportant = 0;
+	info.biClrImportant = 0;
+
+	BITMAPFILEHEADER	fileHdr = {};
+	fileHdr.bfType = 'MB';
+	fileHdr.bfSize = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER) + (3 * uWidth * uHeight);
+	fileHdr.bfOffBits = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER);
+
+	usg::File file(szFileName.c_str(), FILE_ACCESS_WRITE, FILE_TYPE_DEBUG_DATA);
+	if (file.IsOpen())
+	{
+		file.Write(sizeof(fileHdr), &fileHdr);
+		file.Write(sizeof(BITMAPINFOHEADER), &info);
+		file.Write(uWidth * uHeight * 3, pBMPData);
+		file.Close();
+	}
+
+
+#if PLATFORM_PC
+	HANDLE handle = (HANDLE)::GlobalAlloc(GHND, sizeof(BITMAPINFOHEADER) + (uWidth * uHeight * 3));
+	if (handle != nullptr)
+	{
+		char* pHndlData = (char*) ::GlobalLock((HGLOBAL)handle);
+
+		BOOL RETB = OpenClipboard(nullptr);
+		RETB = EmptyClipboard();
+
+		memcpy(pHndlData, &info, sizeof(BITMAPINFOHEADER));
+
+		memcpy(pHndlData + sizeof(BITMAPINFOHEADER), pBMPData, uWidth * uHeight * 3);
+
+		::GlobalUnlock((HGLOBAL)handle);
+
+		SetClipboardData(CF_DIB, handle);
+		CloseClipboard();
+	}
+#endif
+
+	mem::Free(pBMPData);
+
+	// Clean up resources
+	vkUnmapMemory(device, dstImageMemory);
+	vkFreeMemory(device, dstImageMemory, nullptr);
+	vkDestroyImage(device, dstImage, nullptr);
+}
+
 void Display_ps::ScreenShot(usg::GFXDevice* pDevice, const char* szFileName)
 {
+	if(m_screenshotThread.joinable())
+	{
+		m_screenshotThread.join();
+	}
+
 	bool bSupportsBlit = true;
 
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
@@ -790,88 +887,8 @@ void Display_ps::ScreenShot(usg::GFXDevice* pDevice, const char* szFileName)
 		bColorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), m_eVkSwapChainFormat) == formatsBGR.end());
 	}
 
-	uint8* pBMPData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_TEXTURE, (m_uWidth*m_uHeight*3) + sizeof(BITMAPINFOHEADER));
-
-
-	for (uint32_t y = 0; y < m_uHeight; y++)
-	{
-		uint32 uLine = m_uHeight - y - 1;
-		uint8* pDest = &pBMPData[m_uWidth * uLine * 3];
-		uint32* row = (uint32*)pData;
-		for (uint32_t x = 0; x < m_uWidth; x++)
-		{
-			if (bColorSwizzle)
-			{
-				pDest[0] = *((uint8*)row + 2);
-				pDest[1] = *((uint8*)row + 1);
-				pDest[2] = *((uint8*)row + 0);
-			}
-			else
-			{
-				pDest[0] = *((uint8*)row + 0);
-				pDest[1] = *((uint8*)row + 1);
-				pDest[2] = *((uint8*)row + 2);
-			}
-			pDest += 3;
-			row++;
-		}
-		pData += subResourceLayout.rowPitch;
-	}
-
-	BITMAPINFOHEADER info = { };
-
-	info.biSize = sizeof(BITMAPINFOHEADER);
-	info.biWidth = m_uWidth;
-	info.biHeight = m_uHeight;
-	info.biPlanes = 1;
-	info.biBitCount = 24;
-	info.biCompression = BI_RGB;
-	info.biXPelsPerMeter = 1;
-	info.biYPelsPerMeter = 1;
-	info.biClrImportant = 0;
-	info.biClrImportant = 0;
-
-	BITMAPFILEHEADER	fileHdr = {};
-	fileHdr.bfType = 'MB';
-	fileHdr.bfSize = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER) + (3 * m_uWidth * m_uHeight);
-	fileHdr.bfOffBits = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER);
-
-	usg::File file(szFileName, FILE_ACCESS_WRITE, FILE_TYPE_DEBUG_DATA);
-	if (file.IsOpen())
-	{
-		file.Write(sizeof(fileHdr), &fileHdr);
-		file.Write(sizeof(BITMAPINFOHEADER), &info);
-		file.Write(m_uWidth* m_uHeight * 3, pBMPData);
-		file.Close();
-	}
-
-
-#if PLATFORM_PC
-	HANDLE handle = (HANDLE)::GlobalAlloc(GHND, sizeof(BITMAPINFOHEADER) + (m_uWidth * m_uHeight * 3));
-	if(handle != nullptr)
-	{
-		char* pHndlData = (char*) ::GlobalLock((HGLOBAL)handle);
-
-		BOOL RETB = OpenClipboard(nullptr);
-		RETB = EmptyClipboard();
-
-		memcpy(pHndlData, &info, sizeof(BITMAPINFOHEADER));
-
-		memcpy(pHndlData + sizeof(BITMAPINFOHEADER), pBMPData, m_uWidth * m_uHeight * 3);
-
-		::GlobalUnlock((HGLOBAL)handle);
-
-		SetClipboardData(CF_DIB, handle);
-		CloseClipboard();
-	}
-#endif
-
-	mem::Free(pBMPData);
-
-	// Clean up resources
-	vkUnmapMemory(devicePS.GetVKDevice(), dstImageMemory);
-	vkFreeMemory(devicePS.GetVKDevice(), dstImageMemory, nullptr);
-	vkDestroyImage(devicePS.GetVKDevice(), dstImage, nullptr);
+	usg::string tex = szFileName;
+	m_screenshotThread = std::thread(WriteTexture, tex, devicePS.GetVKDevice(), m_uWidth, m_uHeight, pData, bColorSwizzle, dstImageMemory, dstImage, subResourceLayout.rowPitch);
 
 }
 
