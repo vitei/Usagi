@@ -137,6 +137,11 @@ namespace usg
 		m_debugRender.Cleanup(pDevice);
 	}
 
+	bool SimpleGameBase::IsDoingThreadedLoading() const
+	{
+		return m_eState == STATE_LOADING && !m_pInternalData->m_pInitThread->IsThreadEnd();
+	}
+
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)
 	{

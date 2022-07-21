@@ -30,6 +30,7 @@ namespace usg
 	
 	protected:
 		void HandleMessages(usg::GFXDevice* pDevice);
+		bool IsDoingThreadedLoading() const;
 
 		virtual bool DrawLoadingScreen() const { return true; }
 		virtual bool PauseCurrentMode() const { return false; }

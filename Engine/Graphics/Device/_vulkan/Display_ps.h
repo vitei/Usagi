@@ -24,7 +24,7 @@ public:
 	void Present();
 	bool GetActualDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
 	bool GetDisplayDimensions(uint32 &xOut, uint32 &yOut, bool bOrient);
-	void ScreenShot(const char* szFileName);
+	void ScreenShot(usg::GFXDevice* pDevice, const char* szFileName);
 	const RenderPassHndl& GetRenderPass() { return m_directRenderPass; }
 
 	void Resize(usg::GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -75,6 +75,7 @@ private:
 	uint32				m_uHeight;
 	uint32				m_uActiveImage;
 	ColorFormat			m_eSwapChainFormat;
+	VkFormat			m_eVkSwapChainFormat;
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
 	bool				m_bHDR;

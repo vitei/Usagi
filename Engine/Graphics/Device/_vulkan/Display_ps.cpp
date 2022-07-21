@@ -14,6 +14,7 @@
 #include API_HEADER(Engine/Graphics/Device, RenderPass.h)
 #include "Engine/Core/stl/vector.h"
 
+
 extern bool	 g_bFullScreen;
 extern uint32 g_uWindowWidth;
 extern uint32 g_uWindowHeight;
@@ -291,6 +292,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		eFormat = surfFormats[iBestFormat].format;
 		colorSpace = surfFormats[iBestFormat].colorSpace;
 		m_eSwapChainFormat = devicePS.GetUSGFormat(eFormat);
+		m_eVkSwapChainFormat = eFormat;
 
 	}
 
@@ -384,7 +386,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	swap_chain.oldSwapchain = NULL;
 	swap_chain.clipped = true;
 	swap_chain.imageColorSpace = colorSpace;
-	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	swap_chain.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;	// Src bit for screenshots
 	swap_chain.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swap_chain.queueFamilyIndexCount = 0;
 	swap_chain.pQueueFamilyIndices = NULL;
@@ -626,10 +628,253 @@ void Display_ps::SwapBuffers(GFXDevice* pDevice)
 	vkAcquireNextImageKHR(pDevice->GetPlatform().GetVKDevice(), m_swapChain, UINT64_MAX, m_imageAcquired, (VkFence)nullptr, &m_uActiveImage);
 }
 
-void Display_ps::ScreenShot(const char* szFileName)
+void Display_ps::ScreenShot(usg::GFXDevice* pDevice, const char* szFileName)
 {
+	bool bSupportsBlit = true;
+
+	GFXDevice_ps& devicePS = pDevice->GetPlatform();
+
+	VkFormatProperties formatProps;
+
+	vkGetPhysicalDeviceFormatProperties(devicePS.GetPrimaryGPU(), m_eVkSwapChainFormat, &formatProps);
+	if (!(formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT)) 
+	{
+		bSupportsBlit = false;
+	}
+
+	vkGetPhysicalDeviceFormatProperties(devicePS.GetPrimaryGPU(), VK_FORMAT_R8G8B8A8_UNORM, &formatProps);
+	if (!(formatProps.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT)) 
+	{
+		bSupportsBlit = false;
+	}
+
+	VkImage srcImage = m_pSwapchainImages[m_uActiveImage ? 0 : 1];
+
+	// Create linear tiled destination image to copy to
+	VkImageCreateInfo imageCreateCI = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+	imageCreateCI.imageType = VK_IMAGE_TYPE_2D;
+	imageCreateCI.format = VK_FORMAT_R8G8B8A8_UNORM;
+	imageCreateCI.extent.width = m_uWidth;
+	imageCreateCI.extent.height = m_uHeight;
+	imageCreateCI.extent.depth = 1;
+	imageCreateCI.arrayLayers = 1;
+	imageCreateCI.mipLevels = 1;
+	imageCreateCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageCreateCI.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateCI.tiling = VK_IMAGE_TILING_LINEAR;
+	imageCreateCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+
+	VkImage dstImage;
+	VkResult res = vkCreateImage(devicePS.GetVKDevice(), &imageCreateCI, nullptr, &dstImage);
+	ASSERT(res == VK_SUCCESS);
+	
+	VkMemoryRequirements memRequirements;
+	VkMemoryAllocateInfo memAllocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	VkDeviceMemory dstImageMemory;
+	vkGetImageMemoryRequirements(devicePS.GetVKDevice(), dstImage, &memRequirements);
+	memAllocInfo.allocationSize = memRequirements.size;
+	
+	memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	res = vkAllocateMemory(devicePS.GetVKDevice(), &memAllocInfo, nullptr, &dstImageMemory);
+	ASSERT(res == VK_SUCCESS);
+	res = vkBindImageMemory(devicePS.GetVKDevice(), dstImage, dstImageMemory, 0);
+	ASSERT(res == VK_SUCCESS);
+
+	// Do the actual blit from the swapchain image to our host visible destination image
+	VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	// Transition destination image to transfer destination layout
+	VkImageMemoryBarrier imageMemoryBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+	imageMemoryBarrier.srcAccessMask = 0;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	imageMemoryBarrier.image = dstImage;
+	imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+	// Transition swapchain image from present to transfer source layout
+	imageMemoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	imageMemoryBarrier.image = srcImage;
+	imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+	// If source and destination support blit
+	if (bSupportsBlit)
+	{
+		VkOffset3D blitSize;
+		blitSize.x = m_uWidth;
+		blitSize.y = m_uHeight;
+		blitSize.z = 1;
+		VkImageBlit imageBlitRegion{};
+		imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.srcSubresource.layerCount = 1;
+		imageBlitRegion.srcOffsets[1] = blitSize;
+		imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.dstSubresource.layerCount = 1;
+		imageBlitRegion.dstOffsets[1] = blitSize;
+
+		// Issue the blit command
+		vkCmdBlitImage(
+			copyCmd,
+			srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&imageBlitRegion,
+			VK_FILTER_NEAREST);
+	}
+	else
+	{
+		// Just image copy
+		VkImageCopy imageCopyRegion{};
+		imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageCopyRegion.srcSubresource.layerCount = 1;
+		imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageCopyRegion.dstSubresource.layerCount = 1;
+		imageCopyRegion.extent.width = m_uWidth;
+		imageCopyRegion.extent.height = m_uHeight;
+		imageCopyRegion.extent.depth = 1;
+
+		// Issue the copy command
+		vkCmdCopyImage(
+			copyCmd,
+			srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&imageCopyRegion);
+	}
+
+	// Transition destination image to general layout, which is the required layout for mapping the image memory later on
+	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+	imageMemoryBarrier.image = dstImage;
+	imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+	// Transition back the swap chain image after the blit is done
+	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	imageMemoryBarrier.image = srcImage;
+	imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+	devicePS.FlushCommandBuffer(copyCmd, true);
+
+	// Get layout of the image (including row pitch)
+	VkImageSubresource subResource{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 0 };
+	VkSubresourceLayout subResourceLayout;
+	vkGetImageSubresourceLayout(devicePS.GetVKDevice(), dstImage, &subResource, &subResourceLayout);
+
+	// Map image memory so we can start copying from it
+	const uint8* pData;
+	vkMapMemory(devicePS.GetVKDevice(), dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&pData);
+	pData += subResourceLayout.offset;
+
+
+	bool bColorSwizzle = false;
+	if (!bSupportsBlit)
+	{
+		usg::vector<VkFormat> formatsBGR = { VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM };
+		bColorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), m_eVkSwapChainFormat) == formatsBGR.end());
+	}
+
+	uint8* pBMPData = (uint8*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_GFX_TEXTURE, (m_uWidth*m_uHeight*3) + sizeof(BITMAPINFOHEADER));
+
+
+	for (uint32_t y = 0; y < m_uHeight; y++)
+	{
+		uint32 uLine = m_uHeight - y - 1;
+		uint8* pDest = &pBMPData[m_uWidth * uLine * 3];
+		uint32* row = (uint32*)pData;
+		for (uint32_t x = 0; x < m_uWidth; x++)
+		{
+			if (bColorSwizzle)
+			{
+				pDest[0] = *((uint8*)row + 2);
+				pDest[1] = *((uint8*)row + 1);
+				pDest[2] = *((uint8*)row + 0);
+			}
+			else
+			{
+				pDest[0] = *((uint8*)row + 0);
+				pDest[1] = *((uint8*)row + 1);
+				pDest[2] = *((uint8*)row + 2);
+			}
+			pDest += 3;
+			row++;
+		}
+		pData += subResourceLayout.rowPitch;
+	}
+
+	BITMAPINFOHEADER info = { };
+
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	info.biWidth = m_uWidth;
+	info.biHeight = m_uHeight;
+	info.biPlanes = 1;
+	info.biBitCount = 24;
+	info.biCompression = BI_RGB;
+	info.biXPelsPerMeter = 1;
+	info.biYPelsPerMeter = 1;
+	info.biClrImportant = 0;
+	info.biClrImportant = 0;
+
+	BITMAPFILEHEADER	fileHdr = {};
+	fileHdr.bfType = 'MB';
+	fileHdr.bfSize = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER) + (3 * m_uWidth * m_uHeight);
+	fileHdr.bfOffBits = sizeof(fileHdr) + sizeof(BITMAPINFOHEADER);
+
+	usg::File file(szFileName, FILE_ACCESS_WRITE, FILE_TYPE_DEBUG_DATA);
+	if (file.IsOpen())
+	{
+		file.Write(sizeof(fileHdr), &fileHdr);
+		file.Write(sizeof(BITMAPINFOHEADER), &info);
+		file.Write(m_uWidth* m_uHeight * 3, pBMPData);
+		file.Close();
+	}
+
+
+#if PLATFORM_PC
+	HANDLE handle = (HANDLE)::GlobalAlloc(GHND, sizeof(BITMAPINFOHEADER) + (m_uWidth * m_uHeight * 3));
+	if(handle != nullptr)
+	{
+		char* pHndlData = (char*) ::GlobalLock((HGLOBAL)handle);
+
+		BOOL RETB = OpenClipboard(nullptr);
+		RETB = EmptyClipboard();
+
+		memcpy(pHndlData, &info, sizeof(BITMAPINFOHEADER));
+
+		memcpy(pHndlData + sizeof(BITMAPINFOHEADER), pBMPData, m_uWidth * m_uHeight * 3);
+
+		::GlobalUnlock((HGLOBAL)handle);
+
+		SetClipboardData(CF_DIB, handle);
+		CloseClipboard();
+	}
+#endif
+
+	mem::Free(pBMPData);
+
+	// Clean up resources
+	vkUnmapMemory(devicePS.GetVKDevice(), dstImageMemory);
+	vkFreeMemory(devicePS.GetVKDevice(), dstImageMemory, nullptr);
+	vkDestroyImage(devicePS.GetVKDevice(), dstImage, nullptr);
 
 }
+
 
 
 void Display_ps::RecreateSwapChain(GFXDevice* pDevice)
