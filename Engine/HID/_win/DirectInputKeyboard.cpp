@@ -16,7 +16,7 @@ namespace usg
 	// TODO: We probably want our own key code defines
 	static const CodeMap g_sKeyMapping[] =
 	{
-		{ DIK_ESCAPE , VK_ESCAPE },
+		{ DIK_ESCAPE , KEYBOARD_KEY_ESCAPE },
 		{ DIK_1, '1' },
 		{ DIK_2, '2' },
 		{ DIK_3, '3' },
@@ -27,10 +27,10 @@ namespace usg
 		{ DIK_8, '8' },
 		{ DIK_9, '9' },
 		{ DIK_0, '0' },
-		{ DIK_MINUS, VK_OEM_MINUS },
-		{ DIK_EQUALS, VK_OEM_PLUS },
-		{ DIK_BACK, VK_BACK },
-		{ DIK_TAB, VK_TAB },
+		{ DIK_MINUS, KEYBOARD_KEY_MINUS },
+		{ DIK_EQUALS, KEYBOARD_KEY_PLUS },
+		{ DIK_BACK, KEYBOARD_KEY_BACK },
+		{ DIK_TAB, KEYBOARD_KEY_TAB },
 		{ DIK_Q, 'Q' },
 		{ DIK_W, 'W' },
 		{ DIK_E, 'E' },
@@ -43,8 +43,8 @@ namespace usg
 		{ DIK_P, 'P' },
 		{ DIK_LBRACKET, '[' },
 		{ DIK_RBRACKET, ']' },
-		{ DIK_RETURN, VK_RETURN },
-		{ DIK_LCONTROL, VK_CONTROL },
+		{ DIK_RETURN, KEYBOARD_KEY_RETURN },
+		{ DIK_LCONTROL, KEYBOARD_KEY_CONTROL },
 		{ DIK_A, 'A' },
 		{ DIK_S, 'S' },
 		{ DIK_D, 'D' },
@@ -57,7 +57,7 @@ namespace usg
 		{ DIK_SEMICOLON, ';' },
 		{ DIK_APOSTROPHE, '\'' },
 		{ DIK_GRAVE, '`' },
-		{ DIK_LSHIFT, VK_SHIFT }, 
+		{ DIK_LSHIFT, KEYBOARD_KEY_SHIFT }, 
 		{ DIK_BACKSLASH, '\\' },
 		{ DIK_Z, 'Z' },
 		{ DIK_X, 'X' },
@@ -69,82 +69,83 @@ namespace usg
 		{ DIK_COMMA, ',' },
 		{ DIK_PERIOD, '.' },
 		{ DIK_SLASH, '/' },
-		{ DIK_RSHIFT, VK_SHIFT },
+		{ DIK_RSHIFT, KEYBOARD_KEY_SHIFT },
 		{ DIK_MULTIPLY, '*' },
-		{ DIK_LMENU, VK_MENU },
+		{ DIK_LMENU, KEYBOARD_KEY_ALT },
 		{ DIK_SPACE, ' ' },
-		{ DIK_CAPITAL, VK_CAPITAL },
-		{ DIK_F1, VK_F1 },
-		{ DIK_F2, VK_F2 },
-		{ DIK_F3, VK_F3 },
-		{ DIK_F4, VK_F4 },
-		{ DIK_F5, VK_F5 },
-		{ DIK_F6, VK_F6 },
-		{ DIK_F7, VK_F7 },
-		{ DIK_F8, VK_F8 },
-		{ DIK_F9, VK_F9 },
-		{ DIK_F10, VK_F10 },
-		{ DIK_NUMLOCK, VK_NUMLOCK },
-		{ DIK_SCROLL, VK_SCROLL },
-		{ DIK_NUMPAD7, VK_NUMPAD7 },
-		{ DIK_NUMPAD8, VK_NUMPAD8 },
-		{ DIK_NUMPAD9, VK_NUMPAD9 },
-		{ DIK_SUBTRACT, VK_SUBTRACT },
-		{ DIK_NUMPAD4, VK_NUMPAD4 },
-		{ DIK_NUMPAD5, VK_NUMPAD5 },
-		{ DIK_NUMPAD6, VK_NUMPAD6 },
-		{ DIK_ADD, VK_ADD },
-		{ DIK_NUMPAD1, VK_NUMPAD1 },
-		{ DIK_NUMPAD2, VK_NUMPAD2 },
-		{ DIK_NUMPAD3, VK_NUMPAD3 },
-		{ DIK_NUMPAD0, VK_NUMPAD0 },
+		{ DIK_CAPITAL, KEYBOARD_KEY_CAPS },
+		{ DIK_F1, KEYBOARD_KEY_F1 },
+		{ DIK_F2, KEYBOARD_KEY_F2 },
+		{ DIK_F3, KEYBOARD_KEY_F3 },
+		{ DIK_F4, KEYBOARD_KEY_F4 },
+		{ DIK_F5, KEYBOARD_KEY_F5 },
+		{ DIK_F6, KEYBOARD_KEY_F6 },
+		{ DIK_F7, KEYBOARD_KEY_F7 },
+		{ DIK_F8, KEYBOARD_KEY_F8 },
+		{ DIK_F9, KEYBOARD_KEY_F9 },
+		{ DIK_F10, KEYBOARD_KEY_F10 },
+		{ DIK_NUMLOCK, KEYBOARD_KEY_NUMLOCK },
+		{ DIK_SCROLL, KEYBOARD_KEY_SCROLL },
+		{ DIK_NUMPAD7, KEYBOARD_KEY_NUMPAD7 },
+		{ DIK_NUMPAD8, KEYBOARD_KEY_NUMPAD8 },
+		{ DIK_NUMPAD9, KEYBOARD_KEY_NUMPAD9 },
+		{ DIK_SUBTRACT, KEYBOARD_KEY_SUBTRACT },
+		{ DIK_NUMPAD4, KEYBOARD_KEY_NUMPAD4 },
+		{ DIK_NUMPAD5, KEYBOARD_KEY_NUMPAD5 },
+		{ DIK_NUMPAD6, KEYBOARD_KEY_NUMPAD6 },
+		{ DIK_ADD, KEYBOARD_KEY_ADD },
+		{ DIK_NUMPAD1, KEYBOARD_KEY_NUMPAD1 },
+		{ DIK_NUMPAD2, KEYBOARD_KEY_NUMPAD2 },
+		{ DIK_NUMPAD3, KEYBOARD_KEY_NUMPAD3 },
+		{ DIK_NUMPAD0, KEYBOARD_KEY_NUMPAD0 },
 		{ DIK_DECIMAL, '.' },
 		{ DIK_OEM_102, '<' },    /* <> or \| on RT 102-key keyboard (Non-U.S.) */
-		{ DIK_F11, VK_F11 },
-		{ DIK_F12, VK_F12 },
-		{ DIK_F13, VK_F13 },
-		{ DIK_F14, VK_F14 },
-		{ DIK_F15, VK_F15 },
-		{ DIK_KANA, VK_KANA },
+		{ DIK_F11, KEYBOARD_KEY_F11 },
+		{ DIK_F12, KEYBOARD_KEY_F12 },
+		{ DIK_F13, KEYBOARD_KEY_F13 },
+		{ DIK_F14, KEYBOARD_KEY_F14 },
+		{ DIK_F15, KEYBOARD_KEY_F15 },
+		{ DIK_KANA, KEYBOARD_KEY_KANA },
 		{ DIK_ABNT_C1, '?' },   /* /? on Brazilian keyboard */
-		{ DIK_CONVERT, VK_CONVERT },          /* (Japanese keyboard)            */
-		{ DIK_NOCONVERT, VK_NONCONVERT },     /* (Japanese keyboard)            */
+		{ DIK_CONVERT, KEYBOARD_KEY_CONVERT },          /* (Japanese keyboard)            */
+		{ DIK_NOCONVERT, KEYBOARD_KEY_NONCONVERT },     /* (Japanese keyboard)            */
 		{ DIK_YEN, 165 },					 /* (Japanese keyboard)            */
 		{ DIK_ABNT_C2, '.' },
 		{ DIK_NUMPADEQUALS, '=' },
-//		{ DIK_PREVTRACK, VK_MEDIA_PREV_TRACK },
+//		{ DIK_PREVTRACK, KEYBOARD_KEY_MEDIA_PREV_TRACK },
 		{ DIK_AT, '@' },
 		{ DIK_COLON, ':' },
-		{ DIK_KANJI, VK_KANJI },
-		{ DIK_STOP, VK_MEDIA_STOP },
-		{ DIK_AX, VK_OEM_AX }, 
-		//{ DIK_NEXTTRACK, VK_MEDIA_NEXT_TRACK },
-		{ DIK_NUMPADENTER, VK_RETURN }, 
-		{ DIK_RCONTROL, VK_CONTROL },
-		//{ DIK_MUTE, VK_VOLUME_MUTE }, 
-		//{ DIK_PLAYPAUSE, VK_MEDIA_PLAY_PAUSE },
-		//{ DIK_MEDIASTOP, VK_MEDIA_STOP },
-		//{ DIK_VOLUMEDOWN, VK_VOLUME_DOWN },
-		//{ DIK_VOLUMEUP, VK_VOLUME_UP },
+		{ DIK_KANJI, KEYBOARD_KEY_KANJI },
+		{ DIK_STOP, KEYBOARD_KEY_STOP },
+		{ DIK_AX, KEYBOARD_KEY_AX }, 
+		//{ DIK_NEXTTRACK, KEYBOARD_KEY_MEDIA_NEXT_TRACK },
+		{ DIK_NUMPADENTER, KEYBOARD_KEY_RETURN }, 
+		{ DIK_RCONTROL, KEYBOARD_KEY_CONTROL },
+		//{ DIK_MUTE, KEYBOARD_KEY_VOLUME_MUTE }, 
+		//{ DIK_PLAYPAUSE, KEYBOARD_KEY_MEDIA_PLAY_PAUSE },
+		//{ DIK_MEDIASTOP, KEYBOARD_KEY_MEDIA_STOP },
+		//{ DIK_VOLUMEDOWN, KEYBOARD_KEY_VOLUME_DOWN },
+		//{ DIK_VOLUMEUP, KEYBOARD_KEY_VOLUME_UP },
 		{ DIK_NUMPADCOMMA, ',' },
-		{ DIK_RMENU, VK_MENU },
-		{ DIK_UP, VK_UP },
-		{ DIK_PAUSE, VK_PAUSE },
-		{ DIK_HOME, VK_HOME },
-		{ DIK_LEFT, VK_LEFT },
-		{ DIK_RIGHT, VK_RIGHT },
-		{ DIK_END, VK_END },
-		{ DIK_DOWN, VK_DOWN },
-		{ DIK_NEXT, VK_NEXT },
-		{ DIK_INSERT, VK_INSERT },
-		{ DIK_DELETE, VK_DELETE },
+		{ DIK_RMENU, KEYBOARD_KEY_ALT },
+		{ DIK_UP, KEYBOARD_KEY_UP },
+		{ DIK_PAUSE, KEYBOARD_KEY_PAUSE },
+		{ DIK_HOME, KEYBOARD_KEY_HOME },
+		{ DIK_LEFT, KEYBOARD_KEY_LEFT },
+		{ DIK_RIGHT, KEYBOARD_KEY_RIGHT },
+		{ DIK_END, KEYBOARD_KEY_END },
+		{ DIK_DOWN, KEYBOARD_KEY_DOWN },
+		{ DIK_PGDN, KEYBOARD_KEY_PGDN },
+		{ DIK_PGUP, KEYBOARD_KEY_PGUP },
+		{ DIK_INSERT, KEYBOARD_KEY_INSERT },
+		{ DIK_DELETE, KEYBOARD_KEY_DELETE },
 		{ DIK_DIVIDE, '/' },
-		{ DIK_SYSRQ, VK_PRINT }
+		{ DIK_SYSRQ, KEYBOARD_KEY_PRINT }
 	};
 
 	// Unmapped keys
 	/*
-	DIK_PRIOR, DIK_UNDERLINE, DIK_UNLABELED, DIK_CALCULATOR, DIK_WEBHOME,
+	DIK_UNDERLINE, DIK_UNLABELED, DIK_CALCULATOR, DIK_WEBHOME,
 	DIK_SYSRQ, DIK_LWIN, DIK_RWIN, DIK_APPS, DIK_POWER, DIK_SLEEP, DIK_WAKE,
 	DIK_WEBSEARCH, DIK_WEBFAVORITES, DIK_WEBREFRESH, DIK_WEBSTOP, DIK_WEBFORWARD,
 	DIK_WEBBACK, DIK_MYCOMPUTER, DIK_MAIL, DIK_MEDIASELECT*/
@@ -210,7 +211,7 @@ namespace usg
 
 	void DirectInputKeyboard::Update()
 	{
-		char keys[KEYBOARD_KEY_COUNT] = {};
+		char keys[256] = {};
 
 		m_pDevice->Poll();
 
@@ -259,8 +260,17 @@ namespace usg
 			DWORD key = m_objectData[i].dwOfs;
 			if (m_objectData[i].dwData & 0x80 && m_uInputChars < MAX_INPUT_CHARS)
 			{
-				m_inputChars[m_uInputChars] = (char16)key;
-				m_uInputChars++;
+				for (memsize j = 0; j < ARRAY_SIZE(g_sKeyMapping); j++)
+				{
+					if (g_sKeyMapping[j].uDICode == key)
+					{
+						char16 keyOut = (char16)g_sKeyMapping[j].uVKCode;
+						m_inputChars[m_uInputChars] = keyOut;
+						m_uInputChars++;
+						break;
+					}
+				}
+
 			}
 		}
 		

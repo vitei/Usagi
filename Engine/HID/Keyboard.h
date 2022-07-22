@@ -6,6 +6,7 @@
 #define __USG_HID_KEYBOARD__
 
 #include "Engine/HID/InputDefines.h"
+#include "Engine/HID/InputEnums.pb.h"
 
 namespace usg{
 
@@ -15,7 +16,7 @@ public:
     Keyboard(){ m_uInputChars = 0; }
     ~Keyboard(){}
 
-	bool GetKey(uint8 keyboardKey, ButtonState eState = BUTTON_STATE_HELD) const;
+	bool GetKey(uint32 keyboardKey, ButtonState eState = BUTTON_STATE_HELD) const;
 	bool GetToggleHeld(KeyboardToggle eToggle) const { return m_bToggles[eToggle]; }
 
 	char16 GetInputChar(uint32 uChar) const { return m_inputChars[uChar]; }

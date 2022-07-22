@@ -217,7 +217,7 @@ bool Controller::GetValueAsBool( ControllerDetail &detail )
 		return pGamepad ? pGamepad->GetButtonDown(detail.uInputIdA, detail.eInputState) : false;
 	}
 	case INPUT_TYPE_KEY:
-		return m_pKeyboard ? m_pKeyboard->GetKey((uint8)detail.uInputIdA, detail.eInputState) : false;
+		return m_pKeyboard ? m_pKeyboard->GetKey(detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_MOUSE_BUTTON:
 		return m_pMouse ? m_pMouse->GetButton((MouseButton)detail.uInputIdA, detail.eInputState) : false;
 	case INPUT_TYPE_SCREEN_TOUCH:
@@ -318,14 +318,14 @@ float Controller::GetValueAsFloat( ControllerDetail &detail )
 		{
 		case AXIS_TYPE_ABSOLUTE:
 		{
-			float fOutput = m_pKeyboard->GetKey((uint8)detail.uInputIdB, BUTTON_STATE_HELD) ? fValue : 0.0f;
-			fOutput += m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? -fValue : 0.0f;
+			float fOutput = m_pKeyboard->GetKey(detail.uInputIdB, BUTTON_STATE_HELD) ? fValue : 0.0f;
+			fOutput += m_pKeyboard->GetKey(detail.uInputIdA, BUTTON_STATE_HELD) ? -fValue : 0.0f;
 			return fOutput;
 		}
 		case AXIS_TYPE_POSITIVE:
-			return m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
+			return m_pKeyboard->GetKey(detail.uInputIdA, BUTTON_STATE_HELD) ? 1.0f : 0.0f;
 		case AXIS_TYPE_NEGATIVE:
-			return m_pKeyboard->GetKey((uint8)detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
+			return m_pKeyboard->GetKey(detail.uInputIdA, BUTTON_STATE_HELD) ? -1.0f : 0.0f;
 		default:
 			ASSERT(false);
 			break;
@@ -377,12 +377,12 @@ bool Controller::CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, B
 	return true;
 }
 
-bool Controller::CreateKeyMapping(uint8 uKey, MappingOutput& output, ButtonState eInputState)
+bool Controller::CreateKeyMapping(uint32 uKey, MappingOutput& detailOut, ButtonState eInputState /*= BUTTON_STATE_PRESSED*/)
 {
 	ControllerDetail detail;
-	detail.pResult = &output;
-	output.eOutput = OUTPUT_TYPE_BOOL;
-	output.Clear();
+	detail.pResult = &detailOut;
+	detailOut.eOutput = OUTPUT_TYPE_BOOL;
+	detailOut.Clear();
 	detail.deviceType = INPUT_TYPE_KEY;
 	detail.axisType = AXIS_TYPE_POSITIVE;
 	detail.uInputIdA = (uint32)uKey;
@@ -490,14 +490,14 @@ bool Controller::CreateAxisFromButtonPair(uint32 uButtonA, uint32 uButtonB, Mapp
 	return true;
 }
 
-bool Controller::CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& output, float fStickyRate, bool bReverse)
+bool Controller::CreateAxisFromKeyPair(uint32 uKeyA, uint32 uKeyB, MappingOutput& detailOut, float fStickyRate /*= 0.0f*/, bool bReverse /*= false*/)
 {
 	ControllerDetail detail;
-	detail.pResult = &output;
+	detail.pResult = &detailOut;
 	detail.pResult->fStickyRate = fStickyRate;
-	output.eOutput = OUTPUT_TYPE_FLOAT;
-	output.Clear();
-	output.data.fValue = 0.0f;
+	detailOut.eOutput = OUTPUT_TYPE_FLOAT;
+	detailOut.Clear();
+	detailOut.data.fValue = 0.0f;
 
 	detail.deviceType = INPUT_TYPE_KEY;
 	detail.axisType = AXIS_TYPE_ABSOLUTE;
@@ -532,7 +532,7 @@ void Controller::AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle)
 
 }
 
-void Controller::AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle)
+void Controller::AddKeyToggleToPrev(uint32 uKey, bool bReverseToggle)
 {
 	memsize index = m_details.size();
 	ASSERT(index > 0);

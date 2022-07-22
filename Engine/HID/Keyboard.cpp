@@ -7,7 +7,7 @@
 namespace usg
 {
 
-	bool Keyboard::GetKey(uint8 keyboardKey, ButtonState eState) const
+	bool Keyboard::GetKey(uint32 keyboardKey, ButtonState eState) const
 	{
 		switch(eState)
 		{

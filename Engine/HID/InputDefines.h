@@ -8,7 +8,6 @@
 
 namespace usg{
 
-const int KEYBOARD_KEY_COUNT = 256;
 
 enum SampleType
 {

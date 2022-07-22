@@ -78,19 +78,19 @@ protected:
 	float	GetValueAsFloat( ControllerDetail &detail );
 
 	bool CreateButtonMapping(uint32 uButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED, uint32 uSubDevice = 0);
-	bool CreateKeyMapping(uint8 uKey, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
+	bool CreateKeyMapping(uint32 uKey, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateAxisMapping(uint32 uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uDeviceIdx = 0);
 	bool CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	bool CreateButtonFromAxis(uint32 uAxis,  AxisType eType, MappingOutput& detailOut);
 	bool CreateAxisFromButtonPair(uint32 uButtonA, uint32 uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uSubDevice = 0);
-	bool CreateAxisFromKeyPair(uint8 uKeyA, uint8 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
+	bool CreateAxisFromKeyPair(uint32 uKeyA, uint32 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	void ResetDetails();
 	void ClearMappingSet(MappingOutput* pOutputs, uint32 uCount);
 
 	void AddPadToggleToPrev(uint32 eButton, uint32 uSubDevice, bool bReverseToggle);
 	void AddMouseToggleToPrev(MouseButton eButton, bool bReverseToggle);
-	void AddKeyToggleToPrev(uint8 uKey, bool bReverseToggle);
+	void AddKeyToggleToPrev(uint32 uKey, bool bReverseToggle);
 
 	uint32	GetGamepadId() { return m_uGamepadId; }
 	Gamepad* GetGamepad(uint32 uSubDevice = 0);
