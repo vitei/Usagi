@@ -128,6 +128,7 @@ namespace usg
 
 		case TAG_SHADOW:
 		{
+			szText = szText + 1;
 			return true;
 		}
 

@@ -308,6 +308,11 @@ namespace usg
 
 			float fLeft, fRight, fTop, fBottom;
 			bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
+			if(!bFound)
+			{
+				// Show a ? if we are missing this character to avoid unselectable text etc
+				bFound = font->GetCharacterCoords('?', fLeft, fRight, fTop, fBottom);
+			}
 
 			if (bFound) {
 				uFoundCharCount++;
