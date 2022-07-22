@@ -19,7 +19,7 @@ enum MaterialAnimationMemberType {
 
 message AnimationHeader
 {
-	required string name = 1 [(nanopb).max_size = 40];
+	required string name = 1 [(nanopb).max_size = 128];
 	required uint32 frameCount = 2 [default = 0];
 	required float frameRate = 3 [default = 30];
 	required bool isLoop = 4 [default = false];

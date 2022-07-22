@@ -8,7 +8,7 @@ package usg.exchange;
 
 message SkeletalAnimationHeader
 {
-	required string name = 1 [(nanopb).max_size = 40];
+	required string name = 1 [(nanopb).max_size = 128];
 	required uint32 frameCount = 2;
 	required float frameRate = 3;
 	required bool isLoop = 4 [default = false];
