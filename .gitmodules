@@ -14,7 +14,8 @@
 	branch = vitei-settings
 [submodule "Engine/ThirdParty/gli"]
 	path = Engine/ThirdParty/gli
-	url = https://github.com/vitei/gli.git
+	url = https://github.com/g-truc/gli.git
+	branch = master
 [submodule "Engine/ThirdParty/ImGuiColorTextEdit"]
 	path = Engine/ThirdParty/ImGuiColorTextEdit
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git
