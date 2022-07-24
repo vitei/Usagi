@@ -80,11 +80,11 @@ namespace usg
 		return GUID();
 	}
 
-	DirectInput::DeviceInfo* DirectInput::GetDevice(const char* szName)
+	DirectInput::DeviceInfo* DirectInput::GetDevice(const char* szName, bool bAllowConected)
 	{
 		for (auto& device : m_joysticks)
 		{
-			if (device.productName == szName)
+			if (device.productName == szName && (bAllowConected || !device.bConnected) )
 			{
 				return &device;
 			}
@@ -240,7 +240,7 @@ namespace usg
 
 	BOOL DirectInput::DeviceEnumCallback(const DIDEVICEINSTANCE* pInst)
 	{
-		DeviceInfo* pInfo = GetDevice(pInst->tszInstanceName);
+		DeviceInfo* pInfo = GetDevice(pInst->tszInstanceName, false);
 		if (IsXInputDevice(&pInst->guidProduct))
 			return DIENUM_CONTINUE;
 		if (!pInfo)

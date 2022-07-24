@@ -47,7 +47,7 @@ namespace usg {
 			bool					bConnected;
 		};
 
-		DeviceInfo* GetDevice(const char* szName);
+		DeviceInfo* GetDevice(const char* szName, bool bAllowConnected = true);
 		const DeviceInfo* GetDevice(const char* szName) const;
 
 		usg::vector<DeviceInfo>	m_joysticks;

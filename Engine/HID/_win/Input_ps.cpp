@@ -96,6 +96,11 @@ void Input_ps::RegisterDeviceChange()
 {
 	m_xboxPad.TryReconnect();
 
+	if(m_pDirectInput)
+	{
+		m_pDirectInput->UpdateConnectedDevices();
+	}
+
 	// Add more joysticks if needed
 	for (memsize i = 0; i < m_pDirectInput->GetJoystickCount() && i<MAX_DI_DEVICES; i++)
 	{
