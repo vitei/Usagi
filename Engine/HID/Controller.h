@@ -82,7 +82,7 @@ protected:
 	bool CreateMouseButtonMapping(MouseButton eButton, MappingOutput& detailOut, ButtonState eInputState = BUTTON_STATE_PRESSED);
 	bool CreateAxisMapping(uint32 uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uDeviceIdx = 0);
 	bool CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, MappingOutput &detailOut, float fStickyRate = 0.0f, bool bReverse = false);
-	bool CreateButtonFromAxis(uint32 uAxis,  AxisType eType, MappingOutput& detailOut);
+	bool CreateButtonFromAxis(uint32 uAxis,  AxisType eType, MappingOutput& detailOut, uint32 uSubDevice = 0);
 	bool CreateAxisFromButtonPair(uint32 uButtonA, uint32 uButtonB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false, uint32 uSubDevice = 0);
 	bool CreateAxisFromKeyPair(uint32 uKeyA, uint32 uKeyB, MappingOutput& detailOut, float fStickyRate = 0.0f, bool bReverse = false);
 	void ResetDetails();

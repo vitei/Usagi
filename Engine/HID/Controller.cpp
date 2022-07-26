@@ -452,7 +452,7 @@ bool Controller::CreateMouseAxisMapping(MouseAxis uAxis, AxisType eType, Mapping
 }
 
 
-bool Controller::CreateButtonFromAxis( uint32 uAxis,  AxisType eType, MappingOutput& detailOut )
+bool Controller::CreateButtonFromAxis( uint32 uAxis,  AxisType eType, MappingOutput& detailOut, uint32 uSubDevice)
 {
 	ControllerDetail detail;
 	detail.pResult		= &detailOut;
@@ -463,6 +463,7 @@ bool Controller::CreateButtonFromAxis( uint32 uAxis,  AxisType eType, MappingOut
 	detail.axisType		= eType;
 	detail.uInputIdA	= uAxis;
 	detail.uInputIdB	= _GamepadAxis_count;
+	detail.uSubDevice	= uSubDevice;
 
 	m_details.push_back(detail);
 
