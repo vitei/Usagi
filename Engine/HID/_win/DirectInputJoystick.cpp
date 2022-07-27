@@ -128,7 +128,7 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			return;
 		}
 
-		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_BACKGROUND | DISCL_EXCLUSIVE)))
+		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_EXCLUSIVE)))
 		{
 			return;
 		}
