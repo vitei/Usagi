@@ -173,7 +173,7 @@ namespace usg
 			return false;
 		}
 
-		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_EXCLUSIVE)))
+		if (FAILED(m_pDevice->SetCooperativeLevel(pInput->GetWindow(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY)))
 		{
 			return false;
 		}
