@@ -64,7 +64,12 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	SetAnimated(pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING);
 
 	//	SetMaterial(&pMesh->material);
-	m_pszName = pszName;
+	m_name = pszName;
+	str::RemovePath(m_name);
+	str::TruncateExtension(m_name);
+	m_name += " (";
+	m_name += pMesh->matName;
+	m_name += ")";
 	m_uLod = pMesh->uLodIndex;
 	m_bCanHaveShadow = pMesh->layer < RenderLayer::LAYER_TRANSLUCENT;
 
@@ -187,7 +192,7 @@ void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)
 
 bool Model::RenderMesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	pContext->BeginGPUTag(m_pszName, Color::Blue);
+	pContext->BeginGPUTag(m_name.c_str(), Color::Blue);
 
 	// FIXME: Cleaner system?
 	switch (renderContext.eRenderPass)

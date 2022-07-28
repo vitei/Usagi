@@ -126,7 +126,7 @@ namespace usg {
 		const ModelResource::Mesh*	m_pMeshResource;
 		UVMapper					m_uVMapper[ModelResource::Mesh::MAX_UV_STAGES];
 		ConstantSet*				m_pOverridesConstants[OVERRIDE_COUNT];
-		const char*					m_pszName;
+		usg::string					m_name;
 		uint8						m_uOverrides;
 		uint8						m_uReqOverrides;
 		bool						m_bCanHaveShadow;
