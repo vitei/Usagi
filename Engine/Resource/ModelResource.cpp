@@ -53,8 +53,8 @@ static RenderLayer layerMapping[] =
 {
 	RenderLayer::LAYER_OPAQUE,
 	RenderLayer::LAYER_TRANSLUCENT,
-	RenderLayer::LAYER_SUBTRACTIVE,
-	RenderLayer::LAYER_ADDITIVE
+	RenderLayer::LAYER_ADDITIVE,
+	RenderLayer::LAYER_SUBTRACTIVE
 };
 
 
