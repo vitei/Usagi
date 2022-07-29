@@ -72,6 +72,16 @@ namespace usg
 	{
 		auto pRoot = ComponentEntity::GetRoot();
 		ASSERT(pRoot != nullptr);
+
+		auto& ne = ComponentEntity::GetNewEntities();
+		while (!ne.Empty())
+		{
+			const auto entityAndParent = ne.Pop();
+			Entity e = entityAndParent.first;
+
+			FreeEntityRecursive(e);
+		}
+
 		Entity freeEntity = pRoot->GetChildEntity();
 		while (freeEntity)
 		{
