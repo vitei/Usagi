@@ -327,9 +327,11 @@ bool RibbonTrail::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	if(m_uSetVerts > 1)
 	{
+		pContext->BeginGPUTag("Ribbon", usg::Color::Red);
 		m_material.Apply(pContext);
 		pContext->SetVertexBuffer(&m_vertices, 0);
 		pContext->DrawIndexedEx(&m_indices, 0, (m_uSetVerts-1)*4);
+		pContext->EndGPUTag();
 
 		return true;
 	}

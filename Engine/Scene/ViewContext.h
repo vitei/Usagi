@@ -35,6 +35,7 @@ public:
 	virtual void ClearLists();
 	virtual const Camera* GetCamera() const override;
 	virtual Octree::SearchObject& GetSearchObject() override;
+	virtual bool NeedsSort() const override { return true; }
 
 	void SetHighestLOD(uint32 uLOD);
 	void SetLODBias(float fBias);

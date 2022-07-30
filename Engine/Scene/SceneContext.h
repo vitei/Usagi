@@ -45,6 +45,7 @@ public:
 	void SetActive(bool bActive) { m_bActive = bActive; }
 	virtual const Camera* GetCamera() const { return nullptr; }
 	virtual const Sphere* GetSphere() const { return nullptr; }
+	virtual bool NeedsSort() const { return false; }
 	const Scene* GetScene() const { return m_pScene; }
 	Scene* GetScene() { return m_pScene; }
 	uint32 GetVisiblePVSCount() const { return m_uVisiblePVSCount; }

@@ -91,6 +91,7 @@ void ParticleEffect::Init(GFXDevice* pDevice, Scene* pScene, const Matrix4x4& mM
 	m_mTransform = mMat;
 	// FIXME: Add the transform node back
 	m_pRenderGroup = m_pScene->CreateRenderGroup(NULL);//m_pTransformNode);Scale
+	m_pRenderGroup->SetSortPos(mMat.vPos().v3());
 	m_fScale = fScale;
 	
 	SetSystemVelocity(vVelocity);

@@ -166,6 +166,13 @@ namespace usg
 		SetLayer(layerMapping[m_emissionDef.sortSettings.eRenderLayer]);
 		SetPriority(m_emissionDef.sortSettings.uPriority);
 
+#ifdef DEBUG_BUILD
+		if(pResource)
+		{
+			m_name = pResource->GetName();
+		}
+#endif
+
 		RenderPassHndl renderPass = m_pOwner->GetScene()->GetRenderPasses(0).GetRenderPass(*this);
 		if (pResource)
 		{

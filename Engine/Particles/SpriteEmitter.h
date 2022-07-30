@@ -44,6 +44,8 @@ protected:
 	uint32 EmitParticle(uint32 uCount);
 	bool Kill(uint32 uParticle);
 
+	usg::string				m_name;
+
 private:
 	uint8*					m_pCpuData;
 	uint8*					m_pMetaData;

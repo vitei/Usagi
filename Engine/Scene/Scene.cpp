@@ -411,7 +411,7 @@ void Scene::PerformVisibilityTesting(GFXDevice* pDevice)
 		if( it->IsActive() )
 		{
 			it->ClearLists();
-			if(it->GetCamera())
+			if(it->GetCamera() && it->NeedsSort())
 			{
 				m_activeView.BuildCameraFromModel(it->GetCamera()->GetModelMatrix());
 			}

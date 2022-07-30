@@ -154,12 +154,14 @@ bool SpriteEmitter::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	if (m_uTailPart!=m_uActivePart)
 	{
+		pContext->BeginGPUTag(m_name.c_str(), usg::Color::Green);
 		ASSERT(!m_bDirty);
 		SetMaterial(pContext);
 		// For now just hard coding the depth texture to a certain slot for particle effects
 		//pContext->BindTexture(5, pPostFXSys->GetPlatform().GetLinearDepthTex(), m_samplerHndl);
 		pContext->SetVertexBuffer(&m_vertices);
 		pContext->DrawImmediate(m_uActivePart-m_uTailPart, m_uTailPart);
+		pContext->EndGPUTag();
 	}
 
 	return true;
