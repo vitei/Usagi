@@ -86,9 +86,9 @@ namespace usg
 				// Disabling cleanup between modes for now as not needed for demo which keeps re-running the same mission and introduces bugs
 				// FIXME: 
 				// FIXME: 
-				//usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
-	//			m_pDevice->ClearDynamicResources();
-//				mem::FreeToLastTag();
+				usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
+				m_pDevice->ClearDynamicResources();
+				mem::FreeToLastTag();
 			}
 			*m_ppLoadMode = NULL;
 		}
