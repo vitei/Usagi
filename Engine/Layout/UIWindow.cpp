@@ -174,7 +174,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 			alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
 			alphaDecl.srcBlend = usg::BLEND_FUNC_SRC_ALPHA;
 			alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
-			alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_ADD;
+			alphaDecl.blendEqAlpha = usg::BLEND_EQUATION_MAX;
 			alphaDecl.srcBlendAlpha = usg::BLEND_FUNC_SRC_ALPHA;
 			alphaDecl.dstBlendAlpha = usg::BLEND_FUNC_DST_ALPHA;
 		}
