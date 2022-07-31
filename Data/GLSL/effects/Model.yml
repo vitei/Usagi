@@ -46,7 +46,7 @@ CustomEffects:
           - { type: bool,   name: bReflectionMap, default: false } # 76
           - { type: float,  name: alphaRef,       count: 1, default: 1.0 } # 80
           - { type: int,    name: alphaCmp,       count: 1, default: 0 } # 84 // Less, Equal, Greater
-          - { type: float,  name: emissionMapFactor, count: 1, default: 1.0 } # 88
+          - { type: vec4,  name: emissionMapMul, count: 1, default: [1.0, 1.0, 1.0, 1.0] } # 88
       - binding: Custom0
         shaderType: VS 
         Variables:

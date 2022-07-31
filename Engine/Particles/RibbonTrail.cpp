@@ -219,6 +219,14 @@ void RibbonTrail::Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffe
 }
 
 
+void RibbonTrail::WorldShifted(const Vector3f& vShift)
+{
+	for (uint32 i = 0; i < m_uDeclLength; i++)
+	{
+		m_pCpuData[i].vPos -= vShift;
+	}
+}
+
 bool RibbonTrail::Update(float fElapsed)
 {
 	if(fElapsed <= 0.0f && m_fEffectTime > 0.0f)

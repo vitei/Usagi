@@ -28,6 +28,7 @@ public:
 	void AddEmitter(GFXDevice* pDevice, ParticleEmitter* pEmitter);	
 	void RemoveEmitter(ParticleEmitter* pEmitter);	// Really for editor use only
 	void SetWorldMat(const Matrix4x4& mMat);
+	void WorldShifted(const Vector3f& vShift);
 	void Kill(bool bForce = false);
 	Vector4f GetPosition(float fLerp) const;
 	bool IsAlive();

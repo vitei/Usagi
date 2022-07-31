@@ -108,6 +108,31 @@ namespace usg
 			}
 		};
 
+
+		// Matrices only get updated once a frame, to prevent conflicting data we always update them 
+		class OriginShiftMatrix : public usg::System
+		{
+		public:
+
+			struct Inputs
+			{
+				Required<MatrixComponent> matrix;
+			};
+
+			struct Outputs
+			{
+				Required<MatrixComponent> matrix;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
+
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
+			{
+				outputs.matrix.Modify().matrix.SetPos(inputs.matrix->matrix.vPos().v3() - evt.vShift);
+			}
+		};
+
 		class MeasureDistance : public usg::System
 		{
 		public:

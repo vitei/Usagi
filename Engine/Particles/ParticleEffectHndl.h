@@ -24,6 +24,7 @@ public:
 	inline void Kill(bool bForce = false);
 	inline void ForceUpdate(float fElapsed);
 	inline void EnableEmission(bool bEnable);
+	inline void WorldShifted(const usg::Vector3f& vShift);
 
 	SAFEPOINTER_COPY(ParticleEffectHndl)
 
@@ -58,6 +59,16 @@ inline void ParticleEffectHndl::SetVelocity(const Vector3f& vVelocity)
 	{
 		pEffect->SetSystemVelocity(vVelocity);
 	}	
+}
+
+
+inline void ParticleEffectHndl::WorldShifted(const Vector3f& vShift)
+{
+	ParticleEffect* pEffect = GetPointer();
+	if (pEffect)
+	{
+		pEffect->WorldShifted(vShift);
+	}
 }
 
 inline void ParticleEffectHndl::EnableEmission(bool bEnable)

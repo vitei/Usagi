@@ -31,6 +31,7 @@ public:
 	virtual void FreeFromPool();
 	virtual void UpdateBuffers(GFXDevice* pDevice);
 	virtual void SetScale(float fScale);
+	virtual void WorldShifted(const Vector3f& vShift) override;
 	void SetDeclaration(GFXDevice* pDevice, const particles::RibbonData* pDecl);
 	uint32 GetMaxCount() { return m_uMaxLength; }
 	bool IsLargeEnough(const particles::RibbonData& decl) { return GetRequiredVerts(decl.fLifeTime) <= GetMaxCount();}

@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Physics/PhysicsEvents.pb.h"
 #include "Engine/Physics/PhysicsComponents.pb.h"
@@ -94,6 +95,11 @@ namespace usg
 				{
 					outputs.particle.Modify().vVelocity += evt.vVelocity;
 				}
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
+			{
+				outputs.particle.GetRuntimeData().hndl.WorldShifted(evt.vShift);
 			}
 
 		};

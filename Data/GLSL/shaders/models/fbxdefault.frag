@@ -85,7 +85,7 @@ void main(void)
 	if(uMaterial.bEmissiveMap)
 	{
     	vEmissive = texture( sampler2, vo_vTexCoord01.xy ).rgb; 
-    	vEmissive *= uMaterial.emissionMapFactor;
+    	vEmissive *= uMaterial.emissionMapMul.rgb;
 	}
 	
 	vEmissive += uMaterial.emission.rgb;

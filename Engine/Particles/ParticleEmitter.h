@@ -48,6 +48,10 @@ public:
 	void EnableEmission(bool bEnable) { m_bEmissionAllowed = bEnable; }
 	virtual bool ActiveParticles() = 0;
 
+	// If the effect caches previous positions they need updating
+	virtual void WorldShifted(const Vector3f& vShift) { }
+
+
 	// Note not real time, called before init to override parameters
 	virtual void SetScale(float fScale) { }
 	// For any CPU based operations on vertices. Probably shouldn't be necessary on modern hardware,

@@ -120,6 +120,15 @@ Vector4f ParticleEffect::GetPosition(float fLerp) const
 	return Lerp(m_vPrevPos, m_mTransform.vPos(), fLerp);
 }
 
+
+void ParticleEffect::WorldShifted(const Vector3f& vShift)
+{
+	for (ParticleEmitter* pEmitter : m_emitters)
+	{
+		pEmitter->WorldShifted(vShift);
+	}
+}
+
 bool ParticleEffect::Update(float fElapsed)
 {
 	bool bAlive = false;
