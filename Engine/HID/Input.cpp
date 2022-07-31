@@ -34,6 +34,9 @@ void Input::Cleanup()
 
 void Input::DeviceChange()
 {
+	if(!g_bInitCalled)
+		return;
+
 	g_platform.RegisterDeviceChange();
 
 	RenumberGamepads(g_fnEvaluate);
