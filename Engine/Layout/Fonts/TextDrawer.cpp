@@ -210,7 +210,6 @@ namespace usg
 		string u8Text = m_pParent->GetText();
 		const FontHndl& font = m_pParent->GetFont();
 		float fTmpWidth = 0.0f;
-		char* szTxtTmp = (char*)u8Text.data();	// Valid on new eastl, need to cast now we've gone back to the old one
 		const float fWidthLimit = m_pParent->GetWidthLimit();
 
 		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
@@ -219,11 +218,12 @@ namespace usg
 		if(fWidthLimit > 0.0f)
 		{
 			// Insert fake newlines
-			while(*szTxtTmp != 0)
+			for(uint32 uChar = 0; uChar < u8Text.size();)
 			{
-				uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
-				U8Char thisChar(szTxtTmp, uByteCount);
-				if (uByteCount == 1 && *szTxtTmp == '\n')
+				const char* szThisText = &u8Text[uChar];
+				uint32 uByteCount = U8Char::GetByteCount(szThisText);
+				U8Char thisChar(szThisText, uByteCount);
+				if (uByteCount == 1 && *szThisText == '\n')
 				{
 					fTmpWidth = 0.0f;
 				}
@@ -236,22 +236,45 @@ namespace usg
 				fTmpWidth += fCharWidth;
  				if (fTmpWidth > fWidthLimit)
 				{
-					szTxtTmp--;
-					while (szTxtTmp > u8Text.c_str())
+					uint32 uCharCache = uChar;
+					uChar--;
+					bool bFound = false;
+					while (uChar < u8Text.size())
 					{
-						uint32 uByteCount = U8Char::GetByteCount(szTxtTmp);
-						U8Char thisChar(szTxtTmp, uByteCount);
-						if ( (uByteCount == 1 && *szTxtTmp == ' ') || uByteCount > 1)
+						szThisText = &u8Text[uChar];
+						uint32 uByteCount = U8Char::GetByteCount(szThisText);
+						U8Char thisChar(szThisText, uByteCount);
+						if ( (uByteCount == 1 && *szThisText == ' '))
 						{
-							*szTxtTmp = '\n';
+							u8Text[uChar] = '\n';
 							fTmpWidth = 0.0f;
+							bFound = true;
 							break;
 						}
-						szTxtTmp--;
+						uChar--;
+					}
+
+					if(!bFound)
+					{
+						uChar = uCharCache-1;
+						while (uChar < u8Text.size())
+						{
+							szThisText = &u8Text[uChar];
+							uint32 uByteCount = U8Char::GetByteCount(szThisText);
+							U8Char thisChar(szThisText, uByteCount);
+							if (uByteCount == 2)
+							{
+								u8Text.insert(uChar-1, "\n");
+								fTmpWidth = 0.0f;
+								bFound = true;
+								break;
+							}
+							uChar--;
+						}
 					}
 				}
 		
-				szTxtTmp += uByteCount;
+				uChar += uByteCount;
 			}
 		}
 
