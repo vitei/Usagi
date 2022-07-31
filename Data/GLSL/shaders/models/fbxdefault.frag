@@ -105,11 +105,8 @@ void main(void)
 	{
     	vSpecRead = texture( sampler3, vo_vTexCoord01.zw ); 
 	}
-	else
-	{
-		// TODO: Should be applied regardless but defaults coming through too low
-		vSpecular.rgb *= uMaterial.specular.rgb;
-	}
+	vSpecular.rgb *= uMaterial.specular.rgb;
+
 	vSpecular.rgb *= vSpecRead.rgb; 
 	vSpecular *= vo_vColor;
 
