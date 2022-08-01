@@ -305,6 +305,16 @@ namespace usg
 				inputs.scene.GetRuntimeData().GetData().pScene->simulate(fDelta);// physics::GetTimeStep());
 			}
 
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
+			{
+				PreSimulation(inputs, outputs, 0.0f);
+				outputs.scene.GetRuntimeData().pSceneData->pScene->shiftOrigin(ToPhysXVec3(evt.vShift));
+
+				PhysicsSceneDirty dirtyEvt;
+				inputs.eventManager->handle->RegisterEvent(dirtyEvt);
+			}
+
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const physics::details::Events::MarkShapeDirty& evt)
 			{
 				auto& mutableRtd = outputs.scene.GetRuntimeData().GetData();
@@ -400,13 +410,6 @@ namespace usg
 #endif
 			}
 
-			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
-			{
- 				outputs.scene.GetRuntimeData().pSceneData->pScene->shiftOrigin(ToPhysXVec3(evt.vShift));
-
-				PhysicsSceneDirty dirtyEvt;
-				inputs.eventManager->handle->RegisterEvent(dirtyEvt);
-			}
 		};
 
 		class TransformKinematicBody : public System

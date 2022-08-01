@@ -82,7 +82,8 @@ namespace usg
 			}
 		};
 
-		// Catch all the objects not shifted by the physics system
+		// Shift all transforms.
+		// Note non rigid body transforms will override these new values; but best to stay in sync
 		class OriginShiftNonPhysicsBodies : public usg::System 
 		{
 		public:
@@ -100,13 +101,14 @@ namespace usg
 			DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
 
 
-			EXCLUSION(IfHas<TransformComponent, FromParents>, IfHas<RigidBody, FromSelfOrParents>)
+			EXCLUSION(IfHas<TransformComponent, FromParents>)
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ShiftWorldOrigin& evt)
 			{
 				outputs.transform.Modify().position = inputs.transform->position - evt.vShift;
 			}
 		};
+
 
 
 		// Matrices only get updated once a frame, to prevent conflicting data we always update them 

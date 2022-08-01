@@ -167,6 +167,8 @@ namespace usg
 
 		Entity rootEntity = ComponentEntity::GetRoot();
 
+		GetEventManager().TriggerPreRunEvents(m_systemCoordinator, rootEntity, m_uFrameCounter);
+
 		RunSignal runSignal(fElapsed);
 		m_systemCoordinator.TriggerFromRoot(rootEntity, runSignal);
 

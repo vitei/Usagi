@@ -35,6 +35,8 @@ public:
 	void SetupListener(const uint32 uEventId, MessageDispatch& dispatch);
 
 	void TriggerEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame);
+	void TriggerPreRunEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame);
+
 	void TriggerEventsForEntity(SystemCoordinator& systemCoordinator, Entity e, Entity rootEntity);
 	void RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount);
 	static double GetTimeNow();
@@ -104,6 +106,15 @@ public:
 	}
 
 	template<typename EventType>
+	void RegisterPreRunEvent(const EventType& evt, typename Event<EventType>::ExtraData extra = nullptr)
+	{
+		void* buffer = m_heap.Allocate(sizeof(Event<EventType>), 4, 0, ALLOC_EVENT);
+		ASSERT(buffer != nullptr);
+		Event<EventType>* wrappedEvent = new (buffer) Event<EventType>(evt, t, extra);
+		AddToPreRunEventQueue(wrappedEvent);
+	}
+
+	template<typename EventType>
 	void RegisterEventAtTime(const EventType& evt, double t, typename Event<EventType>::ExtraData extra = nullptr)
 	{
 		void* buffer = m_heap.Allocate(sizeof(Event<EventType>), 4, 0, ALLOC_EVENT);
@@ -131,13 +142,19 @@ public:
 private:
 	static const uint32 HEAP_SIZE = 65536;
 
+	void TriggerEventsInt(EventQueue& Queue, SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame);
+
+
 	Messenger* m_messenger;
 	MemHeap m_heap;
 	void* m_pMem;
 	EventQueue m_eventQueue;
+	EventQueue m_preRunEventQueue;
+
 	bool m_bRegisteredDispatch;
 
 	void AddToEventQueue(TriggerableEvent* evt);
+	void AddToPreRunEventQueue(TriggerableEvent* evt);
 	float64 GetServerTimePrecise();
 
 	void RegisterNetworkEventInt(const EventHeader& hdr, const uint32 uEventId, const void* pData, const memsize uDataSize, bool bIncludeSelf);

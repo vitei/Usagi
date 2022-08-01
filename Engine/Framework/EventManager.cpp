@@ -37,6 +37,11 @@ namespace usg
 		m_eventQueue.push_back(evt);
 	}
 
+	void EventManager::AddToPreRunEventQueue(TriggerableEvent* evt)
+	{
+		m_preRunEventQueue.push_back(evt);
+	}
+
 	float64 EventManager::GetServerTimePrecise()
 	{
 		return NetTime::GetServerTimePrecise();
@@ -196,15 +201,16 @@ void EventManager::TriggerEventsForEntity(SystemCoordinator& systemCoordinator, 
 	}
 }
 
-void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame)
+
+void EventManager::TriggerEventsInt(EventQueue& queue, SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame)
 {
 	const float64 now = GetTimeNow();
-	for( auto eventIterator = m_eventQueue.begin()
-	   ; eventIterator != m_eventQueue.end()
-	   ; )
+	for (auto eventIterator = queue.begin()
+		; eventIterator != queue.end()
+		; )
 	{
 		TriggerableEvent* evt = *eventIterator;
-		if(evt->time <= now)
+		if (evt->time <= now)
 		{
 			if (!evt->GetEntity() || evt->GetEntity()->GetSpawnFrame() != 0)
 			{
@@ -212,7 +218,7 @@ void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity ro
 				evt->~TriggerableEvent();
 				m_heap.Deallocate(evt);
 
-				eventIterator = m_eventQueue.erase(eventIterator);
+				eventIterator = queue.erase(eventIterator);
 			}
 			else
 			{
@@ -224,6 +230,16 @@ void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity ro
 			++eventIterator;
 		}
 	}
+}
+
+void EventManager::TriggerPreRunEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame)
+{
+	TriggerEventsInt(m_preRunEventQueue, systemCoordinator, rootEntity, uFrame);
+}
+
+void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame)
+{
+	TriggerEventsInt(m_eventQueue, systemCoordinator, rootEntity, uFrame);
 }
 
 void EventManager::RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount)

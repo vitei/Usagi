@@ -28,6 +28,8 @@ public:
 	virtual bool Update(float fElapsed);
 	virtual void UpdateBuffers(GFXDevice* pDevice);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext) override;
+	virtual void WorldShifted(const Vector3f& vShift) override;
+	virtual void ShiftParticle(void* pPart, const Vector3f& vShift) {}
 
 	virtual void CalculateMaxBoundingArea(usg::Sphere& sphereOut) = 0;
 	

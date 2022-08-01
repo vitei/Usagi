@@ -733,6 +733,16 @@ namespace usg
 
 		return fLife;
 	}
+
+	void ScriptEmitter::ShiftParticle(void* pGPUData, const Vector3f& vShift)
+	{
+		// FIXME: Totally unoptimized; but not dealing with large numbers
+		if (IsLocalSpace())
+			return;
+
+		Particle::ScriptedParticle* pPart = (Particle::ScriptedParticle*)pGPUData;
+		pPart->vPos -= vShift;
+	}
 	
 	void ScriptEmitter::SetMaterial(usg::GFXContext* pContext)
 	{

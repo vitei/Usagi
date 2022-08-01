@@ -150,6 +150,14 @@ bool SpriteEmitter::Kill(uint32 uParticle)
 	return bShift;
 }
 
+void SpriteEmitter::WorldShifted(const Vector3f& vShift)
+{
+	for (uint32 i = m_uTailPart; i < m_uActivePart + m_uTailPart; i++)
+	{
+		ShiftParticle(m_pCpuData + (m_uVertexSize * i), vShift);
+	}
+}
+
 bool SpriteEmitter::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	if (m_uTailPart!=m_uActivePart)
