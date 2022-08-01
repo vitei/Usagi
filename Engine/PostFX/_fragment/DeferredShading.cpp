@@ -283,7 +283,7 @@ void DeferredShading::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 
 void DeferredShading::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 { 
-	if (m_pDestTarget != pDst)
+	//if (m_pDestTarget != pDst)
 	{
 		RenderPassHndl renderPassHndl = pDst->GetRenderPass();
 		// This is obviously not ideal, but it shouldn't normally happen. You'd have to be turning off bloom at run time.
@@ -292,8 +292,6 @@ void DeferredShading::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 
 		for (uint32 i = 0; i < MAX_EXTRA_DIR_LIGHTS; i++)
 		{
-			m_baseDirPass.state = pDevice->GetPipelineState(renderPassHndl, m_baseDirPass.decl);
-
 			m_additionalShadowPass[i].state = pDevice->GetPipelineState(renderPassHndl, m_additionalShadowPass[i].decl);
 		}
 
