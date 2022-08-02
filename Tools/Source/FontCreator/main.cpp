@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 					edgeColoringSimple(shape, 3.0);
 					// range, scale, translation
 					generateMSDF(msdf, shape, 4.0, fontDef.scale, trans/fontDef.scale, pxRange);
-					generatePseudoSDF(sdf, shape, 4.0, fontDef.scale, trans / fontDef.scale);
+					generateSDF(sdf, shape, 4.0, fontDef.scale, trans / fontDef.scale);
 					EncodeUVs(texDef, bounds, chrInfo[uChrCount]);
 					EncodeCharacter(texDef, msdf, sdf, protoDef);
 

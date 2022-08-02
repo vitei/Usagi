@@ -677,6 +677,12 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 		double1 = reinterpret_cast<FbxSurfaceLambert *>(pFBXMaterial)->DiffuseFactor;
 
 		usg::Color diffuse((float)double3.mData[0], (float)double3.mData[1], (float)double3.mData[2], 1.0f);
+		bool bHasDiffuse = false;
+		pMaterial->GetVariable("bDiffuseMap", &bHasDiffuse);
+		if(bHasDiffuse)
+		{
+			diffuse.Assign(1.0f, 1.0f, 1.0f, 1.0f);
+		}
 	//	diffuse *= double1;
 		pMaterial->SetVariableArray("diffuse", diffuse.rgba(), 4);
 
@@ -711,7 +717,13 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 		double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->Shininess;
 		pMaterial->SetVariable("specularpow", (float)Math::Max(double1, 0.01));
 
-		if (double1 > 0.01)
+		bool bHasSpecMap = false;
+		pMaterial->GetVariable("bSpecMap", &bHasSpecMap);
+		if (bHasSpecMap)
+		{
+			pMaterial->SetVariableArray("specular", usg::Color::White.rgba(), 4);
+		}
+		else if (double1 > 0.01)
 		{
 			// Specular Factor
 			double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->SpecularFactor;

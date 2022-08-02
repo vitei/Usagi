@@ -33,9 +33,9 @@ CustomEffects:
         shaderType: PS
         defines: "!SHADOW_PASS"
         Variables:
-          - { type: vec4,   name: emission,       count: 1 }  # 0
-          - { type: vec4,   name: diffuse,        count: 1 }  # 16
-          - { type: vec4,   name: specular,       count: 1 }  # 32
+          - { type: vec4,   name: emission,       count: 1, default: [0.0, 0.0, 0.0, 0.0] }  # 0
+          - { type: vec4,   name: diffuse,        count: 1, default: [1.0, 1.0, 1.0, 1.0] }  # 16
+          - { type: vec4,   name: specular,       count: 1, default: [1.0, 1.0, 1.0, 1.0] }  # 32
           - { type: float,  name: reflectionfactor, count: 1 } # 48
           - { type: float,  name: specularpow,    count: 1, default: 10.0 } # 52
           - { type: float,  name: alpha,          count: 1, default: 1.0 } # 56
