@@ -50,9 +50,9 @@ namespace exchange {
 		template <class VariableType>
 		bool GetVariable(const char* szName, VariableType* pVar, uint32 uIndex = 0)
 		{
-			for (uint32 i = 0; i < m_materialDef.GetConstantSetCount(); i++)
+			for (uint32 i = 0; i < m_materialDef[0].GetConstantSetCount(); i++)
 			{
-				if (m_materialDef.GetVariableTyped(i, GetConstantSetData(i), szName, pVar, uIndex))
+				if (m_materialDef[0].GetVariableTyped(i, GetConstantSetData(0, i), szName, pVar, uIndex))
 					return true;
 			}
 			return false;
