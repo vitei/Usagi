@@ -1123,28 +1123,22 @@ void FbxLoad::AddStreams(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* ppNode,
 
 	const bool bHasSkin = pFbxMesh->GetDeformerCount(FbxDeformer::eSkin) > 0;
 
-	usg::exchange::SkinningType eSkinType;
+	usg::exchange::SkinningType eSkinType = bHasSkin ? usg::exchange::SkinningType_RIGID_SKINNING : usg::exchange::SkinningType_NO_SKINNING;;
+
+	uint32 uNumOfDeformers = pFbxMesh->GetDeformerCount();
 
 	if (bHasSkin)
 	{
-		// TODO: Add primitive info
-		FbxSkin * pSkinDeformer = (FbxSkin *)pFbxMesh->GetDeformer(0, FbxDeformer::eSkin);
-		FbxSkin::EType eSkinningType = pSkinDeformer->GetSkinningType();
-		if (eSkinningType == FbxSkin::eRigid)
+		for (uint32 uDeformer = 0; uDeformer < uNumOfDeformers; ++uDeformer)
 		{
-			eSkinType = usg::exchange::SkinningType_RIGID_SKINNING;
-		}
-		else// if (eSkinningType == FbxSkin::eBlend || eSkinningType == FbxSkin::eLinear || eSkinningType == FbxSkin::eDualQuaternion)
-		{
-			eSkinType = usg::exchange::SkinningType_SMOOTH_SKINNING;
+			FbxSkin * pSkinDeformer = (FbxSkin *)pFbxMesh->GetDeformer(uDeformer, FbxDeformer::eSkin);
+			FbxSkin::EType eSkinningType = pSkinDeformer->GetSkinningType();
+			if (eSkinningType != FbxSkin::eRigid)
+			{
+				eSkinType = usg::exchange::SkinningType_SMOOTH_SKINNING;
+			}
 		}
 	}
-	else
-	{
-		eSkinType = usg::exchange::SkinningType_NO_SKINNING;
-	}
-
-	uint32 uNumOfDeformers = pFbxMesh->GetDeformerCount();
 
 	::exchange::PrimitiveInfo& info = pShape->GetPrimitiveInfo();
 	::exchange::PrimitiveInfo_init(info);
@@ -1497,6 +1491,18 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 			}
 		}
 		uMaxWeights = usg::Math::Max((uint32)itr->weights.size(), uMaxWeights); 
+	}
+
+	BoneWeight tmpWeight;
+	tmpWeight.index = 0;
+	tmpWeight.fValue = 0.0f;
+
+	for (auto itr = m_activeWeights.begin(); itr != m_activeWeights.end(); ++itr)
+	{
+		while( itr->weights.size() < uMaxWeights )
+		{
+			itr->weights.push_back(tmpWeight);
+		}
 	}
 
 

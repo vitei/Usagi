@@ -994,7 +994,7 @@ void GFXDevice_ps::End()
 	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
 	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit returned %d", res);
 
 	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
 	{
@@ -1259,7 +1259,8 @@ VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bo
 	commandBufferAllocateInfo.commandBufferCount = 1;
 
 	VkResult res = vkAllocateCommandBuffers(m_vkDevice, &commandBufferAllocateInfo, &cmdBuffer);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkAllocateCommandBuffers returned %d", res);
+
 
 	// If requested, also start the new command buffer
 	if (begin)
@@ -1271,7 +1272,7 @@ VkCommandBuffer GFXDevice_ps::CreateCommandBuffer(VkCommandBufferLevel level, bo
 		cmdBufferBeginInfo.pNext = NULL;
 
 		res = vkBeginCommandBuffer(cmdBuffer, &cmdBufferBeginInfo);
-		ASSERT(res == VK_SUCCESS);
+		FATAL_RELEASE(res == VK_SUCCESS, "vkBeginCommandBuffer returned %d", res);
 	}
 
 	return cmdBuffer;
@@ -1287,7 +1288,7 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	}
 
 	VkResult res = vkEndCommandBuffer(commandBuffer);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkEndCommandBuffer returned %d", res);
 
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1295,11 +1296,11 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	submitInfo.pCommandBuffers = &commandBuffer;
 
 	res = vkQueueSubmit(m_queue[QUEUE_TYPE_TRANSFER], 1, &submitInfo, VK_NULL_HANDLE);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit returned %d", res);
 
 	// TODO: Remove these waits
 	res = vkQueueWaitIdle(m_queue[QUEUE_TYPE_TRANSFER]);
-	ASSERT(res == VK_SUCCESS);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueWaitIdle returned %d", res);
 
 	if (free)
 	{

@@ -51,7 +51,7 @@ namespace usg {
 		m_pfnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr(pDevice->GetPlatform().GetVKDevice(), "vkCmdDebugMarkerEndEXT");
 
 		err = vkAllocateCommandBuffers(pDevice->GetPlatform().GetVKDevice(), &cmd, &m_cmdBuff);
-		ASSERT(!err);
+		FATAL_RELEASE(err == VK_SUCCESS, "vkAllocateCommandBuffers returned %d", err);
 
 		m_pParent = pParent;
 
@@ -85,16 +85,16 @@ namespace usg {
 
 		// Reset the command buffer to re-use it. Later we should just have pregenerated buffers per 
 		err = vkResetCommandBuffer(m_cmdBuff, 0);
-		ASSERT(!err);
+		FATAL_RELEASE(err == VK_SUCCESS, "vkResetCommandBuffer returned %d", err);
 
 		err = vkBeginCommandBuffer(m_cmdBuff, &cmd_buf_info);
-		ASSERT(!err);
+		FATAL_RELEASE(err == VK_SUCCESS, "vkBeginCommandBuffer returned %d", err);
 	}
 
 	void GFXContext_ps::End()
 	{
 		VkResult res = vkEndCommandBuffer(m_cmdBuff);
-		ASSERT(res == VK_SUCCESS);
+		FATAL_RELEASE(res == VK_SUCCESS, "vkEndCommandBuffer returned %d", res);
 	}
 
 	void GFXContext_ps::Transfer(RenderTarget* pTarget, Display* pDisplay)
