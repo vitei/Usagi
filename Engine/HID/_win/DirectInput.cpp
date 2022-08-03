@@ -259,16 +259,20 @@ namespace usg
 				case 0x09cc054c: 
 				case 0x0ce6054c: 
 					pInfo->bIsGamepad = true;
+					break;
 				default:
 					pInfo->bIsGamepad = false;
+					break;
 				}
 
 				switch (pInst->guidProduct.Data1)
 				{
 				case 0xb687044f:
 					pInfo->bIsThrottle = true;
+					break;
 				default:
 					pInfo->bIsThrottle = false;
+					break;
 				}
 
 				if ( str::Find( pInfo->productName.c_str(), "Throttle") != nullptr)

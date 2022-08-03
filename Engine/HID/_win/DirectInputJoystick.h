@@ -48,7 +48,7 @@ private:
 	usg::string				m_name;
 	bool					m_bConnected;
 	bool					m_bIsGamepad;
-
+	bool					m_bHasPovDpad;
 };
  
 }

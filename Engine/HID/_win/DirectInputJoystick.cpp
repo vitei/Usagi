@@ -69,6 +69,7 @@ DirectInputJoystick::DirectInputJoystick()
 	m_uInputId = 0;
 	m_uCaps = 0;
 	m_uNumButtons = 0;
+	m_bHasPovDpad = false;
 	m_uNumAxes = 0;
 	m_bIsGamepad = false;
 	m_bConnected = false;
@@ -148,18 +149,28 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			{
 				m_uCaps |= CAP_RIGHT_STICK;
 			}
-			if (diCaps.dwPOVs > 0)
+
+			m_bHasPovDpad = false;
+			if(!m_bIsGamepad)
 			{
-				m_uCaps |= CAP_POV;
+				if (diCaps.dwPOVs > 0)
+				{
+					m_uCaps |= CAP_POV;
+				}
+				if (diCaps.dwPOVs > 1)
+				{
+					m_uCaps |= CAP_POV2;
+				}
+				if (diCaps.dwPOVs > 2)
+				{
+					m_uCaps |= CAP_POV3;
+				}
 			}
-			if (diCaps.dwPOVs > 1)
+			else if (diCaps.dwPOVs > 0)
 			{
-				m_uCaps |= CAP_POV2;
+				m_bHasPovDpad = true;
 			}
-			if (diCaps.dwPOVs > 2)
-			{
-				m_uCaps |= CAP_POV3;
-			}
+			
 			m_uNumAxes = diCaps.dwAxes;
 			m_uNumButtons = diCaps.dwButtons;
 		}
@@ -326,7 +337,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 		{
 			if (js.rgbButtons[pMapping->uDirectInputId] & 0x80)
 			{
-				deviceStateOut.uButtonsDown |= (1 << (pMapping->uAbstractID -1));
+				deviceStateOut.uButtonsDown |= pMapping->uAbstractID;
 			}
 			pMapping++;
 		}
@@ -341,6 +352,9 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 			}
 		}
 	}
+
+	bool bLeft, bRight, bUp, bDown;
+	float fPovAxis;
 	
 
 	if (m_bIsGamepad)
@@ -353,6 +367,17 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 			deviceStateOut.fAxisValues[g_axisMappingPad[i].uAbstractID] = GetAxis(js, i);
 
 		}
+
+		if (m_bHasPovDpad)
+		{
+			GetPovData(js.rgdwPOV[0], bUp, bRight, bDown, bLeft, fPovAxis);
+
+			deviceStateOut.uButtonsDown |= bUp ? GAMEPAD_BUTTON_UP : 0;
+			deviceStateOut.uButtonsDown |= bRight ? GAMEPAD_BUTTON_RIGHT : 0;
+			deviceStateOut.uButtonsDown |= bDown ? GAMEPAD_BUTTON_DOWN : 0;
+			deviceStateOut.uButtonsDown |= bLeft ? GAMEPAD_BUTTON_LEFT : 0;
+		}
+	
 	}
 	else
 	{
@@ -366,9 +391,6 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 		}
 
-		bool bLeft, bRight, bUp, bDown;
-		float fPovAxis;
-
 		if (m_uCaps & CAP_POV)
 		{
 			GetPovData(js.rgdwPOV[0], bUp, bRight, bDown, bLeft, fPovAxis);
@@ -379,6 +401,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV_RIGHT : 0;
 			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV_DOWN : 0;
 			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV_LEFT : 0;
+			
 		}
 
 		if (m_uCaps & CAP_POV2)
