@@ -110,7 +110,7 @@ public:
 	{
 		void* buffer = m_heap.Allocate(sizeof(Event<EventType>), 4, 0, ALLOC_EVENT);
 		ASSERT(buffer != nullptr);
-		Event<EventType>* wrappedEvent = new (buffer) Event<EventType>(evt, t, extra);
+		Event<EventType>* wrappedEvent = new (buffer) Event<EventType>(evt, 0, extra);
 		AddToPreRunEventQueue(wrappedEvent);
 	}
 
@@ -227,16 +227,16 @@ struct InitHelper<EVENT, false, false, false> { void operator()(lua_State* pLua,
 template<typename EVENT>
 struct SystemCoordinator::SignalHelper< OnEventSignal<EVENT> >
 {
-static void RegisterSignal(SystemCoordinator& systemCoordinator)
-{
-	if(systemCoordinator.m_pMessageDispatch != nullptr)
+	static void RegisterSignal(SystemCoordinator& systemCoordinator)
 	{
-		ASSERT(systemCoordinator.m_pEventManager != nullptr);
-		systemCoordinator.m_pEventManager->SetupListener(ProtocolBufferFields<EVENT>::ID, *systemCoordinator.m_pMessageDispatch);
+		if (systemCoordinator.m_pMessageDispatch != nullptr)
+		{
+			ASSERT(systemCoordinator.m_pEventManager != nullptr);
+			systemCoordinator.m_pEventManager->SetupListener(ProtocolBufferFields<EVENT>::ID, *systemCoordinator.m_pMessageDispatch);
+		}
+		InitHelper<EVENT, LuaSerializer<EVENT>::GENERATE, LuaSerializer<EVENT>::SEND, LuaSerializer<EVENT>::RECEIVE> helper;
+		helper(systemCoordinator.m_pLuaVM->Root(), systemCoordinator);
 	}
-	InitHelper<EVENT, LuaSerializer<EVENT>::GENERATE, LuaSerializer<EVENT>::SEND, LuaSerializer<EVENT>::RECEIVE> helper;
-	helper(systemCoordinator.m_pLuaVM->Root(), systemCoordinator);
-}
 };
 
 namespace Components
@@ -244,7 +244,7 @@ namespace Components
 	struct EventManagerHandle
 	{
 		EventManagerHandle() : handle(nullptr) {}
-		EventManager& operator*()  { return *handle; }
+		EventManager& operator*() { return *handle; }
 		EventManager* operator->() { return handle; }
 
 		EventManager* handle;
@@ -252,7 +252,7 @@ namespace Components
 }
 
 template<>
-inline constexpr char * NamePB<EventManagerHandle>()
+inline constexpr char* NamePB<EventManagerHandle>()
 {
 	return "EventManagerHandle";
 }
