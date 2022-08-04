@@ -5,7 +5,7 @@
 #include "Engine/Memory/GPUHeap.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 
-#define MERGE_DELAY 10	// 10 frames
+#define MERGE_DELAY 5	// 5 frames
 
 namespace usg {
 
@@ -195,6 +195,7 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 	memsize uFrontPadding = GetRequiredFrontPadding(pInfo->pAllocator, pInfo);
 
 	pData = (void*)AlignAddress((memsize)pInfo->pLocation, uAlign);
+	ASSERT(memsize(pData)-(memsize)(pInfo->pLocation) == GetRequiredFrontPadding(pAllocator, pInfo));
 	memsize blockSize = ((memsize)pData) + AlignSizeUp(uSize, uAlign);
 	blockSize -= (memsize)pInfo->pLocation;
 	ASSERT(blockSize <= pInfo->uSize);

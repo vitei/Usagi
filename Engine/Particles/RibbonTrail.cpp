@@ -156,7 +156,7 @@ void RibbonTrail::Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const partic
 		pIndices4[uIndex++] = i+3;
 	}
 
-	m_indices.Init(pDevice, pIndices4, uIndices4, true );
+	m_indices.Init(pDevice, pIndices4, uIndices4, false );
 	// +2 because we have a cap vertex at each end
 	m_vertices.Init(pDevice, NULL, uVertexSize, uMaxLength+2, "RibbonTrail", usg::GPU_USAGE_DYNAMIC);
 

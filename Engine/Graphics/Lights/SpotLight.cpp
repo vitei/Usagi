@@ -166,9 +166,9 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 	pData->vRange.Assign(1.0f / GetFar(), GetFar(), GetNear()/GetFar(), 0.0f);
 
 	float fAdjustedOuterCutoff = GetOuterCutoff();
-	if (fAdjustedOuterCutoff >= GetInnerCutoff())
+	if (fAdjustedOuterCutoff <= GetInnerCutoff())
 	{
-		fAdjustedOuterCutoff  = GetInnerCutoff() * 0.95f;
+		fAdjustedOuterCutoff  = GetInnerCutoff() * 1.05f;
 	}
 
 	pData->fCosSpotCutoff = cosf(fAdjustedOuterCutoff);

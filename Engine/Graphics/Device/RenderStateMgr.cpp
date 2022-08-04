@@ -253,6 +253,7 @@ PipelineStateHndl RenderStateMgr::GetPipelineState(const RenderPassHndl& renderP
 	pipelineInit.layout = layout;
 	pipelineInit.eSampleCount = decl.eSampleCount;
 	pipelineInit.renderPass = renderPass;
+	pipelineInit.uPatchControlPoints = 0;
 	pipelineInit.InitCmpValue();
 
 	PipelineStateHndl hndl = m_pImpl->pipelines.GetState(&pipelineInit, pDevice);

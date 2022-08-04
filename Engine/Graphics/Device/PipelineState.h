@@ -20,16 +20,16 @@ namespace usg {
 		AlphaStateHndl				alpha;
 		RasterizerStateHndl			ras;
 		DepthStencilStateHndl		depth;
-		PrimitiveType				ePrimType;
-		SampleCount					eSampleCount;
-		uint32						uPatchControlPoints;
+		PrimitiveType				ePrimType = PT_COUNT;
+		SampleCount					eSampleCount = SAMPLE_COUNT_INVALID;
+		uint32						uPatchControlPoints = 0;
 
 		EffectHndl 					pEffect;
 		InputBindingHndl			pBinding;
 		PipelineLayoutHndl			layout;
 		usg::RenderPassHndl			renderPass;
 
-		uint64						uCmpValue;
+		uint64						uCmpValue = 0;
 
 		void InitCmpValue();
 		bool operator==(const PipelineInitData& rhs) const
