@@ -994,7 +994,7 @@ void GFXDevice_ps::End()
 	submitInfo.pWaitDstStageMask = &pipe_stage_flags;
 
 	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
-	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit returned %d", res);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit(GFX) returned %d", res);
 
 	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
 	{
@@ -1296,7 +1296,7 @@ void GFXDevice_ps::FlushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 	submitInfo.pCommandBuffers = &commandBuffer;
 
 	res = vkQueueSubmit(m_queue[QUEUE_TYPE_TRANSFER], 1, &submitInfo, VK_NULL_HANDLE);
-	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit returned %d", res);
+	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit(Transfer) returned %d", res);
 
 	// TODO: Remove these waits
 	res = vkQueueWaitIdle(m_queue[QUEUE_TYPE_TRANSFER]);
