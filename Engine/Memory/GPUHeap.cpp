@@ -90,19 +90,26 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 	CriticalSection::ScopedLock lock(m_criticalSection);
 
 	BlockInfo* pSmallest = NULL;
-	uint32 uSpace = (uint32)AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
+	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
 	uint32 uCurrentFrame = pDevice->GetFrameCount();
 
+	bool bHasNoFrontPadding = false;
 	for( auto pInfo : m_freeList)
 	{
 		ASSERT(pInfo->bValid);
 
 		// Find the smallest 
-		if(CanAlloc(uCurrentFrame, pInfo->uFreeFrame) && pInfo->pAllocator == NULL && (pInfo->uSize >= uSpace) )
+		memsize uFrontPadding = GetRequiredFrontPadding(pAllocator, pInfo);
+		memsize uTotalSize = uSpace + uFrontPadding;
+		if(CanAlloc(uCurrentFrame, pInfo->uFreeFrame) && pInfo->pAllocator == NULL && (pInfo->uSize >= uTotalSize) )
 		{
-			if(pSmallest == NULL || pInfo->uSize < pSmallest->uSize)
+			// If it's the first, or is the first without padding, or is the smallest without padding
+			if( (pSmallest == nullptr)
+				|| ((uFrontPadding == 0) && !bHasNoFrontPadding)
+				|| ((uFrontPadding == 0) && (pInfo->uSize < pSmallest->uSize)) )
 			{
 				pSmallest = pInfo;
+				bHasNoFrontPadding = (uFrontPadding == 0);
 			}
 		}
 	}
@@ -185,9 +192,12 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 
 	void* pData = NULL;
 
+	memsize uFrontPadding = GetRequiredFrontPadding(pInfo->pAllocator, pInfo);
+
 	pData = (void*)AlignAddress((memsize)pInfo->pLocation, uAlign);
 	memsize blockSize = ((memsize)pData) + AlignSizeUp(uSize, uAlign);
 	blockSize -= (memsize)pInfo->pLocation;
+	ASSERT(blockSize <= pInfo->uSize);
 	pInfo->pAllocator = pAllocator;
 
 	// We need a new block, quick add one
@@ -275,8 +285,10 @@ bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 	{
 		ASSERT(pInfo->bValid);
 		ASSERT(pInfo->pAllocator==NULL);
-		// Find the smallest 
-		if( pInfo->uSize >= uSpace && CanAlloc(uCurrentFrame, pInfo->uFreeFrame) )
+		
+		memsize uFrontPadding = GetRequiredFrontPadding(pAllocator, pInfo);
+
+		if( pInfo->uSize >= (uSpace+ uFrontPadding) && CanAlloc(uCurrentFrame, pInfo->uFreeFrame) )
 		{
 			return true;
 		}

@@ -47,6 +47,14 @@ private:
 		bool			bValid;
 	};
 
+	static memsize GetRequiredFrontPadding(MemAllocator* pAllocator, BlockInfo* pBlock)
+	{
+		memsize uDataLoc = (memsize)pBlock->pLocation;
+		memsize uFrontPadding = AlignSizeUp(uDataLoc, pAllocator->GetAlign()) - uDataLoc;
+
+		return uFrontPadding;
+	}
+
 	void SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList);
 	BlockInfo* PopList(BlockInfo** ppSrcList, BlockInfo** ppDstList);
 	bool CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame);
