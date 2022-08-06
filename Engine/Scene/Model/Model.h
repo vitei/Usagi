@@ -76,7 +76,7 @@ public:
 	void SetPriority(uint8 uPriority);
 	void RestoreDefaultLayer();
 	bool IsOnScreen();
-	bool ShouldDraw() { return m_bVisible; }
+	bool ShouldDraw() { return m_bShouldBeVisible; }
 	uint32 GetMeshCount() const;
 	Skeleton& GetSkeleton() { return *m_pSkeleton; }
 	const Skeleton& GetSkeleton() const { return *m_pSkeleton; }
