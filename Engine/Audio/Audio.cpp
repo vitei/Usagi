@@ -571,6 +571,7 @@ SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
 				// We only allow one instance, drop
 				if ((*it)->object.GetSoundFile() == pSoundFile)
 				{
+					(*it)->hndl.Stop();
 					it.RemoveElement();
 				}
 			}
