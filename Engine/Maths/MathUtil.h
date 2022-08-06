@@ -29,6 +29,8 @@ namespace Math
 	uint32 RandMax();
 	float RandSign();
 	float RangedRandom(const float low, const float high);
+
+	// Up to, but not including high
 	sint32 RangedRandomSInt(const sint32 low, const sint32 high);
 	uint32 RangedRandomUInt(const uint32 low, const uint32 high);
 	void SeedRand();

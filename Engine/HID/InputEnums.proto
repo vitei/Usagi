@@ -107,6 +107,9 @@ enum MouseAxis
     MOUSE_DELTA_Y_NORM = 8;
 	MOUSE_DELTA_X_NORM_ASPECT_X = 9;
     MOUSE_DELTA_WHEEL = 10;
+    // For specifying a screen area to create a box from
+    MOUSE_NORM_CUSTOM_BOX_X = 11;
+    MOUSE_NORM_CUSTOM_BOX_Y = 12;
 };
 
 

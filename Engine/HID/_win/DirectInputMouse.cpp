@@ -177,5 +177,17 @@ namespace usg
 		else
 			m_fAxis[MOUSE_DELTA_WHEEL] = 0.0f;
 
+
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_X] = m_mouseBox.bAspectCorrect ? m_fAxis[MOUSE_NORM_ASPECT_POS_X] : m_fAxis[MOUSE_NORM_POS_X];
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_Y] = m_fAxis[MOUSE_NORM_POS_Y];
+
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_X] -= m_mouseBox.vCentre.x;
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_Y] -= m_mouseBox.vCentre.y;
+
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_X] /= m_mouseBox.vBounds.x;
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_Y] /= m_mouseBox.vBounds.y;
+
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_X] = usg::Math::Clamp(m_fAxis[MOUSE_NORM_CUSTOM_BOX_X], -1.f, 1.0f);
+		m_fAxis[MOUSE_NORM_CUSTOM_BOX_Y] = usg::Math::Clamp(m_fAxis[MOUSE_NORM_CUSTOM_BOX_Y], -1.f, 1.0f);
 	}
 }
