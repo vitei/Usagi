@@ -47,7 +47,7 @@ private:
 
 	struct ASSAO_Settings
 	{
-		float Radius = 6.f;//1.2f;
+		float Radius = 1.2f;//1.2f;
 		float ShadowMultiplier = 1.0f;
 		float ShadowPower = 1.50f;
 		float ShadowClamp = 0.98f;

@@ -89,6 +89,7 @@ BUFFER_LAYOUT(1, UBO_MATERIAL_ID) uniform Material
     float       EffectHorizonAngleThreshold;            // limit errors on slopes and caused by insufficient geometry tessellation (0.05 to 0.5)
     float       EffectSamplingRadiusNearLimitRec;          // if viewspace pixel closer than this, don't enlarge shadow sampling radius anymore (makes no sense to grow beyond some distance, not enough samples to cover everything, so just limit the shadow growth; could be SSAOSettingsFadeOutFrom * 0.1 or less)
 
+    float       RadiusDistScalingFunctionPow;
     float       DepthPrecisionOffsetMod;
     float       NegRecEffectRadius;                     // -1.0 / EffectRadius
     float       LoadCounterAvgDiv;                      // 1.0 / ( halfDepthMip[SSAO_DEPTH_MIP_LEVELS-1].sizeX * halfDepthMip[SSAO_DEPTH_MIP_LEVELS-1].sizeY )

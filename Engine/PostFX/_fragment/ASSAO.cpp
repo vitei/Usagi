@@ -47,6 +47,7 @@ namespace usg
 	    float		EffectFadeOutAdd;                       // effect fade out to distance   (ex. 100)
 	    float		EffectHorizonAngleThreshold;            // limit errors on slopes and caused by insufficient geometry tessellation (0.05 to 0.5)
 	    float		EffectSampleRadiusNearLimitRec;          // if viewspace pixel closer than this, don't enlarge shadow sampling radius anymore (makes no sense to grow beyond some distance, not enough samples to cover everything, so just limit the shadow growth; could be SSAOSettingsFadeOutFrom * 0.1 or less)
+		float		RadiusDistScalingFunctionPow;
 
 	    float		DepthPrecisionOffsetMod;
 	    float		NegRecEffectRadius;                     // -1.0 / EffectRadius
@@ -97,6 +98,7 @@ namespace usg
 		SHADER_CONSTANT_ELEMENT( ASSAOConstants, EffectFadeOutAdd,			CT_FLOAT, 1 ),
 		SHADER_CONSTANT_ELEMENT( ASSAOConstants, EffectHorizonAngleThreshold,	CT_FLOAT, 1 ),
 		SHADER_CONSTANT_ELEMENT( ASSAOConstants, EffectSampleRadiusNearLimitRec,	CT_FLOAT, 1 ),
+		SHADER_CONSTANT_ELEMENT( ASSAOConstants, RadiusDistScalingFunctionPow, CT_FLOAT, 1 ),
 
 		SHADER_CONSTANT_ELEMENT( ASSAOConstants, DepthPrecisionOffsetMod,	CT_FLOAT, 1 ),
 		SHADER_CONSTANT_ELEMENT( ASSAOConstants, NegRecEffectRadius,		CT_FLOAT, 1 ),
@@ -528,7 +530,9 @@ namespace usg
 		}
 		effectSamplingRadiusNearLimit /= tanHalfFOVY; // to keep the effect same regardless of FOV
 
-		Consts->EffectSampleRadiusNearLimitRec;          // if viewspace pixel closer than this, don't enlarge shadow sampling radius anymore (makes no sense to grow beyond some distance, not enough samples to cover everything, so just limit the shadow growth; could be SSAOSettingsFadeOutFrom * 0.1 or less)
+		Consts->EffectSampleRadiusNearLimitRec = 1.0f/ effectSamplingRadiusNearLimit;          // if viewspace pixel closer than this, don't enlarge shadow sampling radius anymore (makes no sense to grow beyond some distance, not enough samples to cover everything, so just limit the shadow growth; could be SSAOSettingsFadeOutFrom * 0.1 or less)
+
+		Consts->RadiusDistScalingFunctionPow = 1.2f;
 
 		Consts->DepthPrecisionOffsetMod = 0.9992f;
 		Consts->NegRecEffectRadius = -1.0f / Consts->EffectRadius;

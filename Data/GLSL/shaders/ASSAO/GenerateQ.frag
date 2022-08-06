@@ -131,7 +131,7 @@ void CalculateRadiusParameters( const float pixCenterLength, const vec2 pixelDir
     effectRadius = g_ASSAOConsts.EffectRadius;
 
     // leaving this out for performance reasons: use something similar if radius needs to scale based on distance
-    //effectRadius *= pow( pixCenterLength, g_ASSAOConsts.RadiusDistanceScalingFunctionPow);
+    effectRadius *= clamp( pow( pixCenterLength, g_ASSAOConsts.RadiusDistScalingFunctionPow), 0.0, 1.0);
 
     // when too close, on-screen sampling disk will grow beyond screen size; limit this to avoid closeup temporal artifacts
     const float tooCloseLimitMod = clamp( pixCenterLength * g_ASSAOConsts.EffectSamplingRadiusNearLimitRec, 0.0, 1.0 ) * 0.8 + 0.2;
