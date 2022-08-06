@@ -39,6 +39,7 @@ public:
 	float GetLowPassAttenFactor() const { return m_fLowPassAttenFactor; }
 	const string& GetName() const { return m_strName; }
 	AudioFalloff GetFalloff() const { return m_eFalloff;  }
+	AudioStacking GetStacking() const { return m_eStacking; }
 	uint32 GetPriority() const { return m_uPriority; }
 	uint32 GetCRC() const { return m_uCRC;  }
 
@@ -61,6 +62,7 @@ protected:
 	uint32			m_uPriority;
 	AudioType		m_eType;
 	AudioFalloff	m_eFalloff;
+	AudioStacking	m_eStacking;
 	string			m_strName;
 
 	const AudioFilter*				m_pFilter;

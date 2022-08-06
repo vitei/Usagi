@@ -552,6 +552,30 @@ SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
 	}
 	if(pSoundFile)
 	{
+		AudioStacking eStacking = pSoundFile->GetStacking();
+
+		if(eStacking == AudioStacking::AUDIO_STACK_DROP)
+		{
+			for (FastPool<SoundData>::Iterator it = m_sounds.Begin(); !it.IsEnd(); ++it)
+			{
+				// We only allow one instance, drop
+				if((*it)->object.GetSoundFile() == pSoundFile && (*it)->object.IsPlaying())
+					return handle;
+			}
+		}
+
+		if (eStacking == AudioStacking::AUDIO_STACK_REPLACE)
+		{
+			for (FastPool<SoundData>::DynamicIterator it = m_sounds.BeginDynamic(); !it.IsEnd(); ++it)
+			{
+				// We only allow one instance, drop
+				if ((*it)->object.GetSoundFile() == pSoundFile)
+				{
+					it.RemoveElement();
+				}
+			}
+		}
+
 		handle = CreateSound(emptyHndl);
 		if (handle.IsValid())
 		{

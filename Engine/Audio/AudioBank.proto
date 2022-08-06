@@ -26,6 +26,15 @@ enum AudioFilterType
 	AUDIO_FILTER_HIGH_PASS_ONE_POLE = 5;
 }
 
+enum AudioStacking
+{
+	option (nanopb_enumopt).long_names = false;
+	
+	AUDIO_STACK_MANY = 0;
+	AUDIO_STACK_REPLACE = 1;
+	AUDIO_STACK_DROP = 2;
+}
+
 enum AudioEffectType
 {
 	option (nanopb_enumopt).long_names = false;
@@ -63,6 +72,7 @@ message SoundFileDef
 	repeated uint32 effectCRCs = 18 [(nanopb).max_count = 4];
 	required uint32 roomNameCRC = 19 [default = 0];
 	required float lowPassAttenFactor = 20 [default = 1.0];
+	required AudioStacking eStacking = 21 [default = AUDIO_STACK_MANY];
 }
 
 message AudioFilterDef
