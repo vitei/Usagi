@@ -23,6 +23,13 @@ class Matrix
       quaternion['z'] = (@rows[0][1] - @rows[1][0]) / (2.0 * Math.sqrt(trace))
       quaternion['w'] = Math.sqrt(trace) / 2.0
 
+      # Safety normalization, got a couple of bad n umbers through
+      size = Math.sqrt((quaternion['x'] * quaternion['x']) + (quaternion['y'] * quaternion['y']) + (quaternion['z'] * quaternion['z']) + (quaternion['w'] * quaternion['w']))
+      quaternion['x'] /= size
+      quaternion['y'] /= size
+      quaternion['z'] /= size
+      quaternion['w'] /= size
+
       return quaternion
     end
 
