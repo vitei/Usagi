@@ -165,6 +165,10 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 				{
 					m_uCaps |= CAP_POV3;
 				}
+				if (diCaps.dwPOVs > 3)
+				{
+					m_uCaps |= CAP_POV4;
+				}
 			}
 			else if (diCaps.dwPOVs > 0)
 			{
@@ -288,8 +292,7 @@ bool DirectInputJoystick::IsPovInRange(DWORD povVal, DWORD targVal)
 
 void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 {
-	deviceStateOut.uButtonsPrevDown = deviceStateOut.uButtonsDown;
-	deviceStateOut.uButtonsDown = 0;
+	deviceStateOut.ClearButtons();
 
 	DIJOYSTATE2 js;
 
@@ -337,7 +340,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 		{
 			if (js.rgbButtons[pMapping->uDirectInputId] & 0x80)
 			{
-				deviceStateOut.uButtonsDown |= pMapping->uAbstractID;
+				deviceStateOut.SetButton(pMapping->uAbstractID, true);
 			}
 			pMapping++;
 		}
@@ -348,7 +351,7 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 		{
 			if (js.rgbButtons[i] & 0x80)
 			{
-				deviceStateOut.uButtonsDown |= (1 << i);
+				deviceStateOut.SetButton(i+1, true);
 			}
 		}
 	}
@@ -372,10 +375,10 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 		{
 			GetPovData(js.rgdwPOV[0], bUp, bRight, bDown, bLeft, fPovAxis);
 
-			deviceStateOut.uButtonsDown |= bUp ? GAMEPAD_BUTTON_UP : 0;
-			deviceStateOut.uButtonsDown |= bRight ? GAMEPAD_BUTTON_RIGHT : 0;
-			deviceStateOut.uButtonsDown |= bDown ? GAMEPAD_BUTTON_DOWN : 0;
-			deviceStateOut.uButtonsDown |= bLeft ? GAMEPAD_BUTTON_LEFT : 0;
+			deviceStateOut.SetButton(GAMEPAD_BUTTON_UP, bUp);
+			deviceStateOut.SetButton(GAMEPAD_BUTTON_RIGHT, bRight);
+			deviceStateOut.SetButton(GAMEPAD_BUTTON_DOWN, bDown);
+			deviceStateOut.SetButton(GAMEPAD_BUTTON_LEFT, bLeft);
 		}
 	
 	}
@@ -397,11 +400,10 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV_ANGLE] = fPovAxis;
 
-			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV_UP : 0;
-			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV_RIGHT : 0;
-			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV_DOWN : 0;
-			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV_LEFT : 0;
-			
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV_UP, bUp);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV_RIGHT, bRight);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV_DOWN, bDown);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV_LEFT, bLeft);			
 		}
 
 		if (m_uCaps & CAP_POV2)
@@ -410,10 +412,10 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV2_ANGLE] = fPovAxis;
 
-			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV2_UP : 0;
-			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV2_RIGHT : 0;
-			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV2_DOWN : 0;
-			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV2_LEFT : 0;
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV2_UP, bUp);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV2_RIGHT, bRight);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV2_DOWN, bDown);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV2_LEFT, bLeft);
 		}
 
 		if (m_uCaps & CAP_POV3)
@@ -422,10 +424,22 @@ void DirectInputJoystick::Update(GFXDevice* pDevice, GamepadDeviceState& deviceS
 
 			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV3_ANGLE] = fPovAxis;
 
-			deviceStateOut.uButtonsDown |= bUp ? JOYSTICK_BUTTON_POV3_UP : 0;
-			deviceStateOut.uButtonsDown |= bRight ? JOYSTICK_BUTTON_POV3_RIGHT : 0;
-			deviceStateOut.uButtonsDown |= bDown ? JOYSTICK_BUTTON_POV3_DOWN : 0;
-			deviceStateOut.uButtonsDown |= bLeft ? JOYSTICK_BUTTON_POV3_LEFT : 0;
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV3_UP, bUp);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV3_RIGHT, bRight);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV3_DOWN, bDown);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV3_LEFT, bLeft);
+		}
+
+		if (m_uCaps & CAP_POV4)
+		{
+			GetPovData(js.rgdwPOV[3], bUp, bRight, bDown, bLeft, fPovAxis);
+
+			deviceStateOut.fAxisValues[JOYSTICK_AXIS_POV4_ANGLE] = fPovAxis;
+
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV4_UP, bUp);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV4_RIGHT, bRight);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV4_DOWN, bDown);
+			deviceStateOut.SetButton(JOYSTICK_BUTTON_POV4_LEFT, bLeft);
 		}
 
 	}

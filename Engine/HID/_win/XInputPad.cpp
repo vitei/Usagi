@@ -32,7 +32,6 @@ static const ButtonMapping g_axisMappingPad[] =
 	{ GAMEPAD_BUTTON_SELECT,	XINPUT_GAMEPAD_BACK },
 	{ GAMEPAD_BUTTON_THUMB_L,	XINPUT_GAMEPAD_LEFT_THUMB },
 	{ GAMEPAD_BUTTON_THUMB_R,	XINPUT_GAMEPAD_RIGHT_THUMB },
-	{ GAMEPAD_BUTTON_HOME,		XINPUT_GAMEPAD_START },
 	{ GAMEPAD_BUTTON_NONE,		0 }
 };
 
@@ -72,8 +71,7 @@ void XInputPad::TryReconnect()
 
 void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 {
-	deviceStateOut.uButtonsPrevDown = deviceStateOut.uButtonsDown;
-	deviceStateOut.uButtonsDown = 0;
+	deviceStateOut.ClearButtons();
     // Zeroise the state
     ZeroMemory(&m_controllerState, sizeof(XINPUT_STATE));
 
@@ -92,16 +90,16 @@ void XInputPad::Update(GFXDevice* pDevice, GamepadDeviceState& deviceStateOut)
 	{
 		if(pMapping->uXInputID & m_controllerState.Gamepad.wButtons)
 		{
-			deviceStateOut.uButtonsDown |= pMapping->uAbstractID;//(1 << (pMapping->uAbstractID - 1));
+			deviceStateOut.SetButton(pMapping->uAbstractID, true);
 		}
 		pMapping++;
 	}
 
 	if(m_controllerState.Gamepad.bLeftTrigger)
-		deviceStateOut.uButtonsDown |= GAMEPAD_BUTTON_ZL;
+		deviceStateOut.SetButton(GAMEPAD_BUTTON_ZL, true);
 
 	if(m_controllerState.Gamepad.bRightTrigger)
-		deviceStateOut.uButtonsDown |= GAMEPAD_BUTTON_ZR;
+		deviceStateOut.SetButton(GAMEPAD_BUTTON_ZR, true);
 }
 
 void XInputPad::VibrateInt(int leftVal, int rightVal)

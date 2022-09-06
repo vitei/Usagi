@@ -32,23 +32,58 @@ const char* Gamepad::GetName() const
 	return "";
 }
 
-bool Gamepad::GetButtonDown(uint32 uButtonShift, ButtonState eState) const
+
+bool Gamepad::GetAnyButtonDown(ButtonState eState) const
 {
-	uint32 uButtonMask = uButtonShift;//1 << (uButtonShift - 1);
+	uint64 uButtonMask = 0xFFFFFFFFFFFFFFFF;
+	for(uint32 uIndex=0; uIndex<ARRAY_SIZE(m_deviceState.uButtonsDown); uIndex++)
+	{
+		switch (eState)
+		{
+		case BUTTON_STATE_PRESSED:
+		{
+			if(((m_deviceState.uButtonsDown[uIndex] & uButtonMask) != 0) && ((m_deviceState.uButtonsPrevDown[uIndex] & uButtonMask) == 0))
+				return true;
+		}
+		case BUTTON_STATE_RELEASED:
+		{
+			if(((m_deviceState.uButtonsPrevDown[uIndex] & uButtonMask) != 0) && ((m_deviceState.uButtonsDown[uIndex] & uButtonMask) == 0))
+				return true;
+		}
+		case BUTTON_STATE_HELD:
+		{
+			if((m_deviceState.uButtonsDown[uIndex] & uButtonMask) != 0)
+				return true;
+		}
+		default:
+			break;
+		}
+	}
+	return false;
+}
+
+
+bool Gamepad::GetButtonDown(uint32 uButton, ButtonState eState) const
+{
+	uButton -= 1;	// 0 = NONE
+	uint32 uIndex = uButton / 32;
+	uButton -= (uIndex * 32);
+
+	uint32 uButtonMask = 1 << (uButton);
 
 	switch(eState)
 	{
 	case BUTTON_STATE_PRESSED:
 		{
-			return ((m_deviceState.uButtonsDown&uButtonMask)!=0)&&((m_deviceState.uButtonsPrevDown&uButtonMask)==0);
+			return ((m_deviceState.uButtonsDown[uIndex] & uButtonMask) != 0) && ((m_deviceState.uButtonsPrevDown[uIndex] & uButtonMask) == 0);
 		}
 	case BUTTON_STATE_RELEASED:
 		{
-			return ((m_deviceState.uButtonsPrevDown&uButtonMask)!=0)&&((m_deviceState.uButtonsDown&uButtonMask)==0);
+			return ((m_deviceState.uButtonsPrevDown[uIndex] &uButtonMask)!=0)&&((m_deviceState.uButtonsDown[uIndex] &uButtonMask)==0);
 		}
 	case BUTTON_STATE_HELD:
 		{
-			return ((m_deviceState.uButtonsDown&uButtonMask)!=0);
+			return ((m_deviceState.uButtonsDown[uIndex]&uButtonMask)!=0);
 		}
 	case BUTTON_STATE_CONTACT:
 		{

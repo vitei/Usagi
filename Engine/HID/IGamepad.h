@@ -35,7 +35,6 @@ namespace usg
 		virtual void Vibrate(float fLeft, float fRight) {}
 
 
-
 	};
 
 

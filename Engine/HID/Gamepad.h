@@ -24,7 +24,8 @@ namespace usg
 		Gamepad();
 		~Gamepad();
 
-		bool GetButtonDown(uint32 uButtonShift, ButtonState eState=BUTTON_STATE_PRESSED) const;
+		bool GetButtonDown(uint32 uButton, ButtonState eState=BUTTON_STATE_PRESSED) const;
+		bool GetAnyButtonDown(ButtonState eState = BUTTON_STATE_PRESSED) const;
 
 		float GetAxisValue(uint32 eAxis) const;
 		bool GetScreenTouch(Vector2f& posOut) const { posOut = m_deviceState.vTouchPos; return m_deviceState.bScreenTouch; }
