@@ -113,7 +113,7 @@ private:
 
 	enum
 	{
-		MAX_GPU_COUNT = 2,
+		MAX_GPU_COUNT = 4,
 		MAX_DISPLAY_COUNT = 4,
 		CALLBACK_COUNT = 2
 	};
@@ -182,8 +182,8 @@ private:
 #ifdef USE_VK_DEBUG_EXTENSIONS
 	VkDebugReportCallbackEXT			m_callbacks[CALLBACK_COUNT];
 #endif
-	VkPhysicalDeviceMemoryProperties	m_memoryProperites[MAX_GPU_COUNT];
-	VkPhysicalDeviceProperties			m_deviceProperties[MAX_GPU_COUNT];
+	VkPhysicalDeviceMemoryProperties	m_memoryProperites[MAX_GPU_COUNT] = {};
+	VkPhysicalDeviceProperties			m_deviceProperties[MAX_GPU_COUNT] = {};
 	VkCommandPool						m_cmdPool;
 	VkDevice							m_vkDevice;
 	VkInstance							m_instance;

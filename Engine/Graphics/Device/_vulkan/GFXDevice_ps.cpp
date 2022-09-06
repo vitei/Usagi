@@ -535,7 +535,9 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	FATAL_RELEASE(gpu_count > 0, "GPU not found");
 	m_uGPUCount = Math::Min((uint32)gpu_count, (uint32)MAX_GPU_COUNT);
 	res = vkEnumeratePhysicalDevices(m_instance, &m_uGPUCount, m_gpus);
-	FATAL_RELEASE(!res && m_uGPUCount >= 1, "Couldn't get GPU");
+
+	FATAL_RELEASE(res >= 0, "vkEnumeratePhysicalDevices returned %d", res);
+	FATAL_RELEASE(m_uGPUCount >= 1, "vkEnumeratePhysicalDevices return %d GPUs", m_uGPUCount);
 
 	for (uint32 i = 0; i < m_uGPUCount; i++)
 	{
@@ -552,7 +554,30 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	}
 	else
 	{
-		m_primaryPhysicalDevice = m_gpus[0];
+		uint32 uBestIndex = 0;
+		uint32 uBestScore = 0;
+		for (uint32 i = 0; i < m_uGPUCount; i++)
+		{	
+			uint32 uScore = 1;
+			if (m_deviceProperties[i].vendorID == 0x10DE)
+			{
+				// NVidia highest
+				uScore = 3;
+			}
+			else if (m_deviceProperties[i].vendorID == 0x1002)
+			{
+				// Then AMD
+				uScore = 2;
+			}
+
+			if (uScore > uBestScore)
+			{
+				uBestIndex = i;
+				uBestScore = uScore;
+			}
+		}
+
+		m_primaryPhysicalDevice = m_gpus[uBestIndex];
 	}
 
 	{
