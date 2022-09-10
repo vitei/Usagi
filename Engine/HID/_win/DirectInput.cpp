@@ -275,7 +275,8 @@ namespace usg
 					break;
 				}
 
-				if ( str::Find( pInfo->productName.c_str(), "Throttle") != nullptr)
+				if ( str::Find( pInfo->productName.c_str(), "Throttle") != nullptr
+					|| str::Find(pInfo->productName.c_str(), "THROTTLE") != nullptr )
 				{
 					pInfo->bIsThrottle = true;
 				}

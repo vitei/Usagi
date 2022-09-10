@@ -179,13 +179,10 @@ void DirectInputJoystick::TryReconnect(DirectInput* pInput)
 			m_uNumButtons = diCaps.dwButtons;
 		}
 
-		if ((m_uCaps & CAP_POV))
+		if ((m_uCaps & (CAP_HOTAS_THROTTLE | CAP_GAMEPAD)) == 0)
 		{
-			if ((m_uCaps & (CAP_HOTAS_THROTTLE | CAP_GAMEPAD)) == 0)
-			{
-				// Assume we are joystick
-				m_uCaps |= CAP_JOYSTICK;
-			}
+			// Assume we are joystick
+			m_uCaps |= CAP_JOYSTICK;
 		}
 
 		SetDeadzone(0.05f);
