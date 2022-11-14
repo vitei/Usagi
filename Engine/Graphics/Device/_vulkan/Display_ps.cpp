@@ -750,7 +750,7 @@ void Display_ps::ScreenShot(usg::GFXDevice* pDevice, const char* szFileName)
 	// Create linear tiled destination image to copy to
 	VkImageCreateInfo imageCreateCI = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	imageCreateCI.imageType = VK_IMAGE_TYPE_2D;
-	imageCreateCI.format = VK_FORMAT_R8G8B8A8_UNORM;
+	imageCreateCI.format = VK_FORMAT_B8G8R8A8_UNORM;
 	imageCreateCI.extent.width = m_uWidth;
 	imageCreateCI.extent.height = m_uHeight;
 	imageCreateCI.extent.depth = 1;
