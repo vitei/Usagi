@@ -23,7 +23,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <PreprocessorDefinitions>VK_USE_PLATFORM_WIN32_KHR;LUA_USER_H=&lt;Engine/Framework/Script/LuaConf.h&gt;;PB_FIELD_32BIT;NN_SWITCH_ENABLE_HOST_IO;EASTL_USER_DEFINED_ALLOCATOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>EASTL_CUSTOM_FLOAT_CONSTANTS_REQUIRED;VK_USE_PLATFORM_WIN32_KHR;LUA_USER_H=&lt;Engine/Framework/Script/LuaConf.h&gt;;PB_FIELD_32BIT;NN_SWITCH_ENABLE_HOST_IO;EASTL_USER_DEFINED_ALLOCATOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(USAGI_DIR)\Engine\ThirdParty\lua-5.3.2\src;$(USAGI_DIR)\Engine\ThirdParty\yaml-cpp\include;$(VK_SDK_PATH)\Include;$(USAGI_PHYSICS)\Include;$(USAGI_PHYSICS)\..\PxShared\Include;$(USAGI_DIR)\Engine\ThirdParty\gli;$(USAGI_DIR)\Engine\ThirdParty\gli\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
