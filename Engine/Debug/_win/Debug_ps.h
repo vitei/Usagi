@@ -20,10 +20,15 @@ static HRESULT	g_hResult;
 #ifdef ASSERT
 #undef ASSERT
 #endif
+
+extern void DumpDebugLog(const char* szBuildId);
+
+
 inline void ASSERT(bool condition)
 {
 	if (!condition)
 	{
+		DumpDebugLog(nullptr);
 		ShowCursor(TRUE);
 
  		__debugbreak();
