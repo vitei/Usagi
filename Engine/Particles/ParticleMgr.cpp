@@ -60,7 +60,7 @@ void ParticleMgr::EmitterInstances::ClearPreloadCount()
 
 ScriptEmitter* ParticleMgr::EmitterInstances::GetInstance(GFXDevice* pDevice, ParticleMgr& mgr)
 {
-	ScriptEmitter* pEmitter = m_freeEmitters.front();
+	ScriptEmitter* pEmitter = m_freeEmitters.size() > 0 ? m_freeEmitters.front() : nullptr;
 	if (!pEmitter)
 	{
 		pEmitter = vnew(ALLOC_PARTICLES) ScriptEmitter();
