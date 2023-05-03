@@ -46,6 +46,8 @@ public:
 	float Distance(const Vector2f& vV) const;
 
 	void     operator+=( const Vector2f& vec );
+	void     operator*=(const Vector2f& vec);
+	void     operator*=(float fScalar);
 	Vector2f operator+ ( const Vector2f& vec ) const;
 	Vector2f operator- ( const Vector2f& rhs ) const;
 	Vector2f operator* ( const Vector2f& vec ) const;
@@ -84,6 +86,19 @@ inline void Vector2f::operator +=( const Vector2f& vec )
 	x += vec.x;
 	y += vec.y;
 }
+
+inline void Vector2f::operator *=(float32 fScalar)
+{
+	x *= fScalar;
+	y *= fScalar;
+}
+
+inline void Vector2f::operator *=(const Vector2f& vec)
+{
+	x *= vec.x;
+	y *= vec.y;
+}
+
 
 inline Vector2f Vector2f::operator+( const Vector2f& vec ) const
 {
