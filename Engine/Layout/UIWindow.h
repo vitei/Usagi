@@ -89,6 +89,7 @@ namespace usg
 		usg::Color GetOriginalColor(uint32 uIndex, enum UIItemType eType) const;
 		usg::Vector2f GetOriginalItemSize(uint32 uIndex, enum UIItemType eType) const;
 		void SetText(uint32 uIndex, const char* szText);
+		void SetTexture(uint32 uIndex, usg::TextureHndl tex);
 		void SetUVRange(uint32 uIndex, const usg::Vector2f& vUVMin, const usg::Vector2f& vUVMax);
 		void SetItemPos(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vPos, bool bRelative);
 		void SetItemSize(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vSize, bool bRelative);
@@ -201,6 +202,7 @@ namespace usg
 		usg::Vector2f				m_vMousePos;
 		uint32						m_uItemCounts[UIItemType::UI_ITEM_INVALID];
 
+
 		HUDItemData* m_pUIItemsDefs;
 		TextItemData* m_pTextItemDefs;
 		CustomItemData* m_pCustomItemDefs;
@@ -213,6 +215,8 @@ namespace usg
 		usg::ConstantSet			m_windowConstants;
 		usg::VertexBuffer			m_vertexData;
 		usg::RenderPassHndl			m_renderPass;
+		usg::SamplerHndl			m_linearSamp;
+
 
 		bool						m_bMatrixDirty;
 		bool						m_bVertsDirty;

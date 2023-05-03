@@ -178,6 +178,17 @@ namespace usg
 		ref.pWindow->SetText(ref.uItemIdx, szNewText);
 	}
 
+	void UI::SetTexture(const UIItemRef& ref, usg::TextureHndl texHndl)
+	{
+		if (!IsRefValid(ref))
+			return;
+
+		if (ref.eType != UI_ITEM_IMAGE)
+			return;
+
+		ref.pWindow->SetTexture(ref.uItemIdx, texHndl);
+	}
+
 	void UI::SetUVRange(const UIItemRef& ref, const usg::Vector2f& vUVMin, const usg::Vector2f& vUVMax)
 	{
 		if (!IsRefValid(ref))
@@ -221,6 +232,8 @@ namespace usg
 			itr->GPUUpdate(pDevice);
 		}
 	}
+
+
 
 	bool UI::Update(float fElapsed, const UIInput* pInput, UIResults* pResults)
 	{

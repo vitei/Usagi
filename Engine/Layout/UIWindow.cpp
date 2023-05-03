@@ -81,7 +81,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 		usg::SamplerDecl sampDecl(usg::SAMP_FILTER_LINEAR, usg::SAMP_WRAP_CLAMP);
 		sampDecl.eMipFilter = usg::MIP_FILTER_POINT;
 		sampDecl.LodBias = -0.25f;
-		usg::SamplerHndl linear = pDevice->GetSampler(sampDecl);
+		m_linearSamp = pDevice->GetSampler(sampDecl);
 
 		for (memsize i = 0; i < m_uItemCounts[UI_ITEM_IMAGE]; i++)
 		{
@@ -141,7 +141,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 		{
 			m_pUIItemsDefs[i].descriptor.Init(pDevice, runtimeRes->GetDescriptorLayoutHndl());
 			usg::string fullPath = m_path + m_pUIItemsDefs[i].def.textureName;
-			m_pUIItemsDefs[i].descriptor.SetImageSamplerPairAtBinding(0, pRes->GetTextureAbsolutePath(pDevice, fullPath.c_str()), linear);
+			m_pUIItemsDefs[i].descriptor.SetImageSamplerPairAtBinding(0, pRes->GetTextureAbsolutePath(pDevice, fullPath.c_str()), m_linearSamp);
 			m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
 			// TODO: Get material indices, worst case scenario each element needs its own descriptor set
 		}
@@ -479,6 +479,15 @@ void UIWindow::SetUVRange(uint32 uIndex, const usg::Vector2f& vUVMin, const usg:
 	def.vUVMin = vUVMin;
 	def.vUVMax = vUVMax;
 	m_bVertsDirty = true;
+}
+
+
+void UIWindow::SetTexture(uint32 uIndex, usg::TextureHndl tex)
+{
+	if (uIndex < m_uItemCounts[UI_ITEM_IMAGE])
+	{
+		m_pUIItemsDefs[uIndex].descriptor.SetImageSamplerPairAtBinding(0, tex, m_linearSamp);
+	}
 }
 
 void UIWindow::SetText(uint32 uIndex, const char* szText)
@@ -1153,6 +1162,12 @@ void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 	{
 		m_windowConstants.UpdateData(pDevice);
 		m_descriptor.UpdateDescriptors(pDevice);
+	}
+
+	for (memsize i = 0; i < m_uItemCounts[UIItemType::UI_ITEM_IMAGE]; i++)
+	{	
+		// FIXME: Should optimize this as only needs calling where textures have changed
+		m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
 	}
 
 	if (m_vertices.size() > 0 && m_bVertsDirty)
