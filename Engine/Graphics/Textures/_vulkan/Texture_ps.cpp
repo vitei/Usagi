@@ -715,7 +715,7 @@ bool Texture_ps::Load(GFXDevice* pDevice, const void* pData, uint32 uSize, const
 	uint32 uFirstLevel = 0;
 	memsize uLowMemorySize = 4294967296;
 	memsize uMemSize = pDevice->GetPlatform().GetMemorySize();
-	if (uMemSize < uLowMemorySize && m_uWidth > 2046 && m_uMips > 1)
+	if (uMemSize < uLowMemorySize && m_uWidth > 1024 && m_uMips > 1)
 	{
 		bForceLowerMip = true;
 	}
