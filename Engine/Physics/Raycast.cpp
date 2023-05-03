@@ -129,7 +129,10 @@ namespace usg
 			const uint32 uSystemId = sceneRtd.raycastData.pendingRequests[i].second.first;
 			const uint32 uHitCount = (uint32)hits.size();
 
-			OnRaycastHitSignal onRaycastHitSignal(uSystemId, uUserProvidedRaycastId, &hits[0], &entities[0], uHitCount, &workBuffer[0], workBuffer.size());
+			RaycastHitBase* pHits = uHitCount > 0 ? &hits[0] : nullptr;
+			Entity* pEntities = uHitCount > 0 ? &entities[0] : nullptr;
+
+			OnRaycastHitSignal onRaycastHitSignal(uSystemId, uUserProvidedRaycastId, pHits, pEntities, uHitCount, &workBuffer[0], workBuffer.size());
 			systemCoordinator.Trigger(callbackEntity, onRaycastHitSignal, ON_ENTITY);
 		}
 		sceneRtd.raycastData.pendingRequests.clear();
