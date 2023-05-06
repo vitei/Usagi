@@ -389,6 +389,24 @@ namespace usg
 			}
 		};
 
+		class TeamSystem : public usg::System 
+		{
+		public:
+			struct Outputs
+			{
+				Required<usg::TeamComponent> team;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
+
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ChangeTeamEvent& changeTeamEvt)
+			{
+				outputs.team.Modify().uTeam = changeTeamEvt.uTeam;
+			}
+
+		};
+
 
 		class UpdateSystemTime : public usg::System
 		{

@@ -54,6 +54,11 @@ message KillEntityEvent
 {
 }
 
+message ChangeTeamEvent
+{
+	required uint32 uTeam = 1 [default = 0];
+}
+
 message SetGameState
 {
 	required bool bParticipating = 1;
