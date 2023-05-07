@@ -30,6 +30,8 @@ namespace usg
 		virtual void Exec();
 		void Run();
 
+		bool IsModePaused(uint32 uMode) const;
+
 	private:
 		usg::GFXDevice*			m_pDevice;
 		usg::Mode**				m_ppLoadMode;

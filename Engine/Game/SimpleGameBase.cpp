@@ -142,6 +142,12 @@ namespace usg
 		return m_eState == STATE_LOADING && !m_pInternalData->m_pInitThread->IsThreadEnd();
 	}
 
+	bool SimpleGameBase::IsModePaused(uint32 uMode) const
+	{
+		return m_pInternalData->m_pInitThread->IsModePaused(uMode);
+	}
+
+
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)
 	{

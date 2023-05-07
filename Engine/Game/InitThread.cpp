@@ -28,6 +28,12 @@ namespace usg
 		m_fnLoad = fnLoad;
 	}
 
+
+	bool InitThread::IsModePaused(uint32 uMode) const
+	{
+		return m_pausedModes.find(m_uNextMode) == m_pausedModes.end();
+	}
+
 	void InitThread::SetNextMode(Mode** ppLoadMode, uint32 uNextMode, bool bPauseMode)
 	{
 		ASSERT(m_pDevice != nullptr);
