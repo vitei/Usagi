@@ -31,7 +31,7 @@ namespace usg
 
 	bool InitThread::IsModePaused(uint32 uMode) const
 	{
-		return m_pausedModes.find(m_uNextMode) == m_pausedModes.end();
+		return m_pausedModes.find(uMode) != m_pausedModes.end();
 	}
 
 	void InitThread::SetNextMode(Mode** ppLoadMode, uint32 uNextMode, bool bPauseMode)
