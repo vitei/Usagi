@@ -75,6 +75,8 @@ bool ProcessFiles(const std::string& inputDir)
 // TODO: This should also handle shader file packs
 int main(int argc, char *argv[])
 {
+	CreateDirectory("_dump", 0);
+
 	std::string platform = "win";
 	std::string input;
 	std::string outputFile;
