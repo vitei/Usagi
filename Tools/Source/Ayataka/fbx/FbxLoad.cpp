@@ -1497,8 +1497,16 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 	tmpWeight.index = 0;
 	tmpWeight.fValue = 0.0f;
 
+	BoneWeight tmpFirstWeight;
+	tmpFirstWeight.index = 0;
+	tmpFirstWeight.fValue = 1.0f;
+
 	for (auto itr = m_activeWeights.begin(); itr != m_activeWeights.end(); ++itr)
 	{
+		if (itr->weights.size() == 0 && uMaxWeights > 0)
+		{
+			itr->weights.push_back(tmpFirstWeight);
+		}
 		while( itr->weights.size() < uMaxWeights )
 		{
 			itr->weights.push_back(tmpWeight);
