@@ -12,6 +12,7 @@
 #endif
 
 #include "tchar.h"
+#include "DebugMsgType.h"
 
 static HRESULT	g_hResult;
 
@@ -24,16 +25,7 @@ static HRESULT	g_hResult;
 extern void DumpDebugLog(const char* szBuildId);
 
 
-inline void ASSERT(bool condition)
-{
-	if (!condition)
-	{
-		DumpDebugLog(nullptr);
-		ShowCursor(TRUE);
-
- 		__debugbreak();
-	}
-}
+#define ASSERT(cond) { if(!(cond)) cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR, "Assert");  }
 
 #define ASSERT_RETURN( condition ) \
 	{ASSERT( condition ); \
@@ -45,7 +37,7 @@ inline void ASSERT(bool condition)
 	if ( (condition) == false ) \
 	return (value);}
 
-#define ASSERT_MSG( cond, ... ) if(!(cond)) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__); ASSERT(cond); } 
+#define ASSERT_MSG( cond, ... ) if(!(cond)) { cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_ERROR,__VA_ARGS__); } 
 
 #else
 #define ASSERT_RETURN( condition ) \

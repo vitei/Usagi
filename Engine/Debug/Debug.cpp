@@ -89,7 +89,9 @@ extern "C" void cDebugprintf(const char *szFile, int line, const char* func, uin
 
 		if(uFlags & DEBUG_MSG_ERROR)
 		{
+			ShowCursor(TRUE);
 			DumpDebugLog();
+			__debugbreak();
 			FATAL_RELEASE_INT(g_errorMsgB);
 		}
 	}
