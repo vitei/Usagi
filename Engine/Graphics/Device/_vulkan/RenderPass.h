@@ -14,7 +14,7 @@ class RenderPass
 {
 public:
 	RenderPass() {};
-	~RenderPass() {};
+	~RenderPass();
 	
 	void Init(GFXDevice* pDevice, const class RenderPassInitData &decl, uint32 uId);
 	void Cleanup(GFXDevice* pDevice);
@@ -24,8 +24,8 @@ public:
 private:
 
 	
-	VkRenderPass m_renderPass;
-	uint32		 m_uCRCForPass;
+	VkRenderPass m_renderPass = VK_NULL_HANDLE;
+	uint32		 m_uCRCForPass = 0;
 };
 
 }

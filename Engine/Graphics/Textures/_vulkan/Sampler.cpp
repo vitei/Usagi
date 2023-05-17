@@ -60,7 +60,7 @@ Sampler::Sampler()
 
 Sampler::~Sampler()
 {
-
+	ASSERT(m_sampler == nullptr);
 }
 
 void Sampler::Init(GFXDevice* pDevice, const SamplerDecl &decl, uint32 uId)
@@ -99,6 +99,7 @@ void Sampler::Cleanup(GFXDevice* pDevice)
 	if (m_sampler)
 	{
 		vkDestroySampler(pDevice->GetPlatform().GetVKDevice(), m_sampler, pDevice->GetPlatform().GetAllocCallbacks());
+		m_sampler = nullptr;
 	}
 }
 

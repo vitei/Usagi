@@ -51,6 +51,8 @@ void GPUHeap::Init(void* pMem, memsize uSize, uint32 uMaxAllocs, bool bDelayFree
 	m_memoryBlocks[0].pLocation	= m_pHeapMem;
 	m_memoryBlocks[0].bValid		= true;
 
+	m_uTotalSize = uSize;
+
 	m_freeList.push_back(&m_memoryBlocks[0]);
 	for (uint32 i = 1; i < uMaxAllocs; i++)
 	{

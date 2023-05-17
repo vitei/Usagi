@@ -19,7 +19,7 @@ namespace usg {
 	
 	Shader_ps::~Shader_ps()
 	{
-
+		ASSERT(m_shaderModule == nullptr);
 	}
 
 

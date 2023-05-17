@@ -40,12 +40,12 @@ namespace usg {
 
 	DescriptorSetLayout_ps::DescriptorSetLayout_ps()
 	{
-		m_layout = nullptr;
+		m_layout = VK_NULL_HANDLE;
 	}
 
 	DescriptorSetLayout_ps::~DescriptorSetLayout_ps()
 	{
-
+		ASSERT(m_layout == VK_NULL_HANDLE);
 	}
 
 

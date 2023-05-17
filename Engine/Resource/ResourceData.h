@@ -202,8 +202,7 @@ BaseResHandle ResourceData::GetResourceHndl(const usg::string& resName, Resource
 #endif
 	for (typename FastPool<ResourceInfo>::Iterator it = m_resources.Begin(); !it.IsEnd(); ++it)
 	{
-		if( ( (*it)->resource->GetNameHash() == nameHash
-			|| ((*it)->resource->GetDataHash() == dataHash && dataHash != 0 ) )
+		if(  (*it)->resource->GetNameHash() == nameHash
 			&& (*it)->resource->GetResourceType() == eType )
 		{
 #ifdef DEBUG_RESOURCE_MGR

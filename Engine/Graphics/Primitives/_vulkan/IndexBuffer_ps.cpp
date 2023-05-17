@@ -16,7 +16,7 @@ m_uActiveIBO(0), m_uBufferCount(0), m_uBufferSize(0), m_bUseStaging(false)
 
 IndexBuffer_ps::~IndexBuffer_ps()
 {
-	
+	ASSERT(m_buffer[0] == nullptr);
 }
 
 
@@ -216,6 +216,7 @@ void IndexBuffer_ps::Cleanup(GFXDevice* pDevice)
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
 		pDevice->GetPlatform().ReqDestroyBuffer(m_buffer[i]);
+		m_buffer[i] = VK_NULL_HANDLE;
 	}
 
 	pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);

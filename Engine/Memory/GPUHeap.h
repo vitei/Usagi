@@ -29,6 +29,7 @@ public:
 	void AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
 	void RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
 	bool CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator);
+	memsize GetTotalSize() const { return m_uTotalSize; }
 
 	void MergeMemory(uint32 uCurrentFrame);
 
@@ -72,6 +73,7 @@ private:
 	usg::list< BlockInfo* >	m_allocList;
 	bool		m_bDelayFree;
 	int			m_iMergeFrames;
+	memsize		m_uTotalSize;
 };
 
 }

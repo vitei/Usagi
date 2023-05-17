@@ -42,12 +42,16 @@ namespace usg
 
 	PipelineState_ps::PipelineState_ps()
 	{
+		m_pipeline = VK_NULL_HANDLE;
+		m_layout = VK_NULL_HANDLE;
 	}
 	
 	PipelineState_ps::~PipelineState_ps()
 	{
 		// FIXME: Needs a destory call
 		//vkDestroyPipeline(device, m_pipeline, nullptr);
+		ASSERT(m_pipeline == VK_NULL_HANDLE);
+
 	}
 
 	void PipelineState_ps::Init(GFXDevice* pDevice, const PipelineInitData& decl)
@@ -119,6 +123,7 @@ namespace usg
 	void PipelineState_ps::Cleanup(GFXDevice* pDevice)
 	{
 		vkDestroyPipeline(pDevice->GetPlatform().GetVKDevice(), m_pipeline, nullptr);
+		m_pipeline = VK_NULL_HANDLE;
 	}
 
 

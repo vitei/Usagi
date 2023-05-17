@@ -33,8 +33,8 @@ class IndexBuffer_ps
 
 		VkIndexType		m_eIndexType;
 		uint32			m_uIndexSize;
-		VkBuffer 		m_buffer[GFX_NUM_DYN_BUFF];
-		VkBuffer 		m_stagingBuffer[GFX_NUM_DYN_BUFF];
+		VkBuffer 		m_buffer[GFX_NUM_DYN_BUFF] = {};
+		VkBuffer 		m_stagingBuffer[GFX_NUM_DYN_BUFF] = {};
 
 		VkMemAllocator	m_memoryAlloc;
 		VkMemAllocator	m_stagingMemoryAlloc;
