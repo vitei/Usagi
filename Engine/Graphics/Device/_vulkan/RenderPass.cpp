@@ -230,7 +230,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 
 RenderPass::~RenderPass()
 {
-	ASSERT(m_renderPass = VK_NULL_HANDLE);
+	ASSERT(m_renderPass == VK_NULL_HANDLE);
 }
 
 void RenderPass::Cleanup(GFXDevice* pDevice)
