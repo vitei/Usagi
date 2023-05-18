@@ -54,9 +54,15 @@ extern void DumpDebugLog(const char* szBuildId);
 // For file loading only, will quit the game on failure, even in release mode
 inline void FATAL_RELEASE_INT( const TCHAR* msg )
 {
-	MessageBox(0, msg, TEXT("FATAL"), 0);
-	ASSERT(false);
-	exit(-1);
+	if(IsDebuggerPresent())
+	{
+		ASSERT(false);
+	}
+	else
+	{
+		MessageBox(0, msg, TEXT("FATAL"), 0);	
+		exit(-1);
+	}
 }
 
 inline void DEBUG_PRINT_INT( const TCHAR* msg )
