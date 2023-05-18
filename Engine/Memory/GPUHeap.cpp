@@ -5,7 +5,7 @@
 #include "Engine/Memory/GPUHeap.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 
-#define MERGE_DELAY 5	// 5 frames
+#define MERGE_DELAY 3	// 3 frames
 
 namespace usg {
 
@@ -138,7 +138,7 @@ void GPUHeap::SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg
 
 	if (&dstList == &m_freeList)
 	{
-		dstList.insert(eastl::lower_bound(dstList.begin(), dstList.end(), pInfo), pInfo);
+		dstList.insert(eastl::lower_bound(dstList.begin(), dstList.end(), pInfo, ComparePointers), pInfo);
 	}
 	else
 	{
@@ -211,15 +211,34 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 		m_freeList.push_back(pNext);
 
 		pNext->bValid = true;
-		pNext->uSize = pInfo->uSize - blockSize;
+		pNext->uSize = pInfo->uSize;
 		pNext->pLocation = (void*)(((memsize)pInfo->pLocation)+blockSize);
 		pNext->pAllocator = NULL;
-		pInfo->uSize = blockSize;
+		pInfo->uSize = (memsize)pNext->pLocation - (memsize)pInfo->pLocation;
+		pNext->uSize -= pInfo->uSize;
+
+		DEBUG_PRINT("Size %d", pInfo->uSize);
 	}
 
 	pAllocator->Allocated(pData);
 
-	m_iMergeFrames = MERGE_DELAY;
+	m_iMergeFrames = MERGE_DELAY + 2;
+}
+
+void GPUHeap::Validate()
+{
+	memsize totalSize = 0;
+	for (auto itr : m_freeList)
+	{
+		totalSize += itr->uSize;
+	}
+
+	for (auto itr : m_allocList)
+	{
+		totalSize += itr->uSize;
+	}
+
+	ASSERT(totalSize == m_uTotalSize);
 }
 
 void GPUHeap::FreeMemory(BlockInfo* pInfo)
@@ -233,10 +252,15 @@ void GPUHeap::FreeMemory(BlockInfo* pInfo)
 
 	pAllocator->Released();
 
-	m_iMergeFrames = MERGE_DELAY;
+	m_iMergeFrames = MERGE_DELAY + 2;
 }
 
-void GPUHeap::MergeMemory(uint32 uCurrentFrame)
+bool GPUHeap::ComparePointers(const GPUHeap::BlockInfo* const& a, const GPUHeap::BlockInfo* const& b)
+{
+	return a->pLocation < b->pLocation ;
+}
+
+void GPUHeap::MergeMemory(uint32 uCurrentFrame, bool bFast)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);
 
@@ -244,32 +268,79 @@ void GPUHeap::MergeMemory(uint32 uCurrentFrame)
 		return;
 	BlockInfo* pPrev = nullptr;
 
-	for (auto itr : m_freeList)
+	bool bFound = false;
+	bool bPairFound = false;
+	
+	do 
 	{
-		if (pPrev && CanAlloc(uCurrentFrame, pPrev->uFreeFrame) && CanAlloc(uCurrentFrame, itr->uFreeFrame) )
+		bFound = false;
+		for (auto itr : m_freeList)
 		{
-			uint8* pPrevEnd = ((uint8*)pPrev->pLocation) + pPrev->uSize;
-			uint8* pCurr = (uint8*)itr->pLocation;
-
-			if (pPrevEnd == pCurr)
+			if (pPrev && CanAlloc(uCurrentFrame, pPrev->uFreeFrame) && CanAlloc(uCurrentFrame, itr->uFreeFrame) )
 			{
-				pPrev->uSize += itr->uSize;
-				itr->uSize = 0;
-				itr->pLocation = nullptr;
-				itr->uFreeFrame = usg::Math::Max(itr->uFreeFrame, pPrev->uFreeFrame);
-				itr->bValid = false;
-				SwitchList(itr, m_freeList, m_unusedList);
-				// There will usually be space so don't go overboard trying to free
-				return;
+				uint8* pPrevEnd = ((uint8*)pPrev->pLocation) + pPrev->uSize;
+				uint8* pCurr = (uint8*)itr->pLocation;
+
+				if (pPrevEnd == pCurr)
+				{
+					pPrev->uSize += itr->uSize;
+					itr->uSize = 0;
+					itr->pLocation = nullptr;
+					itr->uFreeFrame = usg::Math::Max(itr->uFreeFrame, pPrev->uFreeFrame);
+					itr->bValid = false;
+
+					// There will usually be space so don't go overboard trying to free
+					SwitchList(itr, m_freeList, m_unusedList);
+					if(bFast)
+					{
+						bFound = true;
+						break;
+					}
+					else
+					{
+						return;
+					}
+				}
 			}
+
+			pPrev = itr;
 		}
 
-		pPrev = itr;
-	}
-
+	} while(bFound);
+	
 	m_iMergeFrames--;
 }
 
+
+memsize GPUHeap::GetSmallestBlock(GFXDevice* pDevice, MemAllocator* pAllocator)
+{
+	CriticalSection::ScopedLock lock(m_criticalSection);
+
+	memsize uSpace = AlignSizeUp(pAllocator->GetSize(), pAllocator->GetAlign());
+	uint32 uCurrentFrame = pDevice->GetFrameCount();
+
+	if (m_freeList.empty())
+		return false;
+
+	if (m_unusedList.empty())
+		return false;
+
+	BlockInfo* pSmallest = nullptr;
+	for (auto pInfo : m_freeList)
+	{
+		memsize uFrontPadding = GetRequiredFrontPadding(pAllocator, pInfo);
+
+		if (pInfo->uSize >= (uSpace + uFrontPadding) && CanAlloc(uCurrentFrame, pInfo->uFreeFrame))
+		{
+			if (!pSmallest || pInfo->uSize < pSmallest->uSize)
+			{
+				pSmallest = pInfo;
+			}
+		}
+	}
+
+	return pSmallest ? pSmallest->uSize : 0;
+}
 
 bool GPUHeap::CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator)
 {

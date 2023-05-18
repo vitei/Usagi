@@ -212,9 +212,9 @@ void GFXDevice::Begin()
 }
 
 
-void GFXDevice::End()
+void GFXDevice::End(bool bIsLoading)
 {
-	m_pImpl->platform.End();
+	m_pImpl->platform.End(bIsLoading);
 	if (m_pHMD)
 	{
 		m_pHMD->Update();

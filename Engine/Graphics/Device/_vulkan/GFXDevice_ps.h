@@ -43,7 +43,7 @@ public:
 	void PostInit() {} 
 
 	void Begin();
-	void End();
+	void End(bool bIsLoading);
 	float GetGPUTime() const { return m_fGPUTime; }
 	
 	GFXContext* CreateDeferredContext(uint32 uSizeMul) { ASSERT(false); return NULL; }

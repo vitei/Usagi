@@ -29,11 +29,14 @@ public:
 	void AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
 	void RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
 	bool CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator);
+	memsize GetSmallestBlock(GFXDevice* pDevice, MemAllocator* pAllocator);
 	memsize GetTotalSize() const { return m_uTotalSize; }
 
-	void MergeMemory(uint32 uCurrentFrame);
+	void MergeMemory(uint32 uCurrentFrame, bool bFast);
 
 private:
+	void Validate();
+
 	CriticalSection	m_criticalSection;
 
 	struct BlockInfo
@@ -63,6 +66,8 @@ private:
 	void AllocMemory(BlockInfo* pInfo);
 	void FreeMemory(BlockInfo* pInfo);
 	BlockInfo* FindUnusedBlock();
+
+	static bool ComparePointers(const BlockInfo* const& a, const BlockInfo* const& b);
 
 	void*		m_pHeapMem;
 	uint32		m_uMaxAllocs;

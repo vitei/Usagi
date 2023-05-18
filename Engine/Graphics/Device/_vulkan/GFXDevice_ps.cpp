@@ -1002,7 +1002,7 @@ void GFXDevice_ps::Begin()
 	// TODO: Update GPU time
 }
 
-void GFXDevice_ps::End()
+void GFXDevice_ps::End(bool bIsLoading)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);
 	// For now just submit our immediate context
@@ -1021,15 +1021,26 @@ void GFXDevice_ps::End()
 	VkResult res = vkQueueSubmit(m_queue[QUEUE_TYPE_GRAPHICS], 1, &submitInfo, m_drawFence);
 	FATAL_RELEASE(res == VK_SUCCESS, "vkQueueSubmit(GFX) returned %d", res);
 
+	memsize uAllocedMem = 0;
+
 	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
 	{
 		CriticalSection::ScopedLock lock(m_criticalSection);
 
 		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
 		{
-			m_memoryPools[type].heaps[i]->MergeMemory(m_pParent->GetFrameCount());
+			m_memoryPools[type].heaps[i]->MergeMemory(m_pParent->GetFrameCount(), bIsLoading);
+
+			if(m_memoryProperites[0].memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			{
+				uAllocedMem += m_memoryPools[type].heaps[i]->GetTotalSize();
+			}
+
 		}
 	}
+	//DEBUG_PRINT("GPU Memory: %d\n", (uAllocedMem / 1024) / 1024);
+
+
 }
 
  
@@ -1122,12 +1133,18 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	uint32 uHeap = USG_INVALID_ID;
 	uint32 uMemType = pAllocInOut->GetPoolId();
 	
+
+	memsize smallest = 0xFFFFFFFFFFFFFFFF;
 	for(memsize i=0; i<m_memoryPools[uMemType].heaps.size(); i++)
 	{
 		if (pAllocInOut->NeedsDynamicCPUMap() == m_memoryPools[uMemType].heaps[i]->IsDynamic() && m_memoryPools[uMemType].heaps[i]->CanAllocate(m_pParent, pAllocInOut))
 		{
-			uHeap = (uint32)i;
-			break;
+			memsize smallBlock = m_memoryPools[uMemType].heaps[i]->GetSmallestBlock(m_pParent, pAllocInOut);
+			if(smallBlock < smallest)
+			{
+				uHeap = (uint32)i;
+				smallest = smallBlock;
+			}
 		}
 	}
 

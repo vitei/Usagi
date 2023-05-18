@@ -73,31 +73,42 @@ namespace usg
 		}
 	}
 
-	void InitThread::Run()
+	void InitThread::Run(bool bThreaded)
 	{
-		if (*m_ppLoadMode)
+		// We can't clear the memory if we are pausing
+		if(!m_bPauseMode)
 		{
-			// We can't clear the memory if we are pausing
-			if(!m_bPauseMode)
-			{
-				// FIXME: Moving into simple game mode for now as handles such as audio aren't thread safe
-				//(*m_ppLoadMode)->Cleanup(m_pDevice);
-				//vdelete* m_ppLoadMode;
-			}
-			if (m_pausedModes.empty())
-			{
-				// FIXME: We can only clear the resources if there are no paused modes!
-				// Rewrite to use tagging system for all resources
-				// FIXME: 
-				// Disabling cleanup between modes for now as not needed for demo which keeps re-running the same mission and introduces bugs
-				// FIXME: 
-				// FIXME: 
-				usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
-				m_pDevice->ClearDynamicResources();
-				mem::FreeToLastTag();
-			}
-			*m_ppLoadMode = NULL;
+			// FIXME: Moving into simple game mode for now as handles such as audio aren't thread safe
+			//(*m_ppLoadMode)->Cleanup(m_pDevice);
+			//vdelete* m_ppLoadMode;
 		}
+		if (m_pausedModes.empty())
+		{
+			// FIXME: We can only clear the resources if there are no paused modes!
+			// Rewrite to use tagging system for all resources
+			// FIXME: 
+			// Disabling cleanup between modes for now as not needed for demo which keeps re-running the same mission and introduces bugs
+			// FIXME: 
+			// FIXME: 
+			usg::ResourceMgr::Inst()->ClearDynamicResources(m_pDevice);
+			m_pDevice->ClearDynamicResources();
+			mem::FreeToLastTag();
+		}
+		*m_ppLoadMode = NULL;
+
+		// Probably overkill unless going from one heavy scene to another
+		#if 0
+		uint32 uStartFrame = m_pDevice->GetFrameCount();
+		if(bThreaded)
+		{
+			// FIXME: In single threaded case we should wait a few frames
+			// Wait a few frames for resources to release keeping VRAM usage as low as possible
+			while (m_pDevice->GetFrameCount() < (uStartFrame + 6))
+			{
+				Thread::Sleep(5);
+			}
+		}
+		#endif
 
 		if(m_pausedModes.find(m_uNextMode) == m_pausedModes.end())
 		{
@@ -116,7 +127,7 @@ namespace usg
 
 	void InitThread::Exec()
 	{
-		Run();
+		Run(true);
 		EndThread();
 	}
 }

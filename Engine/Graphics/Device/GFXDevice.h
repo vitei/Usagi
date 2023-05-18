@@ -46,7 +46,7 @@ public:
 	const DisplaySettings* GetDisplayInfo(uint32 uIndex);
 
 	void Begin();
-	void End();
+	void End(bool bIsLoading = false);
 
 	PipelineStateHndl		GetPipelineState(const RenderPassHndl& renderPass, const PipelineStateDecl& decl);
 	// Returns true if changed, if render pass was equal to the old one or invalid returns false

@@ -342,7 +342,7 @@ namespace usg
 
 		m_cpuTimer.Pause();
 		pImmContext->End();
-		pDevice->End();
+		pDevice->End(m_eState == STATE_LOADING);
 		m_cpuTimer.Start();
 
 	}

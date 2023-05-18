@@ -28,7 +28,7 @@ namespace usg
 		void NotifyDeviceChange();
 
 		virtual void Exec();
-		void Run();
+		void Run(bool bThreaded= false);
 
 		bool IsModePaused(uint32 uMode) const;
 
