@@ -5,7 +5,7 @@
 #define USAGI_ENGINE_GRAPHICS_WIN_VULKAN_INCLUDES
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vk_sdk_platform.h>
+#include <vulkan/vk_platform.h>
 
 #define SAMPLER_OFFSET 10
 
