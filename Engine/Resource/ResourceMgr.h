@@ -30,7 +30,7 @@ public:
 
 	EffectHndl					GetEffect(GFXDevice* pDevice, const char* szEffectName);
 	TextureHndl					GetTextureAbsolutePath(GFXDevice* pDevice, const char* szTextureName, bool bReplaceMissingTex = true, GPULocation eLocation = GPU_LOCATION_STANDARD);
-	TextureHndl					GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_FASTMEM);
+	TextureHndl					GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation = GPU_LOCATION_FASTMEM, bool bReplaceMissingTex = true);
 	ModelResHndl				GetModel(GFXDevice* pDevice, const char* szModelName, bool bFastMem=true);
 	ModelResHndl				GetModelAsInstance(GFXDevice* pDevice, const char* szModelName);
 	FontHndl					GetFont( GFXDevice* pDevice, const char* szFontName );

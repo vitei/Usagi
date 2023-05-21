@@ -240,10 +240,10 @@ TextureHndl	 ResourceMgr::GetTextureAbsolutePath(GFXDevice* pDevice, const char*
 	return pTexture;
 }
 
-TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation)
+TextureHndl	ResourceMgr::GetTexture(GFXDevice* pDevice, const char* szTextureName, GPULocation eLocation, bool bReplaceMissingTex)
 {
 	usg::string path = m_textureDir + szTextureName;
-	return GetTextureAbsolutePath(pDevice, path.c_str(), true, eLocation);
+	return GetTextureAbsolutePath(pDevice, path.c_str(), bReplaceMissingTex, eLocation);
 }
 
 
