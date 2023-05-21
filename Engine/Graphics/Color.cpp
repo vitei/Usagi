@@ -15,6 +15,7 @@ const Color Color::Blue = Color(0.0f, 0.0f, 1.0f, 1.0f);
 const Color Color::Purple = Color(1.0f, 0.0f, 1.0f, 1.0f);
 const Color Color::Black = Color(0.0f, 0.0f, 0.0f, 1.0f);
 const Color Color::Grey = Color(0.5f, 0.5f, 0.5f, 1.0f);
+const Color Color::Orange = Color(1.0f, 0.65f, 0.1f, 1.0f);
 const Color Color::White = Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 }	//	namespace usg

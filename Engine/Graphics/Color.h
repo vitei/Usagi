@@ -87,6 +87,7 @@ public:
 	static const Color Blue;
 	static const Color Black;
 	static const Color Grey;
+	static const Color Orange;
 	static const Color Yellow;
 	static const Color Purple;
 	static const Color White;
