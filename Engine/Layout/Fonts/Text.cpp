@@ -105,14 +105,7 @@ namespace usg
 			return false;
 		}*/
 
-		if( newStrLength > m_drawer.GetMaxStringLength() )
-		{
-			if( !m_drawer.Resize(newStrLength) )
-			{
-				DEBUG_PRINT("Text error: Failed to build buffers.\n");
-				return false;
-			}
-		}
+
 
 		// Store the new length and string.
 		m_cachedString = u8Str;

@@ -53,15 +53,19 @@ namespace usg
 
 	void TextDrawer::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
+		const int iDefaultSize = 64;
 		// Initialize vertices.
 		m_charVerts.Init(
 			pDevice,
 			NULL,
 			sizeof(Vertex),
-			MAX_CHAR_VERTICES,
+			iDefaultSize,
 			"Text system",
 			GPU_USAGE_DYNAMIC
 		);
+
+		m_textBufferTmp.resize(iDefaultSize);
+
 
 		PipelineStateDecl pipelineState;
 		pipelineState.inputBindings[0].Init(g_textVertDecl);
@@ -286,7 +290,6 @@ namespace usg
 		const usg::Color& colorBg = m_pParent->GetBackgroundColor();
 		m_uCharCount = 0;
 		
-		Vertex* pVert = &m_textBufferTmp[0];//[m_uCharCount*4];
 		float fZPos = m_pParent->GetDepth();
 		float fLineWidth = 0.0f;
 
@@ -301,6 +304,8 @@ namespace usg
 
 		while(*szText != 0)
 		{
+			Vertex* pVert = &m_textBufferTmp[uFoundCharCount];//[m_uCharCount*4];
+
 			// ints are the new chars, dontcha know.
 			//char chFoo = szString[uChar];
 
@@ -369,16 +374,17 @@ namespace usg
 			colorBg.FillU8(pVert->cColBg[0], pVert->cColBg[1], pVert->cColBg[2], pVert->cColBg[3]);
 			color.FillU8(pVert->cColFg[0], pVert->cColFg[1], pVert->cColFg[2], pVert->cColFg[3]);
 			pVert->fDepth = fZPos;
-	
-			pVert++;
+
 
 			uCharsThisLine++;
 			float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
 			fPosX += fCharWidth;
 			fLineWidth += fCharWidth;
 			// We can't manage anymore
-			if (uFoundCharCount >= MAX_CHARS)
-				break;
+			if (uFoundCharCount >= m_textBufferTmp.size())
+			{
+				m_textBufferTmp.resize( m_textBufferTmp.size() * 2);
+			}
 		}
 
 		// Add the final line before processing the alignment
@@ -428,32 +434,29 @@ namespace usg
 
 		for(uint32 i=0; i< uFoundCharCount; i++)
 		{
-			pVert = &m_textBufferTmp[i];
+			Vertex* pVert = &m_textBufferTmp[i];
 			m_vMinBounds.Assign(Math::Min(m_vMinBounds.x, pVert->vPosRange.x), Math::Min(m_vMinBounds.y, pVert->vPosRange.y));
 			m_vMaxBounds.Assign(Math::Max(m_vMaxBounds.x, pVert->vPosRange.z), Math::Max(m_vMaxBounds.y, pVert->vPosRange.w));
 		}
 	
+		if (uFoundCharCount > m_charVerts.GetCount())
+		{
+			m_charVerts.Cleanup(pDevice);
+			m_charVerts.Init(pDevice,
+				NULL,
+				sizeof(Vertex),
+				(uint32)m_textBufferTmp.size(),
+				"Text system",
+				GPU_USAGE_DYNAMIC);
+		}
 
 		if (uFoundCharCount > 0)
 		{
-			m_charVerts.SetContents(pDevice, m_textBufferTmp, uFoundCharCount);
+			m_charVerts.SetContents(pDevice, &m_textBufferTmp[0], uFoundCharCount);
 		}
 		m_uCharCount = uFoundCharCount;
 	}
 
-	bool TextDrawer::Resize(memsize uStrLen)
-	{
-		if(uStrLen>MAX_CHARS)
-		{
-			DEBUG_PRINT("Resize request was larger than the OpenGL fixed buffer");
-			return false;
-		}
-		else {
-			m_uCharCount = uStrLen;
-			m_bDirty = true;
-			return true;
-		}
-	}
 
 	void TextDrawer::GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const
 	{
@@ -461,9 +464,4 @@ namespace usg
 		vMax = m_vMaxBounds;
 	}
 
-
-	memsize TextDrawer::GetMaxStringLength() const
-	{
-		return MAX_CHARS;
-	}
 }
