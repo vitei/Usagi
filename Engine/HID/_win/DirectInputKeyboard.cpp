@@ -254,6 +254,7 @@ namespace usg
 		m_bToggles[KEYBOARD_TOGGLE_ALT] = (GetKeyState(VK_MENU) & 0x8000) != 0;
 
 
+		#if 0
 		m_uInputChars = 0;
 		for (uint32 i = 0; i < m_objectDataSize; i++)
 		{
@@ -273,8 +274,7 @@ namespace usg
 
 			}
 		}
-		
-		#if 0
+		#else
 		m_uInputChars = m_pOwner->GetInputChars();
 		for(uint32 i=0; i<m_uInputChars; i++)
 		{
