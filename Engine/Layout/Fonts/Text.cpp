@@ -66,10 +66,24 @@ namespace usg
 
 	void Text::UpdateBuffers(GFXDevice* pDevice)
 	{
-		m_drawer.UpdateBuffers(pDevice);
+		//if(m_dirtyFlags != 0)
+		{
+			m_drawer.FillVertexData();
+			m_drawer.UpdateBuffers(pDevice);
+		}
 		m_dirtyFlags = 0;
 	}
 
+
+	void Text::GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax)
+	{
+		if (m_dirtyFlags)
+		{
+			// Bounds are updated on doing this so need to force
+			m_drawer.FillVertexData();
+		}
+		m_drawer.GetBounds(vMin, vMax);
+	}
 
 	bool Text::Draw( GFXContext* context, bool b3D )
 	{
@@ -95,23 +109,12 @@ namespace usg
 
 		const memsize newStrLength = u8Str.size();
 
-		/*
-		// Null string...
-		if( newStrLength == 0 )
-		{
-#ifdef TEXT_PRINT_WARNINGS
-			DEBUG_PRINT("Text warning: Tried to set a string of zero length.\n");
-#endif
-			return false;
-		}*/
-
-
-
 		// Store the new length and string.
 		m_cachedString = u8Str;
 
 		// Build the text command list.
 		m_dirtyFlags |= kDirtyText;
+
 
 		return true;
 	}

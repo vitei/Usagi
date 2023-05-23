@@ -200,7 +200,7 @@ namespace usg
 		}
 	}
 
-	void TextDrawer::FillVertexBuffers(GFXDevice* pDevice)
+	void TextDrawer::FillVertexData()
 	{
 		// Get position to draw text at.
 		// uint32 uX, uY;
@@ -219,10 +219,10 @@ namespace usg
 		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
 		m_vMaxBounds.Assign(-FLT_MAX, -FLT_MAX);
 
-		if(fWidthLimit > 0.0f)
+		if (fWidthLimit > 0.0f)
 		{
 			// Insert fake newlines
-			for(uint32 uChar = 0; uChar < u8Text.size();)
+			for (uint32 uChar = 0; uChar < u8Text.size();)
 			{
 				const char* szThisText = &u8Text[uChar];
 				uint32 uByteCount = U8Char::GetByteCount(szThisText);
@@ -238,7 +238,7 @@ namespace usg
 				vDimensions = vDimensions * vScale;
 				float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
 				fTmpWidth += fCharWidth;
- 				if (fTmpWidth > fWidthLimit)
+				if (fTmpWidth > fWidthLimit)
 				{
 					uint32 uCharCache = uChar;
 					uChar--;
@@ -248,7 +248,7 @@ namespace usg
 						szThisText = &u8Text[uChar];
 						uint32 uByteCount = U8Char::GetByteCount(szThisText);
 						U8Char thisChar(szThisText, uByteCount);
-						if ( (uByteCount == 1 && *szThisText == ' '))
+						if ((uByteCount == 1 && *szThisText == ' '))
 						{
 							u8Text[uChar] = '\n';
 							fTmpWidth = 0.0f;
@@ -258,9 +258,9 @@ namespace usg
 						uChar--;
 					}
 
-					if(!bFound)
+					if (!bFound)
 					{
-						uChar = uCharCache-1;
+						uChar = uCharCache - 1;
 						while (uChar < u8Text.size())
 						{
 							szThisText = &u8Text[uChar];
@@ -268,7 +268,7 @@ namespace usg
 							U8Char thisChar(szThisText, uByteCount);
 							if (uByteCount == 2)
 							{
-								u8Text.insert(uChar-1, "\n");
+								u8Text.insert(uChar - 1, "\n");
 								fTmpWidth = 0.0f;
 								bFound = true;
 								break;
@@ -277,7 +277,7 @@ namespace usg
 						}
 					}
 				}
-		
+
 				uChar += uByteCount;
 			}
 		}
@@ -289,7 +289,7 @@ namespace usg
 		const usg::Color& colorLower = m_pParent->GetGradationEndColor();
 		const usg::Color& colorBg = m_pParent->GetBackgroundColor();
 		m_uCharCount = 0;
-		
+
 		float fZPos = m_pParent->GetDepth();
 		float fLineWidth = 0.0f;
 
@@ -302,7 +302,7 @@ namespace usg
 		LineInformation lines[MAX_LINES];
 		uint32 uLineCount = 0;
 
-		while(*szText != 0)
+		while (*szText != 0)
 		{
 			Vertex* pVert = &m_textBufferTmp[uFoundCharCount];//[m_uCharCount*4];
 
@@ -314,7 +314,7 @@ namespace usg
 				continue;	// Run through the loop again, this was a tag
 
 			uint32 uByteCount = U8Char::GetByteCount(szText);
-			if(uByteCount == 1 && *szText == '\n')
+			if (uByteCount == 1 && *szText == '\n')
 			{
 				ASSERT(uLineCount < MAX_LINES);
 				lines[uLineCount].fHeight = fMaxHeight;
@@ -336,7 +336,7 @@ namespace usg
 
 			float fLeft, fRight, fTop, fBottom;
 			bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
-			if(!bFound)
+			if (!bFound)
 			{
 				// Show a ? if we are missing this character to avoid unselectable text etc
 				bFound = font->GetCharacterCoords('?', fLeft, fRight, fTop, fBottom);
@@ -349,7 +349,7 @@ namespace usg
 				continue;
 			}
 
-			vScale = m_context.GetScale()*m_pParent->GetFont()->GetDrawScale();
+			vScale = m_context.GetScale() * m_pParent->GetFont()->GetDrawScale();
 			//Vector2f vDimensions = font->GetCharacterSize(fLeft, fRight, fTop, fBottom);
 			Vector2f vDimensions = Vector2f(font->GetCharacterAspect(fLeft, fRight, fTop, fBottom), 1.0f);
 			vDimensions = vDimensions * vScale;
@@ -383,7 +383,7 @@ namespace usg
 			// We can't manage anymore
 			if (uFoundCharCount >= m_textBufferTmp.size())
 			{
-				m_textBufferTmp.resize( m_textBufferTmp.size() * 2);
+				m_textBufferTmp.resize(m_textBufferTmp.size() * 2);
 			}
 		}
 
@@ -432,14 +432,20 @@ namespace usg
 
 		ApplyAlignment(lines, uLineCount, vOrigin, fMaxWidth);
 
-		for(uint32 i=0; i< uFoundCharCount; i++)
+		for (uint32 i = 0; i < uFoundCharCount; i++)
 		{
 			Vertex* pVert = &m_textBufferTmp[i];
 			m_vMinBounds.Assign(Math::Min(m_vMinBounds.x, pVert->vPosRange.x), Math::Min(m_vMinBounds.y, pVert->vPosRange.y));
 			m_vMaxBounds.Assign(Math::Max(m_vMaxBounds.x, pVert->vPosRange.z), Math::Max(m_vMaxBounds.y, pVert->vPosRange.w));
 		}
-	
-		if (uFoundCharCount > m_charVerts.GetCount())
+
+		m_uCharCount = uFoundCharCount;
+
+	}
+
+	void TextDrawer::FillVertexBuffers(GFXDevice* pDevice)
+	{
+		if (m_uCharCount > m_charVerts.GetCount())
 		{
 			m_charVerts.Cleanup(pDevice);
 			m_charVerts.Init(pDevice,
@@ -450,11 +456,10 @@ namespace usg
 				GPU_USAGE_DYNAMIC);
 		}
 
-		if (uFoundCharCount > 0)
+		if (m_uCharCount > 0)
 		{
-			m_charVerts.SetContents(pDevice, &m_textBufferTmp[0], uFoundCharCount);
+			m_charVerts.SetContents(pDevice, &m_textBufferTmp[0], (uint32)m_uCharCount);
 		}
-		m_uCharCount = uFoundCharCount;
 	}
 
 

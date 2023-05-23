@@ -60,7 +60,7 @@ namespace usg
 		int GetTabWidth() const;
 		const FontHndl& GetFont() const { return m_pFont; }
 		uint32 GetDirtyFlags() const { return m_dirtyFlags; }
-		void GetBounds( usg::Vector2f &vMin, usg::Vector2f& vMax ) const { m_drawer.GetBounds(vMin, vMax); }
+		void GetBounds( usg::Vector2f &vMin, usg::Vector2f& vMax );
 
 		void PrintDebugInfo() const;
 
@@ -76,7 +76,8 @@ namespace usg
 			kDirtyScale                 = (1 << 9),
 			kDirtyTabWidth              = (1 << 10),
 			kDirtyText					= (1 << 11),	// We've changed the string
-			kDirtyBgColor				= (1 << 12),
+			kDirtyFont					= (1 << 12),
+			kDirtyBgColor				= (1 << 13)
 		};
 
 

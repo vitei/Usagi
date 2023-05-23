@@ -27,6 +27,7 @@ namespace usg
 		void SetOriginTL(bool bTL) { m_bOriginTL = bTL; }
 		void GetBounds(usg::Vector2f& vMin, usg::Vector2f& vMax) const;
 		bool Draw(GFXContext* context, bool b3D);
+		void FillVertexData();
 
 
 		struct Vertex
