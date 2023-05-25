@@ -277,7 +277,7 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 void Model::SetRenderMask(uint32 uMask)
 {
 	m_uRenderMask = uMask;
-	m_depthRenderMask &= (uMask|RenderMask::RENDER_MASK_SHADOW_CAST);
+	m_depthRenderMask &= (uMask|RenderMask::RENDER_MASK_SHADOW_CAST|RenderMask::RENDER_MASK_NO_MODEL_LIGHT);
 	UpdateRenderMaskInt();
 }
 

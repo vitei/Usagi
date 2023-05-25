@@ -252,6 +252,7 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 	pLight->spec.base.diffuse = color * fIntensity * 1.0f;
 	pLight->spec.base.specular = color * fIntensity * 1.0f;
 	pLight->spec.base.bShadow = true;// pFBXLight->CastShadows;	// Sadly this isn't coming through correctly
+	pLight->spec.base.uShadowExclFlags = RENDER_MASK_NO_MODEL_LIGHT;
 
 	// Matching our simplified settings
 	// TODO: We should really should support these falloff settings in the engine
@@ -275,14 +276,14 @@ void FbxLoad::AddLight(Cmdl& cmdl, FbxNode* pNode)
 		const float fFarIntensityFrac = 100.f;	
 		switch (pFBXLight->DecayType.Get()) {
 		case FbxLight::eLinear:
-			fFarEnd = fFarIntensityFrac *fIntensity;
-			break;
+		//	fFarEnd = fFarIntensityFrac *fIntensity;
+		//	break;
 		case FbxLight::eQuadratic:
-			fFarEnd = fFarIntensityFrac *sqrtf(fIntensity);
-			break;
+		//	fFarEnd = fFarIntensityFrac *sqrtf(fIntensity);
+		//	break;
 		case FbxLight::eCubic:
-			fFarEnd = pow(fFarIntensityFrac*fIntensity, 1.0f / 3.0f);
-			break;
+		//	fFarEnd = pow(fFarIntensityFrac*fIntensity, 1.0f / 3.0f);
+		//	break;
 		case FbxLight::eNone:
 			// Seems to come through as this when inverse square
 			fFarEnd = fAttenuationStart;
