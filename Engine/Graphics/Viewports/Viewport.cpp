@@ -8,7 +8,6 @@
 
 namespace usg {
 
-const float32 VIEWPORT_fFarClip = 1000.0f;
 
 Viewport::~Viewport(void)
 {
