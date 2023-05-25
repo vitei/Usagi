@@ -111,6 +111,7 @@ namespace usg
 
 	void SimpleGameBase::Cleanup(usg::GFXDevice* pDevice)
 	{
+		bool bClearResources = false;
 		if (m_pTransitionMode)
 		{
 			m_pTransitionMode->Cleanup(pDevice);
@@ -124,9 +125,7 @@ namespace usg
 			vdelete m_pActiveMode;
 			m_pActiveMode = nullptr;
 
-			usg::ResourceMgr::Inst()->ClearDynamicResources(pDevice);
-			pDevice->ClearDynamicResources();
-			mem::FreeToLastTag();
+			bClearResources = true;
 		}
 
 		m_pInternalData->m_pInitThread->Cleanup(pDevice);
@@ -135,6 +134,13 @@ namespace usg
 		usg::Fader::Cleanup();
 		usg::MusicManager::Cleanup();
 		m_debugRender.Cleanup(pDevice);
+
+		if (bClearResources)
+		{
+			usg::ResourceMgr::Inst()->ClearDynamicResources(pDevice);
+			pDevice->ClearDynamicResources();
+			mem::FreeToLastTag();
+		}
 	}
 
 	bool SimpleGameBase::IsDoingThreadedLoading() const
