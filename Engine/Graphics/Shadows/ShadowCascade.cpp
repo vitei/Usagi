@@ -51,6 +51,8 @@ ShadowCascade::ShadowCascade()
 	m_uGroupHeight = 0;
 	m_uCascadeStartIndex = 0;
 	m_pRenderTarget = nullptr;
+    m_fMaxShadowDist = 1000.f;
+    m_fResolutionMultiplier = 1.0f;
 
 	for (int i = 0; i < MAX_CASCADES; i++)
 	{
@@ -86,12 +88,12 @@ void ShadowCascade::AssignRenderTarget(RenderTarget* pTarget, uint32 uStartIndex
 	m_uGroupWidth = m_pRenderTarget->GetWidth();
 	m_uGroupHeight = m_pRenderTarget->GetHeight();
 
-	const float32 fScale = (float)m_uGroupWidth / 2048.0f;
-	const float32 fPartSize[] = { 40.0f, 120.0f, 400.0f, 1000.f };
+    m_fResolutionMultiplier = (float)m_uGroupWidth / 2048.0f;
+	const float32 fPartSize[] = { m_fMaxShadowDist * 0.04f, m_fMaxShadowDist * 0.12f, m_fMaxShadowDist * 0.4f, m_fMaxShadowDist };
 
 	for (uint32 i = 0; i < CASCADE_COUNT; i++)
 	{
-		m_fPartitions0To1[i] = fPartSize[i] * fScale;
+		m_fPartitions0To1[i] = fPartSize[i];// * fScale;
 	}
 
 	m_fCascadePartitionsMax = fPartSize[CASCADE_COUNT - 1];
@@ -140,9 +142,9 @@ void ShadowCascade::Update(const Camera& sceneCam)
         readData->mCascadeMtxVInv[i] = mInvView * m_cascadeCamera[i].GetViewMatrix() * m_cascadeCamera[i].GetProjection() * texBias;
     }
 
-	float fBiasMul = 10.125f;
+	float fBiasMul = 5.0f / m_fResolutionMultiplier;
 
-    readData->vBias.Assign(-0.000008f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
+    readData->vBias.Assign(-0.000002f*fBiasMul, -0.000004f*fBiasMul, -0.000007f*fBiasMul, -0.000009f*fBiasMul);
 	readData->vSampleRange.Assign(3.0f, 2.5f, 2.0f, 0.5f);
 
 	float fadeDistances[MAX_CASCADES];
@@ -290,7 +292,7 @@ void ShadowCascade::InitFrame(const Camera& sceneCam)
     float fFrustumIntervalBegin, fFrustumIntervalEnd;
     Vector4f vLightCameraOrthoMin;  // light space frustrum aabb 
     Vector4f vLightCameraOrthoMax;
-    float fCameraNearFarRange = sceneCam.GetFar() - sceneCam.GetNear();
+    float fCameraNearFarRange = /*sceneCam.GetFar()*/ m_fMaxShadowDist - sceneCam.GetNear();
 
 	Vector4f vWorldUnitsPerTexel = Vector4f(0.0f, 0.0f, 0.0f, 0.0f); 
 

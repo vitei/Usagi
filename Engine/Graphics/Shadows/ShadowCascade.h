@@ -87,6 +87,8 @@ private:
 	float					m_fPartitions0To1[MAX_CASCADES];
 	float					m_fCascadePartitionsFrustum[MAX_CASCADES];
 	float					m_fCascadePartitionsMax;
+	float					m_fMaxShadowDist;
+	float					m_fResolutionMultiplier;
 
 	// One frustum for each cascade
 	PointFrustum			m_frustum[MAX_CASCADES];
