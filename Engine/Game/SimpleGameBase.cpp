@@ -153,6 +153,10 @@ namespace usg
 		return m_pInternalData->m_pInitThread->IsModePaused(uMode);
 	}
 
+	void SimpleGameBase::DestroyPausedModes()
+	{
+		return m_pInternalData->m_pInitThread->ForceClearPausedModes();
+	}
 
 	//----------------------------------------------------
 	void SimpleGameBase::StartNextMode(usg::GFXDevice* pDevice)

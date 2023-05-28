@@ -14,6 +14,7 @@ namespace usg
 		, m_ppLoadMode(NULL)
 		, m_uNextMode(0)
 		, m_bPauseMode(false)
+		, m_bForceClearPausedModes(false)
 	{
 	}
 
@@ -31,7 +32,7 @@ namespace usg
 
 	bool InitThread::IsModePaused(uint32 uMode) const
 	{
-		return m_pausedModes.find(uMode) != m_pausedModes.end();
+		return m_pausedModes.find(uMode) != m_pausedModes.end() && !m_bForceClearPausedModes;
 	}
 
 	void InitThread::SetNextMode(Mode** ppLoadMode, uint32 uNextMode, bool bPauseMode)
@@ -81,6 +82,11 @@ namespace usg
 			// FIXME: Moving into simple game mode for now as handles such as audio aren't thread safe
 			//(*m_ppLoadMode)->Cleanup(m_pDevice);
 			//vdelete* m_ppLoadMode;
+		}
+		if (m_bForceClearPausedModes)
+		{
+			Cleanup(m_pDevice);
+			m_bForceClearPausedModes = false;
 		}
 		if (m_pausedModes.empty())
 		{

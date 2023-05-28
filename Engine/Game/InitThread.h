@@ -22,6 +22,7 @@ namespace usg
 		virtual ~InitThread();
 
 		void Init(usg::GFXDevice* pDevice, ModeLoadFunc fnLoad);
+		void ForceClearPausedModes() { m_bForceClearPausedModes = true; }
 		void Cleanup(usg::GFXDevice* pDevice);
 		void SetNextMode(usg::Mode** ppLoadMode, uint32 uNextMode, bool bPauseMode);
 		void NotifyResize(GFXDevice* pDevice, uint32 uDisplay, uint32 uWidth, uint32 uHeight);
@@ -39,6 +40,7 @@ namespace usg
 		ModeLoadFunc			m_fnLoad;
 		usg::map<uint32, Mode*> m_pausedModes;
 		bool					m_bPauseMode;
+		bool					m_bForceClearPausedModes;
 	};
 }
 
