@@ -40,6 +40,7 @@ private:
 	usg::GUIFloat				m_scale;
 	usg::GUIFloat				m_particleScale;
 	usg::GUIFloat				m_startTime;
+	usg::GUITextInput			m_eventName;
 	
 	usg::GUIButton				m_removeEmitterButton;
 	usg::ScriptEmitter			m_emitter;

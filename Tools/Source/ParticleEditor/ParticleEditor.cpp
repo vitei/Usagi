@@ -151,7 +151,7 @@ void ParticleEditor::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pResMgr)
 	m_emitterWindow.GetVariables() = m_emitter.GetDefinition();
 	m_emitterWindow.Init(pDevice, &m_guiRend);
 
-	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
+	m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f, 0);
 	m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 
 	vPos.Assign(740.0f, 120.0f);
@@ -270,7 +270,7 @@ void ParticleEditor::Update(usg::GFXDevice* pDevice)
 		m_emitterPreview.GetEffect().Kill(true);
 		m_emitterPreview.GetEffect().Init(pDevice, &m_emitterPreview.GetScene(), mEffectMat);
 
-		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f);
+		m_emitter.SetInstanceData(mEffectMat, 1.0f, 0.0f, 0);
 		m_emitterPreview.GetEffect().AddEmitter(pDevice, &m_emitter);
 	}
 

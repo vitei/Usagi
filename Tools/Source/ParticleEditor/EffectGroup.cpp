@@ -103,7 +103,8 @@ void EffectGroup::SaveCallback(const char* szName, const char* szFilePath, const
 	{
 		if (m_instances[i].GetActive())
 		{
-			m_effectGroup.emitters[i] = m_instances[i].GetData();
+			int iDX = m_effectGroup.emitters_count;
+			m_effectGroup.emitters[iDX] = m_instances[i].GetData();
 			m_effectGroup.emitters_count++;
 		}
 	}
@@ -112,7 +113,8 @@ void EffectGroup::SaveCallback(const char* szName, const char* szFilePath, const
 	{
 		if (m_ribbons[i].GetActive())
 		{
-			m_effectGroup.ribbons[i] = m_ribbons[i].GetData();
+			int iDX = m_effectGroup.ribbons_count;
+			m_effectGroup.ribbons[iDX] = m_ribbons[i].GetData();
 			m_effectGroup.ribbons_count++;
 		}
 	}

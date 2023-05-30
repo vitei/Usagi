@@ -24,7 +24,7 @@ inline bool Compare(VariableType& inOut, const ComparisonType newValue)
 void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGroup* pParent, uint32 uIndex)
 {
 	usg::Vector2f vPos(0.0f, 0.0f);
-	usg::Vector2f vScale(300.f, 190.f);
+	usg::Vector2f vScale(300.f, 260.f);
 	usg::string name;
 	m_pParent = pParent;
 	name = str::ParseString("Effect %d", uIndex);
@@ -48,6 +48,8 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_particleScale.SetToolTip("Multiplier on particle size");
 	m_startTime.Init("Start time", 0.0f, 5.0f, 0.0f);
 	m_startTime.SetToolTip("Delay before starting emission");
+	m_eventName.Init("Event Name", "");
+	m_eventName.SetToolTip("Converted into a CRC and used to message when this emitter has spawned");
 	m_parameterWindow.Init("Parameters", vPos, vScale, usg::GUIWindow::WINDOW_TYPE_COLLAPSABLE);
 	m_parameterWindow.SetDefaultCollapsed(true);
 
@@ -64,6 +66,7 @@ void EmitterInstance::Init(usg::GFXDevice* pDevice, usg::Scene& scene, EffectGro
 	m_parameterWindow.AddItem(&m_scale);
 	m_parameterWindow.AddItem(&m_particleScale);
 	m_parameterWindow.AddItem(&m_startTime);
+	m_parameterWindow.AddItem(&m_eventName);
 	m_parameterWindow.AddItem(&m_changeAssetButton);
 	m_parameterWindow.AddItem(&m_removeEmitterButton);
 
@@ -94,6 +97,12 @@ bool EmitterInstance::Update(usg::GFXDevice* pDevice, float fElapsed)
 	bAltered |= Compare(m_emitterData.vScale, m_scale.GetValueV3());
 	bAltered |= Compare(m_emitterData.fParticleScale, m_particleScale.GetValue());
 	bAltered |= Compare(m_emitterData.fReleaseFrame, m_startTime.GetValue(0));
+	if (m_eventName.GetUpdated())
+	{
+		strcpy_s(m_emitterData.eventId, m_eventName.GetInput());
+		m_emitterData.has_eventId = true;
+		bAltered = true;
+	}
 	
 	m_emitterData.has_fReleaseFrame = true;
 
@@ -139,6 +148,9 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 		m_emitterData.vScale = usg::Vector3f::ONE;
 		m_emitterData.fParticleScale = 1.0f;
 		m_emitterData.fReleaseFrame = 0.0f;
+		m_emitterData.has_eventId = true;
+		m_emitterData.eventId[0] = '\0';
+	
 	}
 	else
 	{
@@ -153,6 +165,11 @@ void EmitterInstance::AddToScene(usg::GFXDevice* pDevice, usg::particles::Emitte
 		m_startTime.SetValue(m_emitterData.fReleaseFrame);
 	else 
 		m_startTime.SetValue(0.0f);
+
+	if (m_emitterData.has_eventId)
+		m_eventName.SetInput(m_emitterData.eventId);
+	else
+		m_eventName.SetInput("");
 
 	usg::string emitterName = m_emitterData.emitterName;
 	emitterName += ".vpb";
@@ -181,7 +198,7 @@ void EmitterInstance::UpdateInstanceMatrix()
 	mInstanceMat.MakeRotate(usg::Math::DegToRad(m_emitterData.vRotation.x), -usg::Math::DegToRad(m_emitterData.vRotation.y), usg::Math::DegToRad(m_emitterData.vRotation.z));
 	mInstanceMat.SetTranslation(m_emitterData.vPosition);
 	mInstanceMat = mInstanceMat * mScale;
-	m_emitter.SetInstanceData(mInstanceMat, m_emitterData.fParticleScale, m_emitterData.fReleaseFrame);
+	m_emitter.SetInstanceData(mInstanceMat, m_emitterData.fParticleScale, m_emitterData.fReleaseFrame, 0);
 }
 
 void EmitterInstance::UpdateEmitter(usg::GFXDevice* pDevice, usg::Scene& scene, const usg::particles::EmitterEmission& emitterData, const usg::particles::EmitterShapeDetails& shapeData)
