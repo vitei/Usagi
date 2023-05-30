@@ -479,7 +479,8 @@ void Model::AddToSceneInt(GFXDevice* pDevice)
 					float fLODDistance = Math::Max(m_pResource->GetBounds().GetRadius(), 6.0f)*80.0f;
 					if (pBone->GetRenderGroup())
 					{
-						pBone->GetRenderGroup()->SetLodMaxDistance(0, fLODDistance);
+						// For now no culling full stop
+					//	pBone->GetRenderGroup()->SetLodMaxDistance(0, fLODDistance);
 					}
 				}
 

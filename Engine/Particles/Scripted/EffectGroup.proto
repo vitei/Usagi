@@ -25,6 +25,7 @@ message EmitterData
 	required usg.Vector3f vPosition = 5;
 	required float fParticleScale = 6 [default = 1.0];
 	optional float fReleaseFrame = 7 [default = 1.0];
+	optional string eventId = 8 [(nanopb).max_size = 32];
 }
 
 message EffectGroup

@@ -37,7 +37,7 @@ public:
 
     void Alloc(GFXDevice* pDevice);
 	
-	virtual void Init(usg::GFXDevice* pDevice, const ParticleEffect* pParent);
+	virtual void Init(usg::GFXDevice* pDevice, ParticleEffect* pParent);
 	virtual void Cleanup(GFXDevice* pDevice) {}
 	virtual bool Update(float fElapsed);
 	virtual void UpdateBuffers(GFXDevice* pDevice) {}
@@ -61,11 +61,13 @@ public:
 
 protected:
 	bool CanEmit() const { return m_bEmissionAllowed; }
+	ParticleEffect* GetParent() { return m_pParent; }
 	const ParticleEffect* GetParent() const { return m_pParent; }
+
 private:
 
 	bool	m_bEmissionAllowed;
-	const ParticleEffect*	m_pParent;
+	ParticleEffect*	m_pParent;
 };
 
 }

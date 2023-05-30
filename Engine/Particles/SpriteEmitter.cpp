@@ -58,7 +58,7 @@ void SpriteEmitter::Alloc(GFXDevice* pDevice, uint32 uMaxCount, uint32 uVertexSi
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 }
 
-void SpriteEmitter::Init(usg::GFXDevice* pDevice, const ParticleEffect* pParent)
+void SpriteEmitter::Init(usg::GFXDevice* pDevice, ParticleEffect* pParent)
 {
 	m_uActivePart = 0;
 	m_uTailPart = 0;

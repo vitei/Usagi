@@ -6,7 +6,7 @@ MatrixComponent:
 CameraComponent:
   fFOV: 50.0
   fNearPlaneDist: 0.1
-  fFarPlaneDist: 1000.0 
+  fFarPlaneDist: 3000.0 
   uRenderMask: <%= Usg::RenderMask::RENDER_MASK_CAMERA_OUTSIDE %>    
   uCamId: <%= Zlib::crc32('DebugCam') %>    
 DebugCameraComponent:

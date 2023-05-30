@@ -206,7 +206,7 @@ void RibbonTrail::SetDeclaration(GFXDevice* pDevice, const particles::RibbonData
 	m_material.SetTexture(1, usg::ResourceMgr::Inst()->GetTexture(pDevice, name.c_str()), pDevice->GetSampler(samp) );
 }
 
-void RibbonTrail::Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pEffect)
+void RibbonTrail::Init(usg::GFXDevice* pDevice, usg::ParticleEffect* pEffect)
 {
 	m_uNextIndex = 0;
 	m_uSetVerts = 0;

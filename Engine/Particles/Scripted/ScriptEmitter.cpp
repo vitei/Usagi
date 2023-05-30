@@ -83,6 +83,7 @@ namespace usg
 	{
 		m_pEmitterShape = NULL;
 		m_fTriggerTime = 0.0f;
+		m_uEventCRC = 0; 
 		m_effectLocalMatrix = Matrix4x4::Identity();
 		m_bLocalOffset = false; 
 		m_bDynamicResize = false;
@@ -377,7 +378,7 @@ namespace usg
 
 	}
 
-	void ScriptEmitter::Init(GFXDevice* pDevice, const usg::ParticleEffect* pParent)
+	void ScriptEmitter::Init(GFXDevice* pDevice, usg::ParticleEffect* pParent)
 	{
 		Particle::ScriptedParticlePerFrame* pFrame = m_customConstants.Lock<Particle::ScriptedParticlePerFrame>();
 		pFrame->fEffectTime = 0.0f;
@@ -440,9 +441,13 @@ namespace usg
 
 	bool ScriptEmitter::Update(float fElapsed)
 	{
-		m_fDelay -= fElapsed;
 		if(m_fDelay > 0.0f)
-			return true;
+		{
+			m_fDelay -= fElapsed;
+			if(m_fDelay > 0.0f)
+				return true;
+		}
+
 
 		m_vPrevPos = m_mWorldMatrix.vPos();
 		{
@@ -466,6 +471,11 @@ namespace usg
 			m_vShapeVelocity = shapeDef.baseShape.vVelocity + (Math::RangedRandom(-velocityRandRange, velocityRandRange)*shapeDef.baseShape.vVelocity);
 			//usg::Matrix4x4 mTransform = m_effectLocalMatrix * GetParent()->GetMatrix();
 			m_mWorldMatrix.TransformVec3(m_vShapeVelocity, 0.0f);
+			
+			if(m_uEventCRC != 0)
+			{
+				GetParent()->AddEvent(ParticleEffect::EffectEventType::EmitterTriggered, m_uEventCRC, m_mWorldMatrix);
+			}
 		}
 
 		m_vShapeVelocity += m_pEmitterShape->GetDetails().baseShape.vGravity * fElapsed;
@@ -762,11 +772,12 @@ namespace usg
 		}
 	}
 
-	void ScriptEmitter::SetInstanceData(const Matrix4x4& mLocalMatrix, float fParticleScale, float fTriggerTime)
+	void ScriptEmitter::SetInstanceData(const Matrix4x4& mLocalMatrix, float fParticleScale, float fTriggerTime, uint32 uEventCRC)
 	{
 		m_effectLocalMatrix = mLocalMatrix;
 		m_fTriggerTime = fTriggerTime;
 		m_fDelay = fTriggerTime;
+		m_uEventCRC = uEventCRC;
 		
 		Particle::ScriptedParticleConstants* pMaterialSettings = m_materialConsts.Lock<Particle::ScriptedParticleConstants>();
 		pMaterialSettings->vScaling.Assign(m_emissionDef.particleScale.fInitial*fParticleScale,

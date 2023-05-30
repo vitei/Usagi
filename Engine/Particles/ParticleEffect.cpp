@@ -127,10 +127,27 @@ void ParticleEffect::WorldShifted(const Vector3f& vShift)
 	{
 		pEmitter->WorldShifted(vShift);
 	}
+
+	// Shift any queued events
+	for (auto itr : m_frameEvents)
+	{
+		itr.mTransform.SetPos( itr.mTransform.vPos().v3() - vShift);
+	}
+}
+
+void ParticleEffect::AddEvent(EffectEventType eEvent, uint32 uEventHash, usg::Matrix4x4	mTransform)
+{
+	EffectEvent effectEvent;
+	effectEvent.eEvent = eEvent;
+	effectEvent.evtHash = uEventHash;
+	effectEvent.mTransform = mTransform;
+
+	m_frameEvents.push_back(effectEvent);
 }
 
 bool ParticleEffect::Update(float fElapsed)
 {
+	m_frameEvents.clear();
 	bool bAlive = false;
 
 	for(ParticleEmitter* pEmitter : m_emitters)

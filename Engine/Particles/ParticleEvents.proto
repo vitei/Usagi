@@ -16,3 +16,9 @@ message ParticleEnableEmission
 {
 	required bool bEnable = 1 [default = false];
 }
+
+message ParticleEvent
+{
+	required uint32 uEvtCRC = 1 [default = 0];
+	required usg.Matrix4x4 mLocation = 2;
+}

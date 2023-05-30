@@ -143,7 +143,12 @@ void ParticleMgr::EffectResources::AddEmitters(GFXDevice* pDevice, ParticleMgr& 
 		mTransRot.MakeRotate(Math::DegToRad(vRot.x), -Math::DegToRad(vRot.y), Math::DegToRad(vRot.z));
 		mTransRot.SetTranslation(definition.emitters[i].vPosition);
 
-		pEmitter->SetInstanceData(mScale * mTransRot, definition.emitters[i].fParticleScale, definition.emitters[i].fReleaseFrame);
+		uint32 uEventId = 0;
+		if (definition.emitters[i].has_eventId && definition.emitters[i].eventId[0] != '\0')
+		{
+			uEventId = utl::CRC32(definition.emitters[i].eventId);
+		}
+		pEmitter->SetInstanceData(mScale * mTransRot, definition.emitters[i].fParticleScale, definition.emitters[i].fReleaseFrame, uEventId);
 		effect.AddEmitter(pDevice, pEmitter);
 	}
 }

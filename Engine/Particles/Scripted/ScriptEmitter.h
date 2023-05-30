@@ -23,7 +23,7 @@ namespace usg{
 		void Alloc(usg::GFXDevice* pDevice, ParticleMgr* pMgr, const char* szFileName, bool bDynamicResize = false);	// Dynamic resize should be used in the editor only
 		// This should really be private, but exposed for the benefit of the shape emitter
 		void CreateEmitterShape(particles::EmitterShape eShape, const particles::EmitterShapeDetails shapeDetails);
-		virtual void Init(usg::GFXDevice* pDevice, const usg::ParticleEffect* pParent);
+		virtual void Init(usg::GFXDevice* pDevice, usg::ParticleEffect* pParent);
 		virtual void Cleanup(GFXDevice* pDevice) override;
 		virtual bool Update(float fElapsed);
 		virtual void UpdateBuffers(GFXDevice* pDevice);
@@ -34,7 +34,7 @@ namespace usg{
 		virtual void ShiftParticle(void* pPart, const Vector3f& vShift) override;
 
 		// Script specific functions
-		void SetInstanceData(const Matrix4x4& mLocalMatrix, float fParticleScale, float fTriggerTime);
+		void SetInstanceData(const Matrix4x4& mLocalMatrix, float fParticleScale, float fTriggerTime, uint32 uEventCRC);
 
 		const particles::EmitterEmission& GetEmission() const { return m_emissionDef; }
 
@@ -137,6 +137,7 @@ namespace usg{
 		Vector3f					m_vVelocityOffset;
 		Vector3f					m_vRandomRot;
 		Matrix4x4					m_mWorldMatrix;
+		uint32						m_uEventCRC;
 
 		bool						m_bLocalOffset;
 		bool					    m_bDynamicResize;

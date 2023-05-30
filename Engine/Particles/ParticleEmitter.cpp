@@ -28,7 +28,7 @@ void ParticleEmitter::Alloc(GFXDevice* pDevice)
 	
 }
 
-void ParticleEmitter::Init(usg::GFXDevice* pDevice, const ParticleEffect* pParent)
+void ParticleEmitter::Init(usg::GFXDevice* pDevice, ParticleEffect* pParent)
 {
 	m_pParent = pParent;
 	m_bEmissionAllowed = true;

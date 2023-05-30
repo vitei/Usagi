@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Maths/Matrix4x4.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Framework/EventManager.h"
 #include "Engine/Scene/Common/SceneEvents.pb.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Physics/PhysicsEvents.pb.h"
@@ -28,7 +29,9 @@ namespace usg
 					FromSelfOrParents > mtx;
 				Required< SceneComponent, FromSelfOrParents > scene;	// Fixme is actually an output so should be sending messages
 				Required< ParticleComponent > particle;
+				Required<usg::EntityID>	self;
 				Optional< RigidBody, FromSelfOrParents > rigidBody;
+				Required<EventManagerHandle, FromSelfOrParents> eventManager;
 			};
 
 			struct Outputs
@@ -62,6 +65,16 @@ namespace usg
 					outputs.particle.Modify().bSpawn = false;
 				}
 				p.SetWorldMat(inputs.mtx->matrix);
+
+				usg::vector<ParticleEffect::EffectEvent> events;
+				p.GetEffectEvents(events);
+				for (const auto& itr : events)
+				{
+					ParticleEvent particleEvent;
+					particleEvent.uEvtCRC = itr.evtHash;
+					particleEvent.mLocation = itr.mTransform;
+					inputs.eventManager->handle->RegisterEventWithEntity(inputs.self->id, particleEvent, ON_ENTITY|ON_PARENTS);
+				}
 			}
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ParticleEffectStart& startEvent)

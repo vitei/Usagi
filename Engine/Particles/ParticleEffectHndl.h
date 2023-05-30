@@ -25,6 +25,7 @@ public:
 	inline void ForceUpdate(float fElapsed);
 	inline void EnableEmission(bool bEnable);
 	inline void WorldShifted(const usg::Vector3f& vShift);
+	inline void GetEffectEvents(usg::vector<ParticleEffect::EffectEvent>& eventsOut);
 
 	SAFEPOINTER_COPY(ParticleEffectHndl)
 
@@ -51,6 +52,15 @@ inline void ParticleEffectHndl::Kill(bool bForce)
 	RemoveRef();
 }
 
+
+inline void ParticleEffectHndl::GetEffectEvents(usg::vector<ParticleEffect::EffectEvent>& eventsOut)
+{
+	ParticleEffect* pEffect = GetPointer();
+	if (pEffect)
+	{
+		eventsOut = pEffect->GetFrameEvents();
+	}
+}
 
 inline void ParticleEffectHndl::SetVelocity(const Vector3f& vVelocity)
 {
