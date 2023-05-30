@@ -177,7 +177,10 @@ void Signal::TriggerSystemOnParents(GenericInputOutputs* pSystem, SignalClosure&
 		TriggerSystemOnParents(parent, Signal);
 	}
 
-	Signal( pSystem->entity, pSystem->genericInputs, pSystem->genericOutputs );
+	if(pSystem->entity)
+	{
+		Signal( pSystem->entity, pSystem->genericInputs, pSystem->genericOutputs );
+	}
 }
 
 void Signal::TriggerSystemOnEntityAndChildren(GenericInputOutputs* pSystem, SignalClosure& Signal)
