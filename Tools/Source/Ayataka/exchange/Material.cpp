@@ -16,6 +16,7 @@ const char* szPassExtensions[usg::exchange::_Material_RenderPass_count]
 
 void Material::InitCustomMaterial(const char* szPakName, const char* szEffectName, const std::vector<std::string>& defines)
 {
+	bool bPassFound = false;
 	for (uint32 pass = 0; pass < usg::exchange::_Material_RenderPass_count; pass++)
 	{
 		std::vector<std::string> passDefines;
@@ -46,7 +47,7 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 			for (auto itr : passDefines)
 			{
 				if (itr.size() > 0)
-				{
+				{ 
 					name += std::string(".");
 					name += itr;
 				}
@@ -57,6 +58,8 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 			pakName = pakName.substr(uLast + 1, pakName.size() - 4 - uLast - 1);
 				// FIXME: Pack name from input
 			sprintf_s(m_material.renderPasses[pass].effectName, "%s.%s", pakName.c_str(), name.c_str());
+
+			bPassFound = true;
 		}
 		else
 		{
@@ -64,6 +67,16 @@ void Material::InitCustomMaterial(const char* szPakName, const char* szEffectNam
 			m_material.renderPasses[pass].effectName[0] = '\0';
 		}
 
+	}
+
+	if(!bPassFound)
+	{
+		std::string defineString;
+		for (const auto& itr : defines)
+		{
+			defineString += itr;
+		}
+		FATAL_RELEASE(bPassFound, "No passess found for %s with defines %s\n", szEffectName, defineString.c_str());
 	}
 
 	for (uint32 i = 0; i < m_materialDef[0].GetTextureCount(); i++)

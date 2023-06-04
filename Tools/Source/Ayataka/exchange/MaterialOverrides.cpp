@@ -214,6 +214,7 @@ static const EnumTable g_wrapTable[]
 						if ( (*defineItr) == subDefine)
 						{
 							defines.erase(defineItr);
+							break;
 						}
 					}
 				}
