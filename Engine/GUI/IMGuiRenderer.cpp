@@ -270,36 +270,6 @@ void IMGuiRenderer::Init()
 	m_pIMGUIContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(m_pIMGUIContext);
 	ImGuiIO& io = ImGui::GetIO();
-
-#ifdef VK_TAB
-    io.KeyMap[ImGuiKey_Tab] = VK_TAB;                              // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
-    io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-    io.KeyMap[ImGuiKey_Home] = VK_HOME;
-    io.KeyMap[ImGuiKey_End] = VK_END;
-    io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
-    io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
-    io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
-    io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-	io.KeyMap[ImGuiKey_A] = 'A';
-	io.KeyMap[ImGuiKey_C] = 'C';
-	io.KeyMap[ImGuiKey_V] = 'V';
-	io.KeyMap[ImGuiKey_X] = 'X';
-	io.KeyMap[ImGuiKey_Y] = 'Y';
-	io.KeyMap[ImGuiKey_Z] = 'Z';
-
-#else
-	io.KeyMap[ImGuiKey_LeftArrow] = GAMEPAD_BUTTON_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = GAMEPAD_BUTTON_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = GAMEPAD_BUTTON_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = GAMEPAD_BUTTON_DOWN;
-	io.KeyMap[ImGuiKey_Delete] = GAMEPAD_BUTTON_R;
-	io.KeyMap[ImGuiKey_Backspace] = GAMEPAD_BUTTON_L;
-	io.KeyMap[ImGuiKey_Enter] = GAMEPAD_BUTTON_START;
-	io.KeyMap[ImGuiKey_Escape] = GAMEPAD_BUTTON_B;
-#endif
     
     //io.RenderDrawListsFn = RenderFunction;
 }
@@ -313,6 +283,106 @@ void IMGuiRenderer::Cleanup(GFXDevice* pDevice)
 	m_constantSet.Cleanup(pDevice);
 }
 
+
+
+static ImGuiKey UsgKeyToImGui(int iKey)
+{
+	switch (iKey)
+	{
+	case KEYBOARD_KEY_DELETE: return ImGuiKey_Delete;
+	case KEYBOARD_KEY_LEFT: return ImGuiKey_LeftArrow;
+	case KEYBOARD_KEY_RIGHT: return ImGuiKey_RightArrow;
+	case KEYBOARD_KEY_UP: return ImGuiKey_UpArrow;
+	case KEYBOARD_KEY_DOWN: return ImGuiKey_DownArrow;
+	case KEYBOARD_KEY_PGUP: return ImGuiKey_PageUp;
+	case KEYBOARD_KEY_PGDN: return ImGuiKey_PageDown;
+	case KEYBOARD_KEY_HOME: return ImGuiKey_Home;
+	case KEYBOARD_KEY_END: return ImGuiKey_End;
+	case KEYBOARD_KEY_INSERT: return ImGuiKey_Insert;
+	case KEYBOARD_KEY_BACK: return ImGuiKey_Backspace;
+	case ' ': return ImGuiKey_Space;
+	case KEYBOARD_KEY_RETURN: return ImGuiKey_Enter;
+	case KEYBOARD_KEY_ESCAPE: return ImGuiKey_Escape;
+	case '\'': return ImGuiKey_Apostrophe;
+	case ',': return ImGuiKey_Comma;
+	case KEYBOARD_KEY_MINUS: return ImGuiKey_Minus;
+	case '.': return ImGuiKey_Period;
+	case '/': return ImGuiKey_Slash;
+	case ';': return ImGuiKey_Semicolon;
+	case KEYBOARD_KEY_EQUALS: return ImGuiKey_Equal;
+	case KEYBOARD_KEY_CAPS: return ImGuiKey_CapsLock;
+	case KEYBOARD_KEY_SCROLL: return ImGuiKey_ScrollLock;
+	case KEYBOARD_KEY_NUMLOCK: return ImGuiKey_NumLock;
+	case KEYBOARD_KEY_PRINT: return ImGuiKey_PrintScreen;
+	case KEYBOARD_KEY_PAUSE: return ImGuiKey_Pause;
+	case KEYBOARD_KEY_NUMPAD0: return ImGuiKey_Keypad0;
+	case KEYBOARD_KEY_NUMPAD1: return ImGuiKey_Keypad1;
+	case KEYBOARD_KEY_NUMPAD2: return ImGuiKey_Keypad2;
+	case KEYBOARD_KEY_NUMPAD3: return ImGuiKey_Keypad3;
+	case KEYBOARD_KEY_NUMPAD4: return ImGuiKey_Keypad4;
+	case KEYBOARD_KEY_NUMPAD5: return ImGuiKey_Keypad5;
+	case KEYBOARD_KEY_NUMPAD6: return ImGuiKey_Keypad6;
+	case KEYBOARD_KEY_NUMPAD7: return ImGuiKey_Keypad7;
+	case KEYBOARD_KEY_NUMPAD8: return ImGuiKey_Keypad8;
+	case KEYBOARD_KEY_NUMPAD9: return ImGuiKey_Keypad9;
+	case '\\': return ImGuiKey_KeypadDivide;
+	case '*': return ImGuiKey_KeypadMultiply;
+	case KEYBOARD_KEY_SUBTRACT: return ImGuiKey_KeypadSubtract;
+	case KEYBOARD_KEY_PLUS: return ImGuiKey_KeypadAdd;
+	case KEYBOARD_KEY_SHIFT: return ImGuiKey_LeftShift;
+	case KEYBOARD_KEY_CONTROL: return ImGuiKey_LeftCtrl;
+	case KEYBOARD_KEY_ALT: return ImGuiKey_LeftAlt;
+	case '0': return ImGuiKey_0;
+	case '1': return ImGuiKey_1;
+	case '2': return ImGuiKey_2;
+	case '3': return ImGuiKey_3;
+	case '4': return ImGuiKey_4;
+	case '5': return ImGuiKey_5;
+	case '6': return ImGuiKey_6;
+	case '7': return ImGuiKey_7;
+	case '8': return ImGuiKey_8;
+	case '9': return ImGuiKey_9;
+	case 'A': return ImGuiKey_A;
+	case 'B': return ImGuiKey_B;
+	case 'C': return ImGuiKey_C;
+	case 'D': return ImGuiKey_D;
+	case 'E': return ImGuiKey_E;
+	case 'F': return ImGuiKey_F;
+	case 'G': return ImGuiKey_G;
+	case 'H': return ImGuiKey_H;
+	case 'I': return ImGuiKey_I;
+	case 'J': return ImGuiKey_J;
+	case 'K': return ImGuiKey_K;
+	case 'L': return ImGuiKey_L;
+	case 'M': return ImGuiKey_M;
+	case 'N': return ImGuiKey_N;
+	case 'O': return ImGuiKey_O;
+	case 'P': return ImGuiKey_P;
+	case 'Q': return ImGuiKey_Q;
+	case 'R': return ImGuiKey_R;
+	case 'S': return ImGuiKey_S;
+	case 'T': return ImGuiKey_T;
+	case 'U': return ImGuiKey_U;
+	case 'V': return ImGuiKey_V;
+	case 'W': return ImGuiKey_W;
+	case 'X': return ImGuiKey_X;
+	case 'Y': return ImGuiKey_Y;
+	case 'Z': return ImGuiKey_Z;
+	case KEYBOARD_KEY_F1: return ImGuiKey_F1;
+	case KEYBOARD_KEY_F2: return ImGuiKey_F2;
+	case KEYBOARD_KEY_F3: return ImGuiKey_F3;
+	case KEYBOARD_KEY_F4: return ImGuiKey_F4;
+	case KEYBOARD_KEY_F5: return ImGuiKey_F5;
+	case KEYBOARD_KEY_F6: return ImGuiKey_F6;
+	case KEYBOARD_KEY_F7: return ImGuiKey_F7;
+	case KEYBOARD_KEY_F8: return ImGuiKey_F8;
+	case KEYBOARD_KEY_F9: return ImGuiKey_F9;
+	case KEYBOARD_KEY_F10: return ImGuiKey_F10;
+	case KEYBOARD_KEY_F11: return ImGuiKey_F11;
+	case KEYBOARD_KEY_F12: return ImGuiKey_F12;
+	default: return ImGuiKey_None;
+	}
+}
 
 bool IMGuiRenderer::PreUpdate(float fElapsed)
 {
@@ -338,15 +408,32 @@ bool IMGuiRenderer::PreUpdate(float fElapsed)
 		io.KeyShift = pKeyboard->GetToggleHeld(KEYBOARD_TOGGLE_SHIFT);
 		io.KeyAlt = pKeyboard->GetToggleHeld(KEYBOARD_TOGGLE_ALT);
 
-		for(uint32 i=0; i<KEYBOARD_KEY_COUNT; i++)
+		for (uint32 i = KEYBOARD_KEY_DELETE; i < KEYBOARD_KEY_COUNT; i++)
 		{
-			io.KeysDown[i] = pKeyboard->GetKey(i);
+			ImGuiKey key = UsgKeyToImGui(i);
+			if(key != ImGuiKey_None)
+			{
+				if(pKeyboard->GetKey(i, BUTTON_STATE_PRESSED))
+				{
+					io.AddKeyEvent(key, true);
+				}
+				if (pKeyboard->GetKey(i, BUTTON_STATE_RELEASED))
+				{
+					io.AddKeyEvent(key, false);
+				}
+			}
 		}
 
-		for(uint32 i=0; i<pKeyboard->GetInputCharCount(); i++)
+		for (uint32 i = 0; i < pKeyboard->GetInputCharCount(); i++)
 		{
-			io.AddInputCharacter(pKeyboard->GetInputChar(i));
+			int iChar = pKeyboard->GetInputChar(i);
+			if(iChar < KEYBOARD_KEY_DELETE)
+			{
+				io.AddInputCharacter(pKeyboard->GetInputChar(i));
+			}
 		}
+
+
 	}
 
 	const usg::Mouse* pMouse = Input::GetMouse();
