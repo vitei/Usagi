@@ -216,6 +216,16 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 		}
 	}
 
+	#ifdef DEBUG_BUILD
+	for (uint32 i = 0; i < uElementCount; i++)
+	{
+		for (uint32 j = i+1; j < uElementCount; j++)
+		{
+			ASSERT(m_pInputAttribs[i].location != m_pInputAttribs[j].location);
+		}
+	}
+	#endif
+
 	m_inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	m_inputState.pNext = nullptr;
 	m_inputState.flags = 0;
