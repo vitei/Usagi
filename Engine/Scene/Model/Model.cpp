@@ -750,10 +750,19 @@ void Model::UpdateDescriptors(GFXDevice* pDevice)
 void Model::SetTransform(const Matrix4x4 &trans)
 {
 	m_pTransformNode->SetMatrix( trans );
+
 	//else
 		//ASSERT(false);
 }
 
+
+void Model::UpdateScaleBounds(float fScale)
+{
+	usg::Sphere sphere = m_pResource->GetBounds();
+	sphere.SetRadius(sphere.GetRadius() * fScale);
+	// Pos will get transformed by the matrix
+	m_pTransformNode->SetBoundingSphere(sphere);
+}
 
 void Model::RestoreDefaultLayer()
 {

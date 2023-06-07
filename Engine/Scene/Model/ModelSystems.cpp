@@ -43,6 +43,38 @@ namespace usg
 
 	namespace Systems
 	{
+
+		class UpdateModelScale : public System
+		{
+		public:
+			struct Inputs
+			{
+				Required<MatrixComponent>	matrix;
+				Required<ModelComponent>	model;
+				Required<ScaleComponent, FromSelfOrParents>	scale;
+			};
+
+			struct Outputs
+			{
+				Required<ModelComponent>							model;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_POST_TRANSFORM)
+			
+			static void LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				if(inputs.scale.Dirty())
+				{
+					const usg::Matrix4x4& mat = inputs.matrix->matrix;
+					float fMaxScale = Math::Max(mat.vRight().MagnitudeSq(), mat.vUp().MagnitudeSq());
+					fMaxScale = Math::Max(mat.vFace().MagnitudeSq(), fMaxScale);
+					outputs.model.GetRuntimeData().pModel->UpdateScaleBounds(Math::SqrtSafe(fMaxScale));
+				}
+
+			}
+		};
+
+
 		class UpdateModel : public System
 		{
 		public:
@@ -96,6 +128,7 @@ namespace usg
 
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::ScaleModel& event)
 			{
+				// FIXME: Deprecate this
 				outputs.model.GetRuntimeData().pModel->SetScale(event.fScale);
 			}
 
@@ -289,6 +322,36 @@ namespace usg
 					}*/
 				}
 		    }
+		};
+
+		class UpdateBoneBounds : public System, protected BoneTransformInterface
+		{
+		public:
+			struct Inputs
+			{
+				Required<TransformComponent, FromSelf>					tran;
+				Required<MatrixComponent, FromSelfOrParents>			mtx;
+				Required<ScaleComponent, FromSelfOrParents>				scale;
+			};
+
+			struct Outputs
+			{
+				Required<BoneComponent>							bone;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_POST_TRANSFORM)
+
+			static void LateUpdate(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				if (inputs.scale.Dirty())
+				{
+					const usg::Matrix4x4& mat = inputs.mtx->matrix;
+					float fMaxScale = Math::Max(mat.vRight().MagnitudeSq(), mat.vUp().MagnitudeSq());
+					fMaxScale = Math::Max(mat.vFace().MagnitudeSq(), fMaxScale);
+					outputs.bone.GetRuntimeData().pBone->UpdateScaleBounds(fMaxScale);
+				}
+			}
+
 		};
 
 

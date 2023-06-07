@@ -38,6 +38,8 @@ public:
 		}
 	}
 
+	void UpdateScaleBounds(float fScale);
+
 	void UpdateConstants(GFXDevice* pDevice)
 	{
 		// TODO: Only perform if we are visible

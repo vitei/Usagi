@@ -40,6 +40,8 @@ public:
 	void SetInUse(bool bInUse);
 
 	void SetTransform(const Matrix4x4 &trans);
+	void UpdateScaleBounds(float fScale);
+
 	bool OverrideTexture(const char* szTextureName, TextureHndl pSrcTex);	
 
 	void OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex);
@@ -83,7 +85,7 @@ public:
 
 	void GPUUpdate(usg::GFXDevice* pDevice, bool bVisible = true);
 
-	// TODO: Use sparingly!
+	// TODO: Deprecate this function!
 	void SetScale(float fScale);
 	float GetAlpha() const { return m_bVisible ? m_fAlpha : 0.0f; }
 	float GetScale() const { return m_fScale; }

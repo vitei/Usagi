@@ -61,6 +61,15 @@ void Bone::CreateTransformNode(Scene* pScene, TransformNode* pRootNode)
 }
 
 
+void Bone::UpdateScaleBounds(float fScale)
+{
+	usg::Sphere sphere = m_pResource->cColSphere;
+	sphere.SetRadius(sphere.GetRadius() * fScale);
+	// Pos will get transformed by the matrix
+	m_pTransformNode->SetBoundingSphere(sphere);
+}
+
+
 void Bone::RemoveTransformNode(Scene* pScene)
 {
 	if (m_pTransformNode)

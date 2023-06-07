@@ -57,18 +57,18 @@ void main(void)
 #ifndef SHADOW_PASS
 	// Transform the normal into world space
 	vec3 vNormal		= ApplyWorldTransform(vec4( ao_normal, 0.0 ), uVSMaterial.iBoneCount).xyz;
-	vec3 vViewNormal	= (vec4( vNormal, 0.0 ) * mViewMat).xyz;
+	vec3 vViewNormal	= normalize((vec4( vNormal, 0.0 ) * mViewMat).xyz);
 
 #ifdef HAS_BUMP
 	if(uVSMaterial.bBumpMap)
 	{
 		vec3 vTangent		= ApplyWorldTransform(vec4( ao_tangent, 0.0 ), uVSMaterial.iBoneCount).xyz;
-		vec3 vViewTangent	= (vec4( vTangent, 0.0 ) * mViewMat).xyz;
+		vec3 vViewTangent	= normalize((vec4( vTangent, 0.0 ) * mViewMat).xyz);
 		vo_vTangent = vViewTangent;
 	//	if(uVSMaterial.bBinormal)
 		{
 			vec3 vBinormal		= ApplyWorldTransform(vec4( ao_binormal, 0.0 ), uVSMaterial.iBoneCount).xyz;
-			vo_vBinormal	= (vec4( vBinormal, 0.0 ) * mViewMat).xyz;
+			vo_vBinormal	= normalize((vec4( vBinormal, 0.0 ) * mViewMat).xyz);
 		}
 	/*	else
 		{
