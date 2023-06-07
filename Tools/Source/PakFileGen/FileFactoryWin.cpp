@@ -161,7 +161,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 
 	kernel_options.format = format.format;   // Set the format to process
 	kernel_options.fquality = 0.05f;		 // Set the quality of the result
-	kernel_options.threads = 0;              // Auto setting
+	kernel_options.threads = 1;              // Multi-threading is handled by the build
 	//kernel_options.width = MipSetIn.dwWidth;
 	//kernel_options.height = MipSetIn.dwHeight;
 	kernel_options.srcformat = MipSetIn.m_format;
