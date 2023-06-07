@@ -37,6 +37,7 @@ public:
 	bool GetTextureIndex(const char* szHint, uint32& indexOut);
 	bool GetTextureIndex(uint32 uTex, uint32& indexOut);
 	bool GetAttributeIndex(const char* szHint, uint32& indexOut);
+	uint32 GetVariableCount(const char* szName);
 	uint32 GetConstantSetCount();
 	// Returns the size of the constant set
 	uint32 GetConstantSetSize(uint32 uSet);

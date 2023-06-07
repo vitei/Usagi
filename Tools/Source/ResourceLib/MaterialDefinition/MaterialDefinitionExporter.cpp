@@ -791,6 +791,8 @@ bool MaterialDefinitionExporter::GetTextureIndex(const char* szHint, uint32& ind
 	return false;
 }
 
+
+
 bool MaterialDefinitionExporter::GetAttributeIndex(const char* szHint, uint32& indexOut)
 {
 	for (uint32 i = 0; i < m_attributes.size(); i++)
@@ -803,6 +805,26 @@ bool MaterialDefinitionExporter::GetAttributeIndex(const char* szHint, uint32& i
 	}
 	return false;
 }
+
+uint32 MaterialDefinitionExporter::GetVariableCount(const char* szName)
+{
+	for(uint32 uSet = 0; uSet < m_constantSets.size(); uSet++)
+	{
+		ConstantSetData& constantSet = m_constantSets[uSet];
+		for (uint32 i = 0; i < constantSet.constants.size(); i++)
+		{
+			usg::CustomEffectDecl::Constant& var = constantSet.constants[i];
+			if (strcmp(var.szName, szName) == 0)
+			{
+				return constantSet.constants[i].uiCount;
+			}
+
+		}
+	}
+
+	return 0;
+}
+
 
 void MaterialDefinitionExporter::OverrideDefault(uint32 uSet, const char* szName, void* pDst, void* pSrc, uint32 uSize, uint32 uOffset)
 {
