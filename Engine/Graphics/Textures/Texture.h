@@ -36,6 +36,8 @@ public:
 	uint32 GetWidth () const;
 	uint32 GetHeight() const;
 
+	float GetAspect() const;
+
 #ifdef DEBUG_BUILD
 	uint32 GetSizeInMemory() const override { return m_platform.GetSizeInMemory(); }
 #endif

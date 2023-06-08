@@ -66,6 +66,14 @@ uint32 Texture::GetHeight() const
 	return m_platform.GetHeight();
 }
 
+float Texture::GetAspect() const
+{
+	float fWidth = (float)GetWidth();
+	float fHeight = float(GetHeight());
+
+	return fWidth / fHeight;
+}
+
 bool Texture::Load(GFXDevice* pDevice, const char* szFilename, GPULocation eLocation)
 {
 	m_name = szFilename;
