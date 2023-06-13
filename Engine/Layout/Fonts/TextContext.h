@@ -30,6 +30,7 @@ namespace usg
 		void Init(const Text* pInitData);
 
 		bool ProcessTag(uint8 code, const char* &szText);
+		int GetTagLength(uint8 code, const char*& szText);
 
 		void SetRubyScale(float rubyScale);
 

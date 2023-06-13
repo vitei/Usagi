@@ -43,6 +43,20 @@ namespace usg
 		m_fWidthLimit = pInitData->GetWidthLimit();
 	}
 
+	int TextContext::GetTagLength(uint8 code, const char*& szText)
+	{
+		switch (code)
+		{
+			case TAG_COLOR:
+			{
+				const char* szNew = strchr(szText, ')') + 1;
+				return (int)(szNew - szText);
+			}
+			default:
+				return 0;
+		}
+	}
+
 	bool TextContext::ProcessTag(uint8 code, const char* &szText)
 	{
 		switch (code)

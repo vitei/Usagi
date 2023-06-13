@@ -4,6 +4,7 @@
 #include "Engine/Common/Common.h"
 #include "Engine/Core/String/U8String.h"
 #include "Engine/Layout/Fonts/Text.h" 
+#include "Engine/Core/stl/algorithm.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Resource/ResourceMgr.h"
@@ -209,8 +210,6 @@ namespace usg
 		float fPosX = 0.0f;//(float)uX;
 		float fPosY = 0.0f;//(float)uY;
 
-		m_context.Init(m_pParent);
-
 		string u8Text = m_pParent->GetText();
 		const FontHndl& font = m_pParent->GetFont();
 		float fTmpWidth = 0.0f;
@@ -219,12 +218,26 @@ namespace usg
 		m_vMinBounds.Assign(FLT_MAX, FLT_MAX);
 		m_vMaxBounds.Assign(-FLT_MAX, -FLT_MAX);
 
+		m_context.Init(m_pParent);
+
+		usg::vector<uint32> uTagIndices;
 		if (fWidthLimit > 0.0f)
 		{
 			// Insert fake newlines
 			for (uint32 uChar = 0; uChar < u8Text.size();)
 			{
 				const char* szThisText = &u8Text[uChar];
+				// Skip any formatting info
+				uint32 uTagSize = m_context.GetTagLength(*szThisText, szThisText);
+				if (uTagSize > 0)
+				{
+					for (uint32 i = 0; i < uTagSize; i++)
+					{
+						uTagIndices.push_back(uChar + i);
+					}
+					uChar += uTagSize;
+					continue;
+				}
 				uint32 uByteCount = U8Char::GetByteCount(szThisText);
 				U8Char thisChar(szThisText, uByteCount);
 				if (uByteCount == 1 && *szThisText == '\n')
@@ -248,7 +261,8 @@ namespace usg
 						szThisText = &u8Text[uChar];
 						uint32 uByteCount = U8Char::GetByteCount(szThisText);
 						U8Char thisChar(szThisText, uByteCount);
-						if ((uByteCount == 1 && *szThisText == ' '))
+						bool bIsTag = usg::find(uTagIndices.begin(), uTagIndices.end(), uChar) != uTagIndices.end();
+						if ((uByteCount == 1 && *szThisText == ' ') && !bIsTag)
 						{
 							u8Text[uChar] = '\n';
 							fTmpWidth = 0.0f;
@@ -281,6 +295,8 @@ namespace usg
 				uChar += uByteCount;
 			}
 		}
+
+		m_context.Init(m_pParent);
 
 		const char* szText = u8Text.c_str();
 		uint32 uCharCount = (uint32)u8Text.size();
