@@ -55,7 +55,11 @@ FileFactoryWin::~FileFactoryWin()
 std::string FileFactoryWin::LoadFile(const char* szFileName, YAML::Node node)
 {
 	std::string name;
-	if (HasExtension(szFileName, "tga"))
+	if (HasExtension(szFileName, "png"))
+	{
+		name = LoadTexture(szFileName, node);
+	}
+	else if (HasExtension(szFileName, "tga"))
 	{
 		name = LoadTexture(szFileName, node);
 	}

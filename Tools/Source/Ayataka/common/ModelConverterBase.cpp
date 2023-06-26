@@ -410,6 +410,24 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 		}
 	}
 
+	// Not currently used in processing but really useful to reference
+	if (m_cmdl.GetAnimationNum() > 0)
+	{
+		pugi::xml_node animSet = hierarchyNode.append_child("animation_array");
+
+		pugi::xml_attribute animArrayLength = animSet.append_attribute("length");
+		animArrayLength.set_value((unsigned int)m_cmdl.GetAnimationNum());
+
+		for (uint32 i = 0; i < m_cmdl.GetAnimationNum(); i++)
+		{
+			pugi::xml_node camera = animSet.append_child("animation");
+			const ::exchange::Animation* pAnim = m_cmdl.GetAnimation(i);
+
+			pugi::xml_attribute name = camera.append_attribute("name");
+			name.set_value(pAnim->Header().name);
+		}
+	}
+
 
 	skeletonDocument.save_file(path.c_str());
 }
