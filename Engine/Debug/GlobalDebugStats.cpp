@@ -123,7 +123,11 @@ namespace usg {
 		m_fGPUTime = pDevice->GetGPUTime();
 		m_warnings[WARNING_GPU_HEAVY].bActive = m_fGPUTime > 15.5f;
 
+		#ifdef PLATFORM_PC
+		m_warnings[WARNING_MEMORY].bActive = false;
+		#else
 		m_warnings[WARNING_MEMORY].bActive = ((float)mem::GetMainHeap()->GetFreeSize() / (float)mem::GetMainHeap()->GetSize()) < 0.05f;
+		#endif
 	}
 
 	void GlobalDebugStats::AppendWarnings(usg::string& string)
