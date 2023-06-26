@@ -38,6 +38,7 @@ public:
 	uint32 GetNumberOfTargets() { return m_uBoneCount;  }
 	void GetTransform(uint32 uIndex, exchange::BoneAnimationFrame& transform) const;
 	bool IsBoneReferenced(uint32 uIndex) { return m_pBoneInfo[uIndex].sBoneRefIndex >= 0; }
+	void SetLoop(bool bLoop) { m_bLoop = bLoop; }
 
 private:
 	struct BoneInfo
@@ -51,6 +52,7 @@ private:
 	uint32								m_uBoneCount;
 	const SkeletonResource*				m_pResource;
 	SkeletalAnimationResHndl			m_pAnimResource;
+	bool								m_bLoop;
 };
 
 }

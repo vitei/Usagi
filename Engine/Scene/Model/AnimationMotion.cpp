@@ -137,6 +137,7 @@ namespace usg
 			m_pMotions[i].fPlaybackSpeed = motion.anim[i].playbackSpeed;
 			m_pMotions[i].animation.SetSpeed(m_pMotions[i].fPlaybackSpeed);
 			m_pMotions[i].animation.SetWeighting(0.0f);
+			m_pMotions[i].animation.SetLoop(motion.anim[i].bLoop);
 		}
 		m_uMotionCount = motion.anim_count;
 	}

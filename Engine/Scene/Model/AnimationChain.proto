@@ -83,6 +83,7 @@ message Animation
 	required float 	playbackSpeed = 2 [default = 1.0];
 	required float  fLerpX = 3; // For blending purposes
 	required float  fLerpY = 4; // For blending purposes
+	required bool   bLoop = 5 [default = false];
 }
 
 message Transition

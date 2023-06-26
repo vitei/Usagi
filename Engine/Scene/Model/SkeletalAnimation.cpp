@@ -16,6 +16,7 @@ namespace usg
 	SkeletalAnimation::SkeletalAnimation()
 	{
 		m_pBoneInfo = nullptr;
+		m_bLoop = false;
 		Reset();
 	}
 
@@ -59,6 +60,8 @@ namespace usg
 			m_pBoneInfo[i].transform.qRot = mRot;
 		}
 
+		m_bLoop = m_pAnimResource->IsLoop();
+
 
 		return true;
 
@@ -67,7 +70,7 @@ namespace usg
 
 	void SkeletalAnimation::Update(float fElapsed)
 	{
-		UpdateInt(fElapsed, m_pAnimResource->GetFrameRate(), (float)m_pAnimResource->GetFrameCount(), m_pAnimResource->IsLoop());
+		UpdateInt(fElapsed, m_pAnimResource->GetFrameRate(), (float)m_pAnimResource->GetFrameCount(), m_bLoop);
 	}
 
 	void SkeletalAnimation::GetTransform(uint32 uIndex, exchange::BoneAnimationFrame& transform) const
