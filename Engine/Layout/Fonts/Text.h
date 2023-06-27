@@ -82,6 +82,8 @@ namespace usg
 
 
 	private:
+		void Reset();
+
 		TextDrawer	m_drawer;
 
 		string		m_cachedString;

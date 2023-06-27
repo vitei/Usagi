@@ -10,6 +10,15 @@ namespace usg
 {
 	Text::Text() : m_drawer(this)
 	{
+		Reset();
+	}
+
+	Text::~Text()
+	{
+	}
+
+	void Text::Reset()
+	{
 		m_positionX = 0.0f;
 		m_positionY = 0.0f;
 		m_color.Assign(1.0f, 1.0f, 1.0f, 1.0f);
@@ -25,12 +34,9 @@ namespace usg
 		m_dirtyFlags = 0;
 	}
 
-	Text::~Text()
-	{
-	}
-
 	void Text::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
+		Reset();
 		m_drawer.Init(pDevice, pResMgr, renderPass);
 	}
 

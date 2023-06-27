@@ -216,8 +216,6 @@ void GPUHeap::AllocMemory(BlockInfo* pInfo)
 		pNext->pAllocator = NULL;
 		pInfo->uSize = (memsize)pNext->pLocation - (memsize)pInfo->pLocation;
 		pNext->uSize -= pInfo->uSize;
-
-		DEBUG_PRINT("Size %d", pInfo->uSize);
 	}
 
 	pAllocator->Allocated(pData);

@@ -59,7 +59,7 @@ namespace usg
 		void FillVertexBuffers(GFXDevice* pDevice);
 		void ApplyAlignment(LineInformation* pInfo, uint32 uLineCount, Vector2f vOrigin, float fMaxWidth);
 		void ApplyAlignment(Vertex* pVerts, LineInformation* pInfo, Vector2f vOrigin, float fMaxLineWidth);
-		// FIXME: Something more dynamic at a later date
+		void Reset();
 
 		const class Text* m_pParent;
 

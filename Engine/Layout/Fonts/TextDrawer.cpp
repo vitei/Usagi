@@ -39,6 +39,16 @@ namespace usg
 
 	TextDrawer::TextDrawer(Text* p) : m_pParent(p)
 	{
+		Reset();
+	}
+
+	TextDrawer::~TextDrawer()
+	{
+		ASSERT(m_bufferValid == false);
+	}
+
+	void TextDrawer::Reset()
+	{
 		m_bufferValid = false;
 		m_bOriginTL = false;
 		m_bDirty = false;
@@ -47,13 +57,10 @@ namespace usg
 		m_uCharCount = 0;
 	}
 
-	TextDrawer::~TextDrawer()
-	{
-		ASSERT(m_bufferValid == false);
-	}
-
 	void TextDrawer::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPassHndl& renderPass)
 	{
+		Reset();
+
 		const int iDefaultSize = 64;
 		// Initialize vertices.
 		m_charVerts.Init(
