@@ -89,7 +89,7 @@ public:
 	float MagnitudeSquared() const;
 	
 	Vector3f ClampLength(float fLength);
-	Vector2f v2() { return Vector2f(m_xyz[0], m_xyz[1]); }
+	Vector2f v2() const { return Vector2f(m_xyz[0], m_xyz[1]); }
 
 	void AssignAbsolute(const Vector3f& vIn);
 
