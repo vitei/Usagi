@@ -41,6 +41,11 @@ public:
 	Vector3f( float a )
 	{ Assign( a, a, a); }
 	
+
+	Vector3f(usg::Vector2f& v2, float az)
+	{
+		Assign(v2.x, v2.y, az);
+	}
 	
 	~Vector3f(){}
 
