@@ -38,6 +38,15 @@ namespace usg
 		UI_ACTION_DECREMENT
 	};
 
+	enum UIMove
+	{
+		UI_MOVE_LEFT = 0,
+		UI_MOVE_RIGHT,
+		UI_MOVE_UP,
+		UI_MOVE_DOWN,
+		UI_MOVE_COUNT
+	};
+
 	struct UIItemRef
 	{
 		class UIWindow* pWindow = nullptr;
@@ -53,14 +62,21 @@ namespace usg
 		int				iValue;
 	};
 
+	struct UIResults
+	{
+		usg::Vector2f vCursorLocationOut;
+		bool bOverrideCursorLoc = false;
+
+		usg::map< uint32, UIResult > actions;
+	};
+
 	struct UIInput
 	{
 		usg::Vector2f	vCursorLocation = usg::Vector2f::ZERO;
+		usg::vector<UIMove> inputActions;
+		// Keep select separate for implicity
 		bool			bSelect = false;
 	};
-
-	// Action CRC and result type
-	typedef usg::map< uint32, UIResult > UIResults;
 
 	class UIWindow : public usg::RenderNode
 	{
@@ -71,18 +87,19 @@ namespace usg
 		virtual ~UIWindow();
 
 		void Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass,
-			const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen);
+			UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen);
 		void SetPos(usg::Vector2f vPos);
 		void SetSize(usg::Vector2f vSize);
 		void SetItemPos(const char* szName, usg::Vector2f vPos, bool bRelative);
 		void SetMatrixDirty() { m_bMatrixDirty = true; }
 		void SetName(const usg::string& name) { m_name = name; }
-		void Update(const UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults);
+		void Update(UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults);
 		void GPUUpdate(usg::GFXDevice* pDevice);
 		void Draw(usg::GFXContext* pContext);
 		void CleanUpRecursive(usg::GFXDevice* pDevice);
-		void SetEnabled(bool bEnabled) { m_bEnabled = bEnabled; }
+		void SetEnabled(bool bEnabled);
 		bool GetEnabled() const { return m_bEnabled; }
+		bool Navigate(bool bInContext, UIMove eMove, UIWindow* pParent);
 
 		bool GetItemRef(const char* szName, enum UIItemType eType, struct UIItemRef& out);
 		const char* GetOriginalText(uint32 uTextIdx) const;
@@ -94,6 +111,7 @@ namespace usg
 		void SetItemPos(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vPos, bool bRelative);
 		void SetItemSize(uint32 uIndex, enum UIItemType eType, const usg::Vector2f& vSize, bool bRelative);
 		void SetItemVisible(uint32 uIndex, enum UIItemType eType, bool bVisible);
+		bool GetItemVisible(uint32 uIndex, enum UIItemType eType);
 
 		void SetItemColor(uint32 uIndex, enum UIItemType eType, const usg::Color& cColor);
 		void SetButtonEnabled(uint32 uIndex, bool bEnabled);
@@ -110,7 +128,14 @@ namespace usg
 
 		const ButtonTemplateDef* GetUITemplate(const UIDef& uiDef, const char* szName);
 
+
 	private:
+		UIWindow* GetInContextWindow();
+
+		bool DoesAnyWindowHaveContext() const;
+		bool Compare(UIMove eMove, usg::Vector2f vCurrentPos, usg::Vector2f vCmpPos, Vector2f vBestPos);
+		bool NavigateInt(UIMove eMove, usg::Vector2f vCurrentPos, Vector2f& vBestPosInOut);
+
 		usg::Vector2f GetPos(const usg::Vector2f& vBasePos, const usg::Vector2f& vSize, UIHorAlign eHorAlign, UIVertAlign eVerAlign, const UIWindow* pOwner);
 		int GetTextAlign(UIHorAlign eHorAlign, UIVertAlign eVerAlign);
 		void UpdateVertices();
@@ -123,6 +148,9 @@ namespace usg
 		bool SetButtonHighlighted(uint32 uButton, bool bHighlighted, UIResults* pResults);
 		UIActionType SetButtonPressed(uint32 uButton, UIResults* pResults);
 		bool IsPair(uint32 uButton) const;
+
+		void UpdateActionItemData();
+		usg::Vector2f GetPosition(const UIItemRef& ref);
 
 
 		struct VertexData
@@ -145,7 +173,9 @@ namespace usg
 		{
 			uint32					uActionId;
 			usg::vector<UIItemRef>	uiItems;
+			usg::Vector2f			vAveragePos;
 
+			bool bSelectable = true;
 			bool bHighlighted = false;
 			bool bActive = false;
 		};
@@ -202,6 +232,9 @@ namespace usg
 		usg::Vector2f				m_vMousePos;
 		uint32						m_uItemCounts[UIItemType::UI_ITEM_INVALID];
 
+
+		// For gamepad navigation
+		uint32						m_uActiveCRC = USG_INVALID_ID;
 
 		HUDItemData* m_pUIItemsDefs;
 		TextItemData* m_pTextItemDefs;

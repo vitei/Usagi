@@ -34,7 +34,7 @@ UIWindow::~UIWindow()
 	ASSERT(m_pUIItemsDefs == nullptr);
 }
 
-void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen)
+void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen)
 {
 	m_windowPos = windowDef.vPos;
 	m_windowSize = windowDef.vSize;
@@ -242,11 +242,39 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 	}
 
 
+	UpdateActionItemData();
+
 	m_bMatrixDirty = true;
 
 	// FIXME: Remove when spawning is delayed to the next frame
 	Update(pParent, 0.0f, nullptr, nullptr);
 	GPUUpdate(pDevice);
+}
+
+
+void UIWindow::UpdateActionItemData()
+{
+		// Now get an average location for all average items so we can select them with the gamepad
+	for (auto& itr : m_actionData)
+	{
+		itr.vAveragePos = usg::Vector2f::ZERO;
+		itr.bSelectable = false;
+		uint32 uItemCount = 0;
+		for (auto item : itr.uiItems)
+		{
+			if(GetItemVisible(item.uItemIdx, item.eType))
+			{
+				itr.vAveragePos += GetPosition(item);
+				itr.bSelectable = true;
+				uItemCount++;
+			}
+
+			if (uItemCount > 0)
+			{
+				itr.vAveragePos = itr.vAveragePos / (float)uItemCount;
+			}
+		}
+	}
 }
 
 
@@ -506,6 +534,32 @@ const char* UIWindow::GetOriginalText(uint32 uTextIdx) const
 }
 
 
+bool UIWindow::GetItemVisible(uint32 uIndex, enum UIItemType eType)
+{
+	switch (eType)
+	{
+	case UI_ITEM_IMAGE:
+	{
+		ImageDef& defOverride = m_pUIItemsDefs[uIndex].defOverride;
+		return defOverride.bVisible;
+	}
+	case UI_ITEM_BUTTON:
+	{
+		memsize uImageId = m_uItemCounts[UI_ITEM_IMAGE] + uIndex;
+		ImageDef& defOverride = m_pUIItemsDefs[uImageId].defOverride;
+		return defOverride.bVisible;
+	}
+	case UI_ITEM_TEXT:
+	{
+		TextItemDef& def = m_pTextItemDefs[uIndex].def;
+		return def.bVisible;
+	}
+	default:
+		ASSERT(false);
+	}
+	return false;
+}
+
 void UIWindow::SetItemVisible(uint32 uIndex, enum UIItemType eType, bool bVisible)
 {
 	switch (eType)
@@ -557,6 +611,36 @@ void UIWindow::SetItemSize(uint32 uIndex, enum UIItemType eType, const usg::Vect
 	default:
 		ASSERT(false);
 	}
+}
+
+usg::Vector2f UIWindow::GetPosition(const UIItemRef& ref)
+{
+	usg::Vector2f vReturn = usg::Vector2f::ZERO;
+	switch (ref.eType)
+	{
+		case UI_ITEM_TEXT:
+		{
+			uint32 uText = ref.uItemIdx;
+			usg::Vector2f vMin, vMax;
+			m_pTextItemDefs[uText].text.GetBounds(vMin, vMax);
+
+			vReturn = (vMin + vMin) * 0.5f;
+
+			break;
+		}
+		case UI_ITEM_BUTTON:
+		{
+			uint32 uIndex = m_uItemCounts[UI_ITEM_IMAGE] + ref.uItemIdx;
+			const VertexData& vert = m_vertices[uIndex];
+
+			vReturn = vert.vPosition.v2() + (vert.vSize * 0.5f);
+			break;
+		}
+		default:
+		ASSERT(false);
+	};
+
+	return vReturn;
 }
 
 bool UIWindow::IsMouseInRangeOfButton(uint32 uButton)
@@ -714,7 +798,161 @@ void UIWindow::AddResult(UIResults* pResult, uint32 uCRC, UIActionType eAction, 
 	result.actionCRC = uCRC;
 	result.iValue = iValue;
 
-	(*pResult)[uCRC] = result;
+	pResult->actions[uCRC] = result;
+}
+
+bool UIWindow::Compare(UIMove eMove, usg::Vector2f vCurrentPos, usg::Vector2f vCmpPos, Vector2f vBestPos)
+{
+	switch (eMove)
+	{
+		case UI_MOVE_LEFT:
+			if (vCmpPos.x < vCurrentPos.x)
+			{
+				if(vCmpPos.x > vBestPos.x)
+					return true;
+				if(vCmpPos.x == vBestPos.x)
+					return Math::Abs(vCmpPos.y - vCurrentPos.y) < Math::Abs(vBestPos.y - vCurrentPos.y);
+			}
+			break;
+		case UI_MOVE_RIGHT:
+			if (vCmpPos.x > vCurrentPos.x)
+			{
+				if (vCmpPos.x < vBestPos.x)
+					return true;
+				if (vCmpPos.x == vBestPos.x)
+					return Math::Abs(vCmpPos.y - vCurrentPos.y) < Math::Abs(vBestPos.y - vCurrentPos.y);
+			}
+			break;
+		case UI_MOVE_UP:
+			if (vCmpPos.y < vCurrentPos.y)
+			{
+				if (vCmpPos.y > vBestPos.y)
+					return true;
+				if (vCmpPos.y == vBestPos.y)
+					return Math::Abs(vCmpPos.x - vCurrentPos.x) < Math::Abs(vBestPos.x - vCurrentPos.x);
+			}
+			break;
+		case UI_MOVE_DOWN:
+			if (vCmpPos.y > vCurrentPos.y)
+			{
+				if (vCmpPos.y < vBestPos.y)
+					return true;
+				if (vCmpPos.y == vBestPos.y)
+					return Math::Abs(vCmpPos.x - vCurrentPos.x) < Math::Abs(vBestPos.x - vCurrentPos.x);
+			}
+			break;
+		default:
+		ASSERT(false);
+	}
+
+	return false;
+}
+
+bool UIWindow::NavigateInt(UIMove eMove, usg::Vector2f vCurrentPos, Vector2f& vBestPosInOut)
+{
+	bool bFound = false;
+	for (auto& itr : m_actionData)
+	{
+		if (Compare(eMove, vCurrentPos, itr.vAveragePos, vBestPosInOut))
+		{
+			m_uActiveCRC = itr.uActionId;
+			vBestPosInOut = itr.vAveragePos;
+			bFound = true;
+		}
+	}
+
+	if (!bFound)
+	{
+		// Nothing active here
+		m_uActiveCRC = USG_INVALID_ID;
+	}
+
+	return bFound;
+}
+
+bool UIWindow::Navigate(bool bInContext, UIMove eMove, UIWindow* pParent)
+{
+	bool bFound = false;
+	if (!bInContext)
+	{
+		m_uActiveCRC = USG_INVALID_ID;
+	}
+	else
+	{
+		float fMinPos = FLT_MAX;
+		// Get the lowest item
+
+		usg::Vector2f vCurrentPos(FLT_MAX, FLT_MAX);
+		if(eMove == UI_MOVE_DOWN || eMove == UI_MOVE_RIGHT)
+			vCurrentPos = -vCurrentPos;
+
+		usg::Vector2f vBestPos(FLT_MAX, FLT_MAX);
+		if (eMove == UI_MOVE_UP || eMove == UI_MOVE_LEFT)
+			vBestPos = -vBestPos;
+
+		// TODO: Should be a map
+		if(m_uActiveCRC != USG_INVALID_ID)
+		{
+			for (auto& itr : m_actionData)
+			{
+				if (itr.uActionId == m_uActiveCRC)
+				{
+					vCurrentPos = itr.vAveragePos;
+					break;
+				}
+			}
+		}
+
+		// First try here
+		bFound = NavigateInt(eMove, vCurrentPos, vBestPos);
+
+		// Check the child windows
+		for (auto itr : m_children)
+		{
+			usg::Vector2f vTmpCurrentPos = (usg::Vector3f(vCurrentPos, 0.0f) * itr->GetLocalMatrix()).v2();
+			usg::Vector2f vTmpBestPos = (usg::Vector3f(vBestPos, 0.0f) * itr->GetLocalMatrix()).v2();
+				
+			if (itr->NavigateInt(eMove, vTmpCurrentPos, vTmpBestPos))
+			{
+				usg::Matrix4x4 mInv;
+				itr->GetLocalMatrix().GetInverse(mInv);
+				vCurrentPos = (usg::Vector3f(vCurrentPos, 0.0f) * mInv).v2();
+				vBestPos = (usg::Vector3f(vBestPos, 0.0f) * mInv).v2();
+				bFound = true;
+
+				m_uActiveCRC = USG_INVALID_ID;	// Found a better one in the child
+
+			}
+		}
+
+		if(pParent)
+		{
+			usg::Matrix4x4 mInv;
+			m_localMatrix.GetInverse(mInv);
+
+			usg::Vector2f vTmpCurrentPos = (usg::Vector3f(vCurrentPos, 0.0f) * mInv).v2();
+			usg::Vector2f vTmpBestPos = (usg::Vector3f(vBestPos, 0.0f) * mInv).v2();
+
+			if (pParent->NavigateInt(eMove, vCurrentPos, vBestPos))
+			{
+				vCurrentPos = (usg::Vector3f(vCurrentPos, 0.0f) * m_localMatrix).v2();
+				vBestPos = (usg::Vector3f(vBestPos, 0.0f) * m_localMatrix).v2();
+
+				m_uActiveCRC = USG_INVALID_ID;	// Found a better one in the parent
+				for (auto itr : m_children)
+				{
+					itr->m_uActiveCRC = USG_INVALID_ID;
+				}
+
+				bFound = true;
+			}
+		}
+
+		return bFound;
+
+	}
+
+	return false;
 }
 
 bool UIWindow::SetButtonHighlighted(uint32 uButton, bool bHighlighted, UIResults* pResults)
@@ -1066,8 +1304,28 @@ void UIWindow::UpdateButtons(float fElapsed)
 	}
 }
 
-void UIWindow::Update(const UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults)
+bool UIWindow::DoesAnyWindowHaveContext() const
 {
+	for (auto& itr : m_children)
+	{
+		if (itr->DoesAnyWindowHaveContext())
+		{
+			return true;
+		}
+	}
+
+	if (m_uActiveCRC != USG_INVALID_ID)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void UIWindow::Update(UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults)
+{
+	UpdateActionItemData();
+
 	if (m_bEnabled || m_bFirst)
 	{
 		if (m_bMatrixDirty)
@@ -1078,6 +1336,23 @@ void UIWindow::Update(const UIWindow* pParent, float fElapsed, const UIInput* pI
 		if (pInput)
 		{
 			SetMousePos(this, pInput, pResults);
+		}
+
+		for (auto& itr : m_children)
+		{
+			if (m_bMatrixDirty)
+			{
+				itr->SetMatrixDirty();
+			}
+			itr->Update(this, fElapsed, pInput, pResults);
+		}
+
+		if (pInput && ((m_uActiveCRC != USG_INVALID_ID) || (!pParent && !DoesAnyWindowHaveContext())))
+		{
+			for (auto itr : pInput->inputActions)
+			{
+				Navigate(true, itr, pParent);
+			}
 		}
 
 		UpdateButtons(fElapsed);
@@ -1093,15 +1368,6 @@ void UIWindow::Update(const UIWindow* pParent, float fElapsed, const UIInput* pI
 			{
 				m_pCustomItemDefs[i].pItem->Update(fElapsed);;
 			}
-		}
-
-		for (auto& itr : m_children)
-		{
-			if (m_bMatrixDirty)
-			{
-				itr->SetMatrixDirty();
-			}
-			itr->Update(this, fElapsed, pInput, pResults);
 		}
 	}
 }
@@ -1254,6 +1520,15 @@ void UIWindow::CleanUpRecursive(usg::GFXDevice* pDevice)
 	m_windowConstants.Cleanup(pDevice);
 }
 
+
+void UIWindow::SetEnabled(bool bEnabled)
+{
+	m_bEnabled = bEnabled;
+	if (!bEnabled)
+	{
+		m_uActiveCRC = USG_INVALID_ID;
+	}
+}
 
 UIWindow* UIWindow::CreateChildWindow(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::RenderPassHndl& renderPass, const UIDef& def, const UIWindowDef& windowDef, bool bOffscreen)
 {
