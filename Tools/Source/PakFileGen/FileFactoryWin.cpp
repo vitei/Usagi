@@ -165,7 +165,8 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 
 	kernel_options.format = format.format;   // Set the format to process
 	kernel_options.fquality = 0.05f;		 // Set the quality of the result
-	kernel_options.threads = 1;              // Multi-threading is handled by the build
+	kernel_options.encodeWith = format.format == CMP_FORMAT::CMP_FORMAT_BC7 ? CMP_HPC : CMP_CPU;
+	kernel_options.threads = 2;              // Multi-threading is handled by the build
 	//kernel_options.width = MipSetIn.dwWidth;
 	//kernel_options.height = MipSetIn.dwHeight;
 	kernel_options.srcformat = MipSetIn.m_format;
@@ -201,12 +202,12 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 		memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
 
 		cmp_status = CMP_ProcessTexture(&MipSetIn, &MipSetCmp, kernel_options, CompressionCallback);
+		FATAL_RELEASE(cmp_status == CMP_OK, "Failed to process file %s. Error %d", szFileName, cmp_status);
 		if (cmp_status != CMP_OK)
 		{
-			// Failed
+			// Failed 
 			return "";
 		}
-
 		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetCmp);
 
 	}
@@ -214,6 +215,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 	{
 		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetIn);
 	}
+	FATAL_RELEASE(cmp_status == CMP_OK, "Failed to save file %s. Error %d", szFileName, cmp_status);
 
 
 	gli::texture ktx = gli::load(tmpFileName.c_str());
