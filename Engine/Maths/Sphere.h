@@ -19,13 +19,16 @@ public:
 	Sphere() : m_pos(0.0f, 0.0f, 0.0f), m_radius(0.0f) {}
 	~Sphere(void) {}
 	bool Intersect(const Sphere& sphere) const;
+	// Returns the initial entry intersect
+	bool LineIntersect(const usg::Vector3f& vStart, const usg::Vector3f& vEnd, usg::Vector3f& vPosOut);
+
 	void SetPos(const Vector3f& pos) { m_pos = pos; }
 	void SetRadius(const float fRadius) { m_radius = fRadius; }
 	virtual const Vector3f& GetPos()const { return m_pos; }
 	float GetRadius() const { return m_radius; }
 private:
 	Vector3f	m_pos;
-	float32		m_radius;
+	real		m_radius;
 };
 
 inline bool usg::Sphere::Intersect(const usg::Sphere& sphere) const
