@@ -421,14 +421,39 @@ namespace usg
 				Required<RigidBody> rigidBody;
 				Required<TransformComponent> transform;
 				Required<KinematicBodyTag> kinematicTag;
+				Required<SceneComponent, FromSelfOrParents> visualScene;
 			};
 
 			struct Outputs
 			{
-
+				Required<TransformComponent> transform;
 			};
 
 			DECLARE_SYSTEM(SYSTEM_PRE_PHYSICS)
+
+			// Convenience so reset code can be shared without knowing if kinematic
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const FullPhysicsSync& msg)
+			{
+				// We set the transform 
+				outputs.transform.Modify().position = msg.vPosition;
+				outputs.transform.Modify().rotation = msg.qRotation;
+
+				physx::PxRigidDynamic* pRigidDynamic = inputs.rigidBody.GetRuntimeData().pActor->is<physx::PxRigidDynamic>();
+				ASSERT(inputs.rigidBody->bDynamic);
+
+				physx::PxTransform globalPose;
+				physx::PxTransform prevPos = pRigidDynamic->getGlobalPose();
+				globalPose.p = ToPhysXVec3(msg.vPosition);
+				globalPose.q = ToPhysXQuaternion(msg.qRotation);
+				if (msg.bGlobalSpace)
+				{
+					globalPose.p -= ToPhysXVec3(inputs.visualScene->vOriginOffset);
+					outputs.transform.Modify().position -= inputs.visualScene->vOriginOffset;
+				}
+
+				pRigidDynamic->setGlobalPose(globalPose);
+			}
+
 
 			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
 			{
