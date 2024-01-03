@@ -83,12 +83,19 @@ chosenSystems.map { |s|
 
 #{!s["autogenGetInputOutputs"] ? "" : <<END_GET_INPUTOUTPUTS
 #{prefix}
+#ifndef FINAL_BUILD
 const char* #{s["name"]}::Name()
 {
 	static const char* const name = "#{s["name"].split("::").last}";
 	return name;
 }
-
+#else
+const char* #{s["name"]}::Name()
+{
+	static const char* const name = "FINAL";
+	return name;
+}
+#endif
 #{prefix}
 bool #{s["name"]}::GetInputOutputs(usg::ComponentGetter GetComponent, #{s["name"]}::Inputs& inputs, #{s["name"]}::Outputs& outputs)
 {
