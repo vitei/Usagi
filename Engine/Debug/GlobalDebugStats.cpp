@@ -11,6 +11,7 @@
 #include "GlobalDebugStats.h"
 
 #ifndef FINAL_BUILD
+#define SHOW_STAT_WARNINGS 0
 
 namespace usg {
 
@@ -132,6 +133,7 @@ namespace usg {
 
 	void GlobalDebugStats::AppendWarnings(usg::string& string)
 	{
+		#if SHOW_STAT_WARNINGS
 		usg::string warningString;
 		if (m_warnings[WARNING_CPU_HEAVY].fTimeSinceActive < 1.5f)
 		{
@@ -156,6 +158,7 @@ namespace usg {
 			warningString = str::ParseString("Memory (%.1fMB / %.1fMB)", fMemMB, fSizeMB);
 			string += warningString.c_str();
 		}
+		#endif
 	}
 
 
