@@ -616,7 +616,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 			bFoundGFX = true;
 		}
 
-		if (!bFoundTrans && m_pQueueProps[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+		// VK_QUEUE_TRANSFER_BIT is implicit with VK_QUEUE_GRAPHICS_BIT or VK_QUEUE_COMPUTE_BIT
+		if (!bFoundTrans && ( m_pQueueProps[i].queueFlags & (VK_QUEUE_TRANSFER_BIT | VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)) )
 		{
 			if(m_pQueueProps[i].queueCount > 1 || !bFoundGFX || i != m_queueInfo[QUEUE_TYPE_GRAPHICS].queueFamilyIndex || m_uQueueFamilyCount == 1)
 			{
