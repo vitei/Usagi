@@ -120,6 +120,8 @@ public:
 		return Vector3f(x, y, z);
 	}
 
+	static Vector3f RandomPointInSphere(float fRadius); 
+
 	static Vector3f RandomSign()
 	{
 		return Vector3f(Math::RandSign(), Math::RandSign(), Math::RandSign());

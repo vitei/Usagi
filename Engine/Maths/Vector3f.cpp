@@ -56,4 +56,22 @@ Vector3f Vector3f::operator *(const Quaternionf& q) const
 }
 
 
+Vector3f Vector3f::RandomPointInSphere(float fMaxRadius)
+{
+	Vector3f vOut = Vector3f::ZERO;
+
+	float fTheta = Math::RangedRandom(0.0f, Math::two_pi);
+	float fPhi = acosf(Math::RangedRandom(0.0f, 2.0f) - 1.0f);
+	float fRadius = cbrtf(Math::RangedRandom(0.0f, 1.0f)) * fMaxRadius;
+	float fSinTheta = sinf(fTheta);
+	float fCosTheta = cosf(fTheta);
+	float fSinPhi = sinf(fPhi);
+	float fCosPhi = cosf(fPhi);
+	vOut.x = fRadius * fSinPhi * fCosTheta;
+	vOut.y = fRadius * fSinPhi * fSinTheta;
+	vOut.z = fRadius * fCosPhi;
+	return vOut;
+}
+
+
 }
