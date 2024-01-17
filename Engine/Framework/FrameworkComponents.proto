@@ -72,6 +72,7 @@ message HealthComponent
 	required float  fMaxLife = 2  [default = 1.0];
 	required uint32 uKillerTeam = 4 [default = 0];
 	required sint64 iKillerNUID = 5 [default = 0];
+	required uint32 uIgnoreDamageMask = 6 [default = 0];
 }
 
 message DistanceTravelled

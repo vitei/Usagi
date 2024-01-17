@@ -357,6 +357,7 @@ namespace usg
 			{
 				Required<usg::EntityID>			self;
 				Optional<LocalSim>				localSim;
+				Required<usg::HealthComponent> health;
 				Required<EventManagerHandle, FromSelfOrParents> eventManager;
 			};
 
@@ -377,8 +378,12 @@ namespace usg
 			{
 				if (!inputs.localSim.Exists())
 					return;	
-				AddDamage(inputs.self->id, outputs.health.Modify(),
-				          inputs.eventManager->handle, decreaseHealth.amount, decreaseHealth.uDamageCauserTeam, decreaseHealth.iDamageCauserNUID);
+
+				if((decreaseHealth.uDamageMask & inputs.health->uIgnoreDamageMask) == 0)
+				{
+					AddDamage(inputs.self->id, outputs.health.Modify(),
+							  inputs.eventManager->handle, decreaseHealth.amount, decreaseHealth.uDamageCauserTeam, decreaseHealth.iDamageCauserNUID);
+				 }
 			}
 			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetHealthEvent& setHealth)
 			{
@@ -386,6 +391,11 @@ namespace usg
 					return;
 				SetHealth(inputs.self->id, outputs.health.Modify(),
 				          inputs.eventManager->handle, setHealth.amount);
+			}
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const SetIgnoreDamageMask& ignoreDamage)
+			{
+				outputs.health.Modify().uIgnoreDamageMask = ignoreDamage.uIgnoreMask;
 			}
 		};
 

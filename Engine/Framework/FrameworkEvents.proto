@@ -12,6 +12,14 @@ message DecreaseHealthEvent
 	required float amount = 1;
 	required sint64 iDamageCauserNUID = 2 [default = 0];
 	required uint32 uDamageCauserTeam = 3 [default = 0];
+
+	required uint32 uDamageMask = 4 [default = 0];	
+}
+
+
+message SetIgnoreDamageMask
+{
+	required uint32 uIgnoreMask = 1 [default = 0];
 }
 
 
