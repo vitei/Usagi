@@ -1093,9 +1093,13 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 
 	usg::Vector3f vTempPos(vMousePos.x, vMousePos.y, 0.0f);
 	usg::Matrix4x4 mProjInv;
-	m_globalMatrix.GetInverse(mProjInv);
-	vTempPos = mProjInv.TransformVec3(vTempPos);
+	if(pParent || !pInput->bMouseInWindowSpace)
+	{
+		m_globalMatrix.GetInverse(mProjInv);
+		vTempPos = mProjInv.TransformVec3(vTempPos);
+	}
 	m_vMousePos.Assign(vTempPos.x, vTempPos.y);
+
 
 
 	for (memsize i = 0; i < m_actionData.size(); i++)
@@ -1335,7 +1339,7 @@ void UIWindow::Update(UIWindow* pParent, float fElapsed, const UIInput* pInput, 
 
 		if (pInput)
 		{
-			SetMousePos(this, pInput, pResults);
+			SetMousePos(pParent, pInput, pResults);
 		}
 
 		for (auto& itr : m_children)

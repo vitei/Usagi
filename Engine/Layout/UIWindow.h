@@ -76,6 +76,7 @@ namespace usg
 		usg::vector<UIMove> inputActions;
 		// Keep select separate for implicity
 		bool			bSelect = false;
+		bool			bMouseInWindowSpace = false;
 	};
 
 	class UIWindow : public usg::RenderNode
