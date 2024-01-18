@@ -82,6 +82,35 @@ namespace usg
 			}
 		};
 
+
+		class MoveInFacingDirection : public usg::System
+		{
+		public:
+			struct Inputs
+			{
+				Required<ConstantForwardMotion>	motion;
+				Required<TransformComponent>	trans;
+				Required<usg::SimulationActive, FromParents> simactive;
+			};
+
+			struct Outputs
+			{
+				Required<TransformComponent>	trans;
+			};
+
+			DECLARE_SYSTEM(SYSTEM_DEFAULT_PRIORITY)
+			static void Run(const Inputs& inputs, Outputs& outputs, float fDelta)
+			{
+				if (!inputs.simactive->bActive)
+					return;
+
+				usg::Matrix4x4 mDir = inputs.trans->rotation;
+				outputs.trans.Modify().position = inputs.trans->position + (fDelta * inputs.motion->fSpeed * mDir.vFace().v3());
+			}
+		};
+
+
+
 		// Shift all transforms.
 		// Note non rigid body transforms will override these new values; but best to stay in sync
 		class OriginShiftNonPhysicsBodies : public usg::System 

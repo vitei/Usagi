@@ -66,6 +66,11 @@ message StateComponent
 	required STATUS current = 1  [default = ACTIVE];
 }
 
+message ConstantForwardMotion
+{
+	required float fSpeed = 1 [default = 0.0];
+}
+
 message HealthComponent
 {
 	required float  fLife = 1  [default = 1.0];
