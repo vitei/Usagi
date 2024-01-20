@@ -43,11 +43,6 @@ namespace usg
 
 	private:
 
-		enum
-		{
-			MAX_LINES = 20
-		};
-
 		struct LineInformation
 		{
 			float	fWidth;
@@ -57,8 +52,8 @@ namespace usg
 		};
 
 		void FillVertexBuffers(GFXDevice* pDevice);
-		void ApplyAlignment(LineInformation* pInfo, uint32 uLineCount, Vector2f vOrigin, float fMaxWidth);
-		void ApplyAlignment(Vertex* pVerts, LineInformation* pInfo, Vector2f vOrigin, float fMaxLineWidth);
+		void ApplyAlignment(const usg::vector<LineInformation>& lineInfo, Vector2f vOrigin, float fMaxWidth);
+		void ApplyAlignment(Vertex* pVerts, const LineInformation* pInfo, Vector2f vOrigin, float fMaxLineWidth);
 		void Reset();
 
 		const class Text* m_pParent;

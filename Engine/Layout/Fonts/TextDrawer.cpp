@@ -166,19 +166,19 @@ namespace usg
 		return true;
 	}
 
-	void TextDrawer::ApplyAlignment(LineInformation* pInfo, uint32 uLineCount, Vector2f vOrigin, float fMaxWidth)
+	void TextDrawer::ApplyAlignment(const usg::vector<LineInformation>& lineInfo, Vector2f vOrigin, float fMaxWidth)
 	{
-		for (uint32 i = 0; i < uLineCount; i++)
+		for (uint32 i = 0; i < (uint32)lineInfo.size(); i++)
 		{
-			uint32 uLineStart = pInfo[i].uStartCharacter;
-			if (pInfo[i].uCharacterCount > 0)
+			uint32 uLineStart = lineInfo[i].uStartCharacter;
+			if (lineInfo[i].uCharacterCount > 0)
 			{
-				ApplyAlignment(&m_textBufferTmp[uLineStart], &pInfo[i], vOrigin, fMaxWidth);
+				ApplyAlignment(&m_textBufferTmp[uLineStart], &lineInfo[i], vOrigin, fMaxWidth);
 			}
 		}
 	}
 
-	void TextDrawer::ApplyAlignment(Vertex* pVerts, LineInformation* pInfo, Vector2f vOrigin, float fMaxLineWidth)
+	void TextDrawer::ApplyAlignment(Vertex* pVerts, const LineInformation* pInfo, Vector2f vOrigin, float fMaxLineWidth)
 	{
 		uint32 uAlignFlags = m_context.GetAlignFlags();
 		Vector2f vPos = vOrigin;
@@ -320,10 +320,16 @@ namespace usg
 		uint32 uLineStart = 0;
 		uint32 uCharsThisLine = 0;
 		float fMaxHeight = 0.0f;
-		usg::Vector2f vScale;
+		usg::Vector2f vScale = m_context.GetScale() * m_pParent->GetFont()->GetDrawScale();;
 
-		LineInformation lines[MAX_LINES];
-		uint32 uLineCount = 0;
+		usg::vector<LineInformation> lines;
+
+		// Needs to be valid for new line on first line to work
+		float fLeft, fRight, fTop, fBottom;
+		font->GetCharacterCoords(U8Char(" ", 1).GetAsUInt32(), fLeft, fRight, fTop, fBottom);
+		Vector2f vDimensions = Vector2f(font->GetCharacterAspect(fLeft, fRight, fTop, fBottom), 1.0f);
+		vDimensions = vDimensions * vScale;
+		fMaxHeight = vDimensions.y;
 
 		while (*szText != 0)
 		{
@@ -339,12 +345,13 @@ namespace usg
 			uint32 uByteCount = U8Char::GetByteCount(szText);
 			if (uByteCount == 1 && *szText == '\n')
 			{
-				ASSERT(uLineCount < MAX_LINES);
-				lines[uLineCount].fHeight = fMaxHeight;
-				lines[uLineCount].fWidth = fLineWidth;
-				lines[uLineCount].uStartCharacter = uLineStart;
-				lines[uLineCount].uCharacterCount = uCharsThisLine;
-				uLineCount++;
+				LineInformation line;
+				line.fHeight = fMaxHeight;
+				line.fWidth = fLineWidth;
+				line.uStartCharacter = uLineStart;
+				line.uCharacterCount = uCharsThisLine;
+
+				lines.push_back(line);
 
 				uLineStart = uFoundCharCount;
 				uCharsThisLine = 0;
@@ -357,7 +364,6 @@ namespace usg
 			U8Char thisChar(szText, uByteCount);
 			szText += uByteCount;
 
-			float fLeft, fRight, fTop, fBottom;
 			bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
 			if (!bFound)
 			{
@@ -413,17 +419,18 @@ namespace usg
 		// Add the final line before processing the alignment
 		if (uCharsThisLine)
 		{
-			ASSERT(uLineCount < MAX_LINES);
-			lines[uLineCount].fHeight = fMaxHeight;
-			lines[uLineCount].fWidth = fLineWidth;
-			lines[uLineCount].uStartCharacter = uLineStart;
-			lines[uLineCount].uCharacterCount = uCharsThisLine;
-			uLineCount++;
+			LineInformation line;
+			line.fHeight = fMaxHeight;
+			line.fWidth = fLineWidth;
+			line.uStartCharacter = uLineStart;
+			line.uCharacterCount = uCharsThisLine;
+
+			lines.push_back(line);
 		}
 
 		float fMaxWidth = 0.0f;
 		float fTotalHeight = 0.0f;
-		for (uint32 i = 0; i < uLineCount; i++)
+		for (uint32 i = 0; i < (uint32)lines.size(); i++)
 		{
 			fMaxWidth = Math::Max(fMaxWidth, lines[i].fWidth);
 			fTotalHeight += lines[i].fHeight;
@@ -453,7 +460,7 @@ namespace usg
 		}
 
 
-		ApplyAlignment(lines, uLineCount, vOrigin, fMaxWidth);
+		ApplyAlignment(lines, vOrigin, fMaxWidth);
 
 		for (uint32 i = 0; i < uFoundCharCount; i++)
 		{

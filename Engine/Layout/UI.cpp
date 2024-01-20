@@ -101,6 +101,14 @@ namespace usg
 		return ref.pWindow->GetOriginalItemSize(ref.uItemIdx, ref.eType);
 	}
 
+	usg::Vector2f UI::GetOriginalItemPos(const UIItemRef& ref) const
+	{
+		if (!IsRefValid(ref))
+			return usg::Vector2f::ZERO;
+
+		return ref.pWindow->GetOriginalItemPos(ref.uItemIdx, ref.eType);
+	}
+
 	const char* UI::GetOriginalItemText(const UIItemRef& ref) const
 	{
 		if (!IsRefValid(ref))

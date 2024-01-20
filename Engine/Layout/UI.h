@@ -32,6 +32,7 @@ namespace usg
 		const char* GetOriginalItemText(const UIItemRef& ref) const;
 		usg::Color GetOriginalItemColor(const UIItemRef& ref) const;
 		usg::Vector2f GetOriginalItemSize(const UIItemRef& ref) const;
+		usg::Vector2f GetOriginalItemPos(const UIItemRef& ref) const;
 		void SetItemPos(const UIItemRef& ref, const usg::Vector2f& vPos, bool bRelative) const;
 		void SetItemSize(const UIItemRef& ref, const usg::Vector2f& vSize, bool bRelative) const;
 		void SetItemColor(const UIItemRef& ref, const usg::Color& cColor);

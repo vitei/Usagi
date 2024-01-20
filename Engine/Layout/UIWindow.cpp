@@ -701,13 +701,39 @@ void UIWindow::SetItemPos(uint32 uIndex, enum UIItemType eType, const usg::Vecto
 	case UI_ITEM_TEXT:
 	{
 		TextItemDef& def = m_pTextItemDefs[uIndex].def;
-		usg::Vector2f vPos = bRelative ? def.vPos + vPos : vPos;
-		m_pTextItemDefs[uIndex].text.SetPosition(vPos.x, vPos.y);
+		usg::Vector2f vAdjPos = bRelative ? def.vPos + vPos : vPos;
+		m_pTextItemDefs[uIndex].text.SetPosition(vAdjPos.x, vAdjPos.y);
 	}
 	break;
 	default:
 		ASSERT(false);
 	}
+}
+
+usg::Vector2f UIWindow::GetOriginalItemPos(uint32 uIndex, enum UIItemType eType) const
+{
+	switch (eType)
+	{
+	case UI_ITEM_IMAGE:
+	{
+		ImageDef& def = m_pUIItemsDefs[uIndex].def;
+		return def.vPos;
+	}
+	case UI_ITEM_CUSTOM:
+	{
+		CustomItemDef& def = m_pCustomItemDefs[uIndex].def;
+		return def.vPos;
+	}
+	case UI_ITEM_TEXT:
+	{
+		TextItemDef& def = m_pTextItemDefs[uIndex].def;
+		return def.vPos;
+	}
+	default:
+		ASSERT(false);
+	}
+
+	return usg::Vector2f::ZERO;
 }
 
 usg::Vector2f UIWindow::GetOriginalItemSize(uint32 uIndex, enum UIItemType eType) const

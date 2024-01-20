@@ -106,6 +106,8 @@ namespace usg
 		const char* GetOriginalText(uint32 uTextIdx) const;
 		usg::Color GetOriginalColor(uint32 uIndex, enum UIItemType eType) const;
 		usg::Vector2f GetOriginalItemSize(uint32 uIndex, enum UIItemType eType) const;
+		usg::Vector2f GetOriginalItemPos(uint32 uIndex, enum UIItemType eType) const;
+
 		void SetText(uint32 uIndex, const char* szText);
 		void SetTexture(uint32 uIndex, usg::TextureHndl tex);
 		void SetUVRange(uint32 uIndex, const usg::Vector2f& vUVMin, const usg::Vector2f& vUVMax);
