@@ -113,7 +113,7 @@ namespace usg
 
 			static void DoPlayMusic(const uint32_t uAudioID)
 			{
-				MusicManager::Inst()->PlayMusic(uAudioID, 1.0f, MusicManager::FADE_TYPE_WAIT, MusicManager::FADE_TYPE_FADE);
+				MusicManager::Inst()->PlayMusic(uAudioID, 0.3f, MusicManager::FADE_TYPE_WAIT, MusicManager::FADE_TYPE_FADE);
 			}
 
 		private:
