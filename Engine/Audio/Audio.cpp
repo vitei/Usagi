@@ -540,6 +540,15 @@ SoundHandle Audio::PrepareCustomStream(const StreamingSoundDef& def, float fVolu
 #endif
 }
 
+
+bool Audio::HasSound(uint32 uCRC)
+{
+	SoundFile* pSoundFile = m_soundHashes[uCRC];
+
+	return pSoundFile != nullptr;
+
+}
+
 SoundHandle Audio::Prepare2DSound(uint32 crc, const float fVolume, bool bPlay)
 {
 #if !DISABLE_SOUND	

@@ -101,6 +101,8 @@ public:
 	AudioEffect* GetEffect(uint32 uCRC);
 	AudioRoom* GetRoom(uint32 uCRC);
 
+	bool HasSound(uint32 uCRC);
+
 private:
 	bool ShouldPlay(Vector3f vPos, SoundFile* pSoundFile);
 	SoundHandle Play3DSoundInt(SoundActorHandle& actorHandle, SoundFile* pSoundFile, const float fVolume, bool bPlay);
