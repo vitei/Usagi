@@ -386,7 +386,9 @@ void ModelConverterBase::ExportBoneHierarchy(const aya::string& path)
 			const Cmdl::Camera* pCamera = m_cmdl.GetCamera(i);
 
 			pugi::xml_attribute name = camera.append_attribute("name");
-			name.set_value(pCamera->name.c_str());
+			aya::string adjustedName = pCamera->name;
+			adjustedName += ".Camera";	// To avoid bone conflicts
+			name.set_value(adjustedName.c_str());
 			pugi::xml_attribute parentName = camera.append_attribute("parent_name");
 			parentName.set_value(pCamera->parentBone.c_str());
 
