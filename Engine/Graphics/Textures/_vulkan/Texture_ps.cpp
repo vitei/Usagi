@@ -460,8 +460,10 @@ void Texture_ps::InitStaging(GFXDevice* pDevice)
 	memAllocInfo.allocationSize = m_staging.memReq.size;
 	memAllocInfo.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(m_staging.memReq.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-	res = vkAllocateMemory(devicePS, &memAllocInfo, nullptr, &m_staging.memory);
-	res = vkBindBufferMemory(devicePS, m_staging.buffer, m_staging.memory, 0);
+	m_staging.memory.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)m_staging.memReq.alignment, false);
+	pDevice->GetPlatform().AllocateMemory(&m_staging.memory);
+
+	res = vkBindBufferMemory(devicePS, m_staging.buffer, m_staging.memory.GetMemory(), m_staging.memory.GetMemOffset());
 
 	m_staging.bValid = true;
 }
@@ -474,8 +476,9 @@ void Texture_ps::FreeStaging(GFXDevice* pDevice)
 	VkDevice& devicePS = pDevice->GetPlatform().GetVKDevice();
 
 	// Clean up staging resources
-	vkFreeMemory(devicePS, m_staging.memory, nullptr);
-	vkDestroyBuffer(devicePS, m_staging.buffer, nullptr);
+	pDevice->GetPlatform().ReqDestroyBuffer(m_staging.buffer);
+	pDevice->GetPlatform().FreeMemory(&m_staging.memory);
+	m_staging.buffer = nullptr;
 
 	m_staging.bValid = false;
 }
@@ -511,9 +514,9 @@ void Texture_ps::SetRawData(GFXDevice* pDevice, GFXContext* pCtx, void* pData)
 
 	// Copy texture data into staging buffer
 	uint8_t *data;
-	VkResult res = vkMapMemory(devicePS, m_staging.memory, 0, m_staging.memReq.size, 0, (void **)&data);
+	VkResult res = vkMapMemory(devicePS, m_staging.memory.GetMemory(), m_staging.memory.GetMemOffset(), m_staging.memReq.size, 0, (void **)&data);
 	memcpy(data, pData, uImageSize);
-	vkUnmapMemory(devicePS, m_staging.memory);
+	vkUnmapMemory(devicePS, m_staging.memory.GetMemory());
 
 	SetImageLayout(copyCmd, m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 

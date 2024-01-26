@@ -74,7 +74,7 @@ private:
 	{
 		VkMemoryRequirements memReq;
 		VkBuffer		buffer;
-		VkDeviceMemory	memory;
+		VkMemAllocator	memory;
 		bool			bValid = false;
 	};
 
