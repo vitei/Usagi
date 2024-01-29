@@ -31,7 +31,8 @@ void Mesh::SetName(const char* pszName)
 bool Mesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
 	uint32 uIndexCount = m_indexBuffer.GetIndexCount() > m_uMaxCount ? m_uMaxCount : m_indexBuffer.GetIndexCount();
-	if(uIndexCount > 0)
+	uint32 uVertexCount = m_vertexBuffer.GetCount();
+	if(uIndexCount > 0 || uVertexCount > 0)
 	{
 
 		const RenderGroup* pParent = GetParent();
@@ -55,7 +56,15 @@ bool Mesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 			pContext->SetDescriptorSet(&m_descriptors, 1);
 		}
 		pContext->SetVertexBuffer(&m_vertexBuffer);
-		pContext->DrawIndexedEx(&m_indexBuffer, 0, uIndexCount);
+
+		if(uIndexCount > 0)
+		{
+			pContext->DrawIndexedEx(&m_indexBuffer, 0, uIndexCount);
+		}
+		else
+		{
+			pContext->DrawImmediate(uVertexCount);
+		}
 
 		if(m_pszName)
 			pContext->EndGPUTag();
