@@ -573,7 +573,7 @@ void Matrix4x4::MakeRotate(float x, float y, float z)
    _42 = vcPos.y;
    _43 = vcPos.z;
    
-   _41=0.0f; _42=0.0f; _43=0.0f; _44=1.0f;
+   _44=1.0f;
 }
 
 
