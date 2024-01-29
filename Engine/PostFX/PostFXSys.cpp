@@ -60,13 +60,14 @@ void PostFXSys::Init(GFXDevice* pDevice, ResourceMgr* pResource, uint32 uWidth, 
 	};
 
 	m_uEffectsSupported = uInitFlags;
-	m_uEffectsEnabled = uInitFlags;
+	//m_uEffectsEnabled = uInitFlags;
 	m_fullScreenVB.Init(pDevice, verts, sizeof(PositionVertex), 4, "FullScreenVB");
 	m_fullScreenIB.Init(pDevice, iIndices, 6, PT_TRIANGLES);
 
 	m_dummyDepth = pResource->GetTexture(pDevice, "white_default");
 
 	m_platform.Init(this, pResource, pDevice, uInitFlags, uWidth, uHeight);
+	EnableEffects(pDevice, m_uEffectsSupported);
 }
 
 void PostFXSys::Cleanup(GFXDevice* pDevice)
