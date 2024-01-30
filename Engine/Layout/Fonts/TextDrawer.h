@@ -18,6 +18,19 @@ namespace usg
 	class TextDrawer
 	{
 	public:
+
+		struct VSConstants3D
+		{
+			Vector4f position3D;
+			Vector4f depthRange;
+			Vector2f offsetPos2D;
+		};
+
+		struct GSConstants3D
+		{
+			Matrix4x4 projection;
+		};
+
 		TextDrawer(class Text* pOwner);
 		~TextDrawer();
 
@@ -40,6 +53,10 @@ namespace usg
 			uint8	 cColBg[4];
 			uint8	 cColFg[4];
 		};
+
+		static const ShaderConstantDecl ms_constVSDecl[];
+		static const ShaderConstantDecl ms_constGSDecl[];
+		static const DescriptorDeclaration ms_GlobalDescriptors3D[];
 
 	private:
 

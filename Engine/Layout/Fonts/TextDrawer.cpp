@@ -15,9 +15,22 @@
 
 namespace usg
 {
-
 	// TODO: Move to a common file
-	const DescriptorDeclaration g_sGlobalDescriptors3D[] =
+	const ShaderConstantDecl TextDrawer::ms_constVSDecl[] =
+	{
+		SHADER_CONSTANT_ELEMENT(TextDrawer::VSConstants3D, position3D, CT_VECTOR_4, 1),
+		SHADER_CONSTANT_ELEMENT(TextDrawer::VSConstants3D, depthRange, CT_VECTOR_4, 1),
+		SHADER_CONSTANT_ELEMENT(TextDrawer::VSConstants3D, offsetPos2D, CT_VECTOR_2, 1),
+		SHADER_CONSTANT_END()
+	};
+
+	const ShaderConstantDecl TextDrawer::ms_constGSDecl[] =
+	{
+		SHADER_CONSTANT_ELEMENT(TextDrawer::GSConstants3D, projection, CT_MATRIX_44, 1),
+		SHADER_CONSTANT_END()
+	};
+
+	const DescriptorDeclaration TextDrawer::ms_GlobalDescriptors3D[] =
 	{
 		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_VERTEX),
 		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL_1, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_GEOMETRY),
@@ -100,14 +113,17 @@ namespace usg
 		DepthStencilStateDecl& dsDecl = pipelineState.depthState;
 		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.DistanceField");
 		m_pipeline = pDevice->GetPipelineState(renderPass, pipelineState);
-		dsDecl.bDepthEnable = true;
+
+		// 3D text
+		dsDecl.bDepthEnable = false;
 		dsDecl.eDepthFunc = DEPTH_TEST_LESS;
 		pipelineState.pEffect = pResMgr->GetEffect(pDevice, "Text.Text3D");
 		pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
-		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(g_sGlobalDescriptors3D);
+		pipelineState.layout.descriptorSets[1] = pDevice->GetDescriptorSetLayout(Font::m_sDescriptorDecl);
+		pipelineState.layout.descriptorSets[2] = pDevice->GetDescriptorSetLayout(ms_GlobalDescriptors3D);
 		pipelineState.layout.uDescriptorSetCount = 3;
 		// FIXME: Need distance field on the 3D text
-		//m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
+		m_pipeline3D = pDevice->GetPipelineState(renderPass, pipelineState);
 		
 		m_bufferValid = true;
 	}

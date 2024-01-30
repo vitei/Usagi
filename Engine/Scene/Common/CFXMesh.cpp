@@ -75,7 +75,7 @@ bool CFXMesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 
 		const RenderGroup* pParent = GetParent();
 
-		pContext->BeginGPUTag(m_effect.GetResource()->GetName().c_str(), Color::Blue);
+		pContext->BeginGPUTag("CFXMesh", Color::Blue);
 
 		pContext->SetPipelineState(m_pipeline);
 		pContext->SetDescriptorSet(&m_descriptor, 1);

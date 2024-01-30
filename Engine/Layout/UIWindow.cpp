@@ -1460,12 +1460,6 @@ void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 		m_descriptor.UpdateDescriptors(pDevice);
 	}
 
-	for (memsize i = 0; i < m_uItemCounts[UIItemType::UI_ITEM_IMAGE]; i++)
-	{	
-		// FIXME: Should optimize this as only needs calling where textures have changed
-		m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
-	}
-
 	if (m_vertices.size() > 0 && m_bVertsDirty)
 	{
 		m_vertexData.SetContents(pDevice, m_vertices.data(), (uint32)m_vertices.size());
@@ -1496,6 +1490,12 @@ void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 	for (auto& itr : m_children)
 	{
 		itr->GPUUpdate(pDevice);
+	}
+
+	for (memsize i = 0; i < m_uItemCounts[UIItemType::UI_ITEM_IMAGE]; i++)
+	{
+		// FIXME: Should optimize this as only needs calling where textures have changed
+		m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
 	}
 
 	m_bVertsDirty = false;
