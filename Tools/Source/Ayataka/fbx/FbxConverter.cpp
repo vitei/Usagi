@@ -112,6 +112,7 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 		}
 	}
 
+	bool bForceBinormCalc = false;
 	MaterialOverrides overrides;
 	if (!pOptions || !(*pOptions) )
 	{
@@ -124,13 +125,18 @@ int FbxConverter::Load(const aya::string& path, bool bAsCollisionModel, bool bSk
 	else
 	{
 		overrides.Init(pOptions, "Model", "FBXDefault", pDependencies);
+		YAML::Node node = (*pOptions)["RecalcBinorm"];
+		if (node.IsDefined())
+		{
+			bForceBinormCalc = node.as<bool>();
+		}
 	}
 	FbxLoad fbxLoader;
 	// Manually converting the scene used the scale instead of adjusting translations directly, so we just apply the scale during conversion
 	//FbxAxisSystem::DirectX.ConvertScene(scene);
 	//fbxLoader.SetAppliedScale(scale);
 	fbxLoader.SetAttenScale(scale);	// The convert scene doesn't handle this
-	fbxLoader.Load( m_cmdl, scene, bSkeletonOnly, bAsCollisionModel, pDependencies, &overrides);
+	fbxLoader.Load( m_cmdl, scene, bSkeletonOnly, bAsCollisionModel, bForceBinormCalc, pDependencies, &overrides);
 	// Because the convert scene updates the scale of bones, not the translation which isn't what we wan
 
 	SetNameFromPath( path.c_str() );

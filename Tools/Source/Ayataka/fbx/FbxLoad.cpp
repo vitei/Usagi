@@ -49,6 +49,7 @@ FbxLoad::FbxLoad()
 	m_pParentBoneNode = nullptr;
 	m_appliedScale = 1.0;
 	m_fAttenScale = 1.0;
+	m_bForceBinormalCalc = false;
 }
 
 void FbxLoad::AddIdentityBone(::exchange::Skeleton* pSkeleton)
@@ -716,7 +717,7 @@ bool FbxLoad::SetDefaultMaterialVariables(FbxSurfaceMaterial* pFBXMaterial, ::ex
 
 		// Shininess
 		double1 = reinterpret_cast<FbxSurfacePhong *>(pFBXMaterial)->Shininess;
-		pMaterial->SetVariable("specularpow", (float)Math::Max(double1, 0.01));
+		pMaterial->SetVariable("specularpow", (float)Math::Max(double1, 1.0));
 
 		bool bHasSpecMap = false;
 		pMaterial->GetVariable("bSpecMap", &bHasSpecMap);
@@ -908,12 +909,13 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	return pNewMaterial;
 }
 
-void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, DependencyTracker* pDependencies, MaterialOverrides* pOverrides)
+void FbxLoad::Load(Cmdl& cmdl, FbxScene* modelScene, bool bSkeletonOnly, bool bCollisionModel, bool bForceBinormCalc, DependencyTracker* pDependencies, MaterialOverrides* pOverrides)
 {
 	m_pOverrides = pOverrides;
 	m_pDependencies = pDependencies;
 	m_pScene = modelScene;
 	m_bCollisionMesh = bCollisionModel;
+	m_bForceBinormalCalc = bForceBinormCalc;
 
 	FbxNode* pRootNode = modelScene->GetRootNode();
 	::exchange::Skeleton* pSkeleton = NewSkeleton();
@@ -1846,10 +1848,10 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 
 	m_uMeshMaterialTmp = (uint32)materialIndex + m_uMeshMaterialOffset;
 
-	if ( m_bHasNormalMap && currMesh->GetElementTangentCount() < 1)
+	if ( m_bHasNormalMap && (currMesh->GetElementTangentCount() < 1 || m_bForceBinormalCalc) )
 	{
 		// TODO: Use the normal map UV set index
-		currMesh->GenerateTangentsData(0);
+		currMesh->GenerateTangentsData(0, m_bForceBinormalCalc);
 	}
 
 	int iVertex = 0;

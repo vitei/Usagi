@@ -109,7 +109,7 @@ class FbxLoad
 public:
 	FbxLoad();
 
-	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, DependencyTracker* pDependencies, MaterialOverrides* pOverrides);
+	void Load(Cmdl& cmdl, FbxScene*	modelScene, bool bSkeletonOnly, bool bCollisionMode, bool bForceBinormCalc, DependencyTracker* pDependencies, MaterialOverrides* pOverrides);
 	void SetAppliedScale(double appliedScale) { m_appliedScale = appliedScale; }
 	void SetAttenScale(double fScale) { m_fAttenScale = fScale; }
 
@@ -220,6 +220,7 @@ private:
 	bool					m_bHasNormalMap;
 	bool					m_bHasDefaultStaticBone;
 	bool					m_bCollisionMesh;
+	bool					m_bForceBinormalCalc;
 	double					m_appliedScale;
 	double					m_fAttenScale;
 	FbxNode*				m_pParentBoneNode;
