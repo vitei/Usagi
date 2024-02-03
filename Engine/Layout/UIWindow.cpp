@@ -87,6 +87,16 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 		{
 			m_pUIItemsDefs[i].def = pHudItems[i];
 			m_pUIItemsDefs[i].defOverride = pHudItems[i];
+
+			if (m_pUIItemsDefs[i].def.uActionCRC != 0)
+			{
+				memsize uActionIdx = GetActionIdIndex(m_pUIItemsDefs[i].def.uActionCRC);
+				UIItemRef ref;
+				ref.eType = UI_ITEM_IMAGE;
+				ref.pWindow = this;
+				ref.uItemIdx = (uint32)i;
+				m_actionData[uActionIdx].uiItems.push_back(ref);
+			}
 		}
 
 		for(memsize i=0; i< m_uItemCounts[UI_ITEM_BUTTON]; i++)
@@ -636,6 +646,14 @@ usg::Vector2f UIWindow::GetPosition(const UIItemRef& ref)
 			vReturn = vert.vPosition.v2() + (vert.vSize * 0.5f);
 			break;
 		}
+		case UI_ITEM_IMAGE:
+		{
+			uint32 uIndex = ref.uItemIdx;
+			const VertexData& vert = m_vertices[uIndex];
+
+			vReturn = vert.vPosition.v2() + (vert.vSize * 0.5f);
+			break;
+		}
 		default:
 		ASSERT(false);
 	};
@@ -645,8 +663,13 @@ usg::Vector2f UIWindow::GetPosition(const UIItemRef& ref)
 
 bool UIWindow::IsMouseInRangeOfButton(uint32 uButton)
 {
-	uint32 uIndex = m_uItemCounts[UI_ITEM_IMAGE] + uButton;
-	
+	return IsMouseInRangeOfImage(uButton + m_uItemCounts[UI_ITEM_IMAGE]);
+}
+
+bool UIWindow::IsMouseInRangeOfImage(uint32 uImage)
+{
+	uint32 uIndex = uImage;
+
 	if (!m_pUIItemsDefs[uIndex].defOverride.bVisible)
 		return false;
 
@@ -1159,6 +1182,13 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 						}
 					}
 					bHighlighted |= bOver;
+					break;
+				}
+				case UI_ITEM_IMAGE:
+				{
+					bool bOver = IsMouseInRangeOfImage(itr.uItemIdx);
+					bHighlighted |= bOver;
+
 					break;
 				}
 				default:

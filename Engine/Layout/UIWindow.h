@@ -76,6 +76,8 @@ namespace usg
 		usg::vector<UIMove> inputActions;
 		// Keep select separate for implicity
 		bool			bSelect = false;
+		bool			bHeld = false;
+		float			fScroll = 0.0f;
 		bool			bMouseInWindowSpace = false;
 	};
 
@@ -147,6 +149,7 @@ namespace usg
 		void SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIResults* pResults);
 		void AddResult(UIResults* pResult, uint32 uActionCRC, UIActionType eAction, int iValue = 1);
 		bool IsMouseInRangeOfButton(uint32 uButton);
+		bool IsMouseInRangeOfImage(uint32 uImage);
 		bool IsMouseInRangeOfText(uint32 uText);
 		bool SetButtonHighlighted(uint32 uButton, bool bHighlighted, UIResults* pResults);
 		UIActionType SetButtonPressed(uint32 uButton, UIResults* pResults);

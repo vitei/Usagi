@@ -38,6 +38,7 @@ message ImageDef
 	required UIVertAlign eVAlign = 9 [default = Top];
 	required string tags = 10 [(nanopb).max_size = 64];
 	required bool bVisible = 11 [default = true];
+	required uint32 uActionCRC = 12;
 }
 
 message ButtonTemplateDef
