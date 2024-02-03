@@ -377,7 +377,7 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 
 	relativePath = RemoveFileName(fileNameBase) + "/";
 	std::string skelDir = m_tempDir + "skel/";
-	std::string skelName = szFileName;
+	std::string skelName = fileNameBase;
 	memsize pos = skelName.find_first_of("Models");
 	if (pos != std::string::npos)
 	{
