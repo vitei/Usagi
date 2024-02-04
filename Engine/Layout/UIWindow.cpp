@@ -819,6 +819,7 @@ void UIWindow::SetItemColor(uint32 uIndex, enum UIItemType eType, const usg::Col
 	case UI_ITEM_TEXT:
 	{
 		m_pTextItemDefs[uIndex].text.SetColor(cColor);
+		m_pTextItemDefs[uIndex].def.cColor = cColor;
 	}
 	break;
 	default:
