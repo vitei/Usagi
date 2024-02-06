@@ -20,9 +20,8 @@ namespace usg {
 SetSceneTarget::SetSceneTarget():
 PostEffect()
 {
-	SetRenderMask(LAYER_DEFERRED_SHADING);
-	SetLayer(LAYER_OPAQUE_UNLIT);
-	SetPriority(255);
+	SetLayer(LAYER_SKY);
+	SetPriority(0);
 }
 
 
@@ -82,6 +81,47 @@ bool SetSceneTarget::Draw(GFXContext* pContext, RenderContext& renderContext)
 	pContext->SetRenderTarget(m_pDestTarget);
 
 	return true;
+}
+
+
+SetSceneLinDepthTarget::SetSceneLinDepthTarget() :
+	SetSceneTarget()
+{
+	SetLayer(LAYER_DEFERRED_SHADING);
+	SetPriority(255);
+}
+
+
+bool SetSceneLinDepthTarget::Draw(GFXContext* pContext, RenderContext& renderContext)
+{
+	if (!GetEnabled())
+		return false;
+
+	pContext->SetRenderTarget(nullptr);
+
+	// TODO: This needs to be exposed through GFXContext even though for most API's it's unnecessary
+#ifdef USE_VULKAN
+	VkImageSubresourceRange subresourceRange{};
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+	subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	pContext->GetPlatform().SetImageLayout(m_pDestTarget->GetColorBuffer(1)->GetTexture()->GetPlatform().GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange);
+#endif
+
+	pContext->SetRenderTarget(m_pDestTarget);
+
+	return true;
+}
+
+
+bool SetSceneLinDepthTarget::LoadsTexture(Input eInput) const
+{
+	return (eInput == Input::Color || eInput == Input::Depth || eInput == Input::LinearDepth);
+}
+
+bool SetSceneLinDepthTarget::WritesTexture(Input eInput) const
+{
+	return (eInput == Input::Color || eInput == Input::Depth || eInput == Input::LinearDepth);
 }
 
 }

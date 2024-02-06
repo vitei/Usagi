@@ -120,6 +120,7 @@ protected:
 	class ASSAO*			m_pSSAO;
 	class DeferredShading*	m_pDeferredShading;
 	class SetSceneTarget*	m_pSetNoDepthTarget;
+	class SetSceneLinDepthTarget*	m_pSetLinDepthTarget;
 	PostEffect*				m_pDefaultEffects[MAX_DEFAULT_EFFECTS];
 	vector<PostEffect*>		m_activeEffects;
 	list<PostEffect*>		m_customEffects;

@@ -31,10 +31,23 @@ public:
 	virtual bool LoadsTexture(Input eInput) const override;
 	virtual void SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& texture) override;
 
-private:
+protected:
 	PostFXSys*				m_pSys;
-
 	RenderTarget*			m_pDestTarget;
+
+};
+
+
+class SetSceneLinDepthTarget : public SetSceneTarget
+{
+public:
+	SetSceneLinDepthTarget();
+
+
+	virtual bool LoadsTexture(Input eInput) const override;
+	virtual bool WritesTexture(Input eInput) const override;
+	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+
 
 };
 

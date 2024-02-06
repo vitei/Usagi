@@ -90,6 +90,7 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
 	m_pSetNoDepthTarget = nullptr;
+	m_pSetLinDepthTarget = nullptr;
 	m_fPixelScale = 1.0f;
 	m_bHDROut = false;
 }
@@ -212,16 +213,17 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pSkyFog = vnew(ALLOC_OBJECT) SkyFog();
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pSkyFog;
 	}
-	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING)
+	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING )
 	{
 		m_pDeferredShading = vnew(ALLOC_OBJECT) DeferredShading();
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pDeferredShading;
+
+		m_pSetLinDepthTarget = vnew(ALLOC_OBJECT) SetSceneLinDepthTarget();
+		m_pDefaultEffects[m_uDefaultEffects++] = m_pSetLinDepthTarget;
 	}
-	else
-	{
-		m_pSetNoDepthTarget = vnew(ALLOC_OBJECT) SetSceneTarget();
-		m_pDefaultEffects[m_uDefaultEffects++] = m_pSetNoDepthTarget;
-	}
+
+	m_pSetNoDepthTarget = vnew(ALLOC_OBJECT) SetSceneTarget();
+	m_pDefaultEffects[m_uDefaultEffects++] = m_pSetNoDepthTarget;
 
 	if(uInitFlags & PostFXSys::EFFECT_FILM_GRAIN)
 	{
@@ -686,7 +688,9 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	if(m_pDeferredShading)
 		m_pDeferredShading->SetEnabled( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 	if(m_pSetNoDepthTarget)
-		m_pSetNoDepthTarget->SetEnabled((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0);
+		m_pSetNoDepthTarget->SetEnabled(true);//(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0);
+	if (m_pSetLinDepthTarget)
+		m_pSetLinDepthTarget->SetEnabled((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
 	if(m_pSkyFog)
 		m_pSkyFog->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SKY_FOG) != 0);
 	if(m_pBloom)
