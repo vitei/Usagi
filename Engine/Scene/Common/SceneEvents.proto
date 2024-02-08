@@ -34,6 +34,13 @@ message SetFieldOfView
 	required float fFOV = 1 [default = 40.0];
 }
 
+message SetFogRange
+{
+	required float fNearFrac = 1 [default = 0.8];
+	required float fFarFrac = 2 [default = 1.0];
+}
+
+
 
 message SetRenderMask
 {

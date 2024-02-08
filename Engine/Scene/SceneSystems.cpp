@@ -126,6 +126,12 @@ namespace usg
 				Scene* scene = out.sceneComp.GetRuntimeData().pScene;
 				scene->SetActiveCamera(evt.uCameraID, evt.uContext);
 			}
+
+			static void OnEvent(const Inputs& in, Outputs& out, const SetFogRange& evt)
+			{
+				Scene* scene = out.sceneComp.GetRuntimeData().pScene;
+				scene->SetFogRanges(evt.fNearFrac, evt.fFarFrac);
+			}
 		};
 
 		class UpdateSceneLight : public System

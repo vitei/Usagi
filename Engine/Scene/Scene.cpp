@@ -101,6 +101,8 @@ Scene::Scene()
 	m_vTransformOffset.Assign(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pImpl = vnew(ALLOC_OBJECT) PIMPL;
 	m_fTime = 0.0f;
+
+	SetFogRanges(0.8f, 1.0f);
 }
 
 
@@ -145,6 +147,30 @@ const RenderPassHndl& Scene::GetShadowRenderPass() const
 	return m_pImpl->lightMgr.GetShadowPassHndl();
 }
 
+
+void Scene::GetFogRanges(float& fNearFrac, float& fFarFrac) const
+{
+	fNearFrac = m_fFogStart;
+	fFarFrac = m_fFogEnd;
+}
+
+
+void Scene::SetFogRanges(float fNearFrac, float fFarFrac)
+{
+	if(m_fFogStart != fNearFrac || m_fFogEnd != fFarFrac)
+	{
+		m_fFogStart = fNearFrac;
+		m_fFogEnd = fFarFrac;
+
+		for (FastPool<ViewContext>::Iterator it = m_pImpl->viewContexts.Begin(); !it.IsEnd(); ++it)
+		{
+			if((*it)->GetCamera())
+			{
+				(*it)->SetCamera((*it)->GetCamera());
+			}
+		}
+	}
+}
 
 void Scene::SetActiveCamera(uint32 uCameraId, uint32 uViewContext)
 {

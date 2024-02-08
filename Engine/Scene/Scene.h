@@ -118,6 +118,9 @@ public:
 	void AddCamera(const Camera* pCamera);
 	void RemoveCamera(const Camera* pCamera);
 
+	void GetFogRanges(float& fNearFrac, float &fFarFrac) const;
+	void SetFogRanges(float fNearFrac, float fFarFrac);
+
 private:
 	void			PerformVisibilityTesting(GFXDevice* pDevice);
 	void			UpdateSceneContexts(GFXDevice* pDevice);
@@ -134,6 +137,9 @@ private:
 	float32 					m_fTime;
 	bool						m_bShowBounds;
 	Vector4f					m_vTransformOffset;
+
+	float						m_fFogStart;
+	float						m_fFogEnd;
 
 	Matrix4x4					m_activeView;
 };

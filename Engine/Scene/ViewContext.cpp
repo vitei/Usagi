@@ -219,9 +219,12 @@ namespace usg {
 	void ViewContext::SetCamera(const Camera* pCamera)
 	{
 		m_pImpl->pCamera = pCamera;
+		Scene* pScene = GetScene();
+		float fNear, fFar;
+		pScene->GetFogRanges(fNear, fFar);
 		usg::Fog& fog = GetFog();
-		fog.SetMinDepth(pCamera->GetFar() * 0.8f);
-		fog.SetMaxDepth(pCamera->GetFar());
+		fog.SetMinDepth(pCamera->GetFar() * fNear);
+		fog.SetMaxDepth(pCamera->GetFar() * fFar);
 		m_pImpl->searchObject.SetFrustum(&pCamera->GetFrustum());
 	}
 
