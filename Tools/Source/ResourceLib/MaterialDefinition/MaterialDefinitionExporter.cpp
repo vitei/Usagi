@@ -354,6 +354,8 @@ bool MaterialDefinitionExporter::LoadAttributes(YAML::Node& attributes)
 				continue;
 			}
 		}
+		attrib.uVBIndex = (*it)["buffer"] ? (*it)["buffer"].as<uint32>() : 0;
+
 		m_attributes.push_back(attrib);
 	}
 

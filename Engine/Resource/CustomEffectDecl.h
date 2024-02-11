@@ -48,6 +48,7 @@ namespace usg
 			uint32 	uIndex;
 			uint32	eConstantType;
 			uint32	uCount;
+			uint32	uVBIndex;
 		};
 
 		struct Constant

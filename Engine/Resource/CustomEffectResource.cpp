@@ -8,7 +8,9 @@
 #include "Engine/Core/String/String_Util.h"
 #include "Engine/Graphics/RenderConsts.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
+#include "Engine/Core/stl/map.h"
 #include "Engine/Resource/ResourceMgr.h"
 #include "CustomEffectResource.h"
 #include "CustomEffectDecl.h"
@@ -175,28 +177,50 @@ namespace usg
 
 		*pDescDecl = DESCRIPTOR_END();
 
-		// TODO: Once stable move this to the exporter side
-		uint32 uVertexElemCnt = m_header.uAttributeCount + 1;
-		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
-		VertexElement* pElement = m_pVertexDecl;
-		memsize uOffset = 0;
+
+		usg::map<uint32, memsize> buffers;	// Buffer idx, offset
 		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
 		{
-			// Keep the data aligned
-			uOffset = AlignSizeUp(uOffset, g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]);
-			pElement->uAttribId = m_pAttributes[i].uIndex;
-			pElement->uCount = g_veCountMapping[m_pAttributes[i].eConstantType] * m_pAttributes[i].uCount;
-			// FIXME: This is actually the constant type; need to remove the VE types (they should be interchangeable)
-			pElement->eType = g_veMapping[m_pAttributes[i].eConstantType];
-			pElement->bIntegerReg = false;
-			pElement->bNormalised = false;
-			pElement->uOffset = uOffset;
-			uOffset += pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType];
-			pElement++;
+			if (buffers.find(m_pAttributes[i].uVBIndex) == buffers.end())
+			{
+				buffers[i] = memsize(0);
+			}
 		}
-		*pElement = VERTEX_DATA_END();
 
-		m_uVertexSize = AlignSizeUp(uOffset, 4);
+		// TODO: Once stable move this to the exporter side
+		uint32 uVertexElemCnt = m_header.uAttributeCount + (uint32)buffers.size();
+		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
+
+		for (auto itr : buffers)
+		{
+			VertexElement* pElement = m_pVertexDecl;
+			for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+			{
+				// Keep the data aligned
+				uint32 uVertexBuffer = m_pAttributes[i].uVBIndex;
+
+				if(uVertexBuffer != itr.first)
+					continue;
+
+				buffers[uVertexBuffer] = AlignSizeUp(buffers[uVertexBuffer], g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]);
+				pElement->uAttribId = m_pAttributes[i].uIndex;
+				pElement->uCount = g_veCountMapping[m_pAttributes[i].eConstantType] * m_pAttributes[i].uCount;
+				// FIXME: This is actually the constant type; need to remove the VE types (they should be interchangeable)
+				pElement->eType = g_veMapping[m_pAttributes[i].eConstantType];
+				pElement->bIntegerReg = false;
+				pElement->bNormalised = false;
+				pElement->uOffset = buffers[uVertexBuffer];
+				buffers[uVertexBuffer] += pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType];
+				pElement++;
+			}
+			*pElement = VERTEX_DATA_END();
+		}
+
+		for (auto itr : buffers)
+		{
+			m_vertexSizes[itr.first] = AlignSizeUp(itr.second, 4);
+		}
+		
 
 		m_descLayout = pDevice->GetDescriptorSetLayout(m_pDescriptorDecl);
 	}
@@ -252,6 +276,23 @@ namespace usg
 	}
 
 
+	const VertexElement* CustomEffectResource::GetVertexElement(const char* szAttribHint) const
+	{
+		uint32 uBinding = GetAttribBinding(szAttribHint);
+		if(uBinding == USG_INVALID_ID)
+			return nullptr;
+
+		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+		{
+			if (m_pVertexDecl[i].uAttribId == uBinding)
+			{
+				return &m_pVertexDecl[i];
+			}
+		}
+		return nullptr;
+	}
+
+
 	uint32 CustomEffectResource::GetConstantCount(uint32 uSet) const
 	{
 		ASSERT(uSet< m_header.uConstantSetCount);
@@ -285,16 +326,17 @@ namespace usg
 		return nullptr;
 	}
 
-	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVertCount) const
+	bool CustomEffectResource::SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uIndex, uint32 uVertCount) const
 	{
 		memsize uOffsetBase = uVertexId * GetVertexSize();
+		memsize uSubOffset = (uIndex * uSrcSize);
 		bool bFound = false;
 		for (uint32 i = 0; i < m_header.uAttributeCount; i++)
 		{
 			if (str::Compare(szName, m_pAttributes[i].name))
 			{
 				uOffsetBase += m_pVertexDecl[i].uOffset;
-				if ((m_pVertexDecl[i].uCount * g_uConstantSize[m_pVertexDecl[i].eType]) < uSrcSize)
+				if ((m_pVertexDecl[i].uCount * g_uConstantSize[m_pVertexDecl[i].eType]) < (uSrcSize + uSubOffset))
 				{
 					ASSERT(false);
 					return false;
@@ -311,11 +353,107 @@ namespace usg
 
 		for (uint32 i = 0; i < uVertCount; i++)
 		{
-			usg::MemCpy((uint8*)(pVertData)+uOffsetBase, pSrc, uSrcSize);
+			usg::MemCpy((uint8*)(pVertData)+uOffsetBase+uSubOffset, pSrc, uSrcSize);
 			uOffsetBase += GetVertexSize();
 		}
 		return true;
 	}
 
+
+	memsize CustomEffectResource::GetVertexSize(uint32 uBuffer) const
+	{
+		auto itr = m_vertexSizes.find(uBuffer);
+		if (itr != m_vertexSizes.end())
+		{
+			return (*itr).second;
+		}
+		return 0;
+	}
+
+
+	const VertexElement* CustomEffectResource::GetVertexElements(uint32 uBuffer) const
+	{	
+		auto itr = m_vertexSizes.find(uBuffer);
+		if (itr == m_vertexSizes.end())
+		{
+			ASSERT(false);
+			return nullptr;
+		}
+		int iBufferIdx = 0;
+		for (auto itr : m_vertexSizes)
+		{
+			if (itr.first == uBuffer)
+			{
+				break;
+			}
+			iBufferIdx++;
+		}
+
+		// They are in order
+		VertexElement* pDecl = m_pVertexDecl;
+		while (iBufferIdx)
+		{
+			// Look for the vertex caps
+			while (pDecl->eType != usg::VE_INVALID)
+			{
+				pDecl++;
+			}
+			iBufferIdx--;
+		}
+
+		return pDecl;
+	}
+
+
+	void CustomEffectResource::InitWithDefaultData(class ScratchRaw& scratch, uint32 uBuffer, uint32 uVertexCount) const
+	{
+		const VertexElement* pElements = GetVertexElements(uBuffer);
+
+		uint32 uSize = (uint32)GetVertexSize(uBuffer);
+
+		if(uSize == 0)
+			return;
+
+		scratch.Init(uVertexCount * uSize, 4);
+
+		const VertexElement* pElement = pElements;
+
+		while (pElement->eType != VE_INVALID)
+		{
+			for (uint32 i = 0; i < m_header.uAttributeCount; i++)
+			{
+				if (m_pAttributes[i].uVBIndex == uBuffer && m_pAttributes[i].uIndex == pElement->uAttribId)
+				{
+					usg::MemCpy(scratch.GetDataAtOffset((uint32)pElement->uOffset), m_pAttributes[i].defaultData, pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType]);
+					break;
+				}
+			}
+			pElement++;
+		}
+
+		for (uint32 i = 1; i < uVertexCount; i++)
+		{
+			usg::MemCpy(scratch.GetDataAtOffset(uSize * i), scratch.GetRawData(), uSize);
+		}
+	}
+
+	void CustomEffectResource::InitVertexBuffer(usg::GFXDevice* pDevice, class VertexBuffer& buffer, uint32 uBuffer, uint32 uVertexCount, bool bSetDefaults) const
+	{
+		uint32 uSize = (uint32)GetVertexSize(uBuffer);
+
+		void* pData = nullptr;
+		if(bSetDefaults)
+		{
+			ScratchRaw scratch;
+
+			InitWithDefaultData(scratch, uBuffer, uVertexCount);
+			pData = scratch.GetRawData();
+		}
+
+		buffer.Init(pDevice, pData, uSize, uVertexCount, "CustomVB");
+	}
+
+
 }
+
 

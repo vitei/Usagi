@@ -10,6 +10,7 @@
 #include "Engine/Resource/ResourceDecl.h"
 #include "Engine/Resource/ResourceBase.h"
 #include "Engine/Resource/PakDecl.h"
+#include "Engine/Core/stl/map.h"
 #include "CustomEffectDecl.h"
 
 namespace usg
@@ -38,10 +39,12 @@ namespace usg
 		uint32 GetSamplerBinding(const char* szSampler) const;
 
 		const DescriptorDeclaration* GetDescriptorDecl() const { return m_pDescriptorDecl; }
-		const VertexElement* GetVertexElements() const { return m_pVertexDecl; }
+		const VertexElement* GetVertexElements(uint32 uBuffer = 0) const;
+		const VertexElement* GetVertexElement(const char* szAttribHint) const;
 		const DescriptorSetLayoutHndl& GetDescriptorLayoutHndl() const { return m_descLayout; }
 		const ShaderConstantDecl* GetConstantDecl(uint32 uIndex) const { return &m_pShaderConstDecl[m_uConstDeclOffset[uIndex]]; }
-		memsize GetVertexSize() const { return m_uVertexSize; }
+		memsize GetVertexSize(uint32 uBuffer = 0) const;
+		memsize GetVertexBufferCount() const { return m_vertexSizes.size(); }
 
 		uint32 GetConstantSetCount() const;
 		uint32 GetConstantSetBinding(uint32 uSet) const;
@@ -53,12 +56,16 @@ namespace usg
 		const char* GetDefaultTexture(uint32 uSampler);
 
 		// Utility functions for basic vertex setup (only suitable for small numbers, e.g. HUD)
-		bool SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uVerCount = 1) const;
+		bool SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uIndex = 0, uint32 uVerCount = 1) const;
 		template <class VariableType>
-		bool SetVertexAttribute(void* pVertData, const char* szName, VariableType var, uint32 uVertexId, uint32 uVerCount = 1) const
+		bool SetVertexAttribute(void* pVertData, const char* szName, VariableType var, uint32 uVertexId, uint32 uIndex = 0, uint32 uVerCount = 1) const
 		{
 			return SetVertexAttribute(pVertData, szName, (void*)&var, sizeof(VariableType), uVertexId, uVerCount);
 		}
+
+
+		void InitVertexBuffer(usg::GFXDevice* pDevice, class VertexBuffer& buffer, uint32 uBuffer, uint32 uVertexCount, bool bSetDefaults = true) const;
+		void InitWithDefaultData(class ScratchRaw& scratchObj, uint32 uBuffer, uint32 uVertexCount) const;
 
 		const static ResourceType StaticResType = ResourceType::CUSTOM_EFFECT;
 
@@ -80,7 +87,7 @@ namespace usg
 		const CustomEffectDecl::ConstantSet*	m_pConstantSets;
 		const CustomEffectDecl::Sampler*		m_pSamplers;
 		const CustomEffectDecl::Attribute*		m_pAttributes;
-		memsize									m_uVertexSize;
+		usg::map<uint32, memsize>				m_vertexSizes;
 	};
 
 }
