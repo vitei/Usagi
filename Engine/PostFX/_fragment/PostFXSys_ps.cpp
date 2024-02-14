@@ -158,7 +158,8 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	{
 		m_colorBuffer[BUFFER_DIFFUSE].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 0); // 4th component is specular power
 		m_colorBuffer[BUFFER_NORMAL].Init(pDevice, uWidth, uHeight, ColorFormat::NORMAL, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 2);
-		m_colorBuffer[BUFFER_EMISSIVE].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 3);
+		// We have emissive in SRGBA because it's going to be 1:1 with out final format and we want to avoid losing precision
+		m_colorBuffer[BUFFER_EMISSIVE].Init(pDevice, uWidth, uHeight, ColorFormat::SRGBA, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 3);
 		m_colorBuffer[BUFFER_SPECULAR].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_5551, SAMPLE_COUNT_1_BIT, TU_FLAGS_OFFSCREEN_COLOR, 4);
 	}
 	
