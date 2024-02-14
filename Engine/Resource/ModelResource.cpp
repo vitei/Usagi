@@ -537,7 +537,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		if (instanceEffects[usg::exchange::Material_RenderPass_DEFAULT])
 		{
 			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_DEFAULT];
-			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].instancedPipeline = pipelineState;
 		}
 	}
 
@@ -551,7 +551,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		if (instanceEffects[usg::exchange::Material_RenderPass_DEFERRED])
 		{
 			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_DEFERRED];
-			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].instancedPipeline = pipelineState;
 		}
 	}
 
@@ -578,7 +578,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		if (instanceEffects[usg::exchange::Material_RenderPass_TRANSPARENT])
 		{
 			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_TRANSPARENT];
-			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].instancedPipeline = pipelineState;
 		}
 	}
 

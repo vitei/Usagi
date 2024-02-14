@@ -100,21 +100,21 @@ Effects:
         defines: HAS_BUMP ALPHA_TEST CLIP_PLANE
 
       - name: instance
-        defines: INSTANCE
+        defines: INSTANCED
       - name: bump.instance
-        defines: HAS_BUMP INSTANCE
+        defines: HAS_BUMP INSTANCED
       - name: alphaTest.instance
-        defines: ALPHA_TEST INSTANCE     
+        defines: ALPHA_TEST INSTANCED     
       - name: bump.alphaTest.instance
-        defines: HAS_BUMP ALPHA_TEST INSTANCE       
+        defines: HAS_BUMP ALPHA_TEST INSTANCED       
       - name: clip.instance 
-        defines: CLIP_PLANE INSTANCE      
+        defines: CLIP_PLANE INSTANCED      
       - name: bump.clip.instance
-        defines: HAS_BUMP CLIP_PLANE INSTANCE       
+        defines: HAS_BUMP CLIP_PLANE INSTANCED       
       - name: alphaTest.clip.instance
-        defines: ALPHA_TEST CLIP_PLANE INSTANCE      
+        defines: ALPHA_TEST CLIP_PLANE INSTANCED      
       - name: bump.alphaTest.clip.instance
-        defines: HAS_BUMP ALPHA_TEST CLIP_PLANE INSTANCE
+        defines: HAS_BUMP ALPHA_TEST CLIP_PLANE INSTANCED
 
   - name: FBXDefault
     vert: models/fbxdefault
@@ -142,8 +142,8 @@ Effects:
       - name: alphaTest.clip
         defines: ALPHA_TEST CLIP_PLANE 
       - name: alphaTest.instance
-        defines: ALPHA_TEST INSTANCE
+        defines: ALPHA_TEST INSTANCED
       - name: clip.instance
-        defines: CLIP_PLANE INSTANCE       
+        defines: CLIP_PLANE INSTANCED       
       - name: alphaTest.clip.instance
-        defines: ALPHA_TEST CLIP_PLANE INSTANCE
+        defines: ALPHA_TEST CLIP_PLANE INSTANCED
