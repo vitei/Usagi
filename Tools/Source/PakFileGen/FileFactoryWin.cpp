@@ -113,7 +113,17 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 	if (dds.size() > 0)
 	{
 
-		pTexture->Init(dds, false);
+		bool bSRGB = false;
+		if (node)
+		{
+			const YAML::Node force = node["sRGB"];
+			if(force)
+			{
+				bSRGB = force.as<bool>();
+			}
+		}
+
+		pTexture->Init(dds, bSRGB);
 
 		m_resources.push_back(pTexture);
 

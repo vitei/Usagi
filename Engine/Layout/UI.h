@@ -46,6 +46,7 @@ namespace usg
 		void RegisterCustomItem(CustomUIItem* pItem, const UIItemRef& ref);
 		bool IsRefValid(const UIItemRef& ref) const;
 
+		void SetSRGBOut(bool bSRGBOut);
 	private:
 		// Use the same pipeline between windows, but each has their own matrix
 		usg::vector<UIWindow*>	m_parentWindows;

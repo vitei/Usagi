@@ -147,8 +147,8 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 	m_colorBuffer[BUFFER_LIN_DEPTH].Init(pDevice, uWidth, uHeight, ColorFormat::R_16F, eSamples, TU_FLAGS_OFFSCREEN_COLOR, 1);
 
 	// We don't have enough memory for 1080p if we put this in fast memory too
-	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
-	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, ColorFormat::RGBA_8888, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_0].Init(pDevice, uWidth, uHeight, ColorFormat::SRGBA, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
+	m_colorBuffer[BUFFER_LDR_1].Init(pDevice, uWidth, uHeight, ColorFormat::SRGBA, SAMPLE_COUNT_1_BIT, uFinalTransferFlags |TU_FLAGS_OFFSCREEN_COLOR);
 
 
 	m_depthStencil.Init(pDevice, uWidth, uHeight, DepthFormat::DEPTH_24_S8, eSamples, TU_FLAGS_DEPTH_BUFFER | ((uInitFlags&PostFXSys::EFFECT_SMAA) ? TU_FLAG_SHADER_READ : 0));
@@ -582,7 +582,7 @@ void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*
 	else if(m_activeEffects[pass]->WritesTexture(PostEffect::Input::Color))
 	{	
 		// FIXME: OR HDR enabled at a system level
-		if((int)pass < iFinalHdr)
+		if((int)pass < iFinalHdr || m_bHDROut)
 		{	
 			// If it reads that texture as a source we need to swap the buffers
 			if (m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))

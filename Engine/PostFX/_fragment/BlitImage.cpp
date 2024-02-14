@@ -33,13 +33,13 @@ BlitImage::~BlitImage()
 
 }
 
-void BlitImage::Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& pass)
+void BlitImage::Init(GFXDevice* pDevice, EffectHndl effect, const RenderPassHndl& pass)
 {
 	PipelineStateDecl pipelineDecl;
 	pipelineDecl.inputBindings[0].Init(usg::GetVertexDeclaration(usg::VT_POSITION));
 	pipelineDecl.uInputBindingCount = 1;
 	pipelineDecl.ePrimType = PT_TRIANGLES;
-	pipelineDecl.pEffect = pResource->GetEffect(pDevice, "PostProcess.Copy");
+	pipelineDecl.pEffect = effect;
 
 	pipelineDecl.alphaState.SetColor0Only();
 

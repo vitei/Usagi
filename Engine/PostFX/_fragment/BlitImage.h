@@ -15,7 +15,7 @@ public:
 	BlitImage();
 	~BlitImage();
 
-	void Init(GFXDevice* pDevice, ResourceMgr* pResource, const RenderPassHndl& pass);
+	void Init(GFXDevice* pDevice, EffectHndl effect, const RenderPassHndl& pass);
 	void Cleanup(GFXDevice* pDevice);
 	void ChangeRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass);
 	void SetSourceTexture(GFXDevice* pDevice, const TextureHndl& tex);

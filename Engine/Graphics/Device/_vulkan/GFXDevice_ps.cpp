@@ -60,7 +60,7 @@ static const uint32 gMaxFormatFallbacks = 3;
 
 static const VkFormat gFallbackColorFormatMap[][gMaxFormatFallbacks] =
 {
-	{ VK_FORMAT_B8G8R8A8_UNORM },																			// TF_RGBA_8888
+	{ VK_FORMAT_R8G8B8A8_UNORM },																			// TF_RGBA_8888
 	{ VK_FORMAT_B5G5R5A1_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// TG_RGBA_5551
 	{ VK_FORMAT_B5G6R5_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },					// CF_RGB_565,
 	{ VK_FORMAT_R4G4B4A4_UNORM_PACK16, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },				// CF_RGBA_4444,
@@ -76,7 +76,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxFormatFallbacks] =
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
-	{ VK_FORMAT_R8G8B8A8_SRGB },																									// CF_SRGBA
+	{ VK_FORMAT_R8G8B8A8_SRGB },																			// CF_SRGBA						// CF_SRGBA
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -414,6 +414,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
 	extensions.push_back("VK_KHR_win32_surface");
+	extensions.push_back("VK_EXT_swapchain_colorspace");
 #ifndef FINAL_BUILD
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

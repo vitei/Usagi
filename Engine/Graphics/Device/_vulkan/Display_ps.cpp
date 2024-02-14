@@ -43,6 +43,7 @@ Display_ps::Display_ps()
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
 	m_bRTShouldLoad = false;
+	m_bRequiresGammaCorrect = false;
 	m_bHDR = false;
 	m_eVsync = VSYNC_MODE_MAILBOX;
 }
@@ -258,8 +259,9 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	uint32_t formatCount;
 	VkResult res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, NULL);
 	ASSERT(res == VK_SUCCESS);
-	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, surfFormats);
+	usg::vector<VkSurfaceFormatKHR> surfFormats;
+	surfFormats.resize(formatCount);
+	res = vkGetPhysicalDeviceSurfaceFormatsKHR(devicePS.GetPrimaryGPU(), m_surface, &formatCount, surfFormats.data());
 	ASSERT(res == VK_SUCCESS);
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
@@ -268,36 +270,48 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	VkColorSpaceKHR colorSpace;
 	if (formatCount == 1 && surfFormats[0].format == VK_FORMAT_UNDEFINED)
 	{
-		eFormat = VK_FORMAT_B8G8R8A8_UNORM;
+		eFormat = VK_FORMAT_B8G8R8A8_SRGB;
 		colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 	}
 	else
 	{
 		int iBestFormat = 0;
-		#if 0
+		
+		bool bAllowHDR = false;
 		m_bHDR = false;
 		for (uint32 i = 0; i < formatCount; i++)
 		{
-			if (devicePS.GetUSGFormat(surfFormats[i].format) == CF_INVALID)
+			ColorFormat eFormat = devicePS.GetUSGFormat(surfFormats[i].format);
+			if (eFormat == ColorFormat::INVALID)
 			{
 				continue;
 			}
-			if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+
+			if(!m_bHDR && eFormat == ColorFormat::SRGBA)
 			{
 				iBestFormat = i;
-				m_bHDR = true;
 			}
-			else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT &&
-				(iBestFormat == i) ||  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+
+			if(bAllowHDR)
 			{
-				iBestFormat = i;
-				m_bHDR = true;
+				if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				{
+					iBestFormat = i;
+					m_bHDR = true;
+				}
+				else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT &&
+					(iBestFormat == i) ||  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				{
+					iBestFormat = i;
+					m_bHDR = true;
+				}
 			}
 		}
-		#endif
+
 		eFormat = surfFormats[iBestFormat].format;
 		colorSpace = surfFormats[iBestFormat].colorSpace;
 		m_eSwapChainFormat = devicePS.GetUSGFormat(eFormat);
+		m_bRequiresGammaCorrect = surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && m_eSwapChainFormat != ColorFormat::SRGBA;
 		m_eVkSwapChainFormat = eFormat;
 
 	}

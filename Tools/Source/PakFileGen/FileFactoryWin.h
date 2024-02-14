@@ -68,14 +68,19 @@ protected:
 			switch (uFormat)
 			{
 			case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8:
+				return gli::format::FORMAT_RGBA_DXT1_SRGB_BLOCK8;
 			case gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16:		
-			case gli::format::FORMAT_BGR8_UNORM_PACK8:			
-			case gli::format::FORMAT_RG8_UNORM_PACK8:			
-			case gli::format::FORMAT_RGBA8_UNORM_PACK8:
+				return gli::format::FORMAT_RGBA_DXT5_SRGB_BLOCK16;
+			case gli::format::FORMAT_BGR8_UNORM_PACK8:		
+				return gli::format::FORMAT_BGR8_SRGB_PACK8;
+			case gli::format::FORMAT_RG8_UNORM_PACK8:	
+				return gli::format::FORMAT_RG8_SRGB_PACK8;
 			case gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16:			
+				return gli::format::FORMAT_RGBA_BP_SRGB_BLOCK16;
+			case gli::format::FORMAT_RGBA8_UNORM_PACK8:
+				return gli::format::FORMAT_RGBA8_SRGB_PACK8;
 			case gli::format::FORMAT_BGRA8_UNORM_PACK8:
-				return uFormat + 1;
-
+				return gli::format::FORMAT_BGRA8_SRGB_PACK8;
 			default:
 				break;
 			}

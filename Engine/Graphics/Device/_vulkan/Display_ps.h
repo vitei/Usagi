@@ -39,6 +39,7 @@ public:
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
 	bool HasHDRSupport() const { return m_bHDR; }
+	bool RequiresGammaCorrection() const { return m_bRequiresGammaCorrect; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -80,6 +81,7 @@ private:
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
 	bool				m_bHDR;
+	bool				m_bRequiresGammaCorrect;
 };
 
 inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)

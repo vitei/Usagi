@@ -62,6 +62,8 @@ public:
 	Display_ps& GetPlatform() { return m_platform; }
 	WindHndl GetHandle() const { return m_window; }
 
+	bool RequiresGammaCorrection() const { return m_platform.RequiresGammaCorrection(); }
+
 private:
 	PRIVATIZE_COPY(Display)
 

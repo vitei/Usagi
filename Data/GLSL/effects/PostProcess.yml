@@ -17,4 +17,4 @@ Effects:
   - { name: Copy,                   vert: PostFX/fullscreen,        frag: PostFX/screencopy }
   - { name: FilmNoise,              vert: PostFX/fullscreen,        frag: PostFX/filmnoise }  
   - { name: ClearAlpha,             vert: PostFX/fullscreensolid,   frag: PostFX/clearalpha }
-  
+  - { name: AdjustColorSpace,       vert: PostFX/fullscreen,        frag: PostFX/adjustcolorspace }

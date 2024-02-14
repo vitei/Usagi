@@ -1,0 +1,16 @@
+CustomEffects: 
+  UI:
+    Attributes:
+      - { index: 0, name: ao_position, hint: "position", type: vec3 } 
+      - { index: 1, name: ao_size, hint: "size", type: vec2 }
+      - { index: 2, name: ao_texcoordRng, hint: "tex", type: vec4 }
+      - { index: 3, name: ao_color, hint: "color", type: vec4 }
+    Samplers:
+      - { index: 0, hint: "Color", default: "Textures/white" }  
+    ConstantDefs:      
+      - binding: Material
+        shaderType: PS
+        Variables:
+          - { type: bool, name: bsRGBConv,      count: 1, default: false }      
+Effects:
+  - { name: UI, vert: UI/UI, geom: UI/UI, frag: UI/UI, custom_effect: UI } 

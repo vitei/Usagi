@@ -133,7 +133,7 @@ namespace usg
 
 		const ButtonTemplateDef* GetUITemplate(const UIDef& uiDef, const char* szName);
 
-
+		void SetSRGBOut(bool bSRGBOut);
 	private:
 		UIWindow* GetInContextWindow();
 

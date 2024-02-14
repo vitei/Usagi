@@ -63,6 +63,8 @@ VkFormat GetFormatGLI(uint32 uFormat)
 	{
 	case gli::format::FORMAT_RGB8_SNORM_PACK8:
 		return VK_FORMAT_R8G8B8_SNORM;
+	case gli::format::FORMAT_RGBA8_SRGB_PACK8:
+		return VK_FORMAT_R8G8B8A8_SRGB;
 	case gli::format::FORMAT_RGBA8_SNORM_PACK8:
 		return VK_FORMAT_R8G8B8A8_SNORM;
 	case gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8: 
@@ -404,6 +406,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 		m_uBpp = 3; break;
 	case ColorFormat::RGBA_8888:
 	case ColorFormat::R_32:
+	case ColorFormat::SRGBA:
 		m_uBpp = 4; break;
 	default:
 		break;	// bpp won't be valid

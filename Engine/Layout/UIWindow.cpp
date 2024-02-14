@@ -62,7 +62,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 	if (uImageCount > 0)
 	{
 		// TODO: Perhaps put this into the HUD class if all windows are going to use the same effect
-		usg::EffectHndl effect = pRes->GetEffect(pDevice, "2DEffects.HUD");
+		usg::EffectHndl effect = pRes->GetEffect(pDevice, "UI.UI");
 		usg::CustomEffectResHndl effectDecl = effect->GetCustomEffect();
 
 		m_runtimeEffect.Init(pDevice, effect->GetCustomEffect());
@@ -152,6 +152,10 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 			m_pUIItemsDefs[i].descriptor.Init(pDevice, runtimeRes->GetDescriptorLayoutHndl());
 			usg::string fullPath = m_path + m_pUIItemsDefs[i].def.textureName;
 			m_pUIItemsDefs[i].descriptor.SetImageSamplerPairAtBinding(0, pRes->GetTextureAbsolutePath(pDevice, fullPath.c_str()), m_linearSamp);
+			for (uint32 j = 0; j < m_runtimeEffect.GetResource()->GetConstantSetCount(); j++)
+			{
+				m_pUIItemsDefs[i].descriptor.SetConstantSetAtBinding(m_runtimeEffect.GetResource()->GetConstantSetBinding(j), m_runtimeEffect.GetConstantSet(j));				
+			}
 			m_pUIItemsDefs[i].descriptor.UpdateDescriptors(pDevice);
 			// TODO: Get material indices, worst case scenario each element needs its own descriptor set
 		}
@@ -1479,10 +1483,22 @@ void UIWindow::UpdateMatrix(const UIWindow* pParent)
 	}
 }
 
+void UIWindow::SetSRGBOut(bool bSRGBOut)
+{
+	m_runtimeEffect.SetVariable("bsRGBConv", bSRGBOut);
+
+	for (auto& itr : m_children)
+	{
+		itr->SetSRGBOut(bSRGBOut);
+	}
+}
+
 void UIWindow::GPUUpdate(usg::GFXDevice* pDevice)
 {
 	if (!m_bEnabled && !m_bFirst)
 		return;
+
+	m_runtimeEffect.GPUUpdate(pDevice);
 
 	// No GPU work if no renderables
 	if (m_bMatrixDirty && m_windowConstants.GetSize() > 0) 
@@ -1576,6 +1592,7 @@ void UIWindow::CleanUpRecursive(usg::GFXDevice* pDevice)
 		m_pCustomItemDefs = nullptr;
 	}
 
+	m_runtimeEffect.Cleanup(pDevice);
 	m_descriptor.Cleanup(pDevice);
 	m_vertexData.Cleanup(pDevice);
 	m_windowConstants.Cleanup(pDevice);

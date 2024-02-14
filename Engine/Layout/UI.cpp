@@ -78,8 +78,15 @@ namespace usg
 	}
 
 
-	bool UI::GetItemRef(const char* szName, UIItemType eType, UIItemRef& out)
+	void UI::SetSRGBOut(bool bSRGOut)
+	{
+		for (auto itr : m_parentWindows)
+		{
+			itr->SetSRGBOut(bSRGOut);
+		}
+	}
 
+	bool UI::GetItemRef(const char* szName, UIItemType eType, UIItemRef& out)
 	{
 		for (auto itr : m_parentWindows)
 		{

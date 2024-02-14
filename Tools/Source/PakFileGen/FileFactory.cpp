@@ -184,8 +184,10 @@ std::string FileFactory::LoadParticleEmitter(const char* szFileName)
 		path += szTexName;
 
 		YAML::Node out;
-		out.force_insert("format", "BC7");
+		out.force_insert("format", "BC7-srgb");
 		out.force_insert("mips", true);
+		out.force_insert("sRGB", true);
+
 		AddTextureDependecy(path.c_str(), pFileEntry, out);
 	}
 
@@ -466,6 +468,10 @@ std::string FileFactory::LoadModel(const char* szFileName, const YAML::Node& nod
 			YAML::Node out;
 			out.force_insert("format", pConverter->GetTextureFormat(itr));
 			out.force_insert("mips", true);
+			if(str::Find(pConverter->GetTextureFormat(itr), "srgb") != nullptr)
+			{
+				out.force_insert("sRGB", true);
+			}
 
 			std::string fullDir = relativePath + itr;
 			AddTextureDependecy(fullDir.c_str(), pModel, out);
@@ -593,8 +599,9 @@ std::string FileFactory::LoadYMLLayout(const char* szFileName)
 	}
 
 	YAML::Node out;
-	out.force_insert("format", "BC7");
+	out.force_insert("format", "BC7-srgb");
 	out.force_insert("mips", true);
+	out.force_insert("sRGB", true);
 
 	for (auto itr : textures)
 	{
