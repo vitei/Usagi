@@ -1,5 +1,6 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/global_2d.inc"
+#include "../includes/colorspace.inc"
 
 // Input attributes
 layout (location = 0) in vec4 ao_posRange;
@@ -30,10 +31,10 @@ void main(void)
  	vo_posBL = vec4( ao_posRange.xw, ao_fDepth, 1.0 ) * proj;
  	vo_posBR = vec4( ao_posRange.zw, ao_fDepth, 1.0 ) * proj;
  	
-	vo_vColorUpper 		= ao_colUpper;
-	vo_vColorLower 		= ao_colLower;		
-	vo_vBgColor			= ao_colBg;
-	vo_vFgColor			= ao_colFg;
+	vo_vColorUpper 		= toLinear(ao_colUpper);
+	vo_vColorLower 		= toLinear(ao_colLower);		
+	vo_vBgColor			= toLinear(ao_colBg);
+	vo_vFgColor			= toLinear(ao_colFg);
 	vo_vUVRange.xy  	= GetUV(ao_uvRange.xy);
 	vo_vUVRange.zw  	= GetUV(ao_uvRange.zw);
 }

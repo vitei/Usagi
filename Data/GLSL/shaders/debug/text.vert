@@ -1,4 +1,6 @@
 #include "../includes/platformdefines.inc"
+#include "../includes/colorspace.inc"
+
 
 
 // Input attributes
@@ -17,6 +19,6 @@ void main(void)
  	
  	gl_Position		= vPosition;	
 
-	vo_vColor 	= ao_color;	
+	vo_vColor 	= toLinear(ao_color);	
 	vo_vTexCoord	= ao_texCoord0;
 }

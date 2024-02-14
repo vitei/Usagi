@@ -21,7 +21,6 @@ vec3 fromLinear(vec3 linearRGB)
 }*/
 
 
-
 vec3 toLinear(vec3 sRGB)
 {
     bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
@@ -30,5 +29,11 @@ vec3 toLinear(vec3 sRGB)
 
     return mix(higher, lower, cutoff);
 }
+
+vec4 toLinear(vec4 sRGB)
+{
+    return vec4(toLinear(sRGB.rgb), sRGB.a);
+}
+
 
 #endif

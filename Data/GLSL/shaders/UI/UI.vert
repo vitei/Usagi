@@ -1,5 +1,6 @@
 #include "../includes/platformdefines.inc"
 #include "../includes/global_2d.inc"
+#include "../includes/colorspace.inc"
 
 // <<GENERATED_CODE>>
 
@@ -15,7 +16,7 @@ void main(void)
  	
  	gl_Position		= vPosition;	
 
-	vo_vColor 		= ao_color;	
+	vo_vColor 		= toLinear(ao_color);	
 	vo_vTexCoordRng	= ao_texcoordRng;
 	vo_vSize 		= ao_size;
 }
