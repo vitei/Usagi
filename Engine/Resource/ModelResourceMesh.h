@@ -23,14 +23,18 @@ namespace usg{
 
 	struct ModelResource::Mesh
 	{
-		enum
+		enum ERenderState
 		{
 			RS_DEFAULT = 0,
 			RS_DEFERRED,
 			RS_TRANSPARENT,
 			RS_DEPTH,
 			RS_OMNI_DEPTH,
-			RS_COUNT,
+			RS_COUNT
+		};
+
+		enum
+		{
 			VERTEX_BUFFER_NUM = 1 + exchange::Shape::singleAttributes_max_count,
 			MAX_UV_STAGES = 7,
 			MAX_VERT_ELEMENTS = MAX_VERTEX_ATTRIBUTES + 1 + (2 * exchange::Shape::singleAttributes_max_count)
@@ -48,6 +52,7 @@ namespace usg{
 		{
 			CustomEffectRuntime		effectRuntime;
 			PipelineStateDecl		pipeline;
+			PipelineStateDecl		instancedPipeline;
 			VertexBuffer			singleVerts;
 		} renderSets[RS_COUNT];
 

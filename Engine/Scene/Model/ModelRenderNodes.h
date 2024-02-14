@@ -65,6 +65,8 @@ namespace usg {
 		// So far no good reason to override deferred as all our overrides have been for transparency
 		void SetPipelineState(const PipelineStateHndl& pipeline) { m_pipelineState = pipeline; }
 
+		uint32 GetVertexBufferCount() const { return m_uVertexBuffers; }
+
 	protected:
 		struct VertexBufferSet
 		{
@@ -98,8 +100,10 @@ namespace usg {
 		RenderMesh();
 		virtual ~RenderMesh();
 
-		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth);
+		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth, bool bInstanced = false);
 		virtual void Cleanup(GFXDevice* pDevice);
+
+
 		UVMapper* GetUVMapper(uint32 uIndex) { return &m_uVMapper[uIndex]; }
 		void SetOverrideConstant(uint32 uIndex, ConstantSet* pSet) { m_pOverridesConstants[uIndex] = pSet; }
 		void RequestOverride(uint8 uIndex) { m_uReqOverrides |= (1 << uIndex); }
@@ -108,14 +112,21 @@ namespace usg {
 		// Update the animations and UV co-ordinates
 		virtual void VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTransformOffset);
 		virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+		virtual uint64 GetInstanceId() const override { return m_uInstanceId; }
+		virtual InstancedRenderer* CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene) override;
+
+
 		bool SetScale(float fScale, CustomEffectRuntime& customFX);
 		uint8 GetLod() { return m_uLod; }
 		void SetRenderMaskWithShadowCheck(uint32 uMask);
 
 		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes) override;
 
+		usg::Matrix4x4 GetInstanceTransform() const;
 
 	protected:
+		const PipelineStateDecl& GetPipelineState(ModelResource::Mesh::ERenderState eRenderState);
+
 		enum 
 		{
 			OVERRIDE_MATERIAL = (1 << 0),
@@ -124,12 +135,16 @@ namespace usg {
 		};
 
 		const ModelResource::Mesh*	m_pMeshResource;
+		const Bone*					m_pBone;
 		UVMapper					m_uVMapper[ModelResource::Mesh::MAX_UV_STAGES];
 		ConstantSet*				m_pOverridesConstants[OVERRIDE_COUNT];
 		usg::string					m_name;
 		uint8						m_uOverrides;
 		uint8						m_uReqOverrides;
 		bool						m_bCanHaveShadow;
+		uint64						m_uInstanceId;
+		bool						m_bInstanced;
+		bool						m_bDepth;
 
 		uint8						m_uLod;
 	};

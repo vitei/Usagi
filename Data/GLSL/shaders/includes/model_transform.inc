@@ -31,10 +31,19 @@ vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
 
 #else
 
+
+#if INSTANCED
+vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
+{
+	return vec4( vVertex * ao_mModelMat, vVertex.w);
+}
+#else
 vec4 ApplyWorldTransform(in vec4 vVertex, in int iBoneCount)
 {
 	return vec4( vVertex * mModelMat, vVertex.w);
 }
+#endif
+
 
 #endif
 

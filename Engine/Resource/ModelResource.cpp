@@ -38,7 +38,7 @@ static uint32 g_uAttribId[usg::exchange::_VertexAttribute_count] =
 static const VertexElement g_instanceElements[]  =
 {
 	{
-		9,	// szInditifier
+		12,				// uAttribId
 		0,				// uOffset
 		VE_FLOAT,		// eType;
 		12,				// uCount;
@@ -422,19 +422,28 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	uint32 uCount = pShape->streamInfo_count;
 	const int maxElements = 15;
-	// FIXME: Remove hardocding
+	// FIXME: Remove hardcoding
+
+	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
 
 	EffectHndl effects[usg::exchange::_Material_RenderPass_count];
+	EffectHndl instanceEffects[usg::exchange::_Material_RenderPass_count];
 
 	for(uint32 i=0; i<usg::exchange::_Material_RenderPass_count; i++)
 	{
 		// For quicker turn around allow effects that don't support shadowing etc
 		if (pMaterial->renderPasses[i].effectName[0] != '\0')
 		{
-			effects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[i].effectName);
+			usg::string effectName = pMaterial->renderPasses[i].effectName;
+			effects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, effectName.c_str());
 			if (effects[i])
 			{
 				m_meshArray[m_uMeshCount].renderSets[i].effectRuntime.Init(pDevice, effects[i]->GetCustomEffect());
+			}
+			if(!bAnimated)
+			{
+				effectName += ".instance";
+				instanceEffects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, effectName.c_str());
 			}
 		}
 	}
@@ -442,8 +451,6 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	PipelineStateDecl pipelineState;
 	pipelineState.ePrimType = PT_TRIANGLES;
 
-
-	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
 
 	ASSERT(uCount <= maxElements);
 
@@ -526,6 +533,12 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 		pipelineState.alphaState.uColorTargets = 2;
 		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
+
+		if (instanceEffects[usg::exchange::Material_RenderPass_DEFAULT])
+		{
+			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_DEFAULT];
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline = pipelineState;
+		}
 	}
 
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFERRED];
@@ -534,6 +547,12 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		pipelineState.alphaState.uColorTargets = 5;
 		InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEFERRED, pipelineState);
 		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
+
+		if (instanceEffects[usg::exchange::Material_RenderPass_DEFERRED])
+		{
+			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_DEFERRED];
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFERRED].pipeline = pipelineState;
+		}
 	}
 
 	pipelineState.alphaState.uColorTargets = 1;
@@ -555,6 +574,12 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		pipelineState.depthState.bDepthWrite = false;
 		InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_TRANSPARENT, pipelineState);
 		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
+
+		if (instanceEffects[usg::exchange::Material_RenderPass_TRANSPARENT])
+		{
+			pipelineState.pEffect = instanceEffects[usg::exchange::Material_RenderPass_TRANSPARENT];
+			m_meshArray[m_uMeshCount].renderSets[Mesh::RS_TRANSPARENT].pipeline = pipelineState;
+		}
 	}
 
 	
@@ -649,8 +674,23 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	{
 		CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial);
 	}
+
+	AddInstanceBufferInfo();
 }
 
+
+
+void ModelResource::AddInstanceBufferInfo()
+{
+	for (uint32 i = 0; i < Mesh::RS_COUNT; i++)
+	{
+		if(m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.pEffect)
+		{
+			uint32 uLoc = m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.uInputBindingCount++;
+			m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.inputBindings[uLoc].Init(g_instanceElements, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
+		}
+	}
+}
 
 void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshIndex, exchange::Shape* pShape, exchange::Material* pMaterial)
 {
@@ -683,7 +723,15 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	}
 
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEPTH, pipelineState);
+
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEPTH].pipeline = pipelineState;
+
+	if (!bAnimated)
+	{
+		usg::string instancePath = effectPath + ".instance";
+		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, instancePath.c_str());
+		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEPTH].instancedPipeline = pipelineState;
+	}
 
 	string omniDepthName = pMaterial->renderPasses[usg::exchange::Material_RenderPass_OMNI_DEPTH].effectName;
 
@@ -696,6 +744,13 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 	InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_OMNI_DEPTH, pipelineState);
 	m_meshArray[m_uMeshCount].renderSets[Mesh::RS_OMNI_DEPTH].pipeline = pipelineState;
 	  
+	if (!bAnimated)
+	{
+		usg::string instancePath = omniDepthName + ".instance";
+		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, instancePath.c_str());
+		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_OMNI_DEPTH].instancedPipeline = pipelineState;
+	}
+
 
 	// FIXME: Still using default effect for depth pass
 	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEFAULT].effectName);

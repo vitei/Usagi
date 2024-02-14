@@ -10,7 +10,7 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/Scene.h"
+#include "Engine/Scene/Model/ModelInstanceRenderer.h"
  
 
 namespace usg {
@@ -20,17 +20,17 @@ void Model::RenderMesh::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId,
 {
 	if (passes.IsRenderPassDeferred(*this))
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFERRED].pipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_DEFERRED));
 		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFERRED].singleVerts);
 	}
 	else if (passes.IsRenderPassTranslucent(*this))
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_TRANSPARENT].pipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_TRANSPARENT));
 		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_TRANSPARENT].singleVerts);
 	}
 	else
 	{
-		m_pipelineState = pDevice->GetPipelineState(renderPass, m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFAULT].pipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_DEFAULT));
 		SetVertexBuffer(1, &m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFAULT].singleVerts);
 	}
 }
@@ -41,6 +41,10 @@ Model::RenderMesh::RenderMesh() : RenderNodeEx()
 	m_uReqOverrides = 0;
 	m_bCanHaveShadow = false;
 	m_pMeshResource = nullptr;
+	m_pBone = nullptr;
+	m_bInstanced = false;
+	m_bDepth = false;
+	m_uInstanceId = USG_INVALID_ID64;
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
 	{
 		m_pOverridesConstants[i] = NULL;
@@ -54,12 +58,35 @@ Model::RenderMesh::~RenderMesh()
 
 }
 
-void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
+void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth, bool bInstanced)
 {
+	if (bInstanced && pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING)
+	{
+		bInstanced = false;
+
+	}
+	m_bInstanced = bInstanced;
+	m_bDepth = bDepth;
 	m_pMeshResource = pMesh;
 	const char* pszName = pModel->GetResource()->GetName().c_str();
 	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
+
+	m_bInstanced = bInstanced;
+	if (bInstanced)
+	{
+		usg::string matName = pMesh->matName;
+		if (bDepth)
+		{
+			matName += "_depth";
+		}
+		uint64 uModelCRC = utl::CRC32(pModel->GetName().c_str());
+		uint64 uMeshCRC = utl::CRC32(matName.c_str());
+
+		m_uInstanceId = uModelCRC << uint64(32) | uMeshCRC;
+
+		m_pBone = pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex);
+	}
 
 	SetAnimated(pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING);
 
@@ -97,32 +124,34 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		// FIXME: This is only valid for shadow render passes, need another pipeline for scene pre depth passes
 		renderPass = pScene->GetShadowRenderPass();
 
-		m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEPTH].pipeline);
+		m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_DEPTH));
 		SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEPTH].singleVerts);
 	}
 	else
 	{
 		if (pScene->GetRenderPasses(0).IsRenderPassDeferred(*this))
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEFERRED].pipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_DEFERRED));
 			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEFERRED].singleVerts);
 		}
 		else if (pScene->GetRenderPasses(0).IsRenderPassTranslucent(*this))
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_TRANSPARENT].pipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_TRANSPARENT));
 			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_TRANSPARENT].singleVerts);
 		}
 		else
 		{
-			m_pipelineState = pDevice->GetPipelineState(renderPass, pMesh->renderSets[ModelResource::Mesh::RS_DEFAULT].pipeline);
+			m_pipelineState = pDevice->GetPipelineState(renderPass, GetPipelineState(ModelResource::Mesh::RS_DEFAULT));
 			SetVertexBuffer(1, &pMesh->renderSets[ModelResource::Mesh::RS_DEFAULT].singleVerts);
 		}
 	}
 
 	// FIXME: Single verts for omni depth!
-	if (pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline.pEffect)
+
+	const PipelineStateDecl& omniDecl = GetPipelineState(ModelResource::Mesh::RS_OMNI_DEPTH);
+	if (omniDecl.pEffect)
 	{
-		m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), pMesh->renderSets[ModelResource::Mesh::RS_OMNI_DEPTH].pipeline);
+		m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), omniDecl);
 	}
 
 	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
@@ -169,6 +198,29 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.UpdateDescriptors(pDevice);
 }
 
+
+
+InstancedRenderer* Model::RenderMesh::CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene)
+{
+	ModelInstanceRenderer* pInstance = vnew(ALLOC_OBJECT)ModelInstanceRenderer;
+	pInstance->Init(pDevice, pScene, m_uInstanceId, m_pMeshResource, m_bDepth);
+
+	return pInstance;
+}
+
+
+const PipelineStateDecl& Model::RenderMesh::GetPipelineState(ModelResource::Mesh::ERenderState eRenderState)
+{
+	if (m_bInstanced)
+	{
+		return m_pMeshResource->renderSets[eRenderState].instancedPipeline;
+	}
+	else
+	{
+		return m_pMeshResource->renderSets[eRenderState].pipeline;
+	}
+}
+
 void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
@@ -179,6 +231,17 @@ void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
 		}
 	}
 	Inherited::Cleanup(pDevice);
+}
+
+
+usg::Matrix4x4 Model::RenderMesh::GetInstanceTransform() const
+{
+	if (m_pBone)
+	{
+		return m_pBone->GetWorldMatrix();
+	}
+	ASSERT(false);
+	return usg::Matrix4x4::Identity();
 }
 
 void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)
