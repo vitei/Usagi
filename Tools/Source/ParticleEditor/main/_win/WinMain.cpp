@@ -85,6 +85,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		if (wparam < VK_RESERVED)
 		{
 			Input::GetPlatform().RegisterKeyStateChange((uint8)wparam, true);
+
+			if (wparam == VK_PRINT)
+			{
+				// Don't want the system grabbing this
+				return 0;
+			}
 		}
 	}
 	break;
