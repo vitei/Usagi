@@ -70,6 +70,10 @@ public:
 	void AddTextureRotation(const char* szName, uint32 uTexId, float fRot, IdentifierType eNameType = IDENTIFIER_MATERIAL);
 
 	class RenderMesh;
+	class InstanceDrawer;
+	class InstanceMesh;
+	class ModelNodeBase;
+
 	RenderMesh* GetRenderMesh(const char* szMaterailName);
 	RenderMesh* GetRenderMesh(uint32 uMeshId);
 	const RenderMesh* GetRenderMesh(uint32 uMeshId) const;
@@ -108,8 +112,8 @@ private:
 
 	ModelResHndl			m_pResource;
 	
-	RenderMesh**            m_meshArray;
-	RenderMesh**            m_depthMeshArray;
+	ModelNodeBase**         m_meshArray;
+	ModelNodeBase**         m_depthMeshArray;
 	Skeleton*				m_pSkeleton;
 
 	TransformNode*			m_pTransformNode;

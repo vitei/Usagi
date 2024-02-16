@@ -109,7 +109,7 @@ namespace usg
 		m_pOwner = pMgr;
 		m_scriptName = szScriptName;
 		m_bDynamicResize = bDynamicResize;
-
+		m_name = szScriptName;
 
 		if (pResource)
 		{

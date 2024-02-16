@@ -141,6 +141,8 @@ Effects:
         defines: CLIP_PLANE                
       - name: alphaTest.clip
         defines: ALPHA_TEST CLIP_PLANE 
+      - name: instance
+        defines: INSTANCED
       - name: alphaTest.instance
         defines: ALPHA_TEST INSTANCED
       - name: clip.instance

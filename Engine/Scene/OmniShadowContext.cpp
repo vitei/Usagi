@@ -51,6 +51,7 @@ void OmniShadowContext::InitDeviceData(GFXDevice* pDevice)
 
 void OmniShadowContext::Cleanup(GFXDevice* pDevice)
 {
+	Inherited::Cleanup(pDevice);
 	m_globalConstants.Cleanup(pDevice);
 	m_descriptorSet.Cleanup(pDevice);
 }
@@ -122,8 +123,9 @@ void OmniShadowContext::Update(GFXDevice* pDevice)
 				m_drawList.push_back(pNode);
 			}
 		}
-
 	}
+
+	ReplaceInstancedNodes(pDevice);
 }
 
 
@@ -137,7 +139,6 @@ void OmniShadowContext::DrawScene(GFXContext* pContext)
 	{
 		node->Draw(pContext, renderContext);
 	}
-
 	CacheDirtyInfo();
 }
 

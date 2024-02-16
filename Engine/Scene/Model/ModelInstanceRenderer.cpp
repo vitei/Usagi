@@ -11,7 +11,22 @@
 
 namespace usg {
 
-	ModelInstanceRenderer::ModelInstanceRenderer()
+
+	void ModelInstanceSet::Init(ModelInstanceRenderer* pOwner, uint32 uStartIndex, uint32 uCount)
+	{
+		m_pOwner = pOwner;
+		m_uStartIndex = uStartIndex;
+		m_uCount = uCount;
+	}
+	
+	bool ModelInstanceSet::Draw(GFXContext* pContext, RenderContext& renderContext)
+	{
+		m_pOwner->GetDrawer().InstanceDraw(pContext, renderContext, m_pOwner->GetInstanceBuffer(), m_uStartIndex, m_uCount);
+		return true;
+	}
+
+	ModelInstanceRenderer::ModelInstanceRenderer() : 
+		m_groups(30, true, false)
 	{
 
 	}
@@ -25,7 +40,7 @@ namespace usg {
 	{
 		ASSERT(pMesh->primitive.eSkinningMode == exchange::SkinningType_NO_SKINNING);
 
-		m_mesh.Init(pDevice, pScene, pMesh, nullptr, bDepth, true);
+		m_mesh.Init(pDevice, pScene, pMesh, nullptr, bDepth);
 	}
 		
 	uint64 ModelInstanceRenderer::GetInstanceId()
@@ -40,46 +55,36 @@ namespace usg {
 	}
 
 
-	void ModelInstanceRenderer::FinishGroup()
+	RenderNode* ModelInstanceRenderer::EndBatch()
 	{
-		if(m_uActiveDrawId != USG_INVALID_ID)
+		memsize uCount = m_instanceData.size() - m_uStartIndex;
+		if(uCount > 0)
 		{
-			DrawGroup group;
-			group.uStartIndex = m_uStartIndex;
-			group.uCount = (uint32)m_instanceData.size() - m_uStartIndex;
+			usg::ModelInstanceSet* pSet = m_groups.Alloc();
+			pSet->Init(this, (uint32)m_uStartIndex, (uint32)uCount);
 
-			m_groups[m_uActiveDrawId] = group;
+			m_uStartIndex = m_instanceData.size();
 
-			m_uStartIndex = (uint32)m_instanceData.size();
+			return pSet;
 		}
+		return nullptr;
 	}
 
-	void ModelInstanceRenderer::RenderNodes(RenderNode** ppNodes, uint32 uCount, uint32 uDrawId)
+	void ModelInstanceRenderer::AddNode(RenderNode* pNode)
 	{
-		if (uDrawId != m_uActiveDrawId)
-		{
-			FinishGroup();
-		}
-		ASSERT(m_groups.find(uDrawId) == m_groups.end());
-
-		for(uint32 i=0; i<uCount; i++)
-		{
-			Model::RenderMesh* pMesh = (Model::RenderMesh*)(ppNodes[i]);
-			m_instanceData.push_back( pMesh->GetInstanceTransform() );		
-		}
-
+		Model::InstanceMesh* pMesh = (Model::InstanceMesh*)(pNode);
+		m_instanceData.push_back( pMesh->GetInstanceTransform() );		
+	
 	}
 
 	void ModelInstanceRenderer::PreDraw(GFXDevice* pDevice)
 	{
-		FinishGroup();
-
 		if (m_instanceData.size() > 0)
 		{
 			if (m_instanceData.size() > m_instanceBuffer.GetCount())
 			{
 				m_instanceBuffer.Cleanup(pDevice);
-				m_instanceBuffer.Init(pDevice, nullptr, sizeof(Matrix4x3), (uint32)Math::Roundup(m_instanceData.size(), 32), "ModelInstance");
+				m_instanceBuffer.Init(pDevice, nullptr, sizeof(Matrix4x3), (uint32)Math::Roundup(m_instanceData.size(), 32), "ModelInstance", GPU_USAGE_DYNAMIC);
 			}
 			m_instanceBuffer.SetContents(pDevice, m_instanceData.data(), (uint32)m_instanceData.size());
 		}
@@ -89,8 +94,13 @@ namespace usg {
 	void ModelInstanceRenderer::DrawFinished()
 	{
 		m_uStartIndex = 0;
-		m_instanceData.empty();
-		m_groups.empty();
+		m_instanceData.clear();
+		m_groups.Clear();
+	}
+
+	void ModelInstanceRenderer::Cleanup(GFXDevice* pDevice)
+	{
+		m_instanceBuffer.Cleanup(pDevice);
 	}
 
 }

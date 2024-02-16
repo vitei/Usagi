@@ -55,8 +55,10 @@ public:
 	void DrawScene(GFXContext* pContext);
 	void SetShadowColor(usg::Color& color);
 
-
 private:
+
+	void ReplaceInstancedNodes(usg::GFXDevice* pDevice, uint32 uLayer);
+
 	enum
 	{
 		MAX_FOGS = 1

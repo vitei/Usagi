@@ -51,19 +51,23 @@ void RenderNode::SetLayer(RenderLayer eLayer)
 	}
 }
 
-void RenderNode::SetMaterialCmpVal(const PipelineStateHndl& hndl , const Texture* pTexture0)
+void RenderNode::SetMaterialCmpVal(const EffectHndl& hndl, const Texture* pTexture0)
 {
-	uint64 uMask = (COMPARISON_SHIFT_TEXTURE|COMPARISON_MASK_EFFECT);
+	uint64 uMask = (COMPARISON_SHIFT_TEXTURE | COMPARISON_MASK_EFFECT);
 	m_uComparisonVal &= ~uMask;
 
-	uint64 uEffectValue = (uint64)hndl.GetContents()->GetEffect().get();
+	uint64 uEffectValue = (uint64)hndl.get();
 	uEffectValue = (uEffectValue << COMPARISON_SHIFT_EFFECT) & COMPARISON_MASK_EFFECT;
 
 	uint64 uTextureValue = pTexture0 ? (pTexture0->GetId() % uMaxTextureValues) : 0;
-	uTextureValue = (uTextureValue << COMPARISON_SHIFT_TEXTURE) & COMPARISON_MASK_TEXTURE;	
+	uTextureValue = (uTextureValue << COMPARISON_SHIFT_TEXTURE) & COMPARISON_MASK_TEXTURE;
 
-	m_uComparisonVal |= ((uTextureValue|uEffectValue)&(COMPARISON_MASK_TEXTURE|COMPARISON_MASK_EFFECT));
+	m_uComparisonVal |= ((uTextureValue | uEffectValue) & (COMPARISON_MASK_TEXTURE | COMPARISON_MASK_EFFECT));
+}
 
+void RenderNode::SetMaterialCmpVal(const PipelineStateHndl& hndl , const Texture* pTexture0)
+{
+	SetMaterialCmpVal(hndl.GetContents()->GetEffect(), pTexture0);
 }
 
 void RenderNode::SetPriorityCmpValue()

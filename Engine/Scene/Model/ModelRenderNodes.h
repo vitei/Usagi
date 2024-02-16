@@ -16,7 +16,30 @@
 
 namespace usg {
 
-	class RenderNodeEx : public RenderNode
+	class Model::ModelNodeBase : public RenderNode
+	{
+	public:
+		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth) { }
+		virtual void Cleanup(GFXDevice* pDevice) { }
+		virtual class Model::RenderMesh* AsRenderMesh() { return nullptr; };
+		virtual class Model::InstanceMesh* AsInstanceMesh() { return nullptr; };
+		uint8 GetLod() { return m_uLod; }
+
+		void SetRenderMaskWithShadowCheck(uint32 uMask)
+		{
+			if (!m_bCanHaveShadow)
+			{
+				uMask &= ~RenderMask::RENDER_MASK_SHADOW_CAST;
+			}
+			SetRenderMaskIncShadow(uMask);
+		}
+
+	protected:
+		uint8 m_uLod = false;
+		bool m_bCanHaveShadow = false;
+	};
+
+	class RenderNodeEx : public Model::ModelNodeBase
 	{
 	public:
 		RenderNodeEx()
@@ -100,7 +123,8 @@ namespace usg {
 		RenderMesh();
 		virtual ~RenderMesh();
 
-		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth, bool bInstanced = false);
+		// An instanced version should only be created by the model manager
+		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth) override;
 		virtual void Cleanup(GFXDevice* pDevice);
 
 
@@ -112,20 +136,17 @@ namespace usg {
 		// Update the animations and UV co-ordinates
 		virtual void VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTransformOffset);
 		virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
-		virtual uint64 GetInstanceId() const override { return m_uInstanceId; }
-		virtual InstancedRenderer* CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene) override;
 
 
 		bool SetScale(float fScale, CustomEffectRuntime& customFX);
-		uint8 GetLod() { return m_uLod; }
-		void SetRenderMaskWithShadowCheck(uint32 uMask);
 
 		virtual void RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes) override;
 
-		usg::Matrix4x4 GetInstanceTransform() const;
+		virtual class Model::RenderMesh* AsRenderMesh() { return this; };
 
 	protected:
-		const PipelineStateDecl& GetPipelineState(ModelResource::Mesh::ERenderState eRenderState);
+		virtual const PipelineStateDecl& GetPipelineState(ModelResource::Mesh::ERenderState eRenderState);
+		virtual DescriptorSetLayoutHndl GetDescriptorHndl();
 
 		enum 
 		{
@@ -135,18 +156,42 @@ namespace usg {
 		};
 
 		const ModelResource::Mesh*	m_pMeshResource;
-		const Bone*					m_pBone;
 		UVMapper					m_uVMapper[ModelResource::Mesh::MAX_UV_STAGES];
 		ConstantSet*				m_pOverridesConstants[OVERRIDE_COUNT];
 		usg::string					m_name;
 		uint8						m_uOverrides;
 		uint8						m_uReqOverrides;
-		bool						m_bCanHaveShadow;
-		uint64						m_uInstanceId;
 		bool						m_bInstanced;
 		bool						m_bDepth;
+	};
 
-		uint8						m_uLod;
+
+	class Model::InstanceDrawer : public Model::RenderMesh
+	{
+	public:
+		bool InstanceDraw(GFXContext* pContext, RenderContext& renderContext, usg::VertexBuffer& instanceBuffer, uint32 uOffset, uint32 uCount);
+	protected:
+		virtual const PipelineStateDecl& GetPipelineState(ModelResource::Mesh::ERenderState eRenderState);
+		virtual DescriptorSetLayoutHndl GetDescriptorHndl();
+
+	};
+
+	class Model::InstanceMesh : public Model::ModelNodeBase
+	{
+	public:
+		virtual void Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth);
+		virtual uint64 GetInstanceId() const override { return m_uInstanceId; }
+		virtual InstancedRenderer* CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene) override;
+		virtual usg::Matrix4x4 GetInstanceTransform() const;
+		
+		virtual class Model::InstanceMesh* AsInstanceMesh() { return this; };
+	private:
+		
+		const ModelResource::Mesh*	m_pMeshResource = nullptr;
+		const Bone*					m_pBone = nullptr;
+		bool						m_bDepth = false;
+		uint64						m_uInstanceId = USG_INVALID_ID64;
+
 	};
 
 

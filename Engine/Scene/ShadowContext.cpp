@@ -49,6 +49,7 @@ void ShadowContext::InitDeviceData(GFXDevice* pDevice)
 
 void ShadowContext::Cleanup(GFXDevice* pDevice)
 {
+	Inherited::Cleanup(pDevice);
 	m_globalConstants.Cleanup(pDevice);
 	m_descriptorSet.Cleanup(pDevice);
 }
@@ -100,6 +101,8 @@ void ShadowContext::Update(GFXDevice* pDevice)
 		}
 	}
 
+	ReplaceInstancedNodes(pDevice);
+
 }
 
 
@@ -115,6 +118,7 @@ void ShadowContext::DrawScene(GFXContext* pContext)
 		node->Draw(pContext, renderContext);
 	}
 	CacheDirtyInfo();
+
 }
 
 usg::Matrix4x4 ShadowContext::GetLightMat() const

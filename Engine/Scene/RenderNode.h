@@ -76,6 +76,8 @@ public:
 	bool HasShadow() { return m_bHasShadow; }
 
 	void SetMaterialCmpVal(const PipelineStateHndl& hndl , const Texture* pTexture0);
+	void SetMaterialCmpVal(const EffectHndl& hndl, const Texture* pTexture0);
+
 
 	const RenderGroup* GetParent() const { return m_pParent; }
 

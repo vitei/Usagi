@@ -54,6 +54,7 @@ public:
 	void Init(GFXDevice* pDevice, const void* const pVerts, uint32 uVertSize, uint32 uVertCount, const char* pszName, GPUUsage eUsage = GPU_USAGE_STATIC, GPULocation eLocation = GPU_LOCATION_FASTMEM);
 	void Cleanup(GFXDevice* pDevice);
 	uint32 GetCount() const { return m_uVertCount; }
+	uint32 GetVertSize() const { return m_uVertSize; }
 	// Specify zero to copy the entire buffer
 	void SetContents(GFXDevice* pDevice, const void* const pData, uint32 uVertCount = 0);
 	void LockData(GFXDevice* pDevice, uint32 uVertCount, Lock& lockOut);

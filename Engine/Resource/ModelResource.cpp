@@ -38,7 +38,7 @@ static uint32 g_uAttribId[usg::exchange::_VertexAttribute_count] =
 static const VertexElement g_instanceElements[]  =
 {
 	{
-		12,				// uAttribId
+		11,				// uAttribId
 		0,				// uOffset
 		VE_FLOAT,		// eType;
 		12,				// uCount;
@@ -258,7 +258,7 @@ void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, ui
 
 }
 
-DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange::Material* pMaterial, bool bAnimated)
+DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange::Material* pMaterial, bool bAnimated, bool bInstance)
 {
 	uint32 uIndex = 0;
 	DescriptorDeclaration decl[exchange::Material_Constant_TEXTURE_NUM + 6];
@@ -277,11 +277,14 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 
 	if(!bAnimated)
 	{
-		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC;
-		decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
-		decl[uIndex].uCount = 1;
-		decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_0;
-		uIndex++;
+		if(!bInstance)
+		{
+			decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC;
+			decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
+			decl[uIndex].uCount = 1;
+			decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_0;
+			uIndex++;
+		}
 	}
 	else
 	{
@@ -448,6 +451,8 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		}
 	}
 
+	m_meshArray[m_uMeshCount].bCanInstance = !bAnimated;
+
 	PipelineStateDecl pipelineState;
 	pipelineState.ePrimType = PT_TRIANGLES;
 
@@ -466,12 +471,20 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		}
 	}
 
-	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated);
+	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated, false);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineState.layout.descriptorSets[1] = matDescriptors;
 	pipelineState.layout.uDescriptorSetCount = 2;
 
 	m_meshArray[m_uMeshCount].defaultPipelineDescLayout = matDescriptors;
+
+	DescriptorSetLayoutHndl instanceDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated, true);
+	pipelineState.layout.descriptorSets[1] = instanceDescriptors;
+	m_meshArray[m_uMeshCount].instancePipelineDescLayout = instanceDescriptors;
+
+
+	pipelineState.layout.descriptorSets[1] = matDescriptors;
+
 
 	GPULocation eGPULocation = bFastMem ? GPU_LOCATION_FASTMEM : GPU_LOCATION_STANDARD;
 	GPULocation eVertGPULocation = GPU_LOCATION_FASTMEM;
@@ -688,6 +701,13 @@ void ModelResource::AddInstanceBufferInfo()
 		{
 			uint32 uLoc = m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.uInputBindingCount++;
 			m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.inputBindings[uLoc].Init(g_instanceElements, 1, usg::VERTEX_INPUT_RATE_INSTANCE, 1);
+
+			m_meshArray[m_uMeshCount].renderSets[i].instancedPipeline.layout.descriptorSets[1] = m_meshArray[m_uMeshCount].instancePipelineDescLayout;
+
+		}
+		else if (m_meshArray[m_uMeshCount].renderSets[i].pipeline.pEffect)
+		{
+			m_meshArray[m_uMeshCount].bCanInstance = false;
 		}
 	}
 }
@@ -750,25 +770,6 @@ void ModelResource::CreateDepthPassMaterial(GFXDevice* pDevice, uint32 uMeshInde
 		pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, instancePath.c_str());
 		m_meshArray[m_uMeshCount].renderSets[Mesh::RS_OMNI_DEPTH].instancedPipeline = pipelineState;
 	}
-
-
-	// FIXME: Still using default effect for depth pass
-	pipelineState.pEffect = ResourceMgr::Inst()->GetEffect(pDevice, pMaterial->renderPasses[usg::exchange::Material_RenderPass_DEFAULT].effectName);
-	pipelineState = m_meshArray[m_uMeshCount].renderSets[Mesh::RS_DEFAULT].pipeline;
-	alphaDecl.bBlendEnable = true;
-	alphaDecl.uColorMask[0] = uRenderMask;
-	alphaDecl.eAlphaTest = usg::ALPHA_TEST_ALWAYS;
-	alphaDecl.blendEq = usg::BLEND_EQUATION_ADD;
-	alphaDecl.srcBlend = usg::BLEND_FUNC_CONSTANT_COLOR;
-	alphaDecl.dstBlend = usg::BLEND_FUNC_ONE_MINUS_CONSTANT_COLOR;
-
-	// Initialize the depth stencil states needed to test against this stencil write
-	depthPassP.bDepthEnable = true;
-	depthPassP.bStencilEnable = false;
-	depthPassP.bDepthWrite = false;
-
-	depthPassP.eStencilTest = usg::STENCIL_TEST_ALWAYS;
-	depthPassP.eDepthFunc = usg::DEPTH_TEST_EQUAL;
 }
 
 float ModelResource::GetStreamScaling(const usg::exchange::VertexStreamInfo* pInfo, uint32 uCount, usg::exchange::VertexAttribute eType)

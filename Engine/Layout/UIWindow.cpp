@@ -67,6 +67,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 
 		m_runtimeEffect.Init(pDevice, effect->GetCustomEffect());
 		const usg::CustomEffectResHndl& runtimeRes = m_runtimeEffect.GetResource();
+		m_runtimeEffect.GPUUpdate(pDevice);
 
 		const ImageDef* pHudItems = windowDef.imageItems;
 		const ButtonInstanceDef* pButtons = windowDef.buttonItems;

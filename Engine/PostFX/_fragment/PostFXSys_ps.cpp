@@ -30,9 +30,9 @@ inline int CompareNodes(const void* a, const void* b)
 	if (arg1->GetLayer() > arg2->GetLayer()) return 1;
 	if (arg1->GetLayer() == arg2->GetLayer())
 	{
-		if( arg1->GetPriority() > arg2->GetPriority())
+		if( arg1->GetComparisonValue() > arg2->GetComparisonValue())
 			return 1;
-		if (arg1->GetPriority() < arg2->GetPriority())
+		if (arg1->GetComparisonValue() < arg2->GetComparisonValue())
 			return -1;
 
 		return 0;

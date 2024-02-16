@@ -74,6 +74,8 @@ namespace usg{
 
 
 		DescriptorSetLayoutHndl	defaultPipelineDescLayout;
+		DescriptorSetLayoutHndl	instancePipelineDescLayout;
+
 		usg::string				name;
 		usg::string				matName;
 
@@ -82,6 +84,7 @@ namespace usg{
 		TextureCoordInfo		uvMapping[MAX_UV_STAGES];
 		uint32					uUVCount;
 		bool					bCanFade;
+		bool					bCanInstance;
 
 		uint32					singleAttributesNum;
 		Vector4f				singleAttributeValues[exchange::Shape::singleAttributes_max_count];

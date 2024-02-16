@@ -390,12 +390,12 @@ namespace usg {
 	}
 
 
-	void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot)
+	void GFXContext_ps::SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot, uint32 uVertOffset)
 	{
 		// TODO: Change the interface so we are setting them all at once
 		const VertexBuffer_ps& vbPS = pBuffer->GetPlatform();
 		const VkBuffer buffers[] = { vbPS.GetBuffer() };
-		VkDeviceSize offset = 0;
+		VkDeviceSize offset = uVertOffset * pBuffer->GetVertSize();
 		vkCmdBindVertexBuffers(m_cmdBuff, uSlot, 1, buffers, &offset);
 	}
 

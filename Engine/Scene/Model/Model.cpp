@@ -95,14 +95,23 @@ bool Model::Load( GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr, const
 	ASSERT(!m_pResource->IsInstanceModel());
 
 	m_uMeshCount = m_pResource->GetMeshCount();
-	m_meshArray = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh*[m_pResource->GetMeshCount()];
-	m_depthMeshArray = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh*[m_pResource->GetMeshCount()];
+	m_meshArray = vnew(usg::ALLOC_GEOMETRY_DATA) ModelNodeBase*[m_pResource->GetMeshCount()];
+	m_depthMeshArray = vnew(usg::ALLOC_GEOMETRY_DATA) ModelNodeBase*[m_pResource->GetMeshCount()];
 	for (uint32 i = 0; i < m_pResource->GetMeshCount(); i++)
 	{
 		// TODO: Add depth specific variants of the render nodes
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
-		m_meshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh;
-		m_depthMeshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh;
+		 
+		if (!m_bDynamic && pMesh->bCanInstance)
+		{
+			m_meshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) InstanceMesh;
+			m_depthMeshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) InstanceMesh;
+		}
+		else
+		{
+			m_meshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh;
+			m_depthMeshArray[i] = vnew(usg::ALLOC_GEOMETRY_DATA) RenderMesh;
+		}		
 	}
 
 	m_pSkeleton = vnew(usg::ALLOC_GEOMETRY_DATA) Skeleton;
@@ -211,7 +220,12 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 	for (uint32 i = 0; i < m_pResource->GetMeshCount(); i++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
-		DescriptorSet& descSet = m_meshArray[i]->GetDescriptorSet();
+		RenderMesh* pRenderMesh = GetRenderMesh(i);
+
+		if(!pRenderMesh)
+			continue;
+
+		DescriptorSet& descSet = pRenderMesh->GetDescriptorSet();
 		// FIXME: Use the correct indicies
 		uint32 uFirstValid = 0;
 		for (uint32 i = 0; i < ModelResource::Mesh::RS_COUNT; i++)
@@ -243,14 +257,19 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 			}
 		}
 		usg::Color white(1.0f, 1.0f, 1.0f, 1.0f);
-		m_meshArray[i]->SetBlendColor(white);
+		pRenderMesh->SetBlendColor(white);
 		//m_meshArray[i]->SetPipelineState(pDevice->GetPipelineState(m_pScene->GetRenderPasses(0).GetRenderPass(*m_meshArray[i]), pMesh->pipelines.defaultPipeline));
 		m_fScale = 1.0f;
-		m_meshArray[i]->ResetOverrides();
-		m_meshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
+		pRenderMesh->ResetOverrides();
+		pRenderMesh->GetDescriptorSet().UpdateDescriptors(pDevice);
 		if (m_depthMeshArray)
 		{
-			DescriptorSet& depthDesc = m_depthMeshArray[i]->GetDescriptorSet();
+			RenderMesh* pDepth = m_depthMeshArray[i]->AsRenderMesh();
+
+			if(!pDepth)
+				continue;
+
+			DescriptorSet& depthDesc = pDepth->GetDescriptorSet();
 
 			if (depthDesc.GetValid())
 			{
@@ -267,8 +286,8 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 
 				depthDesc.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 
-				m_depthMeshArray[i]->ResetOverrides();
-				m_depthMeshArray[i]->GetDescriptorSet().UpdateDescriptors(pDevice);
+				pDepth->ResetOverrides();
+				pDepth->GetDescriptorSet().UpdateDescriptors(pDevice);
 			}
 		}
 	}
@@ -349,23 +368,25 @@ void Model::InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 i)
 		// Copy the override constant sets (only doing material, not lighting atm)
 		m_pOverrideMaterials[i].customFX.Init(pDevice, &pMesh->renderSets[uFirstValid].effectRuntime);
 		m_pOverrideMaterials[i].customFX.GPUUpdate(pDevice);
+		
+		RenderMesh* pRenderMesh = GetRenderMesh(i);
 
 		// Add the UV sets to the model for updating of the texture matrices
 		for (uint32 uUVSet = 0; uUVSet < pMesh->uUVCount; uUVSet++)
 		{
 			// FIXME: Remove the inheritance as all these allocations are wasteful
 			const ModelResource::TextureCoordInfo* pUVInfo = &pMesh->uvMapping[uUVSet];
-			UVMapper* pMapper = m_meshArray[i]->GetUVMapper(uUVSet);
+			UVMapper* pMapper = pRenderMesh->GetUVMapper(uUVSet);
 			pMapper->Init(uUVSet, pUVInfo->method, &m_pOverrideMaterials[i].customFX, pUVInfo->translate, pUVInfo->scale, pUVInfo->rotate);
 			pMapper->Update();
 		}
 
-		m_meshArray[i]->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
-		m_meshArray[i]->SetOverrideConstant(1, m_pOverrideMaterials[i].customFX.GetConstantSet(1));
+		pRenderMesh->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
+		pRenderMesh->SetOverrideConstant(1, m_pOverrideMaterials[i].customFX.GetConstantSet(1));
 
 		if (m_depthMeshArray)
 		{
-			m_depthMeshArray[i]->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
+			m_depthMeshArray[i]->AsRenderMesh()->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
 		}
 	}
 }
@@ -519,7 +540,7 @@ Model::RenderMesh* Model::GetRenderMesh(const char* szMaterialName)
 	{
 		if(m_pResource->GetMesh(uMesh)->matName == matNameU8)
 		{
-			return m_meshArray[uMesh];
+			return m_meshArray[uMesh]->AsRenderMesh();
 		}
 	}
 	return NULL;
@@ -529,7 +550,7 @@ const Model::RenderMesh* Model::GetRenderMesh(uint32 uMeshId) const
 {
 	ASSERT(uMeshId < m_pResource->GetMeshCount());
 
-	return m_meshArray[uMeshId];
+	return m_meshArray[uMeshId]->AsRenderMesh();
 
 }
 
@@ -537,7 +558,7 @@ Model::RenderMesh* Model::GetRenderMesh(uint32 uMeshId)
 {
 	ASSERT(uMeshId < m_pResource->GetMeshCount());
 
-	return m_meshArray[uMeshId];
+	return m_meshArray[uMeshId]->AsRenderMesh();
 
 }
 
@@ -555,7 +576,7 @@ void Model::SetTextureTranslate(const char* szName, uint32 uTexId, float fX, flo
 		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
-			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
+			UVMapper* pMapper = GetRenderMesh(uMesh)->GetUVMapper(uTexId);
 			if(pMapper)
 			{
 				Vector2f vTrans(fX, fY);
@@ -578,11 +599,11 @@ void Model::SetScale(float fScale)
 
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
-		m_meshArray[uMesh]->SetScale(fScale, m_pOverrideMaterials[uMesh].customFX);
-		m_meshArray[uMesh]->RequestOverride(0);
+		GetRenderMesh(uMesh)->SetScale(fScale, m_pOverrideMaterials[uMesh].customFX);
+		GetRenderMesh(uMesh)->RequestOverride(0);
 		if (m_depthMeshArray)
 		{
-			m_depthMeshArray[uMesh]->RequestOverride(0);
+			m_depthMeshArray[uMesh]->AsRenderMesh()->RequestOverride(0);
 		}
 	}
 	m_fScale = fScale;
@@ -616,7 +637,7 @@ void Model::AddTextureTranslate(const char* szName, uint32 uTexId, float fX, flo
 		const usg::string& cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
-			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
+			UVMapper* pMapper = GetRenderMesh(uMesh)->GetUVMapper(uTexId);
 			if(pMapper)
 			{
 				Vector2f vTrans(fX, fY);
@@ -637,7 +658,7 @@ void Model::SetTextureScale( const char* szName, uint32 uTexId, float fX, float 
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh( uMesh );
 		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if( matNameU8.length() == 0 || cmpName == matNameU8 ) {
-			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper( uTexId );
+			UVMapper* pMapper = GetRenderMesh(uMesh)->GetUVMapper( uTexId );
 			if( pMapper ) {
 				Vector2f scale( fX, fY );
 				pMapper->SetScale( scale );
@@ -657,7 +678,7 @@ void Model::AddTextureRotation( const char* szName, uint32 uTexId, float fRot, I
 		const usg::string&cmpName = eNameType == IDENTIFIER_MESH ? pMesh->name : pMesh->matName;
 		if(matNameU8.length() == 0 || cmpName == matNameU8)
 		{
-			UVMapper* pMapper = m_meshArray[uMesh]->GetUVMapper(uTexId);
+			UVMapper* pMapper = GetRenderMesh(uMesh)->GetUVMapper(uTexId);
 			if(pMapper)
 			{
 				pMapper->SetUVRotation(fRot + pMapper->GetUVRotation());
@@ -680,7 +701,7 @@ bool Model::OverrideTexture(const char* szTextureName, TextureHndl pOverrideTex)
 	for(uint32 uMesh=0; uMesh<m_pResource->GetMeshCount(); uMesh++)
 	{
 		const ModelResource::Mesh* pSrcMesh = m_pResource->GetMesh(uMesh);
-		DescriptorSet* pMaterial = &m_meshArray[uMesh]->GetDescriptorSet();
+		DescriptorSet* pMaterial = &GetRenderMesh(uMesh)->GetDescriptorSet();
 		for(uint32 uTex = 0; uTex < ModelResource::Mesh::MAX_UV_STAGES; uTex++)
 		{
 			TextureHndl pOrigTex = pSrcMesh->pTextures[uTex];
@@ -742,7 +763,7 @@ void Model::UpdateDescriptors(GFXDevice* pDevice)
 {
 	for (uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++)
 	{
-		DescriptorSet& desc = m_meshArray[uMesh]->GetDescriptorSet();
+		DescriptorSet& desc = GetRenderMesh(uMesh)->GetDescriptorSet();
 		desc.UpdateDescriptors(pDevice);
 	}
 }
@@ -766,6 +787,8 @@ void Model::UpdateScaleBounds(float fScale)
 
 void Model::RestoreDefaultLayer()
 {
+	ASSERT(m_bDynamic);
+
 	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
 	{
 		const ModelResource::Mesh* pMesh = m_pResource->GetMesh(i);
@@ -775,6 +798,8 @@ void Model::RestoreDefaultLayer()
 
 void Model::SetLayer(usg::RenderLayer uLayer)
 {
+	ASSERT(m_bDynamic);
+
 	for(uint32 i=0; i<m_pResource->GetMeshCount(); i++)
 	{
 		m_meshArray[i]->SetLayer(uLayer);
@@ -897,8 +922,8 @@ void Model::SetFade(bool bFade, float fAlpha)
 
 UVMapper* Model::GetUVMapper(uint32 uMesh, uint32 uTexIndex)
 {
-	ASSERT(uMesh < m_pResource->GetMeshCount());
-	return m_meshArray[uMesh]->GetUVMapper(uTexIndex);
+	ASSERT(uMesh < m_pResource->GetMeshCount() && m_bDynamic);
+	return GetRenderMesh(uMesh)->GetUVMapper(uTexIndex);
 }
 
 void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex)
@@ -910,8 +935,8 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 		if (m_pOverrideMaterials[uMesh].customFX.SetVariable(szVarName, pData, uSize, 0))
 		{
 			// FIXME: Requesting override on both for now, should check which set it's owned by
-			m_meshArray[uMesh]->RequestOverride(0);
-			m_meshArray[uMesh]->RequestOverride(1);
+			GetRenderMesh(uMesh)->RequestOverride(0);
+			GetRenderMesh(uMesh)->RequestOverride(1);
 		}
 	}
 }

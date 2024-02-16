@@ -59,7 +59,7 @@ public:
 
 	GFXContext_ps&	GetPlatform()	{ return m_platform; }
 
-	void SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot);
+	void SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot = 0, uint32 uVertOffset = 0);
 	void DrawImmediate(uint32 uCount, uint32 uOffset = 0);
 	void DrawIndexed(const IndexBuffer* pBuffer);	
 	void DrawIndexedEx(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstanceCount = 1);
@@ -112,14 +112,14 @@ inline void GFXContext::ClearImage(const TextureHndl& texture, const Color& col)
 	m_platform.ClearImage(texture, col);
 }
 
-inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot=0)
+inline void GFXContext::SetVertexBuffer(const VertexBuffer* pBuffer, uint32 uSlot, uint32 uVertOffset)
 {
 #if !DISABLE_STATE_SHADOWING	
 	if(m_pActiveVBOs[uSlot] != pBuffer)
 #endif
 	{
 		ASSERT(m_pActiveBinding!=NULL);
-		m_platform.SetVertexBuffer(pBuffer, m_pActiveBinding, uSlot);
+		m_platform.SetVertexBuffer(pBuffer, m_pActiveBinding, uSlot, uVertOffset);
 		m_pActiveVBOs[uSlot] = pBuffer;
 	}
 }

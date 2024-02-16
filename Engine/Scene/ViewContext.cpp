@@ -6,8 +6,10 @@
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Scene/Camera/Camera.h"
+#include "Engine/Core/stl/hash_map.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Scene/RenderNode.h"
+#include "Engine/Scene/InstancedRenderer.h"
 #include "Engine/Debug/Rendering/Debug3D.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/SceneSearchObject.h"
@@ -112,6 +114,7 @@ namespace usg {
 		PostFXSys*				pPostFXSys;
 		ViewType				eActiveViewType;
 		LightingContext			lightingContext;
+		hash_map<uint64, InstancedRenderer*> instanceRenders;
 
 		// Arbitrarily assigning fog to the scene context
 		Fog						fog[MAX_FOGS];
@@ -173,6 +176,11 @@ namespace usg {
 	void ViewContext::Cleanup(GFXDevice* pDevice)
 	{
 		m_pImpl->lightingContext.Cleanup(pDevice);
+
+		for (auto itr : m_pImpl->instanceRenders)
+		{
+			itr.second->Cleanup(pDevice);
+		}
 
 		for (int i = 0; i < VIEW_COUNT; i++)
 		{
@@ -263,7 +271,7 @@ namespace usg {
 		return 0;
 	}
 
-	inline int CompareNodes(const void* a, const void* b)   // comparison function
+	inline int CompareOpaqueNodes(const void* a, const void* b)   // comparison function
 	{
 		const RenderNode* arg1 = *(const RenderNode**)(a);
 		const RenderNode* arg2 = *(const RenderNode**)(b);
@@ -294,6 +302,11 @@ namespace usg {
 		Vector4f vCameraPos = pCamera->GetPos();
 
 		Matrix4x4 mTmp;
+
+		for (auto itr : m_pImpl->instanceRenders)
+		{
+			itr.second->DrawFinished();
+		}
 
 		m_pImpl->lightingContext.Update(pDevice, this);
 
@@ -353,14 +366,14 @@ namespace usg {
 			if (m_pImpl->pPostFXSys)
 			{
 				globalData->fAspect = m_pImpl->pPostFXSys->GetInitialRT()->GetWidth() / (float)m_pImpl->pPostFXSys->GetInitialRT()->GetHeight();
-				globalData->vViewportDim = Vector2f( (float)m_pImpl->pPostFXSys->GetFinalTargetWidth(), (float)m_pImpl->pPostFXSys->GetFinalTargetHeight() );
+				globalData->vViewportDim = Vector2f((float)m_pImpl->pPostFXSys->GetFinalTargetWidth(), (float)m_pImpl->pPostFXSys->GetFinalTargetHeight());
 			}
 			else
 			{
 				globalData->fAspect = 1.0f;
 			}
 			Frustum frustum = pCamera->GetFrustum();
-			for(uint32 uPlane = 0; uPlane < 6; uPlane++)
+			for (uint32 uPlane = 0; uPlane < 6; uPlane++)
 			{
 				globalData->vFrustumPlanes[i] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
 			}
@@ -376,7 +389,7 @@ namespace usg {
 					m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(14, m_pImpl->pPostFXSys->GetLinearDepthTex(), m_pImpl->globalDescriptorsWithDepth[i].GetSamplerAtBinding(14));
 				}
 			}
-			
+
 			m_pImpl->globalDescriptors[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_pImpl->globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
 			m_pImpl->globalDescriptorsWithDepth[i].SetImageSamplerPairAtBinding(15, pScene->GetLightMgr().GetShadowCascadeImage(), m_pImpl->globalDescriptorsWithDepth[i].GetSamplerAtBinding(15));
 			m_pImpl->globalDescriptors[i].UpdateDescriptors(pDevice);
@@ -426,7 +439,7 @@ namespace usg {
 		// FIXME: This needs to be more intelligent, an insertion sort when adding/ removing a node
 		for (int uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
 		{
-			if(m_pImpl->pVisibleNodes[uLayer].size() == 0)
+			if (m_pImpl->pVisibleNodes[uLayer].size() == 0)
 				continue;
 
 			if (uLayer == RenderLayer::LAYER_TRANSLUCENT)
@@ -435,12 +448,74 @@ namespace usg {
 			}
 			else
 			{
-				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareNodes);
+ 				qsort(&m_pImpl->pVisibleNodes[uLayer][0], m_pImpl->pVisibleNodes[uLayer].size(), sizeof(RenderNode*), CompareOpaqueNodes);
 			}
+		}
+
+		for (int uLayer = 0; uLayer < RenderLayer::LAYER_COUNT; uLayer++)
+		{
+			ReplaceInstancedNodes(pDevice, uLayer);
+		}
+
+		for (auto itr : m_pImpl->instanceRenders)
+		{
+			itr.second->PreDraw(pDevice);
 		}
 
 		m_bFirstFrame = false;
 
+	}
+
+
+	void ViewContext::ReplaceInstancedNodes(usg::GFXDevice* pDevice, uint32 uLayer)
+	{
+		// Now look for instances and build a new list
+		vector<RenderNode*> adjustedNodes;
+		InstancedRenderer* pCurrentInstanceRenderer = nullptr;
+		uint64 uCurrentInstance = USG_INVALID_ID64;
+
+		for (auto itr : m_pImpl->pVisibleNodes[uLayer])
+		{
+			uint64 uInstanceId = itr->GetInstanceId();
+			if (pCurrentInstanceRenderer && uInstanceId != uCurrentInstance)
+			{
+				adjustedNodes.push_back(pCurrentInstanceRenderer->EndBatch());
+				pCurrentInstanceRenderer = nullptr;
+				uCurrentInstance = USG_INVALID_ID64;
+			}
+
+			if (uInstanceId == USG_INVALID_ID64)
+			{
+				adjustedNodes.push_back(itr);
+			}
+			else
+			{
+				if (uInstanceId == uCurrentInstance)
+				{
+					pCurrentInstanceRenderer->AddNode(itr);
+				}
+				else
+				{
+					if (m_pImpl->instanceRenders.find(uInstanceId) == m_pImpl->instanceRenders.end())
+					{
+						m_pImpl->instanceRenders[uInstanceId] = itr->CreateInstanceRenderer(pDevice, GetScene());
+						ASSERT(m_pImpl->instanceRenders[uInstanceId] != nullptr);
+					}
+					pCurrentInstanceRenderer = m_pImpl->instanceRenders[uInstanceId];
+					pCurrentInstanceRenderer->AddNode(itr);
+					uCurrentInstance = uInstanceId;
+				}
+			}
+		}
+
+		if (pCurrentInstanceRenderer)
+		{
+			adjustedNodes.push_back(pCurrentInstanceRenderer->EndBatch());
+			pCurrentInstanceRenderer = nullptr;
+			uCurrentInstance = USG_INVALID_ID64;
+		}
+
+		m_pImpl->pVisibleNodes[uLayer] = adjustedNodes;
 	}
 
 

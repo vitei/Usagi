@@ -55,7 +55,7 @@ public:
 	void ClearRenderTarget(RenderTarget* pRT, uint32 uFlags);
 	void ClearImage(const TextureHndl& texture, const Color& col);
 
-	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot);
+	void SetVertexBuffer(const VertexBuffer* pBuffer, const InputBinding* pBinding, uint32 uSlot, uint32 uVertOffset);
 	void DrawImmediate(uint32 uCount, uint32 uOffset);
 	void DrawIndexed(const IndexBuffer* pBuffer, uint32 uStartIndex, uint32 uIndexCount, uint32 uInstances);
 

@@ -39,7 +39,7 @@ public:
 	Display* GetDisplay(uint32 uIndex);
 	IHeadMountedDisplay* GetHMD();
 	uint32 GetValidDisplayCount() const { return m_uDisplayCount;  }
-	uint32 GetFrameCount() const { return m_uFrameCount; }
+	inline uint32 GetFrameCount() const { return m_uFrameCount; }
 
 	uint32 GetHardwareDisplayCount();
 	float GetGPUTime() const;

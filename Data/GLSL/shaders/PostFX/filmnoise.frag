@@ -23,7 +23,7 @@ void main(void)
    vec3 texColor = texture(sampler0, vo_vTexCoord).rgb;
 
     float zoom = 1.f/1024.f;//0.002;
-    float strength = 0.85f;
+    float strength = 1.0f;
     vec3 noiseUV = vec3(vo_vTexCoord * vResolution * zoom, fTime);
 
 #if 0

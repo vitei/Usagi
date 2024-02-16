@@ -41,10 +41,9 @@ Model::RenderMesh::RenderMesh() : RenderNodeEx()
 	m_uReqOverrides = 0;
 	m_bCanHaveShadow = false;
 	m_pMeshResource = nullptr;
-	m_pBone = nullptr;
 	m_bInstanced = false;
 	m_bDepth = false;
-	m_uInstanceId = USG_INVALID_ID64;
+
 	for (uint32 i = 0; i < OVERRIDE_COUNT; i++)
 	{
 		m_pOverridesConstants[i] = NULL;
@@ -58,35 +57,13 @@ Model::RenderMesh::~RenderMesh()
 
 }
 
-void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth, bool bInstanced)
+void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
 {
-	if (bInstanced && pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING)
-	{
-		bInstanced = false;
-
-	}
-	m_bInstanced = bInstanced;
 	m_bDepth = bDepth;
 	m_pMeshResource = pMesh;
-	const char* pszName = pModel->GetResource()->GetName().c_str();
+	const char* pszName = pModel ? pModel->GetResource()->GetName().c_str() : "Instance";
 	SetVertexBuffer(0, &pMesh->vertexBuffer);
 	SetIndexBuffer(&pMesh->primitive.indexBuffer);
-
-	m_bInstanced = bInstanced;
-	if (bInstanced)
-	{
-		usg::string matName = pMesh->matName;
-		if (bDepth)
-		{
-			matName += "_depth";
-		}
-		uint64 uModelCRC = utl::CRC32(pModel->GetName().c_str());
-		uint64 uMeshCRC = utl::CRC32(matName.c_str());
-
-		m_uInstanceId = uModelCRC << uint64(32) | uMeshCRC;
-
-		m_pBone = pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex);
-	}
 
 	SetAnimated(pMesh->primitive.eSkinningMode != exchange::SkinningType_NO_SKINNING);
 
@@ -154,7 +131,7 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		m_omniDepthPipelineState = pDevice->GetPipelineState(pScene->GetShadowRenderPass(), omniDecl);
 	}
 
-	m_descriptorSet.Init(pDevice, pMesh->defaultPipelineDescLayout); 
+	m_descriptorSet.Init(pDevice, GetDescriptorHndl());
 
 	// FIXME: Get the index from the custom fx declaration
 
@@ -171,19 +148,22 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
 	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
 
-	switch (pMesh->primitive.eSkinningMode)
+	if(pModel)
 	{
-	case usg::exchange::SkinningType_NO_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_0, pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex)->GetConstantSet(), 0, SHADER_FLAG_VERTEX);
-		break;
-	case usg::exchange::SkinningType_RIGID_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetRigidBones(), 0, SHADER_FLAG_VERTEX);
-		break;
-	case usg::exchange::SkinningType_SMOOTH_SKINNING:
-		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetSkinnedBones(), 0, SHADER_FLAG_VERTEX);
-		break;
-	default:
-		ASSERT(false);
+		switch (pMesh->primitive.eSkinningMode)
+		{
+		case usg::exchange::SkinningType_NO_SKINNING:
+			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_0, pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex)->GetConstantSet(), 0, SHADER_FLAG_VERTEX);
+			break;
+		case usg::exchange::SkinningType_RIGID_SKINNING:
+			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetRigidBones(), 0, SHADER_FLAG_VERTEX);
+			break;
+		case usg::exchange::SkinningType_SMOOTH_SKINNING:
+			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_2, &pModel->GetSkinnedBones(), 0, SHADER_FLAG_VERTEX);
+			break;
+		default:
+			ASSERT(false);
+		}
 	}
 
 	for (uint32 i = 0; i < ModelResource::Mesh::MAX_UV_STAGES; i++)
@@ -199,26 +179,14 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 }
 
 
-
-InstancedRenderer* Model::RenderMesh::CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene)
-{
-	ModelInstanceRenderer* pInstance = vnew(ALLOC_OBJECT)ModelInstanceRenderer;
-	pInstance->Init(pDevice, pScene, m_uInstanceId, m_pMeshResource, m_bDepth);
-
-	return pInstance;
-}
-
-
 const PipelineStateDecl& Model::RenderMesh::GetPipelineState(ModelResource::Mesh::ERenderState eRenderState)
 {
-	if (m_bInstanced)
-	{
-		return m_pMeshResource->renderSets[eRenderState].instancedPipeline;
-	}
-	else
-	{
-		return m_pMeshResource->renderSets[eRenderState].pipeline;
-	}
+	return m_pMeshResource->renderSets[eRenderState].pipeline;
+}
+
+DescriptorSetLayoutHndl Model::RenderMesh::GetDescriptorHndl()
+{
+	return m_pMeshResource->defaultPipelineDescLayout;
 }
 
 void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
@@ -234,24 +202,7 @@ void Model::RenderMesh::Cleanup(GFXDevice* pDevice)
 }
 
 
-usg::Matrix4x4 Model::RenderMesh::GetInstanceTransform() const
-{
-	if (m_pBone)
-	{
-		return m_pBone->GetWorldMatrix();
-	}
-	ASSERT(false);
-	return usg::Matrix4x4::Identity();
-}
 
-void Model::RenderMesh::SetRenderMaskWithShadowCheck(uint32 uMask)
-{
-	if (!m_bCanHaveShadow)
-	{
-		uMask &= ~RenderMask::RENDER_MASK_SHADOW_CAST;
-	}
-	SetRenderMaskIncShadow(uMask);
-}
 
 bool Model::RenderMesh::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
@@ -333,6 +284,111 @@ bool Model::RenderMesh::SetScale(float fScale, CustomEffectRuntime& customFX)
 	customFX.SetVariable("fScale", fScale, 0);
 	return true;
 }
+
+
+const PipelineStateDecl& Model::InstanceDrawer::GetPipelineState(ModelResource::Mesh::ERenderState eRenderState)
+{
+	return m_pMeshResource->renderSets[eRenderState].instancedPipeline;
+}
+
+
+DescriptorSetLayoutHndl Model::InstanceDrawer::GetDescriptorHndl()
+{
+	return m_pMeshResource->instancePipelineDescLayout;
+}
+
+bool Model::InstanceDrawer::InstanceDraw(GFXContext* pContext, RenderContext& renderContext, usg::VertexBuffer& instanceBuffer, uint32 uOffset, uint32 uCount)
+{
+	pContext->BeginGPUTag(m_name.c_str(), Color::Blue);
+
+	// FIXME: Cleaner system?
+	switch (renderContext.eRenderPass)
+	{
+	case RenderNode::RENDER_PASS_DEFERRED:
+	case RenderNode::RENDER_PASS_DEPTH:
+	case RenderNode::RENDER_PASS_FORWARD:
+		pContext->SetPipelineState(m_pipelineState);
+		break;
+	case RenderNode::RENDER_PASS_DEPTH_OMNI:
+		pContext->SetPipelineState(m_omniDepthPipelineState);
+		break;
+	default:
+		ASSERT(false);
+	}
+	pContext->SetDescriptorSet(&m_descriptorSet, 1);
+	pContext->SetBlendColor(m_blendColor);
+
+	for (uint32 i = 0; i < m_uVertexBuffers; ++i)
+	{
+		pContext->SetVertexBuffer(m_vertexBuffer[i].pBuffer, m_vertexBuffer[i].uIndex);
+	}
+
+	pContext->SetVertexBuffer(&instanceBuffer, m_uVertexBuffers, uOffset);
+
+	pContext->DrawIndexedEx(m_pIndexBuffer, 0, m_pIndexBuffer->GetIndexCount(), uCount);
+
+	pContext->EndGPUTag();
+
+	return true;
+}
+
+
+void Model::InstanceMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResource::Mesh* pMesh, const Model* pModel, bool bDepth)
+{
+	ASSERT(pMesh->bCanInstance);
+	m_pMeshResource = pMesh;
+
+	usg::string matName = pMesh->matName;
+	if (bDepth)
+	{
+		matName += "_depth";
+	}
+	uint64 uModelCRC = utl::CRC32(pModel->GetName().c_str());
+	uint64 uMeshCRC = utl::CRC32(matName.c_str());
+
+	m_uInstanceId = uModelCRC << uint64(32) | uMeshCRC;
+	m_uLod = pMesh->uLodIndex;
+	m_bDepth = bDepth;
+
+	m_pBone = pModel->GetSkeleton().GetBone(pMesh->primitive.uRootIndex);
+
+	m_bCanHaveShadow = pMesh->layer < RenderLayer::LAYER_TRANSLUCENT;
+
+	EffectHndl effect;
+	if (bDepth)
+	{
+		effect = m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFERRED].instancedPipeline.pEffect;
+	}
+	else
+	{
+		// Not a perfect match for non instanced but shouldn't matter
+		effect = m_pMeshResource->renderSets[ModelResource::Mesh::RS_DEFAULT].instancedPipeline.pEffect;
+	}
+
+	SetMaterialCmpVal(effect, pMesh->pTextures[0].get());
+
+}
+
+
+usg::Matrix4x4 Model::InstanceMesh::GetInstanceTransform() const
+{
+	if (m_pBone)
+	{
+		return m_pBone->GetWorldMatrix();
+	}
+	ASSERT(false);
+	return usg::Matrix4x4::Identity();
+}
+
+
+InstancedRenderer* Model::InstanceMesh::CreateInstanceRenderer(GFXDevice* pDevice, Scene* pScene)
+{
+	ModelInstanceRenderer* pInstance = vnew(ALLOC_OBJECT)ModelInstanceRenderer;
+	pInstance->Init(pDevice, pScene, m_uInstanceId, m_pMeshResource, m_bDepth);
+
+	return pInstance;
+}
+
 
 
 
