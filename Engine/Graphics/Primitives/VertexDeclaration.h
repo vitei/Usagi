@@ -20,7 +20,7 @@ public:
 
 	memsize GetSize() const { return m_uSize; }
 	uint32 GetElementCount() const { return m_uCount; }
-	bool IsInstanceStream() const { return m_uInstanceDiv != 0; }
+	bool IsInstanceStream() const { return m_uInstanceDiv != USG_INVALID_ID; }
 	uint32 GetInstanceDiv() const { return m_uInstanceDiv; }
 
 	const VertexElement* GetElements() const { return m_elements; }

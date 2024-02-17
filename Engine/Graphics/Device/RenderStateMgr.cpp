@@ -268,7 +268,7 @@ InputBindingHndl RenderStateMgr::GetInputBinding(GFXDevice* pDevice, const Pipel
 	for (uint32 i = 0; i < pDecl->uInputBindingCount; i++)
 	{
 		VertexDeclaration decl;
-		decl.InitDecl(pDecl->inputBindings[i].pElements, pDecl->inputBindings[i].eStepRate == VERTEX_INPUT_RATE_VERTEX ? 0 : pDecl->inputBindings[i].uStepSize, pDecl->inputBindings[i].uVertexSize);
+		decl.InitDecl(pDecl->inputBindings[i].pElements, pDecl->inputBindings[i].eStepRate == VERTEX_INPUT_RATE_VERTEX ? USG_INVALID_ID : pDecl->inputBindings[i].uStepSize, pDecl->inputBindings[i].uVertexSize);
 		uDeclIds[i] = VertexDeclaration::GetDeclId(decl);
 	}
 
@@ -379,7 +379,7 @@ void RenderStateMgr::GetPipelineStateDeclaration(const PipelineStateHndl pipelin
 		for (uint32 i = 0; i < out.uInputBindingCount; i++)
 		{
 			const VertexDeclaration* pDecl = VertexDeclaration::GetDecl(pInitData->pBinding.GetContents()->GetDeclId(i));
-			out.inputBindings[i].eStepRate = pDecl->GetInstanceDiv() == 0 ? VERTEX_INPUT_RATE_VERTEX : VERTEX_INPUT_RATE_INSTANCE;
+			out.inputBindings[i].eStepRate = pDecl->GetInstanceDiv() == USG_INVALID_ID ? VERTEX_INPUT_RATE_VERTEX : VERTEX_INPUT_RATE_INSTANCE;
 			out.inputBindings[i].uBindSlot = i;	// FIXME: Not guaranteed but we are deprecating this function
 			out.inputBindings[i].pElements = pDecl->GetElements();
 			out.inputBindings[i].uStepSize = pDecl->GetInstanceDiv();

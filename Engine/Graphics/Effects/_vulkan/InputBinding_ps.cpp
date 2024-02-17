@@ -189,6 +189,7 @@ void InputBinding_ps::Init(GFXDevice* pDevice, const VertexDeclaration** ppDecls
 		if (ppDecls[uBuffer]->IsInstanceStream())
 		{
 			m_bindingDesc[uBuffer].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+			m_bindingDesc[uBuffer].stride *= ppDecls[uBuffer]->GetInstanceDiv();
 		}
 		else
 		{

@@ -396,7 +396,7 @@ memsize ModelResource::InitInputBindings(usg::GFXDevice* pDevice, const exchange
 		if (uDataSize > 0)
 		{
 			*pElement = VERTEX_ELEMENT_CAP;	// Cap off the declaration
-			bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, (uint32)(-1));
+			bindings[1].Init(pStaticElements, (uint32)1, VERTEX_INPUT_RATE_INSTANCE, 0);
 			m_meshArray[m_uMeshCount].renderSets[RenderState].singleVerts.Init(pDevice, singleAttribScratch.GetRawData(), uDataSize, 1, pMaterial->renderPasses[RenderState].effectName, GPU_USAGE_CONST_REG);
 			pipelineState.uInputBindingCount++;
 		}

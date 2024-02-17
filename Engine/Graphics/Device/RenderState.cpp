@@ -541,6 +541,11 @@ void PipelineStateDecl::InputBinding::Init(const VertexElement* pElementIn, uint
 	pElements = pElementIn;
 	eStepRate = eRateIn;
 	uStepSize = uStepIn;
+
+	if (eRateIn == VERTEX_INPUT_RATE_INSTANCE)
+	{
+		ASSERT(uStepIn != -1);	// We use this to represent no instancing
+	}
 }
 
 PipelineLayoutDecl::PipelineLayoutDecl()
