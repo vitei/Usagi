@@ -60,7 +60,7 @@ struct Scene::PIMPL
 		viewContexts(DEFAULT_VIEW_CONTEXTS, true),
 		shadowContexts(DEFAULT_SHADOW_CONTEXTS, true),
 		omniShadowContexts(DEFAULT_OMNI_SHADOW_CONTEXTS, true),
-		sceneComponents(RENDER_GROUP_POOL_SIZE, true),
+		sceneComponents(RENDER_GROUP_POOL_SIZE, true, false),
 		transformNodes(TRANSFORM_NODE_POOL_SIZE, true, false)
 	{
 

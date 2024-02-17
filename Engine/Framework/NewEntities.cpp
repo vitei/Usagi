@@ -13,6 +13,10 @@ namespace usg
 
 	bool NewEntities::Contains(ComponentEntity* e) const
 	{
+		return e->GetInNewList();
+		
+		// This could show up with enough entities
+		/*
 		auto* pInternalData = static_cast<InternalData*>(m_pInternalData);
 		for (auto it : pInternalData->entities)
 		{
@@ -21,7 +25,7 @@ namespace usg
 				return true;
 			}
 		}
-		return false;
+		return false;*/
 	}
 
 	pair<ComponentEntity*, ComponentEntity*> NewEntities::Pop()
@@ -29,6 +33,10 @@ namespace usg
 		auto* pInternalData = static_cast<InternalData*>(m_pInternalData);
 		auto e = pInternalData->entities.front();
 		pInternalData->entities.pop_front();
+		if (e.first)
+		{
+			e.first->SetInNewList(false);
+		}
 		return e;
 	}
 	
@@ -41,6 +49,7 @@ namespace usg
 	void NewEntities::Add(ComponentEntity* e, ComponentEntity* parent)
 	{
 		auto* pInternalData = static_cast<InternalData*>(m_pInternalData);
+		e->SetInNewList(true);
 		pInternalData->entities.emplace_back(e, parent);
 	}
 

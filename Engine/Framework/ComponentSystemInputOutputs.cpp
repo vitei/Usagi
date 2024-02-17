@@ -22,7 +22,7 @@ namespace usg
 		}
 		auto& pools = *s_pPools;
 		ASSERT(pools.count(uSystemId)==0);
-		pools[uSystemId].reset(vnew(ALLOC_OBJECT) UnTypesafeFastPool(uElementSize,uGroupSize));
+		pools[uSystemId].reset(vnew(ALLOC_OBJECT) UnTypesafeFastPool(uElementSize,uGroupSize, true, false));
 		
 		if (!s_pRootNodes)
 		{

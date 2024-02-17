@@ -82,11 +82,20 @@ namespace usg
 		else
 		{
 			MemBlock* pInsertionPoint = m_pFirstMemBlock;
-			while (pInsertionPoint->pNext)
+
+			if(m_bOptimseForIttr)
 			{
-				pInsertionPoint = pInsertionPoint->pNext;
+				while (pInsertionPoint->pNext)
+				{
+					pInsertionPoint = pInsertionPoint->pNext;
+				}
+				pInsertionPoint->pNext = pBlock;
 			}
-			pInsertionPoint->pNext = pBlock;
+			else
+			{
+				pBlock->pNext = m_pFirstMemBlock;
+				m_pFirstMemBlock = pBlock;
+			}
 		}
 
 		EntryHeader* pHeader = (EntryHeader*)pBlock->pEntries;
