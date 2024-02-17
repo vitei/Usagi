@@ -156,7 +156,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 
 
 	BloomBrightPassConstants* pConsts = m_constants[PASS_BRIGHT_PASS].Lock<BloomBrightPassConstants>();
-	pConsts->vMiddleGray.x = 0.0075f;
+	pConsts->vMiddleGray.x = 0.0045f;
 	m_constants[PASS_BRIGHT_PASS].Unlock();
 	m_constants[PASS_BRIGHT_PASS].UpdateData(pDevice);
 

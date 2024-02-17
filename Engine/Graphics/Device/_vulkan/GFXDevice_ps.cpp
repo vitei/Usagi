@@ -50,6 +50,10 @@ static const VkFormat gColorFormatMap[]=
 	VK_FORMAT_R8G8_UNORM,						// CF_RG_8
 	VK_FORMAT_R16G16B16A16_SNORM,				// CF_NORMAL
 	VK_FORMAT_B8G8R8A8_SRGB,					// CF_SRGBA
+	VK_FORMAT_A2B10G10R10_UNORM_PACK32,			// CF_RGB_HP,
+	VK_FORMAT_R8G8B8A8_UNORM,					// CF_RGBA_8888_SWP
+	VK_FORMAT_R8G8B8A8_SRGB,					// CF_SRGBA_SWP
+	VK_FORMAT_A2R10G10B10_UNORM_PACK32,			// CF_RGB_HP_SWP,
 	VK_FORMAT_UNDEFINED,						// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -67,7 +71,7 @@ static const VkFormat gFallbackColorFormatMap[][gMaxFormatFallbacks] =
 	{ VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM },							// CF_RGB_888,
 	{ VK_FORMAT_R32_UINT },																					// CF_SHADOW,
 	{  },																									// CF_RGBA_16F
-	{ VK_FORMAT_B10G11R11_UFLOAT_PACK32, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },	// CF_RGB_HDR,
+	{ VK_FORMAT_B10G11R11_UFLOAT_PACK32 },																	// CF_RGB_HDR,
 	{ VK_FORMAT_R32_SFLOAT,	VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_SFLOAT },									// CF_R_32F,
 	{ VK_FORMAT_R32_SFLOAT },																				// CF_R_32,
 	{ VK_FORMAT_R32G32B32_SFLOAT },																			// CF_RG_32F,
@@ -76,7 +80,11 @@ static const VkFormat gFallbackColorFormatMap[][gMaxFormatFallbacks] =
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_R_8
 	{ VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM },														// CF_RG_8
 	{ VK_FORMAT_R16G16B16A16_SFLOAT },																		// CF_NORMAL
-	{ VK_FORMAT_R8G8B8A8_SRGB },																			// CF_SRGBA						// CF_SRGBA
+	{ VK_FORMAT_R8G8B8A8_SRGB },																			// CF_SRGBA						
+	{ VK_FORMAT_A2R10G10B10_UNORM_PACK32 },																	// CF_RGB_HP,
+	{ VK_FORMAT_B8G8R8A8_UNORM },																			// CF_RGBA_8888_SWP
+	{ VK_FORMAT_B8G8R8A8_SRGB },																			// CF_SRGBA_SWP
+	{ VK_FORMAT_A2R10G10B10_UNORM_PACK32 },																	// CF_RGB_HP_SWP,
 	{ },																									// CF_UNDEFINED	// Only makes sense for render passes
 };
 
@@ -690,6 +698,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
+	extensions.push_back("VK_EXT_hdr_metadata");
 
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, nullptr);
@@ -847,6 +856,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 		}
 	}
 }
+
+
 
 VkCommandPool GFXDevice_ps::CreateCommandPool(QueueType eQueueType)
 {

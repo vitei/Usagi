@@ -92,7 +92,6 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pSetNoDepthTarget = nullptr;
 	m_pSetLinDepthTarget = nullptr;
 	m_fPixelScale = 1.0f;
-	m_bHDROut = false;
 }
 
 PostFXSys_ps::~PostFXSys_ps()
@@ -583,7 +582,7 @@ void PostFXSys_ps::GetRenderTargetBuffers(memsize pass, usg::vector<ColorBuffer*
 	else if(m_activeEffects[pass]->WritesTexture(PostEffect::Input::Color))
 	{	
 		// FIXME: OR HDR enabled at a system level
-		if((int)pass < iFinalHdr || m_bHDROut)
+		if((int)pass < iFinalHdr)
 		{	
 			// If it reads that texture as a source we need to swap the buffers
 			if (m_activeEffects[pass]->ReadsTexture(PostEffect::Input::Color))

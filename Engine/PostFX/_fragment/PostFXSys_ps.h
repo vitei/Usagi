@@ -136,7 +136,6 @@ protected:
 	SamplerHndl				m_linearSampler;
 	SamplerHndl				m_pointSampler;
 
-	bool					m_bHDROut;
 };
 
 

@@ -79,9 +79,8 @@ void PostFXSys::Cleanup(GFXDevice* pDevice)
 
 void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 {
-	bool bSupport = (m_uEffectsSupported & uEffectFlags) == uEffectFlags;
-	ASSERT(bSupport);
-	if (bSupport && m_uEffectsEnabled != uEffectFlags)
+	uEffectFlags = uEffectFlags & m_uEffectsSupported;
+	if (m_uEffectsEnabled != uEffectFlags)
 	{
 		if( (uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0
 		&& (uEffectFlags & PostFXSys::EFFECT_SSAO) != 0 )

@@ -16,6 +16,14 @@
 #include "Engine/Core/stl/vector.h"
 
 
+#if defined(_WIN32)
+#include <dxgi.h> 
+#include <dxgi1_6.h>
+
+#pragma comment(lib, "dxgi.lib")
+#endif
+
+
 extern bool	 g_bFullScreen;
 extern uint32 g_uWindowWidth;
 extern uint32 g_uWindowHeight;
@@ -219,6 +227,15 @@ bool Display_ps::GetFallbackPresentMode(VkPresentModeKHR& eModeInOut)
 }
 
 
+static inline LONG InterSection(const RECT rect1, const RECT rect2)
+{
+	LONG xInterSect = Math::Max(0L, Math::Min(rect1.right, rect2.right) - Math::Max(rect1.left, rect2.left));
+	LONG yIntersect = Math::Max(0L, Math::Min(rect1.bottom, rect2.bottom) - Math::Max(rect1.top, rect2.top));
+	LONG intersection = xInterSect * yIntersect;
+	return intersection;
+}
+
+
 void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 {
 	GFXDevice_ps& devicePS = pDevice->GetPlatform();
@@ -254,6 +271,46 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		return;
 	}
 
+	RECT windowBounds = {};
+	GetWindowRect((HWND)m_hwnd, &windowBounds);
+	IDXGIAdapter1* dxgiAdapter = NULL;
+	IDXGIFactory6* factory = nullptr;
+
+	bool bAllowHDR = false;
+
+	// Enable the following to allow HDR
+#if 0//def PLATFORM_PC
+	if (SUCCEEDED(CreateDXGIFactory(IID_PPV_ARGS(&factory))))
+	{
+		HRCHECK( factory->EnumAdapters1(0, &dxgiAdapter));
+		UINT         i = 0;
+		IDXGIOutput* bestOutput = nullptr;
+		IDXGIOutput* output = nullptr;
+		LONG         bestAdapter = -1;
+		while (dxgiAdapter->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
+		{
+			DXGI_OUTPUT_DESC desc;
+			output->GetDesc(&desc);
+			LONG intersection = InterSection(windowBounds, desc.DesktopCoordinates);
+			if (intersection > bestAdapter)
+			{
+				bestAdapter = intersection;
+				bestOutput = output;
+			}
+			++i;
+		}
+		IDXGIOutput6* output6;
+		HRCHECK(bestOutput->QueryInterface(IID_PPV_ARGS(&output6)));
+		DXGI_OUTPUT_DESC1 desc1;
+		HRCHECK(output6->GetDesc1(&desc1));
+
+		// This will be true if the user has use HDR set to true in windows, false otherwise
+		bAllowHDR = desc1.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+
+		factory->Release();
+	}
+#endif
+	
 
 	// Get the list of VkFormats that are supported:
 	uint32_t formatCount;
@@ -277,7 +334,6 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	{
 		int iBestFormat = 0;
 		
-		bool bAllowHDR = false;
 		m_bHDR = false;
 		for (uint32 i = 0; i < formatCount; i++)
 		{
@@ -287,9 +343,12 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 				continue;
 			}
 
-			if(!m_bHDR && eFormat == ColorFormat::SRGBA)
+			if(!m_bHDR && (eFormat == ColorFormat::SRGBA) || (eFormat == ColorFormat::SRGBA_SWP))
 			{
-				iBestFormat = i;
+				if(devicePS.GetUSGFormat(surfFormats[iBestFormat].format) != ColorFormat::SRGBA)
+				{
+					iBestFormat = i;
+				}
 			}
 
 			if(bAllowHDR)
@@ -299,9 +358,10 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 					iBestFormat = i;
 					m_bHDR = true;
 				}
-				else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT &&
-					(iBestFormat == i) ||  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT 
+				&&  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
 				{
+					// FIXME: Need to add a usg format equivalent to hit here
 					iBestFormat = i;
 					m_bHDR = true;
 				}
@@ -428,6 +488,16 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 	#if 0
 	VkHdrMetadataEXT metadata = {};
 	metadata.sType = VK_STRUCTURE_TYPE_HDR_METADATA_EXT;
+
+	PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR getPhysicalDeviceSurfaceCapabilities2KHR = VK_NULL_HANDLE;
+	getPhysicalDeviceSurfaceCapabilities2KHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR)vkGetDeviceProcAddr(devicePS.GetVKDevice(), "vkGetPhysicalDeviceSurfaceCapabilities2KHR");
+
+
+	VkPhysicalDeviceSurfaceInfo2KHR deviceInfo;
+	VkSurfaceCapabilities2KHR surfaceCaps;
+	res = getPhysicalDeviceSurfaceCapabilities2KHR(devicePS.GetPrimaryGPU(), &deviceInfo, &surfaceCaps);
+
+
 	metadata.displayPrimaryRed.x = 0.708f;
 	metadata.displayPrimaryRed.y = 0.292f;
 	metadata.displayPrimaryGreen.x = 0.170f;

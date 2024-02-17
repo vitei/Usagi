@@ -117,6 +117,11 @@ enum class ColorFormat
 	RG_8,
 	NORMAL,
 	SRGBA,
+	RGB_HP,	// Probably 1010102
+	// Do not use as render targets, added for swap chain - RGBA_8888 may internally be BGRA depending on hardware
+	RGBA_8888_SWP,	
+	SRGBA_SWP,
+	RGB_HP_SWP,
 	UNDEFINED,
 	COUNT,
 	INVALID = COUNT
