@@ -34,15 +34,15 @@ message LightSpecBase
 	required Color ambient			= 2;
 	required Color diffuse			= 3;
 	required Color specular		    = 4;
-	required bool  bShadow	 		= 5;	
-	required uint32 uShadowExclFlags= 6;
+	required bool  bShadow	 		= 5 [default = false];	
+	required uint32 uShadowExclFlags= 6 [default = 0];
 };
 
 message LightSpecAttenuation
 {
-	required bool bEnabled = 1;
-	required float fNear = 2;
-	required float fFar = 3;
+	required bool bEnabled = 1 [default = false];
+	required float fNear = 2 [default = 1.0];
+	required float fFar = 3 [default = 10.0];
 };
 
 message SpotLightSpec
@@ -55,7 +55,7 @@ message ProjectionLightSpec
 {
 	required string	texName = 1 [(nanopb).max_size = 64];
 	required float fFov = 2 [default = 20];
-	required float fAspect = 3 [default = 1];
+	required float fAspect = 3 [default = 1]; 
 };
 
 message LightSpec
