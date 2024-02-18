@@ -51,7 +51,7 @@ Display_ps::Display_ps()
 	m_uSwapChainImageCount = 0;
 	m_bWindowResized = false;
 	m_bRTShouldLoad = false;
-	m_bRequiresGammaCorrect = false;
+	m_eColorCorrect = ColorCorrection::None;
 	m_bHDR = false;
 	m_eVsync = VSYNC_MODE_MAILBOX;
 }
@@ -353,15 +353,14 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 			if(bAllowHDR)
 			{
-				if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				/*if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
 				{
 					iBestFormat = i;
 					m_bHDR = true;
 				}
-				else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT 
+				else*/if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT 
 				&&  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
 				{
-					// FIXME: Need to add a usg format equivalent to hit here
 					iBestFormat = i;
 					m_bHDR = true;
 				}
@@ -371,7 +370,20 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		eFormat = surfFormats[iBestFormat].format;
 		colorSpace = surfFormats[iBestFormat].colorSpace;
 		m_eSwapChainFormat = devicePS.GetUSGFormat(eFormat);
-		m_bRequiresGammaCorrect = surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && m_eSwapChainFormat != ColorFormat::SRGBA;
+		if (m_bHDR)
+		{
+			if (surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)
+			{
+				m_eColorCorrect = ColorCorrection::BT2084;
+			}
+		}
+		else
+		{
+			if (surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && m_eSwapChainFormat != ColorFormat::SRGBA)
+			{
+				m_eColorCorrect = ColorCorrection::sRGB;
+			}
+		}
 		m_eVkSwapChainFormat = eFormat;
 
 	}

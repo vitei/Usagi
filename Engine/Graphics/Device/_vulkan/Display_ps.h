@@ -39,7 +39,7 @@ public:
 	VkSemaphore& GetImageAcquired() { return m_imageAcquired; }
 	VkImage GetActiveImage() const { return m_pSwapchainImages[m_uActiveImage]; }
 	bool HasHDRSupport() const { return m_bHDR; }
-	bool RequiresGammaCorrection() const { return m_bRequiresGammaCorrect; }
+	ColorCorrection GetRequiredColorCorrection() const { return m_eColorCorrect; }
 
 private:
 	PRIVATIZE_COPY(Display_ps)
@@ -49,7 +49,6 @@ private:
 	void RecreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChain(GFXDevice* pDevice);
 	void CreateSwapChainImageViews(GFXDevice* pDevice);
-	ColorFormat GetColorFormat(VkFormat eFormat);
 	bool GetFallbackPresentMode(VkPresentModeKHR& eModeInOut);
 
 	enum 
@@ -81,7 +80,7 @@ private:
 	bool				m_bWindowResized;
 	bool				m_bRTShouldLoad;
 	bool				m_bHDR;
-	bool				m_bRequiresGammaCorrect;
+	ColorCorrection		m_eColorCorrect;
 };
 
 inline bool Display_ps::GetActualDimensions(uint32 & xOut, uint32 & yOut, bool bOrient)

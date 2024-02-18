@@ -1,3 +1,15 @@
+CustomEffects:  
+  LinearToHDR:
+    Samplers:
+      - { index: 0, hint: "framebuffer" }  
+    ConstantDefs:      
+      - name: uMaterial
+        binding: Material
+        shaderType: PS
+        Variables:
+          - { type: float,   name: fContrast,      count: 1, default: 2.0 }         
+          - { type: bool,    name: bInverseTone, count: 1, default: false }  
+          - { type: bool,    name: bHDR10, count: 1, default: true }  
 Effects:
   - { name: SMAABlendWeightCalc,    vert: SMAA/SMAABlendWeightCalc, frag: SMAA/SMAABlendWeightCalc }
   - { name: SMAAColorEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAAColorEdgeDetection }
@@ -18,3 +30,4 @@ Effects:
   - { name: FilmNoise,              vert: PostFX/fullscreen,        frag: PostFX/filmnoise }  
   - { name: ClearAlpha,             vert: PostFX/fullscreensolid,   frag: PostFX/clearalpha }
   - { name: AdjustColorSpace,       vert: PostFX/fullscreen,        frag: PostFX/adjustcolorspace }
+  - { name: LinearToHDR,            vert: PostFX/fullscreen,        frag: PostFX/LinearToHDR, custom_effect: LinearToHDR } 

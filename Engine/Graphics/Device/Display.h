@@ -62,7 +62,7 @@ public:
 	Display_ps& GetPlatform() { return m_platform; }
 	WindHndl GetHandle() const { return m_window; }
 
-	bool RequiresGammaCorrection() const { return m_platform.RequiresGammaCorrection(); }
+	ColorCorrection GetRequiredColorCorrection() const { return m_platform.GetRequiredColorCorrection(); }
 
 private:
 	PRIVATIZE_COPY(Display)

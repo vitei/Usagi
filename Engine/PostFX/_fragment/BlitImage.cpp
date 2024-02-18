@@ -8,6 +8,7 @@
 #include "Engine/Graphics/StandardVertDecl.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/Graphics/Device/GFXContext.h"
+#include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Layout/Global2D.h"
 #include "BlitImage.h"
 
@@ -24,13 +25,36 @@ static const DescriptorDeclaration g_descriptorDecl[] =
 
 BlitImage::BlitImage()
 {
-
+	m_bCustomEffect = false;
 }
 
 
 BlitImage::~BlitImage()
 {
 
+}
+
+
+void BlitImage::InitForDisplay(GFXDevice* pDevice, usg::ResourceMgr* pResMgr, uint32 uDisplay)
+{
+	usg::Display* pDisplay = pDevice->GetDisplay(uDisplay);
+
+	ASSERT(pDisplay);
+	const RenderPassHndl pass = pDisplay->GetRenderPass();
+	switch (pDisplay->GetRequiredColorCorrection())
+	{
+		case ColorCorrection::BT2084:
+		case ColorCorrection::BT709:
+			// TODO: Different values for each
+			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.LinearToHDR"), pass);
+			break;
+		case ColorCorrection::sRGB:
+			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.AdjustColorSpace"), pass);
+			break;
+		default:
+			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.Copy"), pass);
+			break;
+	}
 }
 
 void BlitImage::Init(GFXDevice* pDevice, EffectHndl effect, const RenderPassHndl& pass)
@@ -41,9 +65,17 @@ void BlitImage::Init(GFXDevice* pDevice, EffectHndl effect, const RenderPassHndl
 	pipelineDecl.ePrimType = PT_TRIANGLES;
 	pipelineDecl.pEffect = effect;
 
+	if (effect->GetCustomEffect())
+	{
+		m_runtimeEffect.Init(pDevice, effect->GetCustomEffect());
+
+		m_bCustomEffect = true;
+	}
+
 	pipelineDecl.alphaState.SetColor0Only();
 
-	usg::DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
+	usg::DescriptorSetLayoutHndl matDescriptors;
+	matDescriptors = pDevice->GetDescriptorSetLayout(m_bCustomEffect ? m_runtimeEffect.GetResource()->GetDescriptorDecl() : g_descriptorDecl);
 	
 	SamplerDecl pointDecl(SAMP_FILTER_LINEAR, SAMP_WRAP_CLAMP);
 	m_sampler = pDevice->GetSampler(pointDecl);
@@ -55,6 +87,19 @@ void BlitImage::Init(GFXDevice* pDevice, EffectHndl effect, const RenderPassHndl
 	pipelineDecl.rasterizerState.eCullFace = CULL_FACE_NONE;
 
 	m_material.Init(pDevice, pDevice->GetPipelineState(pass, pipelineDecl), matDescriptors);
+
+	if (m_bCustomEffect)
+	{
+		CustomEffectResHndl effectDecl = effect->GetCustomEffect();
+
+		m_runtimeEffect.GPUUpdate(pDevice);
+
+		for (uint32 i = 0; i < effectDecl->GetConstantSetCount(); i++)
+		{
+			m_material.SetConstantSet(effectDecl->GetConstantSetBinding(i), m_runtimeEffect.GetConstantSet(i));
+
+		}
+	}
 
 	// Shared vertex data
 	PositionVertex verts[4] =
@@ -79,6 +124,10 @@ void BlitImage::Cleanup(GFXDevice* pDevice)
 {
 	m_fullScreenIB.Cleanup(pDevice);
 	m_fullScreenVB.Cleanup(pDevice);
+	if (m_bCustomEffect)
+	{
+		m_runtimeEffect.Cleanup(pDevice);
+	}
 	m_material.Cleanup(pDevice);
 }
 
@@ -94,6 +143,10 @@ void BlitImage::ChangeRenderPass(GFXDevice* pDevice, const RenderPassHndl& pass)
 void BlitImage::SetSourceTexture(GFXDevice* pDevice, const TextureHndl& tex)
 {
 	m_material.SetTexture(0, tex, m_sampler);
+	if (m_bCustomEffect)
+	{
+		m_runtimeEffect.GPUUpdate(pDevice);
+	}
 	m_material.UpdateDescriptors(pDevice);
 }
 
