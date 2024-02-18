@@ -81,6 +81,13 @@ enum class ShaderType : uint32
 };
 
 
+enum class ColorCorrection : uint32
+{
+	None,
+	sRGB,
+	BT709,
+	BT2084
+};
 
 enum TextureUsageFlags
 {
