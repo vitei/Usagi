@@ -323,28 +323,7 @@ void Model::EnableShadow(GFXDevice* pDevice, bool bEnable)
 	UpdateRenderMaskInt();
 }
 
-void Model::SetDynamic(GFXDevice* pDevice, bool bDynamic)
-{
-	if (bDynamic == m_bDynamic)
-		return;
 
-	if (m_bDynamic && !bDynamic)
-	{
-		// Do nothing, just leave it dynamic
-		//vdelete[] m_pOverrideMaterials;
-		//m_pOverrideMaterials = NULL;
-	}
-	else if (!m_bDynamic && bDynamic)
-	{
-		m_bDynamic = true;
-		m_pOverrideMaterials = vnew(ALLOC_GEOMETRY_DATA) MaterialInfo[m_pResource->GetMeshCount()];
-
-		for (uint32 i = 0; i < m_pResource->GetMeshCount(); i++)
-		{
-			InitDynamics(pDevice, m_pScene, i);
-		}
-	}
-}
 
 void Model::InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 i)
 {

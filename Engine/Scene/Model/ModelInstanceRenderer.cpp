@@ -48,11 +48,6 @@ namespace usg {
 		return m_uInstanceId;
 	}
 
-	void ModelInstanceRenderer::Draw(GFXContext* pContext, RenderNode::RenderContext& renderContext, uint32 uDrawId)
-	{		
-		pContext->SetVertexBuffer(&m_instanceBuffer, m_mesh.GetVertexBufferCount());
-		m_mesh.Draw(pContext, renderContext);
-	}
 
 
 	RenderNode* ModelInstanceRenderer::EndBatch()

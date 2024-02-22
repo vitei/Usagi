@@ -46,7 +46,6 @@ namespace usg {
 		void Init(GFXDevice* pDevice, Scene* pScene, const uint64 uInstanceId, const ModelResource::Mesh* pMesh, bool bDepth);
 		virtual void Cleanup(GFXDevice* pDevice);
 		virtual uint64 GetInstanceId();
-		virtual void Draw(GFXContext* pContext, RenderNode::RenderContext& renderContext, uint32 uDrawId);
 		virtual void AddNode(RenderNode* ppNodes) override;
 		RenderNode* EndBatch() override;
 		virtual void PreDraw(GFXDevice* pDevice) override;

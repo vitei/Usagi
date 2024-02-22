@@ -93,11 +93,11 @@ public:
 	void SetScale(float fScale);
 	float GetAlpha() const { return m_bVisible ? m_fAlpha : 0.0f; }
 	float GetScale() const { return m_fScale; }
-	void SetDynamic(GFXDevice* pDevice, bool bDynamic);
 
 	const ConstantSet& GetSkinnedBones() const { return m_skinnedBones; }
 	const ConstantSet& GetRigidBones() const { return m_staticBones;  }
-
+	bool IsDynamic() const { return m_bDynamic; }
+		
 private:
 	void AddToSceneInt(GFXDevice* pDevice);
 	void AddDepthMesh(GFXDevice* pDevice, bool bAdd);

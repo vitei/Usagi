@@ -23,7 +23,10 @@ namespace usg
 	Model* ModelMgr::GetModel(ResourceMgr* pResMgr, const char* szModelName, bool bDynamic, bool bPerBoneCulling)
 	{
 		usg::string cmpName = pResMgr->GetModelDir() + szModelName;
-		Model* pModel = GetFreeInstance(cmpName);
+
+		auto glambda = [bDynamic](auto a) { return a->IsDynamic() == bDynamic; };
+
+		Model* pModel = GetFreeInstance(cmpName, glambda);
 
 		if(!pModel)	// Handle creating a new instance
 		{
@@ -37,7 +40,6 @@ namespace usg
 		}
 		else
 		{
-			pModel->SetDynamic(m_pDevice, bDynamic);
 			pModel->SetFade(m_pDevice, false);
 			pModel->RemoveOverrides(m_pDevice);
 			pModel->SetInUse(true);

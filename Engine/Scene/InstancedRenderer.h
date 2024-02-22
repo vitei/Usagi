@@ -27,7 +27,6 @@ public:
 
 	virtual void Cleanup(GFXDevice* pDevice) = 0;
 	virtual uint64 GetInstanceId() = 0;
-	virtual void Draw(GFXContext* pContext, RenderNode::RenderContext& renderContext, uint32 uDrawId) = 0;
 	virtual void AddNode(RenderNode* pNode) = 0;
 	virtual RenderNode* EndBatch() = 0;
 	virtual void PreDraw(GFXDevice* pDevice) = 0;

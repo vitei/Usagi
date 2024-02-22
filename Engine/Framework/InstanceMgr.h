@@ -73,12 +73,14 @@ namespace usg
 
 
 	protected:
-		InstanceType* GetFreeInstance(usg::string &name)
+
+		template<class Pred>
+		InstanceType* GetFreeInstance(usg::string &name, Pred pred)
 		{
 			InstanceType* pReturn = NULL;
 			for (auto it = m_freeList.begin(); it != m_freeList.end(); ++it)
 			{
-				if ((*it)->GetName() == name)
+				if ((*it)->GetName() == name && pred(*it))
 				{
 					pReturn = (*it);
 					break;
