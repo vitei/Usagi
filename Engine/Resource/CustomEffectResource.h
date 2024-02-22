@@ -53,7 +53,8 @@ namespace usg
 		uint32 GetBindingPoint(uint32 uSet);
 
 		void* GetDefaultData(uint32 uSet) const;
-		const char* GetDefaultTexture(uint32 uSampler);
+		const char* GetDefaultTexture(uint32 uSampler) const;
+		uint32 GetSamplerCount() const { return m_header.uSamplerCount; }
 
 		// Utility functions for basic vertex setup (only suitable for small numbers, e.g. HUD)
 		bool SetVertexAttribute(void* pVertData, const char* szName, const void* pSrc, uint32 uSrcSize, uint32 uVertexId, uint32 uIndex = 0, uint32 uVerCount = 1) const;

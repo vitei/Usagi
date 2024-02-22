@@ -191,9 +191,9 @@ namespace usg
 		uint32 uVertexElemCnt = m_header.uAttributeCount + (uint32)buffers.size();
 		m_pVertexDecl = vnew(ALLOC_OBJECT)VertexElement[uVertexElemCnt];
 
+		VertexElement* pElement = m_pVertexDecl;
 		for (auto itr : buffers)
 		{
-			VertexElement* pElement = m_pVertexDecl;
 			for (uint32 i = 0; i < m_header.uAttributeCount; i++)
 			{
 				// Keep the data aligned
@@ -213,7 +213,7 @@ namespace usg
 				buffers[uVertexBuffer] += pElement->uCount * g_uConstantCPUAllignment[m_pAttributes[i].eConstantType];
 				pElement++;
 			}
-			*pElement = VERTEX_DATA_END();
+			*pElement++ = VERTEX_DATA_END();
 		}
 
 		for (auto itr : buffers)
@@ -314,7 +314,7 @@ namespace usg
 		return ((uint8*)(m_pBinary) + m_pConstantSets[uSet].uDataOffset);
 	}
 
-	const char* CustomEffectResource::GetDefaultTexture(uint32 uSamplerBinding)
+	const char* CustomEffectResource::GetDefaultTexture(uint32 uSamplerBinding) const
 	{
 		for (uint32 i = 0; i < m_header.uSamplerCount; i++)
 		{
@@ -398,6 +398,7 @@ namespace usg
 			{
 				pDecl++;
 			}
+			pDecl++;
 			iBufferIdx--;
 		}
 
