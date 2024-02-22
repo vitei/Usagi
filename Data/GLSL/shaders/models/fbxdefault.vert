@@ -71,6 +71,11 @@ void main(void)
 			vo_vBinormal = cross(vTangent, vViewNormal);
 		}*/
 	}
+	else
+	{
+		vo_vTangent = vec3(0.0, 0.0, 0.0);
+		vo_vBinormal = vec3(0.0, 0.0, 0.0);
+	}
 #endif
 
 	vo_vColor = ao_color;

@@ -371,6 +371,7 @@ static const EnumTable g_wrapTable[]
 					{
 						strcpy_s(pTextures[uTexIndex].textureName, texture.as<std::string>().c_str());
 					}
+					strcpy_s(pTextures[uTexIndex].textureHint, hint.as<std::string>().c_str());
 
 					GetTexCoordMapperOverrides((*it), texCo.sourceCoordinate, texCo.translate, texCo.scale, texCo.rotate);
 
@@ -391,25 +392,31 @@ static const EnumTable g_wrapTable[]
 			YAML::Node var = (*it)["name"];
 			YAML::Node value = (*it)["value"];
 
-			if (!set || !var)
+			if (!var)
 			{
 				RELEASE_WARNING("Constant override missing required data\n");
 				continue;
 			}
 
+			bool bFound = true;
 			for (uint32 i = 0; i < usg::exchange::_Material_RenderPass_count; i++)
 			{
 				for (uint32 j = 0; j < pMatOut->GetCustomFX(i).GetConstantSetCount(); j++)
 				{
-					if (strcmp(pMatOut->GetCustomFX(i).GetConstantSetName(j), set.as<std::string>().c_str()) != 0)
+					if (set && strcmp(pMatOut->GetCustomFX(i).GetConstantSetName(j), set.as<std::string>().c_str()) != 0)
 					{
 						continue;
 					}
 
 					void* pDst = pMatOut->GetConstantSetData(i, j);
-					pMatOut->GetCustomFX(i).OverrideData(j, var.as<std::string>().c_str(), value, pDst);
+					bFound |= pMatOut->GetCustomFX(i).OverrideData(j, var.as<std::string>().c_str(), value, pDst);
 				}
 				
+			}
+
+			if (!bFound)
+			{
+				RELEASE_WARNING("Could not override %s\n", var.as<std::string>().c_str());
 			}
 		}
 		
