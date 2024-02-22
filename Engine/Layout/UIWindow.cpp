@@ -233,6 +233,8 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 			m_pTextItemDefs[i].text.GetScale(vScale);
 			m_pTextItemDefs[i].text.SetScale(vScale * def.fScale);
 
+			m_pTextItemDefs[i].defOverride = def;
+
 			if (m_pTextItemDefs[i].def.uActionCRC != 0)
 			{
 				memsize uActionIdx = GetActionIdIndex(m_pTextItemDefs[i].def.uActionCRC);
@@ -566,7 +568,7 @@ bool UIWindow::GetItemVisible(uint32 uIndex, enum UIItemType eType)
 	}
 	case UI_ITEM_TEXT:
 	{
-		TextItemDef& def = m_pTextItemDefs[uIndex].def;
+		TextItemDef& def = m_pTextItemDefs[uIndex].defOverride;
 		return def.bVisible;
 	}
 	default:
@@ -596,7 +598,7 @@ void UIWindow::SetItemVisible(uint32 uIndex, enum UIItemType eType, bool bVisibl
 	}
 	case UI_ITEM_TEXT:
 	{
-		TextItemDef& def = m_pTextItemDefs[uIndex].def;
+		TextItemDef& def = m_pTextItemDefs[uIndex].defOverride;
 		def.bVisible = bVisible;
 		break;
 	}
@@ -695,7 +697,7 @@ bool UIWindow::IsMouseInRangeOfText(uint32 uText)
 {
 	uint32 uIndex = m_uItemCounts[UI_ITEM_TEXT];
 
-	if(!m_pTextItemDefs[uText].def.bVisible)
+	if(!m_pTextItemDefs[uText].defOverride.bVisible)
 		return false;
 
 	usg::Vector2f vMin, vMax;
@@ -824,7 +826,7 @@ void UIWindow::SetItemColor(uint32 uIndex, enum UIItemType eType, const usg::Col
 	case UI_ITEM_TEXT:
 	{
 		m_pTextItemDefs[uIndex].text.SetColor(cColor);
-		m_pTextItemDefs[uIndex].def.cColor = cColor;
+		m_pTextItemDefs[uIndex].defOverride.cColor = cColor;
 	}
 	break;
 	default:
@@ -1234,7 +1236,7 @@ void UIWindow::SetMousePos(const UIWindow* pParent, const UIInput* pInput, UIRes
 				switch (itr.eType)
 				{
 				case UI_ITEM_TEXT:
-					m_pTextItemDefs[itr.uItemIdx].text.SetColor(bHighlighted ? m_pTextItemDefs[itr.uItemIdx].def.cHighlightColor : m_pTextItemDefs[itr.uItemIdx].def.cColor);
+					m_pTextItemDefs[itr.uItemIdx].text.SetColor(bHighlighted ? m_pTextItemDefs[itr.uItemIdx].defOverride.cHighlightColor : m_pTextItemDefs[itr.uItemIdx].defOverride.cColor);
 					break;
 				case UI_ITEM_BUTTON:				
 					if( !IsPair(itr.uItemIdx) )
@@ -1668,7 +1670,7 @@ void UIWindow::Draw(usg::GFXContext* pContext)
 
 	for (uint32 i = 0; i < m_uItemCounts[UI_ITEM_TEXT]; i++)
 	{
-		if(m_pTextItemDefs[i].def.bVisible)
+		if(m_pTextItemDefs[i].defOverride.bVisible)
 		{
 			pContext->SetDescriptorSet(&m_descriptor, 0);
 			m_pTextItemDefs[i].text.Draw(pContext);

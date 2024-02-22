@@ -216,6 +216,7 @@ namespace usg
 		struct TextItemData
 		{
 			TextItemDef		def;
+			TextItemDef		defOverride;
 			usg::string		originalText;
 			usg::Text		text;
 		};
