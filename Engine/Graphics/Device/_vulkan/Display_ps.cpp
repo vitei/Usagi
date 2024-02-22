@@ -16,13 +16,17 @@
 #include "Engine/Core/stl/vector.h"
 
 
+
+#define DXGI_TEST_FOR_HDR 0
+
+#if DXGI_TEST_FOR_HDR
 #if defined(_WIN32)
 #include <dxgi.h> 
 #include <dxgi1_6.h>
 
 #pragma comment(lib, "dxgi.lib")
 #endif
-
+#endif
 
 extern bool	 g_bFullScreen;
 extern uint32 g_uWindowWidth;
@@ -271,15 +275,17 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		return;
 	}
 
+
+	bool bAllowHDR = false;
+
+	// Enable the following to allow HDR
+#if DXGI_TEST_FOR_HDR
+
 	RECT windowBounds = {};
 	GetWindowRect((HWND)m_hwnd, &windowBounds);
 	IDXGIAdapter1* dxgiAdapter = NULL;
 	IDXGIFactory6* factory = nullptr;
 
-	bool bAllowHDR = false;
-
-	// Enable the following to allow HDR
-#if 0//def PLATFORM_PC
 	if (SUCCEEDED(CreateDXGIFactory(IID_PPV_ARGS(&factory))))
 	{
 		HRCHECK( factory->EnumAdapters1(0, &dxgiAdapter));
