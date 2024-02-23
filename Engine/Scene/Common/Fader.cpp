@@ -60,6 +60,10 @@ namespace usg
 		}
 	}
 
+	float Fader::GetFadeDuration() const
+	{
+		return 1.f/ FADE_SPEED;
+	}
 
 	void Fader::ForceAlpha(float fAlpha)
 	{

@@ -43,6 +43,8 @@ namespace usg
 
 		void ForceAlpha(float fAlpha);
 
+		float GetFadeDuration() const;
+
 	private:
 		usg::PipelineStateHndl	m_pipelineState;
 		usg::DescriptorSet		m_descriptorSet;

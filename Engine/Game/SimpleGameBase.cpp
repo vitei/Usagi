@@ -189,7 +189,6 @@ namespace usg
 		float fElapsed = m_timer.GetDeltaGameTime();
 		bool bFinished = true;
 		usg::Fader::Inst()->Update(fElapsed);
-		usg::Fader::Inst()->GPUUpdate(pDevice);
 
 		if(m_eState == STATE_ACTIVE)
 		{
@@ -307,6 +306,8 @@ namespace usg
 			usg::MusicManager::Inst()->Update(fElapsed);
 			usg::Audio::Inst()->Update(fElapsed);
 		}
+		usg::Fader::Inst()->GPUUpdate(pDevice);
+
 	}
 	//----------------------------------------------------
 	void SimpleGameBase::Draw(usg::GFXDevice* pDevice)
