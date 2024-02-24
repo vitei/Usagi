@@ -93,7 +93,6 @@ namespace usg
 			UIWindow* pParent, const UIDef& uiDef, const UIWindowDef& windowDef, usg::string path, bool bOffscreen);
 		void SetPos(usg::Vector2f vPos);
 		void SetSize(usg::Vector2f vSize);
-		void SetItemPos(const char* szName, usg::Vector2f vPos, bool bRelative);
 		void SetMatrixDirty() { m_bMatrixDirty = true; }
 		void SetName(const usg::string& name) { m_name = name; }
 		void Update(UIWindow* pParent, float fElapsed, const UIInput* pInput, UIResults* pResults);

@@ -260,14 +260,6 @@ namespace usg
 	}
 
 
-	void UI::SetHUDItemPos(const char* szName, usg::Vector2f vPos, bool bRelative)
-	{
-		for (auto itr : m_parentWindows)
-		{
-			itr->SetItemPos(szName, vPos, bRelative);
-		}
-	}
-
 	bool UI::Draw(usg::GFXContext* pContext)
 	{
 		for (auto itr : m_parentWindows)

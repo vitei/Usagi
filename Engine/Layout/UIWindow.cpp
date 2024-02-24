@@ -1294,25 +1294,6 @@ void UIWindow::SetButtonEnabled(uint32 uIndex, bool bEnabled)
 	}
 }
 
-void UIWindow::SetItemPos(const char* szName, usg::Vector2f vPos, bool bRelative)
-{
-	for (memsize i = 0; i < m_vertices.size(); i++)
-	{
-		if (strcmp(szName, m_pUIItemsDefs[i].def.name) == 0)
-		{
-			usg::Vector2f vAdjPos = GetPos(bRelative ? m_pUIItemsDefs[i].def.vPos + vPos : vPos, m_pUIItemsDefs[i].def.vSize, m_pUIItemsDefs[i].def.eHAlign, m_pUIItemsDefs[i].def.eVAlign, this);
-			m_vertices[i].vPosition.Assign(vAdjPos.x, vAdjPos.y, 0.0f);
-			m_bVertsDirty = true;
-			return;
-		}
-	}
-
-	for (auto& itr : m_children)
-	{
-		itr->SetItemPos(szName, vPos, bRelative);
-	}
-}
-
 
 void UIWindow::UpdateButtons(float fElapsed)
 {

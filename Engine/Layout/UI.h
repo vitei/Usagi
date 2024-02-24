@@ -22,7 +22,6 @@ namespace usg
 		bool Update(float fElapsed, const UIInput* pInput = nullptr, UIResults* pResults = nullptr);
 
 		void GPUUpdate(usg::GFXDevice* pDevice);
-		void SetHUDItemPos(const char* szName, usg::Vector2f vPos, bool bRelative);
 		virtual bool Draw(usg::GFXContext* pContext);
 		virtual void RenderPassChanged(usg::GFXDevice* pDevice, uint32 uContextId, const usg::RenderPassHndl& renderPass, const usg::SceneRenderPasses& passes);
 		UIWindow* GetWindow(const usg::string& name);
