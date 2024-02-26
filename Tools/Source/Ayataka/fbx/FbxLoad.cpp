@@ -1877,30 +1877,33 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 				vertexOut.elements.push_back(normal);
 			}
 
-			if (GetBinormal(currMesh, iVertexIndex, iVertex, binormal))
+			if (!m_bCollisionMesh)
 			{
-				binormal.Transform(normalTransform, 0.0f);
-				vertexOut.elements.push_back(binormal);
-			}
+				if (GetBinormal(currMesh, iVertexIndex, iVertex, binormal))
+				{
+					binormal.Transform(normalTransform, 0.0f);
+					vertexOut.elements.push_back(binormal);
+				}
 
-			if (GetTangent(currMesh, iVertexIndex, iVertex, tangent))
-			{
-				tangent.Transform(normalTransform, 0.0f);
-				vertexOut.elements.push_back(tangent);
-			}
+				if (GetTangent(currMesh, iVertexIndex, iVertex, tangent))
+				{
+					tangent.Transform(normalTransform, 0.0f);
+					vertexOut.elements.push_back(tangent);
+				}
 
-			// TODO: Multiple color streams
-			if (GetColor(currMesh, iVertexIndex, 0, color))
-			{
-				vertexOut.elements.push_back(color);
-			}
+				// TODO: Multiple color streams
+				if (GetColor(currMesh, iVertexIndex, 0, color))
+				{
+					vertexOut.elements.push_back(color);
+				}
 			
-			int uUVCount = currMesh->GetUVLayerCount();
-			for (int k = 0; k < uUVCount; ++k)
-			{
-				GetUV(currMesh, iVertexIndex, currMesh->GetTextureUVIndex(uTriangle, uTriangleVert), k, UV);
-				strcpy_s(UV.hint, uvNames[k]);
-				vertexOut.elements.push_back(UV);
+				int uUVCount = currMesh->GetUVLayerCount();
+				for (int k = 0; k < uUVCount; ++k)
+				{
+					GetUV(currMesh, iVertexIndex, currMesh->GetTextureUVIndex(uTriangle, uTriangleVert), k, UV);
+					strcpy_s(UV.hint, uvNames[k]);
+					vertexOut.elements.push_back(UV);
+				}
 			}
 
 			m_activeVerts.push_back(vertexOut);
