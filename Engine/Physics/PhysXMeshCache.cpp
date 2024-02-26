@@ -120,7 +120,8 @@ namespace usg
 				convexDesc.points.count = static_cast<uint32>(boneVertices->size());
 				convexDesc.points.data = reinterpret_cast<const physx::PxVec3*>(&(*boneVertices)[0]);
 			}
-			ASSERT(convexDesc.points.count >= 4 && convexDesc.points.count <= 256 && "These limits are imposed by PhysX");
+			ASSERT(convexDesc.points.count >= 4);
+			convexDesc.vertexLimit = (physx::PxU16)usg::Math::Min(convexDesc.points.count, 255U);
 			unique_ptr<physx::PxDefaultMemoryOutputStream> buf(vnew(ALLOC_PHYSICS) physx::PxDefaultMemoryOutputStream());
 			physx::PxConvexMeshCookingResult::Enum result;
 			convexDesc.flags |= physx::PxConvexFlag::eCHECK_ZERO_AREA_TRIANGLES;
