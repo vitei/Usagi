@@ -123,6 +123,12 @@ namespace usg
 		return NULL;
 	}
 
+
+	void ComponentManager::SetUseNetTime(bool bNetTime)
+	{
+		m_eventManager.SetUseNetTime(bNetTime);
+	}
+
 	void ComponentManager::HandleSpawnRequests()
 	{
 		// Handle spawn requests
@@ -152,7 +158,7 @@ namespace usg
 		}
 	}
 
-	void ComponentManager::TriggerAllSignals(float fElapsed)
+	void ComponentManager::TriggerAllSignals(float fElapsed, bool bPaused)
 	{
 		HandleSpawnRequests();
 		CheckEntities();
@@ -167,10 +173,12 @@ namespace usg
 
 		Entity rootEntity = ComponentEntity::GetRoot();
 
+		GetEventManager().Update(bPaused ? 0.0f : fElapsed);
 		GetEventManager().TriggerPreRunEvents(m_systemCoordinator, rootEntity, m_uFrameCounter);
 
-		RunSignal runSignal(fElapsed);
+		RunSignal runSignal(fElapsed, bPaused);
 		m_systemCoordinator.TriggerFromRoot(rootEntity, runSignal);
+
 
 		for (GameComponents<usg::PhysicsScene>::Iterator it = GameComponents<usg::PhysicsScene>::GetIterator(); !it.IsEnd(); ++it)
 		{
@@ -528,6 +536,7 @@ namespace usg
 		}
 
 		e->m_uSpawnFrame = 0;
+		e->SetTickWhenPaused(spawnParams.GetTickWhenPaused());
 		m_systemCoordinator.LoadEntityInitializerEvents(file, e);
 
 		for (uint32 j = 0; j < header.childEntityCount; j++)
@@ -548,6 +557,8 @@ namespace usg
 				{
  					Required<usg::SceneComponent, usg::FromSelfOrParents> scene;
 					m_componentLoadHandles.GetComponent(parent, scene);
+
+
 					if (scene.IsValid())
 					{
 						vSpawnPos -= scene->vOriginOffset;

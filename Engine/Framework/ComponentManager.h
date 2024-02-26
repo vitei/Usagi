@@ -31,10 +31,11 @@ namespace usg
 		ComponentManager(MessageDispatch* dispatch, void(*pGameSystemRegisterFunc)(SystemCoordinator&));
 		~ComponentManager();
 
+		void SetUseNetTime(bool bNetTime);
 		void RegisterResourceHandles(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, usg::Scene* pScene);
 		void UpdateDefaultHandles(Entity parent);
 
-		void TriggerAllSignals(float32 fElapsed);
+		void TriggerAllSignals(float32 fElapsed, bool bPaused);
 		void TriggerGPUSignals(GFXDevice* pDevice);
 
 		Entity SpawnEntityFromTemplate(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams);

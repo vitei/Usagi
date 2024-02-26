@@ -9,7 +9,7 @@ namespace usg
 	class EntitySpawnParams
 	{
 	public:
-		EntitySpawnParams() { m_uOverrideFlags = 0; m_iNuid = 0; m_iOwnerNuid = 0; m_uTeam = 0; m_bGlobalTransform = false; }
+		EntitySpawnParams() {}
 		~EntitySpawnParams() {}
 
 		void SetNUID(sint64 uNuid) { m_iNuid = uNuid; m_uOverrideFlags |= SET_NUID; }
@@ -29,6 +29,8 @@ namespace usg
 
 		bool HasGlobalTransform() const { return m_bGlobalTransform; }
 		void SetGlobalTransform(bool bValue) { m_bGlobalTransform = bValue; }
+		void SetTickWhenPaused(bool bValue) { m_bTickWhenPaused = bValue; }
+		bool GetTickWhenPaused() const { return m_bTickWhenPaused; }
 	private:
 		enum Params
 		{
@@ -38,13 +40,14 @@ namespace usg
 			SET_TEAM = (1 << 3)
 		};
 
-		uint32				m_uOverrideFlags;
-		sint64				m_iNuid;
-		sint64				m_iOwnerNuid;
-		uint32				m_uTeam;
+		uint32				m_uOverrideFlags = 0;
+		sint64				m_iNuid = 0;
+		sint64				m_iOwnerNuid = 0;
+		uint32				m_uTeam = 0;
 		TransformComponent	m_transform;
 
-		bool				m_bGlobalTransform;
+		bool				m_bTickWhenPaused = false;
+		bool				m_bGlobalTransform = false;
 	};
 }
 

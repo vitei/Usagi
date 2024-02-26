@@ -80,9 +80,17 @@ namespace usg
 
 	bool SystemsMode::Update(float fElapsed)
 	{
+		Required<SimulationActive, FromSelf> simActive;
+		GetComponent(GetRootEntity(), simActive);
+
+		bool bPaused = false;
+		if (simActive.IsValid() && !simActive->bActive)
+		{
+			bPaused = true;
+		}
 		if (m_pImpl->pComponentManager != nullptr)
 		{
-			m_pImpl->pComponentManager->TriggerAllSignals(fElapsed);
+			m_pImpl->pComponentManager->TriggerAllSignals(fElapsed, bPaused);
 		}
 		return false;
 	}

@@ -74,6 +74,7 @@ ComponentEntity::ComponentEntity() : m_pComponents(StringPointerHash<ComponentTy
 	m_fCatchupTime = 0.0f;
 	m_uOnCollisionMask = 0;
 	m_bIsInNewList = false;
+	m_bTickWhenPaused = false;
 }
 
 ComponentEntity::~ComponentEntity()

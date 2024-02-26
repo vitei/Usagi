@@ -143,6 +143,8 @@ EventManager::EventManager()
 	, m_pMem(mem::Alloc(MEMTYPE_STANDARD, ALLOC_COMPONENT, HEAP_SIZE))
 	, m_eventQueue()
 	, m_bRegisteredDispatch(false)
+	, m_bUseNetTime(false)
+	, m_currentTime(0.0)
 {
 	m_heap.Initialize(m_pMem, HEAP_SIZE);
 }
@@ -242,6 +244,11 @@ void EventManager::TriggerEvents(SystemCoordinator& systemCoordinator, Entity ro
 	TriggerEventsInt(m_eventQueue, systemCoordinator, rootEntity, uFrame);
 }
 
+void EventManager::Update(float fDelta)
+{
+	m_currentTime += fDelta;
+}
+
 void EventManager::RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount)
 {
 	double now = GetTimeNow();
@@ -276,5 +283,12 @@ void EventManager::RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount)
 
 double EventManager::GetTimeNow()
 {
-	return NetTime::GetServerTimePrecise() - NET_TIME_INPUT_DELAY;
+	if(m_bUseNetTime)
+	{
+		return NetTime::GetServerTimePrecise() - NET_TIME_INPUT_DELAY;
+	}
+	else
+	{
+		return m_currentTime;
+	}
 }

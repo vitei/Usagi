@@ -65,7 +65,12 @@ namespace usg
 
 	void RunSignal::RunClosure::operator()(const Entity e, const void* in, void* out)
 	{
-		pRunFunction(*(const GenericInputOutputs*)in, *(GenericInputOutputs*)out, e->GetCatchupTime() + signal->dt);
+		float dt = signal->dt;
+		if (signal->bPaused && !e->TickWhenPaused())
+		{
+			dt = 0.0f;
+		}
+		pRunFunction(*(const GenericInputOutputs*)in, *(GenericInputOutputs*)out, e->GetCatchupTime() + dt);
 	}
 
 	GenericInputOutputs* Signal::GetRootSystem(const uint32 uSystemId)

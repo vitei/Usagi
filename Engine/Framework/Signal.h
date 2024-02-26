@@ -62,7 +62,8 @@ struct RunSignal : public Signal
 	static constexpr uint32 ID = 0x78941da;
 
 	float dt;
-	RunSignal(float _dt) : Signal(ID), dt(_dt) {}
+	bool bPaused;
+	RunSignal(float _dt, bool _bPaused) : Signal(ID), dt(_dt), bPaused(_bPaused) {}
 
 	template<typename System>
 	static inline bool FillSignalRunner(SignalRunner& runner, uint32 systemID)
@@ -80,6 +81,7 @@ struct RunSignal : public Signal
 
 	struct RunClosure;
 };
+
 
 // The following two macros hide away a lot of the boilerplate above...
 #define SIGNAL_RESPONDER(SIGNAL)\

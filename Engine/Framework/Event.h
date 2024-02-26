@@ -1,9 +1,9 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
+//  Events
+//  The OnEvent signal is a special kind of signal
+//  which is parameterized on the event type.
 ****************************************************************************/
-// Events
-// The OnEvent signal is a special kind of signal
-// which is parameterized on the event type.
 
 #ifndef USAGI_FRAMEWORK_EVENT_H_
 #define USAGI_FRAMEWORK_EVENT_H_

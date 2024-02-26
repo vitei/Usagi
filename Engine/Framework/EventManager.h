@@ -34,13 +34,15 @@ public:
 	void SetMessenger(Messenger* messenger);
 	void SetupListener(const uint32 uEventId, MessageDispatch& dispatch);
 
+	void Update(float fDelta);
 	void TriggerEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame);
 	void TriggerPreRunEvents(SystemCoordinator& systemCoordinator, Entity rootEntity, uint32 uFrame);
 
 	void TriggerEventsForEntity(SystemCoordinator& systemCoordinator, Entity e, Entity rootEntity);
 	void RegisterEntitiesRemoved(Entity* pEntities, uint32 uCount);
-	static double GetTimeNow();
-
+	double GetTimeNow();
+	
+	void SetUseNetTime(bool bNetTime) { m_bUseNetTime = bNetTime; }
 
 	template<typename EventType>
 	void RegisterEvent(const EventType& evt, typename Event<EventType>::ExtraData extra = nullptr)
@@ -139,6 +141,24 @@ public:
 		RegisterEventWithEntityAtTime(e.id, evt, targets, t, extra);
 	}
 
+	template<typename EventType>
+	void RegisterEventDelay(const EventType& evt, double t, typename Event<EventType>::ExtraData extra = nullptr)
+	{
+		RegisterEventAtTime(evt, t + GetTimeNow(), extra);
+	}
+
+	template<typename EventType>
+	void RegisterEventWithEntityDelay(Entity e, const EventType& evt, uint32 targets, double t, typename EventOnEntity<EventType>::ExtraData extra = nullptr)
+	{
+		RegisterEventWithEntityAtTime(e, evt, targets, t + GetTimeNow(), extra);
+	}
+
+	template<typename EventType>
+	void RegisterEventWithEntityDelay(EntityID e, const EventType& evt, uint32 targets, double t, typename EventOnEntity<EventType>::ExtraData extra = nullptr)
+	{
+		RegisterEventWithEntityDelay(e.id, evt, targets, t, extra);
+	}
+
 private:
 	static const uint32 HEAP_SIZE = 65536;
 
@@ -152,6 +172,9 @@ private:
 	EventQueue m_preRunEventQueue;
 
 	bool m_bRegisteredDispatch;
+
+	bool m_bUseNetTime;
+	float64 m_currentTime;  
 
 	void AddToEventQueue(TriggerableEvent* evt);
 	void AddToPreRunEventQueue(TriggerableEvent* evt);

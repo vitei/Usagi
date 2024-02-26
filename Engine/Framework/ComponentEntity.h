@@ -134,6 +134,9 @@ namespace usg
 			return m_uSpawnFrame;
 		}
 
+		bool TickWhenPaused() const { return m_bTickWhenPaused; }
+		void SetTickWhenPaused(bool bTick) { m_bTickWhenPaused = bTick; }
+
 		// DO NOT CALL EXCEPT FROM NEW ENTITIES
 		void SetInNewList(bool bInNewList) { m_bIsInNewList = bInNewList; }
 		bool GetInNewList() const { return m_bIsInNewList; }
@@ -148,6 +151,7 @@ namespace usg
 		bool             m_bChildrenChanged;
 		bool			 m_bPendingDeletions;
 		bool			 m_bIsInNewList;
+		bool			 m_bTickWhenPaused;
 		StringPointerHash<ComponentType*> m_pComponents;
 		ComponentType*   m_pFirstComponent;
 		StringPointerHash<GenericInputOutputs*> m_pSystems;
