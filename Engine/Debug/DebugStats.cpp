@@ -6,6 +6,7 @@
 #include "Engine/Core/Thread/Thread.h"
 #include "Engine/Memory/DoubleStack.h"
 #include "Engine/HID/Input.h"
+#include "Engine/HID/Keyboard.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Scene/SceneContext.h"
 #include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
@@ -83,38 +84,40 @@ void DebugStats::Draw()
 
 void DebugStats::UpdatePageNumber(bool bForward, bool bBack)
 {
+	uint32 uActiveType = m_uActiveType;
+	uint32 uActivePage = m_uActivePage;
 	if (bForward)
 	{
-		m_uActivePage = m_uActivePage + 1;
-		if (m_uActivePage >= GetPageCount(m_uActiveType))
+		uActivePage = uActivePage + 1;
+		if (uActivePage >= GetPageCount(m_uActiveType))
 		{
-			m_uActivePage = 0;
+			uActivePage = 0;
 			do
 			{
-				m_uActiveType = (m_uActiveType + 1) % m_debugStats.size();
-			} while (GetPageCount(m_uActiveType) == 0);
+				uActiveType = (uActiveType + 1) % m_debugStats.size();
+			} while (GetPageCount(uActiveType) == 0);
 		}
 	}
 
 	if (bBack)
 	{
-		if (m_uActivePage > 0)
+		if (uActivePage > 0)
 		{
-			m_uActivePage = m_uActivePage - 1;
+			uActivePage = uActivePage - 1;
 		}
 		else
 		{
 			do
 			{
-				m_uActiveType = (m_uActiveType - 1) % m_debugStats.size();
-			} while (GetPageCount(m_uActiveType) == 0);
+				uActiveType = (uActiveType - 1) % m_debugStats.size();
+			} while (GetPageCount(uActiveType) == 0);
 
-			m_uActivePage = GetPageCount(m_uActiveType) - 1;
+			uActivePage = GetPageCount(uActiveType) - 1;
 		}
 	}
 	if(bForward || bBack)
 	{
-		SetPage(m_uActiveType, m_uActivePage);
+		SetPage(uActiveType, uActivePage);
 	}
 }
 
@@ -125,6 +128,12 @@ void DebugStats::Update(float fElapsed)
 	{
 		UpdatePageNumber(pGamepad->GetButtonDown(GAMEPAD_BUTTON_SELECT), false);
 	}
+	Keyboard* pKeyboard = Input::GetKeyboard();
+	if (pKeyboard) 
+	{
+		UpdatePageNumber(pKeyboard->GetKey(KEYBOARD_KEY_NUMPAD6, BUTTON_STATE_PRESSED), pKeyboard->GetKey(KEYBOARD_KEY_NUMPAD4, BUTTON_STATE_PRESSED));
+	}
+
 
 	usg::vector<IDebugStatGroup*>::iterator it;
 	for (it = m_debugStats.begin(); it != m_debugStats.end(); ++it)
