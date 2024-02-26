@@ -306,8 +306,11 @@ namespace usg
 						newCollision.vImpulse = ToUsgVec3(m_contactPoints[j].impulse);
 						newCollision.uMaterialFlags[bSwap ? 1 : 0] = physics::details::FetchMaterialFlags(pairs[i].shapes[0], m_contactPoints[j].internalFaceIndex0);
 						newCollision.uMaterialFlags[bSwap ? 0 : 1] = physics::details::FetchMaterialFlags(pairs[i].shapes[1], m_contactPoints[j].internalFaceIndex1);
+
+						newCollision.uMaterialFlags[bSwap ? 1 : 0] |= rtd1.uMaterialFlags;
+						newCollision.uMaterialFlags[bSwap ? 0 : 1] |= rtd2.uMaterialFlags;
 					}
-				}
+				} 
 			}
 		}
 

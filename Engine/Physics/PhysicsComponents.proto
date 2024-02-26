@@ -91,7 +91,7 @@ message ConeCollider
 	required Vector3f vDirection = 2;
 	required float fLength = 3;
 	required float fRadius = 4;
-	required PhysicMaterial material = 5;
+	required PhysicMaterial material = 5; 
 	required bool bIsTrigger = 6 [default = false];
 }
 

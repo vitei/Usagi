@@ -1,13 +1,6 @@
 /****************************************************************************
 //	Usagi Engine, Copyright © Vitei, Inc. 2013
 ****************************************************************************/
-//
-//  PhysicsSystem.cpp
-//  Usagi_xcode
-//
-//  Created by Giles on 2/18/14.
-//  Copyright (c) 2014 Vitei. All rights reserved.
-//
 #include "Engine/Common/Common.h"
 #include "Engine/Framework/EventManager.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"

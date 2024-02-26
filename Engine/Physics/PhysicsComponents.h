@@ -28,6 +28,7 @@ namespace usg
 		physx::PxShape* pShape;
 		Entity shapeAggregateEntity;
 		Entity entity;
+		uint32 uMaterialFlags = 0;
 		void release();
 	};
 

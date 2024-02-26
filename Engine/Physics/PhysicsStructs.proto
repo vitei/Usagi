@@ -15,6 +15,7 @@ message PhysicMaterial
 	required uint32 uFlags = 4 [default = 0];
 	required CombineMode eFrictionCombineMode = 5 [default = AVERAGE];
 	required CombineMode eRestitutionCombineMode = 6 [default = AVERAGE];
+	required uint32 uMaterialFlags = 7 [default = 0];	// Custom flags which are OR'd with any material flags
 }
 
 message JointBreakForce

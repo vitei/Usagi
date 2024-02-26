@@ -373,6 +373,7 @@ namespace usg
 
 		rtd.pMaterial = handles.pPhysicsScene->pPhysics->createMaterial(PhysicMaterial_fStaticFriction_default, PhysicMaterial_fDynamicFriction_default, PhysicMaterial_fBounciness_default);
 		rtd.pMaterial->userData = (void*)(uint64)0xdeadc0de;
+		rtd.uMaterialFlags = c->material.uMaterialFlags;
 
 		ApplyMaterial(rtd.pMaterial, c->material);
 
