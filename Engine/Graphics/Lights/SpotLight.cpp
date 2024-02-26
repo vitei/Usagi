@@ -14,7 +14,8 @@ struct SpotLightData
 {
 	Matrix4x4	mRotMat;
 	Vector4f	vPos;
-	Vector4f	vColorSpec;
+	Vector4f	vDiffuse;
+	Vector4f	vSpecular;
 	Vector4f	vAmbient;
 	Vector4f	vRange;
 	Vector4f	vDirection;
@@ -27,7 +28,8 @@ static const ShaderConstantDecl g_spotLightDecl[] =
 {
 	SHADER_CONSTANT_ELEMENT(SpotLightData, mRotMat,			CT_MATRIX_44, 1),
 	SHADER_CONSTANT_ELEMENT(SpotLightData, vPos,				CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(SpotLightData, vColorSpec,			CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(SpotLightData, vDiffuse,			CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(SpotLightData, vSpecular,			CT_VECTOR_4, 1),
 	SHADER_CONSTANT_ELEMENT(SpotLightData, vAmbient,			CT_VECTOR_4, 1),
 	SHADER_CONSTANT_ELEMENT(SpotLightData, vRange,				CT_VECTOR_4, 1),
 	SHADER_CONSTANT_ELEMENT(SpotLightData, vDirection,			CT_VECTOR_4, 1),
@@ -158,8 +160,11 @@ void SpotLight::GPUUpdate(GFXDevice* pDevice)
 {
 	SpotLightData* pData = m_constants.Lock<SpotLightData>();
 	const Color& diffuse = GetDiffuse();
+	const Color& specular = GetSpecular();
+
 	pData->mRotMat = MakeRotationDir(GetDirection());
-	pData->vColorSpec.Assign(diffuse.r(), diffuse.g(), diffuse.b(), GetSpecular().r());
+	pData->vDiffuse.Assign(diffuse.r(), diffuse.g(), diffuse.b(), 0.0f);
+	pData->vSpecular.Assign(specular.r(), specular.g(), specular.b(), 0.0f);
 	pData->vPos = GetPosition();
 	pData->vDirection = GetDirection();
 	// TODO: Add support for the near range (pre-falloff)

@@ -37,7 +37,7 @@ void main(void)
 
 	float nDotLD = max(0.0, dot(vNormal, vLightDir));
 
-	vec3 vDiffColor = ((light.vColorSpec.xyz * nDotLD) + light.vAmbient.rgb) * fAttenuation;
+	vec3 vDiffColor = ((light.vDiffuse.xyz * nDotLD) + light.vAmbient.rgb) * fAttenuation;
 
 	vColorOut0	= vec4((vDiffColor*vColor), 1.0);
 }

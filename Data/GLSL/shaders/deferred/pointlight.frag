@@ -97,7 +97,7 @@ void main(void)
                  
     // TODO: Add the ambient colour of the light
     float NdotHV = max(dot(vNormal,refl),0.0);
-    vec3 vSpecular = fAttenuation * vSpecCol * light.vColorSpec.www * pow(NdotHV, fSpecularPow);		
+    vec3 vSpecular = fAttenuation * vSpecCol * light.vSpecular.rgb * pow(NdotHV, fSpecularPow);		
 
     float fShadow = 1.0f;
 #ifdef SHADOW_READ
@@ -108,7 +108,7 @@ void main(void)
     fShadow = ShadowCalculationSoft(vWorldPos);
 #endif
 #endif
-	vec3 vDiffColor = ((light.vColorSpec.xyz * nDotLD * (fShadow)) + light.vAmbient.rgb) * fAttenuation;
+	vec3 vDiffColor = ((light.vDiffuse.xyz * nDotLD * (fShadow)) + light.vAmbient.rgb) * fAttenuation;
 
 	vColorOut0	= vec4((vDiffColor*vColor)+(vSpecular*fShadow), 1.0);
 }

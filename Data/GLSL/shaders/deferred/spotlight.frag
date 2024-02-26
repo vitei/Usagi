@@ -55,7 +55,7 @@ void main(void)
              
         // TODO: Add the ambient colour of the light
         float NdotHV = max(dot(vNormal,refl),0.0);
-        vSpecColor += fAttenuation * vGSpecCol * light.vColorSpec.w * pow(NdotHV, fSpecPow);		
+        vSpecColor += fAttenuation * vGSpecCol * light.vSpecular.rgb * pow(NdotHV, fSpecPow);		
 #endif        
 	}
 	else
@@ -74,7 +74,7 @@ void main(void)
 	fAttenuation *= fShadow;
 	vSpecColor *= fShadow;
 #endif
-	vec3 vDiffColor = light.vColorSpec.xyz * nDotLD * fAttenuation;
+	vec3 vDiffColor = light.vDiffuse.rgb * nDotLD * fAttenuation;
 
 	vColorOut0	= vec4((vDiffColor*vColor)+(vSpecColor), 1.0);
 }

@@ -3,7 +3,8 @@
 struct PointLight
 {
 	vec4	vPos;
-	vec4	vColorSpec;
+	vec4	vDiffuse;
+	vec4	vSpecular;
 	vec4	vRange;
 	vec4	vAmbient;
 };
@@ -13,7 +14,8 @@ struct SpotLight
 {
 	mat4		mRotMat;
 	vec4		vPos;
-	vec4		vColorSpec;
+	vec4		vDiffuse;
+	vec4		vSpecular;
 	vec4		vAmbient;
 	vec4		vRange;
 	vec4		vDirection;

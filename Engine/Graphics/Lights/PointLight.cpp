@@ -12,7 +12,8 @@ namespace usg {
 struct PointLightData
 {
 	Vector4f	vPos;
-	Vector4f	vColorSpec;
+	Vector4f	vDiffuse;
+	Vector4f	vSpecular;
 	Vector4f	vRange;
 	Vector4f	vAmbient;
 	//float		fLightInvRange;
@@ -29,7 +30,8 @@ struct PointLightConsts
 static const ShaderConstantDecl g_pointLightDecl[] =
 {
 	SHADER_CONSTANT_ELEMENT(PointLightData, vPos,			CT_VECTOR_4, 1),
-	SHADER_CONSTANT_ELEMENT(PointLightData, vColorSpec,	CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(PointLightData, vDiffuse,	CT_VECTOR_4, 1),
+	SHADER_CONSTANT_ELEMENT(PointLightData, vSpecular,	CT_VECTOR_4, 1),
 	SHADER_CONSTANT_ELEMENT(PointLightData, vRange,		CT_VECTOR_4, 1),
 	SHADER_CONSTANT_ELEMENT(PointLightData, vAmbient,		CT_VECTOR_4, 1),
 	//SHADER_CONSTANT_ELEMENT( PointLightData, fLightRange,		CT_FLOAT, 1 )
@@ -175,7 +177,10 @@ void PointLight::GPUUpdate(GFXDevice* pDevice)
 		PointLightConsts* pData = m_constants.Lock<PointLightConsts>();
 		const Color& diffuse = GetDiffuse();
 		const Color& ambient = GetAmbient();
-		pData->light[0].vColorSpec.Assign(diffuse.r(), diffuse.g(), diffuse.b(), GetSpecular().r());
+		const Color& specular = GetSpecular();
+
+		pData->light[0].vDiffuse.Assign(diffuse.r(), diffuse.g(), diffuse.b(), 0.0f);
+		pData->light[0].vSpecular.Assign(specular.r(), specular.g(), specular.b(), 0.0f);
 		pData->light[0].vPos = GetPosition();
 		// TODO: Add support for the near range (pre-falloff)
 		pData->light[0].vRange.Assign(1.0f / GetFar(), GetFar(), 1.0f / GetNear(), GetNear());
