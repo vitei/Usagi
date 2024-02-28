@@ -18,10 +18,6 @@ namespace usg
 
 #define FADE_SPEED 8.0f		// 1/8th of a second
 
-	static float sTime = 1.0f;
-	static int sFadeType = 0;
-	static float sfAlpha = 1.0f;
-
 
 #define NUM_VERTICES 6
 
@@ -44,13 +40,16 @@ namespace usg
 	};
 
 
-	void Fader::Draw(usg::GFXContext* pContext, bool upper)
+	void Fader::Draw(usg::GFXContext* pContext)
 	{
-		if (sfAlpha > 0.0f)
+		float fAlpha = 0.0f;
+		for (uint32 i = 0; i < FADE_TYPE_COUNT; i++)
 		{
-			if (!m_bWipeLower && !upper)
-				return;
-
+			fAlpha = Math::Max(fAlpha, m_fade[i].fAlpha);
+		}
+		
+		if (fAlpha > 0.0f)
+		{
 			pContext->BeginGPUTag("Fader");
 			pContext->SetPipelineState(m_pipelineState);
 			pContext->SetDescriptorSet(&m_descriptorSet, 0);
@@ -60,14 +59,14 @@ namespace usg
 		}
 	}
 
-	float Fader::GetFadeDuration() const
+	float Fader::GetFadeDuration(FadeType eType) const
 	{
 		return 1.f/ FADE_SPEED;
 	}
 
-	void Fader::ForceAlpha(float fAlpha)
+	void Fader::ForceAlpha(float fAlpha, FadeType eType)
 	{
-		sfAlpha = fAlpha;
+		m_fade[eType].fAlpha = fAlpha;
 	}
 
 
@@ -122,11 +121,11 @@ namespace usg
 		SetVertex(4, usg::Vector3f(1.0f, -1.0f, 0.5f), verts[4]);
 		SetVertex(5, usg::Vector3f(-1.0f, -1.0f, 0.5f), verts[5]);
 
-		usg::Color overrideColor(0.0f, 0.0f, 0.0f, sfAlpha);
+		usg::Color overrideColor(0.0f, 0.0f, 0.0f, 0.0f);
 		m_constants.Init(pDevice, g_fadeCBDecl);
 		m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
 		FadeConstants* pConst = m_constants.Lock<FadeConstants>();
-		pConst->fFade = sfAlpha;
+		pConst->fFade = 0.0f;
 		m_constants.Unlock();
 		m_VertexBuffer.Init(pDevice, verts, sizeof(usg::PositionVertex), 6, "Fader");
 		m_constants.UpdateData(pDevice);
@@ -143,72 +142,86 @@ namespace usg
 
 	void Fader::Update(float fElapsed)
 	{
-		float fChange = FADE_SPEED * fElapsed;
-		switch (sFadeType)
+		for(uint32 i=0; i<FADE_TYPE_COUNT; i++)
 		{
-		case FADE_IN:
-			sTime += fChange;
-
-			if (sTime >= 1.0f)
+			if (i == FADE_TYPE_GAME && IsFading(FADE_TYPE_SYSTEM))
 			{
-				sTime = 1.0f;
-				sFadeType = 0;
-				sfAlpha = 0.0f;
+				// Don't update the game fade whilst the system is doing things as it looks weird
+				continue;
 			}
-			else
+			float fChange = FADE_SPEED * fElapsed;
+			switch (m_fade[i].iFadeType)
 			{
-				sfAlpha = (1.0f - sTime);
-			}
+			case FADE_IN:
+				m_fade[i].fTime += fChange;
 
-			break;
-
-		case FADE_OUT:
-			sTime += fChange;
-
-			if (sTime >= 1.0f)
-			{
-				sTime = 1.0f;
-				sFadeType = 0;
-				sfAlpha = 1.f;
-			}
-			else
-			{
-				sfAlpha = (sTime);
-			}
-
-			break;
-
-		case FADE_WIPE:
-			sTime += fChange * 2.0f;
-
-			if (sTime >= 1.0f)
-			{
-				sTime = 1.0f;
-				sFadeType = 0;
-				sfAlpha = 0.0f;
-			}
-			else
-			{
-				if (sTime > 0.5f)
+				if (m_fade[i].fTime >= 1.0f)
 				{
-					sfAlpha = sTime * 2.0f;
+					m_fade[i].fTime = 1.0f;
+					m_fade[i].iFadeType = 0;
+					m_fade[i].fAlpha = 0.0f;
 				}
 				else
 				{
-					sfAlpha = 1.0f - ((sTime - 0.5f) * 2.f);
+					m_fade[i].fAlpha = (1.0f - m_fade[i].fTime);
 				}
-			}
 
-			break;
+				break;
+
+			case FADE_OUT:
+				m_fade[i].fTime += fChange;
+
+				if (m_fade[i].fTime >= 1.0f)
+				{
+					m_fade[i].fTime = 1.0f;
+					m_fade[i].iFadeType = 0;
+					m_fade[i].fAlpha = 1.f;
+				}
+				else
+				{
+					m_fade[i].fAlpha = (m_fade[i].fTime);
+				}
+
+				break;
+
+			case FADE_WIPE:
+				m_fade[i].fTime += fChange * 2.0f;
+
+				if (m_fade[i].fTime >= 1.0f)
+				{
+					m_fade[i].fTime = 1.0f;
+					m_fade[i].iFadeType = 0;
+					m_fade[i].fAlpha = 0.0f;
+				}
+				else
+				{
+					if (m_fade[i].fTime > 0.5f)
+					{
+						m_fade[i].fAlpha = m_fade[i].fTime * 2.0f;
+					}
+					else
+					{
+						m_fade[i].fAlpha = 1.0f - ((m_fade[i].fTime - 0.5f) * 2.f);
+					}
+				}
+
+				break;
+			}
 		}
 	}
 
 	void Fader::GPUUpdate(usg::GFXDevice* pDevice)
 	{
-		if(sfAlpha > 0.0f)
+		float fAlpha = 0.0f;
+		for (uint32 i = 0; i < FADE_TYPE_COUNT; i++)
+		{
+			fAlpha = Math::Max(fAlpha, m_fade[i].fAlpha);
+		}
+
+		if(fAlpha > 0.0f)
 		{
 			FadeConstants* pConst = m_constants.Lock<FadeConstants>();
-			pConst->fFade = sfAlpha;
+			pConst->fFade = fAlpha;
 			m_constants.Unlock();
 			m_constants.UpdateData(pDevice);
 			m_descriptorSet.UpdateDescriptors(pDevice);
@@ -216,35 +229,34 @@ namespace usg
 	}
 
 
-	void Fader::StartFade(int type, bool bWipeLower)
+	void Fader::StartFade(int type, FadeType eType)
 	{
 		// Already faded
-		m_bWipeLower = bWipeLower;
-		if (type == FADE_OUT && sfAlpha >= 1.f)
+		if (type == FADE_OUT && m_fade[eType].fAlpha >= 1.f)
 			return;
 
-		if (type != sFadeType)
+		if (type != m_fade[eType].iFadeType)
 		{
-			sFadeType = type;
-			sTime = 0.0;
+			m_fade[eType].iFadeType = type;
+			m_fade[eType].fTime = 0.0;
 		}
 	}
 
 
-	bool Fader::IsFading()
+	bool Fader::IsFading(FadeType eType)
 	{
 		//return sAlpha != 0 && sAlpha != 255;
-		return sFadeType != 0;
+		return m_fade[eType].iFadeType != 0;
 	}
 
-	void Fader::Blackout()
+	void Fader::Blackout(FadeType eType)
 	{
-		sfAlpha = 1.f;
+		m_fade[eType].fAlpha = 1.f;
 	}
 
-	bool Fader::IsBlackout(void)
+	bool Fader::IsBlackout(FadeType eType)
 	{
-		return (sfAlpha >= 1.f);
+		return (m_fade[eType].fAlpha >= 1.f);
 	}
 
 }

@@ -24,33 +24,47 @@ namespace usg
 			FADE_WIPE = 3
 		};
 
+		enum FadeType
+		{
+			FADE_TYPE_GAME = 0,
+			FADE_TYPE_SYSTEM,
+			FADE_TYPE_COUNT
+		};
 
 		void Init(usg::GFXDevice* pDevice, const usg::RenderPassHndl& renderPass);
 		void CleanUpDeviceData(usg::GFXDevice* pDevice);
 
-		void Draw(usg::GFXContext* pContext, bool upper);
+		void Draw(usg::GFXContext* pContext);
 
 		void GPUUpdate(usg::GFXDevice* pDevice);
 		void Update(float fElapsed);
 
-		void StartFade(int type, bool bWipeLower = true);
+		void StartFade(int type, FadeType eType);
 
-		bool IsFading();
+		bool IsFading(FadeType eType);
 
-		void Blackout();
+		void Blackout(FadeType eType);
 
-		bool IsBlackout();
+		bool IsBlackout(FadeType eType);
 
-		void ForceAlpha(float fAlpha);
+		void ForceAlpha(float fAlpha, FadeType eType);
 
-		float GetFadeDuration() const;
+		float GetFadeDuration(FadeType eType) const;
 
 	private:
 		usg::PipelineStateHndl	m_pipelineState;
 		usg::DescriptorSet		m_descriptorSet;
 		usg::ConstantSet		m_constants;
 		usg::VertexBuffer		m_VertexBuffer;
-		bool					m_bWipeLower;
+
+		struct FadeInfo
+		{
+			float fTime = 1.0f;
+			int iFadeType = 0;
+			float fAlpha = 0.0f;
+		};
+
+		FadeInfo m_fade[FADE_TYPE_COUNT];
 	};
 
 }

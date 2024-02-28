@@ -60,7 +60,7 @@ namespace usg
 			m_pActiveMode->Init(pDevice, pResMgr);
 			m_pActiveMode->Update(0.0f);
 			m_pActiveMode->PreDraw(pDevice, nullptr);
-			usg::Fader::Inst()->ForceAlpha(0.0f);
+			usg::Fader::Inst()->ForceAlpha(0.0f, Fader::FADE_TYPE_SYSTEM);
 			m_eState = STATE_SPLASH;
 		}
 		else
@@ -220,20 +220,20 @@ namespace usg
 
 			if (bFinished)
 			{
-				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT, Fader::FADE_TYPE_SYSTEM);
 				m_eState = STATE_FADE_OUT;
 				ModeFinished();
 			}
 			break;
 		case STATE_FADE_OUT:
-			if (usg::Fader::Inst()->IsBlackout())
+			if (usg::Fader::Inst()->IsBlackout(Fader::FADE_TYPE_SYSTEM))
 			{
 				// DeInitHomeButtonDisabledAnimation();
 				m_eState = STATE_TRANSITION;
 				m_pTransitionMode->Reset();
 				if( DrawLoadingScreen() && bThreadedLoad )
 				{
-					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN, Fader::FADE_TYPE_SYSTEM);
 				}
 				usg::Audio::Inst()->StopAll(AUDIO_TYPE_SFX, 0.12f);
 			}
@@ -250,7 +250,7 @@ namespace usg
 
 				if(!bThreadedLoad)
 				{
-					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN, Fader::FADE_TYPE_SYSTEM);
 				}
 				// Normally we would fade in, but we are doing that manually due to the connection method;
 			}
@@ -270,14 +270,14 @@ namespace usg
 				m_eState = STATE_END_LOADING;
 				if(DrawLoadingScreen())
 				{
-					usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+					usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT, Fader::FADE_TYPE_SYSTEM);
 				}
 			}
 			break;
 		case STATE_SPLASH:
 			if (m_pActiveMode->Update(fElapsed))
 			{
-				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT);
+				usg::Fader::Inst()->StartFade(usg::Fader::FADE_OUT, Fader::FADE_TYPE_SYSTEM);
 				PostSplashInit(pDevice, usg::ResourceMgr::Inst());
 				//m_eState = STATE_LOADING;
 				m_eState = STATE_FADE_OUT;
@@ -285,12 +285,12 @@ namespace usg
 			}
 			break;
 		case STATE_END_LOADING:
-			if (!DrawLoadingScreen() || usg::Fader::Inst()->IsBlackout())
+			if (!DrawLoadingScreen() || usg::Fader::Inst()->IsBlackout(Fader::FADE_TYPE_SYSTEM))
 			{
 				m_eState = STATE_ACTIVE;
 				m_pActiveMode->Start();
 				m_pActiveMode->Update(fElapsed);	// Run the update first so everything is valid
-				usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN);
+				usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN, Fader::FADE_TYPE_SYSTEM);
 				usg::File::ResetReadTime();
 			}
 			else
@@ -344,7 +344,7 @@ namespace usg
 		}
 		OverlayRender(pImmContext, pDisplay, pHMD);
 		m_debugRender.Draw(pImmContext);
-		usg::Fader::Inst()->Draw(pImmContext, true);
+		usg::Fader::Inst()->Draw(pImmContext);
 		pDisplay->Present();
 		pRenderMode->PostDraw(pDevice);
 		if(m_eState == STATE_ACTIVE)
