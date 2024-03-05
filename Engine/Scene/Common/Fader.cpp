@@ -229,6 +229,13 @@ namespace usg
 	}
 
 
+	void Fader::ResetFade(FadeType eType)
+	{
+		m_fade[eType].iFadeType = 0;
+		m_fade[eType].fTime = 0.0f;
+		m_fade[eType].fAlpha = 0.0f;
+	}
+
 	void Fader::StartFade(int type, FadeType eType)
 	{
 		// Already faded

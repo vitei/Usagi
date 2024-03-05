@@ -231,6 +231,8 @@ namespace usg
 				// DeInitHomeButtonDisabledAnimation();
 				m_eState = STATE_TRANSITION;
 				m_pTransitionMode->Reset();
+				usg::Fader::Inst()->ResetFade(Fader::FADE_TYPE_GAME);
+
 				if( DrawLoadingScreen() && bThreadedLoad )
 				{
 					usg::Fader::Inst()->StartFade(usg::Fader::FADE_IN, Fader::FADE_TYPE_SYSTEM);

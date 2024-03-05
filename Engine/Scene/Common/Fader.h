@@ -51,6 +51,8 @@ namespace usg
 
 		float GetFadeDuration(FadeType eType) const;
 
+		void ResetFade(FadeType eType);
+
 	private:
 		usg::PipelineStateHndl	m_pipelineState;
 		usg::DescriptorSet		m_descriptorSet;
