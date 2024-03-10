@@ -16,11 +16,13 @@ namespace usg
 		void SetTeam(uint32 uTeam) { m_uTeam = uTeam; m_uOverrideFlags |= SET_TEAM; }
 		void SetOwnerNUID(sint64 uNuid) { m_iOwnerNuid = uNuid; m_uOverrideFlags |= SET_OWNER_NUID; }
 		void SetTransform(const TransformComponent& trans) { m_transform = trans; m_uOverrideFlags |= SET_TRANSFORM; }
+		void SetDeferOnLoaded(bool bDefer) { m_bDeferOnLoaded = bDefer; }
 
 		bool HasNUID() const { return m_uOverrideFlags & SET_NUID; }
 		bool HasOwnerNUID() const { return m_uOverrideFlags & SET_OWNER_NUID; }
 		bool HasTransform() const { return m_uOverrideFlags & SET_TRANSFORM; }
 		bool HasTeam() const { return m_uOverrideFlags & SET_TEAM; }
+		bool GetDeferOnLoaded() const { return m_bDeferOnLoaded; }
 
 		sint64 GetNUID() const { ASSERT(HasNUID()); return m_iNuid; }
 		uint32 GetTeam() const { return m_uTeam; }
@@ -48,6 +50,7 @@ namespace usg
 
 		bool				m_bTickWhenPaused = false;
 		bool				m_bGlobalTransform = false;
+		bool				m_bDeferOnLoaded = false;
 	};
 }
 
