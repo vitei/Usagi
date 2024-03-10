@@ -31,7 +31,8 @@ namespace usg
 		PARTICLE_EFFECT,
 		PARTICLE_EMITTER,
 		PROTOCOL_BUFFER,
-		PAK_FILE
+		PAK_FILE,
+		HEIGHTFIELD
 	};
 
 	class ResourceBase

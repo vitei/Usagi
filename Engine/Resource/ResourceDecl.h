@@ -17,6 +17,7 @@ class Effect;
 class Texture;
 class ModelResource;
 class Font;
+class HeightFieldResource;
 class MaterialAnimationResource;
 class SkeletalAnimationResource;
 class ParticleEffectResource;
@@ -63,6 +64,8 @@ public:
 };
 
 typedef ResourceHandle<const CollisionModelResource, ResourceType::COLLISION> CollisionModelResHndl;
+typedef ResourceHandle<const HeightFieldResource, ResourceType::HEIGHTFIELD> HeightFieldResHndl;
+
 typedef ResourceHandle<const ModelResource, ResourceType::MODEL> ModelResHndl;
 typedef ResourceHandle<const Effect, ResourceType::EFFECT> EffectHndl;
 typedef ResourceHandle<const Texture, ResourceType::TEXTURE> TextureHndl;

@@ -8,6 +8,7 @@
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
 #include "Engine/Resource/CollisionModelResource.h"
+#include "Engine/Resource/HeightFieldResource.h"
 #include "Engine/Physics/PhysXMeshCache.h"
 #include "Engine/Physics/VehicleCollider.h"
 #include "Engine/Physics/PhysicsSceneData.h"
@@ -615,7 +616,11 @@ namespace usg
 
 		// FIXME: Once working this should be cached like the CollisionMesh as we may well re-use terrain sections
 		auto& rtd = c.GetRuntimeData();
-		rtd.pSamples = (physx::PxHeightFieldSample*)mem::Alloc(MEMTYPE_STANDARD, ALLOC_PHYSICS, sizeof(physx::PxHeightFieldSample) * (c->uColumns * c->uRows));
+
+		HeightFieldResHndl heightField = handles.pResourceMgr->GetHeightfieldResource(c->szAsset);
+
+
+		rtd.pSamples = heightField->GetSamples();
 
 		physx::PxHeightFieldDesc hfDesc;
 		hfDesc.format = physx::PxHeightFieldFormat::eS16_TM;

@@ -39,6 +39,11 @@ public:
 	ParticleEffectResHndl		GetParticleEffect(const char* szFileName);
 	ParticleEmitterResHndl		GetParticleEmitter(GFXDevice* pDevice, const char* szFileName);
 	CollisionModelResHndl		GetCollisionModel(const char* szFileName);
+	HeightFieldResHndl			GetHeightfieldResource(const char* szFileName);
+
+	// USE WITH CAUTION
+	// For game specific assets - note that the resource manager will delete the resource so do not delete it manually or pass in a member variable
+	void AddResource(ResourceBase* pBase);
 
 	// Contain customisable constant set data in addition to the effects
 	CustomEffectResHndl			GetCustomEffectRes(GFXDevice* pDevice, const char* szFileName);
@@ -90,6 +95,7 @@ private:
 	usg::string					m_textureDir;
 	usg::string					m_effectDir;
 	usg::string					m_fontDir;
+	usg::string					m_physicsDir;
 	bool						m_bReloadIfDirty;
 	bool						m_bUseLODs;
 

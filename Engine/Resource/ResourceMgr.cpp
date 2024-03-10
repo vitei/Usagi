@@ -55,6 +55,7 @@ ResourceMgr::ResourceMgr(void)
 	m_textureDir = "Textures/";
 	m_effectDir = "Effects/";
 	m_fontDir = "Fonts/";
+	m_physicsDir = "Physics/";
 
 	ResourceDictionary::init();
 
@@ -378,6 +379,18 @@ SkeletalAnimationResHndl ResourceMgr::GetSkeletalAnimation( const char* szFileNa
 	return p;
 }
 
+HeightFieldResHndl ResourceMgr::GetHeightfieldResource(const char* szFileName)
+{
+	// FIXME: Placeholder, the asset doesn't exist (yet) and is only created on the game side
+	HeightFieldResHndl p = m_pImpl->resources.GetResourceHndl(szFileName, ResourceType::HEIGHTFIELD);
+	if (!p)
+	{
+		DEBUG_PRINT("!!!Heightfield not found!!! %s\n", szFileName);
+	}
+	return p;
+
+}
+
 void ResourceMgr::FinishedStaticLoad()
 {
 	m_pImpl->resources.SetTag(1);
@@ -391,6 +404,12 @@ void ResourceMgr::ClearDynamicResources(GFXDevice* pDevice)
 void ResourceMgr::ClearAllResources(GFXDevice* pDevice)
 {
 	m_pImpl->resources.FreeAllResources(pDevice);
+}
+
+
+void ResourceMgr::AddResource(ResourceBase* pBase)
+{
+	m_pImpl->resources.AddResource(pBase);
 }
 
 ModelResHndl ResourceMgr::_GetModel(GFXDevice* pDevice, const char* szModelName, bool bInstance, bool bFastMem)

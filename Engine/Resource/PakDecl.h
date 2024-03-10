@@ -76,6 +76,12 @@ namespace usg
 			uint32 uIntFormat = 0;
 		};
 
+		struct HeightfieldHeader
+		{
+			uint32 uColumns = 0;
+			uint32 uRows = 0;
+		}; 
+
 		template <class HeaderType>
 		inline const HeaderType* GetCustomHeader(const FileInfo* pFileInfo)
 		{
