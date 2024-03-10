@@ -229,7 +229,7 @@ namespace usg
 		bool bReadSucceeded = pFile->Read(&fileHeader);
 		ASSERT(bReadSucceeded);
 
-		return SpawnEntityFromFile(*pFile, parent, spawnParams, spawnParams.GetDeferOnLoaded());
+		return SpawnEntityFromFile(*pFile, parent, spawnParams, !spawnParams.GetDeferOnLoaded());
 	}
 
 	Entity ComponentManager::SpawnEntityFromFileWithHdr(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams)
@@ -238,7 +238,7 @@ namespace usg
 		bool bReadSucceeded = file.Read(&fileHeader);
 		ASSERT(bReadSucceeded);
 
-		return SpawnEntityFromFile(file, parent, spawnParams, spawnParams.GetDeferOnLoaded());
+		return SpawnEntityFromFile(file, parent, spawnParams, !spawnParams.GetDeferOnLoaded());
 	}
 
 	void ComponentManager::ApplyTemplateToEntity(const char* szFilename, Entity root)
