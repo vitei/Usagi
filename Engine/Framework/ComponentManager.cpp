@@ -229,7 +229,7 @@ namespace usg
 		bool bReadSucceeded = pFile->Read(&fileHeader);
 		ASSERT(bReadSucceeded);
 
-		return SpawnEntityFromFile(*pFile, parent, spawnParams, !spawnParams.GetDeferOnLoaded());
+		return SpawnEntityFromFile(*pFile, parent, spawnParams, !spawnParams.GetDeferOnLoaded(), true);
 	}
 
 	Entity ComponentManager::SpawnEntityFromFileWithHdr(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams)
@@ -238,7 +238,7 @@ namespace usg
 		bool bReadSucceeded = file.Read(&fileHeader);
 		ASSERT(bReadSucceeded);
 
-		return SpawnEntityFromFile(file, parent, spawnParams, !spawnParams.GetDeferOnLoaded());
+		return SpawnEntityFromFile(file, parent, spawnParams, !spawnParams.GetDeferOnLoaded(), true);
 	}
 
 	void ComponentManager::ApplyTemplateToEntity(const char* szFilename, Entity root)
@@ -313,7 +313,7 @@ namespace usg
 
 		for (uint32 i = 0; i < fileHeader.entityCount; i++)
 		{
-			SpawnEntityFromFile(file, parent, spawnParams, true);
+			SpawnEntityFromFile(file, parent, spawnParams, true, true);
 		}
 	}
 
@@ -521,7 +521,7 @@ namespace usg
 		}
 	}
 
-	Entity ComponentManager::SpawnEntityFromFile(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams, bool bCallOnLoaded)
+	Entity ComponentManager::SpawnEntityFromFile(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams, bool bCallOnLoaded, bool bFirst)
 	{
 		EntityHeader header;
 		bool bReadSucceeded = file.Read(&header);
@@ -542,10 +542,10 @@ namespace usg
 		for (uint32 j = 0; j < header.childEntityCount; j++)
 		{
 			EntitySpawnParams params = spawnParams;
-			SpawnEntityFromFile(file, e, params, false);
+			SpawnEntityFromFile(file, e, params, false, false);
 		}
 
-		if (bCallOnLoaded)
+		if (bFirst)
 		{
 			if (spawnParams.HasTransform())
 			{
@@ -601,7 +601,10 @@ namespace usg
 					team.Modify().uTeam = spawnParams.GetTeam();
 				}
 			}
+		}
 
+		if(bCallOnLoaded)
+		{
 			ComponentLoadHandles handles;
 			FillComponentLoadHandles(handles, parent);
 			RecursivelyCallOnLoaded(e, handles);
@@ -651,7 +654,7 @@ namespace usg
 		EntitySpawnParams params;
 		for (uint32 j = 0; j < header.childEntityCount; j++)
 		{
-			SpawnEntityFromFile(file, e, params, false);
+			SpawnEntityFromFile(file, e, params, false, false);
 		}
 
 		if (bCallOnLoaded)

@@ -40,7 +40,7 @@ namespace usg
 
 		Entity SpawnEntityFromTemplate(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams);
 		void SpawnHierarchyFromFile(const char* szFilename, Entity parent, const EntitySpawnParams& spawnParams);
-		Entity SpawnEntityFromFile(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams, bool bCallOnLoaded = true);
+		Entity SpawnEntityFromFile(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams, bool bCallOnLoaded = true, bool bFirst = false);
 		Entity SpawnEntityFromFileWithHdr(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams);
 
 		void ApplyTemplateToEntity(const char* szFilename, Entity root);
