@@ -58,7 +58,8 @@ private:
 	{
 		MAX_SPHERES = 1024,
 		MAX_CUBES = 32768,
-		MAX_TRIS = 16384
+		MAX_TRIS = 16384,
+		MAX_LINES = 1024 * 1024 * 10,
 	};
 
 	static Debug3D*			m_psRenderer;
@@ -69,12 +70,12 @@ private:
 	PipelineStateHndl		m_spherePipeline;
 	PipelineStateHndl		m_cubePipeline;
 	PipelineStateHndl		m_triPipeline;
-	Material				m_lineMat;
-	ConstantSet				m_lineConstants;
+	PipelineStateHndl		m_linePipeline;
 	
 	VertexBuffer			m_sphereVB;
 	VertexBuffer			m_cubeVB;
 	VertexBuffer			m_triVB;
+	VertexBuffer			m_lineVB;
 	
 	IndexBuffer				m_sphereIB;
 	IndexBuffer				m_cubeIB;
@@ -82,10 +83,12 @@ private:
 	CubeRender::Cube		m_cubes[MAX_CUBES];
 	SphereData				m_spheres[MAX_SPHERES];
 	TriData					m_triangles[MAX_TRIS * 3];
+	TriData					m_lines[MAX_LINES * 2];
 
 	uint32					m_uSpheres;
 	uint32					m_uCubes;
 	uint32					m_uTris;
+	uint32					m_uLines;
 
 	RenderGroup*			m_pRenderGroup;
 };

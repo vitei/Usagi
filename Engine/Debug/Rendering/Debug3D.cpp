@@ -37,6 +37,7 @@ Debug3D::Debug3D()
 	m_uSpheres = 0;
 	m_uCubes = 0;
 	m_uTris = 0;  
+	m_uLines = 0;
 	m_pRenderGroup = nullptr;
 	SetLayer(RenderLayer::LAYER_TRANSLUCENT);
 	SetPriority(0);
@@ -44,8 +45,10 @@ Debug3D::Debug3D()
 
 Debug3D::~Debug3D()
 {
-	ASSERT(m_psRenderer == this || m_psRenderer == nullptr);
-	m_psRenderer = NULL;
+	if(m_psRenderer == this)
+	{
+		m_psRenderer = NULL;
+	}
 }
 
 void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
@@ -68,6 +71,7 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 	m_cubeIB.Init(pDevice, pIndices, MAX_CUBES);
 
 	m_triVB.Init(pDevice, nullptr, sizeof(TriData), MAX_TRIS * 3, "Tri", GPU_USAGE_DYNAMIC);
+	m_lineVB.Init(pDevice, nullptr, sizeof(TriData), MAX_LINES * 2, "Line", GPU_USAGE_DYNAMIC);
 
 
 
@@ -76,7 +80,11 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 	RenderNode* pNode = this;
 	m_pRenderGroup->AddRenderNodes( pDevice, &pNode, 1, 0 );
 
-	m_psRenderer = this;
+	// This needs refactoring, but for now only the first 
+	if(m_psRenderer == nullptr)
+	{
+		m_psRenderer = this;
+	}
 }
 
 void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewContext* pContext)
@@ -131,6 +139,9 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewCont
 
 	m_triPipeline = pDevice->GetPipelineState(rp, pipelineState);
 
+	pipelineState.ePrimType = PT_LINES;
+
+	m_linePipeline = pDevice->GetPipelineState(rp, pipelineState);
 
 }
 
@@ -141,6 +152,7 @@ void Debug3D::Cleanup(GFXDevice* pDevice)
 	m_cubeIB.Cleanup(pDevice);
 	m_cubeVB.Cleanup(pDevice);
 	m_triVB.Cleanup(pDevice);
+	m_lineVB.Cleanup(pDevice);
 	m_transforms.Cleanup(pDevice);
 }
 
@@ -154,6 +166,7 @@ void Debug3D::Clear()
 	m_uSpheres = 0;
 	m_uCubes = 0;
 	m_uTris = 0;
+	m_uLines = 0;
 }
 
 void Debug3D::AddSphere(const Vector3f &vPos, float fRadius, const Color& color)
@@ -189,20 +202,20 @@ void Debug3D::AddCube(const Matrix4x4& mat, const Color& color)
 
 void Debug3D::AddLine(const Vector3f& vStart, const Vector3f& vEnd, const Color& color, float fWidth)
 {
-	if (vStart.GetSquaredDistanceFrom(vEnd) < 0.0001f)
+	if (m_uLines >= MAX_LINES)
 	{
 		return;
 	}
-	Matrix4x4 mat;
-	mat.LoadIdentity();
-	mat.MakeScale(vEnd.GetDistanceFrom(vStart)*0.5f, fWidth, fWidth);
-	Quaternionf qRot;
-	qRot.MakeVectorRotation(Vector3f(1, 0, 0), (vEnd - vStart).GetNormalised());
-	Matrix4x4 mRot;
-	mRot = qRot;
-	mat *= mRot;
-	mat.SetPos(vStart + 0.5f*(vEnd-vStart));
-	AddCube(mat, color);
+
+	uint32 uIndex = m_uLines * 2;
+
+	m_lines[uIndex + 0].vPos = vStart;
+	color.FillV4(m_lines[uIndex + 0].vColor);
+
+	m_lines[uIndex +1].vPos = vEnd;
+	color.FillV4(m_lines[uIndex + 1].vColor);
+
+	m_uLines++;
 }
 
 void Debug3D::UpdateBuffers(GFXDevice* pDevice)
@@ -220,6 +233,11 @@ void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 	if (m_uTris > 0)
 	{
 		m_triVB.SetContents(pDevice, m_triangles, m_uTris * 3);
+	}
+
+	if (m_uLines > 0)
+	{
+		m_lineVB.SetContents(pDevice, m_lines, m_uLines * 2);
 	}
 }
 
@@ -266,6 +284,13 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 		pContext->SetPipelineState(m_triPipeline);
 		pContext->SetVertexBuffer(&m_triVB);
 		pContext->DrawImmediate(m_uTris * 3);
+	}
+
+	if (m_uLines != 0 && m_linePipeline.IsValid())
+	{
+		pContext->SetPipelineState(m_linePipeline);
+		pContext->SetVertexBuffer(&m_lineVB);
+		pContext->DrawImmediate(m_uLines * 2);
 	}
 
 	return true;
