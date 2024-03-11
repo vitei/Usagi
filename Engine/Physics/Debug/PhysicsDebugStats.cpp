@@ -112,9 +112,11 @@ namespace usg {
 
 		const physx::PxRenderBuffer& rb = m_pPhysicsScene->getRenderBuffer();
 
+		const physx::PxDebugLine* pLines = rb.getLines();
+
 		for (physx::PxU32 i = 0; i < rb.getNbLines(); i++)
 		{
-			const physx::PxDebugLine& line = rb.getLines()[i];
+			const physx::PxDebugLine& line = pLines[i];
 			// render the line
 			usg::Vector3f vStart(line.pos0.x, line.pos0.y, line.pos0.z);
 			usg::Vector3f vEnd(line.pos1.x, line.pos1.y, line.pos1.z);
@@ -122,9 +124,11 @@ namespace usg {
 			Debug3D::GetRenderer()->AddLine(vStart, vEnd, color, 0.01f);
 		}
 
+		const physx::PxDebugTriangle* pTris = rb.getTriangles();
+
 		for (physx::PxU32 i = 0; i < rb.getNbTriangles(); i++)
 		{
-			const physx::PxDebugTriangle& tri = rb.getTriangles()[i];
+			const physx::PxDebugTriangle& tri = pTris[i];
 
 			usg::Vector3f pos0(tri.pos0.x, tri.pos0.y, tri.pos0.z);
 			usg::Vector3f pos1(tri.pos1.x, tri.pos1.y, tri.pos1.z);

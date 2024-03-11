@@ -21,8 +21,8 @@ bool HeightFieldResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* 
 	pHdrData += pFileHeader->uDataOffset;
 
 	const PakFileDecl::HeightfieldHeader* pHeightData = PakFileDecl::GetCustomHeader< PakFileDecl::HeightfieldHeader>(pFileHeader);
-	m_uHeight = pHeightData->uRows;
-	m_uWidth = pHeightData->uColumns;
+	m_uRows = pHeightData->uRows;
+	m_uColumns = pHeightData->uColumns;
 
 	m_pHeightData = (physx::PxHeightFieldSample*)pHdrData;
 	m_bOwnsData = false;
@@ -35,8 +35,8 @@ bool HeightFieldResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* 
 
 bool HeightFieldResource::Init(const char* szName, uint32 uWidth, uint32 uHeight, sint16* pData)
 {
-	m_uWidth = uWidth;
-	m_uHeight = uHeight;
+	m_uColumns = uWidth;
+	m_uRows = uHeight;
 
 	uint32 uCount = uWidth * uHeight;
 	uint32 uSize = uCount * sizeof(physx::PxHeightFieldSample);

@@ -29,11 +29,15 @@ public:
 
 	physx::PxHeightFieldSample* GetSamples() const { return m_pHeightData; }
 	const static ResourceType StaticResType = ResourceType::HEIGHTFIELD;
+
+	uint32 GetColumns() const { return m_uColumns; }
+	uint32 GetRows() const { return m_uRows; }
+
 private:
 	
 	physx::PxHeightFieldSample*	m_pHeightData = nullptr;
-	uint32					m_uWidth = 0;
-	uint32					m_uHeight = 0;
+	uint32					m_uColumns = 0;
+	uint32					m_uRows = 0;
 	bool					m_bOwnsData = false;
 };
 

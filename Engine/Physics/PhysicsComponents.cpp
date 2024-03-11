@@ -624,8 +624,8 @@ namespace usg
 
 		physx::PxHeightFieldDesc hfDesc;
 		hfDesc.format = physx::PxHeightFieldFormat::eS16_TM;
-		hfDesc.nbColumns = c->uColumns;
-		hfDesc.nbRows = c->uRows;
+		hfDesc.nbColumns = heightField->GetColumns();
+		hfDesc.nbRows = heightField->GetRows();
 		hfDesc.samples.data = rtd.pSamples;
 		hfDesc.samples.stride = sizeof(physx::PxHeightFieldSample);
 

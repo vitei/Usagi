@@ -52,6 +52,7 @@ namespace usg
 				Optional<BoxCollider> boxCollider;
 				Optional<MeshCollider> meshCollider;
 				Optional<ConeCollider> coneCollider;
+				Optional< HeightFieldCollider> heightfieldCollider;
 				Optional<CylinderCollider> cylinderCollider;
 			};
 
@@ -94,6 +95,11 @@ namespace usg
 				{
 					ASSERT(uPtrCount < ptrs.size());
 					ptrs[uPtrCount++] = static_cast<PhysXShapeRuntimeData*>(&outputs.cylinderCollider.Force().GetRuntimeData());
+				}
+				if (outputs.heightfieldCollider.Exists())
+				{
+					ASSERT(uPtrCount < ptrs.size());
+					ptrs[uPtrCount++] = static_cast<PhysXShapeRuntimeData*>(&outputs.heightfieldCollider.Force().GetRuntimeData());
 				}
 				for (size_t i = 0; i < uPtrCount; i++)
 				{
