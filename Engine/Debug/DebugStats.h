@@ -12,6 +12,8 @@
 #include API_HEADER(Engine/Debug, DebugStats_ps.h)
 #include "Engine/Debug/GlobalDebugStats.h"
 #include "Engine/Core/String/FixedString.h"
+#include "Engine/Core/stl/vector.h"
+#include "Engine/Core/stl/string.h"
 
 namespace usg {
 
@@ -49,10 +51,19 @@ public:
 	uint32 GetCurrentType() const { return m_uActiveType; }
 	uint32 GetPage() const { return m_uActivePage; }
 
+	void AddCustomString(const char* szMsg, float fDisplayTime = 10.f);
+
 private:
 	// Override this if you want to change the behaviour/ trigger different pages with different numbers
 	virtual void UpdatePageNumber(bool bForward, bool bBack);
 	virtual uint32 GetGamePages() const { return 0; }
+
+	struct CustomMessage
+	{
+		usg::string text;
+		float fDisplayTime;
+	};
+
 
 	uint32		m_uActivePage;
 	uint32		m_uActiveType;
@@ -65,6 +76,7 @@ private:
 
 	uint32 GetPageCount(uint32 uType);
 
+	usg::vector<CustomMessage>		m_messages;
 	DebugRender*					m_pRender;
 	GlobalDebugStats				m_globalStats;
 	DebugStats_ps					m_platform;

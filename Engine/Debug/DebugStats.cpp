@@ -79,7 +79,22 @@ void DebugStats::Draw()
 		m_pRender->AddString(warningString.c_str(), 0.8f, fLineNo, warningCol);
 	}
 
+	fLineNo += 5.0f;
+	for (auto itr = m_messages.begin(); itr != m_messages.end(); itr++)
+	{
+		m_pRender->AddString((*itr).text.c_str(), 0.1f, fLineNo + 5.0f, usg::Color::Grey);
+		fLineNo += 1.0f;
+	}
 
+}
+
+
+void DebugStats::AddCustomString(const char* szMsg, float fDisplayTime)
+{
+	CustomMessage custom;
+	custom.text = szMsg;
+	custom.fDisplayTime = fDisplayTime;
+	m_messages.push_back(custom);
 }
 
 void DebugStats::UpdatePageNumber(bool bForward, bool bBack)
@@ -134,6 +149,17 @@ void DebugStats::Update(float fElapsed)
 		UpdatePageNumber(pKeyboard->GetKey(KEYBOARD_KEY_NUMPAD6, BUTTON_STATE_PRESSED), pKeyboard->GetKey(KEYBOARD_KEY_NUMPAD4, BUTTON_STATE_PRESSED));
 	}
 
+
+	for (auto itr = m_messages.begin(); itr != m_messages.end(); itr++)
+	{
+		(*itr).fDisplayTime -= fElapsed;
+		if ((*itr).fDisplayTime < 0.0f)
+		{
+			itr = m_messages.erase(itr);
+			if(itr == m_messages.end())
+				break;
+		}
+	}
 
 	usg::vector<IDebugStatGroup*>::iterator it;
 	for (it = m_debugStats.begin(); it != m_debugStats.end(); ++it)
