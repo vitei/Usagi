@@ -43,7 +43,7 @@ namespace usg
 				ASSERT(request.uMaxHits > 0);
 
 				auto& sceneRtd = scene.GetRuntimeData().GetData();
-				ASSERT(sceneRtd.raycastData.pendingRequests.size() < PhysicsConstants::MaxNumAsyncRaycastsPerFrame);
+				ASSERT(sceneRtd.raycastData.pendingRequests.size() < PhysicsConstants::MaxNumAsyncSweepsPerFrame);
 
 				const float fDistance = (request.vTo - request.vFrom).Magnitude();
 				const physx::PxVec3 vDirection = ToPhysXVec3((request.vTo - request.vFrom)*(1.0f / fDistance));
@@ -61,6 +61,47 @@ namespace usg
 				filterData.flags |= physx::PxQueryFlag::ePREFILTER;
 				sceneRtd.raycastData.pRaycastBatchQuery->raycast(ToPhysXVec3(request.vFrom), vDirection, fDistance, request.uMaxHits, hitFlags, filterData);
 				sceneRtd.raycastData.pendingRequests.emplace_back(request.uRaycastId, usg::pair<uint32, Entity>(uSystemId, callbackEntity));
+			}
+
+
+			void SweepAsync(Entity callbackEntity, uint32 uSystemId, const AsyncSweepRequest& request)
+			{
+				// FIXME: THREADING ISSUE
+				// We should make access to the raycasts queue publically accessible in a threadsafe way
+				struct Getter : public UnsafeComponentGetter {		}getter;
+				Required<usg::PhysicsScene, FromSelfOrParents> sceneFromSelfOrParents;
+				getter.GetComponent(callbackEntity, sceneFromSelfOrParents);
+				Required<usg::PhysicsScene> scene;
+				getter.GetComponent(sceneFromSelfOrParents.GetEntity(), scene);
+				// FIXME: THREADING ISSUE
+
+				ASSERT(request.fDist > Math::EPSILON);
+				ASSERT(request.pGeo != nullptr);
+				ASSERT( Math::IsEqual(request.vDir.MagnitudeSquared(), 1.0f, 0.01f) );
+				ASSERT(request.uMaxHits > 0);
+
+				auto& sceneRtd = scene.GetRuntimeData().GetData();
+				ASSERT(sceneRtd.raycastData.pendingSweepRequests.size() < PhysicsConstants::MaxNumAsyncRaycastsPerFrame);
+
+				const float fDistance = request.fDist;
+				const physx::PxVec3 vDirection = ToPhysXVec3(request.vDir);
+				physx::PxTransform mTrans;
+				mTrans.p = ToPhysXVec3(request.mTrans.vPos().v3());
+				mTrans.q = ToPhysXQuaternion(request.mTrans);
+
+				physx::PxHitFlags hitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;
+				physx::PxQueryFilterData filterData;
+				filterData.data.word0 = request.uFilter;
+				filterData.data.word1 = 0;
+				filterData.data.word2 = 0;
+				if (request.uMaxHits == 1)
+				{
+					filterData.data.word2 |= RaycastBitmask::StopOnFirstHit;
+				}
+				filterData.data.word3 = 0;
+				filterData.flags |= physx::PxQueryFlag::ePREFILTER;
+				sceneRtd.raycastData.pRaycastBatchQuery->sweep(*request.pGeo, mTrans, vDirection, fDistance, request.uMaxHits, hitFlags, filterData);
+				sceneRtd.raycastData.pendingSweepRequests.emplace_back(request.uRaycastId, usg::pair<uint32, Entity>(uSystemId, callbackEntity));
 			}
 		}
 	}
@@ -85,6 +126,60 @@ namespace usg
 		const PhysXShapeRuntimeData& shapeRtd = *(const PhysXShapeRuntimeData*)s.shape->userData;
 		ASSERT(shapeRtd.entity != nullptr);
 		return shapeRtd.entity;
+	}
+
+
+	void ExecuteSweeps(Required<usg::PhysicsScene> scene, EventManager& eventManager, SystemCoordinator& systemCoordinator)
+	{
+		auto& sceneRtd = scene.GetRuntimeData().GetData();
+
+		vector<RaycastHitBase>& hits = sceneRtd.raycastData.workData.hits;
+		vector<Entity> entities = sceneRtd.raycastData.workData.entities;
+		vector<uint8> workBuffer = sceneRtd.raycastData.workData.workBuffer;
+		if (workBuffer.size() < PhysicsConstants::RaycastWorkBufferSize)
+		{
+			workBuffer.resize(PhysicsConstants::RaycastWorkBufferSize);
+		}
+
+		const uint32 uResultCount = (uint32)sceneRtd.raycastData.pendingSweepRequests.size();
+
+		auto& userMem = sceneRtd.raycastData.pRaycastBatchQuery->getUserMemory();
+
+
+		for (uint32 i = 0; i < uResultCount; i++)
+		{
+			auto& result = userMem.userSweepResultBuffer[i];
+
+			hits.clear();
+			entities.clear();
+			if (result.hasBlock)
+			{
+				hits.push_back(AddHit(result.block));
+				entities.push_back(AddEntity(result.block));
+			}
+			else
+			{
+				for (uint32 j = 0; j < result.nbTouches; j++)
+				{
+					const auto& touch = result.touches[j];
+					hits.push_back(AddHit(touch));
+					entities.push_back(AddEntity(touch));
+				}
+			}
+
+			ASSERT(entities.size() == hits.size());
+			Entity callbackEntity = sceneRtd.raycastData.pendingSweepRequests[i].second.second;
+			const uint32 uUserProvidedRaycastId = sceneRtd.raycastData.pendingSweepRequests[i].first;
+			const uint32 uSystemId = sceneRtd.raycastData.pendingSweepRequests[i].second.first;
+			const uint32 uHitCount = (uint32)hits.size();
+
+			RaycastHitBase* pHits = uHitCount > 0 ? &hits[0] : nullptr;
+			Entity* pEntities = uHitCount > 0 ? &entities[0] : nullptr;
+
+			OnRaycastHitSignal onRaycastHitSignal(uSystemId, uUserProvidedRaycastId, pHits, pEntities, uHitCount, &workBuffer[0], workBuffer.size());
+			systemCoordinator.Trigger(callbackEntity, onRaycastHitSignal, ON_ENTITY);
+		}
+		sceneRtd.raycastData.pendingSweepRequests.clear();
 	}
 
 	void ExecuteRaycasts(Required<usg::PhysicsScene> scene, EventManager& eventManager, SystemCoordinator& systemCoordinator)
@@ -136,7 +231,10 @@ namespace usg
 			systemCoordinator.Trigger(callbackEntity, onRaycastHitSignal, ON_ENTITY);
 		}
 		sceneRtd.raycastData.pendingRequests.clear();
+
+		ExecuteSweeps(scene, eventManager, systemCoordinator);
 	}
+
 
 	void InitRaycasting(Required<usg::PhysicsScene> scene, usg::PhysXAllocator& allocator)
 	{
@@ -144,8 +242,9 @@ namespace usg
 
 		auto& rtd = scene.GetRuntimeData().GetData();
 		physx::PxBatchQueryDesc raycastBatchQueryDesc(PhysicsConstants::MaxNumAsyncRaycastsPerFrame, 0, 0);
-		physx::PxBatchQueryMemory raycastBatchQueryMem(PhysicsConstants::MaxNumAsyncRaycastsPerFrame, 0, 0);
+		physx::PxBatchQueryMemory raycastBatchQueryMem(PhysicsConstants::MaxNumAsyncRaycastsPerFrame, PhysicsConstants::MaxNumAsyncSweepsPerFrame, 0);
 		raycastBatchQueryMem.userRaycastResultBuffer = (physx::PxRaycastQueryResult*)allocator.allocate(sizeof(physx::PxRaycastQueryResult)*PhysicsConstants::MaxNumAsyncRaycastsPerFrame * 2, "", 0, 0);
+		raycastBatchQueryMem.userSweepResultBuffer = (physx::PxSweepQueryResult*)allocator.allocate(sizeof(physx::PxSweepQueryResult) * PhysicsConstants::MaxNumAsyncSweepsPerFrame * 2, "", 0, 0);
 		raycastBatchQueryMem.raycastTouchBufferSize = uTouchBufferSize;
 		raycastBatchQueryMem.userRaycastTouchBuffer = (physx::PxRaycastHit*)allocator.allocate(uTouchBufferSize, "", 0, 0);
 		raycastBatchQueryDesc.queryMemory = raycastBatchQueryMem;

@@ -38,6 +38,7 @@ namespace usg
 	struct PhysicsConstants
 	{
 		static constexpr uint32 MaxNumAsyncRaycastsPerFrame = 256;
+		static constexpr uint32 MaxNumAsyncSweepsPerFrame = 256;
 		static constexpr uint32 RaycastWorkBufferSize = 4096;
 		static constexpr uint32 VehicleMaxNumWheels = PX_MAX_NB_WHEELS;
 	};

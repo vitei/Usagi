@@ -131,7 +131,6 @@ namespace usg
 	struct RuntimeData<usg::Components::HeightFieldCollider> : public PhysXShapeRuntimeData
 	{
 		physx::PxHeightField* pHeightfield;
-		physx::PxHeightFieldSample* pSamples;
 	};
 
 	template<>

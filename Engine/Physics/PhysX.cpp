@@ -472,6 +472,7 @@ namespace usg
 		rtd.vehicleData.pVehicleSceneQueryData = nullptr;
 
 		physics::s_physXAllocator.deallocate(rtd.raycastData.pRaycastBatchQuery->getUserMemory().userRaycastResultBuffer);
+		physics::s_physXAllocator.deallocate(rtd.raycastData.pRaycastBatchQuery->getUserMemory().userSweepResultBuffer);
 		physics::s_physXAllocator.deallocate(rtd.raycastData.pRaycastBatchQuery->getUserMemory().userRaycastTouchBuffer);
 		rtd.raycastData.pRaycastBatchQuery = nullptr;
 		rtd.raycastData.pendingRequests.clear();

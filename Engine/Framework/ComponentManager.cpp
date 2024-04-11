@@ -241,7 +241,7 @@ namespace usg
 		return SpawnEntityFromFile(file, parent, spawnParams, !spawnParams.GetDeferOnLoaded(), true);
 	}
 
-	void ComponentManager::ApplyTemplateToEntity(const char* szFilename, Entity root)
+	void ComponentManager::ApplyTemplateToEntity(const char* szFilename, Entity root, bool bCallOnLoaded)
 	{
 		ASSERT(szFilename != NULL);
 		ProtocolBufferFile* pFile = m_componentLoadHandles.pResourceMgr->GetBufferedFile(szFilename);
@@ -252,7 +252,7 @@ namespace usg
 
 		for (uint32 i = 0; i < fileHeader.entityCount; i++)
 		{
-			MergeTemplateWithEntity(*pFile, root, true);
+			MergeTemplateWithEntity(*pFile, root, bCallOnLoaded);
 		}
 	}
 

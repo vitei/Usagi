@@ -20,9 +20,9 @@ namespace usg
 
 	}
 
-	void  EntityLoader::ApplyTemplateToEntity(const char* szFilename, Entity root)
+	void  EntityLoader::ApplyTemplateToEntity(const char* szFilename, Entity root, bool bCallOnLoaded)
 	{
-		m_componentManager.ApplyTemplateToEntity(szFilename, root);
+		m_componentManager.ApplyTemplateToEntity(szFilename, root, bCallOnLoaded);
 	}
 
 	ComponentEntity* EntityLoader::SpawnEntityFromTemplate(const char* szFilename, ComponentEntity* parent, const EntitySpawnParams& spawnParams)

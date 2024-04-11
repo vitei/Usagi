@@ -16,6 +16,7 @@ namespace usg {
 
 	class GFXDevice;
 	struct AsyncRaycastRequest;
+	struct AsyncSweepRequest;
 	typedef struct _Collision Collision;
 
 	enum FeatureSwitch
@@ -86,7 +87,8 @@ namespace usg {
 	struct RaycastHit : usg::RaycastHitBase { RaycastHit(const RaycastHitInputs& inputs) : raycastHitInputs(inputs) {} const RaycastHitInputs& raycastHitInputs; }; \
 	struct RaycastResult { uint32 uRaycastId; uint32 uNumHits; const RaycastHit* hits; }; \
 	static bool GetRaycastHitInputs(usg::ComponentGetter GetComponent, RaycastHitInputs& colliderInputs); \
-	static void RaycastAsync(const Inputs& inputs, const usg::AsyncRaycastRequest& request);
+	static void RaycastAsync(const Inputs& inputs, const usg::AsyncRaycastRequest& request); \
+	static void SweepAsync(const Inputs& inputs, const usg::AsyncSweepRequest& request);
 
 	// Helper macro for those systems still using the old, global GetInputOutputs method.
 	// When you switch over to the new one, you can delete the DEPRECATED_GETINPUTOUTPUTS

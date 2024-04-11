@@ -619,14 +619,11 @@ namespace usg
 
 		HeightFieldResHndl heightField = handles.pResourceMgr->GetHeightfieldResource(c->szAsset);
 
-
-		rtd.pSamples = heightField->GetSamples();
-
 		physx::PxHeightFieldDesc hfDesc;
 		hfDesc.format = physx::PxHeightFieldFormat::eS16_TM;
 		hfDesc.nbColumns = heightField->GetColumns();
 		hfDesc.nbRows = heightField->GetRows();
-		hfDesc.samples.data = rtd.pSamples;
+		hfDesc.samples.data = heightField->GetSamples();
 		hfDesc.samples.stride = sizeof(physx::PxHeightFieldSample);
 
 		auto& sceneRuntimeData = *handles.pPhysicsScene;
@@ -642,7 +639,6 @@ namespace usg
 	{
 		auto& rtd = c.GetRuntimeData();
 		rtd.pHeightfield = nullptr;
-		rtd.pSamples = nullptr;
 		OnActivateShape(c);
 	}
 
@@ -654,8 +650,6 @@ namespace usg
 		if (rtd.pHeightfield)
 		{
 			rtd.pHeightfield->release();
-			mem::Free(rtd.pSamples);
-			rtd.pSamples = nullptr;
 			rtd.pHeightfield = nullptr;
 		}
 	}

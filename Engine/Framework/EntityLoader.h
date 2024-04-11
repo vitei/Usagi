@@ -20,7 +20,7 @@ namespace usg
 		// Spawn an entity from a .yml file.
 		ComponentEntity* SpawnEntityFromTemplate(const char* szFilename, ComponentEntity* parent, const EntitySpawnParams& spawnParams);
 
-		void ApplyTemplateToEntity(const char* szFilename, ComponentEntity* root);
+		void ApplyTemplateToEntity(const char* szFilename, ComponentEntity* root, bool bCallOnLoaded = true);
 		void ForceCallOnLoaded(Entity e);
 	private:
 		ComponentManager& m_componentManager;

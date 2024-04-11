@@ -145,6 +145,13 @@ void #{s["name"]}::RaycastAsync(const Inputs& inputs, const usg::AsyncRaycastReq
 	usg::physics::details::RaycastAsync(inputs.self->id, usg::GetSystemId<#{s["name"]}>(),  request);
 }
 
+namespace usg { namespace physics {	namespace details { void SweepAsync(Entity callbackEntity, uint32 uSystemId, const AsyncSweepRequest& request); } } }
+void #{s["name"]}::SweepAsync(const Inputs& inputs, const usg::AsyncSweepRequest& request)
+{
+	usg::physics::details::SweepAsync(inputs.self->id, usg::GetSystemId<#{s["name"]}>(),  request);
+}
+
+
 END_GET_RCHINPUTS
 }
 END_SYSTEM_OUTPUT

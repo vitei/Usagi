@@ -43,7 +43,7 @@ namespace usg
 		Entity SpawnEntityFromFile(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams, bool bCallOnLoaded = true, bool bFirst = false);
 		Entity SpawnEntityFromFileWithHdr(ProtocolBufferFile& file, Entity parent, const EntitySpawnParams& spawnParams);
 
-		void ApplyTemplateToEntity(const char* szFilename, Entity root);
+		void ApplyTemplateToEntity(const char* szFilename, Entity root, bool bCallOnLoaded = true);
 		void MergeTemplateWithEntity(ProtocolBufferFile& file, Entity root, bool bCallOnLoaded);
 
 		Entity GetEntityFromNetworkUID(sint64 uid);

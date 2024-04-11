@@ -55,6 +55,8 @@ namespace usg
 			{
 				physx::PxBatchQuery* pRaycastBatchQuery;
 				vector<pair<uint32, pair<uint32, Entity>>> pendingRequests;
+				vector<pair<uint32, pair<uint32, Entity>>> pendingSweepRequests;
+
 				struct
 				{
 					vector<RaycastHitBase> hits;
