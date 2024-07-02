@@ -518,6 +518,8 @@ void Texture_ps::SetRawData(GFXDevice* pDevice, GFXContext* pCtx, void* pData)
 	// Copy texture data into staging buffer
 	uint8_t *data;
 	VkResult res = vkMapMemory(devicePS, m_staging.memory.GetMemory(), m_staging.memory.GetMemOffset(), m_staging.memReq.size, 0, (void **)&data);
+	FATAL_RELEASE(!res, "vkMapMemory failed with error %d (size %d, memory %d, offset %d)", res, m_staging.memReq.size, m_staging.memory.GetMemory(), m_staging.memory.GetMemOffset());
+
 	memcpy(data, pData, uImageSize);
 	vkUnmapMemory(devicePS, m_staging.memory.GetMemory());
 
@@ -862,11 +864,14 @@ bool Texture_ps::LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSiz
 	memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	res = vkAllocateMemory(device, &memAllocInfo, nullptr, &stagingMemory);
+	FATAL_RELEASE(!res, "vkAllocateMemory failed with error %d (size %d)", res, memReqs.size);
 	res = vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0);
 
 	// Copy texture data into staging buffer
 	uint8_t* data;
 	res = vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data);
+	FATAL_RELEASE(!res, "vkMapMemory failed with error %d (size %d)", res, memReqs.size);
+
 	memcpy(data, pData, dataSize);
 	vkUnmapMemory(device, stagingMemory);
 
@@ -910,6 +915,8 @@ bool Texture_ps::LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSiz
 	imageCreateInfo.flags = eVKImageViewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
 	res = vkCreateImage(device, &imageCreateInfo, nullptr, &m_image);
+	FATAL_RELEASE(!res, "vkCreateImage failed with error %d", res);
+
 
 	vkGetImageMemoryRequirements(device, m_image, &memReqs);
 
@@ -920,6 +927,7 @@ bool Texture_ps::LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSiz
 	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
 	res = vkBindImageMemory(device, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());
+	FATAL_RELEASE(!res, "vkBindImageMemory failed with error %d", res);
 
 	VkCommandBuffer copyCmd = devicePS.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 

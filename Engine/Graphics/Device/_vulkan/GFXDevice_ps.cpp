@@ -126,7 +126,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugString(VkFlags msgFlags, VkDebugRep
 static VKAPI_ATTR VkBool32 VKAPI_CALL VkDebugBreak(VkFlags msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject, size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg, void *pUserData)
 {
 	(void)msgFlags; (void)objType; (void)srcObject; (void)location; (void)pUserData; (void)msgCode;
-	ASSERT_MSG(false, "%s: %s\n", pLayerPrefix, pMsg);
+	FATAL_RELEASE(false, "%s: %s\n", pLayerPrefix, pMsg);
 	return VK_FALSE;
 }
 #endif

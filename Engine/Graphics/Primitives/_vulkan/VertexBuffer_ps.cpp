@@ -43,11 +43,11 @@ void VertexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
 		err = vkCreateBuffer(deviceVK, &buf_info, NULL, &m_stagingBuffer[i]);
-		ASSERT(!err);
+		FATAL_RELEASE(!err, "vkCreateBuffer failed with error %d", err);
 	}
 
 	vkGetBufferMemoryRequirements(deviceVK, m_stagingBuffer[0], &mem_reqs);
-	ASSERT(!err);
+	FATAL_RELEASE(!err, "vkGetBufferMemoryRequirements failed with error %d", err);
 
 	mem_alloc.allocationSize = mem_reqs.size;
 	mem_alloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -85,11 +85,11 @@ void VertexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bo
 	for (uint32 i = 0; i < m_uBufferCount; i++)
 	{
 		err = vkCreateBuffer(deviceVK, &buf_info, NULL, &m_buffer[i]);
-		ASSERT(!err);
+		FATAL_RELEASE(!err, "vkCreateBuffer failed with error %d", err);
 	}
 
 	vkGetBufferMemoryRequirements(deviceVK, m_buffer[0], &mem_reqs);
-	ASSERT(!err);
+	FATAL_RELEASE(!err, "vkGetBufferMemoryRequirements failed with error %d", err);
 
 	mem_alloc.allocationSize = mem_reqs.size;
 	if (bHasStaging)
@@ -233,7 +233,7 @@ void* VertexBuffer_ps::LockData(GFXDevice* pDevice, uint32 uSize)
 	else
 	{
 		VkResult err = vkMapMemory(pDevice->GetPlatform().GetVKDevice(), allocator.GetMemory(), allocator.GetMemOffset(), uSize, 0, &pData);
-		ASSERT(!err);
+		FATAL_RELEASE(!err, "vkMapMemory failed with error %d (size %d, memory %d, offset %d)", err, uSize, allocator.GetMemory(), allocator.GetMemOffset());
 	}
 
 	return pData;
