@@ -1453,6 +1453,8 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 			continue;
 		}
 
+		FbxSkin::EType eSkinningType = pSkinDeformer->GetSkinningType();
+		
 		uint32 uNumOfClusters = pSkinDeformer->GetClusterCount();
 
 		for (uint32 uClusterIndex = 0; uClusterIndex < uNumOfClusters; ++uClusterIndex)
@@ -1468,6 +1470,10 @@ uint32 FbxLoad::GetBlendWeightsAndIndices(Cmdl& cmdl, FbxNode* pNode, FbxMesh* p
 			for (uint32 i = 0; i < uNumOfIndices; ++i)
 			{
 				weight.fValue = (float)currCluster->GetControlPointWeights()[i];
+				if (eSkinningType == FbxSkin::eRigid)
+				{
+					m_activeWeights[currCluster->GetControlPointIndices()[i]].weights.clear();
+				}
 				m_activeWeights[currCluster->GetControlPointIndices()[i]].weights.push_back(weight);
 			}
 		}
@@ -1914,6 +1920,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 
 	// TODO: We need a check to see if all verts use the same bone 
 	uint32 uMaxWeights = GetBlendWeightsAndIndices(cmdl, pNode, currMesh);
+	bool bRigid = uMaxWeights == 1;
 	if (uMaxWeights > 0)
 	{
 		// Alignment and input issues if we don't have 4
@@ -1952,7 +1959,7 @@ void FbxLoad::AddMesh(Cmdl& cmdl, ::exchange::Shape* pShape, FbxNode* pNode, Fbx
 			blendweight.uCount = uMaxWeights;
 			m_activeVerts[uVert].elements.push_back(blendindices);
 			// Don't need weights for rigid skinning
-			if (uMaxWeights > 1)
+			if (!bRigid)
 			{
 				m_activeVerts[uVert].elements.push_back(blendweight);
 			}
