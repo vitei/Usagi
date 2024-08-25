@@ -905,12 +905,15 @@ UVMapper* Model::GetUVMapper(uint32 uMesh, uint32 uTexIndex)
 	return GetRenderMesh(uMesh)->GetUVMapper(uTexIndex);
 }
 
-void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex)
+void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex, uint32 uMeshIdx)
 {
 	ASSERT(m_bDynamic);
 
 	for (uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++)
 	{
+		if(uMesh != uMeshIdx && uMeshIdx != USG_INVALID_ID)
+			continue;
+
 		if (m_pOverrideMaterials[uMesh].customFX.SetVariable(szVarName, pData, uSize, 0))
 		{
 			// FIXME: Requesting override on both for now, should check which set it's owned by

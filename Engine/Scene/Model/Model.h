@@ -44,11 +44,11 @@ public:
 
 	bool OverrideTexture(const char* szTextureName, TextureHndl pSrcTex);	
 
-	void OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex);
+	void OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex, uint32 uMeshIdx = USG_INVALID_ID);
 	template <class VariableType>
-	void OverrideVariable(const char* szVarName, VariableType& var, uint32 uIndex = 0)
+	void OverrideVariable(const char* szVarName, VariableType& var, uint32 uIndex = 0, uint32 uMeshIdx = USG_INVALID_ID)
 	{
-		OverrideVariable(szVarName, (void*)&var, sizeof(VariableType), uIndex);
+		OverrideVariable(szVarName, (void*)&var, sizeof(VariableType), uIndex, uMeshIdx);
 	}
 	void UpdateDescriptors(GFXDevice* pDevice);
 	const Matrix4x4& GetTransformMtx() const { return m_pTransformNode->GetMatrix(); }
