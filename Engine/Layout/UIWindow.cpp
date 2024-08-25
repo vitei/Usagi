@@ -38,6 +38,7 @@ void UIWindow::Init(usg::GFXDevice* pDevice, usg::ResourceMgr* pRes, const usg::
 {
 	m_windowPos = windowDef.vPos;
 	m_windowSize = windowDef.vSize;
+	m_windowScale = usg::Vector2f(windowDef.fWindowScale, windowDef.fWindowScale);
 	m_horAlign = windowDef.eHAlign;
 	m_vertAlign = windowDef.eVAlign;
 	m_name = windowDef.name;
@@ -1444,12 +1445,13 @@ void UIWindow::UpdateMatrix(const UIWindow* pParent)
 		if (pParent)
 		{
 			// FIXME: Should just be translation and scale
-			usg::Vector2f vScale = m_windowSize / pParent->GetSize();
-			usg::Vector2f vCorrectedPos = GetPos(m_windowPos, m_windowSize, m_horAlign, m_vertAlign, pParent);
+			usg::Vector2f vAdjustedSize = m_windowScale * m_windowSize;
+			usg::Vector2f vScale = vAdjustedSize / pParent->GetSize();
+			usg::Vector2f vCorrectedPos = GetPos(m_windowPos, vAdjustedSize, m_horAlign, m_vertAlign, pParent);
 			usg::Vector3f vOffset(vCorrectedPos.x, vCorrectedPos.y, 0.0f);
 			m_localMatrix = usg::Matrix4x4::Identity();
 			m_localMatrix.SetTranslation(vOffset);
-			//m_localMatrix.Scale(m_windowSize.x, m_windowSize.y, 1.0f, 1.0f);
+			m_localMatrix.Scale(m_windowScale.x, m_windowScale.y, 1.0f, 1.0f);
 			m_globalMatrix = m_localMatrix * pParent->GetGlobalMatrix();
 		}
 		else

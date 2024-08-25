@@ -235,6 +235,7 @@ namespace usg
 		UIVertAlign					m_vertAlign;
 		usg::Vector2f				m_windowPos;
 		usg::Vector2f				m_windowSize;
+		usg::Vector2f				m_windowScale;
 		usg::Vector2f				m_vMousePos;
 		uint32						m_uItemCounts[UIItemType::UI_ITEM_INVALID];
 

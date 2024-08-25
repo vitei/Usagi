@@ -124,6 +124,8 @@ message UIWindowDef
 	repeated CustomItemDef customItems = 11 [(nanopb).max_count = 8];
 
 	required bool bEnabled = 12 [default = true];
+	
+	required float fWindowScale = 13 [default = 1.0];
 }
 
 
