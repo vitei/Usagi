@@ -44,6 +44,9 @@ FileFactoryWin::FileFactoryWin() :
 	// Uncompressed 8
 	m_texFormats["r"] = { CMP_FORMAT::CMP_FORMAT_R_8, false };
 
+	// Uncompressed 16
+	m_texFormats["r16"] = { CMP_FORMAT::CMP_FORMAT_R_16, false };
+
 	CMP_InitFramework();
 }
 
@@ -207,7 +210,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 
 	// Only compress if the original isn't (i.e. we're loading dds). This is mainly due to compressonator
 	// being a buggy crashy pos.
-	if (MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC)
+	if (MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC && MipSetIn.m_format >= CMP_FORMAT::CMP_FORMAT_BROTLIG)
 	{
 		memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
 
