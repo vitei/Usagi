@@ -15,6 +15,7 @@ public:
 	virtual ~FileFactoryWin();
 
 	virtual std::string LoadFile(const char* szFileName, YAML::Node node) override;
+	virtual std::string LoadHeightmap(const char* szFileName, const YAML::Node& node) override;
 
 protected:
 	struct TextureEntry : public ResourceEntry
@@ -94,8 +95,43 @@ protected:
 		std::vector<char> customHeaderMem;
 	};
 
+	struct HeightfieldEntry : public ResourceEntry
+	{
+		virtual const void* GetData() override { return memory.data(); }
+		virtual uint32 GetDataSize() override { return (uint32)memory.size(); };
+		virtual const void* GetCustomHeader() { return customHeaderMem.data(); }
+		virtual uint32 GetCustomHeaderSize() { return (uint32)customHeaderMem.size(); }
+
+		void Init(const gli::texture& tex)
+		{
+			glm::tvec3<uint32> const extent(tex.extent());
+			usg::PakFileDecl::HeightfieldHeader hdr;
+			hdr.uColumns = extent[0];
+			hdr.uRows = extent[1];
+
+			uint16* pData = (uint16*)tex.data(0, 0, 0);
+			memsize uSize = tex.size(0);
+
+			FATAL_RELEASE(uSize == (hdr.uColumns * hdr.uRows *2), "Data size of heightmap texture doesn't match expected");
+
+			customHeaderMem.resize(sizeof(hdr));
+			memcpy(customHeaderMem.data(), &hdr, sizeof(hdr));
+
+			memory.resize(uSize);
+			memcpy(memory.data(), pData, uSize);
+		}
+
+
+	private:
+
+		std::vector<char> memory;
+		std::vector<char> customHeaderMem;
+	};
+
 	std::string LoadTexture(const char* szFileName, YAML::Node node);
 	std::string LoadDDS(const char* szFileName, YAML::Node node);
+
+	std::string CreateTempKTXTexture(const char* szFileName, YAML::Node node, const char* szTmpFileName);
 
 private:
 	struct TexFormat

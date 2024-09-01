@@ -532,6 +532,9 @@ def shader_pack
     "#{romfiles_dir}/Layout"
   end
 
+  def terrain_out_dir
+    "#{romfiles_dir}/Terrain"
+  end
 
   def custom_effect_out_dir
     "#{romfiles_dir}/CustomFX"

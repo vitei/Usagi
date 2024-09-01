@@ -617,6 +617,13 @@ namespace usg
 		// FIXME: Once working this should be cached like the CollisionMesh as we may well re-use terrain sections
 		auto& rtd = c.GetRuntimeData();
 
+		if (c->szPakName[0] != '\0')
+		{
+			usg::string fullName = "Terrain/";
+			fullName += c->szPakName;
+			handles.pResourceMgr->LoadPackage(handles.pDevice, fullName.c_str());
+		}
+
 		HeightFieldResHndl heightField = handles.pResourceMgr->GetHeightfieldResource(c->szAsset);
 
 		physx::PxHeightFieldDesc hfDesc;

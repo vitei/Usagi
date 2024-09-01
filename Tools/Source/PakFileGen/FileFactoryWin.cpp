@@ -1,6 +1,8 @@
 #include "Engine/Common/Common.h"
 #include "FileFactoryWin.h"
 #include <gli/generate_mipmaps.hpp>
+#include <gli/texture2d.hpp>
+#include <gli/convert.hpp>
 #include <algorithm>
 #include <fstream>
 
@@ -140,19 +142,75 @@ std::string FileFactoryWin::LoadDDS(const char* szFileName, YAML::Node node)
 	}
 }
 
-std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
-{
-	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
-	std::string relativeNameNoExt = RemoveExtension(relativePath);
-	std::string outName = relativeNameNoExt + ".vtx";
-	std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
 
-	// Already references
-	if (HasDestResource(outName))
+std::string FileFactoryWin::LoadHeightmap(const char* szFileName, const YAML::Node& node)
+{
+	// Terrain file is just yaml renamed
+	YAML::Node mainNode = YAML::LoadFile(szFileName);
+
+	if (mainNode && mainNode["Heightmap"])
 	{
+		std::string heightmap = mainNode["Heightmap"].as<std::string>();
+
+
+		// Load the texture
+		YAML::Node out;
+		out.force_insert("mips", false);
+		out.force_insert("format", "r16");
+		out.force_insert("sRGB", false);
+
+
+
+		std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
+		std::string terrainDir = std::string(szFileName).substr(0, std::string(szFileName).find_last_of("\\/")+1);
+		std::string relativeNameNoExt = RemoveExtension(relativePath);
+		std::string outName = relativeNameNoExt + ".vtx";
+		std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
+
+		heightmap = terrainDir + heightmap;
+
+		// Already references
+		if (HasDestResource(outName))
+		{
+			return outName;
+		}
+
+		CreateTempKTXTexture(heightmap.c_str(), node, tmpFileName.c_str());
+
+
+		gli::texture2d ktx(gli::load(tmpFileName.c_str()));
+		DeleteFile(tmpFileName.c_str());
+
+		// Necessary to get rid of all of the swizzle etc
+		gli::texture2d TextureConverted = gli::convert(ktx, gli::FORMAT_R16_UNORM_PACK16);
+
+		HeightfieldEntry* pHeightfield = new HeightfieldEntry;
+		pHeightfield->srcName = szFileName;
+		pHeightfield->SetName(szFileName, usg::ResourceType::HEIGHTFIELD);
+		pHeightfield->Init(TextureConverted);
+
+		std::string texName = RemoveExtension(szFileName) + ".vtx";
+		TextureEntry* pTexture = new TextureEntry;
+		pTexture->srcName = szFileName;
+		pTexture->SetName(outName, usg::ResourceType::TEXTURE);
+		pTexture->Init(TextureConverted,false);
+
+
+		std::string expectedTexName = RemoveExtension(heightmap.substr(m_rootDir.size()).c_str());
+
+		m_resources.push_back(pHeightfield);
+		m_resources.push_back(pTexture);
+
+
+
 		return outName;
 	}
+	return "";
+}
 
+
+std::string FileFactoryWin::CreateTempKTXTexture(const char* szFileName, YAML::Node node, const char* szTmpFileName)
+{
 	CMP_MipSet MipSetIn;
 	memset(&MipSetIn, 0, sizeof(CMP_MipSet));
 	CMP_ERROR cmp_status = CMP_LoadTexture(szFileName, &MipSetIn);
@@ -201,7 +259,7 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 	CMP_MipSet MipSetCmp;
 
 	memsize pos = 0;
-	std::string tmpPath = RemoveFileName(tmpFileName);
+	std::string tmpPath = RemoveFileName(szTmpFileName);
 	do
 	{
 		pos = tmpPath.find_first_of("\\/", pos + 1);
@@ -221,18 +279,39 @@ std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
 			// Failed 
 			return "";
 		}
-		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetCmp);
+		cmp_status = CMP_SaveTexture(szTmpFileName, &MipSetCmp);
 
 	}
 	else
 	{
-		cmp_status = CMP_SaveTexture(tmpFileName.c_str(), &MipSetIn);
+		cmp_status = CMP_SaveTexture(szTmpFileName, &MipSetIn);
 	}
 	FATAL_RELEASE(cmp_status == CMP_OK, "Failed to save file %s. Error %d", szFileName, cmp_status);
 
+	return szTmpFileName;
+}
+
+std::string FileFactoryWin::LoadTexture(const char* szFileName, YAML::Node node)
+{
+	std::string relativePath = std::string(szFileName).substr(m_rootDir.size());
+	std::string relativeNameNoExt = RemoveExtension(relativePath);
+	std::string outName = relativeNameNoExt + ".vtx";
+	std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
+
+	// Already references
+	if (HasDestResource(outName))
+	{
+		return outName;
+	}
+
+	CreateTempKTXTexture(szFileName, node, tmpFileName.c_str());
 
 	gli::texture ktx = gli::load(tmpFileName.c_str());
 	DeleteFile(tmpFileName.c_str());
+
+	TextureSettings textureSettings = GetTextureSettings(node);
+	TexFormat format = GetTexFormat(textureSettings.format.c_str());
+
 
 	TextureEntry* pTexture = new TextureEntry;
 	pTexture->srcName = szFileName;

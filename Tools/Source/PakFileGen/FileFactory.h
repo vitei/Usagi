@@ -79,6 +79,7 @@ protected:
 	const char* GetExtension(const char* szFileName);
 	bool HasExtension(const char* szFileName, const char* szExt);
 	std::string LoadModel(const char* szFileName, const YAML::Node& node);
+	virtual std::string LoadHeightmap(const char* szFileName, const YAML::Node& node) { return ""; };
 	void AddDependency(const char* szFileName);
 	void AddDependenciesFromDepFile(const char* szDepFileName, ResourceEntry* pEntry);
 	void AddDependenciesFromDepTracker(DependencyTracker& tracker);

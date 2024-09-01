@@ -206,6 +206,11 @@ std::string FileFactory::LoadFile(const char* szFileName, YAML::Node node)
 		// Process the fbx file
 		outName = LoadModel(szFileName, node);
 	}
+	else if(HasExtension(szFileName, "terr"))
+	{
+		// Process heightmap
+		outName = LoadHeightmap(szFileName, node);
+	}
 	else if (HasExtension(szFileName, "yml"))
 	{
 		switch(GetYmlType(szFileName))
@@ -358,6 +363,8 @@ void FileFactory::AddDependency(const char* szFileName)
 		m_referencedFiles.push_back(intermediateDep);
 	}
 }
+
+
 
 
 

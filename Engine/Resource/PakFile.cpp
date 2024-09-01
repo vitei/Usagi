@@ -16,6 +16,7 @@
 #include "Engine/Resource/ParticleEffectResource.h"
 #include "Engine/Resource/ParticleEmitterResource.h"
 #include "Engine/Resource/ModelResource.h"
+#include "Engine/Resource/HeightFieldResource.h"
 #include "Engine/Resource/CollisionModelResource.h"
 #include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Resource/SkeletalAnimationResource.h"
@@ -168,6 +169,10 @@ namespace usg
 		case usg::ResourceType::PARTICLE_EMITTER:
 		{
 			return vnew(ALLOC_OBJECT)ParticleEmitterResource;
+		}
+		case usg::ResourceType::HEIGHTFIELD:
+		{
+			return vnew(ALLOC_OBJECT)HeightFieldResource;
 		}
 		default:
 			ASSERT(false);

@@ -71,6 +71,7 @@ message HeightFieldCollider
 	option (nanopb_msgopt).has_onloaded = true;
 
 	required string szAsset = 1 [(nanopb).max_size = 64];
+	required string szPakName = 10 [(nanopb).max_size = 64];
 	required float fHeightScale = 2 [default = 1.0];
 	required float fColumnScale = 3 [default = 1.0];
 	required float fRowScale = 4 [default = 1.0];

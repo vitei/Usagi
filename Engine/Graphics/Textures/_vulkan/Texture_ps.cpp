@@ -103,6 +103,10 @@ VkFormat GetFormatGLI(uint32 uFormat)
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	case gli::format::FORMAT_BGRA8_SRGB_PACK8:
 		return VK_FORMAT_B8G8R8A8_SRGB;
+	case gli::format::FORMAT_R16_UNORM_PACK16:
+		return VK_FORMAT_R16_UNORM;
+	case gli::format::FORMAT_L16_UNORM_PACK16:
+		return VK_FORMAT_R16_UNORM;
 	default:
 		ASSERT(false);	// See what we end up getting passed through
 	}
