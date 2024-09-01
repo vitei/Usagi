@@ -34,7 +34,7 @@ public:
 	void SetName(const char* szName) { m_name = szName; }
 
 	void SetTexture(uint32 uTex, const TextureHndl& pTex, const SamplerHndl &decl) { m_descriptorSet.SetImageSamplerPairAtBinding(uTex, pTex, decl); }
-	void SetConstantSet(uint32 uConstant, const ConstantSet* pSet, uint32 uFlags = (SHADER_FLAG_VERTEX | SHADER_FLAG_GEOMETRY | SHADER_FLAG_PIXEL))
+	void SetConstantSet(uint32 uConstant, const ConstantSet* pSet, uint32 uFlags = (SHADER_FLAG_ALL))
 	{
 		m_descriptorSet.SetConstantSetAtBinding(uConstant, pSet, 0, uFlags); 
 	}

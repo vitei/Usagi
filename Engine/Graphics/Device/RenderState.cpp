@@ -518,6 +518,7 @@ PipelineStateDecl::PipelineStateDecl()
 	pEffect = NULL;
 	uInputBindingCount = 0;
 	eSampleCount = SAMPLE_COUNT_1_BIT;
+	uPatchControlPoints = 0;
 }
 
 PipelineStateDecl::~PipelineStateDecl()

@@ -291,6 +291,7 @@ public:
 	SampleCount				eSampleCount;
 
 	PrimitiveType			ePrimType;
+	uint32					uPatchControlPoints;
 
 };
 
