@@ -335,6 +335,14 @@ struct GFXBounds
 	sint32 height;
 };
 
+struct GPUCapabilities
+{
+	bool	bHasLineSmooth;
+	uint32	maxPushConstantsSize;
+	uint32	maxTessellationGenerationLevel;
+	uint32	maxTessellationPatchSize;
+};
+
 
 #define VERTEX_DATA_ELEMENT_NAME( vs_name, struct_name, element, type, count, normalised ) \
 	{ vs_name, offsetof(struct_name, element), type, count, normalised }

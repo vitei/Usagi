@@ -125,6 +125,12 @@ const DisplaySettings* GFXDevice::GetDisplayInfo(uint32 uIndex)
 	return m_pImpl->platform.GetDisplayInfo(uIndex);
 }
 
+
+const GPUCapabilities& GFXDevice::GetCaps() const
+{
+	return m_pImpl->platform.GetCaps();
+}
+
 PipelineStateHndl GFXDevice::GetPipelineState(const RenderPassHndl& hndl, const PipelineStateDecl& decl)
 {
 	return m_pImpl->renderStates.GetPipelineState(hndl, decl, this);

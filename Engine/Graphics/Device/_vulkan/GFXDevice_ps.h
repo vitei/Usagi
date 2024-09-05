@@ -105,6 +105,8 @@ public:
 	const VkPhysicalDeviceFeatures& GetEnabledFeatures() const { return m_enabledFeatures; }
 	bool HasLineSmooth() const { return m_bHasLineSmooth; }
 	bool IsMultiThreaded() const { return m_queue[QUEUE_TYPE_GRAPHICS] != m_queue[QUEUE_TYPE_TRANSFER]; }
+	 
+	const GPUCapabilities& GetCaps() const { return m_deviceCaps; }
 private:
 	void EnumerateDisplays();
 	bool ColorFormatSupported(VkFormat eFormat);
@@ -210,6 +212,9 @@ private:
 	float								m_fGPUTime;
 	bool								m_bHasLineSmooth;
 	memsize								m_uMemSize;
+
+	GPUCapabilities					m_deviceCaps;
+
 };
 
 }

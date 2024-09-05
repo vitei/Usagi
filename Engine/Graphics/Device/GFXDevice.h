@@ -23,6 +23,9 @@ class RenderPassDecl;
 class SamplerDecl;
 struct DescriptorDeclaration;
 class PipelineStateDecl;
+struct GPUCapabilities;
+
+
 
 class GFXDevice
 {
@@ -44,6 +47,7 @@ public:
 	uint32 GetHardwareDisplayCount();
 	float GetGPUTime() const;
 	const DisplaySettings* GetDisplayInfo(uint32 uIndex);
+	const GPUCapabilities& GetCaps() const;
 
 	void Begin();
 	void End(bool bIsLoading = false);

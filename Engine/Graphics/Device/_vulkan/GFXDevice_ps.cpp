@@ -557,13 +557,14 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	// Init the device
 	memset(m_queueInfo, 0, sizeof(m_queueInfo));
 
+	uint32 uBestIndex = 0;
+
 	if (GetHMDPhysicalDeviceVKFn)
 	{
 		GetHMDPhysicalDeviceVKFn(m_instance, &m_primaryPhysicalDevice);
 	}
 	else
 	{
-		uint32 uBestIndex = 0;
 		uint32 uBestScore = 0;
 		for (uint32 i = 0; i < m_uGPUCount; i++)
 		{	
@@ -588,6 +589,11 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 		m_primaryPhysicalDevice = m_gpus[uBestIndex];
 	}
+
+	const auto& limits = m_deviceProperties[uBestIndex].limits;
+	m_deviceCaps.maxPushConstantsSize = limits.maxPushConstantsSize;
+	m_deviceCaps.maxTessellationPatchSize = limits.maxTessellationPatchSize;
+	m_deviceCaps.maxTessellationGenerationLevel = limits.maxTessellationGenerationLevel;
 
 	{
 		VkPhysicalDeviceMemoryProperties prop;
@@ -668,17 +674,18 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 
 	supportedFeatures.pNext = &lineSupport;
 
-	VkPhysicalDeviceLimits limits = {};
-
 	vkGetPhysicalDeviceFeatures2(m_primaryPhysicalDevice, &supportedFeatures);
 
 	FATAL_RELEASE(supportedFeatures.features.samplerAnisotropy, "No anisotropy");
 
 	FATAL_RELEASE(supportedFeatures.features.geometryShader, "No geometry shader support");
+	FATAL_RELEASE(supportedFeatures.features.tessellationShader, "No tessellation shader support");
 	FATAL_RELEASE(supportedFeatures.features.multiDrawIndirect, "No multi draw indirect");
 	FATAL_RELEASE(supportedFeatures.features.textureCompressionBC, "No BC compression");
 	FATAL_RELEASE(supportedFeatures.features.independentBlend, "No independent blend");
 	FATAL_RELEASE(supportedFeatures.features.shaderClipDistance, "No shader clip distance");
+
+
 
 
 
@@ -733,6 +740,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 		}
 	}
 
+	m_deviceCaps.bHasLineSmooth = m_bHasLineSmooth;
 
 
 	GetHMDExtensionsForType(pHmd, IHeadMountedDisplay::ExtensionType::Device, extensions);
