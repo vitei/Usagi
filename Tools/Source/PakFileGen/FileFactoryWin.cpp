@@ -49,6 +49,10 @@ FileFactoryWin::FileFactoryWin() :
 	// Uncompressed 16
 	m_texFormats["r16"] = { CMP_FORMAT::CMP_FORMAT_R_16, false };
 
+	// Uncompressed 32 bit float
+	m_texFormats["r32f"] = { CMP_FORMAT::CMP_FORMAT_R_32F, false };
+
+
 	CMP_InitFramework();
 }
 
@@ -165,6 +169,7 @@ std::string FileFactoryWin::LoadHeightmap(const char* szFileName, const YAML::No
 		std::string terrainDir = std::string(szFileName).substr(0, std::string(szFileName).find_last_of("\\/")+1);
 		std::string relativeNameNoExt = RemoveExtension(relativePath);
 		std::string outName = relativeNameNoExt + ".vtx";
+		std::string collisionOut = relativeNameNoExt + ".hfld";
 		std::string tmpFileName = m_tempDir + relativeNameNoExt + ".dds";
 
 		heightmap = terrainDir + heightmap;
@@ -175,7 +180,7 @@ std::string FileFactoryWin::LoadHeightmap(const char* szFileName, const YAML::No
 			return outName;
 		}
 
-		CreateTempKTXTexture(heightmap.c_str(), node, tmpFileName.c_str());
+		CreateTempKTXTexture(heightmap.c_str(), out, tmpFileName.c_str());
 
 
 		gli::texture2d ktx(gli::load(tmpFileName.c_str()));
@@ -186,14 +191,17 @@ std::string FileFactoryWin::LoadHeightmap(const char* szFileName, const YAML::No
 
 		HeightfieldEntry* pHeightfield = new HeightfieldEntry;
 		pHeightfield->srcName = szFileName;
-		pHeightfield->SetName(szFileName, usg::ResourceType::HEIGHTFIELD);
+		pHeightfield->SetName(collisionOut.c_str(), usg::ResourceType::HEIGHTFIELD);
 		pHeightfield->Init(TextureConverted);
+
+		// We convert the texture to 32bit to interpolate in the highp shader
+		gli::texture2d TextureHp = gli::convert(ktx, gli::FORMAT_R32_SFLOAT_PACK32);
 
 		std::string texName = RemoveExtension(szFileName) + ".vtx";
 		TextureEntry* pTexture = new TextureEntry;
 		pTexture->srcName = szFileName;
 		pTexture->SetName(outName, usg::ResourceType::TEXTURE);
-		pTexture->Init(TextureConverted,false);
+		pTexture->Init(TextureHp,false);
 
 
 		std::string expectedTexName = RemoveExtension(heightmap.substr(m_rootDir.size()).c_str());

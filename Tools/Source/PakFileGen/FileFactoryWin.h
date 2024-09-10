@@ -4,6 +4,7 @@
 #include "Engine/Core/stl/map.h"
 #include "Engine/Resource/PakDecl.h"
 #include "compressonator.h"
+#include "Engine/Physics/PhysX.h"
 #include <gli/gli.hpp>
 #include <sstream>
 
@@ -97,10 +98,20 @@ protected:
 
 	struct HeightfieldEntry : public ResourceEntry
 	{
-		virtual const void* GetData() override { return memory.data(); }
-		virtual uint32 GetDataSize() override { return (uint32)memory.size(); };
+		virtual ~HeightfieldEntry()
+		{
+			if (pSamples)
+			{
+				delete[] pSamples;
+				pSamples = nullptr;
+			}
+		}
+
+		virtual const void* GetData() override { return (void*)pSamples; }
+		virtual uint32 GetDataSize() override { return uDataSize; };
 		virtual const void* GetCustomHeader() { return customHeaderMem.data(); }
 		virtual uint32 GetCustomHeaderSize() { return (uint32)customHeaderMem.size(); }
+		virtual bool KeepDataAfterLoading() override { return true; }
 
 		void Init(const gli::texture& tex)
 		{
@@ -117,14 +128,27 @@ protected:
 			customHeaderMem.resize(sizeof(hdr));
 			memcpy(customHeaderMem.data(), &hdr, sizeof(hdr));
 
-			memory.resize(uSize);
-			memcpy(memory.data(), pData, uSize);
+			uint32 uSamples = hdr.uColumns * hdr.uRows;
+			pSamples = new physx::PxHeightFieldSample[uSamples];
+
+			uDataSize = uSamples * sizeof(physx::PxHeightFieldSample);
+
+			for(uint32 i=0; i<uSamples; i++)
+			{
+				// Incoming data is unsigned, our heightmap is signed
+				sint32 uData = pData[i];
+				uData += INT16_MIN;
+				pSamples[i].height = (sint16)uData;
+				pSamples[i].materialIndex0 = 0;
+				pSamples[i].materialIndex1 = 0;
+			}
 		}
 
 
 	private:
 
-		std::vector<char> memory;
+		physx::PxHeightFieldSample*	pSamples = nullptr;
+		uint32					uDataSize = 0;
 		std::vector<char> customHeaderMem;
 	};
 

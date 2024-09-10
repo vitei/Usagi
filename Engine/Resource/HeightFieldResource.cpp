@@ -17,14 +17,11 @@ HeightFieldResource::~HeightFieldResource()
 
 bool HeightFieldResource::Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData)
 {
-	const uint8* pHdrData = (const uint8*)pFileHeader;
-	pHdrData += pFileHeader->uDataOffset;
-
 	const PakFileDecl::HeightfieldHeader* pHeightData = PakFileDecl::GetCustomHeader< PakFileDecl::HeightfieldHeader>(pFileHeader);
 	m_uRows = pHeightData->uRows;
 	m_uColumns = pHeightData->uColumns;
 
-	m_pHeightData = (physx::PxHeightFieldSample*)pHdrData;
+	m_pHeightData = (physx::PxHeightFieldSample*)pData;
 	m_bOwnsData = false;
 	SetupHash(pFileHeader->szName);
 	SetReady(true);

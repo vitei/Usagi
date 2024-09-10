@@ -33,6 +33,7 @@ public:
 	uint32 GetColumns() const { return m_uColumns; }
 	uint32 GetRows() const { return m_uRows; }
 
+
 private:
 	
 	physx::PxHeightFieldSample*	m_pHeightData = nullptr;
