@@ -412,6 +412,7 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 		m_uBpp = 3; break;
 	case ColorFormat::RGBA_8888:
 	case ColorFormat::R_32:
+	case ColorFormat::R_32F:
 	case ColorFormat::SRGBA:
 		m_uBpp = 4; break;
 	default:
