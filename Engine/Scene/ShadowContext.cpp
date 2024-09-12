@@ -13,14 +13,16 @@ namespace usg {
 
 struct GlobalShadowConstants
 {
-	Matrix4x4	mProjMat;
-	Matrix4x4	mViewMat;
+	Matrix4x4		mProjMat;
+	Matrix4x4		mViewMat;
+	usg::Vector4f	vFrustumPlanes[6];
 };
 
 static const ShaderConstantDecl g_globalShadowCBDecl[] =
 {
 	SHADER_CONSTANT_ELEMENT(GlobalShadowConstants, mProjMat,			CT_MATRIX_44, 1),
 	SHADER_CONSTANT_ELEMENT(GlobalShadowConstants, mViewMat,			CT_MATRIX_44, 1),
+	SHADER_CONSTANT_ELEMENT(GlobalShadowConstants, vFrustumPlanes,		CT_VECTOR_4, 6),
 	SHADER_CONSTANT_END()
 };
 
@@ -82,6 +84,12 @@ void ShadowContext::Update(GFXDevice* pDevice)
 	// Add the light camera view and projection matrices here
 	globalData->mProjMat		= pCamera->GetProjection();
 	globalData->mViewMat		= pCamera->GetViewMatrix();
+
+	Frustum frustum = pCamera->GetFrustum();
+	for (uint32 uPlane = 0; uPlane < 6; uPlane++)
+	{
+		globalData->vFrustumPlanes[uPlane] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
+	}
 
 	m_globalConstants.Unlock();
 	m_globalConstants.UpdateData(pDevice);

@@ -375,7 +375,7 @@ namespace usg {
 			Frustum frustum = pCamera->GetFrustum();
 			for (uint32 uPlane = 0; uPlane < 6; uPlane++)
 			{
-				globalData->vFrustumPlanes[i] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
+				globalData->vFrustumPlanes[uPlane] = frustum.GetPlane(uPlane).GetNormalAndDistanceV4();
 			}
 			m_pImpl->globalConstants[i].Unlock();
 			m_pImpl->globalConstants[i].UpdateData(pDevice);

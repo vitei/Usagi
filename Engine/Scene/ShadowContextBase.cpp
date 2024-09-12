@@ -40,7 +40,15 @@ namespace usg {
 		{
 			ComparisonData Cmp;
 			Cmp.CmpNode = (memsize)itr;
-			Cmp.CmpLoc = itr->GetParent()->GetTransform()->GetMatrix() * mLightTransform;
+			if (itr->GetParent()->GetTransform())
+			{
+				Cmp.CmpLoc = itr->GetParent()->GetTransform()->GetMatrix() * mLightTransform;
+			}
+			else
+			{
+				Cmp.CmpLoc = mLightTransform;
+			}
+			
 			m_prevData.push_back(Cmp);
 		}
 	}
