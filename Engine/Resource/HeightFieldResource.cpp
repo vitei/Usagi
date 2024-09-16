@@ -34,6 +34,7 @@ bool HeightFieldResource::Init(const char* szName, uint32 uWidth, uint32 uHeight
 {
 	m_uColumns = uWidth;
 	m_uRows = uHeight;
+	m_bOwnsData = true;
 
 	uint32 uCount = uWidth * uHeight;
 	uint32 uSize = uCount * sizeof(physx::PxHeightFieldSample);
