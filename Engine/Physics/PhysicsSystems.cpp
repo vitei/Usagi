@@ -470,7 +470,7 @@ namespace usg
 		};
 
 
-		class HandleShapeEvents : public System
+		class HandleSphereEvents : public System
 		{
 		public:
 
