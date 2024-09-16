@@ -408,6 +408,8 @@ void Texture_ps::Init(GFXDevice* pDevice, ColorFormat eFormat, uint32 uWidth, ui
 	// Only raw 3/4byte images for now
 	switch (eFormat)
 	{
+	case ColorFormat::R_8:
+		m_uBpp = 1; break;
 	case ColorFormat::RGB_888:
 		m_uBpp = 3; break;
 	case ColorFormat::RGBA_8888:
