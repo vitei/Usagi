@@ -41,14 +41,14 @@ namespace usg
 		ResourceBase(ResourceType eType)
 		{
 			m_nameHash = 0;
-			m_dataHash = 0;
+			//m_dataHash = 0;
 			m_resourceType = eType;
 			m_bReady = false;
 		}
 	public:
 		virtual ~ResourceBase() {}
 		NameHash GetNameHash() const { return m_nameHash; }
-		DataHash GetDataHash() const { return m_dataHash; }
+		//DataHash GetDataHash() const { return m_dataHash; }
 
 		// Support for asynchronous loading, coded to match level editor for now
 		virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) { ASSERT(false); return false; }
@@ -66,7 +66,7 @@ namespace usg
 		void SetupHash( const char* name )
 		{
 			m_nameHash = ResourceDictionary::calcNameHash( name );
-			m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
+			//m_dataHash = ResourceDictionary::searchDataHashByName( m_nameHash ); // Possibly not found
 #ifdef DEBUG_BUILD
 			m_name = name;
 #endif
@@ -77,7 +77,7 @@ namespace usg
 	private:
 		ResourceType	m_resourceType;
 		NameHash		m_nameHash;
-		DataHash		m_dataHash;
+		//DataHash		m_dataHash;
 #ifdef DEBUG_BUILD
 		usg::string		m_name;
 #endif

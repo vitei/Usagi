@@ -57,14 +57,14 @@ ResourceMgr::ResourceMgr(void)
 	m_fontDir = "Fonts/";
 	m_physicsDir = "Physics/";
 
-	ResourceDictionary::init();
+	//ResourceDictionary::init();
 
 
 }
 
 ResourceMgr::~ResourceMgr(void)
 {
-	ResourceDictionary::cleanup();
+	//ResourceDictionary::cleanup();
 	vdelete m_pImpl;
 }
 

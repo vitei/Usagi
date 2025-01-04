@@ -126,7 +126,7 @@ def projects(config, n, order_only_deps, win_bp_cpp, data_deps)
   n.alias('projects', all_projects.to_a)
 
   exe_files = ['includes'] + order_only_deps + win_bp_cpp +
-    data_deps.to_a + [config.name_data_hash_list]
+    data_deps.to_a  # + [config.name_data_hash_list]
   n.alias('exe_files', exe_files)
   n.defaults('exe_files')
 end
@@ -607,7 +607,7 @@ end
 def build_hash_list(config, n, data_set)
   list_targets = {config.romfiles_dir => config.data_list_file}
   GeneratorUtil.create_data_list(n, list_targets, data_set.to_a)
-  GeneratorUtil.create_hash_list(config, n)
+  #GeneratorUtil.create_hash_list(config, n)
 end
 
 def build_lua_scripts(config, n)

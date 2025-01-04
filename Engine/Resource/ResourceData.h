@@ -195,7 +195,7 @@ BaseResHandle ResourceData::GetResourceHndl(const usg::string& resName, Resource
 {
 	// TODO: Bad for cache misses and completely unsorted, create a lookup table
 	NameHash nameHash = ResourceDictionary::calcNameHash( resName.c_str() );
-	DataHash dataHash = ResourceDictionary::searchDataHashByName( nameHash );
+//	DataHash dataHash = ResourceDictionary::searchDataHashByName( nameHash );
 	
 #ifdef DEBUG_RESOURCE_MGR
 	m_findTimer.Start();
