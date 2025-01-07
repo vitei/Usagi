@@ -907,7 +907,11 @@ UVMapper* Model::GetUVMapper(uint32 uMesh, uint32 uTexIndex)
 
 void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, uint32 uIndex, uint32 uMeshIdx)
 {
-	ASSERT(m_bDynamic);
+	if (!m_bDynamic)
+	{
+		ASSERT(false);
+		return;
+	}
 
 	for (uint32 uMesh = 0; uMesh < m_pResource->GetMeshCount(); uMesh++)
 	{
