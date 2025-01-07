@@ -30,7 +30,7 @@ namespace usg
 		if (it == m_triangleMeshCache.end())
 		{
 			CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
-			ASSERT(handle != nullptr);
+			ASSERT(handle);
 			const Vector3f* pVerts = handle->GetVertices();
 			const uint32 uVertexCount = handle->GetVertexCount();
 			const uint32 uTriangleCount = handle->GetTriangleCount();
@@ -69,8 +69,8 @@ namespace usg
 	void PhysXMeshCache::preloadConvexMesh(ComponentLoadHandles& handles, const char* szCollisionModelResource)
 	{
 		CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
-		ASSERT(handle != nullptr);
-		if (handle != nullptr)
+		ASSERT(handle);
+		if (handle)
 		{
 			for (auto& bd : handle->GetSubmeshData())
 			{
@@ -87,7 +87,7 @@ namespace usg
 		if (it == m_convexMeshCache.end())
 		{
 			CollisionModelResHndl handle = handles.pResourceMgr->GetCollisionModel(szCollisionModelResource);
-			ASSERT(handle != nullptr);
+			ASSERT(handle);
 
 			unique_ptr<vector<Vector3f>> boneVertices;
 			physx::PxConvexMeshDesc convexDesc;
