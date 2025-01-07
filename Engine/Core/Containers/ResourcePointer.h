@@ -9,7 +9,6 @@
 
 #include "Engine/Memory/ArrayPool.h"
 
-
 template <class PointerType>
 class ResourcePointer
 {
@@ -20,76 +19,88 @@ public:
 	ResourcePointer(PointerType* pData);
 
 	// Copy constructors
-	ResourcePointer(const ResourcePointer &rhs) { init(NULL); copy(rhs); }
-	ResourcePointer& operator=(const ResourcePointer &rhs) { copy(rhs); return *this; }
+	ResourcePointer(const ResourcePointer& rhs);
+	ResourcePointer& operator=(const ResourcePointer& rhs);
 
 	// Operator overloads
-	PointerType* operator->() const { return m_pPointer; }
-	PointerType& operator*() const { return *m_pPointer; }
-	PointerType& operator[](memsize idx) { return m_pPointer[idx]; }
-	operator bool() const { return m_pPointer != NULL; }
+	PointerType* operator->() const;
+	PointerType& operator*() const;
+	operator bool() const;
 
-	// Mimicking C++ 11'd shr_ptr which only has tests against null_ptr
-	bool operator==(const ResourcePointer &rhs) const { return rhs.m_pPointer == m_pPointer; }
-	bool operator!=(const ResourcePointer &rhs) const { return rhs.m_pPointer != m_pPointer; }
+	bool operator==(const ResourcePointer& rhs) const;
+	bool operator!=(const ResourcePointer& rhs) const;
 
-	void reset(PointerType* pType = NULL);	// Call with NULL when the data has been manually deleted
-	PointerType* get() const { return m_pPointer; }
-	bool unique() const { return m_pNext == NULL && m_pPrev == NULL;  }
+	void reset(PointerType* pType = nullptr);
+	PointerType* get() const;
+	bool unique() const;
 
-
-	uint32 use_count() const;
 
 private:
 	void removeRef();
 	void destroy(PointerType* pType);
 	void replacePointer(PointerType* pType, bool bPrev, bool bNext);
 
-
 	void messageDataInvalidate();
 
 	ResourcePointer*	m_pNext;
 	ResourcePointer*	m_pPrev;
 
-protected:
+	mutable std::mutex m_mutex;
+
 	void init(PointerType* pType);
 	void copy(const ResourcePointer<PointerType>& copyData);
-
 	PointerType*	m_pPointer;
 };
 
 template <class PointerType>
-ResourcePointer<PointerType> make_shared(PointerType* pPointer)
+ResourcePointer<PointerType>::ResourcePointer(const ResourcePointer<PointerType>& rhs)
 {
-	// Non optimal, copy constructor, but just need to match the c++ 11 
-	ResourcePointer<PointerType> shared(pPointer);
-	return shared;
-}
-
-
-template <class PointerType>
-NO_INLINE_TEMPL ResourcePointer<PointerType>::ResourcePointer()
-{
-	init(NULL);
+	init(nullptr);
+	copy(rhs);
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL ResourcePointer<PointerType>::ResourcePointer(PointerType* pData)
+ResourcePointer<PointerType>& ResourcePointer<PointerType>::operator=(const ResourcePointer<PointerType>& rhs)
+{
+	if (this != &rhs)
+	{
+		copy(rhs);
+	}
+	return *this;
+}
+
+template <class PointerType>
+ResourcePointer<PointerType>::ResourcePointer()
+{
+	init(nullptr);
+}
+
+template <class PointerType>
+ResourcePointer<PointerType>::ResourcePointer(PointerType* pData)
 {
 	init(pData);
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL ResourcePointer<PointerType>::~ResourcePointer()
+ResourcePointer<PointerType>::~ResourcePointer()
 {
 	removeRef();
 }
 
+template <class PointerType>
+void ResourcePointer<PointerType>::init(PointerType* pType)
+{
+	m_pPointer = pType;
+	m_pNext = nullptr;
+	m_pPrev = nullptr;
+}
 
 template <class PointerType>
 void ResourcePointer<PointerType>::removeRef()
 {
 	// Shared pointers clean themselves up if there are no references to them
+	std::lock_guard<std::mutex> lock(m_mutex);
+
 	if (!m_pNext && !m_pPrev && m_pPointer)
 	{
 		// We don't clean up the data directly so that we don't have to expose the destructor
@@ -100,23 +111,30 @@ void ResourcePointer<PointerType>::removeRef()
 	// Remove ourselves from the list
 	if (m_pPrev)
 	{
+		std::lock_guard<std::mutex> prevLock(m_pPrev->m_mutex);
 		m_pPrev->m_pNext = m_pNext;
 	}
+
 	if (m_pNext)
 	{
+		std::lock_guard<std::mutex> nextLock(m_pNext->m_mutex);
 		m_pNext->m_pPrev = m_pPrev;
 	}
-	m_pNext = NULL;
-	m_pPrev = NULL;
-	m_pPointer = NULL;
+
+	m_pNext = nullptr;
+	m_pPrev = nullptr;
+	m_pPointer = nullptr;
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
+void ResourcePointer<PointerType>::messageDataInvalidate()
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
+
 	ResourcePointer<PointerType>* pPtr = m_pNext;
 	while (pPtr)
 	{
+		std::lock_guard<std::mutex> nextLock(pPtr->m_mutex);
 		ResourcePointer<PointerType>* pNext = pPtr->m_pNext;
 		pPtr->m_pPointer = nullptr;
 		pPtr->m_pNext = nullptr;
@@ -127,6 +145,7 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
 	pPtr = m_pPrev;
 	while (pPtr)
 	{
+		std::lock_guard<std::mutex> prevLock(pPtr->m_mutex);
 		ResourcePointer<PointerType>* pPrev = pPtr->m_pPrev;
 		pPtr->m_pPointer = nullptr;
 		pPtr->m_pNext = nullptr;
@@ -140,10 +159,12 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::messageDataInvalidate()
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::copy(const ResourcePointer<PointerType>& copyData)
+void ResourcePointer<PointerType>::copy(const ResourcePointer<PointerType>& copyData)
 {
-	if(&copyData == this)
+	if (&copyData == this)
+	{
 		return;
+	}
 
 	if (copyData.m_pPointer == m_pPointer)
 	{
@@ -153,24 +174,28 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::copy(const ResourcePointer<Po
 	removeRef();
 
 	ResourcePointer<PointerType>& nonConstCopyData = *const_cast<ResourcePointer<PointerType>*>(&copyData);
-	
-	m_pNext = nonConstCopyData.m_pNext;
-	m_pPrev = &nonConstCopyData;
-	m_pPointer = nonConstCopyData.m_pPointer;
-
-	if(m_pNext)
 	{
-		m_pNext->m_pPrev = this;
-	}
-	nonConstCopyData.m_pNext = this;
+		std::lock_guard<std::mutex> lock(nonConstCopyData.m_mutex);
 
-	ASSERT(m_pNext != this);
+		m_pNext = nonConstCopyData.m_pNext;
+		m_pPrev = &nonConstCopyData;
+		m_pPointer = nonConstCopyData.m_pPointer;
+
+		if (m_pNext)
+		{
+			std::lock_guard<std::mutex> nextLock(m_pNext->m_mutex);
+			m_pNext->m_pPrev = this;
+		}
+		nonConstCopyData.m_pNext = this;
+
+		ASSERT(m_pNext != this);
+	}
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::reset(PointerType* pType)
+void ResourcePointer<PointerType>::reset(PointerType* pType)
 {
-	if (pType == NULL)
+	if (pType == nullptr)
 	{
 		// The data is gone, clean up all the pointers
 		destroy(m_pPointer);
@@ -183,42 +208,90 @@ NO_INLINE_TEMPL void ResourcePointer<PointerType>::reset(PointerType* pType)
 }
 
 template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::init(PointerType* pPointerData)
+void ResourcePointer<PointerType>::destroy(PointerType* pPointerData)
 {
-	m_pPointer = pPointerData;
-	m_pNext = NULL;
-	m_pPrev = NULL;
-}
-
-template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::destroy(PointerType* pPointerData)
-{
-	ASSERT(m_pPointer!=NULL);
+	ASSERT(m_pPointer != nullptr);
 	ASSERT(m_pPointer == pPointerData);
 	messageDataInvalidate();
 }
 
-
 template <class PointerType>
-NO_INLINE_TEMPL void ResourcePointer<PointerType>::replacePointer(PointerType* pType, bool bPrev, bool bNext)
+void ResourcePointer<PointerType>::replacePointer(PointerType* pType, bool bPrev, bool bNext)
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
+
 	ResourcePointer<PointerType>* pPtr = m_pNext;
 	while (pPtr)
 	{
-		ResourcePointer<PointerType>* pNext = pPtr->m_pNext;
-		pPtr->m_pPointer = pType;
-		pPtr = pNext;
+		{
+			std::lock_guard<std::mutex> nextLock(pPtr->m_mutex);
+			ResourcePointer<PointerType>* pNext = pPtr->m_pNext;
+			pPtr->m_pPointer = pType;
+			pPtr = pNext;
+		}
 	}
 
 	pPtr = m_pPrev;
 	while (pPtr)
 	{
-		ResourcePointer<PointerType>* pPrev = pPtr->m_pPrev;
-		pPtr->m_pPointer = pType;
-		pPtr = pPrev;
+		{
+			std::lock_guard<std::mutex> prevLock(pPtr->m_mutex);
+			ResourcePointer<PointerType>* pPrev = pPtr->m_pPrev;
+			pPtr->m_pPointer = pType;
+			pPtr = pPrev;
+		}
 	}
 
 	m_pPointer = pType;
+}
+
+
+// Operator overloads
+template <class PointerType>
+PointerType* ResourcePointer<PointerType>::operator->() const
+{
+	ASSERT(m_pPointer != nullptr);
+	return m_pPointer;
+}
+
+template <class PointerType>
+PointerType& ResourcePointer<PointerType>::operator*() const
+{
+	ASSERT(m_pPointer != nullptr);
+	return *m_pPointer;
+}
+
+template <class PointerType>
+ResourcePointer<PointerType>::operator bool() const
+{
+	return m_pPointer != nullptr;
+}
+
+template <class PointerType>
+bool ResourcePointer<PointerType>::operator==(const ResourcePointer<PointerType>& rhs) const
+{
+	return m_pPointer == rhs.m_pPointer;
+}
+
+template <class PointerType>
+bool ResourcePointer<PointerType>::operator!=(const ResourcePointer<PointerType>& rhs) const
+{
+	return !(*this == rhs);
+}
+
+// Get the raw pointer
+template <class PointerType>
+PointerType* ResourcePointer<PointerType>::get() const
+{
+	return m_pPointer;
+}
+
+// Check if this is the only reference to the resource
+template <class PointerType>
+bool ResourcePointer<PointerType>::unique() const
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	return m_pNext == nullptr && m_pPrev == nullptr;
 }
 
 #endif

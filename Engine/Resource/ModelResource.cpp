@@ -463,7 +463,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	uint32 uFirstValidPass = 0;
 	for (uint32 i = 0; i < usg::exchange::_Material_RenderPass_count; i++)
 	{
-		if (effects[i] != nullptr)
+		if (effects[i])
 		{
 			uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, effects[i]->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
 			uFirstValidPass = i;
@@ -555,7 +555,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 	}
 
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_DEFERRED];
-	if(pipelineState.pEffect != nullptr)
+	if(pipelineState.pEffect)
 	{
 		pipelineState.alphaState.uColorTargets = 5;
 		InitInputBindings(pDevice, pShape, pMaterial, pipelineState.pEffect->GetCustomEffect(), Mesh::RS_DEFERRED, pipelineState);
@@ -570,7 +570,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	pipelineState.alphaState.uColorTargets = 1;
 	pipelineState.pEffect = effects[usg::exchange::Material_RenderPass_TRANSPARENT];
-	if (pipelineState.pEffect != nullptr)
+	if (pipelineState.pEffect)
 	{
 		/*if (m_meshArray[m_uMeshCount].layer < RenderLayer::LAYER_TRANSLUCENT)
 		{
@@ -683,7 +683,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		}
 	}
 
-	if (effects[usg::exchange::Material_RenderPass_DEPTH] != nullptr)
+	if (effects[usg::exchange::Material_RenderPass_DEPTH])
 	{
 		CreateDepthPassMaterial(pDevice, meshIndex, pShape, pMaterial);
 	}

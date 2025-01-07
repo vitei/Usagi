@@ -57,10 +57,10 @@ public:
 
 	HighLevelType* operator->() const
 	{
-		return (HighLevelType*)(m_pPointer);
+		return (HighLevelType*)(BaseResHandle::get());
 	}
-	HighLevelType& operator*() const { return *((HighLevelType*)m_pPointer); }
-	HighLevelType* get() const { return (HighLevelType*)m_pPointer; }
+	HighLevelType& operator*() const { return *((HighLevelType*)data()); }
+	HighLevelType* get() const { return (HighLevelType*)BaseResHandle::get(); }
 };
 
 typedef ResourceHandle<const CollisionModelResource, ResourceType::COLLISION> CollisionModelResHndl;
