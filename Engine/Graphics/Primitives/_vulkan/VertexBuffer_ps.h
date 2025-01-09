@@ -25,14 +25,14 @@ public:
 	void*	LockData(GFXDevice* pDevice, uint32 uElements);
 	void	UnlockData(GFXDevice* pDevice, void* pData, uint32 uElements);
 
-	VkBuffer GetBuffer() const { return m_buffer[m_uActiveVBO]; }
+	VkBuffer GetBuffer() const { return m_buffer[m_uActiveVBO]; }  
 private:
-	void CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize);
-	void CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging);
+	void CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize, const char* pszName);
+	void CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging, const char* pszName);
 	void CleanupStaging(GFXDevice* pDevice);
 
-    VkBuffer 					m_buffer[GFX_NUM_DYN_BUFF];
-	VkBuffer 					m_stagingBuffer[GFX_NUM_DYN_BUFF];
+    VkBuffer 					m_buffer[GFX_NUM_DYN_BUFF] = {};
+	VkBuffer 					m_stagingBuffer[GFX_NUM_DYN_BUFF] = {};
 
 	GPULocation					m_eLocation;
 	VkDeviceSize				m_uBufferSize;

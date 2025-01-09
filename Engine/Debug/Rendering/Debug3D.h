@@ -12,6 +12,11 @@
 #include "Engine/Debug/Rendering/CubeRender.h"
 #include "Engine/Graphics/Effects/ConstantSet.h"
 
+#ifdef DEBUG_BUILD
+#define ENABLE_DEBUG3D
+#endif
+
+
 namespace usg {
 
 class ViewContext;
@@ -59,11 +64,12 @@ private:
 		MAX_SPHERES = 1024,
 		MAX_CUBES = 32768,
 		MAX_TRIS = 16384,
-		MAX_LINES = 1024 * 1024 * 10,
+		MAX_LINES = 1024 * 1024,
 	};
 
 	static Debug3D*			m_psRenderer;
 
+#ifdef ENABLE_DEBUG3D
 	VertexBuffer			m_transforms;
 	VertexBuffer::Lock		m_transformLock;
 	
@@ -84,6 +90,7 @@ private:
 	SphereData				m_spheres[MAX_SPHERES];
 	TriData					m_triangles[MAX_TRIS * 3];
 	TriData					m_lines[MAX_LINES * 2];
+#endif
 
 	uint32					m_uSpheres;
 	uint32					m_uCubes;

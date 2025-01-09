@@ -3,6 +3,7 @@
 ****************************************************************************/
 #pragma once
 #include "Engine/Memory/MemAllocator.h"
+#include "Engine/Core/Utility.h"
 #include OS_HEADER(Engine/Graphics/Device, VulkanIncludes.h)
 
 namespace usg {
@@ -14,11 +15,12 @@ public:
 	VkMemAllocator() : m_memory(nullptr), m_uPoolIndex(0), m_pMemoryMap(nullptr), m_bDynamicCPUMap(false) {}
 	virtual ~VkMemAllocator() {}
 
-	void Init(uint32 uPoolIndex, uint32 uSize, uint32 uAlign, bool bDynamicCPUMap)
+	void Init(uint32 uPoolIndex, uint32 uSize, uint32 uAlign, bool bDynamicCPUMap, const char* szDebugName)
 	{
 		m_uPoolIndex = uPoolIndex;
 		m_bDynamicCPUMap = bDynamicCPUMap;
-		Inherited::Init(uSize, uAlign, true); 
+
+		Inherited::Init(uSize, uAlign, true, szDebugName); 
 	}
 
 	void SetMemory(VkDeviceMemory memory, void* pMemMap) { m_memory = memory;  m_pMemoryMap = pMemMap; }
@@ -34,6 +36,7 @@ public:
 	// Not using callbacks atm
 	virtual void AllocatedCallback(void* pMem) override {}
 	virtual void ReleasedCallback() override {}
+
 
 private:
 	VkDeviceMemory	m_memory;

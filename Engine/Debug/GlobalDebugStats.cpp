@@ -8,6 +8,7 @@
 #include "Engine/Debug/Rendering/DebugRender.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
 #include "Engine/Core/Timer/ProfilingTimer.h"
+#include API_HEADER(Engine/Graphics/Device, GFXDevice_ps.h)
 #include "GlobalDebugStats.h"
 
 #ifndef FINAL_BUILD
@@ -85,6 +86,9 @@ namespace usg {
 		case PAGE_MEMORY:
 			DrawMemoryPage(pRender, mem::GetMainHeap(), "Main Mem");
 			break;
+		case PAGE_GPU_MEMORY:
+			DrawGPUMemoryPage(pRender);
+			break;
 		case PAGE_MAIN:
 			// Do nothing, we want the main page to be empty
 			break;
@@ -118,6 +122,13 @@ namespace usg {
 		else
 		{
 			m_fCPUTime = 0.0f;
+		}
+
+		if (m_uActivePage == PAGE_GPU_MEMORY)
+		{
+#ifdef USE_VULKAN
+			m_gpuMemoryString = pDevice->GetPlatform().GetMemUsageString();
+#endif
 		}
 
 		m_warnings[WARNING_CPU_HEAVY].bActive = m_fCPUTime > 16.0f;
@@ -161,6 +172,18 @@ namespace usg {
 		#endif
 	}
 
+
+	void GlobalDebugStats::DrawGPUMemoryPage(DebugRender* pRender)
+	{
+		usg::string str;
+		Color cTitle(0.0f, 1.0f, 1.0f, 1.0f);
+		Color cUsage(1.0f, 0.0f, 0.0f, 1.0f);
+		
+		pRender->AddString("GPU Memory", 0.0f, 1.0f, cTitle);
+
+		pRender->AddString(m_gpuMemoryString.c_str(), 0.0f, 4.0f, cUsage);
+
+	}
 
 	void GlobalDebugStats::DrawTimingPage(DebugRender* pRender)
 	{

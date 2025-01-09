@@ -11,77 +11,82 @@
 #include "Engine/Memory/MemUtil.h"
 #include "Engine/Memory/MemAllocator.h"
 #include "Engine/Core/stl/list.h"
+#include "Engine/Core/stl/map.h"
 
 namespace usg {
 
-class GPUHeap
-{
-public:
-	GPUHeap();
-	~GPUHeap();
 
-	void Init(void* pLoc, memsize uSize, uint32 uMaxAllocs, bool bDelayFree = false);
-
-	void ReacquireAll();
-	void ReleaseAll();
-
-	// Note that this allocator must remain valid throughout the lifetime of the allocation
-	void AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
-	void RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
-	bool CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator);
-	memsize GetSmallestBlock(GFXDevice* pDevice, MemAllocator* pAllocator);
-	memsize GetTotalSize() const { return m_uTotalSize; }
-
-	void MergeMemory(uint32 uCurrentFrame, bool bFast);
-
-private:
-	void Validate();
-
-	CriticalSection	m_criticalSection;
-
-	struct BlockInfo
+	class GPUHeap
 	{
-		MemAllocator* 	pAllocator; // If NULL this is a free block
-		void*			pLocation;
-		memsize			uSize;
+	public:
+		GPUHeap();
+		~GPUHeap();
 
-		bool operator <(const BlockInfo& rhs) { return pLocation < rhs.pLocation; }
+		void Init(void* pLoc, memsize uSize, uint32 uMaxAllocs, bool bDelayFree = false);
 
-		uint32			uFreeFrame;
-		bool			bValid;
+		void ReacquireAll();
+		void ReleaseAll();
+
+		// Note that this allocator must remain valid throughout the lifetime of the allocation
+		void AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
+		void RemoveAllocator(GFXDevice* pDevice, MemAllocator* pAllocator);
+		bool CanAllocate(GFXDevice* pDevice, MemAllocator* pAllocator);
+		memsize GetSmallestBlock(GFXDevice* pDevice, MemAllocator* pAllocator);
+		memsize GetTotalSize() const { return m_uTotalSize; }
+
+		void MergeMemory(uint32 uCurrentFrame, bool bFast);
+
+#ifndef FINAL_BUILD
+		void AppendAllocations(usg::map<uint32, memsize>& sizes);
+#endif
+
+	private:
+		void Validate();
+
+		CriticalSection	m_criticalSection;
+
+		struct BlockInfo
+		{
+			MemAllocator* pAllocator; // If NULL this is a free block
+			void* pLocation;
+			memsize			uSize;
+
+			bool operator <(const BlockInfo& rhs) { return pLocation < rhs.pLocation; }
+
+			uint32			uFreeFrame;
+			bool			bValid;
+		};
+
+		static memsize GetRequiredFrontPadding(MemAllocator* pAllocator, BlockInfo* pBlock)
+		{
+			memsize uDataLoc = (memsize)pBlock->pLocation;
+			memsize uFrontPadding = AlignSizeUp(uDataLoc, pAllocator->GetAlign()) - uDataLoc;
+
+			return uFrontPadding;
+		}
+
+		void SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList);
+		BlockInfo* PopList(BlockInfo** ppSrcList, BlockInfo** ppDstList);
+		bool CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame);
+
+		void AllocMemory(BlockInfo* pInfo);
+		void FreeMemory(BlockInfo* pInfo);
+		BlockInfo* FindUnusedBlock();
+
+		static bool ComparePointers(const BlockInfo* const& a, const BlockInfo* const& b);
+
+		void* m_pHeapMem;
+		uint32		m_uMaxAllocs;
+		BlockInfo* m_memoryBlocks;
+
+		usg::list< BlockInfo* >	m_freeList;
+		usg::list< BlockInfo* >	m_unusedList;
+		usg::list< BlockInfo* >	m_allocList;
+		bool		m_bDelayFree;
+		int			m_iMergeFrames;
+		memsize		m_uTotalSize;
 	};
-
-	static memsize GetRequiredFrontPadding(MemAllocator* pAllocator, BlockInfo* pBlock)
-	{
-		memsize uDataLoc = (memsize)pBlock->pLocation;
-		memsize uFrontPadding = AlignSizeUp(uDataLoc, pAllocator->GetAlign()) - uDataLoc;
-
-		return uFrontPadding;
-	}
-
-	void SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList);
-	BlockInfo* PopList(BlockInfo** ppSrcList, BlockInfo** ppDstList);
-	bool CanAlloc(uint32 uCurrentFrame, uint32 uFreeFrame);
-
-	void AllocMemory(BlockInfo* pInfo);
-	void FreeMemory(BlockInfo* pInfo);
-	BlockInfo* FindUnusedBlock();
-
-	static bool ComparePointers(const BlockInfo* const& a, const BlockInfo* const& b);
-
-	void*		m_pHeapMem;
-	uint32		m_uMaxAllocs;
-	BlockInfo*	m_memoryBlocks;
-
-	usg::list< BlockInfo* >	m_freeList;
-	usg::list< BlockInfo* >	m_unusedList;
-	usg::list< BlockInfo* >	m_allocList;
-	bool		m_bDelayFree;
-	int			m_iMergeFrames;
-	memsize		m_uTotalSize;
-};
 
 }
 
 #endif
-

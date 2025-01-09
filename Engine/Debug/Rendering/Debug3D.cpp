@@ -12,6 +12,7 @@
 #include "Engine/Debug/Rendering/Debug3D.h"
 #include "Engine/Scene/ViewContext.h"
 
+
 namespace usg 
 {
 
@@ -53,6 +54,7 @@ Debug3D::~Debug3D()
 
 void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 {
+#ifdef ENABLE_DEBUG3D
 	int i, iC = MAX_SPHERES;
 	
 	MakeSphere(pDevice);
@@ -85,10 +87,12 @@ void Debug3D::Init(GFXDevice* pDevice, Scene* pScene, ResourceMgr* pResMgr)
 	{
 		m_psRenderer = this;
 	}
+#endif
 }
 
 void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewContext* pContext)
 {
+#ifdef ENABLE_DEBUG3D
 	RenderPassHndl rp = pContext->GetRenderPasses().GetRenderPass(*this);
 
 
@@ -142,11 +146,12 @@ void Debug3D::InitContextData(GFXDevice* pDevice, ResourceMgr* pResMgr, ViewCont
 	pipelineState.ePrimType = PT_LINES;
 
 	m_linePipeline = pDevice->GetPipelineState(rp, pipelineState);
-
+#endif
 }
 
 void Debug3D::Cleanup(GFXDevice* pDevice)
 {
+#ifdef ENABLE_DEBUG3D
 	m_sphereIB.Cleanup(pDevice);
 	m_sphereVB.Cleanup(pDevice);
 	m_cubeIB.Cleanup(pDevice);
@@ -154,6 +159,8 @@ void Debug3D::Cleanup(GFXDevice* pDevice)
 	m_triVB.Cleanup(pDevice);
 	m_lineVB.Cleanup(pDevice);
 	m_transforms.Cleanup(pDevice);
+
+#endif
 }
 
 Debug3D* Debug3D::GetRenderer()
@@ -171,6 +178,7 @@ void Debug3D::Clear()
 
 void Debug3D::AddSphere(const Vector3f &vPos, float fRadius, const Color& color)
 {
+#ifdef ENABLE_DEBUG3D
 	if(m_uSpheres >= MAX_SPHERES)
 	{
 		//ASSERT(false);
@@ -180,10 +188,14 @@ void Debug3D::AddSphere(const Vector3f &vPos, float fRadius, const Color& color)
 	color.FillV4(m_spheres[m_uSpheres].vColor);
 
 	m_uSpheres++;
+
+#endif
 }
 
 void Debug3D::AddCube(const Matrix4x4& mat, const Color& color)
 {
+#ifdef ENABLE_DEBUG3D
+
 	if(m_uCubes >= MAX_CUBES)
 	{
 		return;
@@ -197,11 +209,13 @@ void Debug3D::AddCube(const Matrix4x4& mat, const Color& color)
 	cube.g = color.g();
 	cube.b = color.b();
 	cube.a = color.a();
-
+#endif
 }
 
 void Debug3D::AddLine(const Vector3f& vStart, const Vector3f& vEnd, const Color& color, float fWidth)
 {
+
+#ifdef ENABLE_DEBUG3D
 	if (m_uLines >= MAX_LINES)
 	{
 		return;
@@ -216,10 +230,13 @@ void Debug3D::AddLine(const Vector3f& vStart, const Vector3f& vEnd, const Color&
 	color.FillV4(m_lines[uIndex + 1].vColor);
 
 	m_uLines++;
+
+#endif
 }
 
 void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 {
+#ifdef ENABLE_DEBUG3D
 	if(m_uCubes > 0)
 	{
 		m_cubeVB.SetContents(pDevice, m_cubes, m_uCubes);
@@ -239,10 +256,14 @@ void Debug3D::UpdateBuffers(GFXDevice* pDevice)
 	{
 		m_lineVB.SetContents(pDevice, m_lines, m_uLines * 2);
 	}
+
+#endif
 }
 
 void Debug3D::AddTriangle(const Vector3f& vPos0, const Color& color0, const Vector3f& vPos1, const Color& color1, const Vector3f& vPos2, const Color& color2)
 {
+
+#ifdef ENABLE_DEBUG3D
 	if (m_uTris >= MAX_TRIS)
 	{
 		return;
@@ -260,10 +281,13 @@ void Debug3D::AddTriangle(const Vector3f& vPos0, const Color& color0, const Vect
 	color2.FillV4(m_triangles[uIndex + 2].vColor);
 
 	m_uTris++;
+
+#endif
 }
 
 bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
+#ifdef ENABLE_DEBUG3D
 	if(m_uSpheres != 0 && m_spherePipeline.IsValid())
 	{
 		pContext->SetPipelineState(m_spherePipeline);
@@ -292,17 +316,20 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 		pContext->SetVertexBuffer(&m_lineVB);
 		pContext->DrawImmediate(m_uLines * 2);
 	}
+#endif
 
 	return true;
 }
 
 void Debug3D::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes)
 {
+#ifdef ENABLE_DEBUG3D
 	pDevice->ChangePipelineStateRenderPass(renderPass, m_spherePipeline);
 	if (m_cubePipeline.IsValid())
 	{
 		pDevice->ChangePipelineStateRenderPass(renderPass, m_cubePipeline);
 	}
+#endif
 }
 
 

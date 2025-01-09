@@ -106,8 +106,8 @@ void DebugRender::Init(GFXDevice* pDevice, ResourceMgr* pResMgr, const RenderPas
 		m_indices.Init( pDevice, puIndices, MAX_BAR_INDICES );
 	}
 
-	m_barVerts.Init( pDevice, NULL, sizeof(PositionDiffuseVertex), MAX_BAR_VERTICES, "Debug Bars", GPU_USAGE_DYNAMIC);
-	m_charVerts.Init( pDevice, NULL, sizeof(PositionUVColVertex), MAX_CHAR_VERTICES, "Debug Chars", GPU_USAGE_DYNAMIC);
+	m_barVerts.Init( pDevice, NULL, sizeof(PositionDiffuseVertex), MAX_BAR_VERTICES, "Debug Bars", GPU_USAGE_DYNAMIC, GPU_LOCATION_STANDARD);
+	m_charVerts.Init( pDevice, NULL, sizeof(PositionUVColVertex), MAX_CHAR_VERTICES, "Debug Chars", GPU_USAGE_DYNAMIC, GPU_LOCATION_STANDARD);
 
 	{
 		uint16* puIndices;

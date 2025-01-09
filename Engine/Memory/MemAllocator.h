@@ -18,7 +18,7 @@ public:
 	MemAllocator();
 	virtual ~MemAllocator();
 
-	void Init(uint32 uSize, uint32 uAlign, bool bGPU);
+	void Init(uint32 uSize, uint32 uAlign, bool bGPU, const char* szDebugName);
 	void Allocated(void* pData);
 	void Released();
 
@@ -30,8 +30,19 @@ public:
 	uint32	GetAlign() { return m_uAlign; }
 	bool	IsGPUData() { return m_bGPUData; }
 
+	#ifndef FINAL_BUILD
+	uint32 GetAllocType() const { return m_uAllocType; }
+	void SetAllocName(const char* szName);
+	usg::string GetAllocName() const { return m_allocName; }
+	#endif
+
 
 private:
+#ifndef FINAL_BUILD
+	uint32			m_uAllocType;
+	usg::string		m_allocName;
+#endif
+
 	void*		m_pData;
 	uint32		m_uSize;
 	uint32		m_uAlign;

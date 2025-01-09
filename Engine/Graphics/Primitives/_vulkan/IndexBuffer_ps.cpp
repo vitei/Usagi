@@ -59,7 +59,7 @@ void IndexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
 		size = m_uBufferSize * m_uBufferCount;
 	}
 
-	m_stagingMemoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
+	m_stagingMemoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1, "IndexBuffer");
 	pDevice->GetPlatform().AllocateMemory(&m_stagingMemoryAlloc);
 }
 
@@ -113,7 +113,7 @@ void IndexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, boo
 		size = m_uBufferSize * m_uBufferCount;
 	}
 
-	m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
+	m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1, "Index Buffer");
 	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 }
 

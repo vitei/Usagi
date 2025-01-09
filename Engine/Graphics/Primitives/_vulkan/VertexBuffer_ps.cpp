@@ -22,7 +22,7 @@ VertexBuffer_ps::~VertexBuffer_ps()
 }
 
 
-void VertexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
+void VertexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize, const char* pszName)
 {
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
 
@@ -56,11 +56,11 @@ void VertexBuffer_ps::CreateStagingBuffer(GFXDevice* pDevice, uint32 uDataSize)
 	m_uBufferSize = AlignSizeUp(size, mem_reqs.alignment);
 	size = m_uBufferSize * m_uBufferCount;
 
-	m_stagingMemoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
+	m_stagingMemoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1, "VertexStaging");
 	pDevice->GetPlatform().AllocateMemory(&m_stagingMemoryAlloc);
 }
 
-void VertexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging)
+void VertexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bool bHasStaging, const char* pszName)
 {
 	VkDevice& deviceVK = pDevice->GetPlatform().GetVKDevice();
 
@@ -108,7 +108,7 @@ void VertexBuffer_ps::CreateFinalBuffer(GFXDevice* pDevice, uint32 uDataSize, bo
 		size = m_uBufferSize * m_uBufferCount;
 	}
 
-	m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1);
+	m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)size, (uint32)mem_reqs.alignment, m_uBufferCount > 1, "VertexBuffer");
 	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 }
 
@@ -146,12 +146,12 @@ void VertexBuffer_ps::Init(GFXDevice* pDevice, const void* const pVerts, uint32 
 	
 	if (!m_bUseStaging)
 	{
-		CreateFinalBuffer(pDevice, uDataSize, false);
+		CreateFinalBuffer(pDevice, uDataSize, false, pszName);
 	}
 	else
 	{
-		CreateStagingBuffer(pDevice, uDataSize);
-		CreateFinalBuffer(pDevice, uDataSize, true);
+		CreateStagingBuffer(pDevice, uDataSize, pszName);
+		CreateFinalBuffer(pDevice, uDataSize, true, pszName);
 	}
 
 

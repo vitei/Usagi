@@ -98,7 +98,7 @@ ConstantSet_ps::~ConstantSet_ps()
 	memAlloc.allocationSize = memReqs.size;
 	memAlloc.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-	m_memoryAlloc.Init(memAlloc.memoryTypeIndex, (uint32)memAlloc.allocationSize, usg::Math::Max((uint32)uPerBufferAlign, (uint32)memReqs.alignment), true);
+	m_memoryAlloc.Init(memAlloc.memoryTypeIndex, (uint32)memAlloc.allocationSize, usg::Math::Max((uint32)uPerBufferAlign, (uint32)memReqs.alignment), true, "ConstantSet");
 	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
 	m_pBoundGPUData = m_memoryAlloc.GetMappedMemory();

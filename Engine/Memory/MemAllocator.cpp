@@ -20,11 +20,24 @@ MemAllocator::~MemAllocator()
 	ASSERT(m_pData==NULL);
 }
 
-void MemAllocator::Init(uint32 uSize, uint32 uAlign, bool bGPUData)
+void MemAllocator::Init(uint32 uSize, uint32 uAlign, bool bGPUData, const char* szDebugName)
 {
 	m_uSize		= uSize;
 	m_uAlign	= uAlign;
 	m_bGPUData	= bGPUData;
+
+#ifndef FINAL_BUILD
+	SetAllocName(szDebugName);
+#endif
+}
+
+
+void MemAllocator::SetAllocName(const char* szName)
+{
+#ifndef FINAL_BUILD
+	m_uAllocType = utl::CRC32(szName);
+	m_allocName = szName;
+#endif
 }
 
 void MemAllocator::Allocated(void* pData)

@@ -85,7 +85,7 @@ private:
 	};
 
 	// FIXME: Refactor to pre-load these views
-	mutable usg::vector<CustomView>	m_customViews;
+	mutable vector<CustomView>	m_customViews;
 	TexStaging		m_staging;
 	VkMemAllocator	m_memoryAlloc;
 	VkImage			m_image;

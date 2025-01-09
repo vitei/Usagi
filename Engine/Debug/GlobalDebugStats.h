@@ -39,6 +39,7 @@ namespace usg
 			PAGE_MAIN = 0,
 			PAGE_TIMING,
 			PAGE_MEMORY,
+			PAGE_GPU_MEMORY,
 			PAGE_PHYSICS,
 			//	PAGE_THREADS,
 			PAGE_COUNT
@@ -49,6 +50,7 @@ namespace usg
 		void DrawThreadsPage(DebugRender* pRender);
 		void DrawMemoryPage(DebugRender* pRender, const MemHeap* pHeap, const char* szName);
 		float DrawMemoryStat(DebugRender* pRenderer, const MemHeap* pHeap, MemAllocType eType, float fPos, float fMaxSize);
+		void DrawGPUMemoryPage(DebugRender* pRender);
 
 		void UpdateFPS(float fElapsed);
 
@@ -68,6 +70,7 @@ namespace usg
 		LabelString				m_currentThread[NUM_THREADS];
 		LabelString				m_lastThread[NUM_THREADS];
 		Warning					m_warnings[WARNING_COUNT];
+		string					m_gpuMemoryString;
 		float					m_fTotalElapsed;
 		float					m_fMaxElapsed;
 		uint32					m_uFrameCounter;

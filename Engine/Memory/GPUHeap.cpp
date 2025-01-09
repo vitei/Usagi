@@ -127,6 +127,27 @@ void GPUHeap::AddAllocator(GFXDevice* pDevice, MemAllocator* pAllocator)
 	ASSERT(false);
 }
 
+#ifndef FINAL_BUILD
+void GPUHeap::AppendAllocations(usg::map<uint32, memsize>& sizes)
+{
+	for(auto itr : m_allocList)
+	{
+		if(!itr->pAllocator)
+			continue;
+
+		uint32 uAllocType = itr->pAllocator->GetAllocType();
+		if(sizes.find(uAllocType) != sizes.end())
+		{
+			sizes[uAllocType] += itr->uSize;
+		}
+		else
+		{
+			sizes[uAllocType] = itr->uSize;
+		}
+	}
+}
+#endif
+
 void GPUHeap::SwitchList(BlockInfo* pInfo, usg::list< BlockInfo* >& srcList, usg::list< BlockInfo* >& dstList)
 {
 	auto itr = eastl::find(srcList.begin(), srcList.end(), pInfo);

@@ -472,7 +472,7 @@ void Texture_ps::InitStaging(GFXDevice* pDevice)
 	memAllocInfo.allocationSize = m_staging.memReq.size;
 	memAllocInfo.memoryTypeIndex = pDevice->GetPlatform().GetMemoryTypeIndex(m_staging.memReq.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-	m_staging.memory.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)m_staging.memReq.alignment, false);
+	m_staging.memory.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)m_staging.memReq.alignment, false, "TextureStaging");
 	pDevice->GetPlatform().AllocateMemory(&m_staging.memory);
 
 	res = vkBindBufferMemory(devicePS, m_staging.buffer, m_staging.memory.GetMemory(), m_staging.memory.GetMemOffset());
@@ -671,7 +671,7 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
 	{
 		pDevice->GetPlatform().FreeMemory(&m_memoryAlloc);
 
-		m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)mem_alloc.allocationSize, (uint32)mem_reqs.alignment, false);
+		m_memoryAlloc.Init(mem_alloc.memoryTypeIndex, (uint32)mem_alloc.allocationSize, (uint32)mem_reqs.alignment, false, "TextureRaw");
 		pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 	}
 
@@ -932,7 +932,7 @@ bool Texture_ps::LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSiz
 	memAllocInfo.allocationSize = memReqs.size;
 	memAllocInfo.memoryTypeIndex = devicePS.GetMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	m_memoryAlloc.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)memReqs.alignment, false);
+	m_memoryAlloc.Init(memAllocInfo.memoryTypeIndex, (uint32)memAllocInfo.allocationSize, (uint32)memReqs.alignment, false, "TextureFile");
 	pDevice->GetPlatform().AllocateMemory(&m_memoryAlloc);
 
 	res = vkBindImageMemory(device, m_image, m_memoryAlloc.GetMemory(), m_memoryAlloc.GetMemOffset());

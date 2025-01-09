@@ -1149,6 +1149,72 @@ uint32 GFXDevice_ps::GetMemoryTypeIndex(uint32 typeBits, VkMemoryPropertyFlags p
 	return USG_INVALID_ID;
 }
 
+
+string GFXDevice_ps::GetMemUsageString() 
+{
+	string out;
+
+	memsize uTotalUsage = 0;
+#ifndef FINAL_BUILD
+
+	char tmp[256];
+
+	VkPhysicalDeviceMemoryProperties prop;
+	vkGetPhysicalDeviceMemoryProperties(m_primaryPhysicalDevice, &prop);
+
+	for (memsize type = 0; type < VK_MAX_MEMORY_TYPES; type++)
+	{
+		usg::string props;
+		if((m_memoryProperites[0].memoryTypes[type].propertyFlags& VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT))
+		{
+			props = "[DeviceLocal]";
+		}
+		if (m_memoryProperites[0].memoryTypes[type].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+		{
+			props += "[Host Visible]";
+		}
+		if (m_memoryProperites[0].memoryTypes[type].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+		{
+			props += "[Host Coherant]";
+		}
+
+		map<uint32, memsize> memory;
+
+		for (memsize i = 0; i < m_memoryPools[type].heaps.size(); i++)
+		{
+			m_memoryPools[type].heaps[i]->AppendAllocations(memory);
+		}
+
+		if (!memory.empty())
+		{
+			uint32 uHeap = m_memoryProperites[0].memoryTypes[type].heapIndex;
+			float fHeapSize = (float)m_memoryProperites[0].memoryHeaps[uHeap].size / (1024.f * 1024.f * 1024.f);
+			out += str::ParseString("\nMemory Type %d %s (Heap %d %f GB)\n", type, props.c_str(), uHeap, fHeapSize);
+		}
+		for (auto itr : memory)
+		{
+			uint32 uMem = itr.first;
+			memsize uSize = itr.second;
+			string name = m_memDebugNames[uMem];
+			float fSize = (float)uSize / (1024.f * 1024.f * 1024.f);
+			str::ParseVariableArgsC(tmp, sizeof(tmp), "%s: %0.4f GB\n", name.c_str(), fSize);
+			out += tmp;
+			if ((m_memoryProperites[0].memoryTypes[type].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT))
+			{
+				uTotalUsage += uSize;
+			}
+		}
+	}
+
+	float fTotalUsage = (float)uTotalUsage / (1024.f * 1024.f * 1024.f);
+
+	out = str::ParseString("Total Device Usage: %fGB\n", fTotalUsage) + out;
+
+#endif
+
+	return out;
+}
+
 bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 {
 	CriticalSection::ScopedLock lock(m_criticalSection);
@@ -1156,6 +1222,12 @@ bool GFXDevice_ps::AllocateMemory(VkMemAllocator* pAllocInOut)
 	uint32 uHeap = USG_INVALID_ID;
 	uint32 uMemType = pAllocInOut->GetPoolId();
 	
+	#ifndef FINAL_BUILD
+	if (m_memDebugNames.find(pAllocInOut->GetAllocType()) == m_memDebugNames.end())
+	{
+		m_memDebugNames[pAllocInOut->GetAllocType()] = pAllocInOut->GetAllocName();
+	}
+	#endif
 
 	memsize smallest = 0xFFFFFFFFFFFFFFFF;
 	for(memsize i=0; i<m_memoryPools[uMemType].heaps.size(); i++)
