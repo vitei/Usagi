@@ -684,6 +684,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	FATAL_RELEASE(supportedFeatures.features.textureCompressionBC, "No BC compression");
 	FATAL_RELEASE(supportedFeatures.features.independentBlend, "No independent blend");
 	FATAL_RELEASE(supportedFeatures.features.shaderClipDistance, "No shader clip distance");
+	FATAL_RELEASE(supportedFeatures.features.shaderStorageImageWriteWithoutFormat, "No storage image write without format");
 
 
 
@@ -706,6 +707,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	extensions.clear();
 	extensions.push_back("VK_KHR_swapchain");
 	extensions.push_back("VK_EXT_hdr_metadata");
+	extensions.push_back("VK_KHR_format_feature_flags2");
 
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(m_primaryPhysicalDevice, nullptr, &extensionCount, nullptr);
