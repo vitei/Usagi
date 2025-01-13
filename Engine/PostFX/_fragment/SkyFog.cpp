@@ -43,7 +43,7 @@ SkyFog::~SkyFog(void)
 }
 
 
-void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys)
+void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource)
 {
 	m_bUseDepthTex = true;
 	m_pDestTarget = nullptr;
@@ -155,14 +155,10 @@ void SkyFog::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 	}
 }
 
-void SkyFog::SetTexture(GFXDevice* pDevice, const TextureHndl& tex, const TextureHndl& linDepth)
+void SkyFog::SetTexture(GFXDevice* pDevice, const TextureHndl& tex)
 {
 	m_materialFade.SetTexture(0, tex, m_linearSampl);
-	m_materialFade.SetTexture(5, linDepth, m_samplerHndl);
-	m_materialFade.UpdateDescriptors(pDevice);
 	m_materialNoFade.SetTexture(0, tex, m_linearSampl);
-	m_materialNoFade.UpdateDescriptors(pDevice);
-	m_bValid = true;
 }
 
 void SkyFog::MakeCube(GFXDevice* pDevice)
@@ -372,6 +368,7 @@ void SkyFog::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& tex
 	if (eInput == PostEffect::Input::LinearDepth)
 	{
 		m_materialFade.SetTexture(5, texture, m_samplerHndl);
+		m_bValid = true;	
 	}
 }
 
@@ -380,6 +377,7 @@ void SkyFog::PassDataSet(GFXDevice* pDevice)
 	if(m_bValid)
 	{
 		m_materialFade.UpdateDescriptors(pDevice);
+		m_materialNoFade.UpdateDescriptors(pDevice);
 	}
 }
 

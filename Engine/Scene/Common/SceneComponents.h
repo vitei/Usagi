@@ -16,6 +16,7 @@ namespace usg
 	class ShadowCascade;
 	class Decal;
 	class ModelMgr;
+	class SkyFog;
 
 	template<>
 	struct RuntimeData<usg::Components::SceneComponent>
@@ -59,6 +60,14 @@ namespace usg
 	struct RuntimeData<HMDCameraComponent>
 	{
 		HMDCamera* pCamera;
+	};
+
+
+	template<>
+	struct RuntimeData<SkyFogComponent>
+	{
+		SkyFog*		pFog;
+		TextureHndl texture;
 	};
 }
 

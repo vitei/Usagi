@@ -18,7 +18,6 @@ namespace usg {
 
 PostFXSys::PostFXSys()
 {
-	m_uPostEffects = 0;
 	m_pDepthTarget = NULL;
 }
 
@@ -94,6 +93,7 @@ void PostFXSys::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 }
 
+
 void PostFXSys::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	m_platform.Resize(pDevice, uWidth, uHeight);
@@ -119,11 +119,6 @@ RenderTarget* PostFXSys::BeginScene(GFXContext* pContext, uint32 uTransferFlags)
 }
 
 
-void PostFXSys::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl)
-{
-	m_platform.SetSkyTexture(pDevice, hndl);
-}
-
 
 void PostFXSys::UpdateRTSize(GFXDevice* pDevice, Display* pDisplay)
 {
@@ -139,21 +134,6 @@ RenderTarget* PostFXSys::GetFinalRT()
 {
 	return m_platform.GetFinalRT();
 }
-
-
-PostEffect* PostFXSys::GetEffect(uint32 uEffectId)
-{
-	ASSERT(uEffectId < m_uPostEffects);
-	return m_pPostEffects[uEffectId];
-}
-
-void PostFXSys::RegisterEffect(PostEffect* pEffect)
-{
-	ASSERT(m_uPostEffects < MAX_POST_EFFECTS);
-	m_pPostEffects[m_uPostEffects] = pEffect;
-	m_uPostEffects++;
-}
-
 
 void PostFXSys::DrawFullScreenQuad(GFXContext* pContext) const
 {

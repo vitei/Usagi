@@ -36,7 +36,6 @@ public:
 		EFFECT_BLOOM = (1 << 1),
 		EFFECT_MOTION_BLUR = (1 << 2),
 		EFFECT_DEFERRED_SHADING = (1 << 3),
-		EFFECT_SKY_FOG = (1 << 4),
 		EFFECT_SMAA = (1 << 5),
 		EFFECT_FILM_GRAIN = (1<<6),
 		EFFECT_SSAO = (1<<7),
@@ -73,7 +72,6 @@ public:
 
 	void DrawFullScreenQuad(GFXContext* pCtxt) const;
 
-	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	void UpdateRTSize(GFXDevice* pDevice, Display* pDisplay);
 
 	uint32 GetFinalTargetWidth(bool bOrient = true) { return m_platform.GetFinalTargetWidth(bOrient); }
@@ -86,9 +84,8 @@ public:
 	void SetActiveViewContext(ViewContext* pViewContext) { m_pActiveScene = pViewContext; }
 	ViewContext* GetActiveViewContext() { return m_pActiveScene; }
 
-	uint32 GetPostEffectCount() const { return m_uPostEffects; }
-	PostEffect* GetEffect(uint32 uEffectId);
-	void RegisterEffect(PostEffect* pEffect);
+	uint32 GetPostEffectCount() const { return m_platform.GetPostEffectCount(); }
+	PostEffect* GetEffect(uint32 uEffectId) { return m_platform.GetEffect(uEffectId); }
 	bool IsEffectEnabled(EffectFlags uFlag) { return (m_uEffectsEnabled & uFlag) != 0; }
 	uint32 GetEnabledEffectFlags() const { return m_uEffectsEnabled; }
 
@@ -107,16 +104,8 @@ protected:
 
 	PostFXSys_ps	m_platform;
 
-	enum
-	{
-		MAX_POST_EFFECTS = 10
-	};
-
 	RenderTarget*		m_pDepthTarget;
 	TextureHndl			m_dummyDepth;
-
-	PostEffect*			m_pPostEffects[MAX_POST_EFFECTS];
-	uint32				m_uPostEffects;
 
 	ViewContext*		m_pActiveScene;
 

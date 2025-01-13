@@ -6,12 +6,16 @@
 #include "Engine/Scene/Camera/HMDCamera.h"
 #include "Engine/Scene/ViewContext.h"
 #include "Engine/Scene/Common/GroundDecals.h"
+#include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Lights/Light.h"
 #include "Engine/Graphics/Lights/LightMgr.h"
 #include "Engine/Scene/Common/SceneComponents.pb.h"
 #include "Engine/Scene/Common/SceneEvents.pb.h"
+#include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Framework/FrameworkComponents.pb.h"
 #include "Engine/Framework/ComponentLoadHandles.h"
+#include FRAGMENT_HEADER(Engine/PostFX, SkyFog.h)
+
 
 namespace usg
 {
@@ -235,5 +239,61 @@ namespace usg
 			p.GetRuntimeData().pCamera = nullptr;
 		}
 	}
+
+
+	template<>
+	void OnLoaded<SkyFogComponent>(Component<SkyFogComponent>& p, ComponentLoadHandles& handles,
+		bool bWasPreviouslyCalled)
+	{
+		bool bIsNull = p.GetRuntimeData().texture.get() == nullptr;
+
+		if (bWasPreviouslyCalled && !bIsNull)
+		{
+			return;
+		}
+
+		p.GetRuntimeData().pFog = vnew(ALLOC_OBJECT) SkyFog;
+		if (handles.pDevice)
+		{
+			p.GetRuntimeData().pFog->Init(handles.pDevice, handles.pResourceMgr);
+		}
+
+		handles.pResourceMgr->LoadPackage(handles.pDevice, p->szPakName);
+		p.GetRuntimeData().texture = handles.pResourceMgr->GetTexture(handles.pDevice, p->szTexName);
+
+		ViewContext* ViewCtxt = handles.pScene->GetViewContext(0);
+		if (ViewCtxt)
+		{
+			PostFXSys* pSys = ViewCtxt->GetPostFXSys();
+			if (pSys)
+			{
+				p.GetRuntimeData().pFog->SetEnabled(true);
+				p.GetRuntimeData().pFog->SetTexture(handles.pDevice, p.GetRuntimeData().texture);
+				pSys->AddCustomEffect(p.GetRuntimeData().pFog);
+			}
+		}
+	}
+
+	template<>
+	void OnActivate<SkyFogComponent>(Component<SkyFogComponent>& p)
+	{
+		p.GetRuntimeData().pFog = nullptr;
+
+		p.GetRuntimeData().texture = nullptr;
+	}
+
+	template<>
+	void OnDeactivate<SkyFogComponent>(Component<SkyFogComponent>& p, ComponentLoadHandles& handles)
+	{
+		if (p.GetRuntimeData().pFog)
+		{
+			p.GetRuntimeData().pFog->Cleanup(handles.pDevice);
+			vdelete p.GetRuntimeData().pFog;
+			p.GetRuntimeData().pFog = nullptr;
+		}
+
+		p.GetRuntimeData().texture = nullptr;
+	}
+
 
 }

@@ -27,11 +27,11 @@ public:
 	SkyFog();
 	virtual ~SkyFog();
 
-	virtual void Init(GFXDevice* pDevice, ResourceMgr* pResource, PostFXSys* pSys) override;
+	void Init(GFXDevice* pDevice, ResourceMgr* pResource);
 	virtual void Cleanup(GFXDevice* pDevice) override;
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
-	void SetTexture(GFXDevice* pDevice, const TextureHndl& skyTex, const TextureHndl& linDepth);
+	void SetTexture(GFXDevice* pDevice, const TextureHndl& skyTex);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
 
 	virtual bool ReadsTexture(Input eInput) const override;

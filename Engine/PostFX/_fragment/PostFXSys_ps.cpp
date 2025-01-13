@@ -12,7 +12,6 @@
 #include "LinearDepth.h"
 #include "SetSceneTarget.h"
 #include "DeferredShading.h"
-#include "SkyFog.h"
 #include "Engine/Scene/SceneConstantSets.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Graphics/StandardVertDecl.h"
@@ -87,7 +86,6 @@ PostFXSys_ps::PostFXSys_ps()
 	m_pFilmGrain = nullptr;
 	m_pSSAO = nullptr;
 	m_pBloom = nullptr;
-	m_pSkyFog = nullptr;
 	m_pDeferredShading = nullptr;
 	m_pSetNoDepthTarget = nullptr;
 	m_pSetLinDepthTarget = nullptr;
@@ -107,6 +105,11 @@ void PostFXSys_ps::Update(Scene* pScene, float fElapsed)
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
 		m_pDefaultEffects[i]->Update(pScene,fElapsed);
+	}
+
+	for (auto itr : m_customEffects)
+	{
+		itr->Update(pScene, fElapsed);
 	}
 }
 
@@ -129,6 +132,14 @@ void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 		if(m_pDefaultEffects[i]->GetEnabled())
 		{
 			m_pDefaultEffects[i]->UpdateBuffer(pDevice);
+		}
+	}
+
+	for (auto itr : m_customEffects)
+	{
+		if(itr->GetEnabled())
+		{
+			itr->UpdateBuffer(pDevice);
 		}
 	}
 }
@@ -208,11 +219,6 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 		m_pBloom = vnew(ALLOC_OBJECT) Bloom();
 		m_pDefaultEffects[m_uDefaultEffects++] = m_pBloom;
 	}
-	if (uInitFlags & PostFXSys::EFFECT_SKY_FOG)
-	{
-		m_pSkyFog = vnew(ALLOC_OBJECT) SkyFog();
-		m_pDefaultEffects[m_uDefaultEffects++] = m_pSkyFog;
-	}
 	if(uInitFlags & PostFXSys::EFFECT_DEFERRED_SHADING )
 	{
 		m_pDeferredShading = vnew(ALLOC_OBJECT) DeferredShading();
@@ -243,12 +249,7 @@ void PostFXSys_ps::Init(PostFXSys* pParent, ResourceMgr* pResMgr, GFXDevice* pDe
 
 	EnableEffects(pDevice, uInitFlags);
 
-	
-	
-	for(uint32 i=0; i<m_uDefaultEffects; i++)
-	{
-		m_pParent->RegisterEffect(m_pDefaultEffects[i]);
-	}	
+
 }
 
 void PostFXSys_ps::Cleanup(GFXDevice* pDevice)
@@ -402,7 +403,6 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 
 	qsort(&m_activeEffects[0], m_activeEffects.size(), sizeof(RenderNode*), CompareNodes);
-
 
 	// Max buffers
 	int iFinalHDRTarget = -1;	// TODO: Set to last if final target is HDR
@@ -562,6 +562,28 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 	}
 	m_renderPasses.UpdateEnd(pDevice);
 
+
+	uint32 uWidth = m_colorBuffer[BUFFER_LDR_0].GetWidth();
+	uint32 uHeight = m_colorBuffer[BUFFER_LDR_0].GetHeight();
+	for (uint32 i = 0; i < m_uDefaultEffects; i++)
+	{
+		if (!m_pDefaultEffects[i]->GetEnabled())
+		{
+			m_pDefaultEffects[i]->Resize(pDevice, 32, 32);
+		}
+		else
+		{
+			m_pDefaultEffects[i]->Resize(pDevice, uWidth, uHeight);
+		}
+	}
+	for (auto itr : m_customEffects)
+	{
+		if (itr->GetEnabled())
+		{
+			m_activeEffects.push_back(itr);
+		}
+	}
+
 }
 
 void PostFXSys_ps::ForceUpdateRenderPasses(GFXDevice* pDevice)
@@ -691,8 +713,6 @@ void PostFXSys_ps::EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags)
 		m_pSetNoDepthTarget->SetEnabled(true);//(uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) == 0);
 	if (m_pSetLinDepthTarget)
 		m_pSetLinDepthTarget->SetEnabled((uEffectFlags & PostFXSys::EFFECT_DEFERRED_SHADING) != 0);
-	if(m_pSkyFog)
-		m_pSkyFog->SetEnabled((uEffectFlags & PostFXSys::EFFECT_SKY_FOG) != 0);
 	if(m_pBloom)
 		m_pBloom->SetEnabled((uEffectFlags & PostFXSys::EFFECT_BLOOM) != 0);
 	if(m_pFXAA)
@@ -760,7 +780,7 @@ void PostFXSys_ps::ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uH
 
 	for (auto* const pPostEffect : m_pDefaultEffects)
 	{
-		if (pPostEffect != nullptr)
+		if (pPostEffect != nullptr && pPostEffect->GetEnabled())
 		{
 			pPostEffect->Resize(pDevice, uScaledWidth, uScaledHeight);
 		}
@@ -808,15 +828,6 @@ void PostFXSys_ps::UpdateRTSize(GFXDevice* pDevice, Display* pDisplay)
 		}
 	}
 #endif
-}
-
-
-void PostFXSys_ps::SetSkyTexture(GFXDevice* pDevice, const TextureHndl& tex)
-{
-	if (m_pSkyFog)
-	{
-		m_pSkyFog->SetTexture(pDevice, tex, m_colorBuffer[BUFFER_LIN_DEPTH].GetTexture());
-	}
 }
 
 

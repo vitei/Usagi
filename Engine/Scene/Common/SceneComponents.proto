@@ -42,6 +42,18 @@ message LightFadeComponent
 }
 
 
+message SkyFogComponent
+{
+	option (nanopb_msgopt).has_onactivate = true;
+	option (nanopb_msgopt).has_ondeactivate = true;
+	option (nanopb_msgopt).has_onloaded = true;
+
+	required string szPakName = 1 [(nanopb).max_size = 64];
+	required string szTexName = 2 [(nanopb).max_size = 64];
+}
+
+
+
 message ShadowDecalComponent
 {
 	option (nanopb_msgopt).has_ondeactivate = true;

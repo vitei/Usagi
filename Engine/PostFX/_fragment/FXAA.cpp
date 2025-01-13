@@ -141,7 +141,10 @@ void FXAA::SetTexture(GFXDevice* pDevice, Input eInput, const TextureHndl& textu
 void FXAA::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	// The internal texture info has changed
-	m_material.UpdateDescriptors(pDevice);
+	if(GetEnabled())
+	{
+		m_material.UpdateDescriptors(pDevice);
+	}
 }
 
 bool FXAA::Draw(GFXContext* pContext, RenderContext& renderContext)

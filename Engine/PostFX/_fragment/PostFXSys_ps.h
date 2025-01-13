@@ -52,7 +52,6 @@ public:
 
 	const SceneRenderPasses& GetRenderPasses() const;
 	SceneRenderPasses& GetRenderPasses();
-	void SetSkyTexture(GFXDevice* pDevice, const TextureHndl& hndl);
 	
 	uint32 GetFinalTargetWidth(bool bOrient ) { return m_colorBuffer[BUFFER_LDR_0].GetWidth(); }
 	uint32 GetFinalTargetHeight(bool bOrient) { return m_colorBuffer[BUFFER_LDR_0].GetHeight(); }
@@ -71,6 +70,9 @@ public:
 	RenderTarget* GetFinalRT();
 
 	void ForceUpdateRenderPasses(GFXDevice* pDevice);
+
+	uint32 GetPostEffectCount() const { return (uint32)m_activeEffects.size(); }
+	PostEffect* GetEffect(uint32 uEffectId) { return m_activeEffects[uEffectId]; }
 
 protected:
 	PRIVATIZE_COPY(PostFXSys_ps)
@@ -112,7 +114,6 @@ protected:
 
 
 	PostFXSys*				m_pParent;
-	class SkyFog*			m_pSkyFog;
 	class Bloom*			m_pBloom;
 	class FXAA*				m_pFXAA;
 	class SMAA*				m_pSMAA;

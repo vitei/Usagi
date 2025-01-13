@@ -66,7 +66,7 @@ public:
 
 	virtual void Update(Scene* pScene, float fElapsed) {}
 	virtual void UpdateBuffer(usg::GFXDevice* pDevice) {}
-	void SetEnabled(bool bEnabled);
+	virtual void SetEnabled(bool bEnabled);
 	bool GetEnabled() { return m_bEnabled; }
 
 private:

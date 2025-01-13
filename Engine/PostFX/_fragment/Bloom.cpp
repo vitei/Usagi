@@ -193,6 +193,7 @@ void Bloom::Init(GFXDevice* pDevice, ResourceMgr* pRes, PostFXSys* pSys)
 }
 
 
+
 void Bloom::Cleanup(GFXDevice* pDevice)
 {
 	for (uint32 i = 0; i < PASS_COUNT; i++)
