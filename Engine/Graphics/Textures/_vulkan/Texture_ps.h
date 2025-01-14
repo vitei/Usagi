@@ -61,7 +61,7 @@ public:
 	void SetName(GFXDevice* pDevice, const char* szFileName);
 
 private:
-	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true);
+	void Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemoryPropertyFlags flags, bool bInitMemory = true, const char* szDebugName = "TextureRaw");
 	bool LoadWithGLI(GFXDevice* pDevice, const char* szFileName);
 	bool LoadWithGLI(GFXDevice* pDevice, const void* pData, memsize uSize, bool bForceSRGB, bool bForceKtx = false);
 	bool LoadInt(GFXDevice* pDevice, VkFormat eFormatVK, memsize dataSize, void* pData, const vector< Vector3i >& extents, const vector<uint32>& mipSizes);
