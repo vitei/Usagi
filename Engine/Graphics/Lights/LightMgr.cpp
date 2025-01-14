@@ -38,7 +38,7 @@ m_pParent(nullptr)
 	m_uActiveFrame = UINT_MAX;
 	m_bLightTexDirty = false;
 	m_uShadowCastingFlags = RENDER_MASK_ALL;
-	m_uShadowMapRes = g_uShadowResMap[m_qualitySettings.uShadowQuality];
+	m_uShadowMapRes = 32;
 }
 
 LightMgr::~LightMgr(void)
@@ -87,11 +87,11 @@ void LightMgr::SetQualitySettings(GFXDevice* pDevice, const QualitySettings& set
 		&& m_qualitySettings.bPointShadows == settings.bPointShadows
 		&& m_qualitySettings.bSpotShadows == settings.bSpotShadows)
 		return;
-	m_uShadowMapRes = g_uShadowResMap[settings.uShadowQuality];
+	m_uShadowMapRes = settings.bDirectionalShadows ? g_uShadowResMap[settings.uShadowQuality] : 32;
 
-	bool bUpdatePointLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bPointShadows;
-	bool bUpdateSpotLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bSpotShadows;
-	bool bUpdateCascade = m_qualitySettings.uShadowQuality != settings.uShadowQuality && settings.bDirectionalShadows;
+	bool bUpdatePointLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality;// && settings.bPointShadows;
+	bool bUpdateSpotLights = m_qualitySettings.uShadowQuality != settings.uShadowQuality;// && settings.bSpotShadows;
+	bool bUpdateCascade = m_qualitySettings.uShadowQuality != settings.uShadowQuality;// && settings.bDirectionalShadows;
 	m_qualitySettings = settings;
 
 

@@ -41,7 +41,7 @@ public:
 		bool	bPointShadows = true;
 		bool	bPointLights = true;
 		bool	bSpotLights = true;
-		uint32	uShadowQuality = 1;	// 0-3
+		uint32	uShadowQuality = 3;	// 0-3
 	};
 
 	// TODO: Add names to these lights?
