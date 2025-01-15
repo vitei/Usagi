@@ -11,6 +11,7 @@
 #include "Engine/Graphics/Materials/Material.h"
 #include "Engine/Graphics/Primitives/VertexBuffer.h"
 #include "Engine/Graphics/Primitives/IndexBuffer.h"
+#include "Engine/Scene/Common/CustomEffectRuntime.h"
 #include "Engine/PostFX/PostEffect.h"
 
 namespace usg {
@@ -27,7 +28,7 @@ public:
 	SkyFog();
 	virtual ~SkyFog();
 
-	void Init(GFXDevice* pDevice, ResourceMgr* pResource);
+	void Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl nearEffect, usg::EffectHndl farEffect);
 	virtual void Cleanup(GFXDevice* pDevice) override;
 	virtual void SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst);
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
@@ -47,13 +48,20 @@ private:
 	// FIXME: We should be grabbing effects and textures from a resource manager
 	PipelineStateDecl		m_pipelineNoFadeDecl;
 	PipelineStateDecl		m_pipelineFadeDecl;
+
 	RenderTarget*			m_pDestTarget;
+
+	CustomEffectRuntime		m_runtimeEffectNear;
+	CustomEffectRuntime		m_runtimeEffectFar;
+
 	Material				m_materialNoFade;
 	Material 				m_materialFade;
 	IndexBuffer				m_indexBuffer;
 	VertexBuffer			m_vertexBuffer;
+
 	SamplerHndl				m_samplerHndl;
 	SamplerHndl				m_linearSampl;
+
 	bool					m_bUseDepthTex;
 	bool					m_bValid;
 

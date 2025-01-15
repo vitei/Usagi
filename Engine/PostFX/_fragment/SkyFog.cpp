@@ -13,22 +13,11 @@
 #include "Engine/Resource/ResourceMgr.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/PostFX/PostFXSys.h"
+#include "Engine/Resource/CustomEffectResource.h"
 #include "SkyFog.h"
 
 namespace usg {
 
-static const usg::DescriptorDeclaration g_descriptorDecl[] =
-{
-	DESCRIPTOR_ELEMENT(0,	usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, usg::SHADER_FLAG_PIXEL),
-	DESCRIPTOR_END()
-};
-
-static const usg::DescriptorDeclaration g_descriptorDeclFade[] =
-{
-	DESCRIPTOR_ELEMENT(0,	usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, usg::SHADER_FLAG_PIXEL),
-	DESCRIPTOR_ELEMENT(5,	usg::DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, usg::SHADER_FLAG_PIXEL),
-	DESCRIPTOR_END()
-};
 
 SkyFog::SkyFog(void)
 {
@@ -43,21 +32,29 @@ SkyFog::~SkyFog(void)
 }
 
 
-void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource)
+void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl nearEffect, usg::EffectHndl farEffect)
 {
 	m_bUseDepthTex = true;
 	m_pDestTarget = nullptr;
+
+
+	usg::CustomEffectResHndl nearCustomEffectDecl = nearEffect->GetCustomEffect();
+	usg::CustomEffectResHndl farCustomEffectDecl = farEffect->GetCustomEffect();
+	ASSERT(nearCustomEffectDecl && farCustomEffectDecl);
+	m_runtimeEffectNear.Init(pDevice, nearCustomEffectDecl);
+	m_runtimeEffectFar.Init(pDevice, farCustomEffectDecl);
 
 	MakeSphere(pDevice, 1.0f);
 	//MakeCube(pDevice);
 
 	// TODO: Move the depth stencil stuff out of the materials and into the layers?
+	// FIXME: Allow custom geo? Attributes?
 	PipelineStateDecl pipeline;
 	pipeline.inputBindings[0].Init(GetVertexDeclaration(VT_POSITION));
 	pipeline.uInputBindingCount = 1;
 
-	DescriptorSetLayoutHndl matDescriptors = pDevice->GetDescriptorSetLayout(g_descriptorDecl);
-	DescriptorSetLayoutHndl matDescriptorsFade = pDevice->GetDescriptorSetLayout(g_descriptorDeclFade);
+	DescriptorSetLayoutHndl matDescriptors = farCustomEffectDecl->GetDescriptorLayoutHndl();
+	DescriptorSetLayoutHndl matDescriptorsFade = nearCustomEffectDecl->GetDescriptorLayoutHndl();
 	pipeline.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipeline.layout.descriptorSets[1] = matDescriptorsFade;
 	pipeline.layout.uDescriptorSetCount = 2;
@@ -97,7 +94,7 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource)
 
 	//alphaDecl.SetColor0Only();
 	alphaDecl.bBlendEnable = true;
-	pipeline.pEffect = pResource->GetEffect(pDevice, "PostProcess.FogSphere");
+	pipeline.pEffect = nearEffect;
 
 	Material &mat = m_materialFade;
 	mat.SetDescriptorLayout(pDevice, matDescriptorsFade);
@@ -111,7 +108,7 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource)
 	SamplerHndl point = pDevice->GetSampler(sampDecl);
 
 	Material &mat2 = m_materialNoFade;
-	pipeline.pEffect = pResource->GetEffect(pDevice, "PostProcess.FogSphereFar");
+	pipeline.pEffect = farEffect;
 	pipeline.layout.descriptorSets[1] = matDescriptors;
 	depthDecl.eStencilTest = STENCIL_TEST_NOTEQUAL;
 	depthDecl.SetMask(STENCIL_GEOMETRY, 0, STENCIL_GEOMETRY);
@@ -125,6 +122,28 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource)
 	colorSamp.SetClamp(SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 	m_linearSampl = pDevice->GetSampler(colorSamp);
+
+	for (uint32 i = 0; i < m_runtimeEffectFar.GetResource()->GetSamplerCount(); i++)
+	{
+		uint32 uBinding = m_runtimeEffectFar.GetResource()->GetSamplerBinding(i);
+		if(m_runtimeEffectFar.GetResource()->GetDefaultTexture(i))
+			m_materialNoFade.SetTexture(uBinding, pResource->GetTexture(pDevice, m_runtimeEffectFar.GetResource()->GetDefaultTexture(i)), pDevice->GetSampler(colorSamp));
+	}
+	for (uint32 i = 0; i < m_runtimeEffectFar.GetResource()->GetConstantSetCount(); i++)
+	{
+		m_materialNoFade.SetConstantSet(m_runtimeEffectFar.GetResource()->GetConstantSetBinding(i), m_runtimeEffectFar.GetConstantSet(i));
+	}
+
+	for (uint32 i = 0; i < m_runtimeEffectNear.GetResource()->GetSamplerCount(); i++)
+	{
+		uint32 uBinding = m_runtimeEffectNear.GetResource()->GetSamplerBinding(i);
+		if (m_runtimeEffectNear.GetResource()->GetDefaultTexture(i))
+			m_materialFade.SetTexture(uBinding, pResource->GetTexture(pDevice, m_runtimeEffectNear.GetResource()->GetDefaultTexture(i)), pDevice->GetSampler(colorSamp));
+	}
+	for (uint32 i = 0; i < m_runtimeEffectNear.GetResource()->GetConstantSetCount(); i++)
+	{
+		m_materialFade.SetConstantSet(m_runtimeEffectNear.GetResource()->GetConstantSetBinding(i), m_runtimeEffectNear.GetConstantSet(i));
+	}
 }
 
 void SkyFog::Cleanup(GFXDevice* pDevice)
@@ -133,6 +152,8 @@ void SkyFog::Cleanup(GFXDevice* pDevice)
 	m_materialNoFade.Cleanup(pDevice);
 	m_vertexBuffer.Cleanup(pDevice);
 	m_indexBuffer.Cleanup(pDevice);
+	m_runtimeEffectNear.Cleanup(pDevice);
+	m_runtimeEffectFar.Cleanup(pDevice);
 	m_bValid = false;
 }
 
@@ -141,8 +162,8 @@ void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	if (pDst != m_pDestTarget)
 	{
 		m_pDestTarget = pDst;
-		m_materialFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineFadeDecl));
 		m_materialNoFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineNoFadeDecl));
+		m_materialFade.SetPipelineState(pDevice->GetPipelineState(pDst->GetRenderPass(), m_pipelineFadeDecl));
 	}
 }
 

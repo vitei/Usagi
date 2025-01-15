@@ -2,8 +2,7 @@
 #include "includes/global_3d.inc"
 #include "includes/depth_read.inc"
 
-// Input attributes
-ATTRIB_LOC(0) in vec3 ao_position;
+// <<GENERATED_CODE>>
 
 // Output attributes
 ATTRIB_LOC(0) out vec3 vo_vTexCoord;

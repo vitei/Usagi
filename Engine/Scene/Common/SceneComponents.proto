@@ -48,8 +48,11 @@ message SkyFogComponent
 	option (nanopb_msgopt).has_ondeactivate = true;
 	option (nanopb_msgopt).has_onloaded = true;
 
-	required string szPakName = 1 [(nanopb).max_size = 64];
-	required string szTexName = 2 [(nanopb).max_size = 64];
+	required string szEffectName = 1 [(nanopb).max_size = 64, default = "PostProcess.SkyFogDefault.blend"];
+	required string szFarName = 2 [(nanopb).max_size = 64, default = "PostProcess.SkyFogDefault"];
+
+	required string szPakName = 3 [(nanopb).max_size = 64];
+	required string szTexName = 4 [(nanopb).max_size = 64];
 }
 
 

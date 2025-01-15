@@ -255,7 +255,10 @@ namespace usg
 		p.GetRuntimeData().pFog = vnew(ALLOC_OBJECT) SkyFog;
 		if (handles.pDevice)
 		{
-			p.GetRuntimeData().pFog->Init(handles.pDevice, handles.pResourceMgr);
+			usg::EffectHndl effectNear = handles.pResourceMgr->GetEffect(handles.pDevice, p->szEffectName);
+			usg::EffectHndl effectFar = handles.pResourceMgr->GetEffect(handles.pDevice, p->szFarName);
+
+			p.GetRuntimeData().pFog->Init(handles.pDevice, handles.pResourceMgr, effectNear, effectFar);
 		}
 
 		handles.pResourceMgr->LoadPackage(handles.pDevice, p->szPakName);

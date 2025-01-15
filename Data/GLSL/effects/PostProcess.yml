@@ -10,6 +10,12 @@ CustomEffects:
           - { type: float,   name: fContrast,      count: 1, default: 2.0 }         
           - { type: bool,    name: bInverseTone, count: 1, default: false }  
           - { type: bool,    name: bHDR10, count: 1, default: true }  
+  SkyFogDefault:
+    Attributes:
+      - { index: 0, name: ao_position, hint: "position", type: vec3 }    
+    Samplers:
+      - { index: 0, hint: "image", type: "samplerCube", default: "nebula" }                
+      - { index: 5, hint: "linearDepth", defines: "BLEND_GEO" }                      
 Effects:
   - { name: SMAABlendWeightCalc,    vert: SMAA/SMAABlendWeightCalc, frag: SMAA/SMAABlendWeightCalc }
   - { name: SMAAColorEdgeDetection, vert: SMAA/SMAAEdgeDetect,      frag: SMAA/SMAAColorEdgeDetection }
@@ -18,8 +24,6 @@ Effects:
   - { name: SMAANeighborhoodBlend,  vert: SMAA/SMAANeighbourhoodBlend, frag: SMAA/SMAANeighbourhoodBlend } 
   - { name: SMAAResolve,            vert: SMAA/SMAAPassThrough,     frag: SMAA/SMAAResolve } 
   - { name: FXAA,                   vert: PostFX/fxaa,              frag: PostFX/fxaa } 
-  - { name: FogSphere,              vert: fogsphere,                frag: fogbox } 
-  - { name: FogSphereFar,           vert: fogspherefar,             frag: fogboxfar } 
   - { name: BloomMain,              vert: PostFX/fullscreen,        frag: PostFX/bloom } 
   - { name: BloomFinal,             vert: PostFX/fullscreen,        frag: PostFX/bloomfinal } 
   - { name: BloomBrightPass,        vert: PostFX/fullscreen,        frag: PostFX/brightpass } 
@@ -31,3 +35,10 @@ Effects:
   - { name: ClearAlpha,             vert: PostFX/fullscreensolid,   frag: PostFX/clearalpha }
   - { name: AdjustColorSpace,       vert: PostFX/fullscreen,        frag: PostFX/adjustcolorspace }
   - { name: LinearToHDR,            vert: PostFX/fullscreen,        frag: PostFX/LinearToHDR, custom_effect: LinearToHDR } 
+  - name: SkyFogDefault
+    vert: fogsphere
+    frag: fogbox
+    custom_effect: SkyFogDefault
+    define_sets:
+      - name: blend
+        defines: BLEND_GEO  
