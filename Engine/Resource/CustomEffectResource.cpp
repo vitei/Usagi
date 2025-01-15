@@ -251,13 +251,23 @@ namespace usg
 		return &m_pAttributes[uIndex];
 	}
 
+	uint32 CustomEffectResource::GetSamplerBinding(uint32 uIndex) const
+	{
+		if (uIndex < m_header.uSamplerCount)
+		{
+			return m_pSamplers[uIndex].uIndex;
+		}
+
+		return USG_INVALID_ID;
+	}
+
 	uint32 CustomEffectResource::GetSamplerBinding(const char* szSampler) const
 	{
 		for(uint32 i=0; i< m_header.uSamplerCount; i++)
 		{
 			if( str::Compare(szSampler, m_pSamplers[i].hint) )
 			{
-				return i;
+				return m_pSamplers[i].uIndex;
 			}
 		}
 		return USG_INVALID_ID;

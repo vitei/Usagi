@@ -37,6 +37,8 @@ namespace usg
 		uint32 GetAttribCount() const;
 		const CustomEffectDecl::Attribute* GetAttribute(uint32 uIndex) const;
 		uint32 GetSamplerBinding(const char* szSampler) const;
+		uint32 GetSamplerBinding(uint32 uIndex) const;
+
 
 		const DescriptorDeclaration* GetDescriptorDecl() const { return m_pDescriptorDecl; }
 		const VertexElement* GetVertexElements(uint32 uBuffer = 0) const;
@@ -61,7 +63,7 @@ namespace usg
 		template <class VariableType>
 		bool SetVertexAttribute(void* pVertData, const char* szName, VariableType var, uint32 uVertexId, uint32 uIndex = 0, uint32 uVerCount = 1) const
 		{
-			return SetVertexAttribute(pVertData, szName, (void*)&var, sizeof(VariableType), uVertexId, uVerCount);
+			return this->SetVertexAttribute(pVertData, szName, static_cast<const void*>(&var), sizeof(VariableType), uVertexId, uIndex, uVerCount); 
 		}
 
 
