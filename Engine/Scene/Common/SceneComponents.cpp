@@ -253,16 +253,18 @@ namespace usg
 		}
 
 		p.GetRuntimeData().pFog = vnew(ALLOC_OBJECT) SkyFog;
-		if (handles.pDevice)
-		{
-			usg::EffectHndl effectNear = handles.pResourceMgr->GetEffect(handles.pDevice, p->szEffectName);
-			usg::EffectHndl effectFar = handles.pResourceMgr->GetEffect(handles.pDevice, p->szFarName);
-
-			p.GetRuntimeData().pFog->Init(handles.pDevice, handles.pResourceMgr, effectNear, effectFar);
-		}
-
 		handles.pResourceMgr->LoadPackage(handles.pDevice, p->szPakName);
+		
+		usg::EffectHndl effectNear = handles.pResourceMgr->GetEffect(handles.pDevice, p->szEffectName);
+		usg::EffectHndl effectFar = handles.pResourceMgr->GetEffect(handles.pDevice, p->szFarName);
+
+		p.GetRuntimeData().pFog->Init(handles.pDevice, handles.pResourceMgr, effectNear, effectFar);
+		
+
 		p.GetRuntimeData().texture = handles.pResourceMgr->GetTexture(handles.pDevice, p->szTexName);
+
+		p.GetRuntimeData().pFog->SetEnabled(true);
+		p.GetRuntimeData().pFog->SetTexture(handles.pDevice, p.GetRuntimeData().texture);
 
 		ViewContext* ViewCtxt = handles.pScene->GetViewContext(0);
 		if (ViewCtxt)
@@ -270,8 +272,6 @@ namespace usg
 			PostFXSys* pSys = ViewCtxt->GetPostFXSys();
 			if (pSys)
 			{
-				p.GetRuntimeData().pFog->SetEnabled(true);
-				p.GetRuntimeData().pFog->SetTexture(handles.pDevice, p.GetRuntimeData().texture);
 				pSys->AddCustomEffect(p.GetRuntimeData().pFog);
 			}
 		}

@@ -22,6 +22,7 @@ namespace usg {
 SkyFog::SkyFog(void)
 {
 	m_bValid = false;
+	m_bHasTexture = false;
 	SetLayer(RenderLayer::LAYER_SKY);
 	SetPriority(1);
 }
@@ -36,7 +37,7 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 {
 	m_bUseDepthTex = true;
 	m_pDestTarget = nullptr;
-
+	m_bHasTexture = false;
 
 	usg::CustomEffectResHndl nearCustomEffectDecl = nearEffect->GetCustomEffect();
 	usg::CustomEffectResHndl farCustomEffectDecl = farEffect->GetCustomEffect();
@@ -137,6 +138,7 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 	for (uint32 i = 0; i < m_runtimeEffectNear.GetResource()->GetSamplerCount(); i++)
 	{
 		uint32 uBinding = m_runtimeEffectNear.GetResource()->GetSamplerBinding(i);
+		m_bHasTexture |= uBinding == 0;
 		if (m_runtimeEffectNear.GetResource()->GetDefaultTexture(i))
 			m_materialFade.SetTexture(uBinding, pResource->GetTexture(pDevice, m_runtimeEffectNear.GetResource()->GetDefaultTexture(i)), pDevice->GetSampler(colorSamp));
 	}
@@ -144,6 +146,9 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 	{
 		m_materialFade.SetConstantSet(m_runtimeEffectNear.GetResource()->GetConstantSetBinding(i), m_runtimeEffectNear.GetConstantSet(i));
 	}
+
+	m_runtimeEffectNear.GPUUpdate(pDevice);
+	m_runtimeEffectFar.GPUUpdate(pDevice);
 }
 
 void SkyFog::Cleanup(GFXDevice* pDevice)
@@ -167,6 +172,11 @@ void SkyFog::SetDestTarget(GFXDevice* pDevice, RenderTarget* pDst)
 	}
 }
 
+void SkyFog::UpdateBuffer(usg::GFXDevice* pDevice)
+{
+
+}
+
 void SkyFog::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 {
 	if (m_bValid)
@@ -178,8 +188,11 @@ void SkyFog::Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight)
 
 void SkyFog::SetTexture(GFXDevice* pDevice, const TextureHndl& tex)
 {
-	m_materialFade.SetTexture(0, tex, m_linearSampl);
-	m_materialNoFade.SetTexture(0, tex, m_linearSampl);
+	if(m_bHasTexture)
+	{
+		m_materialFade.SetTexture(0, tex, m_linearSampl);
+		m_materialNoFade.SetTexture(0, tex, m_linearSampl);
+	}
 }
 
 void SkyFog::MakeCube(GFXDevice* pDevice)

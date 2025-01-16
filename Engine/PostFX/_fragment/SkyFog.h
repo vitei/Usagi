@@ -34,6 +34,7 @@ public:
 	virtual void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 	void SetTexture(GFXDevice* pDevice, const TextureHndl& skyTex);
 	virtual bool Draw(GFXContext* pContext, RenderContext& renderContext);
+	virtual void UpdateBuffer(usg::GFXDevice* pDevice) override;
 
 	virtual bool ReadsTexture(Input eInput) const override;
 	virtual bool LoadsTexture(Input eInput) const override;
@@ -64,6 +65,7 @@ private:
 
 	bool					m_bUseDepthTex;
 	bool					m_bValid;
+	bool					m_bHasTexture;
 
 };
 

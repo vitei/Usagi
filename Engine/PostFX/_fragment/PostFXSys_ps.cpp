@@ -786,6 +786,14 @@ void PostFXSys_ps::ResizeTargetsInt(GFXDevice* pDevice, uint32 uWidth, uint32 uH
 		}
 	}
 
+	for (auto itr : m_customEffects)
+	{
+		if (itr != nullptr && itr->GetEnabled())
+		{
+			itr->Resize(pDevice, uScaledWidth, uScaledHeight);
+		}
+	}
+
 	/*
 	if (m_pFinalEffect)
 	{
