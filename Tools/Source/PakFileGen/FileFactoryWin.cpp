@@ -176,7 +176,7 @@ std::string FileFactoryWin::LoadHeightmap(const char* szFileName, const YAML::No
 
 		// Already references
 		if (HasDestResource(outName))
-		{
+		{ 
 			return outName;
 		}
 
@@ -230,7 +230,7 @@ std::string FileFactoryWin::CreateTempKTXTexture(const char* szFileName, YAML::N
 	TextureSettings textureSettings = GetTextureSettings(node);
 	TexFormat format = GetTexFormat(textureSettings.format.c_str());
 	// Fails to build mips on compressed formats
-	textureSettings.bGenMips &= MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC;
+	textureSettings.bGenMips &= !CMP_IsFloatFormat(MipSetIn.m_format);
 
 	if (MipSetIn.m_nMipLevels <= 1 && textureSettings.bGenMips)
 	{
@@ -241,10 +241,12 @@ std::string FileFactoryWin::CreateTempKTXTexture(const char* szFileName, YAML::N
 	KernelOptions   kernel_options;
 	memset(&kernel_options, 0, sizeof(KernelOptions));
 
+	KernelDeviceInfo info;
+	CMP_GetDeviceInfo(&info);
 
 	kernel_options.format = format.format;   // Set the format to process
-	kernel_options.fquality = 0.05f;		 // Set the quality of the result
-	kernel_options.encodeWith = format.format == CMP_FORMAT::CMP_FORMAT_BC7 ? CMP_HPC : CMP_CPU;
+	kernel_options.fquality = 0.15f;		 // Set the quality of the result
+	//format.format == CMP_FORMAT::CMP_FORMAT_BC7 ? CMP_HPC : CMP_CPU;
 	kernel_options.threads = 2;              // Multi-threading is handled by the build
 	//kernel_options.width = MipSetIn.dwWidth;
 	//kernel_options.height = MipSetIn.dwHeight;
@@ -276,7 +278,7 @@ std::string FileFactoryWin::CreateTempKTXTexture(const char* szFileName, YAML::N
 
 	// Only compress if the original isn't (i.e. we're loading dds). This is mainly due to compressonator
 	// being a buggy crashy pos.
-	if (MipSetIn.m_format < CMP_FORMAT::CMP_FORMAT_ASTC && MipSetIn.m_format >= CMP_FORMAT::CMP_FORMAT_BROTLIG)
+	if (!CMP_IsCompressedFormat(MipSetIn.m_format) && CMP_IsCompressedFormat(format.format) )
 	{
 		memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
 

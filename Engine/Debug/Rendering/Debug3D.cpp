@@ -341,6 +341,8 @@ static inline void sincosf( float angle, float* psin, float* pcos )
 
 void Debug3D::MakeSphere(GFXDevice* pDevice)
 {
+#ifdef ENABLE_DEBUG3D
+
 	const float fRadius = 1.0f;	// Will be scaled in the vertexShader;
 	const uint32 uSlices = 16;
 	const uint32 uStacks = 16;
@@ -470,6 +472,7 @@ void Debug3D::MakeSphere(GFXDevice* pDevice)
 	m_sphereVB.Init(pDevice, pVertices, sizeof(PositionVertex), uVertices, "DebugSphere");
 	m_transforms.Init(pDevice, NULL, sizeof(SphereData), MAX_SPHERES, "DebugSphereTrans", usg::GPU_USAGE_DYNAMIC);
 	m_sphereIB.Init(pDevice, puIndices, uIndices);
+#endif
 }
 
 }
