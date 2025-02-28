@@ -278,7 +278,7 @@ std::string FileFactoryWin::CreateTempKTXTexture(const char* szFileName, YAML::N
 
 	// Only compress if the original isn't (i.e. we're loading dds). This is mainly due to compressonator
 	// being a buggy crashy pos.
-	if (!CMP_IsCompressedFormat(MipSetIn.m_format) && CMP_IsCompressedFormat(format.format) )
+	if ( !CMP_IsCompressedFormat(MipSetIn.m_format) && MipSetIn.m_format != kernel_options.format )
 	{
 		memset(&MipSetCmp, 0, sizeof(CMP_MipSet));
 
