@@ -52,6 +52,7 @@ public:
 
 	void Update(Scene* pScene, float fElapsed) { m_platform.Update(pScene, fElapsed); }
 	void UpdateGPU(GFXDevice* pDevice) { m_platform.UpdateGPU(pDevice); }
+	void PreViewUpdate(GFXDevice* pDevice) { m_platform.PreViewUpdate(pDevice); }
 
 	void EnableEffects(GFXDevice* pDevice, uint32 uEffectFlags);
 

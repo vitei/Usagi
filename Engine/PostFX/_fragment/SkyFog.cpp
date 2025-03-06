@@ -120,6 +120,8 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 	// TODO: Set the transform nodes bounding volume (should always pass)
 	SamplerDecl depthSamp(SAMP_FILTER_POINT, SAMP_WRAP_REPEAT);
 	SamplerDecl colorSamp(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
+	SamplerDecl colorSamp1(SAMP_FILTER_LINEAR, SAMP_WRAP_REPEAT);
+
 	colorSamp.SetClamp(SAMP_WRAP_CLAMP);
 	m_samplerHndl = pDevice->GetSampler(depthSamp);
 	m_linearSampl = pDevice->GetSampler(colorSamp);
@@ -127,8 +129,9 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 	for (uint32 i = 0; i < m_runtimeEffectFar.GetResource()->GetSamplerCount(); i++)
 	{
 		uint32 uBinding = m_runtimeEffectFar.GetResource()->GetSamplerBinding(i);
-		if(m_runtimeEffectFar.GetResource()->GetDefaultTexture(i))
-			m_materialNoFade.SetTexture(uBinding, pResource->GetTexture(pDevice, m_runtimeEffectFar.GetResource()->GetDefaultTexture(i)), pDevice->GetSampler(colorSamp));
+		const char* szTex = m_runtimeEffectFar.GetResource()->GetDefaultTexture(uBinding);
+		if(szTex)
+			m_materialNoFade.SetTexture(uBinding, pResource->GetTexture(pDevice, szTex), pDevice->GetSampler(uBinding == 0 ? colorSamp : colorSamp1));
 	}
 	for (uint32 i = 0; i < m_runtimeEffectFar.GetResource()->GetConstantSetCount(); i++)
 	{
@@ -139,8 +142,9 @@ void SkyFog::Init(GFXDevice* pDevice, ResourceMgr* pResource, usg::EffectHndl ne
 	{
 		uint32 uBinding = m_runtimeEffectNear.GetResource()->GetSamplerBinding(i);
 		m_bHasTexture |= uBinding == 0;
-		if (m_runtimeEffectNear.GetResource()->GetDefaultTexture(i))
-			m_materialFade.SetTexture(uBinding, pResource->GetTexture(pDevice, m_runtimeEffectNear.GetResource()->GetDefaultTexture(i)), pDevice->GetSampler(colorSamp));
+		const char* szTex = m_runtimeEffectFar.GetResource()->GetDefaultTexture(uBinding);
+		if (szTex)
+			m_materialFade.SetTexture(uBinding, pResource->GetTexture(pDevice, szTex), pDevice->GetSampler(uBinding == 0 ? colorSamp : colorSamp1));
 	}
 	for (uint32 i = 0; i < m_runtimeEffectNear.GetResource()->GetConstantSetCount(); i++)
 	{
@@ -360,22 +364,26 @@ void SkyFog::MakeSphere(GFXDevice* pDevice, float fScale)
 
 bool SkyFog::Draw(GFXContext* pContext, RenderContext& renderContext)
 {
-	pContext->BeginGPUTag("Sky", Color::Green);
+	if(GetEnabled())
+	{
+		pContext->BeginGPUTag("Sky", Color::Green);
 
-	// Setting the destination target now handled outside
-	pContext->SetRenderTarget(m_pDestTarget);
-	m_materialFade.Apply(pContext);
-	pContext->SetVertexBuffer(&m_vertexBuffer);
-	pContext->DrawIndexed(&m_indexBuffer);
+		// Setting the destination target now handled outside
+		pContext->SetRenderTarget(m_pDestTarget);
+		m_materialFade.Apply(pContext);
+		pContext->SetVertexBuffer(&m_vertexBuffer);
+		pContext->DrawIndexed(&m_indexBuffer);
 
-	m_materialNoFade.Apply(pContext);
-	pContext->SetVertexBuffer(&m_vertexBuffer);
-	pContext->DrawIndexed(&m_indexBuffer);
+		m_materialNoFade.Apply(pContext);
+		pContext->SetVertexBuffer(&m_vertexBuffer);
+		pContext->DrawIndexed(&m_indexBuffer);
 
-	pContext->EndGPUTag();
+		pContext->EndGPUTag();
 
 	
-	return true;
+		return true;
+	}
+	return false;
 }
 
 bool SkyFog::LoadsTexture(Input eInput) const

@@ -31,6 +31,7 @@ public:
 	void AddRenderNodes(GFXDevice* pDevice, RenderNode** pNode, uint32 uCount, uint32 uLod = 0);
 	void AddRenderNode(GFXDevice* pDevice, RenderNode* pNode, uint32 uLod = 0) { AddRenderNodes(pDevice, &pNode, 1, uLod); }
 	void RemoveRenderNode(RenderNode* pNode);
+	void ViewContextUpdated(GFXDevice* pDevice);
 	bool IsEmpty() const;
 	void SetLodMaxDistance(uint32 uLod, float fMaxDistance);
 	bool GetLod(const Vector4f &cameraPos, uint32& lodOut, float fLODBias);

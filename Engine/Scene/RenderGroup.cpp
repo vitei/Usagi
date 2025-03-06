@@ -115,6 +115,30 @@ void RenderGroup::RenderPassChanged(SceneRenderPasses& passSet, GFXDevice* pDevi
 
 }
 
+void RenderGroup::ViewContextUpdated(GFXDevice* pDevice)
+{
+	for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+	{
+		m_pScene->GetRenderPasses(i).RemoveCallback(RenderPassChangeCallback, this);
+	}
+
+
+	for (uint32 i = 0; i < m_uLODGroups; i++)
+	{
+		for (auto itr : m_lodGroups[i].nodes)
+		{
+			RenderPassHndl hndl = m_pScene->GetRenderPasses(i).GetRenderPass(*itr);
+
+			NotifyRenderPassChanged(pDevice, i, itr, hndl);
+		}
+	}
+
+	for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+	{
+		m_pScene->GetRenderPasses(i).AddCallback(RenderPassChangeCallback, this);
+	}
+}
+
 void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint32 uCount, uint32 uLod)
 {
 	ASSERT(uLod < MAX_LOD_GROUPS);
@@ -131,10 +155,10 @@ void RenderGroup::AddRenderNodes(GFXDevice* pDevice, RenderNode** ppNodes, uint3
 
 		// We can't know if this was created with the correct render pass, so assume it wasn't
 		lodGroup.nodes.push_back(ppNodes[i]);	
-		for (uint32 i = 0; i < m_pScene->GetViewContextCount(); i++)
+		for (uint32 j = 0; j < m_pScene->GetViewContextCount(); j++)
 		{
-			RenderPassHndl hndl = m_pScene->GetRenderPasses(i).GetRenderPass(*ppNodes[i]);
-			NotifyRenderPassChanged(pDevice, i, ppNodes[i], hndl);
+			RenderPassHndl hndl = m_pScene->GetRenderPasses(i).GetRenderPass(*ppNodes[j]);
+			NotifyRenderPassChanged(pDevice, i, ppNodes[j], hndl);
 		}
 	}
 

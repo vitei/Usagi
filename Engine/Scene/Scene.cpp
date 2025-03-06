@@ -316,6 +316,8 @@ void Scene::DeleteRenderGroup(RenderGroup* pRemove)
 	m_pImpl->sceneComponents.Free(pComponent);
 }
 
+void RenderPassChangeCallback(SceneRenderPasses& passSet, GFXDevice* pDevice, void* pUserData);
+
 ViewContext* Scene::CreateViewContext(GFXDevice* pDevice)
 {
 	ViewContext* pContext = m_pImpl->viewContexts.Alloc();
@@ -325,7 +327,18 @@ ViewContext* Scene::CreateViewContext(GFXDevice* pDevice)
 		pContext->InitDeviceData(pDevice);
 	}
 	m_pImpl->sceneContexts.push_back(pContext);
+
+
 	return pContext;
+}
+
+
+void Scene::SetRenderPasses(usg::GFXDevice* pDevice)
+{
+	for (FastPool<RenderGroup>::Iterator it = m_pImpl->sceneComponents.Begin(); !it.IsEnd(); ++it)
+	{
+		(*it)->ViewContextUpdated(pDevice);
+	}
 }
 
 

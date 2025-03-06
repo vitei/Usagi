@@ -206,6 +206,11 @@ namespace usg {
 		{
 			Debug3D::GetRenderer()->InitContextData(pDevice, pResMgr, this);
 		}
+
+		if(GetScene() && GetScene()->GetViewContext(0) == this)
+		{
+			GetScene()->SetRenderPasses(pDevice);
+		}
 	}
 
 
@@ -423,6 +428,7 @@ namespace usg {
 
 		if (m_pImpl->pPostFXSys)
 		{
+			m_pImpl->pPostFXSys->PreViewUpdate(pDevice);
 			for (uint32 i = 0; i < m_pImpl->pPostFXSys->GetPostEffectCount(); i++)
 			{
 				PostEffect* pEffect = m_pImpl->pPostFXSys->GetEffect(i);

@@ -40,6 +40,7 @@ public:
 	void Cleanup(GFXDevice* pDevice);
 	void Update(Scene* pScene, float fElapsed);
 	void UpdateGPU(GFXDevice* pDevice);
+	void PreViewUpdate(GFXDevice* pDevice);
 
 	void Resize(GFXDevice* pDevice, uint32 uWidth, uint32 uHeight);
 

@@ -52,6 +52,7 @@ public:
 
 	ViewContext*	GetViewContext(uint32 uId);
 	uint32			GetViewContextCount() const;
+	void			SetRenderPasses(usg::GFXDevice* pDevice);
 	SceneRenderPasses& GetRenderPasses(uint32 uViewContext);
 
 	

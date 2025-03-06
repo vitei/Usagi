@@ -319,7 +319,9 @@ namespace usg
 			{
 				if(evt.uCameraID == 0 || outputs.cam.GetRuntimeData().pCamera->GetID() == evt.uCameraID)
 				{
-					outputs.cam.Modify().uRenderMask = (outputs.cam->uRenderMask | evt.uAddMasks ) & ~evt.uSubMasks;
+					uint32 uMask = (outputs.cam->uRenderMask | evt.uAddMasks) & ~evt.uSubMasks;
+					outputs.cam.Modify().uRenderMask = uMask;
+					outputs.cam.GetRuntimeData().pCamera->SetRenderMask(uMask);
 				}
 			}
 
@@ -336,6 +338,37 @@ namespace usg
 				}
 			}
 
+		};
+
+
+		// TODO: Skyfog should be it's own thing rather than part of postfx
+		class UpdateSkyFog : public usg::System
+		{
+		public:
+			struct Inputs
+			{
+				usg::Required<SkyFogComponent> fog;
+				Required<EntityID, FromParentWith<SceneComponent> >	sceneEntity;
+				Required<usg::EventManagerHandle, FromParents> eventManager;
+			};
+
+			struct Outputs
+			{
+				usg::Required<SkyFogComponent> fog;
+			};
+
+			DECLARE_SYSTEM(usg::SYSTEM_DEFAULT_PRIORITY)
+
+			static void Run(const Inputs& in, Outputs& out, float fDelta)
+			{
+
+			}
+
+
+			static void OnEvent(const Inputs& inputs, Outputs& outputs, const ::usg::Events::SetFogRange& event)
+			{
+				inputs.eventManager->handle->RegisterEventWithEntity(inputs.sceneEntity->id, event, ON_ENTITY);
+			}
 		};
 
 

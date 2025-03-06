@@ -113,7 +113,7 @@ void PostFXSys_ps::Update(Scene* pScene, float fElapsed)
 	}
 }
 
-void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
+void PostFXSys_ps::PreViewUpdate(GFXDevice* pDevice)
 {
 	// If effects get out of hand we might want to use callbacks, but this is fine for now
 	for (auto cfx : m_customEffects)
@@ -126,6 +126,11 @@ void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
 			break;
 		}
 	}
+}
+
+void PostFXSys_ps::UpdateGPU(GFXDevice* pDevice)
+{
+	PreViewUpdate(pDevice);
 
 	for (uint32 i = 0; i < m_uDefaultEffects; i++)
 	{
@@ -574,13 +579,6 @@ void PostFXSys_ps::EnableEffectsInt(GFXDevice* pDevice, uint32 uEffectFlags)
 		else
 		{
 			m_pDefaultEffects[i]->Resize(pDevice, uWidth, uHeight);
-		}
-	}
-	for (auto itr : m_customEffects)
-	{
-		if (itr->GetEnabled())
-		{
-			m_activeEffects.push_back(itr);
 		}
 	}
 

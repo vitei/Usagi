@@ -53,6 +53,8 @@ message SkyFogComponent
 
 	required string szPakName = 3 [(nanopb).max_size = 64];
 	required string szTexName = 4 [(nanopb).max_size = 64];
+
+	required bool bAddToScene = 5 [default = true];
 }
 
 

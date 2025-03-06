@@ -263,7 +263,7 @@ namespace usg
 
 		p.GetRuntimeData().texture = handles.pResourceMgr->GetTexture(handles.pDevice, p->szTexName);
 
-		p.GetRuntimeData().pFog->SetEnabled(true);
+		p.GetRuntimeData().pFog->SetEnabled(p->bAddToScene);
 		p.GetRuntimeData().pFog->SetTexture(handles.pDevice, p.GetRuntimeData().texture);
 
 		ViewContext* ViewCtxt = handles.pScene->GetViewContext(0);
