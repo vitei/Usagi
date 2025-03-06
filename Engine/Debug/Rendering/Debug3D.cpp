@@ -324,7 +324,10 @@ bool Debug3D::Draw(GFXContext* pContext, RenderContext& renderContext)
 void Debug3D::RenderPassChanged(GFXDevice* pDevice, uint32 uContextId, const RenderPassHndl &renderPass, const SceneRenderPasses& passes)
 {
 #ifdef ENABLE_DEBUG3D
-	pDevice->ChangePipelineStateRenderPass(renderPass, m_spherePipeline);
+	if(m_spherePipeline.IsValid())
+	{
+		pDevice->ChangePipelineStateRenderPass(renderPass, m_spherePipeline);
+	}
 	if (m_cubePipeline.IsValid())
 	{
 		pDevice->ChangePipelineStateRenderPass(renderPass, m_cubePipeline);
