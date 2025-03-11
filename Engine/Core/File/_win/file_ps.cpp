@@ -28,7 +28,7 @@ static const char* s_szAccessStrings[] =
 {
 	"rb",	// FILE_ACCESS_READ
 	"wb",	// FILE_ACCESS_WRITE
-	"rb+",	// FILE_ACCESS_READ_WRITE_DEPRECATED
+	"ab",	// FILE_ACCESS_READ_WRITE_DEPRECATED
 };
 
 
