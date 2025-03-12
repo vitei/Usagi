@@ -20,6 +20,8 @@ ATTRIB_LOC(5) out vec3 vo_vBinormal;
 ATTRIB_LOC(6) out vec3 vo_vWorldPos;
 ATTRIB_LOC(7) out vec3 vo_vViewDir;
 #endif
+#elif defined(PORTAL_TEST)
+ATTRIB_LOC(0) out vec3 vo_vWorldPos;
 #endif
 
 
@@ -92,6 +94,10 @@ void main(void)
 #ifndef SHADOW_PASS
 	vo_vViewDir			= -vViewPos.xyz;
 
+	vo_vWorldPos		= vWorldPos.xyz;
+#endif
+
+#ifdef PORTAL_TEST
 	vo_vWorldPos		= vWorldPos.xyz;
 #endif
 

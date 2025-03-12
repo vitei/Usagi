@@ -13,8 +13,12 @@
 #include "../includes/forward_lighting.inc"
 #endif
 
-
 // <<GENERATED_CODE>>
+
+#ifdef PORTAL_TEST
+#include "../includes/portalclip.inc"
+#endif
+
 
 #ifndef SHADOW_PASS
 ATTRIB_LOC(0) in vec4 vo_vTexCoord01;
@@ -29,6 +33,8 @@ ATTRIB_LOC(5) in vec3 vo_vBinormal;
 ATTRIB_LOC(6) in vec3 vo_vWorldPos;
 ATTRIB_LOC(7) in vec3 vo_vViewDir;
 #endif
+#elif defined(PORTAL_TEST)
+ATTRIB_LOC(0) in vec3 vo_vWorldPos;
 #endif
 
 #ifndef DEFERRED_SHADING
@@ -60,6 +66,13 @@ void CheckForDiscard(float fAlpha, float fAlphaRef, int iAlphaCmp)
 // Entry point
 void main(void)
 {
+#ifdef PORTAL_TEST
+	if ( ShouldPortalDiscardFragment(vo_vWorldPos) )
+	{
+		discard;
+	}
+#endif
+
 #ifndef SHADOW_PASS
 	vec3	vSrcColArg[3];
 	float	vSrcAlphaArg[3];
