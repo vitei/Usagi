@@ -1,74 +1,122 @@
 #ifndef _PORTAL_CLIP_INC
 #define _PORTAL_CLIP_INC
 
-
-// Transform a world-space position into local OOBB space
+// Transform a world-space position into local OOBB space.
+// (Note: Adjust the multiplication order if your matrix convention differs.)
 vec3 WorldToOOBB(vec3 worldPos)
 {
-    return vec4(worldPos, 1.0) * uPortal.mWorldToPortal;
+    return (vec4(worldPos, 1.0) * uPortal.mWorldToPortal).xyz;
 }
 
-// Check if a point is inside the OOBB
+// Check if a point is inside the OOBB.
+// Assumes the box is centered at the origin in OOBB space.
 bool IsInsideOOBB(vec3 localPos)
 {
     return all(lessThanEqual(abs(localPos), uPortal.portalOOBBHalfSize));
 }
 
-// Ray-OOBB intersection test (checks only for front/rear face exit)
-bool RayExitsThroughFrontOrRear(vec3 rayOrigin, vec3 rayDir)
+// Calculate the local eye position for different cases (camera/omni light)
+vec3 GetEyePosition()
 {
-    vec3 tMin = (-uPortal.portalOOBBHalfSize - rayOrigin) / rayDir;
-    vec3 tMax = ( uPortal.portalOOBBHalfSize - rayOrigin) / rayDir;
-    
-    float tNear = max(max(min(tMin.x, tMax.x), min(tMin.y, tMax.y)), min(tMin.z, tMax.z));
-    float tFar  = min(min(max(tMin.x, tMax.x), max(tMin.y, tMax.y)), max(tMin.z, tMax.z));
+#ifndef SHADOW_PASS
+    return WorldToOOBB(vEyePos.xyz);  // Camera view
+#elif defined(OMNI_DEPTH)
+    return WorldToOOBB(lightPos.xyz);  // Light view (for depth pass)
+#else
+    return -vec3(mViewMat[0][3], mViewMat[1][3], mViewMat[2][3]);  // Default (camera)
+#endif
+}
 
-    if (tNear > tFar || tFar < 0.0) return false; // No intersection
-
-    // If the intersection happens along the Z-axis (front or rear), allow it
-    vec3 exitPoint = rayOrigin + tFar * rayDir;
-    return abs(exitPoint.z) > abs(exitPoint.x) && abs(exitPoint.z) > abs(exitPoint.y);
+bool RayPassesThroughDoor(vec3 eyePos, vec3 rayDir, float doorZ)
+{
+    float epsilon = 0.0001;
+    if (abs(rayDir.z) < epsilon)
+        return false;
+        
+    // Compute t for intersection with the door plane.
+    float t = (doorZ - eyePos.z) / rayDir.z;
+    if (t < 0.0)
+        return false; // Intersection behind the eye.
+        
+    vec3 p = eyePos + t * rayDir;
+    // Check if the intersection is within the door's x/y extents.
+    return (abs(p.x) <= uPortal.portalOOBBHalfSize.x &&
+            abs(p.y) <= uPortal.portalOOBBHalfSize.y);
 }
 
 bool ShouldPortalDiscardFragment(vec3 vFragWorldPos)
 {
-    // Transform positions into local OOBB space
-
-#ifndef SHADOW_PASS
-    vec3 vLocalEyePos  = WorldToOOBB(vEyePos.xyz);
-    
-    // If the camera is inside the hangar, always render
-    if (IsInsideOOBB(vLocalEyePos))
-    {
-        return false;
-    }
-
-#elif defined(OMNI_DEPTH)
-    vec3 vLocalEyePos  = WorldToOOBB(lightPos.xyz);
-
-    // If the camera is inside the hangar, always render
-    if (IsInsideOOBB(vLocalEyePos))
-    {
-        return !uPortal.bIsInnerGeo;
-    }
-#else
-    vec3 vLocalEyePos = -vec3(mViewMat[0][3], mViewMat[1][3], mViewMat[2][3]);
-
-    // No need to test if in it for a diectional shadow
-#endif
-
+    // Transform positions into portal (OOBB) local space.
+    vec3 vLocalEyePos  = GetEyePosition();
     vec3 vLocalFragPos = WorldToOOBB(vFragWorldPos);
+    vec3 vRayDir       = normalize(vLocalFragPos - vLocalEyePos);
 
-    // Compute the view ray
-    vec3 vRayDir = normalize(vLocalFragPos - vLocalEyePos);
-
-    // If the ray exits through the front or rear, render
-    if (RayExitsThroughFrontOrRear(vLocalEyePos, vRayDir))
+    // Define door plane positions in portal space.
+    float doorNeg = -uPortal.portalOOBBHalfSize.z;
+    float doorPos =  uPortal.portalOOBBHalfSize.z;
+    
+    bool inside = IsInsideOOBB(vLocalEyePos);
+    
+    if (inside)
     {
-        return !uPortal.bIsInnerGeo;
+        if (uPortal.bIsInnerGeo)
+        {
+            // When inside, interior geometry is always visible.
+            return false;
+        }
+        else
+        {
+            // When inside, treat both doors as exits.
+            bool throughNegExit = RayPassesThroughDoor(vLocalEyePos, vRayDir, doorNeg);
+            bool throughPosExit = RayPassesThroughDoor(vLocalEyePos, vRayDir, doorPos);
+            return !(throughNegExit || throughPosExit);
+        }
     }
+    else
+    {
+        // Outside: determine entrance (nearest door) and exit (farthest door)
+        float distNeg = abs(vLocalEyePos.z - doorNeg);
+        float distPos = abs(vLocalEyePos.z - doorPos);
+        float entranceZ = (distNeg < distPos) ? doorNeg : doorPos;
+        float exitZ     = (distNeg < distPos) ? doorPos : doorNeg;
 
-    return uPortal.bIsInnerGeo;
+        bool passesEntrance = RayPassesThroughDoor(vLocalEyePos, vRayDir, entranceZ);
+        bool passesExit     = RayPassesThroughDoor(vLocalEyePos, vRayDir, exitZ);
+        
+        if (uPortal.bIsInnerGeo)
+        {
+            // Outside: interior geometry is visible only if the ray passes through the entrance.
+            return !passesEntrance;
+        }
+        else
+        {
+            // For external geometry:
+            // If the ray passes through the entrance but not the exit,
+            // then check if the fragment is behind the entrance relative to the eye.
+            if (passesEntrance && !passesExit)
+            {
+                bool geoInFrontOfEntrance;
+                // "In front" means on the same side of the entrance plane as the eye.
+                if (vLocalEyePos.z > entranceZ)
+                    geoInFrontOfEntrance = (vLocalFragPos.z > entranceZ);
+                else
+                    geoInFrontOfEntrance = (vLocalFragPos.z < entranceZ);
+                    
+                // Only discard if the fragment is behind the entrance.
+                if (!geoInFrontOfEntrance)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                // Otherwise, external geometry is rendered.
+                return false;
+            }
+        }
+    }
 }
 
+
 #endif
+

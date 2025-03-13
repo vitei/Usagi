@@ -258,35 +258,22 @@ void ModelResource::SetupMeshes( const string & modelDir, GFXDevice* pDevice, ui
 
 }
 
-DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange::Material* pMaterial, bool bAnimated, bool bInstance)
+DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const CustomEffectResHndl& customFXDec, bool bAnimated, bool bInstance)
 {
 	uint32 uIndex = 0;
 	DescriptorDeclaration decl[exchange::Material_Constant_TEXTURE_NUM + 6];
 
-	for (int i = 0; i < exchange::Material_Constant_TEXTURE_NUM; ++i)
+	const DescriptorDeclaration* pDescIn = customFXDec->GetDescriptorDecl();
+	while (pDescIn->eDescriptorType != usg::DESCRIPTOR_TYPE_INVALID)
 	{
-		if (pMaterial->textures[i].textureName[0] != '\0')
-		{
-			decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			decl[uIndex].shaderType = SHADER_FLAG_PIXEL;
-			decl[uIndex].uCount = 1;
-			decl[uIndex].uBinding = i;
-			uIndex++;
-		}
+		decl[uIndex] = *pDescIn;
+		++pDescIn;
+		++uIndex;
 	}
 
-	if(!bAnimated)
-	{
-		if(!bInstance)
-		{
-			decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER_DYNAMIC;
-			decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
-			decl[uIndex].uCount = 1;
-			decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_0;
-			uIndex++;
-		}
-	}
-	else
+	// We leave the bones out of the effect description so our custom runtime isn't stuffed with data we don't need
+	// FIXME: We need a variable sized VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+	if(bAnimated)
 	{
 		// Still enabling this separately
 		decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER;
@@ -295,20 +282,6 @@ DescriptorSetLayoutHndl GetDeclarationLayout(GFXDevice* pDevice, const exchange:
 		decl[uIndex].uBinding = SHADER_CONSTANT_CUSTOM_2;
 		uIndex++;
 	}
-
-	// Vertex material constants
-	decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER;
-	decl[uIndex].shaderType = SHADER_FLAG_VERTEX;
-	decl[uIndex].uCount = 1;
-	decl[uIndex].uBinding = SHADER_CONSTANT_MATERIAL;
-	uIndex++;
-
-	// Fragment lighting
-	decl[uIndex].eDescriptorType = DESCRIPTOR_TYPE_CONSTANT_BUFFER;
-	decl[uIndex].shaderType = SHADER_FLAG_PIXEL;
-	decl[uIndex].uCount = 1;
-	decl[uIndex].uBinding = SHADER_CONSTANT_MATERIAL_1;
-	uIndex++;
 
 	decl[uIndex] = DESCRIPTOR_CAP;
 	return pDevice->GetDescriptorSetLayout(decl);
@@ -429,6 +402,8 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	bool bAnimated = pShape->skinningType != usg::exchange::SkinningType_NO_SKINNING;
 
+	bool bCanInstance = !bAnimated;
+
 	EffectHndl effects[usg::exchange::_Material_RenderPass_count];
 	EffectHndl instanceEffects[usg::exchange::_Material_RenderPass_count];
 
@@ -443,7 +418,7 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 			{
 				m_meshArray[m_uMeshCount].renderSets[i].effectRuntime.Init(pDevice, effects[i]->GetCustomEffect());
 			}
-			if(!bAnimated)
+			if(bCanInstance)
 			{
 				effectName += ".instance";
 				instanceEffects[i] = usg::ResourceMgr::Inst()->GetEffect(pDevice, effectName.c_str());
@@ -451,7 +426,9 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		}
 	}
 
-	m_meshArray[m_uMeshCount].bCanInstance = !bAnimated;
+	// Some more complex effects we don't allow instancing on
+
+	m_meshArray[m_uMeshCount].bCanInstance = bCanInstance;
 
 	PipelineStateDecl pipelineState;
 	pipelineState.ePrimType = PT_TRIANGLES;
@@ -467,21 +444,24 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 		{
 			uVertexSize = InitInputBindings(pDevice, pShape, pMaterial, effects[i]->GetCustomEffect(), Mesh::RS_DEFAULT, pipelineState);
 			uFirstValidPass = i;
+			bCanInstance &= instanceEffects[uFirstValidPass];
 			break;
 		}
 	}
 
-	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated, false);
+	DescriptorSetLayoutHndl matDescriptors = GetDeclarationLayout(pDevice, effects[uFirstValidPass]->GetCustomEffect(), bAnimated, false);
 	pipelineState.layout.descriptorSets[0] = pDevice->GetDescriptorSetLayout(SceneConsts::g_globalDescriptorDecl);
 	pipelineState.layout.descriptorSets[1] = matDescriptors;
 	pipelineState.layout.uDescriptorSetCount = 2;
 
 	m_meshArray[m_uMeshCount].defaultPipelineDescLayout = matDescriptors;
 
-	DescriptorSetLayoutHndl instanceDescriptors = GetDeclarationLayout(pDevice, pMaterial, bAnimated, true);
-	pipelineState.layout.descriptorSets[1] = instanceDescriptors;
-	m_meshArray[m_uMeshCount].instancePipelineDescLayout = instanceDescriptors;
-
+	if(bCanInstance)
+	{
+		DescriptorSetLayoutHndl instanceDescriptors = GetDeclarationLayout(pDevice, instanceEffects[uFirstValidPass]->GetCustomEffect(), bAnimated, true);
+		pipelineState.layout.descriptorSets[1] = instanceDescriptors;
+		m_meshArray[m_uMeshCount].instancePipelineDescLayout = instanceDescriptors;
+	}
 
 	pipelineState.layout.descriptorSets[1] = matDescriptors;
 
@@ -601,9 +581,12 @@ void ModelResource::SetupMesh( const string& modelDir, GFXDevice* pDevice, usg::
 
 	for (uint32 i = 0; i < pMaterial->renderPasses[uFirstValidPass].constants_count; i++)
 	{
-		// Override the default values if we have them
-		void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->renderPasses[uFirstValidPass].constants[i].uOffset);
-		fxRunTime.SetSetData(i, pData, pMaterial->renderPasses[uFirstValidPass].constants[i].uSize);
+		// Override the default values if we have them, but CUSTOM_0 is a special case for bones
+		if(fxRunTime.GetResource()->GetConstantSetCount() > i && fxRunTime.GetResource()->GetConstantSetBinding(i) != SHADER_CONSTANT_CUSTOM_0)
+		{
+			void* pData = (void*)(((uint8*)pMaterial->constantData) + pMaterial->renderPasses[uFirstValidPass].constants[i].uOffset);
+			fxRunTime.SetSetData(i, pData, pMaterial->renderPasses[uFirstValidPass].constants[i].uSize);
+		}
 	}
 	// The w is scaling of the vertex color, if 0 the vertex color is ignored
 	fxRunTime.SetVariable("iBoneCount", GetBoneIndexCount(pShape));

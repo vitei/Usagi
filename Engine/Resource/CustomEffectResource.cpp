@@ -115,7 +115,7 @@ namespace usg
 		m_pAttributes = (CustomEffectDecl::Attribute*)(((uint8*)m_pBinary) + m_header.uAttributeOffset);
 		m_pSamplers = (CustomEffectDecl::Sampler*)(((uint8*)m_pBinary) + m_header.uSamplerOffset);
 
-		ASSERT(m_header.uConstantSetCount < MAX_CONSTANT_SETS);
+		ASSERT(m_header.uConstantSetCount <= MAX_CONSTANT_SETS);
 
 		m_pConstantSets = (CustomEffectDecl::ConstantSet*)(((uint8*)m_pBinary) + m_header.uConstantSetDeclOffset);
 
@@ -277,6 +277,20 @@ namespace usg
 	uint32 CustomEffectResource::GetConstantSetCount() const
 	{
 		return m_header.uConstantSetCount;
+	}
+
+
+	uint32 CustomEffectResource::GetIndexOfConstantSetAtBinding(uint32 uBinding) const
+	{
+		for (uint32 i = 0; i < m_header.uConstantSetCount; i++)
+		{
+			if(m_pConstantSets[i].uBinding == uBinding)
+			{
+				return i;
+			}
+		}
+
+		return USG_INVALID_ID;
 	}
 
 	uint32 CustomEffectResource::GetConstantSetBinding(uint32 uSet) const

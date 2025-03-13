@@ -10,6 +10,7 @@
 #include "Engine/Resource/ModelResourceMesh.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/Scene/Model/Bone.h"
 #include "Engine/Scene/Model/ModelRenderNodes.h"
 #include "Model.h"
@@ -237,8 +238,20 @@ void Model::RemoveOverrides(GFXDevice* pDevice)
 			}
 		}
 
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
-		descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
+		const auto& effectRes = pMesh->renderSets[uFirstValid].effectRuntime.GetResource();
+		uint32 uMat = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_MATERIAL);
+		uint32 uMat1 = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1);
+		uint32 uCustom1 = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_1);
+
+		if(uMat != USG_INVALID_ID)
+			descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(uMat), 0, SHADER_FLAG_VERTEX);
+
+		if(uMat1 != USG_INVALID_ID)
+			descSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(uMat1), 0, SHADER_FLAG_PIXEL);
+
+		if(uCustom1 != USG_INVALID_ID)
+			descSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(uCustom1), 0, SHADER_FLAG_ALL);
+
 		for (uint32 i = 0; i < ModelResource::Mesh::MAX_UV_STAGES; i++)
 		{
 			if (pMesh->pTextures[i])
@@ -360,12 +373,28 @@ void Model::InitDynamics(GFXDevice* pDevice, Scene* pScene, uint32 i)
 			pMapper->Update();
 		}
 
-		pRenderMesh->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
-		pRenderMesh->SetOverrideConstant(1, m_pOverrideMaterials[i].customFX.GetConstantSet(1));
+		const auto& effectRes = m_pOverrideMaterials[i].customFX.GetResource();
+		uint32 uMat = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_MATERIAL);
+		uint32 uMat1 = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1);
+		uint32 uCustom1 = effectRes->GetIndexOfConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_1);
+
+		if(uMat != USG_INVALID_ID)
+			pRenderMesh->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(uMat));
+
+		if (uMat1 != USG_INVALID_ID)
+			pRenderMesh->SetOverrideConstant(1, m_pOverrideMaterials[i].customFX.GetConstantSet(uMat1));
+
+		if (uCustom1 != USG_INVALID_ID)
+			pRenderMesh->SetOverrideConstant(2, m_pOverrideMaterials[i].customFX.GetConstantSet(uCustom1));
 
 		if (m_depthMeshArray)
 		{
-			m_depthMeshArray[i]->AsRenderMesh()->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(0));
+			if (uMat != USG_INVALID_ID)
+				m_depthMeshArray[i]->AsRenderMesh()->SetOverrideConstant(0, m_pOverrideMaterials[i].customFX.GetConstantSet(uMat));
+
+			if (uCustom1 != USG_INVALID_ID)
+				m_depthMeshArray[i]->AsRenderMesh()->SetOverrideConstant(2, m_pOverrideMaterials[i].customFX.GetConstantSet(uCustom1));
+
 		}
 	}
 }
@@ -921,8 +950,10 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 		if (m_pOverrideMaterials[uMesh].customFX.SetVariable(szVarName, pData, uSize, 0))
 		{
 			// FIXME: Requesting override on both for now, should check which set it's owned by
-			GetRenderMesh(uMesh)->RequestOverride(0);
-			GetRenderMesh(uMesh)->RequestOverride(1);
+			for (uint32 i = 0; i < m_pOverrideMaterials[uMesh].customFX.GetResource()->GetConstantSetCount(); i++)
+			{
+				GetRenderMesh(uMesh)->RequestOverride(i);
+			}			
 		}
 	}
 }

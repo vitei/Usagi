@@ -156,12 +156,20 @@ void CustomEffectRuntime::GPUUpdate(GFXDevice* pDevice)
 
 ConstantSet* CustomEffectRuntime::GetConstantSet(uint32 uSet)
 {
-	return &m_pConstantSets[uSet];
+	if(uSet < m_uConstantSets)
+	{
+		return &m_pConstantSets[uSet];
+	}
+	return nullptr;
 }
 
 const ConstantSet* CustomEffectRuntime::GetConstantSet(uint32 uSet) const
 {
-	return &m_pConstantSets[uSet];
+	if (uSet < m_uConstantSets)
+	{
+		return &m_pConstantSets[uSet];
+	}
+	return nullptr;
 }
 
 }

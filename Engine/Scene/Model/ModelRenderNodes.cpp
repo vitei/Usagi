@@ -8,6 +8,7 @@
 #include "Engine/Scene/Model/Bone.h"
 #include "Engine/Graphics/Device/GFXContext.h"
 #include "Engine/Graphics/Device/GFXDevice.h"
+#include "Engine/Resource/CustomEffectResource.h"
 #include "Engine/PostFX/PostFXSys.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/Model/ModelInstanceRenderer.h"
@@ -145,8 +146,16 @@ void Model::RenderMesh::Init(GFXDevice* pDevice, Scene* pScene, const ModelResou
 		}
 	}
 
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(1), 0, SHADER_FLAG_PIXEL);
-	m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, pMesh->renderSets[uFirstValid].effectRuntime.GetConstantSet(0), 0, SHADER_FLAG_VERTEX);
+	auto& runTime = pMesh->renderSets[uFirstValid].effectRuntime;
+
+	for (uint32 i = 0; i < runTime.GetResource()->GetConstantSetCount(); i++)
+	{	
+		// FIXME: This shouldn't really be in the runtime
+		if(runTime.GetResource()->GetConstantSetBinding(i) != SHADER_CONSTANT_CUSTOM_0)
+		{
+			m_descriptorSet.SetConstantSetAtBinding(runTime.GetResource()->GetConstantSetBinding(i), runTime.GetConstantSet(i));
+		}
+	}
 
 	if(pModel)
 	{
@@ -262,16 +271,22 @@ void Model::RenderMesh::VisibilityUpdate(GFXDevice* pDevice, const Vector4f& vTr
 		{
 			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, m_pOverridesConstants[1], 0, SHADER_FLAG_PIXEL);
 		}
-		
+		if (m_uReqOverrides & OVERRIDE_CUSTOM_1)
+		{
+			m_descriptorSet.SetConstantSetAtBinding(SHADER_CONSTANT_CUSTOM_1, m_pOverridesConstants[2], 0, SHADER_FLAG_PIXEL);
+		}
+
 		m_uOverrides |= m_uReqOverrides;
 	}
 
 	if (m_uOverrides)
 	{
 		// FIXME: Use the customFX runtime
-		m_pOverridesConstants[0]->UpdateData(pDevice);
-		if(m_pOverridesConstants[1])
-			m_pOverridesConstants[1]->UpdateData(pDevice);
+		for(int i=0; i<ARRAY_SIZE(m_pOverridesConstants); i++)
+		{
+			if(m_pOverridesConstants[i])
+				m_pOverridesConstants[i]->UpdateData(pDevice);
+		}
 	}
 	m_descriptorSet.UpdateDescriptors(pDevice);
 

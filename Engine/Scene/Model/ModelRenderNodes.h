@@ -152,7 +152,8 @@ namespace usg {
 		{
 			OVERRIDE_MATERIAL = (1 << 0),
 			OVERRIDE_MATERIAL_1 = (1<<1),
-			OVERRIDE_COUNT = 2
+			OVERRIDE_CUSTOM_1 = (1<<2),
+			OVERRIDE_COUNT = 3
 		};
 
 		const ModelResource::Mesh*	m_pMeshResource;

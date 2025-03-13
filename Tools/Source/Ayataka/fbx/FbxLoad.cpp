@@ -856,11 +856,16 @@ void FbxLoad::SetRenderState(::exchange::Material* pNewMaterial, FbxSurfaceMater
 	}
 
 	m_pDependencies->LogDependency(emuPath.c_str());
-	pNewMaterial->InitCustomMaterial(emuPath.c_str(), "FBXDefault", defines);
+
+
+	//pNewMaterial->InitCustomMaterial(emuPath.c_str(), "FBXDefault", defines);
 
 	// material name
 	const char* pMaterialName = "Dummy";
 	strncpy(pNewMaterial->pb().materialName, pMaterialName, strlen(pMaterialName) + 1);
+
+	// Do InitDefault so we can do overrides on dummy materials
+	m_pOverrides->InitDefault(pNewMaterial->pb().materialName, defines, pNewMaterial);
 
 	for (uint32 i = 0; i < pNewMaterial->GetCustomFX(0).GetTextureCount(); i++)
 	{

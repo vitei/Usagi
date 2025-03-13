@@ -47,12 +47,20 @@ CustomEffects:
           - { type: bool,   name: bReflectionMap, default: false } # 76
           - { type: float,  name: alphaRef,       count: 1, default: 1.0 } # 80
           - { type: int,    name: alphaCmp,       count: 1, default: 0 } # 84 // Less, Equal, Greater
-          - { type: vec4,  name: emissionMapMul, count: 1, default: [1.0, 1.0, 1.0, 1.0] } # 88
+          - { type: vec4,   name: emissionMapMul, count: 1, default: [1.0, 1.0, 1.0, 1.0] } # 88         
       - binding: Custom0
         shaderType: VS 
-        defines: "!INSTANCED"        
+        defines: "!INSTANCED !HAS_SKELETON"        
         Variables:
-         - { type: mat3x4,   name: mModelMat,    count: 1  }  # 0          
+         - { type: mat3x4,   name: mModelMat,    count: 1  }  # 0           
+      - name: uPortal
+        binding: Custom1
+        shaderType: PS 
+        defines: "PORTAL_TEST"        
+        Variables:
+          - { type: mat3x4, name: mWorldToPortal,    count: 1  }  # 0
+          - { type: vec3,   name: portalOOBBHalfSize, count: 1, default: [0.0, 0.0, 0.0] }   
+          - { type: bool,   name: bIsInnerGeo, count: 1, default: true }             
 Effects: 
   - name: FBXDefault
     vert: models/fbxdefault
@@ -92,12 +100,28 @@ Effects:
         defines: HAS_BUMP ALPHA_TEST        
       - name: clip
         defines: CLIP_PLANE        
+      - name: portal
+        defines: PORTAL_TEST         
       - name: bump.clip
         defines: HAS_BUMP CLIP_PLANE        
       - name: alphaTest.clip
         defines: ALPHA_TEST CLIP_PLANE       
       - name: bump.alphaTest.clip
         defines: HAS_BUMP ALPHA_TEST CLIP_PLANE
+      - name: bump.portal
+        defines: HAS_BUMP PORTAL_TEST
+      - name: alphaTest.portal
+        defines: ALPHA_TEST PORTAL_TEST
+      - name: bump.alphaTest.portal
+        defines: HAS_BUMP ALPHA_TEST PORTAL_TEST        
+      - name: clip.portal
+        defines: CLIP_PLANE PORTAL_TEST        
+      - name: bump.clip.portal
+        defines: HAS_BUMP CLIP_PLANE PORTAL_TEST        
+      - name: alphaTest.clip.portal
+        defines: ALPHA_TEST CLIP_PLANE PORTAL_TEST       
+      - name: bump.alphaTest.clip.portal
+        defines: HAS_BUMP ALPHA_TEST CLIP_PLANE PORTAL_TEST        
 
       - name: instance
         defines: INSTANCED
