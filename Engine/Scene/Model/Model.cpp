@@ -952,7 +952,12 @@ void Model::OverrideVariable(const char* szVarName, void* pData, uint32 uSize, u
 			// FIXME: Requesting override on both for now, should check which set it's owned by
 			for (uint32 i = 0; i < m_pOverrideMaterials[uMesh].customFX.GetResource()->GetConstantSetCount(); i++)
 			{
-				GetRenderMesh(uMesh)->RequestOverride(i);
+				if(m_pOverrideMaterials[uMesh].customFX.GetResource()->GetConstantSetBinding(i) == SHADER_CONSTANT_MATERIAL)
+					GetRenderMesh(uMesh)->RequestOverride(0);
+				if (m_pOverrideMaterials[uMesh].customFX.GetResource()->GetConstantSetBinding(i) == SHADER_CONSTANT_MATERIAL_1)
+					GetRenderMesh(uMesh)->RequestOverride(1);
+				if (m_pOverrideMaterials[uMesh].customFX.GetResource()->GetConstantSetBinding(i) == SHADER_CONSTANT_CUSTOM_1)
+					GetRenderMesh(uMesh)->RequestOverride(2);
 			}			
 		}
 	}
