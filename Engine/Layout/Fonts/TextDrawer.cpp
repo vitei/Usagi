@@ -246,6 +246,7 @@ namespace usg
 		usg::vector<uint32> uTagIndices;
 		if (fWidthLimit > 0.0f)
 		{
+			bool bSpaceThisLine = false;
 			// Insert fake newlines
 			for (uint32 uChar = 0; uChar < u8Text.size();)
 			{
@@ -266,7 +267,13 @@ namespace usg
 				if (uByteCount == 1 && *szThisText == '\n')
 				{
 					fTmpWidth = 0.0f;
+					bSpaceThisLine = false;
 				}
+				else if(uByteCount == 1 && *szThisText == ' ')
+				{
+					bSpaceThisLine = true;
+				}
+
 				float fLeft, fRight, fTop, fBottom;
 				Vector2f vScale = m_context.GetScale() * m_pParent->GetFont()->GetDrawScale();
 				bool bFound = font->GetCharacterCoords(thisChar.GetAsUInt32(), fLeft, fRight, fTop, fBottom);
@@ -274,7 +281,7 @@ namespace usg
 				vDimensions = vDimensions * vScale;
 				float fCharWidth = vDimensions.x + font->GetCharacterSpacing() * vScale.x;
 				fTmpWidth += fCharWidth;
-				if (fTmpWidth > fWidthLimit)
+				if (fTmpWidth > fWidthLimit && bSpaceThisLine)
 				{
 					uint32 uCharCache = uChar;
 					uChar--;
