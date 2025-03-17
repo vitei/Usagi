@@ -70,6 +70,9 @@ namespace usg
 		ActiveDevice_init(activeDevice, pDevice);
 
 		m_pImpl->pComponentManager->RegisterResourceHandles(pDevice, pResMgr, m_pImpl->pScene);
+
+		m_pImpl->pComponentManager->GetEventManager().SetMessenger(m_pImpl->pMessenger.get());
+
 		
 	}
 

@@ -582,6 +582,16 @@ namespace usg
 				}
 			}
 
+			if (spawnParams.HasNUID())
+			{
+				Required<usg::NetworkUID> netId;
+				m_componentLoadHandles.GetComponent(e, netId);
+				if (netId.IsValid())
+				{
+					netId.Modify().gameUID = spawnParams.GetNUID();
+				}
+			}
+
 			if (spawnParams.HasOwnerNUID())
 			{
 				Required<usg::NetworkOwner> owner;

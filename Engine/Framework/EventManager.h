@@ -44,6 +44,9 @@ public:
 	
 	void SetUseNetTime(bool bNetTime) { m_bUseNetTime = bNetTime; }
 
+	// FIXME: Should clean this up so we have an offline messenger, but only health is currently firing
+	bool IsOnline() const { return m_messenger != nullptr; }
+
 	template<typename EventType>
 	void RegisterEvent(const EventType& evt, typename Event<EventType>::ExtraData extra = nullptr)
 	{
@@ -113,6 +116,16 @@ public:
 		void* buffer = m_heap.Allocate(sizeof(Event<EventType>), 4, 0, ALLOC_EVENT);
 		ASSERT(buffer != nullptr);
 		Event<EventType>* wrappedEvent = new (buffer) Event<EventType>(evt, 0, extra);
+		AddToPreRunEventQueue(wrappedEvent);
+	}
+
+	template<typename EventType>
+	void RegisterPreRunEventWithEntity(Entity e, const EventType& evt, uint32 targets = ON_ENTITY, typename EventOnEntity<EventType>::ExtraData extra = nullptr)
+	{
+		void* buffer = m_heap.Allocate(sizeof(EventOnEntity<EventType>), 4, 0, ALLOC_EVENT);
+		ASSERT(buffer != nullptr);
+		ASSERT(e != nullptr);
+		EventOnEntity<EventType>* wrappedEvent = new (buffer) EventOnEntity<EventType>(e, evt, targets, 0, extra);
 		AddToPreRunEventQueue(wrappedEvent);
 	}
 

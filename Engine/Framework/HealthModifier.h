@@ -30,7 +30,7 @@ protected:
 		{
 			usg::NetworkUID* pNUID = GameComponents<usg::NetworkUID>::GetComponentData(entity);
 
-			if(pNUID != NULL)
+			if(pNUID != NULL && pEventManager->IsOnline())
 			{
 				pEventManager->RegisterNetworkEventWithEntity(*pNUID, damageEvt, ON_ENTITY);
 			}
