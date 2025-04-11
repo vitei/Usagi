@@ -8,24 +8,25 @@
 #include "Engine/Core/Containers/SafePointer.h"
 #include "SoundObject.h"
 
-namespace usg{
+namespace usg {
 
-class SoundHandle :  public SafePointer<SoundObject>
+class SoundHandle : public SafePointer<SoundObject>
 {
 public:
 	SoundHandle() {}
 	~SoundHandle() {}
 
-	void Start(float fTime=0.0f);
-	void Stop(float fTime=0.0f);
-	void Pause(float fTime=0.0f);
+	void Start(float fTime = 0.0f);
+	void Stop(float fTime = 0.0f);
+	void Pause(float fTime = 0.0f);
 	bool IsPlaying() const;
+	bool IsPaused() const;
 	void SetVolume(float fVolume);
 	void SetPitch(float fPitch);
 	float GetRandomPitch() const;
 	float GetVolume() const;
 	bool GetLooping() const;
-	bool IsValid() const { return GetPointer()!=NULL; }
+	bool IsValid() const { return GetPointer() != NULL; }
 	void SetActiveTrack(uint32 uTrack, float fFadeTime);
 	void SubmitData(void* pData, memsize size);
 	uint64 GetSamplesPlayed() const;
@@ -45,7 +46,7 @@ private:
 inline void SoundHandle::Start(float fTime)
 {
 	SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		pObject->Start(fTime);
 	}
@@ -64,7 +65,7 @@ inline void SoundHandle::Pause(float fTime)
 inline void SoundHandle::SetVolume(float fVolume)
 {
 	SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		pObject->SetVolume(fVolume);
 	}
@@ -92,7 +93,7 @@ inline float SoundHandle::GetRandomPitch() const
 inline float SoundHandle::GetVolume() const
 {
 	const SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		return pObject->GetVolume();
 	}
@@ -103,7 +104,7 @@ inline float SoundHandle::GetVolume() const
 inline void SoundHandle::Stop(float fTime)
 {
 	SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		pObject->Stop(fTime);
 	}
@@ -113,9 +114,19 @@ inline void SoundHandle::Stop(float fTime)
 inline bool SoundHandle::IsPlaying() const
 {
 	const SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		return pObject->IsPlaying();
+	}
+	return false;
+}
+
+inline bool SoundHandle::IsPaused() const
+{
+	const SoundObject* pObject = GetPointer();
+	if (pObject)
+	{
+		return pObject->IsPaused();
 	}
 	return false;
 }
@@ -163,7 +174,7 @@ inline void SoundHandle::SetActiveTrack(uint32 uTrack, float fTime)
 inline SoundObject_ps* SoundHandle::GetPlatform()
 {
 	SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		return &pObject->GetPlatform();
 	}
@@ -175,7 +186,7 @@ inline SoundActorHandle SoundHandle::GetSoundActor()
 {
 	SoundActorHandle retHndl;
 	SoundObject* pObject = GetPointer();
-	if(pObject)
+	if (pObject)
 	{
 		retHndl = pObject->GetSoundActor();
 	}
@@ -185,7 +196,7 @@ inline SoundActorHandle SoundHandle::GetSoundActor()
 inline SoundObject* SoundHandle::GetObject()
 {
 	SoundObject* pObject = GetPointer();
-	ASSERT(pObject!=NULL);
+	ASSERT(pObject != NULL);
 	return pObject;
 }
 

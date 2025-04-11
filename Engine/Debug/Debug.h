@@ -15,17 +15,19 @@
 // Cache the debug log on all versions of the game except for the final rom
 void DumpDebugLog(const char* szBuildId = NULL);
 #else
-void FatalInFinal(const char *format, ...);
+void FatalInFinal(const char* format, ...);
 #endif
 
 #ifndef FINAL_BUILD
 // But only actually print out the log on a debug build
 #define DEBUG_PRINT( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG,__VA_ARGS__)
+#define DEBUG_PRINT_RAW( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_LOG|DEBUG_MSG_RAW,__VA_ARGS__)
 #define WARNING( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_WARNING|DEBUG_MSG_LOG,__VA_ARGS__)
 #define RELEASE_WARNING( ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, DEBUG_MSG_RELEASE|DEBUG_MSG_LOG,__VA_ARGS__)
 #define LOG_MSG( uFlags, ... )	cDebugprintf(__FILE__, __LINE__, __FUNCTION__, uFlags, __VA_ARGS__)
 #else
 #define DEBUG_PRINT( ... ) ((void) 0)
+#define DEBUG_PRINT_RAW( ... ) ((void) 0)
 #define WARNING( ... ) ((void) 0)
 #define RELEASE_WARNING( ... ) ((void) 0)
 #define LOG_MSG( ... ) ((void) 0)
@@ -38,3 +40,4 @@ void FatalInFinal(const char *format, ...);
 #endif
 
 #endif
+

@@ -17,6 +17,8 @@ class SceneRenderPasses;
 class LightingContext;
 class Fog;
 class GFXContext;
+class Color;
+
 
 class ViewContext : public SceneContext
 {
