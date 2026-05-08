@@ -10,6 +10,25 @@ CustomEffects:
           - { type: float,   name: fContrast,      count: 1, default: 2.0 }         
           - { type: bool,    name: bInverseTone, count: 1, default: false }  
           - { type: bool,    name: bHDR10, count: 1, default: true }  
+  LinearToST2084:
+    Samplers:
+      - { index: 0, hint: "framebuffer" }
+    ConstantDefs:
+      - name: uMaterial
+        binding: Material
+        shaderType: PS
+        Variables:
+          - { type: bool,    name: bExpandGamut, count: 1, default: true }
+  
+  LinearToExtended:
+    Samplers:
+      - { index: 0, hint: "framebuffer" }
+    ConstantDefs:
+      - name: uMaterial
+        binding: Material
+        shaderType: PS
+        Variables:
+          - { type: float,   name: fBrightness, count: 1, default: 4.0 }
   SkyFogDefault:
     Attributes:
       - { index: 0, name: ao_position, hint: "position", type: vec3 }    
@@ -35,6 +54,8 @@ Effects:
   - { name: ClearAlpha,             vert: PostFX/fullscreensolid,   frag: PostFX/clearalpha }
   - { name: AdjustColorSpace,       vert: PostFX/fullscreen,        frag: PostFX/adjustcolorspace }
   - { name: LinearToHDR,            vert: PostFX/fullscreen,        frag: PostFX/LinearToHDR, custom_effect: LinearToHDR } 
+  - { name: LinearToST2084,         vert: PostFX/fullscreen,        frag: PostFX/LinearToST2084, custom_effect: LinearToST2084 }
+  - { name: LinearToExtended,       vert: PostFX/fullscreen,        frag: PostFX/LinearToExtended, custom_effect: LinearToExtended }
   - name: SkyFogDefault
     vert: fogsphere
     frag: fogbox

@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>Data\Models\LongbowCockpit\Longbow_Cockpit.yml -def -o_romfiles/win/Particle/Effects.pak -pwin  -d_romfiles/win/Particle/Effects.pak.d</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>Data\Models\Sheffield\Sheffield.yml -def -o_romfiles/win/Particle/Effects.pak -pwin  -d_romfiles/win/Particle/Effects.pak.d</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>Data\Textures\Terrain\Tyr.yml -def -o_romfiles/win/Particle/Effects.pak -pwin  -d_romfiles/win/Particle/Effects.pak.d</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>Data\Terrain\Detail.yml -def -o_romfiles/win/Terrain/Tyr.pak -pwin  -d_romfiles/win/Terrain/Tyr.pak.d</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>

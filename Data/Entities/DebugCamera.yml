@@ -4,7 +4,7 @@ Identifier:
   name: "DebugCam"
 MatrixComponent:
 CameraComponent:
-  fFOV: 50.0
+  fFOV: 45.0
   fNearPlaneDist: 0.1
   fFarPlaneDist: 6000.0 
   uRenderMask: <%= Usg::RenderMask::RENDER_MASK_CAMERA_OUTSIDE %>    

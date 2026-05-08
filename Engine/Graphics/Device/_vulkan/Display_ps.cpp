@@ -17,7 +17,7 @@
 
 
 
-#define DXGI_TEST_FOR_HDR 0
+#define DXGI_TEST_FOR_HDR 1
 
 #if DXGI_TEST_FOR_HDR
 #if defined(_WIN32)
@@ -359,13 +359,13 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 
 			if(bAllowHDR)
 			{
-				/*if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)
 				{
 					iBestFormat = i;
 					m_bHDR = true;
 				}
-				else*/if (surfFormats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT 
-				&&  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)
+				else if (surfFormats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT
+				&&  surfFormats[iBestFormat].colorSpace != VK_COLOR_SPACE_HDR10_ST2084_EXT)
 				{
 					iBestFormat = i;
 					m_bHDR = true;
@@ -380,14 +380,18 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 		{
 			if (surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)
 			{
-				m_eColorCorrect = ColorCorrection::BT2084;
+				m_eColorCorrect = ColorCorrection::HDR_ST2084;
+			}
+			else
+			{
+				m_eColorCorrect = ColorCorrection::HDR_Extended;
 			}
 		}
 		else
 		{
 			if (surfFormats[iBestFormat].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && m_eSwapChainFormat != ColorFormat::SRGBA)
 			{
-				m_eColorCorrect = ColorCorrection::sRGB;
+				m_eColorCorrect = ColorCorrection::SDR_sRGB;
 			}
 		}
 		m_eVkSwapChainFormat = eFormat;

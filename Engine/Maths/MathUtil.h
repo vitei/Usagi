@@ -211,6 +211,13 @@ namespace Math
 		return (cosf(t * Math::pi + Math::pi) + 1.0f) / 2.0f;
 	}
 
+	inline float SmoothStep(float edge0, float edge1, float x) {
+		// Scale, and clamp x to 0..1 range
+		float t = Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+		// Evaluate polynomial: t^2 * (3 - 2t)
+		return t * t * (3.0f - 2.0f * t);
+	}
+
 	template<class VectorType>
 	VectorType Hermite(const VectorType& p0, const VectorType& v0, const VectorType& p1, const VectorType& v1, const float t)
 	{

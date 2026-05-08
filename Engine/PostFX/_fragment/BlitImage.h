@@ -6,6 +6,8 @@
 #define USG_POSTFX_BLIT_IMAGE
 #include "Engine/Graphics/Effects/Effect.h"
 #include "Engine/Graphics/Materials/Material.h"
+#include "Engine/Graphics/Primitives/VertexBuffer.h"
+#include "Engine/Graphics/Primitives/IndexBuffer.h"
 #include "Engine/Scene/Common/CustomEffectRuntime.h"
 
 

@@ -43,12 +43,13 @@ void BlitImage::InitForDisplay(GFXDevice* pDevice, usg::ResourceMgr* pResMgr, ui
 	const RenderPassHndl pass = pDisplay->GetRenderPass();
 	switch (pDisplay->GetRequiredColorCorrection())
 	{
-		case ColorCorrection::BT2084:
-		case ColorCorrection::BT709:
-			// TODO: Different values for each
-			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.LinearToHDR"), pass);
+		case ColorCorrection::HDR_ST2084:
+			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.LinearToST2084"), pass);
 			break;
-		case ColorCorrection::sRGB:
+		case ColorCorrection::HDR_Extended:
+			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.LinearToExtended"), pass);
+			break;
+		case ColorCorrection::SDR_sRGB:
 			Init(pDevice, pResMgr->GetEffect(pDevice, "PostProcess.AdjustColorSpace"), pass);
 			break;
 		default:
