@@ -1,0 +1,18 @@
+AudioBank:
+  soundFiles:
+    - enumName: LASER_SHOT
+      filename: laser_shot
+      stream: false
+      loop: false
+      volume: 1.0
+      minDistance: 1.0
+      maxDistance: 1000.0
+      eType: 1
+      eFalloff: 0
+      pitchRandomisation: 0.0
+      priority: 128
+      crossfade: ""
+      basePitch: 1.0
+      dopplerFactor: 0.0
+      localized: false
+      crc: 0

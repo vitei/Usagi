@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/Usagi.AudioToolCli/Usagi.AudioToolCli.csproj" />
+  <Project Path="src/Usagi.ToolCore/Usagi.ToolCore.csproj" />
+  <Project Path="tests/Usagi.ToolCore.Tests/Usagi.ToolCore.Tests.csproj" />
+</Solution>

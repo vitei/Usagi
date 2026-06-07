@@ -1,0 +1,18 @@
+AudioBank:
+  soundFiles:
+    - enumName: Z_LAST
+      filename: z_last
+      eType: 1
+      eFalloff: 0
+    - enumName: A_FIRST
+      filename: a_first
+      eType: 1
+      eFalloff: 0
+    - enumName: " spaced name "
+      filename: spaced_name
+      eType: 1
+      eFalloff: 0
+    - enumName: lowercase
+      filename: lowercase
+      eType: 1
+      eFalloff: 0
