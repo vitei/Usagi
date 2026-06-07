@@ -8,6 +8,7 @@
 #define USG_RESOURCE_RESOURCE_DATA_H
 
 #include "Engine/Core/stl/string.h"
+#include "Engine/Core/stl/vector.h"
 
 
 //#define DEBUG_RESOURCE_MGR
@@ -71,6 +72,47 @@ private:
 	};
 
 public:
+	struct ResourceRequestDependency
+	{
+		ResourceRequestDependency()
+			: uFileCRC(0)
+			, uUsageCRC(0)
+		{
+		}
+
+		ResourceRequestDependency(const usg::string& dependencyName, uint32 uDependencyFileCRC, uint32 uDependencyUsageCRC)
+			: name(dependencyName)
+			, uFileCRC(uDependencyFileCRC)
+			, uUsageCRC(uDependencyUsageCRC)
+		{
+		}
+
+		usg::string	name;
+		uint32		uFileCRC;
+		uint32		uUsageCRC;
+	};
+
+	struct ResourceRequest
+	{
+		ResourceRequest()
+			: eType(ResourceType::UNDEFINED)
+			, uPriority(0)
+			, uTag(0)
+			, bStatic(true)
+			, eState(ResourceState::REQUESTED)
+		{
+		}
+
+		usg::string								name;
+		ResourceType							eType;
+		uint32									uPriority;
+		uint32									uTag;
+		bool									bStatic;
+		ResourceState							eState;
+		usg::vector<ResourceRequestDependency>	dependencies;
+		BaseResHandle							resource;
+	};
+
 	ResourceData();
 	~ResourceData();
 
@@ -126,6 +168,17 @@ public:
 	BaseResHandle AddResource(const ResourceBase* pResource);
 	void AddResource(BaseResHandle resHndl);
 
+	ResourceRequest& QueueRequest(const usg::string& resName, ResourceType eType, uint32 uPriority = 0);
+	ResourceRequest* GetNextQueuedRequest();
+	const ResourceRequest* GetNextQueuedRequest() const;
+	ResourceRequest* FindRequest(const usg::string& resName, ResourceType eType);
+	const ResourceRequest* FindRequest(const usg::string& resName, ResourceType eType) const;
+	void AddRequestDependency(ResourceRequest& request, const usg::string& dependencyName, uint32 uFileCRC, uint32 uUsageCRC);
+	void SetRequestState(ResourceRequest& request, ResourceState eState);
+	void CompleteRequest(ResourceRequest& request, BaseResHandle resHandle);
+	uint32 GetRequestCount() const { return (uint32)m_requests.size(); }
+	bool HasQueuedRequests() const { return GetNextQueuedRequest() != nullptr; }
+	void ClearRequests() { m_requests.clear(); }
 
 	uint32 GetResourceCount() const { return m_resources.Size(); }
 
@@ -149,6 +202,7 @@ public:
 
 private:
 	FastPool<ResourceInfo>	m_resources;
+	usg::vector<ResourceRequest>	m_requests;
 
 };
 
@@ -190,6 +244,87 @@ inline void ResourceData::AddResource(BaseResHandle resHandle)
 	pInfo->bStatic = m_bLoadAsStatic;
 }
 
+inline ResourceData::ResourceRequest& ResourceData::QueueRequest(const usg::string& resName, ResourceType eType, uint32 uPriority)
+{
+	ResourceRequest* pRequest = FindRequest(resName, eType);
+	if (pRequest != nullptr)
+	{
+		if (uPriority > pRequest->uPriority)
+		{
+			pRequest->uPriority = uPriority;
+		}
+		return *pRequest;
+	}
+
+	ResourceRequest request;
+	request.name = resName;
+	request.eType = eType;
+	request.uPriority = uPriority;
+	request.uTag = m_uTag;
+	request.bStatic = m_bLoadAsStatic;
+	request.eState = ResourceState::REQUESTED;
+	m_requests.push_back(request);
+	return m_requests.back();
+}
+
+inline ResourceData::ResourceRequest* ResourceData::GetNextQueuedRequest()
+{
+	ResourceRequest* pNextRequest = nullptr;
+	for (uint32 i = 0; i < m_requests.size(); ++i)
+	{
+		if (m_requests[i].eState != ResourceState::REQUESTED)
+		{
+			continue;
+		}
+
+		if (pNextRequest == nullptr || m_requests[i].uPriority > pNextRequest->uPriority)
+		{
+			pNextRequest = &m_requests[i];
+		}
+	}
+
+	return pNextRequest;
+}
+
+inline const ResourceData::ResourceRequest* ResourceData::GetNextQueuedRequest() const
+{
+	return const_cast<ResourceData*>(this)->GetNextQueuedRequest();
+}
+
+inline ResourceData::ResourceRequest* ResourceData::FindRequest(const usg::string& resName, ResourceType eType)
+{
+	for (uint32 i = 0; i < m_requests.size(); ++i)
+	{
+		if (m_requests[i].name == resName && m_requests[i].eType == eType)
+		{
+			return &m_requests[i];
+		}
+	}
+
+	return nullptr;
+}
+
+inline const ResourceData::ResourceRequest* ResourceData::FindRequest(const usg::string& resName, ResourceType eType) const
+{
+	return const_cast<ResourceData*>(this)->FindRequest(resName, eType);
+}
+
+inline void ResourceData::AddRequestDependency(ResourceRequest& request, const usg::string& dependencyName, uint32 uFileCRC, uint32 uUsageCRC)
+{
+	request.dependencies.push_back(ResourceRequestDependency(dependencyName, uFileCRC, uUsageCRC));
+}
+
+inline void ResourceData::SetRequestState(ResourceRequest& request, ResourceState eState)
+{
+	request.eState = eState;
+}
+
+inline void ResourceData::CompleteRequest(ResourceRequest& request, BaseResHandle resHandle)
+{
+	request.resource = resHandle;
+	request.eState = (resHandle.get() != nullptr) ? ResourceState::READY : ResourceState::FAILED;
+}
+
 
 BaseResHandle ResourceData::GetResourceHndl(const usg::string& resName, ResourceType eType)
 {
@@ -228,4 +363,3 @@ const ResourceType* ResourceData::GetResource(const usg::string &resName, usg::R
 } // namespace usg
 
 #endif // USG_RESOURCE_RESOURCE_DATA_H
-

@@ -35,6 +35,20 @@ namespace usg
 		HEIGHTFIELD
 	};
 
+	enum class ResourceState : uint8
+	{
+		REQUESTED = 0,
+		CPU_LOADING,
+		WAITING_DEPENDENCIES,
+		CPU_READY,
+		QUEUED_GPU_UPLOAD,
+		GPU_UPLOADING,
+		READY,
+		FAILED,
+		CANCELLED,
+		UNLOADING
+	};
+
 	class ResourceBase
 	{
 	protected:
@@ -43,7 +57,7 @@ namespace usg
 			m_nameHash = 0;
 			//m_dataHash = 0;
 			m_resourceType = eType;
-			m_bReady = false;
+			m_eState = ResourceState::REQUESTED;
 		}
 	public:
 		virtual ~ResourceBase() {}
@@ -53,8 +67,10 @@ namespace usg
 		// Support for asynchronous loading, coded to match level editor for now
 		virtual bool Init(GFXDevice* pDevice, const PakFileDecl::FileInfo* pFileHeader, const class FileDependencies* pDependencies, const void* pData) { ASSERT(false); return false; }
 		virtual void Cleanup(GFXDevice* pDevice) {}
-		bool IsReady() const { return m_bReady; }
-		void SetReady(bool bReady) { m_bReady = bReady; }
+		bool IsReady() const { return m_eState == ResourceState::READY; }
+		void SetReady(bool bReady) { m_eState = bReady ? ResourceState::READY : ResourceState::REQUESTED; }
+		ResourceState GetState() const { return m_eState; }
+		void SetState(ResourceState eState) { m_eState = eState; }
 		ResourceType GetResourceType() const { return m_resourceType; }
 
 #ifdef DEBUG_BUILD
@@ -72,7 +88,7 @@ namespace usg
 #endif
 		}
 
-		bool		m_bReady;
+		ResourceState	m_eState;
 
 	private:
 		ResourceType	m_resourceType;
