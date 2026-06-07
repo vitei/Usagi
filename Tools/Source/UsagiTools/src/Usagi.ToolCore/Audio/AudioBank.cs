@@ -31,6 +31,8 @@ public sealed class SoundFileDefinition
     public uint FilterCrc { get; set; }
     public List<uint> EffectCrcs { get; } = [];
     public uint RoomNameCrc { get; set; }
+    public float LowPassAttenFactor { get; set; } = 1.0f;
+    public int Stacking { get; set; }
 
     internal static float ParseFloat(string value, float fallback)
     {

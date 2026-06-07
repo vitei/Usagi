@@ -28,10 +28,12 @@ public sealed partial class FsidBuilderTests
               effectCRCs:
                 - 300
               roomNameCRC: 400
+              lowPassAttenFactor: 0.35
+              eStacking: AUDIO_STACK_REPLACE
           filters:
             - enumName: FILTER_LOW
               crc: 200
-              eFilter: AUDIO_FILTER_LOW_PASS
+              eFilter: AUDIO_FILTER_NOTCH
               fFrequency: 0.5
               fOneOverQ: 1.25
           reverbs:
@@ -52,7 +54,7 @@ public sealed partial class FsidBuilderTests
               roomSize: 25.0
           rooms:
             - roomName: ROOM_SMALL
-              roomCrc: 400
+              crc: 400
               filterCrc: 200
               effectCrcs:
                 - 300
@@ -160,9 +162,11 @@ public sealed partial class FsidBuilderTests
         Assert.Equal(200u, sound.FilterCrc);
         Assert.Equal([300u], sound.EffectCrcs);
         Assert.Equal(400u, sound.RoomNameCrc);
+        Assert.Equal(0.35f, sound.LowPassAttenFactor);
+        Assert.Equal(1, sound.Stacking);
 
         Assert.Equal("FILTER_LOW", bank.Filters[0].EnumName);
-        Assert.Equal(0, bank.Filters[0].FilterType);
+        Assert.Equal(3, bank.Filters[0].FilterType);
         Assert.Equal(0.5f, bank.Filters[0].Frequency);
 
         Assert.Equal("REVERB_SMALL", bank.Reverbs[0].Effect.EnumName);
@@ -183,6 +187,8 @@ public sealed partial class FsidBuilderTests
 
         Assert.Equal(original.SoundFiles[0].FilterCrc, roundTripped.SoundFiles[0].FilterCrc);
         Assert.Equal(original.SoundFiles[0].EffectCrcs, roundTripped.SoundFiles[0].EffectCrcs);
+        Assert.Equal(original.SoundFiles[0].LowPassAttenFactor, roundTripped.SoundFiles[0].LowPassAttenFactor);
+        Assert.Equal(original.SoundFiles[0].Stacking, roundTripped.SoundFiles[0].Stacking);
         Assert.Equal(original.Filters[0].OneOverQ, roundTripped.Filters[0].OneOverQ);
         Assert.Equal(original.Reverbs[0].RoomFilterHf, roundTripped.Reverbs[0].RoomFilterHf);
         Assert.Equal(original.Rooms[0].RoomCrc, roundTripped.Rooms[0].RoomCrc);
@@ -231,7 +237,12 @@ public sealed partial class FsidBuilderTests
                   volume: -1
                   minDistance: 10
                   maxDistance: 1
+                  eType: 99
+                  eFalloff: 99
                   priority: 999
+                  crossfade: 123456789012345678901234567890123
+                  lowPassAttenFactor: -1
+                  eStacking: 99
                   effectCRCs: [1, 2, 3, 4, 5]
             """);
 
@@ -241,7 +252,12 @@ public sealed partial class FsidBuilderTests
         Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].filename");
         Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].volume");
         Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].maxDistance");
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].eType");
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].eFalloff");
         Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].priority");
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].crossfade");
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].lowPassAttenFactor");
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].eStacking");
         Assert.Contains(diagnostics, diagnostic => diagnostic.Field == "soundFiles[0].effectCRCs");
     }
 

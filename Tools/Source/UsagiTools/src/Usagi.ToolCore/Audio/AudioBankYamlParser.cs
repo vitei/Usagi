@@ -22,7 +22,18 @@ public static class AudioBankYamlParser
     private static readonly IReadOnlyDictionary<string, int> AudioFilters = new Dictionary<string, int>(StringComparer.Ordinal)
     {
         ["AUDIO_FILTER_LOW_PASS"] = 0,
-        ["AUDIO_FILTER_HIGH_PASS"] = 1
+        ["AUDIO_FILTER_BAND_PASS"] = 1,
+        ["AUDIO_FILTER_HIGH_PASS"] = 2,
+        ["AUDIO_FILTER_NOTCH"] = 3,
+        ["AUDIO_FILTER_LOW_PASS_ONE_POLE"] = 4,
+        ["AUDIO_FILTER_HIGH_PASS_ONE_POLE"] = 5
+    };
+
+    private static readonly IReadOnlyDictionary<string, int> AudioStacking = new Dictionary<string, int>(StringComparer.Ordinal)
+    {
+        ["AUDIO_STACK_MANY"] = 0,
+        ["AUDIO_STACK_REPLACE"] = 1,
+        ["AUDIO_STACK_DROP"] = 2
     };
 
     private static readonly IReadOnlyDictionary<string, int> AudioEffects = new Dictionary<string, int>(StringComparer.Ordinal)
@@ -168,6 +179,12 @@ public static class AudioBankYamlParser
                 case "roomNameCRC":
                     sound.RoomNameCrc = ParseUInt(value, sound.RoomNameCrc);
                     break;
+                case "lowPassAttenFactor":
+                    sound.LowPassAttenFactor = SoundFileDefinition.ParseFloat(value, sound.LowPassAttenFactor);
+                    break;
+                case "eStacking":
+                    sound.Stacking = ParseEnumInt(value, sound.Stacking, AudioStacking);
+                    break;
             }
         }
 
@@ -289,6 +306,7 @@ public static class AudioBankYamlParser
                     room.RoomName = value;
                     break;
                 case "roomCrc":
+                case "crc":
                     room.RoomCrc = ParseUInt(value, room.RoomCrc);
                     break;
                 case "filterCrc":

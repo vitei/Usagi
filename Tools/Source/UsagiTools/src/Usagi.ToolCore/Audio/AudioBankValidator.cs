@@ -4,6 +4,11 @@ namespace Usagi.ToolCore.Audio;
 
 public static partial class AudioBankValidator
 {
+    private const int MaxSoundEnumNameLength = 32;
+    private const int MaxSoundFilenameLength = 128;
+    private const int MaxCrossfadeLength = 32;
+    private const int MaxNamedObjectLength = 32;
+
     public static IReadOnlyList<AudioBankDiagnostic> Validate(AudioBank bank, string? projectRoot = null)
     {
         var diagnostics = new List<AudioBankDiagnostic>();
@@ -64,9 +69,9 @@ public static partial class AudioBankValidator
             diagnostics.Add(Error($"{field}.enumName", $"Duplicate normalized sound enum name '{normalizedName}'."));
         }
 
-        if (sound.EnumName.Length > 32)
+        if (sound.EnumName.Length > MaxSoundEnumNameLength)
         {
-            diagnostics.Add(Error($"{field}.enumName", "Sound enum name exceeds nanopb max size 32."));
+            diagnostics.Add(Error($"{field}.enumName", $"Sound enum name exceeds nanopb max size {MaxSoundEnumNameLength}."));
         }
 
         if (string.IsNullOrWhiteSpace(sound.Filename))
@@ -80,9 +85,9 @@ public static partial class AudioBankValidator
                 diagnostics.Add(Error($"{field}.filename", "Sound filename must be extensionless."));
             }
 
-            if (sound.Filename.Length > 32)
+            if (sound.Filename.Length > MaxSoundFilenameLength)
             {
-                diagnostics.Add(Error($"{field}.filename", "Sound filename exceeds nanopb max size 32."));
+                diagnostics.Add(Error($"{field}.filename", $"Sound filename exceeds nanopb max size {MaxSoundFilenameLength}."));
             }
 
             if (projectRoot is not null)
@@ -112,6 +117,31 @@ public static partial class AudioBankValidator
         if (sound.Priority is < 0 or > 255)
         {
             diagnostics.Add(Error($"{field}.priority", "Priority must be between 0 and 255."));
+        }
+
+        if (sound.AudioType is < 0 or > 4)
+        {
+            diagnostics.Add(Error($"{field}.eType", "Audio type must be between 0 and 4."));
+        }
+
+        if (sound.Falloff is < 0 or > 1)
+        {
+            diagnostics.Add(Error($"{field}.eFalloff", "Audio falloff must be between 0 and 1."));
+        }
+
+        if (sound.Stacking is < 0 or > 2)
+        {
+            diagnostics.Add(Error($"{field}.eStacking", "Audio stacking must be between 0 and 2."));
+        }
+
+        if (sound.LowPassAttenFactor < 0)
+        {
+            diagnostics.Add(Error($"{field}.lowPassAttenFactor", "Low-pass attenuation factor must be non-negative."));
+        }
+
+        if (sound.Crossfade.Length > MaxCrossfadeLength)
+        {
+            diagnostics.Add(Error($"{field}.crossfade", $"Crossfade name exceeds nanopb max size {MaxCrossfadeLength}."));
         }
 
         if (sound.EffectCrcs.Count > 4)
@@ -172,9 +202,9 @@ public static partial class AudioBankValidator
         {
             diagnostics.Add(Error($"{field}.enumName", "Name is required."));
         }
-        else if (name.Length > 32)
+        else if (name.Length > MaxNamedObjectLength)
         {
-            diagnostics.Add(Error($"{field}.enumName", "Name exceeds nanopb max size 32."));
+            diagnostics.Add(Error($"{field}.enumName", $"Name exceeds nanopb max size {MaxNamedObjectLength}."));
         }
 
         if (crc == 0)

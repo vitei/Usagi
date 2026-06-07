@@ -46,6 +46,8 @@ public static class AudioBankYamlWriter
             writer.AppendLine($"      filterCRC: {sound.FilterCrc}");
             WriteUIntList(writer, "effectCRCs", sound.EffectCrcs, 6);
             writer.AppendLine($"      roomNameCRC: {sound.RoomNameCrc}");
+            writer.AppendLine($"      lowPassAttenFactor: {Float(sound.LowPassAttenFactor)}");
+            writer.AppendLine($"      eStacking: {sound.Stacking}");
         }
     }
 
@@ -109,7 +111,7 @@ public static class AudioBankYamlWriter
         foreach (var room in rooms)
         {
             writer.AppendLine($"    - roomName: {Quote(room.RoomName)}");
-            writer.AppendLine($"      roomCrc: {room.RoomCrc}");
+            writer.AppendLine($"      crc: {room.RoomCrc}");
             writer.AppendLine($"      filterCrc: {room.FilterCrc}");
             WriteUIntList(writer, "effectCrcs", room.EffectCrcs, 6);
         }
