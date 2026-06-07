@@ -157,22 +157,20 @@ PlaneClass Frustum::ClassifyBox(const AABB &box) const
 
 bool Frustum::ArePointsInFrustum(const Vector4f* ppvPoints, uint32 uCount) const
 {
-	// For every plane of frustum
-	const Plane*	pPlane = &m_planes[0];
-	uint32 uInside = uCount;
-
-	for(uint32 uPoint=0; uPoint < uCount; uPoint++)
+	for(uint32 planeId = 0; planeId < PLANE_COUNT; planeId++)
 	{
-		uint32 uPointsInView = 0;
-		for (uint32 planeId = 0; planeId < PLANE_COUNT; planeId++, pPlane++)
+		bool bAllPointsBehind = true;
+		for(uint32 uPoint = 0; uPoint < uCount; uPoint++)
 		{
-			PlaneClass eClass =  pPlane->GetPointPlaneClass(ppvPoints[uPoint].v3());
+			PlaneClass eClass = m_planes[planeId].GetPointPlaneClass(ppvPoints[uPoint].v3());
 			if(eClass != PC_BEHIND)
 			{
-				uPointsInView++;
+				bAllPointsBehind = false;
+				break;
 			}
 		}
-		if (uPointsInView == 0)
+
+		if(bAllPointsBehind)
 		{
 			return false;
 		}

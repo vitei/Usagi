@@ -96,7 +96,7 @@ static const Vector4f V4F_Z_AXIS(0.0f, 0.0f, 1.0f, 0.0f);
 inline Vector4f ScalarVectorMultiply(const Vector4f &inV, float inScalar )
 {
 //	ASSERT(inV.w == 0.0f);
-	return Vector4f(inScalar*inV.x, inScalar*inV.y, inScalar*inV.z, inV.w);
+	return Vector4f(inScalar*inV.x, inScalar*inV.y, inScalar*inV.z, inScalar*inV.w);
 }
 
 inline Vector4f ScalarVectorDivide(const Vector4f &inV, float scalarValue)

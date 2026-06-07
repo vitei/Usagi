@@ -102,11 +102,11 @@ inline bool AABB::IntersectBox(const usg::Sphere& sphere) const
 		uClip |= 1<<3;
 	}
 
-	if (offset.y > m_radii.y) 
+	if (offset.y > radius.y)
 	{
 		uClip |= 1<<4;
 	}
-	else if (offset.y < -m_radii.y)
+	else if (offset.y < -radius.y)
 	{
 		uClip |= 1<<5;
 	}
@@ -138,11 +138,11 @@ inline bool AABB::ContainedInBox(const usg::Sphere& sphere) const
 		uClip |= 1<<3;
 	}
 
-	if (offset.y > m_radii.y) 
+	if (offset.y > radius.y)
 	{
 		uClip |= 1<<4;
 	}
-	else if (offset.y < -m_radii.y)
+	else if (offset.y < -radius.y)
 	{
 		uClip |= 1<<5;
 	}
