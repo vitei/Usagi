@@ -3,6 +3,7 @@
 #include "Engine/Core/Utility.h"
 #include "Engine/Resource/PakDecl.h"
 #include <algorithm>
+#include <string>
 #include <vector>
 
 struct DependencyEntry
@@ -57,22 +58,6 @@ struct ResourceEntry
 	uint32 GetNameCRCNoExt() const { return uFileCRCNoExt;  }
 	usg::ResourceType GetResourceType() const { return resourceType; }
 
-	bool operator<(const ResourceEntry &rhs) const
-	{
-		const auto& rhsDeps = rhs.GetDeps();
-		if (dependencies.size() == 0 && rhs.dependencies.size() > 0)
-			return true;
-		for (size_t i = 0; i < rhsDeps.size(); i++)
-		{
-			if (rhsDeps[i].fileNameCRC == uFileCRC)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 private:
 	std::vector<DependencyEntry> dependencies;
 	std::string name;
@@ -81,18 +66,133 @@ private:
 	uint32 uFileCRCNoExt;
 };
 
-inline bool ComparePointers(const ResourceEntry * const & a, const ResourceEntry * const & b)
-{
-	return *a < *b;
-}
-
 namespace ResourcePakExporter
 {
+	inline bool ResourceEntryLess(const ResourceEntry* pLhs, const ResourceEntry* pRhs)
+	{
+		const int nameCmp = pLhs->GetName().compare(pRhs->GetName());
+		if (nameCmp != 0)
+		{
+			return nameCmp < 0;
+		}
+
+		return pLhs->GetNameCRC() < pRhs->GetNameCRC();
+	}
+
+	inline int FindResourceIndex(const std::vector<ResourceEntry*>& entries, uint32 uFileCRC)
+	{
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			if (entries[i]->GetNameCRC() == uFileCRC)
+			{
+				return (int)i;
+			}
+		}
+
+		return -1;
+	}
+
+	inline bool SortAndValidateDependencies(const char* szFileName, std::vector<ResourceEntry*>& entries)
+	{
+		std::sort(entries.begin(), entries.end(), ResourceEntryLess);
+
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			for (uint32 j = i + 1; j < entries.size(); j++)
+			{
+				if (entries[i]->GetNameCRC() == entries[j]->GetNameCRC())
+				{
+					RELEASE_WARNING("Resources %s and %s have duplicate CRCs in pak %s\n", entries[i]->GetName().c_str(), entries[j]->GetName().c_str(), szFileName);
+					return false;
+				}
+			}
+		}
+
+		std::vector<std::vector<uint32>> dependents(entries.size());
+		std::vector<uint32> dependencyCounts(entries.size(), 0);
+
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			for (auto& depItr : entries[i]->GetDeps())
+			{
+				const int depId = FindResourceIndex(entries, depItr.fileNameCRC);
+				if (depId < 0)
+				{
+					RELEASE_WARNING("Dependency %s for resource %s was not found in pak %s\n", depItr.fileName.c_str(), entries[i]->GetName().c_str(), szFileName);
+					return false;
+				}
+
+				dependents[depId].push_back(i);
+				dependencyCounts[i]++;
+			}
+		}
+
+		for (auto& dependentList : dependents)
+		{
+			std::sort(dependentList.begin(), dependentList.end(), [&](uint32 lhs, uint32 rhs)
+			{
+				return ResourceEntryLess(entries[lhs], entries[rhs]);
+			});
+		}
+
+		std::vector<uint32> ready;
+		for (uint32 i = 0; i < entries.size(); i++)
+		{
+			if (dependencyCounts[i] == 0)
+			{
+				ready.push_back(i);
+			}
+		}
+
+		std::vector<ResourceEntry*> sortedEntries;
+		sortedEntries.reserve(entries.size());
+
+		while (!ready.empty())
+		{
+			std::sort(ready.begin(), ready.end(), [&](uint32 lhs, uint32 rhs)
+			{
+				return ResourceEntryLess(entries[lhs], entries[rhs]);
+			});
+
+			const uint32 entryId = ready.front();
+			ready.erase(ready.begin());
+
+			sortedEntries.push_back(entries[entryId]);
+
+			for (uint32 dependentId : dependents[entryId])
+			{
+				ASSERT(dependencyCounts[dependentId] > 0);
+				dependencyCounts[dependentId]--;
+				if (dependencyCounts[dependentId] == 0)
+				{
+					ready.push_back(dependentId);
+				}
+			}
+		}
+
+		if (sortedEntries.size() != entries.size())
+		{
+			for (uint32 i = 0; i < entries.size(); i++)
+			{
+				if (dependencyCounts[i] > 0)
+				{
+					RELEASE_WARNING("Resource %s has cyclic dependencies in pak %s\n", entries[i]->GetName().c_str(), szFileName);
+				}
+			}
+			return false;
+		}
+
+		entries.swap(sortedEntries);
+		return true;
+	}
+
 	// Note entries may be re-ordered by this function
 	inline bool Export(const char* szFileName, std::vector<ResourceEntry*>& entries)
 	{
-		// Sort these entries so that dependencies come before other files
-		std::sort(entries.begin(), entries.end(), ComparePointers);
+		if (!SortAndValidateDependencies(szFileName, entries))
+		{
+			return false;
+		}
 
 		uint32 uTmpOffset = sizeof(usg::PakFileDecl::ResourcePakHdr);
 		for (uint32 i = 0; i < entries.size(); i++)
@@ -102,38 +202,35 @@ namespace ResourcePakExporter
 			uTmpOffset += (uint32)(entries[i]->GetDeps().size() * sizeof(usg::PakFileDecl::Dependency));
 		}
 
-		bool bHasKeepData = false;
 		uint32 uKeepOffset = uTmpOffset;
+		bool bHasPersistentData = false;
 		for (uint32 i = 0; i < entries.size(); i++)
 		{
 			if (!entries[i]->KeepDataAfterLoading())
 			{
 				uKeepOffset += entries[i]->GetDataSize();
 			}
-			else
+			else if (entries[i]->GetDataSize() > 0)
 			{
-				bHasKeepData = true;
+				bHasPersistentData = true;
 			}
 		}
 
-		if (!bHasKeepData)
-		{
-			uKeepOffset = USG_INVALID_ID;
-		}
+		const uint32 uPersistentDataOffset = bHasPersistentData ? uKeepOffset : USG_INVALID_ID;
 
 		FILE* pFileOut = nullptr;
 		fopen_s(&pFileOut, szFileName, "wb");
 
 		if (!pFileOut)
 		{
-			DEBUG_PRINT("Unable to open file %s", szFileName);
+			RELEASE_WARNING("Unable to open file %s", szFileName);
 			return false;
 		}
 
 		usg::PakFileDecl::ResourcePakHdr hdr;
 		hdr.uVersionId = usg::PakFileDecl::CURRENT_VERSION;
 		hdr.uFileCount = (uint32)entries.size();
-		hdr.uResDataOffset = uKeepOffset;
+		hdr.uResDataOffset = uPersistentDataOffset;
 		hdr.uTempDataOffset = uTmpOffset;
 
 		fwrite(&hdr, sizeof(hdr), 1, pFileOut);
@@ -189,8 +286,15 @@ namespace ResourcePakExporter
 					{
 						if (entries[depId]->GetNameCRC() == depItr.fileNameCRC)
 						{
-							dep.PakIndex = (uint32)i;
+							dep.PakIndex = (uint32)depId;
+							break;
 						}
+					}
+					if (dep.PakIndex == USG_INVALID_ID || dep.PakIndex >= i)
+					{
+						RELEASE_WARNING("Dependency %s for resource %s is not ordered before the resource in pak %s\n", depItr.fileName.c_str(), entries[i]->GetName().c_str(), szFileName);
+						fclose(pFileOut);
+						return false;
 					}
 					fwrite(&dep, sizeof(dep), 1, pFileOut);
 				}

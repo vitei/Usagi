@@ -21,7 +21,7 @@ public:
 	std::string LoadParticleEffect(const char* szFileName);
 	std::string LoadParticleEmitter(const char* szFileName);
 
-	void ExportResources(const char* szFileName);
+	bool ExportResources(const char* szFileName);
 	void WriteDependencies(const char* szFileName);
 
 	void AddTextureDependecy(const char* szTexName, ResourceEntry* pEntry, YAML::Node details);
@@ -108,4 +108,3 @@ protected:
 	std::vector<ResourceEntry*> m_resources;
 	std::vector<std::string> m_referencedFiles;
 };
-

@@ -120,7 +120,7 @@ namespace usg
 #if PAK_FILE_TIMINGS
 			loadTimer.ClearAndStart();
 #endif
-			LoadFile(pDevice, header.uResDataOffset, pFileInfo, scratch.GetRawData());
+			LoadFile(pDevice, szFileName, header.uResDataOffset, pFileInfo, scratch.GetRawData());
 #if PAK_FILE_TIMINGS
 			loadTimer.Stop();
 			LOG_MSG(DEBUG_MSG_RELEASE, "Processed sub file %s in %f milliseconds\n", pFileInfo->szName, loadTimer.GetTotalMilliSeconds());
@@ -180,7 +180,7 @@ namespace usg
 		return nullptr;
 	}
 
-	void PakFile::LoadFile(GFXDevice* pDevice, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
+	void PakFile::LoadFile(GFXDevice* pDevice, const char* szPakName, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch)
 	{
 		string name = pFileInfo->szName;
 		name.make_lower();
@@ -205,7 +205,7 @@ namespace usg
 		if (pFileInfo->uDependenciesCount > 0)
 		{
 			const PakFileDecl::Dependency* pDependencies = PakFileDecl::GetDependencies(pFileInfo);
-			deps.Init(this, pDependencies, pFileInfo->uDependenciesCount);
+			deps.Init(this, szPakName, pFileInfo, pDependencies, pFileInfo->uDependenciesCount);
 		}
 
 		// FIXME: Make the init function virtual to save this mess
@@ -340,4 +340,3 @@ namespace usg
 
 
 }
-

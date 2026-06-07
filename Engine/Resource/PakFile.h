@@ -32,7 +32,7 @@ namespace usg
 		void ClearHandles() { m_resources.clear(); }
 
 	private:
-		void LoadFile(GFXDevice* pDevice, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch);
+		void LoadFile(GFXDevice* pDevice, const char* szPakName, uint32 uPersistentOffset, const PakFileDecl::FileInfo* pFileInfo, void* pFileScratch);
 		static ResourceBase* CreateResource(usg::ResourceType eType);
 		
 		void*							m_pPersistantData;

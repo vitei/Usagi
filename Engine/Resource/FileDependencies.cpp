@@ -21,7 +21,7 @@ namespace usg
 
 	}
 
-	void FileDependencies::Init(class PakFile* pCurrentFile, const PakFileDecl::Dependency* pDependencies, uint32 uDependencyCount)
+	void FileDependencies::Init(class PakFile* pCurrentFile, const char* szPakName, const PakFileDecl::FileInfo* pOwnerFile, const PakFileDecl::Dependency* pDependencies, uint32 uDependencyCount)
 	{
 		m_dependencies.resize(uDependencyCount);
 		for (uint32 i = 0; i < uDependencyCount; i++)
@@ -30,12 +30,32 @@ namespace usg
 			if (pDependencies[i].PakIndex != USG_INVALID_ID)
 			{
 				dep.resHandle = pCurrentFile->GetResource(pDependencies[i].FileCRC);
-				ASSERT(dep.resHandle);
+				if (!dep.resHandle)
+				{
+					DEBUG_PRINT("Missing pak dependency: pak=%s owner=%s owner_crc=0x%08x owner_type=%u dependency=%u file_crc=0x%08x file_crc_no_ext=0x%08x pak_index=%u usage_crc=0x%08x\n",
+						szPakName ? szPakName : "<unknown>",
+						pOwnerFile ? pOwnerFile->szName : "<unknown>",
+						pOwnerFile ? pOwnerFile->CRC : 0,
+						pOwnerFile ? pOwnerFile->uResourceType : 0,
+						i,
+						pDependencies[i].FileCRC,
+						pDependencies[i].FileCRCNoExt,
+						pDependencies[i].PakIndex,
+						pDependencies[i].UsageCRC);
+				}
 			}
 			else
 			{
 				// TODO: Dependencies from other files
-				ASSERT(false);
+				DEBUG_PRINT("Unsupported external pak dependency: pak=%s owner=%s owner_crc=0x%08x owner_type=%u dependency=%u file_crc=0x%08x file_crc_no_ext=0x%08x usage_crc=0x%08x\n",
+					szPakName ? szPakName : "<unknown>",
+					pOwnerFile ? pOwnerFile->szName : "<unknown>",
+					pOwnerFile ? pOwnerFile->CRC : 0,
+					pOwnerFile ? pOwnerFile->uResourceType : 0,
+					i,
+					pDependencies[i].FileCRC,
+					pDependencies[i].FileCRCNoExt,
+					pDependencies[i].UsageCRC);
 			}
 			dep.uFileCRC = pDependencies[i].FileCRC;
 			dep.uUsageCRC = pDependencies[i].UsageCRC;
@@ -57,6 +77,11 @@ namespace usg
 	
 	BaseResHandle FileDependencies::GetDependencyByIndex(uint32 uFileIndex) const
 	{
+		if (uFileIndex >= m_dependencies.size())
+		{
+			DEBUG_PRINT("Dependency index %u out of range. Dependency count is %u\n", uFileIndex, (uint32)m_dependencies.size());
+			return BaseResHandle(nullptr);
+		}
 		return m_dependencies[uFileIndex].resHandle;
 	}
 
@@ -87,7 +112,7 @@ namespace usg
 	{
 		for (auto& dep : m_dependencies)
 		{
-			if (dep.resHandle->GetResourceType() == eType)
+			if (dep.resHandle && dep.resHandle->GetResourceType() == eType)
 			{
 				return dep.resHandle;
 			}
@@ -99,7 +124,7 @@ namespace usg
 	{
 		for (auto& dep : m_dependencies)
 		{
-			if (dep.resHandle->GetResourceType() == eType && (uFileCRCNoExt == dep.uFileCRCNoExt))
+			if (dep.resHandle && dep.resHandle->GetResourceType() == eType && (uFileCRCNoExt == dep.uFileCRCNoExt))
 			{
 				return dep.resHandle;
 			}
@@ -111,7 +136,7 @@ namespace usg
 	{
 		for (auto& dep : m_dependencies)
 		{
-			if (dep.resHandle->GetResourceType() == eType)
+			if (dep.resHandle && dep.resHandle->GetResourceType() == eType)
 			{
 				depOut.push_back(&dep);
 			}

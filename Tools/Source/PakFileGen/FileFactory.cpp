@@ -916,9 +916,9 @@ void FileFactory::AddDependenciesFromDepFile(const char* szDepFileName, Resource
 	}
 }
 
-void FileFactory::ExportResources(const char* szFileName)
+bool FileFactory::ExportResources(const char* szFileName)
 {
-	ResourcePakExporter::Export(szFileName, m_resources);
+	return ResourcePakExporter::Export(szFileName, m_resources);
 }
 
 void FileFactory::WriteDependencies(const char* szFileName)
@@ -980,6 +980,5 @@ std::string FileFactory::RemoveFileName(const std::string& fileName)
 	std::string out = fileName.substr(0, fileName.find_last_of("\\/"));
 	return out;
 }
-
 
 

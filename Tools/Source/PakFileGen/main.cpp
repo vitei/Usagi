@@ -198,11 +198,14 @@ int main(int argc, char *argv[])
 	
 
 	// Write out the file
-	g_pFileFactory->ExportResources(outputFile.c_str());
-	g_pFileFactory->WriteDependencies(dependencyFile.c_str());
+	bool bExportSuccess = g_pFileFactory->ExportResources(outputFile.c_str());
+	if (bExportSuccess)
+	{
+		g_pFileFactory->WriteDependencies(dependencyFile.c_str());
+	}
 
 
 	delete g_pFileFactory;
 
-	return 0;
+	return bExportSuccess ? 0 : -1;
 }
