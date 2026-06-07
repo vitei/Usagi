@@ -19,6 +19,9 @@ swap-chain behavior.
   `LinearToExtended`) own final HDR/display conversion. Tests in this PR should
   validate those files and shader packaging without replacing or bypassing the
   HDR swap-chain path.
+- SDR fallback surface selection must not run after an HDR surface format has
+  already been selected. Otherwise a later SDR-compatible swap-chain format can
+  silently replace `HDR_ST2084` or `HDR_Extended` output.
 
 ## Validation
 
@@ -26,5 +29,7 @@ swap-chain behavior.
   standard sRGB transfer constants for UI/text and other SDR conversion users.
 - `Data/GLSL/effects/PostProcess.yml` should continue to package the HDR output
   effects used by the current renderer.
+- Vulkan display setup should continue to guard SDR fallback format selection
+  behind `!m_bHDR` for both supported sRGB swap-chain formats.
 - Rendering tests should prefer package/build smoke checks and small math
   invariants before touching runtime rendering code.

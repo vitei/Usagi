@@ -37,6 +37,7 @@ $ColorSpace = Read-RequiredText (Join-Path $UsagiRoot 'Data\GLSL\shaders\include
 $PostProcess = Read-RequiredText (Join-Path $UsagiRoot 'Data\GLSL\effects\PostProcess.yml')
 $LinearToHDR = Read-RequiredText (Join-Path $UsagiRoot 'Data\GLSL\shaders\PostFX\LinearToHDR.frag')
 $LinearToST2084 = Read-RequiredText (Join-Path $UsagiRoot 'Data\GLSL\shaders\PostFX\LinearToST2084.frag')
+$VulkanDisplay = Read-RequiredText (Join-Path $UsagiRoot 'Engine\Graphics\Device\_vulkan\Display_ps.cpp')
 
 foreach ($Needle in @('0.0031308', '12.92', '1.0/2.4', '0.04045', '2.4')) {
     if (-not $ColorSpace.Contains($Needle)) {
@@ -59,6 +60,15 @@ foreach ($Needle in @('InverseTonemap', 'Hdr10', 'LinearToST2084')) {
 foreach ($Needle in @('k709to2020', 'kExpanded709to2020', 'LinearToST2084')) {
     if (-not $LinearToST2084.Contains($Needle)) {
         throw "LinearToST2084.frag no longer contains expected HDR10 token: $Needle"
+    }
+}
+
+if (-not $VulkanDisplay.Contains('if(!m_bHDR && ((eFormat == ColorFormat::SRGBA) || (eFormat == ColorFormat::SRGBA_SWP)))')) {
+    throw 'Vulkan display SDR fallback can override a selected HDR surface format.'
+}
+foreach ($Needle in @('VK_COLOR_SPACE_HDR10_ST2084_EXT', 'VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT', 'ColorCorrection::HDR_ST2084', 'ColorCorrection::HDR_Extended')) {
+    if (-not $VulkanDisplay.Contains($Needle)) {
+        throw "Vulkan display no longer contains expected HDR swap-chain token: $Needle"
     }
 }
 

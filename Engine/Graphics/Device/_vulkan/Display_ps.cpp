@@ -349,7 +349,7 @@ void Display_ps::CreateSwapChain(GFXDevice* pDevice)
 				continue;
 			}
 
-			if(!m_bHDR && (eFormat == ColorFormat::SRGBA) || (eFormat == ColorFormat::SRGBA_SWP))
+			if(!m_bHDR && ((eFormat == ColorFormat::SRGBA) || (eFormat == ColorFormat::SRGBA_SWP)))
 			{
 				if(devicePS.GetUSGFormat(surfFormats[iBestFormat].format) != ColorFormat::SRGBA)
 				{
@@ -1061,4 +1061,3 @@ void Display_ps::Minimized(usg::GFXDevice* pDevice)
 }
 
 }
-
