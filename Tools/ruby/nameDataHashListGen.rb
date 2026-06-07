@@ -2,6 +2,66 @@
 require 'optparse'
 require 'zlib'
 require 'digest/sha1'
+require 'fileutils'
+
+MESSAGE_DELIMITER = "\0"
+
+def abort_with_error(message)
+  $stderr.puts "ERROR: #{message}"
+  exit 1
+end
+
+def validate_readable_file(path, description)
+  abort_with_error("#{description} not specified") if path.nil? || path.empty?
+  abort_with_error("#{description} does not exist: #{path}") unless File.exist?(path)
+  abort_with_error("#{description} is not a file: #{path}") unless File.file?(path)
+  abort_with_error("#{description} is not readable: #{path}") unless File.readable?(path)
+end
+
+def validate_directory(path, description)
+  abort_with_error("#{description} not specified") if path.nil? || path.empty?
+  abort_with_error("#{description} does not exist: #{path}") unless File.exist?(path)
+  abort_with_error("#{description} is not a directory: #{path}") unless File.directory?(path)
+end
+
+def create_output_parent(output)
+  abort_with_error("Output filename not specified") if output.nil? || output.empty?
+
+  parent = File.dirname(output)
+  return if parent.nil? || parent.empty? || parent == '.'
+
+  if File.exist?(parent)
+    abort_with_error("Output parent is not a directory: #{parent}") unless File.directory?(parent)
+    return
+  end
+
+  FileUtils.mkdir_p(parent)
+rescue SystemCallError => e
+  abort_with_error("Could not create output directory #{parent}: #{e.message}")
+end
+
+def validate_listed_data_files(input, dir)
+  current_path = input
+  File.foreach(input) do |line|
+    file_name = line.chomp
+    current_path = File.join(dir, file_name)
+    validate_readable_file(current_path, "Listed data file")
+    File.open(current_path, 'rb') {}
+  end
+rescue SystemCallError => e
+  abort_with_error("Could not read file #{current_path}: #{e.message}")
+end
+
+def require_protobufs(require_dirs)
+  require_dirs.each do |dir|
+    $LOAD_PATH << dir
+    Dir[File.join(dir, '**', '*.pb.rb')].each do |f|
+      require f.sub(%r{\A#{Regexp.escape(dir)}[\\/]}, '')
+    end
+  end
+rescue LoadError => e
+  abort_with_error("Could not require protobuf file: #{e.message}")
+end
 
 ##################
 # option parsing #
@@ -33,41 +93,51 @@ option_parser = OptionParser.new do |opts|
   end
 end
 
-option_parser.parse!
-
-if ARGV.length != 1
-  raise "ERROR: No YAML input file specified!"
+begin
+  option_parser.parse!
+rescue OptionParser::ParseError => e
+  abort_with_error(e.message)
 end
 
-# Require PB codes
+abort_with_error("Expected exactly one input list file") if ARGV.length != 1
+
+input = ARGV[0]
+
+abort_with_error("Output filename not specified") if options[:output].nil? || options[:output].empty?
+abort_with_error("Root directory not specified") if options[:dir].nil? || options[:dir].empty?
+
+validate_directory(options[:dir], "Root directory")
 options[:require_dirs].each do |dir|
-  $LOAD_PATH << dir
-  Dir[dir + "/**/*.pb.rb"].each do |f|
-    require f.sub(dir + "/", "")
-  end
+  validate_directory(dir, "Require directory")
 end
 
-MESSAGE_DELIMITER = "\0"
+validate_readable_file(input, "Input list")
+validate_listed_data_files(input, options[:dir])
+create_output_parent(options[:output])
+
+# Require PB codes after all require directories have been validated.
+require_protobufs(options[:require_dirs])
 
 def main(output, input, dir)
   list = []
 
-  f = File.open( input, 'r' )
-  f.each {|line|
-    fileName = "#{line[0..-2]}"
-    filePath = "#{dir}/#{fileName}"
-    crc = Zlib.crc32(fileName, 0)
-    # dataHash = Digest::SHA1.hexdigest(File.open(filePath, "rb").read)
-    dataHash = Zlib.crc32(File.open(filePath, "rb").read, 0)
-    # print "#{filePath} #{crc} #{dataHash}\n"
+  File.open( input, 'r' ) do |f|
+    f.each {|line|
+      fileName = line.chomp
+      filePath = "#{dir}/#{fileName}"
+      crc = Zlib.crc32(fileName, 0)
+      # dataHash = Digest::SHA1.hexdigest(File.open(filePath, "rb").read)
+      dataHash = Zlib.crc32(File.open(filePath, "rb").read, 0)
+      # print "#{filePath} #{crc} #{dataHash}\n"
 
-    temp = {}
-    temp[:name] = fileName
-    temp[:crc] = crc
-    temp[:dataHash] = dataHash
+      temp = {}
+      temp[:name] = fileName
+      temp[:crc] = crc
+      temp[:dataHash] = dataHash
 
-    list.push( temp )
-  }
+      list.push( temp )
+    }
+  end
 
   list.sort! {|a, b|
     a[:crc] <=> b[:crc]
@@ -83,10 +153,15 @@ def main(output, input, dir)
 
   header = Usg::NameDataHashHeader.new( hashNum: list.length )
 
-  out = File.open(output, "wb")
-  header.serialize(out) << MESSAGE_DELIMITER
-  messages.each { |s| s.serialize(out) << MESSAGE_DELIMITER }
-  out.close
+  begin
+    out = File.open(output, "wb")
+    header.serialize(out) << MESSAGE_DELIMITER
+    messages.each { |s| s.serialize(out) << MESSAGE_DELIMITER }
+    out.close
+  rescue SystemCallError => e
+    out.close if out && !out.closed?
+    abort_with_error("Could not write output file #{output}: #{e.message}")
+  end
 end
 
-main(options[:output], ARGV[0], options[:dir])
+main(options[:output], input, options[:dir])

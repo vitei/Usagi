@@ -8,6 +8,7 @@
 
 require 'optparse'
 
+require 'fileutils'
 require 'set'
 require 'erb'
 require 'yaml'
@@ -43,8 +44,30 @@ optparser = OptionParser.new do |opts|
   end
 end
 
-optparser.parse!
-raise "ERROR: No input file specified!" if ARGV.length != 1
+begin
+  optparser.parse!
+rescue OptionParser::ParseError => e
+  abort "yml2vpb: #{e.message}"
+end
+
+abort "yml2vpb: expected exactly one input file" if ARGV.length != 1
+
+SRC = ARGV[0]
+
+abort "yml2vpb: input file not found: #{SRC}" if !File.file?(SRC)
+
+$options[:defaults].each do |filename|
+  abort "yml2vpb: defaults file not found: #{filename}" if !File.file?(filename)
+end
+
+$options[:require_dirs].each do |dir|
+  abort "yml2vpb: require directory not found: #{dir}" if !File.directory?(dir)
+end
+
+if $options[:output]
+  output_dir = File.dirname($options[:output])
+  FileUtils.mkdir_p(output_dir) if output_dir && output_dir != '.'
+end
 
 $options[:require_dirs].each do |dir|
   $LOAD_PATH << dir
@@ -55,8 +78,6 @@ end
 
 require_relative 'tracker'
 require_relative 'lib/entity_util'
-
-SRC = ARGV[0]
 
 # Useful function I wish hashes had.. should probably go in some utility file somewhere
 class Hash
@@ -163,6 +184,26 @@ def symbolize_keys(hash)
   end
 end
 
+def load_erb_yaml_file(filename, description)
+  content = File.open(filename, "r:UTF-8") { |f| ERB.new(f.read).result }
+  YAML.load(content)
+rescue Psych::Exception => e
+  raise "#{description} has invalid YAML: #{e.message}"
+rescue SystemCallError => e
+  raise "#{description} could not be read: #{e.message}"
+end
+
+def load_erb_yaml_stream(filename)
+  content = File.open(filename, "r:UTF-8") { |f| ERB.new(f.read).result }
+  documents = YAML.load_stream(content)
+  raise "input file '#{filename}' must contain at least one YAML document" if documents.empty?
+  documents
+rescue Psych::Exception => e
+  raise "input file '#{filename}' has invalid YAML: #{e.message}"
+rescue SystemCallError => e
+  raise "input file '#{filename}' could not be read: #{e.message}"
+end
+
 class Constants
   NUL = "\0"
 end
@@ -175,32 +216,32 @@ def process(pb_type, pb_vals)
   protocol.new(fieldsHash)
 end
 
-if $options[:defaults]
-  $defaults = $options[:defaults].inject({}) do |acc, filename|
-    File.open(filename , 'r') do |f|
-      content = ERB.new(f.read).result
-      acc.deep_merge(symbolize_keys( YAML.load(content) ))
+begin
+  if $options[:defaults]
+    $defaults = $options[:defaults].inject({}) do |acc, filename|
+      defaults = load_erb_yaml_file(filename, "defaults file '#{filename}'")
+      raise "defaults file '#{filename}' must be a YAML mapping" if !defaults.is_a?(Hash)
+      acc.deep_merge(symbolize_keys(defaults))
     end
   end
-end
 
-content = File.open(SRC, "r:UTF-8") { |f| ERB.new(f.read).result }
+  output = load_erb_yaml_stream(SRC).map.with_index do |data, i|
+    raise "document #{i + 1} root node should be a hash" if !data.is_a?(Hash)
+    raise "document #{i + 1} should contain a single protocol buffer" if data.length != 1
 
-out_stream = $options[:output] ? File.open($options[:output], "wb:UTF-8") : $stdout
-out_stream.binmode
+    pb_type, pb_vals = data.to_a[0]
+    pb = process(pb_type, pb_vals)
+    pb.serialize_to_string + Constants::NUL
+  end
 
-YAML.load_stream(content).each do |data|
-  raise "Root node should be a hash" if not data.is_a? Hash
-  raise "File should contain a single protocol buffer" if data.length != 1
+  out_stream = $options[:output] ? File.open($options[:output], "wb:UTF-8") : $stdout
+  out_stream.binmode
+  output.each { |out_data| out_stream.print(out_data) }
 
-  pb_type, pb_vals = data.to_a[0]
-  pb = process(pb_type, pb_vals)
-  out_data = pb.serialize_to_string
-
-  out_stream.print (out_data + Constants::NUL)
-end
-
-if $options[:output]
-  out_stream.close
-  Tracker::writeDependenciesFile($options, $options[:output])
+  if $options[:output]
+    out_stream.close
+    Tracker::writeDependenciesFile($options, $options[:output])
+  end
+rescue StandardError => e
+  abort "yml2vpb: #{SRC}: #{e.message}"
 end

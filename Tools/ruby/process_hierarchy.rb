@@ -6,6 +6,7 @@
 # relationships for each entity are also written to this file.
 
 require 'erb'
+require 'fileutils'
 require 'matrix'
 require 'optparse'
 require 'pathname'
@@ -60,8 +61,30 @@ optparser = OptionParser.new do |opts|
   end
 end
 
-optparser.parse!
-raise "ERROR: No input file specified!" if ARGV.length != 1
+begin
+  optparser.parse!
+rescue OptionParser::ParseError => e
+  abort "process_hierarchy: #{e.message}"
+end
+
+abort "process_hierarchy: expected exactly one input file" if ARGV.length != 1
+
+ENTITY_SRC = ARGV[0]
+
+abort "process_hierarchy: input file not found: #{ENTITY_SRC}" if !File.file?(ENTITY_SRC)
+
+$options[:defaults].each do |filename|
+  abort "process_hierarchy: defaults file not found: #{filename}" if !File.file?(filename)
+end
+
+$options[:require_dirs].each do |dir|
+  abort "process_hierarchy: require directory not found: #{dir}" if !File.directory?(dir)
+end
+
+if $options[:output]
+  output_dir = File.dirname($options[:output])
+  FileUtils.mkdir_p(output_dir) if output_dir && output_dir != '.'
+end
 
 $options[:require_dirs].each do |dir|
   $LOAD_PATH << dir
@@ -77,8 +100,6 @@ require_relative 'lib/matrix_util'
 require_relative 'lib/skeletonextractor'
 require_relative 'lib/componentextractor'
 require_relative 'tracker'
-
-ENTITY_SRC = ARGV[0]
 
 # Useful function I wish hashes had.. should probably go in some utility file somewhere
 class ::Hash
@@ -154,6 +175,31 @@ def symbolize_keys(hash)
   end
 end
 
+def load_yaml_file(filename, description)
+  content = File.open(filename, 'r') { |f| ERB.new(f.read).result }
+  YAML.load(content)
+rescue Psych::Exception => e
+  raise "#{description} has invalid YAML: #{e.message}"
+rescue SystemCallError => e
+  raise "#{description} could not be read: #{e.message}"
+end
+
+def validate_entity_yaml(data, description)
+  return if data.is_a?(Hash)
+
+  if data.is_a?(Array)
+    raise "#{description} must contain at least one entity" if data.empty?
+
+    data.each_with_index do |entry, i|
+      raise "#{description} entity #{i + 1} must be a YAML mapping" if !entry.is_a?(Hash)
+    end
+
+    return
+  end
+
+  raise "#{description} must be a YAML mapping or non-empty list of mappings"
+end
+
 def find_include(entity_name)
     relative_path = $options[:includes].find do |i|
       path = File.join(i, entity_name + ".yml")
@@ -166,6 +212,8 @@ def find_include(entity_name)
 end
 
 def import(data, entity_name, already_loaded, override_data)
+  raise "entity '#{entity_name}' must be a YAML mapping" if !data.is_a?(Hash)
+
   if !already_loaded.has_key? entity_name
     already_loaded[entity_name] = :loading
     e = symbolize_keys(data)
@@ -186,8 +234,7 @@ def import(data, entity_name, already_loaded, override_data)
     inherits_from.each do |inherited_entity|
       filename = find_include(inherited_entity)
       Tracker::DepSet.instance.addDep(filename)
-      content = File.open(filename, 'r') { |f| ERB.new(f.read).result }
-      inherited_data << import(YAML.load(content), File.basename(filename, '.yml'), already_loaded, override_data)
+      inherited_data << import(load_yaml_file(filename, "included entity '#{inherited_entity}'"), File.basename(filename, '.yml'), already_loaded, override_data)
     end
 
     override_data.each_pair do |name, data|
@@ -205,10 +252,9 @@ end
 
 if $options[:defaults]
   $defaults = $options[:defaults].inject({}) do |acc, filename|
-    File.open(filename , 'r') do |f|
-      content = ERB.new(f.read).result
-      acc.deep_merge(symbolize_keys( YAML.load(content) ))
-    end
+    defaults = load_yaml_file(filename, "defaults file '#{filename}'")
+    raise "defaults file '#{filename}' must be a YAML mapping" if !defaults.is_a?(Hash)
+    acc.deep_merge(symbolize_keys(defaults))
   end
 end
 
@@ -392,6 +438,10 @@ end
 
 def write_file(entities)
   header = Usg::HierarchyHeader.new(entityCount: entities.length)
+  if $options[:output]
+    output_dir = File.dirname($options[:output])
+    FileUtils.mkdir_p(output_dir) if output_dir && output_dir != '.'
+  end
   out_stream = $options[:output] ? File.open($options[:output], "wb") : $stdout
   out_stream.binmode
   header.serialize(out_stream) << Constants::NUL
@@ -399,25 +449,29 @@ def write_file(entities)
   out_stream.close if $options[:output]
 end
 
-content = File.open(ENTITY_SRC, 'r') { |f| ERB.new(f.read).result }
-data = YAML.load(content)
-entities = []
+begin
+  data = load_yaml_file(ENTITY_SRC, "input file '#{ENTITY_SRC}'")
+  validate_entity_yaml(data, "input file '#{ENTITY_SRC}'")
+  entities = []
 
-if data.is_a? Hash
-  # the file contains a single entity
-  entity_name = get_unique_name(data)
-  entities<< process_entity(data, entity_name)
-elsif data.is_a? Array
-  # the file contains a list of entities
-  data.each do |entity_data|
-    $already_loaded = {}
-    # clear the set of identifiers, becuause each node should
-    # be processed independently
-    $identifiers.clear
-    entities << process_entity(entity_data, 'Placeholder')
+  if data.is_a? Hash
+    # the file contains a single entity
+    entity_name = get_unique_name(data)
+    entities<< process_entity(data, entity_name)
+  elsif data.is_a? Array
+    # the file contains a list of entities
+    data.each do |entity_data|
+      $already_loaded = {}
+      # clear the set of identifiers, becuause each node should
+      # be processed independently
+      $identifiers.clear
+      entities << process_entity(entity_data, 'Placeholder')
+    end
   end
+
+  write_file(entities)
+
+  Tracker::writeDependenciesFile($options, $options[:output])
+rescue StandardError => e
+  abort "process_hierarchy: #{ENTITY_SRC}: #{e.message}"
 end
-
-write_file(entities)
-
-Tracker::writeDependenciesFile($options, $options[:output])

@@ -30,8 +30,21 @@ optparser = OptionParser.new do |opts|
   end
 end
 
-optparser.parse!
-raise "ERROR: No input file specified!" if ARGV.length != 1
+begin
+  optparser.parse!
+rescue OptionParser::ParseError => e
+  abort "expand_erb: #{e.message}"
+end
+
+abort "expand_erb: expected exactly one input file" if ARGV.length != 1
+
+SRC = ARGV[0]
+
+abort "expand_erb: input file not found: #{SRC}" if !File.file?(SRC)
+
+$options[:require_dirs].each do |dir|
+  abort "expand_erb: require directory not found: #{dir}" if !File.directory?(dir)
+end
 
 $options[:require_dirs].each do |dir|
   $LOAD_PATH << dir
@@ -40,14 +53,17 @@ $options[:require_dirs].each do |dir|
   end
 end
 
-SRC = ARGV[0]
+begin
+  content = File.open(SRC, 'r') { |f| ERB.new(f.read).result }
 
-content = File.open(SRC, 'r') { |f| ERB.new(f.read).result }
+  if $options[:output]
+    output_dir = File.dirname($options[:output])
+    FileUtils.mkdir_p(output_dir) if output_dir && output_dir != '.'
+  end
 
-FileUtils.mkdir_p(File.dirname($options[:output])) if $options[:output]
-out_stream = $options[:output] ? File.open($options[:output], "w") : $stdout
-out_stream.print content
-
-if $options[:output]
-  out_stream.close
+  out_stream = $options[:output] ? File.open($options[:output], "w") : $stdout
+  out_stream.print content
+  out_stream.close if $options[:output]
+rescue StandardError => e
+  abort "expand_erb: #{SRC}: #{e.message}"
 end

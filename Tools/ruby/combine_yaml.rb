@@ -4,6 +4,7 @@
 #Combines yaml files
 
 require 'optparse'
+require 'fileutils'
 require 'yaml'
 
 # Useful functions I wish hashes had..
@@ -40,16 +41,45 @@ optparser = OptionParser.new do |opts|
   end
 end
 
-optparser.parse!
+begin
+  optparser.parse!
+rescue OptionParser::ParseError => e
+  abort "combine_yaml: #{e.message}"
+end
 
 input_files = ARGV
 
 if $input
-  input_files = IO.readlines($input).map{|f| f.gsub('\\', '/').chomp }
+  abort "combine_yaml: input list not found: #{$input}" if !File.file?($input)
+
+  input_files = IO.readlines($input).map{|f| f.gsub('\\', '/').chomp }.reject(&:empty?)
 end
 
-input_yaml  = input_files.map {|f| data = YAML.load(File.read(f)) }
+def load_yaml_file(filename)
+  abort "combine_yaml: input file not found: #{filename}" if !File.file?(filename)
+
+  data = YAML.load(File.read(filename))
+  abort "combine_yaml: input file must be a YAML mapping: #{filename}" if !data.is_a?(Hash)
+
+  data
+rescue Psych::Exception => e
+  abort "combine_yaml: invalid YAML in #{filename}: #{e.message}"
+rescue SystemCallError => e
+  abort "combine_yaml: unable to read #{filename}: #{e.message}"
+end
+
+input_yaml  = input_files.map {|f| load_yaml_file(f) }
 merged_hash = input_yaml.inject({}) { |merged, input| merged.deep_merge input }
 
-out_stream = $out ? File.open($out, 'w') : $stdout
-out_stream.puts merged_hash.to_yaml
+if $out
+  output_dir = File.dirname($out)
+  FileUtils.mkdir_p(output_dir) if output_dir && output_dir != '.'
+end
+
+begin
+  out_stream = $out ? File.open($out, 'w') : $stdout
+  out_stream.puts merged_hash.to_yaml
+  out_stream.close if $out
+rescue SystemCallError => e
+  abort "combine_yaml: unable to write #{$out}: #{e.message}"
+end
