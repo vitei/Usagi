@@ -33,6 +33,14 @@ FastPool< ComponentEntity >* ComponentEntity::g_pPool = nullptr;
 void* g_mainMem = nullptr;
 MemHeap* g_pMemHeap = nullptr;
 
+static void SetStableEntityHandleStatus(StableEntityHandleStatus* pStatus, StableEntityHandleStatus eStatus)
+{
+	if (pStatus)
+	{
+		*pStatus = eStatus;
+	}
+}
+
 void ComponentEntity::InitPool(uint32 uPoolSize)
 {
 	static const size_t alloc_size = 1024 * 2048;
@@ -350,20 +358,56 @@ void ComponentEntity::UnregisterStableEntity(ComponentEntity* entity)
 	}
 }
 
-Entity ComponentEntity::GetEntityFromStableID(EntityHandle id)
+Entity ComponentEntity::GetEntityFromStableID(EntityHandle id, StableEntityHandleStatus* pStatus)
 {
 	if (!id.IsValid() || id.uIndex >= s_stableEntityLookup.size())
 	{
+		SetStableEntityHandleStatus(pStatus, !id.IsValid() ? STABLE_ENTITY_HANDLE_INVALID : STABLE_ENTITY_HANDLE_OUT_OF_RANGE);
 		return nullptr;
 	}
 
 	ComponentEntity* entity = s_stableEntityLookup[id.uIndex];
-	if (!entity || !entity->IsActive() || entity->m_uGeneration != id.uGeneration)
+	if (!entity)
 	{
+		SetStableEntityHandleStatus(pStatus, STABLE_ENTITY_HANDLE_EMPTY_SLOT);
 		return nullptr;
 	}
 
+	if (!entity->IsActive())
+	{
+		SetStableEntityHandleStatus(pStatus, STABLE_ENTITY_HANDLE_INACTIVE);
+		return nullptr;
+	}
+
+	if (entity->m_uGeneration != id.uGeneration)
+	{
+		SetStableEntityHandleStatus(pStatus, STABLE_ENTITY_HANDLE_STALE_GENERATION);
+		return nullptr;
+	}
+
+	SetStableEntityHandleStatus(pStatus, STABLE_ENTITY_HANDLE_VALID);
 	return entity;
+}
+
+const char* ComponentEntity::GetStableIDStatusName(StableEntityHandleStatus eStatus)
+{
+	switch (eStatus)
+	{
+	case STABLE_ENTITY_HANDLE_VALID:
+		return "valid";
+	case STABLE_ENTITY_HANDLE_INVALID:
+		return "invalid";
+	case STABLE_ENTITY_HANDLE_OUT_OF_RANGE:
+		return "out_of_range";
+	case STABLE_ENTITY_HANDLE_EMPTY_SLOT:
+		return "empty_slot";
+	case STABLE_ENTITY_HANDLE_INACTIVE:
+		return "inactive";
+	case STABLE_ENTITY_HANDLE_STALE_GENERATION:
+		return "stale_generation";
+	default:
+		return "unknown";
+	}
 }
 
 void ComponentEntity::SetComponentBit(uint32 uBitfieldOffset, uint32 uBitfieldIndex, bool bValue)

@@ -37,6 +37,16 @@ namespace usg
 		uint32 uGeneration;
 	};
 
+	enum StableEntityHandleStatus
+	{
+		STABLE_ENTITY_HANDLE_VALID,
+		STABLE_ENTITY_HANDLE_INVALID,
+		STABLE_ENTITY_HANDLE_OUT_OF_RANGE,
+		STABLE_ENTITY_HANDLE_EMPTY_SLOT,
+		STABLE_ENTITY_HANDLE_INACTIVE,
+		STABLE_ENTITY_HANDLE_STALE_GENERATION
+	};
+
 	class ComponentEntity : public HierearchyNode<ComponentEntity>
 	{
 		friend class ComponentManager;
@@ -157,8 +167,9 @@ namespace usg
 		bool GetInNewList() const { return m_bIsInNewList; }
 
 		EntityHandle GetStableID() const { return EntityHandle(m_uIndex, m_uGeneration); }
-		static Entity GetEntityFromStableID(EntityHandle id);
+		static Entity GetEntityFromStableID(EntityHandle id, StableEntityHandleStatus* pStatus = nullptr);
 		static bool IsStableIDValid(EntityHandle id) { return GetEntityFromStableID(id) != nullptr; }
+		static const char* GetStableIDStatusName(StableEntityHandleStatus eStatus);
 	private:
 		static NewEntities& GetNewEntities();
 

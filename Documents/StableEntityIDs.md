@@ -19,6 +19,11 @@ live and its generation still matches.
 - `ComponentEntity::GetStableID()` returns the handle for a live entity.
 - `ComponentEntity::GetEntityFromStableID()` resolves a handle to a live
   `Entity` pointer or returns `nullptr` for stale IDs.
+- `ComponentEntity::GetEntityFromStableID(handle, &status)` also reports why a
+  handle did not resolve: invalid, out of range, empty slot, inactive entity, or
+  stale generation.
+- `ComponentEntity::GetStableIDStatusName()` returns stable diagnostic names for
+  those resolver states.
 - `ComponentEntity::IsStableIDValid()` provides a debug-friendly validity check.
 - `Components::EntityID` still carries the legacy raw pointer in `id`, and now
   also stores `stableId` for new code.

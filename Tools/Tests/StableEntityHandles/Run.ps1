@@ -33,9 +33,17 @@ foreach ($Expected in @(
     "bool IsValid() const",
     "operator==",
     "operator!=",
+    "enum StableEntityHandleStatus",
+    "STABLE_ENTITY_HANDLE_VALID",
+    "STABLE_ENTITY_HANDLE_INVALID",
+    "STABLE_ENTITY_HANDLE_OUT_OF_RANGE",
+    "STABLE_ENTITY_HANDLE_EMPTY_SLOT",
+    "STABLE_ENTITY_HANDLE_INACTIVE",
+    "STABLE_ENTITY_HANDLE_STALE_GENERATION",
     "GetStableID",
     "GetEntityFromStableID",
     "IsStableIDValid",
+    "GetStableIDStatusName",
     "EntityHandle stableId"
 )) {
     if ($Header -notmatch [regex]::Escape($Expected)) {
@@ -49,7 +57,12 @@ foreach ($Expected in @(
     "UnregisterStableEntity(this)",
     "s_stableEntityLookup.clear()",
     "entity->stableId = e->GetStableID()",
-    "entity->m_uGeneration != id.uGeneration"
+    "entity->m_uGeneration != id.uGeneration",
+    "STABLE_ENTITY_HANDLE_STALE_GENERATION",
+    "STABLE_ENTITY_HANDLE_EMPTY_SLOT",
+    "STABLE_ENTITY_HANDLE_OUT_OF_RANGE",
+    "SetStableEntityHandleStatus(pStatus, STABLE_ENTITY_HANDLE_VALID)",
+    "GetStableIDStatusName"
 )) {
     if ($Source -notmatch [regex]::Escape($Expected)) {
         throw "Stable entity handle source contract is missing: $Expected"
@@ -64,6 +77,9 @@ if ($Source -notmatch "if \(m_uGeneration == 0\)") {
 }
 if ($Source -notmatch "return nullptr") {
     throw "Stale stable handles no longer resolve to nullptr."
+}
+if ($Source -notmatch '"stale_generation"' -or $Source -notmatch '"empty_slot"' -or $Source -notmatch '"out_of_range"') {
+    throw "Stable handle diagnostics no longer expose failure status names."
 }
 
 foreach ($Deferred in @(
