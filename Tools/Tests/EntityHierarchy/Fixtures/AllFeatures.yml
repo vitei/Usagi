@@ -1,0 +1,21 @@
+Inherits:
+  - BaseEntity
+Identifier:
+  name: RootValidation
+~Merge:
+  entityWithID: ChildTarget
+Overrides:
+  - EntityWithID: ChildTarget
+    HealthComponent:
+      fLife: 25.0
+InitializerEvents:
+  - IncreaseHealthEvent:
+      amount: 2.5
+Children:
+  - Identifier:
+      name: ChildTarget
+    TransformComponent:
+      position:
+        x: 1.0
+        y: 2.0
+        z: 3.0
