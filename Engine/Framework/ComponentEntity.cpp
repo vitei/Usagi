@@ -10,6 +10,7 @@
 #include "NewEntities.h"
 #include "Engine/Framework/SystemCoordinator.h"
 #include "Engine/Core/String/String_Util.h"
+#include "Engine/Core/stl/vector.h"
 #include "Engine/Core/stl/memory.h"
 #include "Engine/Framework/NewEntities.h"
 
@@ -25,6 +26,7 @@ namespace usg {
 	}
 
 static uint32 s_uEntityNum=1;
+static vector<ComponentEntity*> s_stableEntityLookup;
 uint32 ComponentEntity::g_uNumSystemTypes=0;
 ComponentEntity	*		ComponentEntity::g_hierarchy;
 FastPool< ComponentEntity >* ComponentEntity::g_pPool = nullptr;
@@ -63,6 +65,7 @@ void ComponentEntity::Reset()
 	}
 	g_hierarchy = nullptr;
 	s_pNewEntities.reset(nullptr);
+	s_stableEntityLookup.clear();
 	g_uNumSystemTypes = 0;
 	s_uEntityNum = 1;
 }
@@ -71,6 +74,7 @@ ComponentEntity::ComponentEntity() : m_pComponents(StringPointerHash<ComponentTy
 {
 	m_bActive = false;
 	m_uIndex = s_uEntityNum++;
+	m_uGeneration = 0;
 	m_fCatchupTime = 0.0f;
 	m_uOnCollisionMask = 0;
 	m_bIsInNewList = false;
@@ -134,6 +138,12 @@ void ComponentEntity::Activate()
    
     
 	m_bActive = true;
+	++m_uGeneration;
+	if (m_uGeneration == 0)
+	{
+		++m_uGeneration;
+	}
+	RegisterStableEntity(this);
 	m_fCatchupTime = 0.0f;
     
 	ComponentStats::ActivatedEntity();
@@ -223,6 +233,7 @@ void ComponentEntity::Deactivate()
 	ASSERT(m_bActive);
     
 	m_bActive = false;
+	UnregisterStableEntity(this);
     
 	ComponentStats::DeactivatedEntity();
 }
@@ -283,6 +294,7 @@ ComponentEntity* ComponentEntity::Create(ComponentEntity* parent)
 
 	EntityID* entity = GameComponents<EntityID>::Create(e);
 	entity->id = e;
+	entity->stableId = e->GetStableID();
     
 	return e;
 }
@@ -316,6 +328,42 @@ void ComponentEntity::Free(Entity e, ComponentLoadHandles& handles)
 uint32 ComponentEntity::NumEntities()
 {
 	return g_pPool == nullptr ? 0 : g_pPool->Size();
+}
+
+void ComponentEntity::RegisterStableEntity(ComponentEntity* entity)
+{
+	ASSERT(entity != nullptr);
+	if (s_stableEntityLookup.size() <= entity->m_uIndex)
+	{
+		s_stableEntityLookup.resize(entity->m_uIndex + 1, nullptr);
+	}
+	ASSERT(s_stableEntityLookup[entity->m_uIndex] == nullptr || s_stableEntityLookup[entity->m_uIndex] == entity);
+	s_stableEntityLookup[entity->m_uIndex] = entity;
+}
+
+void ComponentEntity::UnregisterStableEntity(ComponentEntity* entity)
+{
+	ASSERT(entity != nullptr);
+	if (entity->m_uIndex < s_stableEntityLookup.size() && s_stableEntityLookup[entity->m_uIndex] == entity)
+	{
+		s_stableEntityLookup[entity->m_uIndex] = nullptr;
+	}
+}
+
+Entity ComponentEntity::GetEntityFromStableID(EntityHandle id)
+{
+	if (!id.IsValid() || id.uIndex >= s_stableEntityLookup.size())
+	{
+		return nullptr;
+	}
+
+	ComponentEntity* entity = s_stableEntityLookup[id.uIndex];
+	if (!entity || !entity->IsActive() || entity->m_uGeneration != id.uGeneration)
+	{
+		return nullptr;
+	}
+
+	return entity;
 }
 
 void ComponentEntity::SetComponentBit(uint32 uBitfieldOffset, uint32 uBitfieldIndex, bool bValue)
