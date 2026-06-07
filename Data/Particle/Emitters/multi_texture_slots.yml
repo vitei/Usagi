@@ -1,0 +1,164 @@
+Particles.EmitterEmission:
+  blend:
+    rgbSrcFunc: 6
+    rgbDestFunc: 7
+    rgbOp: 0
+    alphaSrcFunc: 1
+    alphaDestFunc: 7
+    alphaOp: 0
+    constColor:
+      m_fR: 0.0
+      m_fG: 0.0
+      m_fB: 0.0
+      m_fA: 0.0
+    alphaTestFunc: 1
+    alphaTestReference: 0.0
+  fSoftFadeDistance: 0.0
+  sortSettings:
+    eRenderLayer: 1
+    uPriority: 0
+    bWriteDepth: false
+  textureData:
+    - name: particles/water_circle
+      uPatternRepeatHor: 2
+      uPatternRepeatVer: 2
+      textureAnim:
+        eTexMode: 2
+        bRandomOffset: false
+        animIndex: [0, 1, 2, 3]
+        fAnimTimeScale: 0.18
+    - name: particles/water_circle
+      uPatternRepeatHor: 2
+      uPatternRepeatVer: 2
+      textureAnim:
+        eTexMode: 2
+        bRandomOffset: false
+        animIndex: [3, 2, 1, 0]
+        fAnimTimeScale: 0.11
+  emission:
+    eEmissionType: 1
+    fEmissionTime: 5.0
+    emissionRate:
+      frames:
+        - fTimeIndex: 0.0
+          fValue: 18.0
+    fReleaseInterval: 0.0
+    fReleaseIntervalRandom: 0.0
+    uMaxParticles: 128
+    vUserRotation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+  fPositionRandomness: 0.15
+  omniVelocity:
+    frames:
+      - fTimeIndex: 0.0
+        fValue: 0.25
+  dirVelocity:
+    frames:
+      - fTimeIndex: 0.0
+        fValue: 0.45
+  vVelocityDir:
+    x: 0.0
+    y: 1.0
+    z: 0.0
+  fVelocityDirConeDeg: 25.0
+  fSpeedRandomness: 0.35
+  bInheritVelocity: false
+  bLocalEffect: true
+  bCPUPositionUpdate: false
+  fDrag: 0.02
+  fGravityStrength: 0.0
+  vGravityDir:
+    x: 0.0
+    y: -1.0
+    z: 0.0
+  eParticleType: 0
+  life:
+    frames:
+      - fTimeIndex: 0.0
+        fValue: 1.4
+  fLifeRandomness: 0.25
+  vParticleCenter:
+    x: 0.5
+    y: 0.5
+  particleColor:
+    eColorMode: 0
+    cColor0:
+      m_fR: 0.35
+      m_fG: 0.75
+      m_fB: 1.0
+      m_fA: 1.0
+    cColor1:
+      m_fR: 0.85
+      m_fG: 0.95
+      m_fB: 1.0
+      m_fA: 1.0
+    cColor2:
+      m_fR: 1.0
+      m_fG: 1.0
+      m_fB: 1.0
+      m_fA: 1.0
+    fInTimeEnd: 0.0
+    fOutTimeStart: 1.0
+    fPeak: 1.0
+    uRepetitionCount: 0
+    bRandomRepetitionPos: false
+    fLerpEnvColor: 0.0
+  particleAlpha:
+    fInitialAlpha: 0.0
+    fIntermediateAlpha: 0.8
+    fEndAlpha: 0.0
+    fFinishInTime: 0.12
+    fOutStartTiming: 0.75
+  particleRotation:
+    fBaseRotation: 0.0
+    fRandomise: 360.0
+    fSpeed: 25.0
+    fSpeedRandomise: 50.0
+  particleScale:
+    standardValue:
+      frames:
+        - fTimeIndex: 0.0
+          fValue: 0.3
+    fRandomness: 0.25
+    fInitial: 0.4
+    fIntermediate: 1.0
+    fEnding: 1.5
+    fBeginScaleIn: 0.15
+    fStartScaleOut: 0.7
+  eShape: 0
+---
+Particles.EmitterShapeDetails:
+  baseShape:
+    vScale:
+      x: 1.0
+      y: 1.0
+      z: 1.0
+    vRotation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    vPosition:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    fHollowness: 0.0
+    vVelocity:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    fSpeedRand: 0.0
+    vGravity:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    fShapeExpandVel: 0.0
+  arc:
+    fArcWidthDeg: 360.0
+    fArcStartDeg: 0.0
+    bRandomizeStartAngle: false
+  vShapeExtents:
+    x: 0.0
+    y: 0.0
+    z: 0.0

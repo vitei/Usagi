@@ -1,0 +1,18 @@
+Particles.EffectGroup:
+  emitters:
+    - emitterName: multi_texture_slots
+      vScale:
+        x: 1.0
+        y: 1.0
+        z: 1.0
+      vRotation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      vPosition:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      fParticleScale: 1.0
+      fReleaseFrame: 0.0
+  uPreloadCount: 1
