@@ -28,6 +28,8 @@ Implemented:
 - Stubbed `loadEntity`, `loadParticle`, `tick`, `pick`, and camera command handling.
 - Graceful shutdown on `shutdown` or window close.
 - `Tools/Tests/PreviewHost/Run.ps1` build/headless smoke coverage for protocol startup, stub responses, picking, and shutdown.
+- `Tools/Tests/PreviewHost/Run.ps1 -PreflightOnly` reports build, romfiles,
+  model, particle, shader, and texture prerequisites without launching the host.
 
 Not implemented:
 
@@ -69,3 +71,18 @@ The next slice should decide how to bridge the ParticleEditor/GameInterface patt
 4. Only then wire `loadParticle` to the same particle systems used by ParticleEditor.
 
 Keeping the first scaffold standalone avoids taking on renderer lifetime, OpenGL/Vulkan context ownership, and engine reset behavior before the Avalonia embedding contract is proven.
+
+## Smoke Test Preflight
+
+Run the preflight when setting up a clean checkout or reviewing preview changes:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools\Tests\PreviewHost\Run.ps1 -PreflightOnly
+```
+
+The report lists every prerequisite the full smoke needs, including generated
+native projects, MSBuild, `UsagiPreviewHost.exe`, `_romfiles\win\nameDataHash.bin`,
+source particle data, shader effects, texture data, `Ayataka.exe`, and the
+PBRSample model source. Full smoke mode still fails on missing required
+prerequisites, but it now prints the complete checklist first instead of failing
+one missing file at a time.

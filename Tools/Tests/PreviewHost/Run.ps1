@@ -5,7 +5,8 @@ param(
     [string]$Platform = "x64",
     [int]$TimeoutSeconds = 20,
     [switch]$SkipBuild,
-    [switch]$SkipAssetLoads
+    [switch]$SkipAssetLoads,
+    [switch]$PreflightOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,6 +31,10 @@ if ([Threading.Thread]::CurrentThread.GetApartmentState() -ne [Threading.Apartme
         $args += "-SkipAssetLoads"
     }
 
+    if ($PreflightOnly) {
+        $args += "-PreflightOnly"
+    }
+
     & $powershell @args
     exit $LASTEXITCODE
 }
@@ -52,7 +57,7 @@ function Get-RepoRoot {
     return $root
 }
 
-function Get-MSBuild {
+function Find-MSBuild {
     $fromPath = Get-Command msbuild.exe -ErrorAction SilentlyContinue
     if ($fromPath) {
         return $fromPath.Source
@@ -66,7 +71,60 @@ function Get-MSBuild {
         }
     }
 
+    return $null
+}
+
+function Get-MSBuild {
+    $found = Find-MSBuild
+    if ($found) {
+        return $found
+    }
+
     throw "MSBuild.exe was not found. Install Visual Studio Build Tools with C++ workload or run from a Developer PowerShell."
+}
+
+function New-PreviewPrerequisite {
+    param(
+        [string]$Name,
+        [string]$Path,
+        [bool]$Present,
+        [bool]$Required,
+        [string]$Action
+    )
+
+    [PSCustomObject]@{
+        Name = $Name
+        Path = $Path
+        Present = $Present
+        Required = $Required
+        Action = $Action
+    }
+}
+
+function Write-PreviewPreflight {
+    param([object[]]$Items)
+
+    Write-Host "Preview host preflight:"
+    foreach ($item in $Items) {
+        $state = if ($item.Present) { "OK" } elseif ($item.Required) { "MISSING" } else { "optional" }
+        Write-Host ("[{0}] {1}: {2}" -f $state, $item.Name, $item.Path)
+        if (!$item.Present -and $item.Action) {
+            Write-Host ("      {0}" -f $item.Action)
+        }
+    }
+}
+
+function Assert-PreviewPreflight {
+    param([object[]]$Items)
+
+    $missing = @($Items | Where-Object { $_.Required -and !$_.Present })
+    if ($missing.Count -eq 0) {
+        return
+    }
+
+    Write-PreviewPreflight $Items
+    $names = ($missing | ForEach-Object { $_.Name }) -join ", "
+    throw "Preview host prerequisites are missing: $names"
 }
 
 function Send-Json([System.Diagnostics.Process]$Process, [string]$Json) {
@@ -178,10 +236,35 @@ $env:USAGI_DIR = $repoRoot
 $projectPath = Join-Path $repoRoot "Tools\Source\UsagiPreviewHost\project\UsagiPreviewHost.vcxproj"
 $hostPath = Join-Path $repoRoot "Tools\bin\UsagiPreviewHost.exe"
 $generatedProjects = Join-Path $repoRoot "_build\projects"
+$romfilesPath = Join-Path $repoRoot "_romfiles\win"
+$nameDataHash = Join-Path $romfilesPath "nameDataHash.bin"
+$ayataka = Join-Path $repoRoot "Tools\bin\Ayataka.exe"
+$modelSource = Join-Path $repoRoot "Data\Models\PBRSample\PBRSample.fbx"
+$particleData = Join-Path $repoRoot "Data\Particle"
+$effectsData = Join-Path $repoRoot "Data\GLSL\effects"
+$texturesData = Join-Path $repoRoot "Data\Textures"
+$msbuildPath = Find-MSBuild
+$msbuildDisplayPath = if ($msbuildPath) { $msbuildPath } else { "msbuild.exe" }
 
-if (!$SkipBuild -and !(Test-Path $generatedProjects)) {
-    throw "Preview host build requires generated native projects at $generatedProjects. Run project generation first."
+$preflight = @(
+    New-PreviewPrerequisite "Preview host project" $projectPath (Test-Path $projectPath) $true "The PR12 preview host project file is missing."
+    New-PreviewPrerequisite "Generated native projects" $generatedProjects (Test-Path $generatedProjects) (!$SkipBuild) "Run project generation before building the preview host."
+    New-PreviewPrerequisite "MSBuild" $msbuildDisplayPath ($null -ne $msbuildPath) (!$SkipBuild) "Install Visual Studio Build Tools with the C++ workload or run from Developer PowerShell."
+    New-PreviewPrerequisite "Preview host executable" $hostPath (Test-Path $hostPath) $SkipBuild "Build UsagiPreviewHost.exe, or rerun without -SkipBuild."
+    New-PreviewPrerequisite "nameDataHash.bin" $nameDataHash (Test-Path $nameDataHash) $true "Run a data build before launching the preview host smoke."
+    New-PreviewPrerequisite "Particle source data" $particleData (Test-Path $particleData) (!$SkipAssetLoads) "Particle preview smoke needs Data\Particle fixtures."
+    New-PreviewPrerequisite "Shader effect data" $effectsData (Test-Path $effectsData) (!$SkipAssetLoads) "Particle/model preview smoke needs shader effect fixtures."
+    New-PreviewPrerequisite "Texture source data" $texturesData (Test-Path $texturesData) (!$SkipAssetLoads) "Preview smoke copies Data\Textures into romfiles."
+    New-PreviewPrerequisite "Ayataka model converter" $ayataka (Test-Path $ayataka) (!$SkipAssetLoads) "Model preview smoke needs Ayataka.exe to build the PBRSample fixture."
+    New-PreviewPrerequisite "PBRSample model source" $modelSource (Test-Path $modelSource) (!$SkipAssetLoads) "Model preview smoke needs Data\Models\PBRSample\PBRSample.fbx."
+)
+
+if ($PreflightOnly) {
+    Write-PreviewPreflight $preflight
+    exit 0
 }
+
+Assert-PreviewPreflight $preflight
 
 if (!$SkipBuild) {
     $msbuild = Get-MSBuild
@@ -204,10 +287,8 @@ $form.Height = 480
 $form.Show()
 [System.Windows.Forms.Application]::DoEvents()
 
-$romfilesPath = Join-Path $repoRoot "_romfiles\win"
 New-Item -ItemType Directory -Force -Path $romfilesPath | Out-Null
 
-$nameDataHash = Join-Path $romfilesPath "nameDataHash.bin"
 if (!(Test-Path $nameDataHash)) {
     throw "Preview smoke requires nameDataHash.bin at $nameDataHash. Run a data build first."
 }
