@@ -18,7 +18,7 @@ class EntityYaml:
         usagi_dir = os.getenv( 'USAGI_DIR' )
         f = open( usagi_dir + '/Data/' + yamlPath, 'r' )
 
-        yamlData = yaml.load(f)
+        yamlData = yaml.safe_load(f)
         f.close()
         return yamlData
 
@@ -35,14 +35,14 @@ class EntityYaml:
             self.inherits = vals[0] # 'vals' should be a list instance.
         else:
             if (type(vals) is dict):
-                for valKey, valValue in vals.iteritems():
+                for valKey, valValue in vals.items():
                     if not isinstance( valValue, dict):
                         self.catchValue( valKey, valValue )
                     else:
                         pass
             elif (type(vals) is list):
                 for listItem in vals:
-                    for valKey, valValue in listItem.iteritems():
+                    for valKey, valValue in listItem.items():
                         if not isinstance( valValue, dict):
                             self.catchValue( valKey, valValue )
                         else:

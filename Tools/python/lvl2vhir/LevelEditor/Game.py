@@ -227,7 +227,7 @@ class GameObject:
         self.node.attrib['{' + XmlSchemaInstance + '}type'] = type
 
     def getAttribute(self, attrName):
-        if self.node.attrib.has_key(attrName):
+        if attrName in self.node.attrib:
             return self.node.attrib[attrName]
         else:
             return None
@@ -271,32 +271,32 @@ class Level:
         return self.gameObjectFolder.find( ".//gap:gameObject[@name='%s']" % name, myNamespaces )
 
     def dump(self):
-        print self.root.tag
+        print(self.root.tag)
         folders = self.getFolders()
         depth = 0
         for folder in folders:
             self.dumpFolder( folder, depth )
 
     def dumpFolder(self, folder, depth):
-        print '----'
-        print folder.attrib['name'] + ' depth:%d' % depth
-        print '----'
+        print('----')
+        print(folder.attrib['name'] + ' depth:%d' % depth)
+        print('----')
         for obj in folder:
             if obj.tag == "{gap}folder":
                 self.dumpFolder( obj, depth + 1 )
                 continue
 
-            print obj.tag
+            print(obj.tag)
 
             gobj = GameObject(obj)
             trans = gobj.getTranslation()
             rot = gobj.getRotate()
             scale = gobj.getScale()
 
-            print "name:" + gobj.getName()
-            print "trans %f, %f, %f" % ( trans.x, trans.y, trans.z )
-            print "rot   %f, %f, %f" % ( rot.x, rot.y, rot.z )
-            print "scale %f, %f, %f" % ( scale.x, scale.y, scale.z )
+            print("name:" + gobj.getName())
+            print("trans %f, %f, %f" % ( trans.x, trans.y, trans.z ))
+            print("rot   %f, %f, %f" % ( rot.x, rot.y, rot.z ))
+            print("scale %f, %f, %f" % ( scale.x, scale.y, scale.z ))
             uri = gobj.getURI()
             if not uri == None:
-                print 'uri   ' + uri
+                print('uri   ' + uri)

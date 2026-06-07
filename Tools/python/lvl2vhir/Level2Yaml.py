@@ -8,10 +8,10 @@ INST_SUFFIX = '_inst'
 def createInstanceEntity( yamlPath, ext ):
     usagi_dir = os.getenv( 'USAGI_DIR' )
     f = open( usagi_dir + '/Data/' + yamlPath + ext, 'r' )
-    yamlData = yaml.load(f)
+    yamlData = yaml.safe_load(f)
     f.close
 
-    if yamlData.has_key('ModelComponent'):
+    if 'ModelComponent' in yamlData:
         yamlData.pop('ModelComponent')
 
     return yamlData
@@ -57,7 +57,7 @@ def makeEntity( obj, format, isInst ):
         else:
             # Add model component
             outputUri = path + ".vmdc"
-            outputUri = string.replace(outputUri, 'Models/', '')
+            outputUri = outputUri.replace('Models/', '')
             enti['ModelComponent'] = { 'name': outputUri }
 
         # Matrix

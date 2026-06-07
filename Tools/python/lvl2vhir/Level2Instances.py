@@ -67,14 +67,14 @@ class InstancesConverter:
             gobj = LevelEditor.Game.GameObject( obj )
             cmdlPath = EntityYaml.searchModelComponent( gobj.getURI() )
             cmdlPath = cmdlPath.replace( 'Models/', '' ) + '.vmdc'
-            if not self.hash.has_key( cmdlPath ):
+            if cmdlPath not in self.hash:
                 self.hash[cmdlPath] = {}
 
             self.hash[cmdlPath][gobj.getName()] = InstanceObject(gobj)#obj
 
     def groupInstances( self, objs ):
         indexA = 0
-        instances = objs.items()
+        instances = list(objs.items())
         for keyA, insObjA in instances:
 
             # Set group number initially
