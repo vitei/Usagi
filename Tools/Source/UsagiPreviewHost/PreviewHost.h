@@ -10,6 +10,7 @@
 #define NOMINMAX
 #include <windows.h>
 
+#include "PreviewEngineBridge.h"
 #include "IpcProtocol.h"
 
 class PreviewHost
@@ -30,6 +31,8 @@ private:
     void HandleAttachWindow(const IpcAttachWindowCommand& command);
     void HandleLoadEntity(const IpcLoadEntityCommand& command);
     void HandleLoadParticle(const IpcLoadParticleCommand& command);
+    void HandleTick(const IpcTickCommand& command);
+    void HandleSetCameraPosition(const IpcSetCameraPositionCommand& command);
     void HandlePick(const IpcPickCommand& command);
     void HandleShutdown();
 
@@ -47,6 +50,9 @@ private:
     DWORD m_stdinType;
     bool m_shutdownRequested;
     bool m_protocolReady;
+    HINSTANCE m_instance;
+    IpcInitCommand m_initCommand;
+    PreviewEngineBridge m_engine;
     char m_inputBuffer[8192];
     int m_inputPos;
 };

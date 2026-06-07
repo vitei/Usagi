@@ -8,7 +8,7 @@
 #include <cstring>
 
 static const char* kWindowClassName = "UsagiPreviewHostWindow";
-static const char* kEngineVersion = "UsagiPreviewHost scaffold";
+static const char* kEngineVersion = "UsagiPreviewHost engine bootstrap";
 
 PreviewHost::PreviewHost()
     : m_hwnd(nullptr)
@@ -18,9 +18,11 @@ PreviewHost::PreviewHost()
     , m_stdinType(FILE_TYPE_UNKNOWN)
     , m_shutdownRequested(false)
     , m_protocolReady(false)
+    , m_instance(nullptr)
     , m_inputPos(0)
 {
     std::memset(m_inputBuffer, 0, sizeof(m_inputBuffer));
+    std::memset(&m_initCommand, 0, sizeof(m_initCommand));
     if (m_stdin != INVALID_HANDLE_VALUE && m_stdin != nullptr)
     {
         m_stdinType = GetFileType(m_stdin);
@@ -39,6 +41,7 @@ PreviewHost::~PreviewHost()
 int PreviewHost::Run(HINSTANCE instance, int showCommand)
 {
     UNREFERENCED_PARAMETER(showCommand);
+    m_instance = instance;
 
     if (!CreatePreviewWindow(instance))
     {
@@ -67,6 +70,7 @@ int PreviewHost::Run(HINSTANCE instance, int showCommand)
         Sleep(8);
     }
 
+    m_engine.Shutdown();
     return 0;
 }
 
@@ -292,7 +296,18 @@ void PreviewHost::ProcessLine(const char* line)
     }
 
     case IpcCommandType::Tick:
+    {
+        IpcTickCommand command;
+        if (IpcParser::ParseTick(line, command))
+        {
+            HandleTick(command);
+        }
+        else
+        {
+            SendError("Invalid tick command", line);
+        }
         break;
+    }
 
     case IpcCommandType::Pick:
     {
@@ -309,8 +324,18 @@ void PreviewHost::ProcessLine(const char* line)
     }
 
     case IpcCommandType::SetCameraPosition:
-        SendDiagnostic("info", "Camera command accepted by scaffold");
+    {
+        IpcSetCameraPositionCommand command;
+        if (IpcParser::ParseSetCameraPosition(line, command))
+        {
+            HandleSetCameraPosition(command);
+        }
+        else
+        {
+            SendError("Invalid setCameraPosition command", line);
+        }
         break;
+    }
 
     case IpcCommandType::Unknown:
     default:
@@ -331,6 +356,7 @@ void PreviewHost::HandleInit(const IpcInitCommand& command)
     }
 
     m_protocolReady = true;
+    m_initCommand = command;
     SendReady();
 }
 
@@ -355,17 +381,71 @@ void PreviewHost::HandleAttachWindow(const IpcAttachWindowCommand& command)
     char message[128];
     std::snprintf(message, sizeof(message), "Attached native preview window: %dx%d", command.width, command.height);
     SendDiagnostic("info", message);
+
+    char error[512] = {};
+    if (m_engine.Initialize(m_instance, m_hwnd, m_initCommand.romfilesPath, error, sizeof(error)))
+    {
+        SendDiagnostic("info", "Usagi engine initialized for preview host");
+    }
+    else
+    {
+        SendError("Failed to initialize Usagi preview engine", error);
+    }
 }
 
 void PreviewHost::HandleLoadEntity(const IpcLoadEntityCommand& command)
 {
-    SendLoaded("entity", command.path, false, "Entity preview rendering is not implemented in the scaffold");
+    char error[512] = {};
+    if (m_engine.LoadEntity(command.path, error, sizeof(error)))
+    {
+        SendLoaded("entity", command.path, true);
+    }
+    else
+    {
+        SendLoaded("entity", command.path, false, error);
+    }
 }
 
 void PreviewHost::HandleLoadParticle(const IpcLoadParticleCommand& command)
 {
     const char* path = command.effectPath[0] != '\0' ? command.effectPath : command.emitterPath;
-    SendLoaded("particle", path, false, "Particle preview rendering is not implemented in the scaffold");
+    char error[512] = {};
+    if (m_engine.LoadParticle(command.emitterPath, command.effectPath, error, sizeof(error)))
+    {
+        SendLoaded("particle", path, true);
+    }
+    else
+    {
+        SendLoaded("particle", path, false, error);
+    }
+}
+
+void PreviewHost::HandleTick(const IpcTickCommand& command)
+{
+    if (!m_engine.IsInitialized())
+    {
+        SendDiagnostic("warning", "Tick ignored before preview engine initialization");
+        return;
+    }
+
+    m_engine.Tick(command.deltaTime);
+}
+
+void PreviewHost::HandleSetCameraPosition(const IpcSetCameraPositionCommand& command)
+{
+    if (!m_engine.IsInitialized())
+    {
+        SendDiagnostic("warning", "Camera command ignored before preview engine initialization");
+        return;
+    }
+
+    m_engine.SetCameraPosition(
+        command.x,
+        command.y,
+        command.z,
+        command.targetX,
+        command.targetY,
+        command.targetZ);
 }
 
 void PreviewHost::HandlePick(const IpcPickCommand& command)
@@ -380,6 +460,7 @@ void PreviewHost::HandlePick(const IpcPickCommand& command)
 void PreviewHost::HandleShutdown()
 {
     SendDiagnostic("info", "Shutdown requested");
+    m_engine.Shutdown();
     m_shutdownRequested = true;
 }
 
@@ -391,6 +472,7 @@ void PreviewHost::ResizeHostedWindow(int width, int height)
     }
 
     MoveWindow(m_hwnd, 0, 0, std::max(width, 1), std::max(height, 1), TRUE);
+    m_engine.Resize();
 }
 
 void PreviewHost::SendResponse(const char* json)

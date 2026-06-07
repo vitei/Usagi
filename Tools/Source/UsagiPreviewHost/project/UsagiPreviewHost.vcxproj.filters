@@ -15,6 +15,9 @@
     <ClCompile Include="..\IpcProtocol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\PreviewEngineBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\PreviewHost.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -24,6 +27,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\IpcProtocol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PreviewEngineBridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\PreviewHost.h">
