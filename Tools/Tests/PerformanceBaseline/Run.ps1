@@ -26,6 +26,15 @@ Invoke-TestStep 'write baseline metadata report' {
             'ResourcePakExporter',
             'ShaderPackageRendering'
         )
+        deferredSuites = @(
+            'AudioToolBuildRules',
+            'PreviewHost',
+            'ModelInstancing',
+            'ResourceAsyncFoundation',
+            'StableEntityHandles',
+            'SystemScheduler',
+            'ECSFrameThreading'
+        )
     }
 
     $json = Join-Path $OutputDir 'baseline.json'
@@ -38,7 +47,9 @@ Invoke-TestStep 'write baseline metadata report' {
         "Generated: $($report.generatedAt)",
         '',
         'This PR 02 baseline records the smoke harness surface only.',
-        'Timing and render baselines are deferred until the relevant native suites are ported.'
+        'Timing and render baselines are deferred until the relevant native suites are ported.',
+        '',
+        'Deferred suites are recorded in baseline.json so later PRs can promote them deliberately.'
     ) | Set-Content -Encoding ASCII -Path $markdown
 
     Assert-PathExists $json

@@ -18,6 +18,15 @@ $Steps = @(
     'ShaderPackageRendering'
 )
 
+$DeferredSteps = @(
+    'AudioToolReverseEngineering',
+    'AudioToolBuildRules',
+    'PreviewHost',
+    'ModelInstancing',
+    'ResourceAsyncFoundation',
+    'StableEntityHandles'
+)
+
 foreach ($step in $Steps) {
     Invoke-TestStep "release readiness step exists: $step" {
         Assert-PathExists (Join-Path $TestsRoot "$step\Run.ps1")
@@ -37,6 +46,16 @@ if ($IncludeOptional) {
 }
 else {
     Add-TestSkip 'Aggregated readiness execution is opt-in; RunAll.ps1 already invokes each suite once.'
+}
+
+foreach ($step in $DeferredSteps) {
+    $script = Join-Path $TestsRoot "$step\Run.ps1"
+    if (Test-Path -LiteralPath $script) {
+        Add-TestSkip "Deferred suite available but not part of PR 02 default readiness: $step"
+    }
+    else {
+        Add-TestSkip "Deferred suite not present in this branch: $step"
+    }
 }
 
 Complete-TestHarness
