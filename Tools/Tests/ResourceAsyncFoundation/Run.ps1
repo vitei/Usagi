@@ -60,7 +60,17 @@ foreach ($Expected in @(
     "FindRequest",
     "AddRequestDependency",
     "SetRequestState",
+    "MarkRequestCpuLoading",
+    "MarkRequestWaitingDependencies",
+    "MarkRequestCpuReady",
+    "MarkRequestQueuedGpuUpload",
+    "MarkRequestGpuUploading",
     "CompleteRequest",
+    "FailRequest",
+    "CancelRequest",
+    "IsRequestTerminal",
+    "HasInflightRequests",
+    "ClearCompletedRequests",
     "HasQueuedRequests",
     "ClearRequests"
 )) {
@@ -87,6 +97,21 @@ if ($ResourceData -notmatch "request\.dependencies\.push_back") {
 }
 if ($ResourceData -notmatch "ResourceState::READY : ResourceState::FAILED") {
     throw "CompleteRequest no longer marks success or failure from the completed handle."
+}
+foreach ($Expected in @(
+    "ResourceState::CPU_LOADING",
+    "ResourceState::WAITING_DEPENDENCIES",
+    "ResourceState::CPU_READY",
+    "ResourceState::QUEUED_GPU_UPLOAD",
+    "ResourceState::GPU_UPLOADING",
+    "ResourceState::CANCELLED",
+    "m_requests.erase",
+    "pRequest->dependencies.clear()",
+    "pRequest->resource.reset()"
+)) {
+    if ($ResourceData -notmatch [regex]::Escape($Expected)) {
+        throw "Resource async lifecycle follow-up is missing: $Expected"
+    }
 }
 
 foreach ($Deferred in @(

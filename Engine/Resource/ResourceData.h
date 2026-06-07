@@ -175,7 +175,17 @@ public:
 	const ResourceRequest* FindRequest(const usg::string& resName, ResourceType eType) const;
 	void AddRequestDependency(ResourceRequest& request, const usg::string& dependencyName, uint32 uFileCRC, uint32 uUsageCRC);
 	void SetRequestState(ResourceRequest& request, ResourceState eState);
+	void MarkRequestCpuLoading(ResourceRequest& request);
+	void MarkRequestWaitingDependencies(ResourceRequest& request);
+	void MarkRequestCpuReady(ResourceRequest& request);
+	void MarkRequestQueuedGpuUpload(ResourceRequest& request);
+	void MarkRequestGpuUploading(ResourceRequest& request);
 	void CompleteRequest(ResourceRequest& request, BaseResHandle resHandle);
+	void FailRequest(ResourceRequest& request);
+	void CancelRequest(ResourceRequest& request);
+	bool IsRequestTerminal(const ResourceRequest& request) const;
+	bool HasInflightRequests() const;
+	void ClearCompletedRequests();
 	uint32 GetRequestCount() const { return (uint32)m_requests.size(); }
 	bool HasQueuedRequests() const { return GetNextQueuedRequest() != nullptr; }
 	void ClearRequests() { m_requests.clear(); }
@@ -249,6 +259,17 @@ inline ResourceData::ResourceRequest& ResourceData::QueueRequest(const usg::stri
 	ResourceRequest* pRequest = FindRequest(resName, eType);
 	if (pRequest != nullptr)
 	{
+		if (IsRequestTerminal(*pRequest))
+		{
+			pRequest->uPriority = uPriority;
+			pRequest->uTag = m_uTag;
+			pRequest->bStatic = m_bLoadAsStatic;
+			pRequest->eState = ResourceState::REQUESTED;
+			pRequest->dependencies.clear();
+			pRequest->resource.reset();
+			return *pRequest;
+		}
+
 		if (uPriority > pRequest->uPriority)
 		{
 			pRequest->uPriority = uPriority;
@@ -319,10 +340,84 @@ inline void ResourceData::SetRequestState(ResourceRequest& request, ResourceStat
 	request.eState = eState;
 }
 
+inline void ResourceData::MarkRequestCpuLoading(ResourceRequest& request)
+{
+	SetRequestState(request, ResourceState::CPU_LOADING);
+}
+
+inline void ResourceData::MarkRequestWaitingDependencies(ResourceRequest& request)
+{
+	SetRequestState(request, ResourceState::WAITING_DEPENDENCIES);
+}
+
+inline void ResourceData::MarkRequestCpuReady(ResourceRequest& request)
+{
+	SetRequestState(request, ResourceState::CPU_READY);
+}
+
+inline void ResourceData::MarkRequestQueuedGpuUpload(ResourceRequest& request)
+{
+	SetRequestState(request, ResourceState::QUEUED_GPU_UPLOAD);
+}
+
+inline void ResourceData::MarkRequestGpuUploading(ResourceRequest& request)
+{
+	SetRequestState(request, ResourceState::GPU_UPLOADING);
+}
+
 inline void ResourceData::CompleteRequest(ResourceRequest& request, BaseResHandle resHandle)
 {
 	request.resource = resHandle;
 	request.eState = (resHandle.get() != nullptr) ? ResourceState::READY : ResourceState::FAILED;
+}
+
+inline void ResourceData::FailRequest(ResourceRequest& request)
+{
+	request.resource.reset();
+	SetRequestState(request, ResourceState::FAILED);
+}
+
+inline void ResourceData::CancelRequest(ResourceRequest& request)
+{
+	if (!IsRequestTerminal(request))
+	{
+		request.resource.reset();
+		SetRequestState(request, ResourceState::CANCELLED);
+	}
+}
+
+inline bool ResourceData::IsRequestTerminal(const ResourceRequest& request) const
+{
+	return request.eState == ResourceState::READY
+		|| request.eState == ResourceState::FAILED
+		|| request.eState == ResourceState::CANCELLED;
+}
+
+inline bool ResourceData::HasInflightRequests() const
+{
+	for (uint32 i = 0; i < m_requests.size(); ++i)
+	{
+		if (!IsRequestTerminal(m_requests[i]))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+inline void ResourceData::ClearCompletedRequests()
+{
+	for (uint32 i = 0; i < m_requests.size();)
+	{
+		if (IsRequestTerminal(m_requests[i]))
+		{
+			m_requests.erase(m_requests.begin() + i);
+			continue;
+		}
+
+		++i;
+	}
 }
 
 

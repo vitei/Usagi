@@ -16,6 +16,13 @@ dependencies, and completed handle. The queue helpers deduplicate requests,
 raise priority when the same resource is queued again, select the highest
 priority requested item, and mark completion or failure.
 
+The first follow-up lifecycle slice adds request transition helpers for CPU
+load, dependency wait, CPU-ready, GPU-queued, and GPU-upload states. It also
+adds cancellation, explicit failure, terminal-state checks, inflight detection,
+completed-request cleanup, and terminal-request retry behavior. This keeps the
+queue usable by later worker and GPU-upload slices without starting worker
+threads in this branch.
+
 The deferred worker-loading work should build on this in later slices:
 skeletal-animation CPU preload, particle CPU data split, worker result draining,
 shutdown cancellation, and queue ownership. Those changes are intentionally
