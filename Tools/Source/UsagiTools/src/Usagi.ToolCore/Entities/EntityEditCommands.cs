@@ -168,3 +168,39 @@ internal sealed class RemoveComponentCommand : ICommand
         _entity.Components.Insert(insertAt, _removedComponent);
     }
 }
+
+internal sealed class SetComponentFieldCommand : ICommand
+{
+    private readonly EditableComponent _component;
+    private readonly string _fieldName;
+    private readonly object? _newValue;
+    private readonly bool _hadOldValue;
+    private readonly object? _oldValue;
+
+    public SetComponentFieldCommand(EditableComponent component, string fieldName, object? value)
+    {
+        _component = component;
+        _fieldName = fieldName;
+        _newValue = value;
+        _hadOldValue = component.Fields.TryGetValue(fieldName, out _oldValue);
+    }
+
+    public string Description => $"Set {_component.Name}.{_fieldName}";
+
+    public void Execute()
+    {
+        _component.Fields[_fieldName] = _newValue;
+    }
+
+    public void Undo()
+    {
+        if (_hadOldValue)
+        {
+            _component.Fields[_fieldName] = _oldValue;
+        }
+        else
+        {
+            _component.Fields.Remove(_fieldName);
+        }
+    }
+}

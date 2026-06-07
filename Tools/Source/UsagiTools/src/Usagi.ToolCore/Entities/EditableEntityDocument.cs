@@ -63,6 +63,11 @@ public sealed class EditableEntityDocument
         History.Execute(new RemoveComponentCommand(entity, componentName));
     }
 
+    public void SetComponentField(EditableComponent component, string fieldName, object? value)
+    {
+        History.Execute(new SetComponentFieldCommand(component, fieldName, value));
+    }
+
     public string ToYaml()
     {
         return _writer.Write(Root);
