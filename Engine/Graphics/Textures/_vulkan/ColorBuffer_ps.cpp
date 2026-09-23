@@ -71,7 +71,7 @@ void ColorBuffer_ps::FreeExViews(GFXDevice* pDevice)
 	{
 		for (uint32 i = 0; i < m_texture.GetPlatform().GetFaces() * m_uMips; i++)
 		{
-			vkDestroyImageView(pDevice->GetPlatform().GetVKDevice(), m_pExtraViews[i], nullptr);
+			pDevice->GetPlatform().ReqDestroyImageView(m_pExtraViews[i]);
 		}
 	}
 

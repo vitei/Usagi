@@ -664,7 +664,7 @@ void Texture_ps::Init(GFXDevice* pDevice, VkImageCreateInfo& createInfo, VkMemor
     // Create the image
 	if (m_image)
 	{
-		vkDestroyImage(vKDevice, m_image, nullptr);
+		pDevice->GetPlatform().ReqDestroyImage(m_image);
 		m_image = VK_NULL_HANDLE;
 	}
     VkResult err = vkCreateImage(vKDevice, &createInfo, NULL, &m_image);
