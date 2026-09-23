@@ -79,7 +79,10 @@ public:
 	enum StageFlags
 	{
 		SF_BOTTOM_OF_PIPE = (1 << 0),
-		SF_COLOR_ATTACHMENT_OUTPUT = (1 << 1)
+		SF_COLOR_ATTACHMENT_OUTPUT = (1 << 1),
+		SF_FRAGMENT_SHADER = (1 << 2),
+		SF_EARLY_FRAGMENT_TESTS = (1 << 3),
+		SF_LATE_FRAGMENT_TESTS = (1 << 4)
 	};
 
 	enum AccessFlags
@@ -89,7 +92,9 @@ public:
 		AC_COLOR_ATTACHMENT_WRITE = (1 << 2),
 		AC_SHADER_READ_BIT = (1<<3),
 		AC_SHADER_WRITE_BIT = (1<<4),	// Image store rather than write as attachment
-		AC_TRANSFER_WRITE_BIT = (1<<5)
+		AC_TRANSFER_WRITE_BIT = (1<<5),
+		AC_DEPTH_STENCIL_ATTACHMENT_READ = (1<<6),
+		AC_DEPTH_STENCIL_ATTACHMENT_WRITE = (1<<7)
 	};
 
 	enum AttachmentLoadOp

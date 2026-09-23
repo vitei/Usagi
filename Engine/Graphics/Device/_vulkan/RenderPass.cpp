@@ -47,7 +47,7 @@ namespace usg
 	}
 
 
-	VkAccessFlags GetStageFlags(uint32 uFlags)
+	VkPipelineStageFlags GetStageFlags(uint32 uFlags)
 	{
 		VkAttachmentDescriptionFlags flagsOut = 0;
 		if (uFlags & RenderPassDecl::SF_BOTTOM_OF_PIPE)
@@ -57,6 +57,18 @@ namespace usg
 		if (uFlags & RenderPassDecl::SF_COLOR_ATTACHMENT_OUTPUT)
 		{
 			flagsOut |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+		if (uFlags & RenderPassDecl::SF_FRAGMENT_SHADER)
+		{
+			flagsOut |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		if (uFlags & RenderPassDecl::SF_EARLY_FRAGMENT_TESTS)
+		{
+			flagsOut |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		}
+		if (uFlags & RenderPassDecl::SF_LATE_FRAGMENT_TESTS)
+		{
+			flagsOut |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 		}
 
 		return flagsOut;
@@ -88,6 +100,14 @@ namespace usg
 		if (uFlags & RenderPassDecl::AC_TRANSFER_WRITE_BIT)
 		{
 			flagsOut |= VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_DEPTH_STENCIL_ATTACHMENT_READ)
+		{
+			flagsOut |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+		}
+		if (uFlags & RenderPassDecl::AC_DEPTH_STENCIL_ATTACHMENT_WRITE)
+		{
+			flagsOut |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 		}
 
 		return flagsOut;
@@ -217,7 +237,7 @@ void RenderPass::Init(GFXDevice* pDevice, const RenderPassInitData &initData, ui
 		dependencies[i].dstAccessMask = GetAccessFlags(in.uDstAccessFlags);
 		dependencies[i].srcStageMask = GetStageFlags(in.uSrcStageFlags);
 		dependencies[i].dstStageMask = GetStageFlags(in.uDstStageFlags);
-		dependencies[i].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		dependencies[i].dependencyFlags = 0;
 	}
 	renderPassInfo.dependencyCount = decl.uDependencies;
 	renderPassInfo.pDependencies = dependencies.data();

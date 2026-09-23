@@ -356,16 +356,16 @@ const RenderPassDecl::Dependency* RenderPassDecl::ExternalColorDependenciesInAnd
 		DefaultExternals[0].uSrcSubPass = SUBPASS_EXTERNAL;
 		DefaultExternals[0].uDstSubPass = 0;
 		DefaultExternals[0].uSrcStageFlags = SF_BOTTOM_OF_PIPE;
-		DefaultExternals[0].uDstStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
+		DefaultExternals[0].uDstStageFlags = SF_COLOR_ATTACHMENT_OUTPUT | SF_EARLY_FRAGMENT_TESTS | SF_FRAGMENT_SHADER;
 		DefaultExternals[0].uSrcAccessFlags = AC_MEMORY_READ;
-		DefaultExternals[0].uDstAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
+		DefaultExternals[0].uDstAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE | AC_DEPTH_STENCIL_ATTACHMENT_WRITE | AC_SHADER_READ_BIT;
 
 		DefaultExternals[1].uSrcSubPass = 0;
 		DefaultExternals[1].uDstSubPass = SUBPASS_EXTERNAL;
-		DefaultExternals[1].uSrcStageFlags = SF_COLOR_ATTACHMENT_OUTPUT;
-		DefaultExternals[1].uDstStageFlags = SF_BOTTOM_OF_PIPE;
-		DefaultExternals[1].uSrcAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE;
-		DefaultExternals[1].uDstAccessFlags = AC_MEMORY_READ;
+		DefaultExternals[1].uSrcStageFlags = SF_COLOR_ATTACHMENT_OUTPUT | SF_LATE_FRAGMENT_TESTS;
+		DefaultExternals[1].uDstStageFlags = SF_COLOR_ATTACHMENT_OUTPUT | SF_FRAGMENT_SHADER;
+		DefaultExternals[1].uSrcAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE | AC_DEPTH_STENCIL_ATTACHMENT_WRITE;
+		DefaultExternals[1].uDstAccessFlags = AC_COLOR_ATTACHMENT_READ | AC_COLOR_ATTACHMENT_WRITE | AC_SHADER_READ_BIT;
 		bHasInit = true;
 	}
 

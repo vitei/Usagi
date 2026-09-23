@@ -182,7 +182,7 @@ namespace usg
 		DESCRIPTOR_ELEMENT(SHADER_CONSTANT_MATERIAL, DESCRIPTOR_TYPE_CONSTANT_BUFFER, 1, SHADER_FLAG_PIXEL),
 		DESCRIPTOR_END()
 	};
-	 
+
 
 	ASSAO::ASSAO()
 	{
@@ -251,6 +251,10 @@ namespace usg
 		m_importanceMapRT.Init(pDevice, &m_importanceMapCB, nullptr, "ASSAO Importance");
 		m_importanceMapPongRT.Init(pDevice, &m_importanceMapPongCB, nullptr, "ASSAO Pong");
 
+		// Init before the descriptor setup below samples it, else the bind captures an empty texture.
+		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, ColorFormat::RG_8);
+		m_finalResultsRT.Init(pDevice, &m_finalResultsCB, nullptr, "ASSAO Final");
+
 		m_loadTargetCB.Init(pDevice, 1, 1, ColorFormat::R_32, usg::SAMPLE_COUNT_1_BIT, TU_FLAG_SHADER_READ | TU_FLAG_FAST_MEM | TU_FLAG_STORAGE_BIT | TU_FLAG_TRANSFER_DST);
 
 		m_importanceMapDesc.Init(pDevice, desc1Tex);
@@ -264,9 +268,6 @@ namespace usg
 		m_importanceMapBDesc.SetImageSamplerPairAtBinding(0, m_importanceMapPongCB.GetTexture(), m_pointSampler);
 		m_importanceMapBDesc.SetImageAtBinding(1, m_loadTargetCB.GetTexture());
 
-
-		m_finalResultsCB.InitCube(pDevice, halfSize.x, halfSize.y, 4, ColorFormat::RG_8);
-		m_finalResultsRT.Init(pDevice, &m_finalResultsCB, nullptr, "ASSAO Final");
 
 		RenderTarget::RenderPassFlags flags;
 		flags.uClearFlags = 0;
@@ -397,7 +398,8 @@ namespace usg
 					m_genQDesc[i][uPass].SetImageSamplerPair(4, m_finalResultsCB.GetTexture(), m_pointSampler);
 				}
 				m_genQDesc[i][uPass].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL, &m_constants);
-				m_genQDesc[i][uPass].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, &m_passConstants[Math::Clamp((int)i, 0, CONST_PASS_COUNT-1)]);
+				// Per-pass constants are per deinterleaved depth layer (uPass), not per quality variant (i).
+				m_genQDesc[i][uPass].SetConstantSetAtBinding(SHADER_CONSTANT_MATERIAL_1, &m_passConstants[uPass]);
 				// We don't update these yet as we don't have the normals
 			}
 		}
@@ -477,7 +479,6 @@ namespace usg
 
 	void ASSAO::UpdateConstants(uint32 uWidth, uint32 uHeight, const usg::Camera* pCamera)
 	{
-
 		usg::Matrix4x4 mProj = pCamera->GetProjection();
 		float fNear = pCamera->GetNear();
 		float fFar = pCamera->GetFar();
@@ -488,7 +489,7 @@ namespace usg
 		halfSize.y = (uHeight + 1) / 2;
 		Vector2i quarterSize;
 		quarterSize.x = (halfSize.x + 1) / 2;
-		quarterSize.y = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.y + 1) / 2;
 
 		Consts->ViewportPixelSize.Assign(1.0f / (float)uWidth, 1.0f / (float)uHeight);
 		Consts->HalfViewportPixelSize.Assign(1.0f / (float)halfSize.x, 1.0f / (float)halfSize.y);
@@ -671,7 +672,7 @@ namespace usg
 		halfSize.y = (uHeight + 1) / 2;
 		Vector2i quarterSize;
 		quarterSize.x = (halfSize.x + 1) / 2;
-		quarterSize.y = (halfSize.x + 1) / 2;
+		quarterSize.y = (halfSize.y + 1) / 2;
 		for (int i = 0; i < DEPTH_COUNT; i++)
 		{
 			m_halfDepthTargets[i].Resize(pDevice, halfSize.x, halfSize.y);
