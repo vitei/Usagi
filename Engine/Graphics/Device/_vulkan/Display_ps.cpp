@@ -205,6 +205,8 @@ void Display_ps::Initialise(usg::GFXDevice* pDevice, WindHndl hndl)
 	rpDecl.uAttachments = 1;
 	rpDecl.uSubPasses = 1;
 	rpDecl.pSubPasses = &subPass;
+	rpDecl.pDependencies = Dependencies;
+	rpDecl.uDependencies = 2;
 	attach.format.eColor = m_eSwapChainFormat;	// FIXME: Match the true format
 	m_directRenderPass = pDevice->GetRenderPass(rpDecl);
 

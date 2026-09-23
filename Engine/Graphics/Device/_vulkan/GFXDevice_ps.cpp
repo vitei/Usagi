@@ -211,7 +211,7 @@ void SetImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageLayout oldI
 	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
 		if (imageMemoryBarrier.srcAccessMask == 0)
 		{
-			imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+			imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
 		}
 		imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		break;
@@ -417,7 +417,7 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	app_info.applicationVersion = 1;
 	app_info.pEngineName = "Usagi_Engine";
 	app_info.engineVersion = 1;
-	app_info.apiVersion = VK_API_VERSION_1_2;
+	app_info.apiVersion = VK_API_VERSION_1_4;
 
 	vector<const char*> extensions;
 	extensions.push_back("VK_KHR_surface");
@@ -758,8 +758,8 @@ void GFXDevice_ps::Init(GFXDevice* pParent)
 	device_info.pQueueCreateInfos = m_queueInfo;
 	device_info.enabledExtensionCount = (uint32)extensions.size();
 	device_info.ppEnabledExtensionNames = extensions.data();
-	device_info.enabledLayerCount = validationLayerCount;
-	device_info.ppEnabledLayerNames = validationLayerNames;
+	device_info.enabledLayerCount = 0;
+	device_info.ppEnabledLayerNames = nullptr;
 	device_info.pEnabledFeatures = &m_enabledFeatures;
 
 	// Issue with the allocators atm so disabling for now
