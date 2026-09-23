@@ -97,7 +97,7 @@ void main(void)
                  
     // TODO: Add the ambient colour of the light
     float NdotHV = max(dot(vNormal,refl),0.0);
-    vec3 vSpecular = fAttenuation * vSpecCol * light.vSpecular.rgb * pow(NdotHV, fSpecularPow);		
+    vec3 vSpecular = fAttenuation * vSpecCol * light.vSpecular.rgb * pow(max(NdotHV, 0.0001), fSpecularPow);
 
     float fShadow = 1.0f;
 #ifdef SHADOW_READ

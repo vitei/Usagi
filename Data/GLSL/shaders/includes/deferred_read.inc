@@ -14,7 +14,7 @@ void GetDeferredDataSpecFS(in vec2 texCoord, in vec3 frustumRay, out vec3 pos, o
 	vec4 vRead4 = texture(sampler4, texCoord);
 
 	float fPixelDepth = vRead0.x;
-	normal	= normalize(vRead1.xyz);
+	normal	= dot(vRead1.xyz, vRead1.xyz) > 0.0 ? normalize(vRead1.xyz) : vec3(0.0, 0.0, 1.0);
 	color	= vRead2.xyz;
 	specColor = vRead4.xyz;
 	specularPow = vRead2.w * 128.f;
@@ -31,7 +31,7 @@ void GetDeferredDataFS(in vec2 texCoord, in vec3 frustumRay, out vec3 pos, out v
 	vec4 vRead2 = texture(sampler2, texCoord);
 
 	float fPixelDepth = vRead0.x;
-	normal	= normalize(vRead1.xyz);
+	normal	= dot(vRead1.xyz, vRead1.xyz) > 0.0 ? normalize(vRead1.xyz) : vec3(0.0, 0.0, 1.0);
 	color	= vRead2.xyz;
 
 	pos = (fPixelDepth * frustumRay);
@@ -50,7 +50,7 @@ void GetDeferredData3D(in vec2 texCoord, in vec3 vVSValue, out vec3 pos, out vec
 	vec4 vRead1 = texture(sampler1, texCoord);
 	vec4 vRead2 = texture(sampler2, texCoord);
 
-	normal	= normalize(vRead1.xyz);
+	normal	= dot(vRead1.xyz, vRead1.xyz) > 0.0 ? normalize(vRead1.xyz) : vec3(0.0, 0.0, 1.0);
 	color	= vRead2.xyz;
 
 	vec3 vViewRay = vec3(vVSValue.xy * (vNearFar.y / vVSValue.z), vNearFar.y);
@@ -67,7 +67,7 @@ void GetDeferredDataSpec3D(in vec2 texCoord, in vec3 vVSValue, out vec3 pos, out
 	vec4 vRead2 = texture(sampler2, texCoord);
 	vec4 vRead4 = texture(sampler4, texCoord);
 
-	normal	= normalize(vRead1.xyz);
+	normal	= dot(vRead1.xyz, vRead1.xyz) > 0.0 ? normalize(vRead1.xyz) : vec3(0.0, 0.0, 1.0);
 	color	= vRead2.xyz;
 	specPow = vRead2.w * 128.f;
 	specCol = vRead4.xyz;

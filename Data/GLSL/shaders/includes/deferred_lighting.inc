@@ -16,7 +16,7 @@ void CalculateDirectionalLighting(int iLight, vec3 vNormal, vec3 vViewDir, float
 	vec3  vReflection	= reflect( vNormal, - vLightDir ); 
 	float fRDotV		= max( 0.0, dot( vReflection, vViewDir ) );
 
-	float fSpecular = ( pow( fRDotV, fSpecPow ) );
+	float fSpecular = ( pow( max( fRDotV, 0.0001 ), fSpecPow ) );
 
 	vDiffuse  += lights[iLight].vDiffuse*nDotL;
 	vSpecular += lights[iLight].vSpecular*fSpecular;

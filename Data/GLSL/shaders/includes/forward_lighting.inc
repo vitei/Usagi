@@ -25,7 +25,7 @@ void CalculatePointLighting(int iLight, vec3 vPos, vec3 vNormal, vec3 vViewDir, 
 	                 
 	    // TODO: Add the ambient colour of the light
 	    float NdotHV = max(dot(vNormal,refl),0.0);
-	    vSpecular.xyz += fAttenuation * lights[iLight].vSpecular.xyz * pow(NdotHV, fSpecPower);		
+	    vSpecular.xyz += fAttenuation * lights[iLight].vSpecular.xyz * pow(max(NdotHV, 0.0001), fSpecPower);
 
 		vDiffuse.xyz += ((lights[iLight].vDiffuse.xyz * nDotLD) + lights[iLight].vAmbient.rgb) * fAttenuation;
 	}
@@ -39,7 +39,7 @@ void CalculateDirectionalLighting(int iLight, vec3 vNormal, vec3 vViewDir, inout
 	vec3  vReflection	= reflect( -vLightDir, vNormal ); 
 	float fRDotV		= max( 0.0, dot( vReflection, vViewDir ) );
 
-	float fSpecular = ( pow( fRDotV, fSpecPower ) );
+	float fSpecular = ( pow( max( fRDotV, 0.0001 ), fSpecPower ) );
 
 	vDiffuse  += lights[iLight].vDiffuse*nDotL;
 	vSpecular += lights[iLight].vSpecular*fSpecular;
@@ -78,7 +78,7 @@ void CalculateSpotLighting(int iLight, vec3 vPos, vec3 vNormal, vec3 vViewDir, i
              
         // TODO: Add the ambient colour of the light
         float NdotHV = max(dot(vNormal,refl),0.0);
-        vSpecColor += fAttenuation * lights[iLight].vSpecular.w * pow(NdotHV, fSpecPower);		  
+        vSpecColor += fAttenuation * lights[iLight].vSpecular.w * pow(max(NdotHV, 0.0001), fSpecPower);  
 	}
 	else
 	{
@@ -114,7 +114,7 @@ void DirectionLighting(vec3 vNormal, vec3 vViewDir, vec3 vWorldPos, float fViewD
 				vec3  vReflection	= reflect( -vLightDir, vNormal ); 
 				float fRDotV		= max( 0.0, dot( vReflection, vViewDir ) );
 
-				float fSpecular = ( pow( fRDotV, fSpecPower ) );
+				float fSpecular = ( pow( max( fRDotV, 0.0001 ), fSpecPower ) );
 
 				vDiffuse  += lights[i].vDiffuse*nDotL*fShadow;
 				vSpecular += lights[i].vSpecular*fSpecular*fShadow;
